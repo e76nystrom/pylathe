@@ -1,6 +1,5 @@
 #!/cygdrive/c/Python27/Python.exe
 
-
 cmdList = \
 [\
     "z motion commands",
