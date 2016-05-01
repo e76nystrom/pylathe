@@ -1,0 +1,265 @@
+from sys import stdout
+from threading import Thread, Lock, Event
+import serial
+import lathe
+
+ser = None
+timeout = False
+commLock = Lock()
+
+cmds = None
+parms = None
+xRegs = None
+xDbgPrint = True
+
+def openSerial(port, rate):
+    global ser
+    try:
+        ser = serial.Serial(port, 57600, timeout=1)
+    except IOError:
+        print "unable to open port"
+        stdout.flush()
+
+class commTimeout(Exception):
+    pass
+
+def command(cmd):
+    global ser, cmds, commLock, timeout
+    (cmdVal, action) = cmds[cmd]
+    if action != None:
+        cmd = "lathe." + action + "()"
+        eval(cmd)
+        # action()
+    if ser is None:
+        return("");
+    cmdStr = '\x01%x ' % (cmdVal)
+    print "%-15s %s" % (cmd, cmdStr)
+    stdout.flush()
+    commLock.acquire(True)
+    ser.write(cmdStr)
+    rsp = ""
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "timeout %s" % (cmd)
+                stdout.flush()
+            raise commTimeout()
+            break
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp;
+    commLock.release()
+    return(rsp.strip("\n\r"))
+
+def setParm(parm, val):
+    global ser, parms, cmds, commLock, timeout
+    cmdInfo = parms[parm]
+    parmIndex = cmdInfo[0]
+    parmType = cmdInfo[1]
+    if len(cmdInfo) == 3:
+        parmVar = cmdInfo[2]
+        if parmType == 'float':
+            valString = "%5.6f" % (float(val))
+        else:
+            valString = "%d" % (int(val))
+        cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
+        exec(cmd)
+    if ser is None:
+        return
+    if parmType == 'float':
+        valString = "%5.6f" % (float(val))
+    else:
+        valString = "x%x" % (int(val))
+    cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
+    print "%-15s %s" % (parm, cmd)
+    stdout.flush()
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "setParm timeout %s" % (parm)
+                stdout.flush()
+            raise commTimeout()
+            break;
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp
+    commLock.release()
+
+def getParm(parm):
+    global ser, cmds, parms, commLock, timeout
+    if ser is None:
+        return
+    cmd = '\x01%x %x ' % (cmds['READVAL'][0], parms[parm][0])
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if len(tmp) == 0:
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "getParm timeout %s" % (parm)
+            raise commTimeout()
+            break;
+        if tmp == '*':
+            timeout = False
+            result = rsp.split()
+            if len(result) == 3:
+                commLock.release()
+                retVal = int(result[2], 16)
+                if retVal & 0x80000000:
+                    retVal -= 0x100000000
+                return(retVal)
+        rsp = rsp + tmp;
+    commLock.release()
+
+def setXReg(reg, val):
+    global ser, xRegs, cmds, comLock, timeout, xDbgPrint
+    if ser is None:
+        return
+    if not (reg in xRegs):
+        print "invalid register " + reg
+        return
+    val = int(val)
+    if xDbgPrint:
+        print "%-12s %2x %8x %12d" % (reg, xRegs[reg], val & 0xffffffff, val)
+    cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
+                               val & 0xffffffff)
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if len(tmp) == 0:
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "timeout"
+            raise commTimeout
+            break;
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp;
+    commLock.release()
+
+def getXReg(reg):
+    global ser, xRegs, cmds, commLock, timeout
+    if ser is None:
+        return(0)
+    if not (reg in xRegs):
+        print "invalid register " + reg
+        return(0);
+    cmd = '\x01%x %x ' % (cmds['READXREG'][0], xRegs[reg])
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "timeout"
+            raise commTimeout
+            break;
+        if (tmp == '*'):
+            timeout = False
+            result = rsp.split()
+            if (len(result) == 3):
+                val = int(result[2], 16)
+                if val & 0x80000000:
+                    val = -((val ^ 0xffffffff) + 1)
+                commLock.release()
+                return(val)
+        rsp = rsp + tmp;
+
+
+def dspXReg(reg, label=''):
+    val = getXReg(reg)
+    global xRegs, xDbgPrint
+    if xDbgPrint:
+        print ("%-12s %8x %12d %s" %
+               (reg, val & 0xffffffff, val, label))
+    return(val)
+
+def sendMove(op, val):
+    global ser, commLock, timeout
+    if ser is None:
+        return
+    if isinstance(val, float):
+        valStr = "%0.4f" % (val)
+        prtStr = "%7.4f" % (val)
+    elif isinstance(val, int):
+        valStr = "x%x" % (val)
+        prtStr = "%7x" % (val)
+    elif isinstance(val, str):
+        valStr = val
+        prtStr = str
+    else:
+        print "sendMove val invalid type"
+        stdout.flush()
+        return
+    cmd = '\x01%x x%x %s ' % (cmds['SENDMOVE'][0], op, valStr)
+    print "cmd %3x %s" % (op, prtStr)
+    stdout.flush()
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "sendMove timeout"
+                stdout.flush()
+            raise commTimeout()
+            break;
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp
+    commLock.release()
+
+def getQueueStatus():
+    global ser, commLock, timeout
+    if ser is None:
+        return
+    cmd = '\x01%x ' % (cmds['MOVEQUESTATUS'][0])
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "getQueStatus timeout"
+                stdout.flush()
+            raise commTimeout()
+            break;
+        if (tmp == '*'):
+            timeout = False
+            result = rsp.split()
+            if (len(result) == 2):
+                commLock.release()
+                retVal = int(result[1], 16)
+                if retVal & 0x80000000:
+                    retVal -= 0x100000000
+                return(retVal)
+        rsp = rsp + tmp;
+    commLock.release()

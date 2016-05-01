@@ -1,0 +1,1745 @@
+#!/cygdrive/c/Python27/Python.exe
+
+import sys
+import serial
+from sys import stdout
+from time import sleep, time
+from math import ceil, floor, log
+import lathe
+from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
+import comm
+from comm import openSerial, command, setXReg, getXReg, dspXReg
+
+fData = False
+# jLoc = '../../Java/Lathe/src/lathe/'
+cLoc = '../LatheX/include/'
+xLoc = '../../Xilinx/LatheCtl/'
+
+from setup import createCommands, createParameters, \
+    createXilinxReg, createXilinxBits, createCtlStates, createCtlBits
+from interfaceX import cmdList, parmList, stateList, regList,\
+    xilinxList, xilinxBitList
+
+createCommands(cmdList, cLoc, fData)
+createParameters(parmList, cLoc, fData)
+createCtlStates(stateList, cLoc, fData)
+createCtlBits(regList, cLoc, fData)
+createXilinxReg(xilinxList, cLoc, xLoc, fData)
+createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+from setup import *
+
+# zTA = T_ACCEL()
+# zPA = T_ACCEL()
+# taperCalc(zTA, zPA, 0.15)
+# xTaperInit(zTA, 1)
+# zTaperInit(zTA, 1)
+# print tmp(125)
+# print 'test'
+
+openSerial('com7', 57600)
+
+comm.cmds = cmds
+comm.parms = parms
+comm.xRegs = xRegs
+
+def bitSize(val):
+    return(int(ceil(log(abs(val), 2))))
+
+# z unsynchronized move with acceleration
+
+def testxx(runClocks=100, runSteps=0, dbgprint=True, dbg=False, pData=False):
+    cFreq = 50000000            # clock frequency
+    mult = 8                    # freq gen multiplier
+    stepsRev = 1600             # steps per revolution
+    pitch = .1                  # pitch
+    scale = 1 << 6              # scale factor
+
+    minFeed = 10                # min feed ipm
+    maxFeed = 40                # max feed ipm
+    accelRate = 4               # acceleration rate in per sec squared
+
+    stepsInch = stepsRev / pitch # steps per inch
+    stepsMinMax = maxFeed * stepsInch # max steps per min
+    stepsSecMax = stepsMinMax / 60.0  # max steps per second
+    freqGenMax = stepsSecMax * mult # frequency generator maximum
+    print "stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax)
+
+    stepsMinMin = minFeed * stepsInch # max steps per min
+    stepsSecMin = stepsMinMin / 60.0  # max steps per second
+    freqGenMin = stepsSecMin * mult # frequency generator maximum
+    print "stepsSecMin %6.0f freqGenMin %7.0f" % (stepsSecMin, freqGenMin)
+
+    freqDivider = int(floor(cFreq / freqGenMax)) - 1 # calc divider
+    print "freqDivider %3.0f" % freqDivider
+
+    accelTime = maxFeed / (60.0 * accelRate) # acceleration time
+    print "accelTime %8.6f" % (accelTime)
+
+    accelRateSteps = stepsSecMax / accelTime # rate steps per sec sqr
+    print "accelRateSteps %6.0f" % (accelRateSteps)
+
+    accelSteps = accelTime * stepsSecMax # accel time in steps
+    accelClocks = accelTime * freqGenMax # accel time in clocks
+    print "accelSteps %3.0f accelClocks %6.0f" % (accelSteps, accelClocks)
+
+    stepAreaClocks = accelClocks * freqGenMax / 2 # step area in clocks
+    bits = bitSize(stepAreaClocks)
+    print "stepAreaClocks %10.0f bits %2d" % (stepAreaClocks, bits)
+
+    velPerClock = freqGenMax / accelClocks    # velocity per clock
+    velPerClock *= scale
+    areaPerStep = stepAreaClocks / accelSteps # accel area per step
+    areaPerStep *= scale
+    bits = bitSize(areaPerStep)
+    print ("velPerClock %7.2f areaPerStep %10.0f bits %2d" %
+           (velPerClock, areaPerStep, bits))
+
+    finalVelocity = int(accelClocks) * int(velPerClock) # final velocity
+    print "finalVelocity %d" % (finalVelocity)
+
+    minVelocity = freqGenMin * scale;
+    clocksMin = minVelocity / velPerClock
+    minAreaClocks = (freqGenMin * clocksMin) / 2
+    stepsMin = (minAreaClocks * scale) / areaPerStep
+    print ("clocksMin %d stepsMin %d freqGenMin %d minAreaClocks %d" %
+           (clocksMin, stepsMin, freqGenMin, minAreaClocks))
+
+    print "accelSteps %d" % (accelSteps - stepsMin)
+
+    if pData:
+        from pylab import plot, grid, show
+        from array import array
+        time = array('f')
+        data = array('f')
+        data1 = array('f')
+        time.append(0)
+        data.append(0)
+        data1.append(0)
+
+    f = open('accel.txt', 'w')
+    area = 0
+    totalArea = 0
+    clocks = 0
+    steps = 1
+    velocity = 0
+    chkMin = True
+    lastT = 0
+    while (steps < accelSteps):
+        while (area < areaPerStep):
+            clocks += 1
+            velocity += int(velPerClock)
+            area += velocity
+            totalArea += velocity
+        steps += 1
+        curT = clocks / freqGenMax
+        deltaT = curT - lastT
+        if pData:
+            time.append(curT)
+            data.append(velocity)
+            data1.append(1.0 / deltaT)
+        f.write("clock %5d time %8.6f step %4d velocity %6d\n" %
+                (clocks, deltaT, steps, velocity))
+        lastT = curT
+        area -= areaPerStep
+        if chkMin & dbg:
+            print "clock %5d step %4d velocity %6d" % (clocks, steps, velocity)
+        if chkMin & (velocity >= (freqGenMin * scale)):
+            chkMin = False
+            print ("clocks %d velocity %d steps %d area %d delta %d" %
+                   (clocks, velocity / scale, steps, totalArea / scale, 
+                    totalArea/scale - minAreaClocks))
+    print ("clocks %d %8.6f velocity %d totalArea %d delta %d" % 
+           (clocks, clocks / freqGenMax, velocity / scale, totalArea / scale, 
+            totalArea / scale - int(stepAreaClocks)))
+    f.close()
+    stdout.flush()
+
+    # setXReg('XLDZCTL', 0, dbgprint)
+    # setXReg('XLDZCTL', ZRST, dbgprint) # reset z axis
+    # setXReg('XLDZCTL', 0, dbgprint)
+
+    # setXReg('XLDDCTL', 0, dbgprint) # disable debug mode
+    # setXReg('XLDZCTL', 0, dbgprint) # clear z mode
+    # setXReg('XLDDCTL', 0, dbgprint)
+
+    # if runClocks > 0:
+    #     setXReg('XLDTFREQ', freqDivider, dbgprint) # load test frequency
+    #     setXReg('XLDTCOUNT', runClocks-1, dbgprint) # load test count 
+    # else:
+    #     setXReg('XLDZFREQ', freqDivider, dbgprint)
+
+    # setXReg('XLDZMINV', minVelocity, dbgprint)
+    # setXReg('XLDZMAXV', finalVelocity, dbgprint)
+    # setXReg('XLDZACCL', velPerClock, dbgprint)
+    # setXReg('XLDZAFRQ', areaPerStep, dbgprint)
+
+    # setXReg('XLDZDIST', 2 * accelSteps + runSteps, dbgprint)
+    # setXReg('XLDZLOC', 0, dbgprint) # set location
+    # setXReg('XLDZCTL', ZSET_LOC | ZRST, dbgprint) # set z loc and load dist
+    # setXReg('XLDZCTL', 0, dbgprint)        # clear
+
+    # if  runClocks > 0:
+    #     setXReg('XLDDCTL', DBG_MOVE, dbgprint) # select clock
+
+    # dspXReg('XRDZDIST', "dist", dbgprint)
+
+    # setXReg('XLDZCTL', (ZSTART |
+    #                    ZDIR_POS |
+    #                    ZWAIT_SYN), dbgprint)
+
+    # if  runClocks > 0:
+    #     setXReg('XLDDCTL', (DBG_ENA |           # enable debugging
+    #                        DBG_COUNT |         # run for number in count
+    #                        DBG_MOVE), dbgprint) # debug axis move
+    # stdout.flush()
+    # sleep(1.3)
+
+    # dspXReg('XRDZVEL', "vel", True)
+    # dspXReg('XRDZNXT', "nxt", True)
+    # dspXReg('XRDZASTP', "a steps", dbgprint)
+
+    # dspXReg('XRDZDIST', "dist", dbgprint)
+    # dspXReg('XRDZLOC', "loc", dbgprint)
+    # setXReg('XLDZCTL', 0, dbgprint)
+    # dspXReg('XRDSTATE', "state", dbgprint)
+
+    # if pData:
+    #     stdout.flush()
+    #     plot(time, data, 'b', time, data1, 'r', aa="true")
+    #     grid(True)
+    #     show()
+
+# z unsynchronized motion with acceleration
+
+def test3(runClocks=100, dist=20, dbgprint=True, dbg=False, pData=False):
+    if pData:
+        from pylab import plot, grid, show
+        from array import array
+        time = array('f')
+        data = array('f')
+        time.append(0)
+        data.append(0)
+
+    cFreq = 50000000            # clock frequency
+    mult = 64                   # freq gen multiplier
+    stepsRev = 1600             # steps per revolution
+    pitch = .1                  # leadscrew pitch
+    scale = 8                   # scale factor
+
+    minFeed = 10                # min feed ipm
+    maxFeed = 40                # max feed ipm
+    accelRate = 5               # acceleration rate in per sec^2
+
+    stepsInch = stepsRev / pitch      # steps per inch
+    stepsMinMax = maxFeed * stepsInch # max steps per min
+    stepsSecMax = stepsMinMax / 60.0  # max steps per second
+    freqGenMax = int(stepsSecMax) * mult # frequency generator maximum
+    print "stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax)
+
+    stepsMinMin = minFeed * stepsInch # max steps per min
+    stepsSecMin = stepsMinMin / 60.0  # max steps per second
+    freqGenMin = stepsSecMin * mult   # frequency generator maximum
+    print "stepsSecMin %6.0f freqGenMin %7.0f" % (stepsSecMin, freqGenMin)
+
+    freqDivider = int(floor(cFreq / freqGenMax - 1)) # calc divider
+    print "freqDivider %3.0f" % freqDivider
+
+    accelTime = (maxFeed - minFeed) / (60.0 * accelRate) # acceleration time
+    accelClocks = int(accelTime * freqGenMax)
+    print "accelTime %8.6f clocks %d" % (accelTime, accelClocks)
+
+    for scale in range(0, 10):
+        dyMin = int(stepsSecMin) << scale
+        dyMax = int(stepsSecMax) << scale
+        dx = int(freqGenMax) << scale
+        dyDelta = dyMax - dyMin
+        print "\ndx %d dyMin %d dyMax %d dyDelta %d" % (dx, dyMin, dyMax,\
+                                                        dyDelta)
+
+        incPerClock = dyDelta / float(accelClocks)
+        intIncPerClock = int(incPerClock)
+        dyDeltaC = intIncPerClock * accelClocks
+        dyIni = dyMax - dyDeltaC
+        err = int(dyDelta - dyDeltaC) >> scale
+        bits = bitSize(2*dx)
+        print ("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f err %d bits %d" %
+               (dyIni, dyMax, dyDeltaC, incPerClock, err, bits))
+        if err == 0:
+            break
+
+    # incr1 = 2 * dyMax
+    # incr2 = incr1 - 2 * dx
+    # d = incr1 - dx
+    # bits = bitSize(incr2)
+    # print ("incr1 %d incr2 %d d %d bits %d" %
+    #        (incr1, incr2, d, bits))
+
+    print ""
+    clocks = 0
+    lastT = 0
+    lastC = 0
+    x = 0
+    y = 0
+    incr1 = 2 * dyIni
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+
+    bits = bitSize(incr2)
+    print ("dx %d dy %d incr1 %d incr2 %d d %d bits %d" %
+           (dx, dyIni, incr1, incr2, d, bits))
+
+    zSynAccel = 2 * intIncPerClock
+    zSynAclCnt = accelClocks
+    
+    totalSum = (accelClocks * incr1) + d
+    totalInc = (accelClocks * (accelClocks - 1) * zSynAccel) / 2
+    accelSteps = ((totalSum + totalInc) / (2 * dx))
+
+    print ("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
+           (accelClocks, totalSum, totalInc, accelSteps))
+
+    f = open('accel.txt', 'w')
+    sum = d
+    inc = 2 * intIncPerClock
+    incAccum = 0
+    print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
+    stdout.flush()
+    while (clocks < (accelClocks * 1.2)):
+        x += 1
+        if sum < 0:
+            sum += incr1
+        else:
+            deltaC = clocks - lastC
+            f.write(("x %6d y %5d deltaC %5d sum %12d incAccum %12d " +
+                     "incr1 %8d incr2 %11d\n") % \
+                    (x, y, deltaC, sum, incAccum, 
+                     incr1 + incAccum, incr2 + incAccum))
+            y += 1
+            sum += incr2
+            curT = clocks / freqGenMax
+            deltaT = curT - lastT
+            if pData:
+                if lastT != 0:
+                    time.append(curT);
+                    data.append(1.0 / deltaT)
+            lastT = curT
+            lastC = clocks
+        sum += incAccum
+        if clocks < accelClocks:
+            incAccum += inc
+        clocks += 1
+    f.close()
+
+    print ("y %d incr1 %d incr2 %d sum %d incAccum %d" %
+           (y, incr1 + incAccum, incr2 + incAccum, sum, incAccum))
+
+    print "\n"
+
+    setXReg('XLDDCTL', 0, dbgprint)    # disable debug mode
+    setXReg('XLDTCTL', 0, dbgprint)    # clear taper
+    setXReg('XLDZCTL', ZRESET, dbgprint) # reset z
+    setXReg('XLDZCTL', 0, dbgprint)    # clear z mode
+    setXReg('XLDDCTL', 0, dbgprint)
+    setXReg('XLDXCTL', XRESET, dbgprint) # reset x
+    setXReg('XLDXCTL', 0, dbgprint)
+
+    # setXReg('XLDDREG', xRegs['XRDZSUM'], dbgprint) # load display register
+
+    setXReg('XLDZD', d, dbgprint)		# load d value
+    setXReg('XLDZINCR1', incr1, dbgprint)	# load incr1 value
+    setXReg('XLDZINCR2', incr2, dbgprint)	# load incr2 value
+
+    setXReg('XLDZACCEL', zSynAccel, dbgprint)   # load z accel
+    setXReg('XLDZACLCNT', zSynAclCnt, dbgprint) # load z accel count
+
+    setXReg('XLDTFREQ', freqDivider, dbgprint)  # load test frequency
+    setXReg('XLDTCOUNT', runClocks-1, dbgprint) # load test count 
+    setXReg('XLDDCTL', DBG_INIT, dbgprint)      # initialize debug
+    setXReg('XLDDCTL', DBG_MOVE, dbgprint)      # clear init and set move
+
+    setXReg('XLDZLOC', 20, dbgprint)       # set z location
+    setXReg('XLDZDIST', dist, dbgprint)    # load z distance
+    setXReg('XLDZCTL', ZRESET | ZSET_LOC, dbgprint) # reset and set z location
+
+    setXReg('XLDZCTL', (ZDIR_POS # clear reset set direction positive
+                   ), dbgprint)
+
+    setXReg('XLDZCTL', (ZSTART      # start with
+                       | ZDIR_POS  # direction positive
+                   ), dbgprint)
+
+    setXReg('XLDDCTL', (DBG_ENA     # enable debugging
+                       | DBG_COUNT # run for number in count
+                       | DBG_MOVE
+                   ), dbgprint)
+
+    sleep(.5);
+    if dbgprint:
+        print "\nresults %d clocks \n" % (runClocks)
+
+    xPos = dspXReg('XRDZXPOS', "xpos", dbgprint)
+    dspXReg('XRDZYPOS', "ypos", dbgprint)
+    zsum = dspXReg('XRDZSUM', "sum", dbgprint)
+    zAclSum = dspXReg('XRDZACLSUM', "aclsum", dbgprint)
+
+    dspXReg('XRDZDIST', "dist", dbgprint)
+    dspXReg('XRDZASTP', "a steps", dbgprint)
+    dspXReg('XRDZLOC', "loc", dbgprint)
+    dspXReg('XRDSTATE', "state", dbgprint)
+
+    x = 0
+    y = 0
+    clocks = 0
+    sum = d
+    accelAccum = 0
+    distCtr = dist
+    l0 = dist
+    while (clocks < xPos):
+        clocks += 1
+        x += 1
+        if sum < 0:
+            sum += incr1
+        else:
+            y += 1
+            sum += incr2
+            distCtr -= 1
+            if distCtr == 0:
+                break
+        sum += accelAccum
+        if y >= l0:
+            if accelAccum > 0:
+                accelAccum -= zSynAccel
+        else:
+            if clocks <= accelClocks:
+                accelAccum += zSynAccel
+        l0 = distCtr
+
+    print ("\nx %d y %d sum %d delta %d accelAccum %d delta %d" %
+           (x, y, sum, sum - zsum, accelAccum, accelAccum - zAclSum))
+
+    if pData:
+        plot(time, data, 'b', aa="true")
+        grid(True)
+        show()
+
+# z synchronized move with acceleration
+
+def test4(runClocks=0, tpi=0, dist=20, dbgprint=True, pData=True):
+    print runClocks, tpi
+    if tpi == 0:
+        return
+    if tpi < 1:
+        tpi = 1.0 / tpi
+    if runClocks == 0:
+        runClocks = 1
+    f = open('accel.txt', 'w')
+
+    if pData:
+        from pylab import plot, grid, show
+        from array import array
+        time = array('f')
+        data = array('f')
+        time.append(0)
+        data.append(0)
+
+    stepsRev = 1600             # steps per revolution
+    lsPitch = .1                # leadscrew pitch
+    spindleRPM = 300            # spindle speed
+    encoder = 20320             # encoder counts
+    threadPerIn = tpi           # threads per inch
+    minFeed = 2.0               # minimum speed
+    accelRate = 1               # acceleration inch per sec^2
+    scale = 8
+
+    print "tpi %5.2f pitch %5.3f" % (tpi, 1.0 / tpi)
+
+    zFeedRate = spindleRPM / threadPerIn # z feed rate inch per min
+    print "zFeedRate %6.2f ipm" % (zFeedRate)
+
+    spindleRPS = spindleRPM / 60.0 # spindle rev per second
+
+    encPerSec = spindleRPS * encoder # encoder counts per second
+    print "encPerSec %5.0f" % (encPerSec)
+
+    stepsPerInch = stepsRev / lsPitch # steps per inch
+    encPerInch = encoder * threadPerIn # encoder pulse per inch
+    print "stepsPerInch %d encoderPerIn %d" % (stepsPerInch, encPerInch)
+
+    stepsPerThread = stepsPerInch / threadPerIn # steps per thread
+    stepsPerSecond = zFeedRate * stepsPerInch / 60.0 # steps per second
+    print ("stepsPerThread %5.0f stepsPerSecond %5.0f" %
+           (stepsPerThread, stepsPerSecond))
+
+    dx = int(encPerInch) << scale
+    dy = int(stepsPerInch) << scale
+    print ("dx %d dy %d scale %d" % (dx, dy, 1 << scale))
+
+    accelTime = (zFeedRate - minFeed) / (60.0 * accelRate)
+    accelClocks = int(encPerSec * accelTime)
+    bits = bitSize(accelClocks)
+    print ("accelTime %8.6f accelClocks %4.0f bits %d" %
+           (accelTime, accelClocks, bits))
+
+    dyIni = dy /  (zFeedRate / minFeed)
+    dyDelta = dy - dyIni
+    incPerClock = dyDelta / accelClocks
+    intIncPerClock = int(incPerClock)
+    dyIni = dy - intIncPerClock * accelClocks
+    print ("dyIni %d dy %d dyDelta %d incPerClock %6.2f" %
+           (dyIni, dy, dyDelta, incPerClock))
+
+    incr1 = 2 * dy
+    incr2 = incr1 - 2 * dx
+    sum = incr1 - dx
+
+    bits = bitSize(incr2)
+    print ("incr1 %d incr2 %d bits %d" %
+           (incr1, incr2, bits))
+    
+    stdout.flush()
+
+    # clocks = 0
+    # lastT = 0
+    # x = 0
+    # y = 0
+    # incr1 = 2 * dyIni
+    # incr2 = incr1 - 2 * dx
+    # sum = incr1 - dx
+    # inc = 2 * intIncPerClock
+    # print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
+    # stdout.flush()
+    # while (clocks < (accelClocks * 1.2)):
+    #     clocks += 1
+    #     x += 1
+    #     if sum < 0:
+    #         sum += incr1
+    #     else:
+    #         y += 1
+    #         sum += incr2
+    #         curT = clocks / encPerSec
+    #         deltaT = curT - lastT
+    #         if pData:
+    #             if lastT != 0:
+    #                 time.append(curT);
+    #                 data.append(1.0 / deltaT)
+    #         lastT = curT
+    #         f.write("x %6d y %5d sum %11d incr1 %8d incr2 %11d\n" %
+    #                 (x, y, sum, incr1, incr2))
+    #     if clocks <= accelClocks:
+    #         incr1 += inc
+    #         incr2 += inc
+    # print "y %d incr1 %d incr2 %d sum %d" % (y, incr1, incr2, sum)
+    # stdout.flush()
+
+    clocks = 0
+    lastT = 0
+    x = 0
+    y = 0
+    incr1 = 2 * dyIni
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+    sum = d
+
+    zSynAccel = 2 * intIncPerClock
+    zSynAclCnt = accelClocks
+
+    totalSum = (accelClocks * incr1) + d
+    totalInc = (accelClocks * (accelClocks - 1) * zSynAccel) / 2
+    accelSteps = ((totalSum + totalInc) / (2 * dx)) + 1
+
+    print ("accelClocks %d totalSum %d totalInc %d %d" % 
+           (accelClocks, totalSum, totalInc, accelSteps))
+
+    incAccum = 0;
+    print ("incr1 %d incr2 %d zSynAccel %d" % (incr1, incr2, zSynAccel))
+    stdout.flush()
+    while (clocks < (accelClocks * 1.2)):
+        clocks += 1
+        x += 1
+        if sum < 0:
+            sum += incr1
+        else:
+            y += 1
+            sum += incr2
+            curT = clocks / encPerSec
+            deltaT = curT - lastT
+            if pData:
+                if lastT != 0:
+                    time.append(curT);
+                    data.append(1.0 / deltaT)
+            lastT = curT
+        sum += incAccum
+        if clocks <= accelClocks:
+            incAccum += zSynAccel
+        f.write("x %6d y %5d sum %12d incAccum %12d incr1 %8d incr2 %11d\n" %
+                (x, y, sum, incAccum, incr1 + incAccum, incr2 + incAccum))
+    print ("y %d incr1 %d incr2 %d sum %d" %
+           (y, incr1 + incAccum, incr2 + incAccum, sum))
+    print ("y %d incr1 %d incr2 %d incAccum %d" %
+           (y, incr1, incr2, incAccum))
+    f.close()
+
+    incr1 = 2 * dyIni
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+
+    encPhase = 10
+
+    setXReg('XLDDCTL', 0, dbgprint)    # disable debug mode
+    setXReg('XLDZCTL', ZRESET, dbgprint) # reset z
+    setXReg('XLDZCTL', 0, dbgprint)    # clear z mode
+    setXReg('XLDDCTL', 0, dbgprint)
+    setXReg('XLDZCTL', 0, dbgprint)
+
+    setXReg('XLDTFREQ', 10000, dbgprint)	# load test frequency
+    setXReg('XLDTCOUNT', runClocks-1, dbgprint) # load test count 
+
+    setXReg('XLDPHASE', encPhase - 1, dbgprint) # load phase count
+
+    setXReg('XLDZD', d, dbgprint)		# load d value
+    setXReg('XLDZINCR1', incr1, dbgprint)	# load incr1 value
+    setXReg('XLDZINCR2', incr2, dbgprint)	# load incr2 value
+
+    setXReg('XLDZACCEL', zSynAccel, dbgprint)   # load z accel
+    setXReg('XLDZACLCNT', zSynAclCnt, dbgprint) # load z accel count
+
+    setXReg('XLDDCTL', DBG_INIT, dbgprint) # initialize z modules
+    setXReg('XLDDCTL', 0, dbgprint)        # clear
+
+    setXReg('XLDZLOC', 20, dbgprint)       # set location
+    setXReg('XLDZCTL', ZSET_LOC, dbgprint) # set z location
+    setXReg('XLDZCTL', 0, dbgprint)        # clear
+
+    setXReg('XLDZDIST', dist, dbgprint) # load z distance
+    setXReg('XLDZCTL', ZRESET, dbgprint) # reset z to load distance
+    setXReg('XLDZCTL', 0, dbgprint)     # clear reset
+
+    setXReg('XLDZCTL', (ZSRC_SYN    # sync source
+                       | ZDIR_POS   # direction positive
+                       | ZWAIT_SYN  # wait for sync pulse
+                   ), dbgprint)
+
+    setXReg('XLDZCTL', (ZSTART      # start
+                       | ZSRC_SYN   # sync source
+                       | ZDIR_POS   # direction positive
+                       | ZWAIT_SYN  # wait for sync pulse
+                   ), dbgprint)
+
+    setXReg('XLDDCTL', (DBG_ENA     # enable debugging
+                       | DBG_COUNT # run for number in count
+                   ), dbgprint)
+
+    sleep(.5);
+    if dbgprint:
+        print "\nresults %d clocks \n" % (runClocks)
+
+    dspXReg('XRDFREQ', "freq", dbgprint)
+    dspXReg('XRDPSYN', "phase syn", dbgprint)
+    dspXReg('XRDTPHS', "tot phase", dbgprint)
+
+    xPos = dspXReg('XRDZXPOS', "xpos", dbgprint)
+    dspXReg('XRDZYPOS', "ypos", dbgprint)
+    zsum = dspXReg('XRDZSUM', "sum", dbgprint)
+    zAclSum = dspXReg('XRDZACLSUM', "aclsum", dbgprint)
+
+    dspXReg('XRDZDIST', "dist", dbgprint)
+    dspXReg('XRDZASTP', "a steps", dbgprint)
+    dspXReg('XRDZLOC', "loc", dbgprint)
+    dspXReg('XRDSTATE', "state", dbgprint)
+
+    x = 0
+    y = 0
+    clocks = 0
+    sum = d
+    accelAccum = 0
+    distCtr = dist
+    l0 = dist
+    while (clocks < xPos):
+        clocks += 1
+        x += 1
+        if sum < 0:
+            sum += incr1
+        else:
+            y += 1
+            sum += incr2
+            distCtr -= 1
+            if distCtr == 0:
+                break
+        sum += accelAccum
+        if y >= l0:
+            if accelAccum > 0:
+                accelAccum -= zSynAccel
+        else:
+            if clocks <= accelClocks:
+                accelAccum += zSynAccel
+        l0 = distCtr
+
+    print ("\nx %d y %d sum %d delta %d accelAccum %d delta %d" %
+           (x, y, sum, sum - zsum, accelAccum, accelAccum - zAclSum))
+
+    if pData:
+        plot(time, data, 'b', aa="true")
+        grid(True)
+        show()
+
+def test5(dist=100, dbgprint=True, prt=False):
+    if dist == 0:
+        dist = 100
+
+    cFreq = 50000000            # clock frequency
+    mult = 64                   # freq gen multiplier
+    stepsRev = 1600             # steps per revolution
+    pitch = .1                  # leadscrew pitch
+    scale = 8                   # scale factor
+
+    minFeed = 10                # min feed ipm
+    maxFeed = 40                # max feed ipm
+    jogV = 20                   # jog velocity
+    accelRate = 5               # acceleration rate in per sec^2
+
+    stepsInch = stepsRev / pitch      # steps per inch
+    stepsMinMax = maxFeed * stepsInch # max steps per min
+    stepsSecMax = stepsMinMax / 60.0  # max steps per second
+    freqGenMax = int(stepsSecMax) * mult # frequency generator maximum
+    if prt:
+        print "stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax)
+
+    stepsMinMin = minFeed * stepsInch # max steps per min
+    stepsSecMin = stepsMinMin / 60.0  # max steps per second
+    freqGenMin = stepsSecMin * mult   # frequency generator maximum
+    if prt:
+        print "stepsSecMin %6.0f freqGenMin %7.0f" % (stepsSecMin, freqGenMin)
+
+    stepsMinJog = int(jogV * stepsInch)
+    stepsSecJog = stepsMinJog / 60
+    freqGenJog = stepsSecJog * mult
+    if prt:
+        print "stepsSecJog %d freqGenJog %d\n" % (stepsSecJog, freqGenJog)
+
+    freqDivider = int(floor(cFreq / freqGenMax - 1)) # calc divider
+    if prt:
+        print "freqDivider %3.0f" % freqDivider
+
+    accelTime = (maxFeed - minFeed) / (60.0 * accelRate) # acceleration time
+    accelClocks = int(accelTime * freqGenMax)
+    if prt:
+        print "accelTime %8.6f clocks %d" % (accelTime, accelClocks)
+
+    for scale in range(0, 10):
+        dyMin = int(stepsSecMin) << scale
+        dyMax = int(stepsSecMax) << scale
+        dx = int(freqGenMax) << scale
+        dyDelta = dyMax - dyMin
+        if prt:
+            print ("\ndx %d dyMin %d dyMax %d dyDelta %d" %
+                   (dx, dyMin, dyMax, dyDelta))
+
+        incPerClock = dyDelta / float(accelClocks)
+        intIncPerClock = int(incPerClock)
+        dyDeltaC = intIncPerClock * accelClocks
+        dyIni = dyMax - dyDeltaC
+        err = int(dyDelta - dyDeltaC) >> scale
+        bits = bitSize(2*dx)
+        if prt:
+            print (("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f " +
+                    "err %d bits %d") %
+                   (dyIni, dyMax, dyDeltaC, incPerClock, err, bits))
+        if err == 0:
+            break
+
+    accel = 2 * intIncPerClock
+    
+    dyJog = stepsSecJog << scale;
+    dyDelta = (dyJog - dyIni);
+    jogAccelClocks = dyDelta / accel;
+    dyJog = jogAccelClocks * accel;
+
+    incr1 = 2 * dyIni
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+    
+    totalSum = (accelClocks * incr1) + d
+    totalInc = (accelClocks * (accelClocks - 1) * accel) / 2
+    accelSteps = ((totalSum + totalInc) / (2 * dx))
+
+    if prt:
+        print ("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
+               (accelClocks, totalSum, totalInc, accelSteps))
+
+    while True:
+        rsp = command('READDBG')
+        if len(rsp) <= 4:
+            break;
+    command('CMDSTOP')
+    command('XSTOP')
+    setParm('PRMXLOCIN', 0)
+    command('XSETLOC')
+    setParm('PRMXFREQ', freqDivider)
+    setParm('PRMXDX', dx)
+    setParm('PRMXDYINI', dyIni)
+    setParm('PRMXDYJOG', dyJog)
+    setParm('PRMXDYMAX', dyMax)
+    setParm('PRMXACCEL', accel)
+    setParm('PRMXACLJOG', jogAccelClocks)
+    setParm('PRMXACLMAX', accelClocks)
+    setParm('PRMXDISTIN', dist)
+    command('LOADXPRM')
+    command('XMOVE')
+    while True:
+        rsp = command('READDBG')
+        if len(rsp) > 4:
+            print rsp
+            stdout.flush()
+            if rsp.find("x st 00000000") > 0:
+                break;
+    dspXReg('XRDXLOC', "x loc", dbgprint)
+
+class Axis():
+    def __init__(self, cFreq=50000000, mult=16):
+        self.cFreq = cFreq      # clock frequency
+        self.mult = mult        # freq gen multiplier
+        self.axis = None        # axis name
+        self.pitch = 0.0        # axis leadscrew pitch
+        self.ratio = 0.0        # motor leadscrew ratio
+        self.microSteps = 0     # micro steps
+        self.motorSteps = 0     # motor steps
+        self.accel = 0.0        # acceleration
+        self.backlash = 0.0     # backlash
+        self.stepsInch = 0      # axis steps per inch
+        self.backlashSteps = 0  # backlash steps
+    
+    def setup(self):
+        self.stepsInch = int((self.microSteps * self.motorSteps * self.ratio) /
+                             axis.pitch)
+        self.backlashSteps = int(axis.backlash * axis.stepsInch)
+
+    def setAxis(self, axis):
+        self.axis = axis
+
+class Accel():
+    def __init__(self, prt=False):
+        self.prt = prt
+
+        self.encoder = 0        # encoder count
+
+        self.accelTime = 0      # acceleration time
+        self.accelSteps = 0     # acceleration steps
+
+        self.scale = 0          # scale factor
+        self.dx = 0             # dx value
+        self.dyIni = 0          # initial dy
+        self.dyMax = 0          # maximum dy
+        self.intIncPerClock = 0 # increment per clock
+
+        self.incr1 = 0          # add if negative
+        self.incr2 = 0          # add if positive
+        self.sum = 0            # initial sum
+        self.accel = 0          # inc per clock
+        self.accelClocks = 0    # acceleration clocks
+
+    def calc(self, dxBase, dyMaxBase, dyMinBase):
+        for scale in range(0, 12):
+            accel.dx = dxBase << scale
+            accel.dyMax = dyMaxBase << scale
+            dyMin = dyMinBase << scale
+            dyDelta = accel.dyMax - dyMin
+            if self.prt:
+                print ("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" %
+                        (scale, accel.dx, dyMin, accel.dyMax, dyDelta))
+            incPerClock = float(dyDelta) / accel.accelClocks
+            intIncPerClock = int(incPerClock + 0.5)
+            if intIncPerClock == 0:
+                continue
+            accel.intIncPerClock = intIncPerClock
+            dyDeltaC = intIncPerClock * accel.accelClocks
+            err = int(abs(dyDelta - dyDeltaC)) >> scale
+            accel.dyIni = accel.dyMax - intIncPerClock * accel.accelClocks
+            bits = bitSize(accel.dx) + 1
+            if self.prt:
+                print ("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f "\
+                        "err %d bits %d" %
+                        (accel.dyIni, accel.dyMax, dyDelta, incPerClock,\
+                            err, bits))
+
+            if (bits >= 30) or (err == 0):
+                break
+        accel.scale = scale
+
+        self.incr1 = incr1 = 2 * self.dyIni
+        self.incr2 = incr2 = incr1 - 2 * self.dx
+        self.sum = incr1 - self.dx
+        if self.prt:
+            print ("\nincr1 %d incr2 %d scale %d bits %d" %
+                    (incr1, incr2, self.scale, bitSize(incr2)))
+
+        if self.intIncPerClock != 0:
+            self.accel = 2 * self.intIncPerClock
+
+            totalSum = (self.accelClocks * incr1) + self.sum
+            totalInc = (self.accelClocks * (self.accelClocks - 1) * 
+                        self.accel) / 2
+            self.accelSteps = ((totalSum + totalInc) / (2 * self.dx))
+
+            if self.prt:
+                print ("accelClocks %d totalSum %d totalInc %d "\
+                        "accelSteps %d" % 
+                        (self.accelClocks, totalSum, totalInc, \
+                        self.accelSteps))
+        else:
+            self.accelClocks = 0
+            self.accel = 0
+
+    def test(self):
+        # lastT = 0
+        # encPerSec = self.encPerSec
+        accelClocks = self.accelClocks
+        accel = self.accel
+        incr1 = self.incr1
+        incr2 = self.incr2
+        sum = self.sum
+        print ("\nincr1 %d incr2 %d sum %d inc %d accel %d" %
+               (incr1, incr2, sum, self.intIncPerClock, accel))
+    
+        f = open("turnAccel.txt", "w")
+        x = 0
+        y = 0
+        clocks = 0
+        incAccum = 0
+        while clocks < (accelClocks * 1.2):
+            clocks += 1
+            x += 1
+            if sum < 0:
+                sum += incr1
+            else:
+                y += 1
+                sum += incr2
+                # curT = clocks / encPerSec
+                # deltaT = curT - lastT
+                # if pData:
+                #     if lastT != 0:
+                #         time.append(curT);
+                #         data.append(1.0 / deltaT)
+                # lastT = curT
+            sum += incAccum
+            if clocks <= accelClocks:
+                incAccum += accel
+            f.write("x %6d y %5d sum %12d incAccum %12d incr1 %8d "\
+                    "incr2 %11d\n" %
+                    (x, y, sum, incAccum, incr1 + incAccum, incr2 + incAccum))
+
+        print ("incr1 %d incr2 %d sum %d" %
+               (incr1 + incAccum, incr2 + incAccum, sum))
+
+        incr1 = 2 * self.dyMax
+        incr2 = incr1 - 2 * self.dx
+        print ("incr1 %d incr2 %d" %
+               (incr1, incr2))
+
+        stdout.flush()
+        f.close()
+
+class Test(Accel):
+    def __init__(self, dbgPrint=False):
+        Accel.__init__(self)
+        self.dbgPrint = dbgPrint
+
+        self.axis = None        # axis for accleration
+        self.freqDivider = 0    # frequency divider
+
+        self.dist = 0           # test distance
+        self.loc = 0            # start location
+
+    def setDbgPrint(self, val):
+        self.dbgPrint = val
+        comm.xDbgPrint = val
+
+    def testNoAccelSetup(self, dx, dy):
+        self.dx = dx
+        self.dy = dy
+
+        self.incr1 = (2 * dy)
+        self.incr2 = (2 * (dy - dx))
+        self.sum = (self.incr1 - dx)
+
+        print "dx %d dy %d" % (dx, dy)
+        print ("incr1 %d incr2 %d sum %d" %
+               (self.incr1, self.incr2, self.sum))
+
+        self.accel = 0
+        self.accelClocks = 0
+
+    def zTestSync(self, runClocks, dist=100, loc=20):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "z test no acceleration"
+
+        if self.dbgPrint:
+            print
+
+        self.testInit(self.encoder)
+        self.zSetup(dist, loc)
+
+        dir = ZDIR_POS
+        if dist < 0:
+            dir = ZDIR_NEG
+        setXReg('XLDZCTL', ZSRC_SYN | dir)
+        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | dir)
+
+        self.testRun(runClocks)
+        self.testWait(runClocks, 0.5)
+        self.readPhase()
+        if self.accel == 0:
+            self.zTestCheck(None)
+        else:
+            self.zTestAccelCheck(None)
+
+    def xTestSync(self, runClocks, dist=100, loc=20):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "x test no acceleration"
+
+        if self.dbgPrint:
+            print
+
+        self.testInit(self.encoder)
+        self.xSetup(dist, loc)
+
+        dir = ZDIR_POS
+        if dist < 0:
+            dir = ZDIR_NEG
+        setXReg('XLDXCTL', XSRC_SYN | dir)
+        setXReg('XLDXCTL', XSTART | XSRC_SYN | dir)
+
+        self.testRun(runClocks)
+        self.testWait(runClocks, 0.5)
+        self.readPhase()
+        if self.accel == 0:
+            self.xTestCheck(None)
+        else:
+            self.xTestAccelCheck(None)
+
+    def zTestXTaper(self, runClocks, dist=100, loc=20, ac=None):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "z sync move x taper"
+
+        if self.dbgPrint:
+            print
+
+        self.testInit(self.encoder)
+        self.zSetup(dist, loc)
+        self.xSetup(0, loc, ac)
+
+        setXReg('XLDTCTL', TENA) # set for taper x
+
+        dir = ZDIR_POS
+        if dist < 0:
+            dir = ZDIR_NEG
+        setXReg('XLDZCTL', ZSRC_SYN | dir) # set source and direction
+        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | dir) # start z
+
+        self.testRun(runClocks)
+        self.testWait(runClocks, 2.0)
+        self.readPhase()
+        self.zTestCheck(None)
+        self.xTestCheck(ac)
+
+    def xTestZTaper(self, runClocks, dist=100, loc=20, ac=None):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "x sync move z taper"
+
+        if self.dbgPrint:
+            print
+
+        self.testInit(self.encoder)
+        self.xSetup(dist, loc)
+        self.zSetup(0, loc, ac)
+
+        setXReg('XLDTCTL', TENA | TZ) # set for taper z
+
+        dir = XDIR_POS
+        if dist < 0:
+            dir = XDIR_NEG
+        setXReg('XLDXCTL', XSRC_SYN | dir) # set source and direction
+        setXReg('XLDXCTL', XSTART | XSRC_SYN | dir) # start x
+
+        self.testRun(runClocks)
+        self.testWait(runClocks, 2.0)
+        self.readPhase()
+        self.xTestCheck(None)
+        self.zTestCheck(ac)
+
+    def zTestMove(self, runClocks, dist=100, loc=20):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "z test move"
+
+        if self.dbgPrint:
+            print
+
+        self.resetAll()
+        self.testMoveInit()
+
+        self.zSetup(dist, loc)
+
+        dir = ZDIR_POS
+        if dist < 0:
+            dir = ZDIR_NEG
+        setXReg('XLDZCTL', dir) # set direction
+        setXReg('XLDZCTL', (ZSTART | # start
+                            dir))    # and direction
+
+        self.testMoveStart(runClocks, self.freqDivider)
+
+        self.testWait(runClocks, 2.0)
+        self.zTestAccelCheck(None)
+
+    def xTestMove(self, runClocks, dist=100, loc=20):
+        if dist == 0:
+            dist = 100
+        if loc == 0:
+            loc = 20
+
+        print "x test move"
+
+        if self.dbgPrint:
+            print
+
+        self.resetAll()
+        self.testMoveInit()
+
+        self.xSetup(dist, loc)
+
+        dir = XDIR_POS
+        if dist < 0:
+            dir = XDIR_NEG
+        setXReg('XLDXCTL', dir) # set direction
+        setXReg('XLDXCTL', (XSTART | # start
+                            dir))    # and direction
+
+        self.testMoveStart(runClocks, self.freqDivider)
+
+        self.testWait(runClocks, 2.0)
+        self.xTestAccelCheck(None)
+
+    def resetAll(self):
+        setXReg('XLDDCTL', 0)    # disable debug mode
+        setXReg('XLDTCTL', 0)    # clear taper
+        setXReg('XLDZCTL', ZRESET) # reset z
+        setXReg('XLDZCTL', 0)      # clear z mode
+        setXReg('XLDXCTL', XRESET) # reset x
+        setXReg('XLDXCTL', 0)      # clear x mode
+
+    def testInit(self, encoder, dbgFreq=10000, dbgCount=4):
+        self.resetAll()
+        setXReg('XLDDCTL', DBG_SEL) # select debug encoder
+
+        setXReg('XLDTFREQ', dbgFreq - 1) # load test frequency
+        setXReg('XLDTCOUNT', dbgCount-1) # load test count 
+        setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
+                            DBG_INIT)) # initialize dbg and z modules
+        setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
+
+        setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
+                            DBG_SEL |   # select dbg encoder
+                            DBG_COUNT)) # run for number in count
+        setXReg('XLDDCTL', DBG_SEL)     # select debug encoder
+
+        setXReg('XLDDREG', 0x1234) # load display register
+        setXReg('XLDPHASE', encoder) # load phase count
+
+    def testMoveInit(self):
+        setXReg('XLDDCTL', DBG_INIT)      # initialize debug
+        setXReg('XLDDCTL', DBG_MOVE)      # clear init and set move
+
+    def testMoveStart(self, runClocks, dbgFreq):
+        setXReg('XLDTFREQ', dbgFreq) # load test frequency
+        if runClocks != 0:
+            setXReg('XLDTCOUNT', runClocks-1) # load test count 
+
+            setXReg('XLDDCTL', (DBG_ENA     # enable debugging
+                                | DBG_COUNT # run for number in count
+                                | DBG_MOVE
+                            ))
+
+    def testRun(self, runClocks):
+        if runClocks != 0:
+            setXReg('XLDTCOUNT', runClocks-1) # load test count 
+
+            setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
+                                DBG_INIT)) # initialize dbg and z modules
+            setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
+
+            setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
+                                DBG_SEL |   # select dbg encoder
+                                DBG_COUNT | # run for number in count
+                                DBG_RSYN |  # enable sync
+                                DBG_MOVE))  # debug axis move
+
+    def zSetup(self, dist, loc, ac=None):
+        if ac == None:
+            ac = self
+        self.dist = dist
+        self.loc = loc
+        setXReg('XLDZD', ac.sum)       # load d value
+        setXReg('XLDZINCR1', ac.incr1) # load incr1 value
+        setXReg('XLDZINCR2', ac.incr2) # load incr2 value
+
+        if dist > 1:
+            setXReg('XLDZACCEL', ac.accel)        # load z accel
+            setXReg('XLDZACLCNT', ac.accelClocks - 1) # load z accel count
+        else:
+            setXReg('XLDZACCEL', 0)  # load z accel
+            setXReg('XLDZACLCNT', 0) # load z accel count
+
+        setXReg('XLDZDIST', abs(dist)) # load z distance
+        setXReg('XLDZLOC', loc)   # set location
+
+        setXReg('XLDZCTL', ZRESET | ZSET_LOC) # reset z and load location
+        setXReg('XLDZCTL', 0)    # clear reset
+
+    def xSetup(self, dist, loc, ac=None):
+        if ac == None:
+            ac = self
+        self.dist = dist
+        self.loc = loc
+        setXReg('XLDXD', ac.sum)       # load d value
+        setXReg('XLDXINCR1', ac.incr1) # load incr1 value
+        setXReg('XLDXINCR2', ac.incr2) # load incr2 value
+
+        setXReg('XLDXACCEL', ac.accel)        # load x accel
+        setXReg('XLDXACLCNT', ac.accelClocks - 1) # load x accel count
+
+        setXReg('XLDXDIST', abs(dist)) # load x distance
+        setXReg('XLDXLOC', loc)        # set location
+
+        setXReg('XLDXCTL', XRESET | XSET_LOC) # reset x and load location
+        setXReg('XLDXCTL', 0)                 # clear reset
+
+    def testWait(self, runClocks, interval=0.5):
+        start = time()
+        # sleep(0.1)
+        # zLast = 0
+        # xLast = 0
+        # while True:
+            # zVal = getXReg('XRDZXPOS')
+            # xVal = getXReg('XRDXXPOS')
+            # if zVal == zLast and xVal == xLast:
+            #     break
+            # zLast = zVal
+            # xLast = xVal
+        while True:
+            val = dspXReg('XRDSR')
+            # print val
+            if val != 0:
+                break
+        delta = time() - start
+
+        if val & 1:
+            setXReg('XLDZCTL', 0)   # clear z done flag
+        if val & 2:
+            setXReg('XLDXCTL', 0)   # clear x done flag
+
+        zVal = getXReg('XRDZXPOS')
+        xVal = getXReg('XRDXXPOS')
+        tmp = max(zVal, xVal)
+
+        if self.dbgPrint:
+            print 
+        print "results %d %d clocks %4.2f sec\n" % (runClocks, tmp, delta)
+
+    def readPhase(self):
+        dspXReg('XREADREG', "freq")
+
+        dspXReg('XRDFREQ', "freq")
+        dspXReg('XRDPSYN', "phase syn")
+        dspXReg('XRDTPHS', "tot phase")
+
+    def zTestCheck(self, ac=None):
+        if self.dbgPrint:
+            print
+        xPos = dspXReg('XRDZXPOS', "z xpos")
+        yPos = dspXReg('XRDZYPOS', "z ypos")
+        zSum = dspXReg('XRDZSUM', "z sum")
+
+        dspXReg('XRDZDIST', "z dist")
+        dspXReg('XRDZLOC', "z loc")
+        dspXReg('XRDSTATE', "state")
+
+        if self.dbgPrint:
+            print
+        self.testCheck(xPos, yPos, zSum, ac)
+
+    def xTestCheck(self, ac=None):
+        if self.dbgPrint:
+            print
+        xPos = dspXReg('XRDXXPOS', "x xpos")
+        yPos = dspXReg('XRDXYPOS', "x ypos")
+        xSum = dspXReg('XRDXSUM', "x sum")
+
+        dspXReg('XRDXDIST', "x dist")
+        dspXReg('XRDXLOC', "x loc")
+        dspXReg('XRDSTATE', "state")
+
+        if self.dbgPrint:
+            print
+        self.testCheck(xPos, yPos, xSum, ac)
+
+    def testCheck(self, xPos, yPos, testSum, ac=None):
+        if ac == None:
+            ac = self
+        incr1 = ac.incr1
+        incr2 = ac.incr2
+
+        clocks = 0
+        x = 0
+        y = 0
+        sum = ac.sum
+        while (clocks < xPos):
+            clocks += 1
+            x += 1
+            if sum < 0:
+                sum += incr1
+            else:
+                y += 1
+                sum += incr2
+
+        print ("x %d y %d yPos %d sum %d testSum %d" %
+               (x, y, yPos, sum, testSum))
+
+    def zTestAccelCheck(self, ac=None):
+        xPos = dspXReg('XRDZXPOS', "xpos")
+        yPos = dspXReg('XRDZYPOS', "ypos")
+        zSum = dspXReg('XRDZSUM', "sum")
+        zAclSum = dspXReg('XRDZACLSUM', "aclsum")
+
+        dspXReg('XRDZDIST', "dist")
+        dspXReg('XRDZASTP', "a steps")
+        dspXReg('XRDZLOC', "loc")
+        dspXReg('XRDSTATE', "state")
+
+        self.testAccelCheck(xPos, yPos, zSum, zAclSum)
+
+    def xTestAccelCheck(self, ac=None):
+        xPos = dspXReg('XRDXXPOS', "xpos")
+        yPos = dspXReg('XRDXYPOS', "ypos")
+        xSum = dspXReg('XRDXSUM', "sum")
+        xAclSum = dspXReg('XRDXACLSUM', "aclsum")
+
+        dspXReg('XRDXDIST', "dist")
+        dspXReg('XRDXASTP', "a steps")
+        dspXReg('XRDXLOC', "loc")
+        dspXReg('XRDSTATE', "state")
+
+        self.testAccelCheck(xPos, yPos, xSum, xAclSum)
+
+    def testAccelCheck(self, xPos, yPos, xSum, aclSum):
+        incr1 = self.incr1
+        incr2 = self.incr2
+        sum = self.sum
+        distCtr = abs(self.dist)
+        if distCtr > 1:
+            synAccel = self.accel
+            accelClocks = self.accelClocks
+            accel = True
+        else:
+            synAccel = 0
+            accelClocks = 0
+            accel = False
+
+        print
+        print ("synAccel %d accelClocks %d accelSum %d" %
+               (synAccel, accelClocks, synAccel * accelClocks))
+
+        x = 0
+        y = 0
+        aClk = accelClocks
+        aclSteps = 0
+        accelAccum = 0
+        accelAccum0 = 0
+        decel = False
+        while x < xPos:
+            if self.dbgPrint:
+                print ("x %3d y %3d sum %8d aSum %6d dist %3d "\
+                       "aclSteps %3d aClk %3d %d %d" %
+                       (x, y, sum, accelAccum, distCtr, aclSteps, aClk,\
+                        accel, decel))
+            if not decel:
+                if aclSteps >= distCtr:
+                    accel = False
+                    decel = True
+                    aClk = accelClocks
+            if decel:
+                if accelAccum > 0:
+                    aClk -= 1
+                    accelAccum -= synAccel
+            x += 1
+            if sum < 0:
+                sum += incr1
+            else:
+                y += 1
+                sum += incr2
+                distCtr -= 1
+            sum += accelAccum0
+            if distCtr == 0:
+                break
+            if accel:
+                aclSteps = y
+                # if x <= accelClocks:
+                if aClk > 0:
+                    aClk -= 1
+                    accelAccum += synAccel
+                else:
+                    accel = False
+            accelAccum0 = accelAccum
+        print "%10s %10s %12s %12s" % ("x", "y", "sum", "accelSum")
+        print "%10d %10d %12d %12d calc" % (x, y, sum, accelAccum)
+        print "%10s %10d %12d %12d read" % ("", yPos, xSum, aclSum)
+        print "%10s %10d %12d %12d diff" % ("", y - yPos, sum - xSum,\
+                                            accelAccum - aclSum)
+
+class Turn():
+    def __init__(self, axis, minFeed, encoder, prt=False):
+        self.prt = prt
+        self.axis = axis        # axis
+        self.minFeed = minFeed  # minimum feed for accel
+        self.encoder = encoder  # encoder pulses per rev
+        self.feedRate = 0       # feed ipm
+
+        self.spindleRPM = 0     # spindle rpm
+        self.encPerSec = 0      # encoder pulses per second
+
+        self.pitch = 0          # turn pitch
+        self.encPerInch = 0     # encoder pulses per inch
+
+    def setup(self, accel, spindleRPM, pitch):
+        self.spindleRPM = spindleRPM
+        self.pitch = pitch
+
+        self.feedRate = feedRate = spindleRPM * pitch # feed rate inch per min
+        if self.prt:
+            print ("minFeed %6.2f feedRate %6.2f ipm" % 
+                   (self.minFeed, self.feedRate))
+
+        self.encPerSec = int((spindleRPM / 60.0) * self.encoder) # cnts per sec
+        self.encPerInch = int(self.encoder * (1.0 / pitch)) # enc pulse inch
+        if self.prt:
+            print ("encPerSec %d stepsInch %d encoderPerIn %d" %
+                   (self.encPerSec, self.axis.stepsInch, self.encPerInch))
+
+        if self.feedRate < self.minFeed:
+            accel.dx = int(self.encPerInch)
+            accel.dyMax = accel.dyIni = int(self.axis.stepsInch)
+            accel.accelClocks = 0
+            accel.intIncPerClock = 0
+        else:
+            accel.accelTime = ((feedRate - self.minFeed) /
+                               (60.0 * self.axis.accel))
+            accel.accelClocks = int(self.encPerSec * accel.accelTime)
+
+            stepsPerRev = self.axis.stepsInch * pitch # steps per turn
+            stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
+            stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
+            if self.prt:
+                print ("stepsPerRev %5.0f stepsSecMin %5.2f stepsSecMax %5.2f" %
+                       (stepsPerRev, stepsSecMin, stepsSecMax))
+
+            stepsSec2 = self.axis.accel * self.axis.stepsInch
+            accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
+            accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
+            accel.accelSteps = accelMaxStep - accelMinStep
+            if self.prt:
+                print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d "\
+                       "accelclocks %d bits %d" %
+                       (stepsSec2, accel.accelTime,\
+                        accel.accelSteps, accel.accelClocks,\
+                        bitSize(accel.accelClocks)))
+
+            dxBase = int(self.encPerInch)
+            dyMaxBase = self.axis.stepsInch
+            dyMinBase = int((dyMaxBase * self.minFeed) / self.feedRate)
+
+            accel.axis = self.axis
+            accel.encoder = self.encoder
+            accel.calc(dxBase, dyMaxBase, dyMinBase)
+
+class Taper():
+    def __init__(self, turn, axis, prt=False):
+        self.prt = prt
+        self.turn = turn        # turn parameters
+        self.axis = axis        # taper axis
+
+        self.taper = 0          # taper distance
+        self.dist = 0           # turn distance
+        self.dx = 0             # turn steps
+        self.dy = 0             # taper steps
+
+        self.incr1 = 0          # add if negative
+        self.incr2 = 0          # add if ge zero
+        self.sum = 0            # initial sum
+
+    def setup(self, taper, dist=1.0):
+        self.taper = taper
+        self.dist = dist
+        turn = self.turn
+        self.dx = dx = turn.axis.stepsInch * dist
+        self.dy = dy = int(taper * self.axis.stepsInch * dist)
+
+        self.incr1 = 2 * dy
+        self.incr2 = self.incr1 - 2 * dx
+        self.sum = self.incr1 - dx
+        if self.prt:
+            print ("dx %d dy %d" % (dx, dy))
+            print ("incr1 %d incr2 %d sum %d bits %d" %
+                   (self.incr1, self.incr2, self.sum, bitSize(incr2)))
+
+class Move():
+    def __init__(self, axis, prt=False):
+        self.prt = prt
+        self.axis = axis        # axis
+        self.minFeed = 0        # min feed ipm
+        self.maxFeed = 0        # max feed ipm
+
+        self.freqDivider = 0    # frequency divider
+
+    def setup(self, accel, minFeed, maxFeed):
+        self.minFeed = minFeed
+        self.maxFeed = maxFeed
+        stepsMinMax = self.maxFeed * self.axis.stepsInch # max steps per min
+        stepsSecMax = stepsMinMax / 60.0       # max steps per second
+        freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
+
+        stepsMinMin = self.minFeed * self.axis.stepsInch # max steps per min
+        stepsSecMin = stepsMinMin / 60.0       # min steps per second
+
+        self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
+                            - 1)   # calc divider
+        if self.prt:
+            print ("stepsSecMin %6.0f stepsSecMax %6.0f freqGenMax %7.0f "\
+                   "freqDivider %d" %
+                   (stepsSecMin, stepsSecMax, freqGenMax, self.freqDivider))
+
+        stepsSec2 = self.axis.accel * self.axis.stepsInch
+        accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
+        accel.accelClocks = int(accel.accelTime * freqGenMax)
+
+        accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
+        accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
+        accel.accelSteps = accelMaxStep - accelMinStep
+        if self.prt:
+            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d clocks %d" %
+                   (stepsSec2, accel.accelTime,\
+                    accel.accelSteps, accel.accelClocks))
+
+        dxBase = int(freqGenMax)
+        dyMaxBase = int(stepsSecMax)
+        dyMinBase = int(stepsSecMin)
+
+        accel.axis = self.axis
+        accel.freqDivider = self.freqDivider
+        accel.calc(dxBase, dyMaxBase, dyMinBase)
+
+def test6(dist=100, dbgprint=True, prt=False):
+    if dist == 0:
+        dist = 100
+
+    cFreq = 50000000            # clock frequency
+    mult = 64                   # freq gen multiplier
+    stepsRev = 1600             # steps per revolution
+    pitch = .1                  # leadscrew pitch
+    scale = 8                   # scale factor
+
+    minFeed = 10                # min feed ipm
+    maxFeed = 40                # max feed ipm
+    jogV = 20                   # jog velocity
+    accelRate = 5               # acceleration rate in per sec^2
+
+    stepsInch = stepsRev / pitch      # steps per inch
+    stepsMinMax = maxFeed * stepsInch # max steps per min
+    stepsSecMax = stepsMinMax / 60.0  # max steps per second
+    freqGenMax = int(stepsSecMax) * mult # frequency generator maximum
+    if prt:
+        print "stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax)
+
+    stepsMinMin = minFeed * stepsInch # max steps per min
+    stepsSecMin = stepsMinMin / 60.0  # max steps per second
+    freqGenMin = stepsSecMin * mult   # frequency generator maximum
+    if prt:
+        print "stepsSecMin %6.0f freqGenMin %7.0f" % (stepsSecMin, freqGenMin)
+
+    stepsMinJog = int(jogV * stepsInch)
+    stepsSecJog = stepsMinJog / 60
+    freqGenJog = stepsSecJog * mult
+    if prt:
+        print "stepsSecJog %d freqGenJog %d\n" % (stepsSecJog, freqGenJog)
+
+    freqDivider = int(floor(cFreq / freqGenMax - 1)) # calc divider
+    if prt:
+        print "freqDivider %3.0f" % freqDivider
+
+    accelTime = (maxFeed - minFeed) / (60.0 * accelRate) # acceleration time
+    accelClocks = int(accelTime * freqGenMax)
+    if prt:
+        print "accelTime %8.6f clocks %d" % (accelTime, accelClocks)
+
+    for scale in range(0, 10):
+        dyMin = int(stepsSecMin) << scale
+        dyMax = int(stepsSecMax) << scale
+        dx = int(freqGenMax) << scale
+        dyDelta = dyMax - dyMin
+        if prt:
+            print ("\ndx %d dyMin %d dyMax %d dyDelta %d" %
+                   (dx, dyMin, dyMax, dyDelta))
+
+        incPerClock = dyDelta / float(accelClocks)
+        intIncPerClock = int(incPerClock)
+        dyDeltaC = intIncPerClock * accelClocks
+        dyIni = dyMax - dyDeltaC
+        err = int(dyDelta - dyDeltaC) >> scale
+        bits = bitSize(2*dx)
+        if prt:
+            print (("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f " +
+                    "err %d bits %d") %
+                   (dyIni, dyMax, dyDeltaC, incPerClock, err, bits))
+            if err == 0:
+                break
+
+    accel = 2 * intIncPerClock
+
+    dyJog = stepsSecJog << scale;
+    dyDelta = (dyJog - dyIni);
+    jogAccelClocks = dyDelta / accel;
+    dyJog = jogAccelClocks * accel;
+
+    incr1 = 2 * dyIni
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+
+    totalSum = (accelClocks * incr1) + d
+    totalInc = (accelClocks * (accelClocks - 1) * accel) / 2
+    accelSteps = ((totalSum + totalInc) / (2 * dx))
+
+    if prt:
+        print ("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
+               (accelClocks, totalSum, totalInc, accelSteps))
+
+    setXReg('XLDTCTL', 0, dbgprint)    # clear taper
+    command('CMDSTOP')
+    while True:
+        rsp = command('READDBG')
+        if len(rsp) <= 4:
+            break;
+        print rsp
+    print "send commands"
+    command('ZSTOP')
+    setParm('PRMZLOCIN', 0)
+    command('ZSETLOC')
+    setParm('PRMZFREQ', freqDivider)
+    setParm('PRMZDX', dx)
+    setParm('PRMZDYINI', dyIni)
+    setParm('PRMZDYJOG', dyJog)
+    setParm('PRMZDYMAX', dyMax)
+    setParm('PRMZACCEL', accel)
+    setParm('PRMZACLJOG', jogAccelClocks)
+    setParm('PRMZACLMAX', accelClocks)
+    setParm('PRMZDISTIN', dist)
+    command('LOADZPRM')
+    command('ZMOVE')
+    while True:
+        rsp = command('READDBG')
+        if len(rsp) > 4:
+            print rsp
+            stdout.flush()
+            if rsp.find("z st 00000000") > 0:
+                break;
+    dspXReg('XRDZLOC', "x loc", dbgprint)
+
+arg1 = 0
+arg2 = 0
+arg3 = 0
+if len(sys.argv) > 1:
+    try:
+        arg1 = int(sys.argv[1])
+    except ValueError:
+        arg1 = sys.argv[1]
+
+if len(sys.argv) > 2:
+    try:
+        arg2 = int(sys.argv[2])
+    except ValueError:
+        arg2 = sys.argv[2]
+
+if len(sys.argv) > 3:
+    try:
+        arg3 = int(sys.argv[3])
+    except ValueError:
+        arg3 = sys.argv[3]
+
+if arg1 == 'd':
+    if arg2 in xRegs:
+        setXReg('XLDDREG', xRegs[arg2], False) # load display register
+    else:
+        print "invalid register " + arg2
+else:
+    comm.xDbgPrint = True
+    # test3(runClocks=arg1, dist=arg2)
+    # test4(runClocks=arg1, tpi=arg2, pData=False)
+    # test5(dist=arg1)
+    # test6(dist=arg1)
+
+    axis = Axis()
+    axis.pitch = 0.1
+    axis.ratio = 1
+    axis.microSteps = 8
+    axis.motorSteps = 200
+    axis.accel = 0.75
+    axis.backlash = 0.023
+    axis.setup()
+
+    # tmp = Move(axis, True)
+    # accel = Accel(True)
+    # tmp.setup(accel, 10.0, 40.0)
+    # accel.test()
+
+    # print
+
+    tmp = Turn(axis, 5.0, 20380, True)
+    accel = Test(True)
+    tmp.setup(accel, 300, .05)
+    # accel.test()
+
+    # accel = Test(True)
+    # accel.encoder = 2540 * 8
+    # accel.testNoAccelSetup(2540 * 8, 600)
+    # accel.accel = 8
+    # accel.accelClocks = 100
+    accel.setDbgPrint(True)
+    # accel.zTestSync(arg1, arg2, arg3)
+    # accel.xTestSync(arg1, arg2, arg3)
+    # accel.zTestXTaper(arg1, arg2, arg3)
+    # accel.xTestZTaper(arg1, arg2, arg3)
+    # accel.zTestMove(arg1, arg2, arg3)
+    # accel.xTestMove(arg1, arg2, arg3)
+    
+    accel.setDbgPrint(False)
+    accel.zTestSync(arg1, arg2, arg3)
+    # accel.xTestSync(arg1, arg2, arg3)
+
+if not (comm.ser is None):
+    comm.ser.close()
