@@ -938,6 +938,71 @@ class Accel():
         stdout.flush()
         f.close()
 
+class AccelPlot(Accel):
+    def __init__(self, dbgPrint=False):
+        Accel.__init__(self)
+        self.dbgPrint = dbgPrint
+
+    def test(self, file=None, pData=False):
+        if pData:
+            from pylab import plot, grid, show
+            from array import array
+            time = array('f')
+            data = array('f')
+            time.append(0)
+            data.append(0)
+
+        f = None
+        if file != None:
+            f = open(file, 'w')
+        incr1 = self.incr1
+        incr2 = self.incr2
+        sum = self.sum
+        inc = self.accel
+        accelClocks = self.accelClocks
+        incAccum = 0
+        lastT = 0
+        lastC = 0
+        print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
+        stdout.flush()
+        while (clocks < (accelClocks * 1.2)):
+            x += 1
+            if sum < 0:
+                sum += incr1
+            else:
+                deltaC = clocks - lastC
+                if f != None:
+                    f.write(("x %6d y %5d deltaC %5d sum %12d incAccum %12d " +
+                             "incr1 %8d incr2 %11d\n") % \
+                            (x, y, deltaC, sum, incAccum, 
+                             incr1 + incAccum, incr2 + incAccum))
+                y += 1
+                sum += incr2
+                curT = clocks / freqGenMax
+                deltaT = curT - lastT
+                if pData:
+                    if lastT != 0:
+                        time.append(curT);
+                        data.append(1.0 / deltaT)
+                lastT = curT
+                lastC = clocks
+            sum += incAccum
+            if clocks < accelClocks:
+                incAccum += inc
+            clocks += 1
+        if f != None:
+            f.close()
+
+        print ("y %d incr1 %d incr2 %d sum %d incAccum %d" %
+               (y, incr1 + incAccum, incr2 + incAccum, sum, incAccum))
+
+        if pData:
+            stdout.flush()
+            plot(time, data, 'b', aa="true")
+            grid(True)
+            show()
+
+
 class Test(Accel):
     def __init__(self, dbgPrint=False):
         Accel.__init__(self)
@@ -1554,55 +1619,6 @@ class Move():
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
         accel.calc(dxBase, dyMaxBase, dyMinBase)
-
-    def test(self, file=None, pData=False):
-        if pData:
-            from pylab import plot, grid, show
-            from array import array
-            time = array('f')
-            data = array('f')
-            time.append(0)
-            data.append(0)
-
-        f = None
-        if file != None:
-            f = open(file, 'w')
-    sum = d
-    inc = 2 * intIncPerClock
-    incAccum = 0
-    print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
-    stdout.flush()
-    while (clocks < (accelClocks * 1.2)):
-        x += 1
-        if sum < 0:
-            sum += incr1
-        else:
-            deltaC = clocks - lastC
-            if f != None:
-            f.write(("x %6d y %5d deltaC %5d sum %12d incAccum %12d " +
-                     "incr1 %8d incr2 %11d\n") % \
-                    (x, y, deltaC, sum, incAccum, 
-                     incr1 + incAccum, incr2 + incAccum))
-            y += 1
-            sum += incr2
-            curT = clocks / freqGenMax
-            deltaT = curT - lastT
-            if pData:
-                if lastT != 0:
-                    time.append(curT);
-                    data.append(1.0 / deltaT)
-            lastT = curT
-            lastC = clocks
-        sum += incAccum
-        if clocks < accelClocks:
-            incAccum += inc
-        clocks += 1
-    if f != None:
-    f.close()
-
-    print ("y %d incr1 %d incr2 %d sum %d incAccum %d" %
-           (y, incr1 + incAccum, incr2 + incAccum, sum, incAccum))
-
 
 def test6(dist=100, dbgprint=True, prt=False):
     if dist == 0:
