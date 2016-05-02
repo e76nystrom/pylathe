@@ -1555,6 +1555,59 @@ class Move():
         accel.freqDivider = self.freqDivider
         accel.calc(dxBase, dyMaxBase, dyMinBase)
 
+    def test(self, file=None, pData=False):
+
+    if pData:
+        from pylab import plot, grid, show
+        from array import array
+        time = array('f')
+        data = array('f')
+        data1 = array('f')
+        time.append(0)
+        data.append(0)
+        data1.append(0)
+
+    f = None
+    if file != None
+    f = open('accel.txt', 'w')
+    area = 0
+    totalArea = 0
+    clocks = 0
+    steps = 1
+    velocity = 0
+    chkMin = True
+    lastT = 0
+    while (steps < accelSteps):
+        while (area < areaPerStep):
+            clocks += 1
+            velocity += int(velPerClock)
+            area += velocity
+            totalArea += velocity
+        steps += 1
+        curT = clocks / freqGenMax
+        deltaT = curT - lastT
+        if pData:
+            time.append(curT)
+            data.append(velocity)
+            data1.append(1.0 / deltaT)
+        f.write("clock %5d time %8.6f step %4d velocity %6d\n" %
+                (clocks, deltaT, steps, velocity))
+        lastT = curT
+        area -= areaPerStep
+        if chkMin & dbg:
+            print "clock %5d step %4d velocity %6d" % (clocks, steps, velocity)
+        if chkMin & (velocity >= (freqGenMin * scale)):
+            chkMin = False
+            print ("clocks %d velocity %d steps %d area %d delta %d" %
+                   (clocks, velocity / scale, steps, totalArea / scale, 
+                    totalArea/scale - minAreaClocks))
+    print ("clocks %d %8.6f velocity %d totalArea %d delta %d" % 
+           (clocks, clocks / freqGenMax, velocity / scale, totalArea / scale, 
+            totalArea / scale - int(stepAreaClocks)))
+    f.close()
+    stdout.flush()
+
+
 def test6(dist=100, dbgprint=True, prt=False):
     if dist == 0:
         dist = 100
