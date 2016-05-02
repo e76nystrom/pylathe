@@ -632,12 +632,13 @@ class Test(Accel):
 
         zVal = getXReg('XRDZXPOS')
         xVal = getXReg('XRDXXPOS')
-        tmp = max(zVal, xVal)
+        maxClocks = max(zVal, xVal)
         comm.xDbgPrint = tmp
 
         if self.dbgPrint:
             print 
-        print "results %d %d clocks %4.2f sec\n" % (runClocks, tmp, delta)
+        print ("results %d %d clocks %4.2f sec\n" % 
+               (runClocks, maxClocks, delta))
 
     def readPhase(self):
         dspXReg('XREADREG', "freq")
