@@ -1123,7 +1123,7 @@ else:
 
     if testId == '3':
         tmp = Move(axis, True)
-        accel = Accel(True)
+        accel = Test(True)
         tmp.setup(accel, 10.0, 40.0)
         if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
