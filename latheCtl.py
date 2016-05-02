@@ -745,14 +745,14 @@ class Test(Accel):
             synAccel = self.accel
             accelClocks = self.accelClocks
             accel = True
+            tmp = min(xPos, accelClocks)
+            print ("synAccel %d accelClocks %d accelSum %d" %
+                   (synAccel, tmp, synAccel * tmp))
+            print
         else:
             synAccel = 0
             accelClocks = 0
             accel = False
-
-        print ("synAccel %d accelClocks %d accelSum %d" %
-               (synAccel, accelClocks, synAccel * accelClocks))
-        print
 
         x = 0
         y = 0
