@@ -1095,26 +1095,26 @@ else:
         accel.encoder = 2540 * 8
         accel.testNoAccelSetup(2540 * 8, 600)
         accel.setDbgPrint(True)
-        if testAxis = 'z':
+        if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        elif testAxis = 'x':
+        elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '2':
         accel = Test(True)
         accel.testNoAccelSetup(2540 * 8, 600)
-        if testAxis = 'z':
+        if testAxis == 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
-        elif testAxis = 'x':
+        elif testAxis == 'x':
             accel.xTestZTaper(arg1, arg2, arg3)
 
     if testId == '3':
         tmp = Move(axis, True)
         accel = Accel(True)
         tmp.setup(accel, 10.0, 40.0)
-        if testAxis = 'z':
+        if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
-        elif testAxis = 'x':
+        elif testAxis == 'x':
             accel.xTestMove(arg1, arg2, arg3)
 
     if testId == '4':
@@ -1123,9 +1123,9 @@ else:
         accel.accel = 8
         accel.accelClocks = 100
         accel.setDbgPrint(True)
-        if testAxis = 'z':
+        if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        elif testAxis = 'x':
+        elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '5':
@@ -1133,9 +1133,9 @@ else:
         tmp = Turn(axis, 5.0, 20380, True)
         tmp.setup(accel, 300, .05)
         accel.setDbgPrint(True)
-        if testAxis = 'z':
+        if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        elif testAxis = 'x':
+        elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
 
