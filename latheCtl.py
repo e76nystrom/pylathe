@@ -1056,19 +1056,19 @@ if len(sys.argv) > 3:
     try:
         arg1 = int(sys.argv[1])
     except ValueError:
-        arg1 = sys.argv[1]
+        arg1 = sys.argv[3]
 
 if len(sys.argv) > 4:
     try:
         arg2 = int(sys.argv[2])
     except ValueError:
-        arg2 = sys.argv[2]
+        arg2 = sys.argv[4]
 
 if len(sys.argv) > 5:
     try:
         arg3 = int(sys.argv[3])
     except ValueError:
-        arg3 = sys.argv[3]
+        arg3 = sys.argv[5]
 
 if arg1 == 'd':
     if arg2 in xRegs:
