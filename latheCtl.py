@@ -788,6 +788,7 @@ class Turn():
                        (stepsSec2, accel.accelTime,\
                         accel.accelSteps, accel.accelClocks,\
                         bitSize(accel.accelClocks)))
+                print
 
             dxBase = int(self.encPerInch)
             dyMaxBase = self.axis.stepsInch
