@@ -1098,7 +1098,7 @@ if len(sys.argv) > n:
 n += 1
 if len(sys.argv) > n:
     try:
-        arg3 = int(syys.argv[n])
+        arg3 = int(sys.argv[n])
     except ValueError:
         arg3 = sys.argv[n]
 
