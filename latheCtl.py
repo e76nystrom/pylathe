@@ -599,6 +599,8 @@ class Test(Accel):
         setXReg('XLDXCTL', 0)                 # clear reset
 
     def testWait(self, runClocks, interval=0.5):
+        tmp = comm.xDbgPrint
+        comm.xDbgPrint = False
         start = time()
         # sleep(0.1)
         # zLast = 0
@@ -625,6 +627,7 @@ class Test(Accel):
         zVal = getXReg('XRDZXPOS')
         xVal = getXReg('XRDXXPOS')
         tmp = max(zVal, xVal)
+        comm.xDbgPrint = tmp
 
         if self.dbgPrint:
             print 
