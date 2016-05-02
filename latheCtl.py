@@ -608,6 +608,7 @@ class Test(Accel):
         setXReg('XLDXCTL', 0)                 # clear reset
 
     def testWait(self, runClocks, interval=0.5):
+        if runClocks != 0:
         tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         start = time()
