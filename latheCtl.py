@@ -193,6 +193,7 @@ class AccelPlot(Accel):
     def __init__(self, dbgPrint=False):
         Accel.__init__(self)
         self.dbgPrint = dbgPrint
+        self.clockInterval = 0
 
     def plot(self, dist, file="", pData=False):
         if pData:
@@ -209,14 +210,16 @@ class AccelPlot(Accel):
         incr1 = self.incr1
         incr2 = self.incr2
         sum = self.sum
-        inc = self.accel
+        accel = self.accel
         accelClocks = self.accelClocks
         incAccum = 0
         lastT = 0
         lastC = 0
-        print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
+        print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, accel))
         stdout.flush()
-        while (clocks < (accelClocks * 1.2)):
+        x = 0
+        y = 0
+        while (x < dist):
             x += 1
             if sum < 0:
                 sum += incr1
@@ -229,7 +232,7 @@ class AccelPlot(Accel):
                              incr1 + incAccum, incr2 + incAccum))
                 y += 1
                 sum += incr2
-                curT = clocks / freqGenMax
+                curT = clocks * clockInterval
                 deltaT = curT - lastT
                 if pData:
                     if lastT != 0:
@@ -239,7 +242,7 @@ class AccelPlot(Accel):
                 lastC = clocks
             sum += incAccum
             if clocks < accelClocks:
-                incAccum += inc
+                incAccum += accel
             clocks += 1
         if f != None:
             f.close()
