@@ -752,7 +752,7 @@ class Test(Accel):
         decel = False
         while x < xPos:
             if self.dbgPrint:
-                print ("x %4d y %3d sum %10d aSum %6d dist %3d "\
+                print ("x %5d y %3d sum %10d aSum %6d dist %3d "\
                        "aclSteps %4d aClk %6d %d %d" %
                        (x, y, sum, accelAccum, distCtr, aclSteps, aClk,\
                         accel, decel))
