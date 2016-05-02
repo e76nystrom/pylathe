@@ -565,7 +565,10 @@ class Test(Accel):
 
         if dist > 1:
             setXReg('XLDZACCEL', ac.accel)        # load z accel
-            setXReg('XLDZACLCNT', ac.accelClocks - 1) # load z accel count
+            if ac.accelClocks > 0:
+                setXReg('XLDZACLCNT', ac.accelClocks - 1) # load z accel count
+            else:
+                setXReg('XLDZACLCNT', 0) # load z accel count
         else:
             setXReg('XLDZACCEL', 0)  # load z accel
             setXReg('XLDZACLCNT', 0) # load z accel count
