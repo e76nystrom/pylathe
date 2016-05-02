@@ -1062,34 +1062,47 @@ def test6(dist=100, dbgprint=True, prt=False):
 
 testId = ''
 testAxis = ''
+dbgPrint = False
 arg1 = 0
 arg2 = 0
 arg3 = 0
 
-if len(sys.argv) > 1:
-    testId = sys.argv[1]
+n = 1
+if len(sys.argv) > n:
+    testId = sys.argv[n]
 
-if len(sys.argv) > 2:
-    testAxis = sys.argv[2]
+n += 1
+if len(sys.argv) > n:
+    testAxis = sys.argv[n]
 
-if len(sys.argv) > 3:
+n += 1
+if len(sys.argv) > n:
+    tmp = sys.argv[n]
+    if tmp = 'dbg':
+        dbgPrint = True
+        n += 1
+
+if len(sys.argv) > n:
     try:
-        arg1 = int(sys.argv[3])
+        arg1 = int(sys.argv[n])
     except ValueError:
-        arg1 = sys.argv[3]
+        arg1 = sys.argv[n]
 
-if len(sys.argv) > 4:
+n += 1
+if len(sys.argv) > n:
     try:
-        arg2 = int(sys.argv[4])
+        arg2 = int(sys.argv[n])
     except ValueError:
-        arg2 = sys.argv[4]
+        arg2 = sys.argv[n]
 
-if len(sys.argv) > 5:
+n += 1
+if len(sys.argv) > n:
     try:
-        arg3 = int(sys.argv[5])
+        arg3 = int(syys.argv[n])
     except ValueError:
-        arg3 = sys.argv[5]
+        arg3 = sys.argv[n]
 
+n += 1
 if arg1 == 'd':
     if arg2 in xRegs:
         setXReg('XLDDREG', xRegs[arg2], False) # load display register
