@@ -1081,6 +1081,7 @@ else:
     tmp.setup(accel, 300, .05)
     # accel.test()
 
+    testAxis = 'z':
     if False:
         accel = Test(True)
         accel.encoder = 2540 * 8
@@ -1116,35 +1117,21 @@ else:
         accel.accel = 8
         accel.accelClocks = 100
         accel.setDbgPrint(True)
-        accel.zTestSync(arg1, arg2, arg3)
+        if testAxis = 'z':
+            accel.zTestSync(arg1, arg2, arg3)
+        else:
+            accel.xTestSync(arg1, arg2, arg3)
 
     if False:
         accel = Test(True)
-        accel.encoder = 2540 * 8
-        accel.accel = 8
-        accel.accelClocks = 100
+        tmp = Turn(axis, 5.0, 20380, True)
+        tmp.setup(accel, 300, .05)
         accel.setDbgPrint(True)
-        accel.xTestSync(arg1, arg2, arg3)
+        if testAxis = 'z':
+            accel.zTestSync(arg1, arg2, arg3)
+        else:
+            accel.xTestSync(arg1, arg2, arg3)
 
-    if False:
-        accel = Test(True)
-        accel.encoder = 2540 * 8
-        accel.accel = 8
-        accel.accelClocks = 100
-        accel.setDbgPrint(True)
-        accel.zTestSync(arg1, arg2, arg3)
-
-    if False:
-        accel = Test(True)
-        accel.encoder = 2540 * 8
-        accel.accel = 8
-        accel.accelClocks = 100
-        accel.setDbgPrint(True)
-        accel.xTestSync(arg1, arg2, arg3)
-    
-    accel.setDbgPrint(False)
-    accel.zTestSync(arg1, arg2, arg3)
-    # accel.xTestSync(arg1, arg2, arg3)
 
 if not (comm.ser is None):
     comm.ser.close()
