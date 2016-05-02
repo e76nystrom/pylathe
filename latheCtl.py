@@ -1102,7 +1102,6 @@ if len(sys.argv) > n:
     except ValueError:
         arg3 = sys.argv[n]
 
-n += 1
 if arg1 == 'd':
     if arg2 in xRegs:
         setXReg('XLDDREG', xRegs[arg2], False) # load display register
