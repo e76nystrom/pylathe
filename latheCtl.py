@@ -225,7 +225,7 @@ class AccelPlot(Accel):
         print ("synAccel %d accelClocks %d accelSum %d" %
                (synAccel, accelClocks, synAccel * accelClocks))
         print ("incr1 %d incr2 %d sum %d" % (incr1, incr2, sum))
-        stdout.flush()
+
         aClk = accelClocks
         aclSteps = 0
         accelAccum = 0
