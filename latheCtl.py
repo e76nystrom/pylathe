@@ -75,6 +75,147 @@ class Axis():
         self.accel = 0.75
         self.backlash = 0.023
 
+class Move():
+    def __init__(self, axis, prt=False):
+        self.prt = prt
+        self.axis = axis        # axis
+        self.minFeed = 0        # min feed ipm
+        self.maxFeed = 0        # max feed ipm
+
+        self.freqDivider = 0    # frequency divider
+
+    def setup(self, accel, minFeed, maxFeed):
+        self.minFeed = minFeed
+        self.maxFeed = maxFeed
+        stepsMinMax = self.maxFeed * self.axis.stepsInch # max steps per min
+        stepsSecMax = stepsMinMax / 60.0       # max steps per second
+        freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
+
+        stepsMinMin = self.minFeed * self.axis.stepsInch # max steps per min
+        stepsSecMin = stepsMinMin / 60.0       # min steps per second
+
+        self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
+                            - 1)   # calc divider
+        if self.prt:
+            print ("stepsSecMin %6.0f stepsSecMax %6.0f freqGenMax %7.0f "\
+                   "freqDivider %d" %
+                   (stepsSecMin, stepsSecMax, freqGenMax, self.freqDivider))
+
+        stepsSec2 = self.axis.accel * self.axis.stepsInch
+        accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
+        accel.accelClocks = int(accel.accelTime * freqGenMax)
+
+        accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
+        accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
+        accel.accelSteps = accelMaxStep - accelMinStep
+        if self.prt:
+            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d clocks %d" %
+                   (stepsSec2, accel.accelTime,\
+                    accel.accelSteps, accel.accelClocks))
+
+        dxBase = int(freqGenMax)
+        dyMaxBase = int(stepsSecMax)
+        dyMinBase = int(stepsSecMin)
+
+        accel.axis = self.axis
+        accel.freqDivider = self.freqDivider
+        accel.calc(dxBase, dyMaxBase, dyMinBase)
+
+class Turn():
+    def __init__(self, axis, minFeed, encoder, prt=False):
+        self.prt = prt
+        self.axis = axis        # axis
+        self.minFeed = minFeed  # minimum feed for accel
+        self.encoder = encoder  # encoder pulses per rev
+        self.feedRate = 0       # feed ipm
+
+        self.spindleRPM = 0     # spindle rpm
+        self.encPerSec = 0      # encoder pulses per second
+
+        self.pitch = 0          # turn pitch
+        self.encPerInch = 0     # encoder pulses per inch
+
+    def setup(self, accel, spindleRPM, pitch):
+        self.spindleRPM = spindleRPM
+        self.pitch = pitch
+
+        self.feedRate = feedRate = spindleRPM * pitch # feed rate inch per min
+        if self.prt:
+            print ("minFeed %6.2f feedRate %6.2f ipm" % 
+                   (self.minFeed, self.feedRate))
+
+        self.encPerSec = int((spindleRPM / 60.0) * self.encoder) # cnts per sec
+        self.encPerInch = int(self.encoder * (1.0 / pitch)) # enc pulse inch
+        if self.prt:
+            print ("encPerSec %d stepsInch %d encoderPerIn %d" %
+                   (self.encPerSec, self.axis.stepsInch, self.encPerInch))
+
+        if self.feedRate < self.minFeed:
+            accel.dx = int(self.encPerInch)
+            accel.dyMax = accel.dyIni = int(self.axis.stepsInch)
+            accel.accelClocks = 0
+            accel.intIncPerClock = 0
+        else:
+            accel.accelTime = ((feedRate - self.minFeed) /
+                               (60.0 * self.axis.accel))
+            accel.accelClocks = int(self.encPerSec * accel.accelTime)
+
+            stepsPerRev = self.axis.stepsInch * pitch # steps per turn
+            stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
+            stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
+            if self.prt:
+                print ("stepsPerRev %d stepsSecMin %5.2f stepsSecMax %5.2f" %
+                       (int(stepsPerRev), stepsSecMin, stepsSecMax))
+
+            stepsSec2 = self.axis.accel * self.axis.stepsInch
+            accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
+            accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
+            accel.accelSteps = accelMaxStep - accelMinStep
+            if self.prt:
+                print ("stepsSec2 %d accelTime %8.6f accelSteps %d "\
+                       "accelclocks %d bits %d" %
+                       (stepsSec2, accel.accelTime,\
+                        accel.accelSteps, accel.accelClocks,\
+                        bitSize(accel.accelClocks)))
+                print
+
+            dxBase = int(self.encPerInch)
+            dyMaxBase = self.axis.stepsInch
+            dyMinBase = int((dyMaxBase * self.minFeed) / self.feedRate)
+
+            accel.axis = self.axis
+            accel.encoder = self.encoder
+            accel.calc(dxBase, dyMaxBase, dyMinBase)
+
+class Taper():
+    def __init__(self, turn, axis, prt=False):
+        self.prt = prt
+        self.turn = turn        # turn parameters
+        self.axis = axis        # taper axis
+
+        self.taper = 0          # taper distance
+        self.dist = 0           # turn distance
+        self.dx = 0             # turn steps
+        self.dy = 0             # taper steps
+
+        self.incr1 = 0          # add if negative
+        self.incr2 = 0          # add if ge zero
+        self.sum = 0            # initial sum
+
+    def setup(self, taper, dist=1.0):
+        self.taper = taper
+        self.dist = dist
+        turn = self.turn
+        self.dx = dx = turn.axis.stepsInch * dist
+        self.dy = dy = int(taper * self.axis.stepsInch * dist)
+
+        self.incr1 = 2 * dy
+        self.incr2 = self.incr1 - 2 * dx
+        self.sum = self.incr1 - dx
+        if self.prt:
+            print ("dx %d dy %d" % (dx, dy))
+            print ("incr1 %d incr2 %d sum %d bits %d" %
+                   (self.incr1, self.incr2, self.sum, bitSize(incr2)))
 
 class Accel():
     def __init__(self, prt=False):
@@ -97,7 +238,7 @@ class Accel():
         self.accel = 0          # inc per clock
         self.accelClocks = 0    # acceleration clocks
 
-    def calc(self, dxBase, dyMaxBase, dyMinBase):
+    def setup(self, dxBase, dyMaxBase, dyMinBase):
         for scale in range(0, 12):
             accel.dx = dxBase << scale
             accel.dyMax = dyMaxBase << scale
@@ -803,148 +944,6 @@ class Test(Accel):
         print "%10s %10d %12d %12d diff" % ("", y - yPos, sum - xSum,\
                                             accelAccum - aclSum)
 
-class Turn():
-    def __init__(self, axis, minFeed, encoder, prt=False):
-        self.prt = prt
-        self.axis = axis        # axis
-        self.minFeed = minFeed  # minimum feed for accel
-        self.encoder = encoder  # encoder pulses per rev
-        self.feedRate = 0       # feed ipm
-
-        self.spindleRPM = 0     # spindle rpm
-        self.encPerSec = 0      # encoder pulses per second
-
-        self.pitch = 0          # turn pitch
-        self.encPerInch = 0     # encoder pulses per inch
-
-    def setup(self, accel, spindleRPM, pitch):
-        self.spindleRPM = spindleRPM
-        self.pitch = pitch
-
-        self.feedRate = feedRate = spindleRPM * pitch # feed rate inch per min
-        if self.prt:
-            print ("minFeed %6.2f feedRate %6.2f ipm" % 
-                   (self.minFeed, self.feedRate))
-
-        self.encPerSec = int((spindleRPM / 60.0) * self.encoder) # cnts per sec
-        self.encPerInch = int(self.encoder * (1.0 / pitch)) # enc pulse inch
-        if self.prt:
-            print ("encPerSec %d stepsInch %d encoderPerIn %d" %
-                   (self.encPerSec, self.axis.stepsInch, self.encPerInch))
-
-        if self.feedRate < self.minFeed:
-            accel.dx = int(self.encPerInch)
-            accel.dyMax = accel.dyIni = int(self.axis.stepsInch)
-            accel.accelClocks = 0
-            accel.intIncPerClock = 0
-        else:
-            accel.accelTime = ((feedRate - self.minFeed) /
-                               (60.0 * self.axis.accel))
-            accel.accelClocks = int(self.encPerSec * accel.accelTime)
-
-            stepsPerRev = self.axis.stepsInch * pitch # steps per turn
-            stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
-            stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
-            if self.prt:
-                print ("stepsPerRev %d stepsSecMin %5.2f stepsSecMax %5.2f" %
-                       (int(stepsPerRev), stepsSecMin, stepsSecMax))
-
-            stepsSec2 = self.axis.accel * self.axis.stepsInch
-            accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
-            accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
-            accel.accelSteps = accelMaxStep - accelMinStep
-            if self.prt:
-                print ("stepsSec2 %d accelTime %8.6f accelSteps %d "\
-                       "accelclocks %d bits %d" %
-                       (stepsSec2, accel.accelTime,\
-                        accel.accelSteps, accel.accelClocks,\
-                        bitSize(accel.accelClocks)))
-                print
-
-            dxBase = int(self.encPerInch)
-            dyMaxBase = self.axis.stepsInch
-            dyMinBase = int((dyMaxBase * self.minFeed) / self.feedRate)
-
-            accel.axis = self.axis
-            accel.encoder = self.encoder
-            accel.calc(dxBase, dyMaxBase, dyMinBase)
-
-class Taper():
-    def __init__(self, turn, axis, prt=False):
-        self.prt = prt
-        self.turn = turn        # turn parameters
-        self.axis = axis        # taper axis
-
-        self.taper = 0          # taper distance
-        self.dist = 0           # turn distance
-        self.dx = 0             # turn steps
-        self.dy = 0             # taper steps
-
-        self.incr1 = 0          # add if negative
-        self.incr2 = 0          # add if ge zero
-        self.sum = 0            # initial sum
-
-    def setup(self, taper, dist=1.0):
-        self.taper = taper
-        self.dist = dist
-        turn = self.turn
-        self.dx = dx = turn.axis.stepsInch * dist
-        self.dy = dy = int(taper * self.axis.stepsInch * dist)
-
-        self.incr1 = 2 * dy
-        self.incr2 = self.incr1 - 2 * dx
-        self.sum = self.incr1 - dx
-        if self.prt:
-            print ("dx %d dy %d" % (dx, dy))
-            print ("incr1 %d incr2 %d sum %d bits %d" %
-                   (self.incr1, self.incr2, self.sum, bitSize(incr2)))
-
-class Move():
-    def __init__(self, axis, prt=False):
-        self.prt = prt
-        self.axis = axis        # axis
-        self.minFeed = 0        # min feed ipm
-        self.maxFeed = 0        # max feed ipm
-
-        self.freqDivider = 0    # frequency divider
-
-    def setup(self, accel, minFeed, maxFeed):
-        self.minFeed = minFeed
-        self.maxFeed = maxFeed
-        stepsMinMax = self.maxFeed * self.axis.stepsInch # max steps per min
-        stepsSecMax = stepsMinMax / 60.0       # max steps per second
-        freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
-
-        stepsMinMin = self.minFeed * self.axis.stepsInch # max steps per min
-        stepsSecMin = stepsMinMin / 60.0       # min steps per second
-
-        self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
-                            - 1)   # calc divider
-        if self.prt:
-            print ("stepsSecMin %6.0f stepsSecMax %6.0f freqGenMax %7.0f "\
-                   "freqDivider %d" %
-                   (stepsSecMin, stepsSecMax, freqGenMax, self.freqDivider))
-
-        stepsSec2 = self.axis.accel * self.axis.stepsInch
-        accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
-        accel.accelClocks = int(accel.accelTime * freqGenMax)
-
-        accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
-        accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
-        accel.accelSteps = accelMaxStep - accelMinStep
-        if self.prt:
-            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d clocks %d" %
-                   (stepsSec2, accel.accelTime,\
-                    accel.accelSteps, accel.accelClocks))
-
-        dxBase = int(freqGenMax)
-        dyMaxBase = int(stepsSecMax)
-        dyMinBase = int(stepsSecMin)
-
-        accel.axis = self.axis
-        accel.freqDivider = self.freqDivider
-        accel.calc(dxBase, dyMaxBase, dyMinBase)
-
 def test6(dist=100, dbgprint=True, prt=False):
     if dist == 0:
         dist = 100
@@ -1114,18 +1113,6 @@ else:
     axis.testInit()
     axis.setup()
 
-    # tmp = Move(axis, True)
-    # accel = Accel(True)
-    # tmp.setup(accel, 10.0, 40.0)
-    # accel.test()
-
-    # print
-
-    # tmp = Turn(axis, 5.0, 20380, True)
-    # accel = Test(True)
-    # tmp.setup(accel, 300, .05)
-    # accel.test()
-
     if testId == '1':
         accel = Test(True)
         accel.encoder = 2540 * 8
@@ -1174,6 +1161,17 @@ else:
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
+    if testId == '6':
+        tmp = Move(axis, True)
+        accel = Accel(True)
+        tmp.setup(accel, 10.0, 40.0)
+        accel.test()
+
+    if testId == '7':
+        tmp = Turn(axis, 5.0, 20380, True)
+        accel = Test(True)
+        tmp.setup(accel, 300, .05)
+        accel.test()
 
 if not (comm.ser is None):
     comm.ser.close()
