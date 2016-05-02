@@ -203,6 +203,7 @@ class AccelPlot(Accel):
             data = array('f')
             time.append(0)
             data.append(0)
+            lastT = 0
 
         f = None
         if len(file) != 0:
@@ -210,16 +211,37 @@ class AccelPlot(Accel):
         incr1 = self.incr1
         incr2 = self.incr2
         sum = self.sum
-        accel = self.accel
-        accelClocks = self.accelClocks
-        incAccum = 0
-        lastT = 0
-        lastC = 0
+        distCtr = abs(self.dist)
+        if distCtr > 1:
+            synAccel = self.accel
+            accelClocks = self.accelClocks
+            accel = True
+        else:
+            synAccel = 0
+            accelClocks = 0
+            accel = False
+
         print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, accel))
         stdout.flush()
+        aClk = accelClocks
+        aclSteps = 0
+        accelAccum = 0
+        accelAccum0 = 0
+        decel = False
         x = 0
         y = 0
+        lastC = 0
+        clocks = 0
         while (x < dist):
+            if not decel:
+                if aclSteps >= distCtr:
+                    accel = False
+                    decel = True
+                    aClk = accelClocks
+            if decel:
+                if accelAccum > 0:
+                    aClk -= 1
+                    accelAccum -= synAccel
             x += 1
             if sum < 0:
                 sum += incr1
@@ -232,17 +254,27 @@ class AccelPlot(Accel):
                              incr1 + incAccum, incr2 + incAccum))
                 y += 1
                 sum += incr2
-                curT = clocks * clockInterval
-                deltaT = curT - lastT
+                distCtr -= 1
+                lastC = clocks
                 if pData:
+                    curT = clocks * clockInterval
+                    deltaT = curT - lastT
                     if lastT != 0:
                         time.append(curT);
                         data.append(1.0 / deltaT)
-                lastT = curT
-                lastC = clocks
-            sum += incAccum
-            if clocks < accelClocks:
-                incAccum += accel
+                        lastT = curT
+            sum += accelAccum0
+            if distCtr == 0:
+                break
+            if accel:
+                aclSteps = y
+                # if x <= accelClocks:
+                if aClk > 0:
+                    aClk -= 1
+                    accelAccum += synAccel
+                else:
+                    accel = False
+            accelAccum0 = accelAccum
             clocks += 1
         if f != None:
             f.close()
