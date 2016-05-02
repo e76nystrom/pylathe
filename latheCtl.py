@@ -775,15 +775,15 @@ class Turn():
             stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
             stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
             if self.prt:
-                print ("stepsPerRev %5.0f stepsSecMin %5.2f stepsSecMax %5.2f" %
-                       (stepsPerRev, stepsSecMin, stepsSecMax))
+                print ("stepsPerRev %d stepsSecMin %5.2f stepsSecMax %5.2f" %
+                       (int(stepsPerRev), stepsSecMin, stepsSecMax))
 
             stepsSec2 = self.axis.accel * self.axis.stepsInch
             accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
             accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
             accel.accelSteps = accelMaxStep - accelMinStep
             if self.prt:
-                print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d "\
+                print ("stepsSec2 %d accelTime %8.6f accelSteps %d "\
                        "accelclocks %d bits %d" %
                        (stepsSec2, accel.accelTime,\
                         accel.accelSteps, accel.accelClocks,\
