@@ -185,7 +185,7 @@ class Turn():
 
             accel.axis = self.axis
             accel.encoder = self.encoder
-            accel.calc(dxBase, dyMaxBase, dyMinBase)
+            accel.setup(dxBase, dyMaxBase, dyMinBase)
 
 class Taper():
     def __init__(self, turn, axis, prt=False):
