@@ -1078,7 +1078,7 @@ if len(sys.argv) > n:
 n += 1
 if len(sys.argv) > n:
     tmp = sys.argv[n]
-    if tmp = 'dbg':
+    if tmp == 'dbg':
         dbgPrint = True
         n += 1
 
