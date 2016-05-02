@@ -752,8 +752,7 @@ class Test(Accel):
 
         print ("synAccel %d accelClocks %d accelSum %d" %
                (synAccel, accelClocks, synAccel * accelClocks))
-        if self.dbgPrint:
-            print
+        print
 
         x = 0
         y = 0
