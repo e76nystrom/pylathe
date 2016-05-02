@@ -336,7 +336,7 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print ("z test no acceleration clocks %d dist %d loc %d" %
+        print ("z test sync clocks %d dist %d loc %d" %
                (runClocks, dist, loc))
 
         if self.dbgPrint:
@@ -365,7 +365,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "x test no acceleration"
+        print ("x sync test clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
@@ -393,7 +394,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "z sync move x taper"
+        print ("z sync x taper clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
@@ -422,7 +424,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "x sync move z taper"
+        print ("x sync z taper clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
@@ -451,7 +454,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "z test move"
+        print ("z move clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
@@ -479,7 +483,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "x test move"
+        print ("x move clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
