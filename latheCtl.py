@@ -326,6 +326,7 @@ class Test(Accel):
         print "dx %d dy %d" % (dx, dy)
         print ("incr1 %d incr2 %d sum %d" %
                (self.incr1, self.incr2, self.sum))
+        print
 
         self.accel = 0
         self.accelClocks = 0
