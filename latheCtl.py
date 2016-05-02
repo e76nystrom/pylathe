@@ -1002,7 +1002,6 @@ class AccelPlot(Accel):
             grid(True)
             show()
 
-
 class Test(Accel):
     def __init__(self, dbgPrint=False):
         Accel.__init__(self)
@@ -1428,9 +1427,9 @@ class Test(Accel):
             accelClocks = 0
             accel = False
 
-        print
         print ("synAccel %d accelClocks %d accelSum %d" %
                (synAccel, accelClocks, synAccel * accelClocks))
+        print
 
         x = 0
         y = 0
@@ -1473,6 +1472,8 @@ class Test(Accel):
                 else:
                     accel = False
             accelAccum0 = accelAccum
+        if self.dbgPrint:
+            print
         print "%10s %10s %12s %12s" % ("x", "y", "sum", "accelSum")
         print "%10d %10d %12d %12d calc" % (x, y, sum, accelAccum)
         print "%10s %10d %12d %12d read" % ("", yPos, xSum, aclSum)
