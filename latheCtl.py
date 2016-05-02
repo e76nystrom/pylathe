@@ -211,7 +211,8 @@ class AccelPlot(Accel):
         incr1 = self.incr1
         incr2 = self.incr2
         sum = self.sum
-        distCtr = abs(self.dist)
+        dist = abs(dist)
+        distCtr = abs(self)
         if distCtr > 1:
             synAccel = self.accel
             accelClocks = self.accelClocks
