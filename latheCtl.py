@@ -609,25 +609,28 @@ class Test(Accel):
 
     def testWait(self, runClocks, interval=0.5):
         if runClocks != 0:
-        tmp = comm.xDbgPrint
-        comm.xDbgPrint = False
-        start = time()
-        # sleep(0.1)
-        # zLast = 0
-        # xLast = 0
-        # while True:
-            # zVal = getXReg('XRDZXPOS')
-            # xVal = getXReg('XRDXXPOS')
-            # if zVal == zLast and xVal == xLast:
-            #     break
-            # zLast = zVal
-            # xLast = xVal
-        while True:
-            val = dspXReg('XRDSR')
-            # print val
-            if val != 0:
-                break
-        delta = time() - start
+            tmp = comm.xDbgPrint
+            comm.xDbgPrint = False
+            start = time()
+            # sleep(0.1)
+            # zLast = 0
+            # xLast = 0
+            # while True:
+                # zVal = getXReg('XRDZXPOS')
+                # xVal = getXReg('XRDXXPOS')
+                # if zVal == zLast and xVal == xLast:
+                #     break
+                # zLast = zVal
+                # xLast = xVal
+            while True:
+                val = dspXReg('XRDSR')
+                # print val
+                if val != 0:
+                    break
+            delta = time() - start
+        else:
+            delta = 0
+            val = 0
 
         if val & 1:
             setXReg('XLDZCTL', 0)   # clear z done flag
