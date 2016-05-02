@@ -1036,22 +1036,31 @@ def test6(dist=100, dbgprint=True, prt=False):
                 break;
     dspXReg('XRDZLOC', "x loc", dbgprint)
 
+testId = ''
+testAxis = ''
 arg1 = 0
 arg2 = 0
 arg3 = 0
+
 if len(sys.argv) > 1:
+    testId = sys.argv[1]
+
+if len(sys.argv) > 2:
+    testAxis = sys.argv[2]
+
+if len(sys.argv) > 3:
     try:
         arg1 = int(sys.argv[1])
     except ValueError:
         arg1 = sys.argv[1]
 
-if len(sys.argv) > 2:
+if len(sys.argv) > 4:
     try:
         arg2 = int(sys.argv[2])
     except ValueError:
         arg2 = sys.argv[2]
 
-if len(sys.argv) > 3:
+if len(sys.argv) > 5:
     try:
         arg3 = int(sys.argv[3])
     except ValueError:
@@ -1076,13 +1085,12 @@ else:
 
     # print
 
-    tmp = Turn(axis, 5.0, 20380, True)
+    # tmp = Turn(axis, 5.0, 20380, True)
     # accel = Test(True)
-    tmp.setup(accel, 300, .05)
+    # tmp.setup(accel, 300, .05)
     # accel.test()
 
-    testAxis = 'z':
-    if False:
+    if testId == '1':
         accel = Test(True)
         accel.encoder = 2540 * 8
         accel.testNoAccelSetup(2540 * 8, 600)
@@ -1091,27 +1099,27 @@ else:
         accel.setDbgPrint(True)
         if testAxis = 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        else:
+        elif testAxis = 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
-    if False:
+    if testId == '2':
         accel = Test(True)
         accel.testNoAccelSetup(2540 * 8, 600)
         if testAxis = 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
-        else:
+        elif testAxis = 'x':
             accel.xTestZTaper(arg1, arg2, arg3)
 
-    if False:
+    if testId == '3':
         tmp = Move(axis, True)
         accel = Accel(True)
         tmp.setup(accel, 10.0, 40.0)
         if testAxis = 'z':
             accel.zTestMove(arg1, arg2, arg3)
-        else:
+        elif testAxis = 'x':
             accel.xTestMove(arg1, arg2, arg3)
 
-    if False:
+    if testId == '4':
         accel = Test(True)
         accel.encoder = 2540 * 8
         accel.accel = 8
@@ -1119,17 +1127,17 @@ else:
         accel.setDbgPrint(True)
         if testAxis = 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        else:
+        elif testAxis = 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
-    if False:
+    if testId == '5':
         accel = Test(True)
         tmp = Turn(axis, 5.0, 20380, True)
         tmp.setup(accel, 300, .05)
         accel.setDbgPrint(True)
         if testAxis = 'z':
             accel.zTestSync(arg1, arg2, arg3)
-        else:
+        elif testAxis = 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
 
