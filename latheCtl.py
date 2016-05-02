@@ -336,7 +336,8 @@ class Test(Accel):
         if loc == 0:
             loc = 20
 
-        print "z test no acceleration"
+        print ("z test no acceleration clocks %d dist %d loc %d" %
+               (runClocks, dist, loc))
 
         if self.dbgPrint:
             print
