@@ -194,7 +194,7 @@ class AccelPlot(Accel):
         Accel.__init__(self)
         self.dbgPrint = dbgPrint
 
-    def test(self, file=None, pData=False):
+    def plot(self, dist, file="", pData=False):
         if pData:
             from pylab import plot, grid, show
             from array import array
@@ -204,7 +204,7 @@ class AccelPlot(Accel):
             data.append(0)
 
         f = None
-        if file != None:
+        if len(file) != 0:
             f = open(file, 'w')
         incr1 = self.incr1
         incr2 = self.incr2
