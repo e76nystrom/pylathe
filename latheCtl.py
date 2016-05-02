@@ -1094,8 +1094,6 @@ else:
         accel = Test(True)
         accel.encoder = 2540 * 8
         accel.testNoAccelSetup(2540 * 8, 600)
-        accel.accel = 8
-        accel.accelClocks = 100
         accel.setDbgPrint(True)
         if testAxis = 'z':
             accel.zTestSync(arg1, arg2, arg3)
