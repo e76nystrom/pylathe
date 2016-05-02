@@ -67,6 +67,15 @@ class Axis():
     def setAxis(self, axis):
         self.axis = axis
 
+    def testInit(self):
+        self.pitch = 0.1
+        self.ratio = 1
+        self.microSteps = 8
+        self.motorSteps = 200
+        self.accel = 0.75
+        self.backlash = 0.023
+
+
 class Accel():
     def __init__(self, prt=False):
         self.prt = prt
@@ -1055,18 +1064,9 @@ if arg1 == 'd':
         print "invalid register " + arg2
 else:
     comm.xDbgPrint = True
-    # test3(runClocks=arg1, dist=arg2)
-    # test4(runClocks=arg1, tpi=arg2, pData=False)
-    # test5(dist=arg1)
-    # test6(dist=arg1)
 
     axis = Axis()
-    axis.pitch = 0.1
-    axis.ratio = 1
-    axis.microSteps = 8
-    axis.motorSteps = 200
-    axis.accel = 0.75
-    axis.backlash = 0.023
+    axis.testInit()
     axis.setup()
 
     # tmp = Move(axis, True)
@@ -1077,22 +1077,70 @@ else:
     # print
 
     tmp = Turn(axis, 5.0, 20380, True)
-    accel = Test(True)
+    # accel = Test(True)
     tmp.setup(accel, 300, .05)
     # accel.test()
 
-    # accel = Test(True)
-    # accel.encoder = 2540 * 8
-    # accel.testNoAccelSetup(2540 * 8, 600)
-    # accel.accel = 8
-    # accel.accelClocks = 100
-    accel.setDbgPrint(True)
-    # accel.zTestSync(arg1, arg2, arg3)
-    # accel.xTestSync(arg1, arg2, arg3)
-    # accel.zTestXTaper(arg1, arg2, arg3)
-    # accel.xTestZTaper(arg1, arg2, arg3)
-    # accel.zTestMove(arg1, arg2, arg3)
-    # accel.xTestMove(arg1, arg2, arg3)
+    if False:
+        accel = Test(True)
+        accel.encoder = 2540 * 8
+        accel.testNoAccelSetup(2540 * 8, 600)
+        accel.accel = 8
+        accel.accelClocks = 100
+        accel.setDbgPrint(True)
+        if testAxis = 'z':
+            accel.zTestSync(arg1, arg2, arg3)
+        else:
+            accel.xTestSync(arg1, arg2, arg3)
+
+    if False:
+        accel = Test(True)
+        accel.testNoAccelSetup(2540 * 8, 600)
+        if testAxis = 'z':
+            accel.zTestXTaper(arg1, arg2, arg3)
+        else:
+            accel.xTestZTaper(arg1, arg2, arg3)
+
+    if False:
+        tmp = Move(axis, True)
+        accel = Accel(True)
+        tmp.setup(accel, 10.0, 40.0)
+        if testAxis = 'z':
+            accel.zTestMove(arg1, arg2, arg3)
+        else:
+            accel.xTestMove(arg1, arg2, arg3)
+
+    if False:
+        accel = Test(True)
+        accel.encoder = 2540 * 8
+        accel.accel = 8
+        accel.accelClocks = 100
+        accel.setDbgPrint(True)
+        accel.zTestSync(arg1, arg2, arg3)
+
+    if False:
+        accel = Test(True)
+        accel.encoder = 2540 * 8
+        accel.accel = 8
+        accel.accelClocks = 100
+        accel.setDbgPrint(True)
+        accel.xTestSync(arg1, arg2, arg3)
+
+    if False:
+        accel = Test(True)
+        accel.encoder = 2540 * 8
+        accel.accel = 8
+        accel.accelClocks = 100
+        accel.setDbgPrint(True)
+        accel.zTestSync(arg1, arg2, arg3)
+
+    if False:
+        accel = Test(True)
+        accel.encoder = 2540 * 8
+        accel.accel = 8
+        accel.accelClocks = 100
+        accel.setDbgPrint(True)
+        accel.xTestSync(arg1, arg2, arg3)
     
     accel.setDbgPrint(False)
     accel.zTestSync(arg1, arg2, arg3)
