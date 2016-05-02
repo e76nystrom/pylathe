@@ -717,6 +717,8 @@ class Test(Accel):
         dspXReg('XRDZLOC', "loc")
         dspXReg('XRDSTATE', "state")
 
+        if self.dbgPrint:
+            print
         self.testAccelCheck(xPos, yPos, zSum, zAclSum)
 
     def xTestAccelCheck(self, ac=None):
@@ -730,6 +732,8 @@ class Test(Accel):
         dspXReg('XRDXLOC', "loc")
         dspXReg('XRDSTATE', "state")
 
+        if self.dbgPrint:
+            print
         self.testAccelCheck(xPos, yPos, xSum, xAclSum)
 
     def testAccelCheck(self, xPos, yPos, xSum, aclSum):
@@ -748,8 +752,7 @@ class Test(Accel):
 
         print ("synAccel %d accelClocks %d accelSum %d" %
                (synAccel, accelClocks, synAccel * accelClocks))
-        if not self.dbgPrint:
-            print
+        print
 
         x = 0
         y = 0
