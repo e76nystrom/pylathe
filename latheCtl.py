@@ -1070,6 +1070,7 @@ def test6(dist=100, dbgprint=True, prt=False):
 
 testId = ''
 testAxis = 'z'
+repeat = 1
 dbgPrint = False
 
 dx = 2540 * 6
@@ -1119,6 +1120,8 @@ while True:
             testAxis = 'z';
         elif tmp == 'dbg':
             dbgPrint = True
+        elif tmp.startswith('repeat'):
+            repeat = extractVal(tmp, repeat, True)
         elif tmp.startswith('dx'):
             dx = extractVal(tmp, dx, True)
         elif tmp.startswith('dy'):
@@ -1194,13 +1197,14 @@ else:
             accel.xTestZTaper(arg1, arg2, arg3)
 
     if testId == '3':           # move with acceleration
-        tmp = Move(axis, dbgPrint)
-        accel = Test(dbgPrint)
-        tmp.setup(accel, minV, maxV)
-        if testAxis == 'z':
-            accel.zTestMove(arg1, arg2, arg3)
-        elif testAxis == 'x':
-            accel.xTestMove(arg1, arg2, arg3)
+        for i in range(0, repeat):
+            tmp = Move(axis, dbgPrint)
+            accel = Test(dbgPrint)
+            tmp.setup(accel, minV, maxV)
+            if testAxis == 'z':
+                accel.zTestMove(arg1, arg2, arg3)
+            elif testAxis == 'x':
+                accel.xTestMove(arg1, arg2, arg3)
 
     if testId == '4':           # simple acceleration test
         accel = Test(dbgPrint)
