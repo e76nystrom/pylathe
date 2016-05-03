@@ -261,6 +261,7 @@ class Accel():
                         "err %d bits %d" %
                         (accel.dyIni, accel.dyMax, dyDelta, incPerClock,\
                             err, bits))
+                print
 
             if (bits >= 30) or (err == 0):
                 break
