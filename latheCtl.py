@@ -1072,8 +1072,8 @@ aClks = 100
 minAccel = 5.0
 encoder = 20380
 
-min = 10.0
-max = 40.0
+minV = 10.0
+maxV = 40.0
 
 rpm = 300
 pitch = 0.05
@@ -1117,9 +1117,9 @@ while True:
         elif tmp.startswith('rpm'):
             rpm = extractVal(tmp, rpm, True)
         elif tmp.startswith('min'):
-            min = extractVal(tmp, min)
+            minV = extractVal(tmp, minV)
         elif tmp.startswith('max'):
-            min = extractVal(tmp, max)
+            maxV = extractVal(tmp, maxV)
         elif tmp.startswith('pitch'):
             pitch = extractVal(tmp, pitch)
         elif tmp.startswith('encoder'):
@@ -1187,7 +1187,7 @@ else:
     if testId == '3':
         tmp = Move(axis, True)
         accel = Test(True)
-        tmp.setup(accel, min, max)
+        tmp.setup(accel, min, maxV)
         if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
         elif testAxis == 'x':
@@ -1218,7 +1218,7 @@ else:
     if testId == '6':
         tmp = Move(axis, True)
         accel = Accel(True)
-        tmp.setup(accel, min, max)
+        tmp.setup(accel, min, maxV)
         accel.test()
 
     if testId == '7':
