@@ -1062,6 +1062,9 @@ def test6(dist=100, dbgprint=True, prt=False):
 testId = ''
 testAxis = 'z'
 dbgPrint = False
+dx = 2540 * 6
+dy = 600
+minAccel = 5.0
 encoder = 20380
 min = 10.0
 max = 40.0
@@ -1071,11 +1074,14 @@ arg1 = 0
 arg2 = 0
 arg3 = 0
 
-def extractVal(arg, default):
+def extractVal(arg, default, integer=False):
     tmp = arg.split('=')
     if len(tmp) == 2:
         try:
-            val = float(tmp[1])
+            if integer:
+                val = int(tmp[1])
+            else:
+                val = float(tmp[1])
         except:
             val = default
     else:
@@ -1099,8 +1105,11 @@ while True:
         elif tmp == 'dbg':
             dbgPrint = True
             n += 1
-        elif tmp.startswith('rpm'):
-            rpm = extractVal(tmp, rpm)
+        elif tmp.startswith('dx'):
+            dx = extractVal(tmp, dx, True)
+            n += 1
+        elif tmp.startswith('dy'):
+            dy = extractVal(tmp, dy, True)
             n += 1
         elif tmp.startswith('min'):
             min = extractVal(tmp, min)
@@ -1113,6 +1122,9 @@ while True:
             n += 1
         elif tmp.startswith('encoder'):
             encoder = extractVal(tmp, encoder)
+            n += 1
+        elif tmp.startswith('minAccel'):
+            minAccel = extractVal(tmp, minAccel)
             n += 1
             
     break
