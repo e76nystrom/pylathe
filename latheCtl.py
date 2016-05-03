@@ -617,6 +617,7 @@ class Test(Accel):
         dspXReg('XRDZXPOS')
         setXReg('XLDZCTL', (ZSTART | # start
                             dir))    # and direction
+        dspXReg('XRDZXPOS')
 
         self.testMoveStart(runClocks, self.freqDivider)
 
