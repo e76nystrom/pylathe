@@ -604,7 +604,7 @@ class Test(Accel):
             print
 
         self.resetAll()
-        getXReg('XRDZXPOS')
+        dspXReg('XRDZXPOS')
         self.testMoveInit()
 
         self.zSetup(dist, loc)
@@ -614,7 +614,7 @@ class Test(Accel):
             dir = ZDIR_NEG
         setXReg('XLDZCTL',ZRESET )   # reset z
         setXReg('XLDZCTL', dir)      # clear reset set direction
-        getXReg('XRDZXPOS')
+        dspXReg('XRDZXPOS')
         setXReg('XLDZCTL', (ZSTART | # start
                             dir))    # and direction
 
