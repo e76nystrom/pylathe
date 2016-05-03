@@ -1160,7 +1160,7 @@ if arg1 == 'd':
     else:
         print "invalid register " + arg2
 else:
-    comm.xDbgPrint = True
+    comm.xDbgPrint = dbgPrint
 
     axis = Axis()
     axis.testInit()
