@@ -840,6 +840,10 @@ class Test(Accel):
         self.testCheck(xPos, yPos, xSum, ac)
 
     def testCheck(self, xPos, yPos, testSum, ac=None):
+        if xPos & (1 << 23):
+            xPos = -((xPos ^ 0xffffff) + 1)
+        if yPos & (1 << 23):
+            yPos = -((xPos ^ 0xffffff) + 1)
         if ac == None:
             ac = self
         incr1 = ac.incr1
