@@ -1066,7 +1066,7 @@ dbgPrint = False
 dx = 2540 * 6
 dy = 600
 
-accel = 8
+aVal = 8
 aClks = 100
 
 minAccel = 5.0
@@ -1126,8 +1126,8 @@ while True:
             encoder = extractVal(tmp, encoder)
         elif tmp.startswith('minAccel'):
             minAccel = extractVal(tmp, minAccel)
-        elif tmp.startswith('accel'):
-            accel = extractVal(tmp, accel, True)
+        elif tmp.startswith('aVal'):
+            aVal = extractVal(tmp, aVal, True)
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
         else:
@@ -1197,7 +1197,7 @@ else:
         accel = Test(True)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
-        accel.accel = accel
+        accel.accel = aVal
         accel.accelClocks = aClks
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
