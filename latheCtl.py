@@ -687,9 +687,8 @@ class Test(Accel):
         if runClocks != 0:
             setXReg('XLDTCOUNT', runClocks-1) # load test count 
 
-            setXReg('XLDDCTL', DBG_INIT) # initialize dbg and z modules
-            # setXReg('XLDDCTL', 0)        # clear init
-
+            setXReg('XLDDCTL', DBG_MOVE) # initialize dbg and z modules
+            setXReg('XLDDCTL', DBG_INIT | DBG_MOVE) # initialize dbg and z modules
             setXReg('XLDDCTL', (DBG_ENA     # enable debugging
                                 | DBG_COUNT # run for number in count
                                 | DBG_MOVE
