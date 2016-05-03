@@ -788,8 +788,8 @@ class Test(Accel):
             setXReg('XLDXCTL', 0)   # clear x done flag
 
         comm.xDbgPrint = True
-        zVal = getXReg('XRDZXPOS')
-        xVal = getXReg('XRDXXPOS')
+        zVal = dspXReg('XRDZXPOS')
+        xVal = dspXReg('XRDXXPOS')
         comm.xDbgPrint = False
         maxClocks = max(zVal, xVal)
 
