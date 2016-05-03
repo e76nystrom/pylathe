@@ -1106,44 +1106,33 @@ while True:
         tmp = sys.argv[n]
         if tmp == 'z':
             testAxis = 'z';
-            n += 1
         elif tmp == 'x':
             testAxis = 'z';
-            n += 1
         elif tmp == 'dbg':
             dbgPrint = True
-            n += 1
         elif tmp.startswith('dx'):
             dx = extractVal(tmp, dx, True)
-            n += 1
         elif tmp.startswith('dy'):
             dy = extractVal(tmp, dy, True)
-            n += 1
         elif tmp.startswith('rpm'):
             rpm = extractVal(tmp, rpm, True)
-            n += 1
         elif tmp.startswith('min'):
             min = extractVal(tmp, min)
-            n += 1
         elif tmp.startswith('max'):
             min = extractVal(tmp, max)
-            n += 1
         elif tmp.startswith('pitch'):
             pitch = extractVal(tmp, pitch)
-            n += 1
         elif tmp.startswith('encoder'):
             encoder = extractVal(tmp, encoder)
-            n += 1
         elif tmp.startswith('minAccel'):
             minAccel = extractVal(tmp, minAccel)
-            n += 1
         elif tmp.startswith('accel'):
             accel = extractVal(tmp, accel, True)
-            n += 1
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
-            n += 1
-    break
+        else:
+            break
+    n += 1
 
 if len(sys.argv) > n:
     try:
