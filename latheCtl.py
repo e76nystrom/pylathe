@@ -1166,7 +1166,7 @@ else:
     axis.testInit()
     axis.setup()
 
-    if testId == '1':
+    if testId == '1':           # no accel
         accel = Test(True)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
@@ -1176,7 +1176,7 @@ else:
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
-    if testId == '2':
+    if testId == '2':           # taper without acceleration
         accel = Test(True)
         accel.testNoAccelSetup(dx, dy)
         if testAxis == 'z':
@@ -1184,7 +1184,7 @@ else:
         elif testAxis == 'x':
             accel.xTestZTaper(arg1, arg2, arg3)
 
-    if testId == '3':
+    if testId == '3':           # move with acceleration
         tmp = Move(axis, True)
         accel = Test(True)
         tmp.setup(accel, min, maxV)
@@ -1193,7 +1193,7 @@ else:
         elif testAxis == 'x':
             accel.xTestMove(arg1, arg2, arg3)
 
-    if testId == '4':
+    if testId == '4':           # simple acceleration test
         accel = Test(True)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
@@ -1205,7 +1205,7 @@ else:
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
-    if testId == '5':
+    if testId == '5':           # turn with acceleration
         accel = Test(True)
         tmp = Turn(axis, minAccel, encoder, True)
         tmp.setup(accel, rpm, pitch)
@@ -1215,19 +1215,19 @@ else:
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
-    if testId == '6':
+    if testId == '6':           # move setup
         tmp = Move(axis, True)
         accel = Accel(True)
         tmp.setup(accel, min, maxV)
         accel.test()
 
-    if testId == '7':
+    if testId == '7':           # turn setup
         tmp = Turn(axis, minAccel, encoder, True)
         accel = Test(True)
         tmp.setup(accel, rpm, pitch)
         accel.test()
 
-    if testId == '8':
+    if testId == '8':           # acceleration plot for turn
         tmp = Turn(axis, minAccel, encoder, True)
         accel = accelPlot(True)
         tmp.setup(accel, rpm, pitch)
