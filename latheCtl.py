@@ -1161,7 +1161,7 @@ while True:
 
 if len(sys.argv) > n:
     try:
-        arg1 = int(sys.argv[n])
+        arg1 = abs(int(sys.argv[n]))
     except ValueError:
         arg1 = sys.argv[n]
 
