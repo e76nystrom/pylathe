@@ -783,7 +783,7 @@ class Test(Accel):
             val = 0
 
         if val & 1:
-            setxreg('XLDZCTL', 0)      # clear z done flag
+            setXReg('XLDZCTL', 0)      # clear z done flag
         if val & 2:
             setXReg('XLDXCTL', 0)   # clear x done flag
 
@@ -1122,7 +1122,7 @@ while True:
         if tmp == 'z':
             testAxis = 'z';
         elif tmp == 'x':
-            testAxis = 'z';
+            testAxis = 'x';
         elif tmp == 'dbg':
             dbgPrint = True
         elif tmp.startswith('repeat'):
