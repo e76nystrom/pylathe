@@ -615,7 +615,7 @@ class Test(Accel):
         setXReg('XLDZCTL', (ZSTART | # start
                             dir))    # and direction
 
-        self.zTestMoveStart(runClocks, self.freqDivider)
+        self.testMoveStart(runClocks, self.freqDivider)
 
         self.testWait(runClocks, 2.0)
         self.zTestAccelCheck(None)
@@ -686,7 +686,7 @@ class Test(Accel):
             setXReg('XLDTCOUNT', runClocks-1) # load test count 
 
             setXReg('XLDDCTL', DBG_INIT) # initialize dbg and z modules
-            setXReg('XLDDCTL', 0)        # clear init
+            # setXReg('XLDDCTL', 0)        # clear init
 
             setXReg('XLDDCTL', (DBG_ENA     # enable debugging
                                 | DBG_COUNT # run for number in count
