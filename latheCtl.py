@@ -688,13 +688,17 @@ class Test(Accel):
         setXReg('XLDTFREQ', dbgFreq) # load test frequency
         if runClocks != 0:
             setXReg('XLDTCOUNT', runClocks-1) # load test count 
+            dspXReg('XRDZXPOS')
 
             setXReg('XLDDCTL', DBG_MOVE) # select debug frequency clock
+            dspXReg('XRDZXPOS')
             setXReg('XLDDCTL', (DBG_INIT | # initialize dbg
                                 DBG_MOVE))  # keep debug clock selected
+            dspXReg('XRDZXPOS')
             setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
                                 DBG_COUNT | # run for number in count
                                 DBG_MOVE)) # keep debug clock selected
+            dspXReg('XRDZXPOS')
 
     def testRun(self, runClocks):
         if runClocks != 0:
