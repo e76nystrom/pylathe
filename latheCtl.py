@@ -792,9 +792,9 @@ class Test(Accel):
         maxClocks = max(zVal, xVal)
 
         setXReg('XLDZCTL', ZRESET) # reset z
-        setXreg('XLDZCTL', 0)      # clear reset
+        setXReg('XLDZCTL', 0)      # clear reset
         setXReg('XLDZCTL', XRESET) # reset x
-        setXreg('XLDZCTL', 0)      # clear reset
+        setXReg('XLDZCTL', 0)      # clear reset
         comm.xDbgPrint = tmp
 
         if self.dbgPrint:
