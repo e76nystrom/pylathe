@@ -1198,6 +1198,8 @@ else:
 
     if testId == '3':           # move with acceleration
         for i in range(0, repeat):
+            if repeat > 1:
+                print "pass %d" % (i + 1)
             tmp = Move(axis, dbgPrint)
             accel = Test(dbgPrint)
             tmp.setup(accel, minV, maxV)
@@ -1205,6 +1207,7 @@ else:
                 accel.zTestMove(arg1, arg2, arg3)
             elif testAxis == 'x':
                 accel.xTestMove(arg1, arg2, arg3)
+            stdout.flush()
 
     if testId == '4':           # simple acceleration test
         accel = Test(dbgPrint)
