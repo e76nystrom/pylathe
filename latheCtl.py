@@ -1187,7 +1187,7 @@ else:
     if testId == '3':           # move with acceleration
         tmp = Move(axis, True)
         accel = Test(True)
-        tmp.setup(accel, min, maxV)
+        tmp.setup(accel, minV, maxV)
         if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
         elif testAxis == 'x':
