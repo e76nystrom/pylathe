@@ -341,11 +341,11 @@ class Accel():
 
 class AccelPlot(Accel):
     def __init__(self, dbgPrint=False):
-        Accel.__init__(self)
+        Accel.__init__(self, dbgPrint)
         self.dbgPrint = dbgPrint
         self.clockInterval = 0
 
-    def plot(self, dist, file="", pData=False):
+    def plot(self, runClocks, dist, file="", pData=False):
         if pData:
             from pylab import plot, grid, show
             from array import array
@@ -385,7 +385,7 @@ class AccelPlot(Accel):
         y = 0
         lastC = 0
         clocks = 0
-        while (x < dist):
+        while (x < runClocks):
             if not decel:
                 if aclSteps >= distCtr:
                     accel = False
@@ -443,7 +443,7 @@ class AccelPlot(Accel):
 
 class Test(Accel):
     def __init__(self, dbgPrint=False):
-        Accel.__init__(self)
+        Accel.__init__(self, dbgPrint)
         self.dbgPrint = dbgPrint
 
         self.axis = None        # axis for accleration
@@ -1060,26 +1060,62 @@ def test6(dist=100, dbgprint=True, prt=False):
     dspXReg('XRDZLOC', "x loc", dbgprint)
 
 testId = ''
-testAxis = ''
+testAxis = 'z'
 dbgPrint = False
+encoder = 20380
+min = 10.0
+max = 40.0
+rpm = 300
+pitch = 0.05
 arg1 = 0
 arg2 = 0
 arg3 = 0
+
+def extractVal(arg, default):
+    tmp = arg.split('=')
+    if len(tmp) == 2:
+        try:
+            val = float(tmp[1])
+        except:
+            val = default
+    else:
+        val = default
+    return(val)
 
 n = 1
 if len(sys.argv) > n:
     testId = sys.argv[n]
 
 n += 1
-if len(sys.argv) > n:
-    testAxis = sys.argv[n]
-
-n += 1
-if len(sys.argv) > n:
-    tmp = sys.argv[n]
-    if tmp == 'dbg':
-        dbgPrint = True
-        n += 1
+while True:
+    if len(sys.argv) > n:
+        tmp = sys.argv[n]
+        if tmp == 'z':
+            testAxis = 'z';
+            n += 1
+        elif tmp == 'x':
+            testAxis = 'z';
+            n += 1
+        elif tmp == 'dbg':
+            dbgPrint = True
+            n += 1
+        elif tmp.startswith('rpm'):
+            rpm = extractVal(tmp, rpm)
+            n += 1
+        elif tmp.startswith('min'):
+            min = extractVal(tmp, min)
+            n += 1
+        elif tmp.startswith('max'):
+            min = extractVal(tmp, max)
+            n += 1
+        elif tmp.startswith('pitch'):
+            pitch = extractVal(tmp, pitch)
+            n += 1
+        elif tmp.startswith('encoder'):
+            encoder = extractVal(tmp, encoder)
+            n += 1
+            
+    break
 
 if len(sys.argv) > n:
     try:
@@ -1173,6 +1209,12 @@ else:
         accel = Test(True)
         tmp.setup(accel, 300, .05)
         accel.test()
+
+    if testId == '8':
+        tmp = Turn(axis, 5.0, 20380, True)
+        accel = accelPlot(True)
+        tmp.setup(accel, 300, .05)
+        accel.plot(arg1, arg2, "accelPlot.txt", True)
 
 if not (comm.ser is None):
     comm.ser.close()
