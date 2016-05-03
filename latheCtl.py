@@ -690,9 +690,9 @@ class Test(Accel):
             setXReg('XLDDCTL', DBG_MOVE) # select debug frequency clock
             setXReg('XLDDCTL', (DBG_INIT | # initialize dbg
                                 DBG_MOVE)  # keep debug clock selected
-            setXReg('XLDDCTL', (DBG_ENA     # enable debugging
-                                | DBG_COUNT # run for number in count
-                                | DBG_MOVE  # keep debug clock selected
+            setXReg('XLDDCTL', (DBG_ENA |  # enable debugging
+                                DBG_COUNT | # run for number in count
+                                DBG_MOVE # keep debug clock selected
                             ))
 
     def testRun(self, runClocks):
