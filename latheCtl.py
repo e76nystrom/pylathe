@@ -119,7 +119,7 @@ class Move():
 
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
-        accel.calc(dxBase, dyMaxBase, dyMinBase)
+        accel.setup(dxBase, dyMaxBase, dyMinBase)
 
 class Turn():
     def __init__(self, axis, minFeed, encoder, prt=False):
