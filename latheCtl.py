@@ -1163,8 +1163,8 @@ else:
 
     if testId == '1':
         accel = Test(True)
-        accel.encoder = 2540 * 8
-        accel.testNoAccelSetup(2540 * 8, 600)
+        accel.encoder = encoder
+        accel.testNoAccelSetup(dx, dy)
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
@@ -1173,7 +1173,7 @@ else:
 
     if testId == '2':
         accel = Test(True)
-        accel.testNoAccelSetup(2540 * 8, 600)
+        accel.testNoAccelSetup(dx, dy)
         if testAxis == 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
         elif testAxis == 'x':
@@ -1182,7 +1182,7 @@ else:
     if testId == '3':
         tmp = Move(axis, True)
         accel = Test(True)
-        tmp.setup(accel, 10.0, 40.0)
+        tmp.setup(accel, min, max)
         if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
         elif testAxis == 'x':
@@ -1190,8 +1190,8 @@ else:
 
     if testId == '4':
         accel = Test(True)
-        accel.encoder = 2540 * 8
-        accel.testNoAccelSetup(2540 * 8, 600)
+        accel.encoder = encoder
+        accel.testNoAccelSetup(dx, dy)
         accel.accel = 8
         accel.accelClocks = 100
         accel.setDbgPrint(dbgPrint)
@@ -1202,8 +1202,8 @@ else:
 
     if testId == '5':
         accel = Test(True)
-        tmp = Turn(axis, 5.0, 20380, True)
-        tmp.setup(accel, 300, .05)
+        tmp = Turn(axis, minAccel, encoder, True)
+        tmp.setup(accel, rpm, pitch)
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
@@ -1213,19 +1213,19 @@ else:
     if testId == '6':
         tmp = Move(axis, True)
         accel = Accel(True)
-        tmp.setup(accel, 10.0, 40.0)
+        tmp.setup(accel, min, max)
         accel.test()
 
     if testId == '7':
-        tmp = Turn(axis, 5.0, 20380, True)
+        tmp = Turn(axis, minAccel, encoder, True)
         accel = Test(True)
-        tmp.setup(accel, 300, .05)
+        tmp.setup(accel, rpm, pitch)
         accel.test()
 
     if testId == '8':
-        tmp = Turn(axis, 5.0, 20380, True)
+        tmp = Turn(axis, minAccel, encoder, True)
         accel = accelPlot(True)
-        tmp.setup(accel, 300, .05)
+        tmp.setup(accel, rpm, pitch)
         accel.plot(arg1, arg2, "accelPlot.txt", True)
 
 if not (comm.ser is None):
