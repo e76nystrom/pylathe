@@ -1062,18 +1062,22 @@ def test6(dist=100, dbgprint=True, prt=False):
 testId = ''
 testAxis = 'z'
 dbgPrint = False
+
 dx = 2540 * 6
 dy = 600
+
 accel = 8
 aClks = 100
+
 minAccel = 5.0
 encoder = 20380
+
 min = 10.0
 max = 40.0
+
 rpm = 300
 pitch = 0.05
-accel = 8
-aClks = 100
+
 arg1 = 0
 arg2 = 0
 arg3 = 0
