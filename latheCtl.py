@@ -1138,7 +1138,7 @@ while True:
             minAccel = extractVal(tmp, minAccel)
             n += 1
         elif tmp.startswith('accel'):
-            accel = extractVal(tmp, accel True)
+            accel = extractVal(tmp, accel, True)
             n += 1
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
