@@ -1070,6 +1070,8 @@ min = 10.0
 max = 40.0
 rpm = 300
 pitch = 0.05
+accel = 8
+aClks = 100
 arg1 = 0
 arg2 = 0
 arg3 = 0
@@ -1111,6 +1113,9 @@ while True:
         elif tmp.startswith('dy'):
             dy = extractVal(tmp, dy, True)
             n += 1
+        elif tmp.startswith('rpm'):
+            rpm = extractVal(tmp, rpm, True)
+            n += 1
         elif tmp.startswith('min'):
             min = extractVal(tmp, min)
             n += 1
@@ -1125,6 +1130,12 @@ while True:
             n += 1
         elif tmp.startswith('minAccel'):
             minAccel = extractVal(tmp, minAccel)
+            n += 1
+        elif tmp.startswith('accel'):
+            accel = extractVal(tmp, accel True)
+            n += 1
+        elif tmp.startswith('aClks'):
+            aClks = extractVal(tmp, aClks, True)
             n += 1
             
     break
@@ -1192,8 +1203,8 @@ else:
         accel = Test(True)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
-        accel.accel = 8
-        accel.accelClocks = 100
+        accel.accel = accel
+        accel.accelClocks = aClks
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
