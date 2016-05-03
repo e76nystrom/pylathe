@@ -1167,7 +1167,7 @@ else:
     axis.setup()
 
     if testId == '1':           # no accel
-        accel = Test(True)
+        accel = Test(dbgPrint)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
         accel.setDbgPrint(dbgPrint)
@@ -1177,7 +1177,7 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '2':           # taper without acceleration
-        accel = Test(True)
+        accel = Test(dbgPrint)
         accel.testNoAccelSetup(dx, dy)
         if testAxis == 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
@@ -1185,8 +1185,8 @@ else:
             accel.xTestZTaper(arg1, arg2, arg3)
 
     if testId == '3':           # move with acceleration
-        tmp = Move(axis, True)
-        accel = Test(True)
+        tmp = Move(axis, dbgPrint)
+        accel = Test(dbgPrint)
         tmp.setup(accel, minV, maxV)
         if testAxis == 'z':
             accel.zTestMove(arg1, arg2, arg3)
@@ -1194,7 +1194,7 @@ else:
             accel.xTestMove(arg1, arg2, arg3)
 
     if testId == '4':           # simple acceleration test
-        accel = Test(True)
+        accel = Test(dbgPrint)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
         accel.accel = aVal
@@ -1206,8 +1206,8 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '5':           # turn with acceleration
-        accel = Test(True)
-        tmp = Turn(axis, minAccel, encoder, True)
+        accel = Test(dbgPrint)
+        tmp = Turn(axis, minAccel, encoder, dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
@@ -1216,22 +1216,22 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '6':           # move setup
-        tmp = Move(axis, True)
-        accel = Accel(True)
+        tmp = Move(axis, dbgPrint)
+        accel = Accel(dbgPrint)
         tmp.setup(accel, min, maxV)
         accel.test()
 
     if testId == '7':           # turn setup
-        tmp = Turn(axis, minAccel, encoder, True)
-        accel = Test(True)
+        tmp = Turn(axis, minAccel, encoder, dbgPrint)
+        accel = Test(dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.test()
 
     if testId == '8':           # acceleration plot for turn
-        tmp = Turn(axis, minAccel, encoder, True)
-        accel = accelPlot(True)
+        tmp = Turn(axis, minAccel, encoder, dbgPrint)
+        accel = accelPlot(dbgPrint)
         tmp.setup(accel, rpm, pitch)
-        accel.plot(arg1, arg2, "accelPlot.txt", True)
+        accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
 if not (comm.ser is None):
     comm.ser.close()
