@@ -191,8 +191,8 @@ def dspXReg(reg, label=''):
     val = getXReg(reg)
     global xRegs, xDbgPrint
     if xDbgPrint:
-        print ("%-12s %8x %12d %s" %
-               (reg, val & 0xffffffff, val, label))
+        print ("%-12s %2x %8x %12d %s" %
+               (reg, xRegs[reg], val & 0xffffffff, val, label))
     return(val)
 
 def sendMove(op, val):
