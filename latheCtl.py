@@ -1137,7 +1137,6 @@ while True:
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
             n += 1
-            
     break
 
 if len(sys.argv) > n:
