@@ -208,7 +208,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
                 cFile.write("%s/* 0x%02x %s */\n" % 
                             (tmp.ljust(32),val,regComment));
                 xFile.write(('constant %-12s : unsigned(opb-1 downto 0) ' +
-                             ':= x"%02x"; --%s\n') %
+                             ':= x"%02x"; -- %s\n') %
                             (regName,val,regComment))
                 # tmp = "  %s," % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
@@ -279,8 +279,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                             bitStr.append("%s/* 0x%02x %s */\n"
                                           % (tmp.ljust(32),bit << shift,comment))
                         xLst.append((" alias %-10s : std_logic is %sreg(%d); " +
-                                     "-- %s\n") %
-                                    (xVar,regName,shift,comment))
+                                     "-- x%02x %s\n") %
+                                    (xVar, regName, shift, 1 << shift, comment))
                         if (shift > maxShift):
                             maxShift = shift
                     # tmp =  (" public static final int %-10s = (%s << %s);" %
