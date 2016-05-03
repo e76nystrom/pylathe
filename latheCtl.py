@@ -677,6 +677,7 @@ class Test(Accel):
 
     def testMoveInit(self):
         setXReg('XLDDCTL', DBG_INIT)      # initialize debug
+        setXReg('XLDDCTL', 0)             # initialize debug
         setXReg('XLDDCTL', DBG_MOVE)      # clear init and set move
 
     def testMoveStart(self, runClocks, dbgFreq):
