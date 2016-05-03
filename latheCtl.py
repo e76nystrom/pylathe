@@ -797,6 +797,8 @@ class Test(Accel):
         setXReg('XLDZCTL', 0)      # clear reset
         comm.xDbgPrint = tmp
 
+        if maxClocks & (1 << 23):
+            maxClocks = -((maxClocks ^ 0xffffff) + 1)
         if self.dbgPrint:
             print 
         print ("results %d %d clocks %4.2f sec\n" % 
@@ -843,7 +845,7 @@ class Test(Accel):
         if xPos & (1 << 23):
             xPos = -((xPos ^ 0xffffff) + 1)
         if yPos & (1 << 23):
-            yPos = -((xPos ^ 0xffffff) + 1)
+            yPos = -((yPos ^ 0xffffff) + 1)
         if ac == None:
             ac = self
         incr1 = ac.incr1
