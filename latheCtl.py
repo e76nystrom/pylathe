@@ -654,8 +654,8 @@ class Test(Accel):
         self.xTestAccelCheck(None)
 
     def resetAll(self):
-        setXReg('XLDXCTL', XRESET) # reset x
         setXReg('XLDZCTL', ZRESET) # reset z
+        setXReg('XLDXCTL', XRESET) # reset x
         setXReg('XLDTCTL', 0)      # clear taper
         setXReg('XLDDCTL', 0)      # disable debug mode
         setXReg('XLDZCTL', 0)      # clear z mode
@@ -783,8 +783,10 @@ class Test(Accel):
             val = 0
 
         if val & 1:
-            setXReg('XLDZCTL', 0)   # clear z done flag
+            setXReg('XLDZCTL', ZRESET) # reset z
+            setxreg('XLDZCTL', 0)      # clear z done flag
         if val & 2:
+            setXReg('XLDZCTL', XRESET) # reset x
             setXReg('XLDXCTL', 0)   # clear x done flag
 
         zVal = getXReg('XRDZXPOS')
