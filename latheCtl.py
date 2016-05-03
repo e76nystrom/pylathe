@@ -783,15 +783,17 @@ class Test(Accel):
             val = 0
 
         if val & 1:
-            setXReg('XLDZCTL', ZRESET) # reset z
             setxreg('XLDZCTL', 0)      # clear z done flag
         if val & 2:
-            setXReg('XLDZCTL', XRESET) # reset x
             setXReg('XLDXCTL', 0)   # clear x done flag
 
         zVal = getXReg('XRDZXPOS')
         xVal = getXReg('XRDXXPOS')
         maxClocks = max(zVal, xVal)
+        setXReg('XLDZCTL', ZRESET) # reset z
+        setxreg('XLDZCTL', 0)      # clear reset
+        setXReg('XLDZCTL', XRESET) # reset x
+        setxreg('XLDZCTL', 0)      # clear reset
         comm.xDbgPrint = tmp
 
         if self.dbgPrint:
