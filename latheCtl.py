@@ -615,7 +615,7 @@ class Test(Accel):
         setXReg('XLDZCTL', (ZSTART | # start
                             dir))    # and direction
 
-        self.testMoveStart(runClocks, self.freqDivider)
+        self.zTestMoveStart(runClocks, self.freqDivider)
 
         self.testWait(runClocks, 2.0)
         self.zTestAccelCheck(None)
