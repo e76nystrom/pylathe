@@ -611,6 +611,8 @@ class Test(Accel):
         dir = ZDIR_POS
         if dist < 0:
             dir = ZDIR_NEG
+        setXReg('XLDZCTL',ZRESET ) # set direction
+        setXReg('XLDZCTL',0 ) # set direction
         setXReg('XLDZCTL', dir) # set direction
         setXReg('XLDZCTL', (ZSTART | # start
                             dir))    # and direction
