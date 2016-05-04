@@ -1228,6 +1228,9 @@ else:
             tmp.setup(accel, minV, maxV)
             if testAxis == 'z':
                 accel.zTestMove(arg1, arg2, arg3)
+                tmp = dspXReg('XRDZXPOS')
+                if tmp == 0:
+                    break
             elif testAxis == 'x':
                 accel.xTestMove(arg1, arg2, arg3)
             stdout.flush()
@@ -1251,9 +1254,6 @@ else:
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
             accel.zTestSync(arg1, arg2, arg3)
-            tmp = dspXReg('XRDZXPOS')
-            if tmp == 0:
-                break
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
 
