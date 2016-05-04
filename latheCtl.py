@@ -654,9 +654,9 @@ class Test(Accel):
 
         self.xSetup(dist, loc)
 
-        setXReg('XLDXCTL', dir) # set direction
+        setXReg('XLDXCTL', xDir) # set direction
         setXReg('XLDXCTL', (XSTART | # start
-                            dir))    # and direction
+                            xDir))    # and direction
 
         self.testMoveStart(runClocks, self.freqDivider)
 
@@ -785,7 +785,10 @@ class Test(Accel):
             while True:
                 val = dspXReg('XRDSR')
                 # print val
-                if val != 0:
+                if (val & 7) != 0:
+                    break
+                if (val & 0x18) == 0:
+                    print "no start"
                     break
             delta = time() - start
         else:
