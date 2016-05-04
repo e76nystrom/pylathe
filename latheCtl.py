@@ -622,10 +622,10 @@ class Test(Accel):
 
         setXReg('XLDZCTL',ZRESET )   # reset z
         setXReg('XLDZCTL', zDir)      # clear reset set direction
-        dspXReg('XRDZXPOS')
+        # dspXReg('XRDZXPOS')
         setXReg('XLDZCTL', (ZSTART | # start
                             zDir))    # and direction
-        dspXReg('XRDZXPOS')
+        # dspXReg('XRDZXPOS')
 
         self.testMoveStart(runClocks, self.freqDivider)
 
@@ -698,17 +698,17 @@ class Test(Accel):
         setXReg('XLDTFREQ', dbgFreq) # load test frequency
         if runClocks != 0:
             setXReg('XLDTCOUNT', runClocks-1) # load test count 
-            dspXReg('XRDZXPOS')
+            # dspXReg('XRDZXPOS')
 
             setXReg('XLDDCTL', DBG_MOVE) # select debug frequency clock
-            dspXReg('XRDZXPOS')
+            # dspXReg('XRDZXPOS')
             setXReg('XLDDCTL', (DBG_INIT | # initialize dbg
                                 DBG_MOVE))  # keep debug clock selected
-            dspXReg('XRDZXPOS')
+            # dspXReg('XRDZXPOS')
             setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
                                 DBG_COUNT | # run for number in count
                                 DBG_MOVE)) # keep debug clock selected
-            dspXReg('XRDZXPOS')
+            # dspXReg('XRDZXPOS')
 
     def testRun(self, runClocks):
         if runClocks != 0:
