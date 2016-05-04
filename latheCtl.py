@@ -1230,6 +1230,7 @@ else:
                 accel.zTestMove(arg1, arg2, arg3)
                 tmp = dspXReg('XRDZXPOS')
                 if tmp == 0:
+                    print "z pos zero"
                     break
             elif testAxis == 'x':
                 accel.xTestMove(arg1, arg2, arg3)
