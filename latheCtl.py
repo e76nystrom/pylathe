@@ -610,11 +610,13 @@ class Test(Accel):
         dspXReg('XRDZXPOS')
         self.testMoveInit()
 
-        self.zSetup(dist, loc)
-
         zDir = ZDIR_POS
         if dist < 0:
             zDir = ZDIR_NEG
+            dist = abs(dist)
+
+        self.zSetup(dist, loc)
+
         setXReg('XLDZCTL',ZRESET )   # reset z
         setXReg('XLDZCTL', zDir)      # clear reset set direction
         dspXReg('XRDZXPOS')
