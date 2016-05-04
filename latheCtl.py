@@ -544,16 +544,19 @@ class Test(Accel):
             print
 
         self.testInit(self.encoder)
+
+        zDir = ZDIR_POS
+        if dist < 0:
+            zDir = ZDIR_NEG
+            dist = abs(dist)
+
         self.zSetup(dist, loc)
         self.xSetup(0, loc, ac)
 
         setXReg('XLDTCTL', TENA) # set for taper x
 
-        dir = ZDIR_POS
-        if dist < 0:
-            dir = ZDIR_NEG
-        setXReg('XLDZCTL', ZSRC_SYN | dir) # set source and direction
-        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | dir) # start z
+        setXReg('XLDZCTL', ZSRC_SYN | zDir) # set source and direction
+        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | zDir) # start z
 
         self.testRun(runClocks)
         self.testWait(runClocks, 2.0)
@@ -579,11 +582,11 @@ class Test(Accel):
 
         setXReg('XLDTCTL', TENA | TZ) # set for taper z
 
-        dir = XDIR_POS
+        xDir = XDIR_POS
         if dist < 0:
-            dir = XDIR_NEG
-        setXReg('XLDXCTL', XSRC_SYN | dir) # set source and direction
-        setXReg('XLDXCTL', XSTART | XSRC_SYN | dir) # start x
+            xDir = XDIR_NEG
+        setXReg('XLDXCTL', XSRC_SYN | xDir) # set source and direction
+        setXReg('XLDXCTL', XSTART | XSRC_SYN | xDir) # start x
 
         self.testRun(runClocks)
         self.testWait(runClocks, 2.0)
