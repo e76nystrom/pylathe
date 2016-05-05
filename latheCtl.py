@@ -676,18 +676,18 @@ class Test(Accel):
         setXReg('XLDDCTL', DBG_SEL) # select debug encoder
 
         setXReg('XLDTFREQ', dbgFreq - 1) # load test frequency
-        setXReg('XLDTCOUNT', dbgCount-1) # load test count 
-        setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
-                            DBG_INIT)) # initialize dbg and z modules
-        setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
+        # setXReg('XLDTCOUNT', dbgCount-1) # load test count 
+        # setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
+        #                     DBG_INIT)) # initialize dbg and z modules
+        # setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
 
-        setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
-                            DBG_SEL |   # select dbg encoder
-                            DBG_COUNT)) # run for number in count
-        setXReg('XLDDCTL', DBG_SEL)     # select debug encoder
+        # setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
+        #                     DBG_SEL |   # select dbg encoder
+        #                     DBG_COUNT)) # run for number in count
+        # setXReg('XLDDCTL', DBG_SEL)     # select debug encoder
 
-        setXReg('XLDDREG', 0x1234) # load display register
         setXReg('XLDPHASE', encoder) # load phase count
+        setXReg('XLDDREG', 0x1234) # load display register
 
     def testMoveInit(self):
         setXReg('XLDDCTL', DBG_INIT)      # initialize debug
