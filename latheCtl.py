@@ -824,7 +824,7 @@ class Test(Accel):
         dspXReg('XREADREG', "freq")
 
         tmp = comm.xDbgPrint
-        com.xDbgPrint = True
+        comm.xDbgPrint = True
         dspXReg('XRDFREQ', "freq")
         dspXReg('XRDPSYN', "phase syn")
         dspXReg('XRDTPHS', "tot phase")
