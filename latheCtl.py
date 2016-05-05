@@ -823,12 +823,12 @@ class Test(Accel):
     def readPhase(self):
         dspXReg('XREADREG', "freq")
 
-        tmp = com.xDbgPrint
+        tmp = comm.xDbgPrint
         com.xDbgPrint = True
         dspXReg('XRDFREQ', "freq")
         dspXReg('XRDPSYN', "phase syn")
         dspXReg('XRDTPHS', "tot phase")
-        com.xDbgPrint = tmp
+        comm.xDbgPrint = tmp
 
     def zTestCheck(self, ac=None):
         if self.dbgPrint:
