@@ -665,11 +665,11 @@ class Test(Accel):
 
     def resetAll(self):
         setXReg('XLDZCTL', ZRESET) # reset z
+        setXReg('XLDZCTL', 0)      # clear z mode
         setXReg('XLDXCTL', XRESET) # reset x
+        setXReg('XLDXCTL', 0)      # clear x mode
         setXReg('XLDTCTL', 0)      # clear taper
         setXReg('XLDDCTL', 0)      # disable debug mode
-        setXReg('XLDZCTL', 0)      # clear z mode
-        setXReg('XLDXCTL', 0)      # clear x mode
 
     def testInit(self, encoder, dbgFreq=10000, dbgCount=4):
         self.resetAll()
