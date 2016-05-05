@@ -716,7 +716,7 @@ class Test(Accel):
 
             setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
                                 DBG_INIT)) # initialize dbg and z modules
-        setXReg('XLDDCTL', DBG_SEL | DBG_RSYN)    # select dbg encoder
+            setXReg('XLDDCTL', DBG_SEL | DBG_RSYN) # select dbg encoder
 
             setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
                                 DBG_SEL |   # select dbg encoder
