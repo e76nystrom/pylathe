@@ -338,6 +338,11 @@ xilinxList = \
 
     ["XRDSR", "read status register"],
 
+    "read phase",
+
+    ["XRDPSYN", "read sync phase val"],
+    ["XRDTPHS", "read tot phase val"],
+
     "phase counter",
 
     ["XLDPHASE", "load phase max"],
@@ -394,11 +399,6 @@ xilinxList = \
 
     ["XRDFREQ", "read encoder freq"],
     ["XRDSTATE", "read state info"],
-
-    "read phase",
-
-    ["XRDPSYN", "read sync phase val"],
-    ["XRDTPHS", "read tot phase val"],
 
     "phase limit info",
 
