@@ -807,11 +807,11 @@ class Test(Accel):
         # comm.xDbgPrint = False
         maxClocks = max(zVal, xVal)
 
-        setXReg('XLDZCTL', ZRESET) # reset z
-        setXReg('XLDZCTL', 0)      # clear reset
-        setXReg('XLDZCTL', XRESET) # reset x
-        setXReg('XLDZCTL', 0)      # clear reset
-        setXReg('XLDDCTL', 0)      # clear debug
+        # setXReg('XLDZCTL', ZRESET) # reset z
+        # setXReg('XLDZCTL', 0)      # clear reset
+        # setXReg('XLDZCTL', XRESET) # reset x
+        # setXReg('XLDZCTL', 0)      # clear reset
+        # setXReg('XLDDCTL', 0)      # clear debug
         comm.xDbgPrint = tmp
 
         if maxClocks & (1 << 23):
