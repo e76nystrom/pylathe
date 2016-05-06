@@ -686,7 +686,8 @@ class Test(Accel):
         #                     DBG_COUNT)) # run for number in count
         # setXReg('XLDDCTL', DBG_SEL)     # select debug encoder
 
-        setXReg('XLDPHASE', encoder) # load phase count
+        # setXReg('XLDPHASE', encoder-1) # load phase count
+        setXReg('XLDPHASE', 15) # load phase count
         setXReg('XLDDREG', 0x1234) # load display register
 
     def testMoveInit(self):
