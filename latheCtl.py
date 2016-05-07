@@ -1315,7 +1315,7 @@ else:
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
     if testId == '9':           # test software encoder
-        global fcy
+        # global fcy
         preScaler = 1
         encTimer = int(fcy / encoder)
         while encTimer >= 65536:
