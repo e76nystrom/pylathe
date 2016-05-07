@@ -1288,9 +1288,13 @@ else:
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
     if testId == '9':           # test software encoder
-        fcy = 42000000
+        fcy = 84000000
+        preScaler = 1
         encTimer = int(fcy / encoder)
-        print "encTimer %d" % (encTimer)
+        while encTimer <= 65536:
+            preScaler += 1
+            encTimer = int((fcy / (encoder * preScaler))
+        print "preScaler %d encTimer %d" % (preScaler, encTimer)
         command('ENCSTOP')
         setParm('ENC_PRE_SCALER', 1)
         setParm('ENC_TIMER', encTimer)
