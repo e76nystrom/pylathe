@@ -492,6 +492,8 @@ class Test(Accel):
         self.testInit(self.encoder)
         self.zSetup(dist, loc)
 
+        setXReg('XLDZCTL', ZRESET);
+        setXReg('XLDZCTL', 0);
         dir = ZDIR_POS
         if dist < 0:
             dir = ZDIR_NEG
