@@ -325,6 +325,7 @@ parmList = \
     ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
     ["ENC_RUN_COUNT", "encoder run count", "int"],
 
+    ["ENC_RUN", "encoder running flag", "char"],
     ["ENC_COUNTER", "encoder count in rev", "int16_t"],
     ["ENC_REV_COUNTER", "encoder revolution counter", "int32_t"],
  
