@@ -493,12 +493,12 @@ xilinxBitList = \
  "status register",
 
     ["sReg"],
-    ["z_Done_Int", 1, 0, "z done interrrupt"],
-    ["x_Done_Int", 1, 1, "x done interrupt"],
-    ["dbg_Done",   1, 2, "debug done"],
-    ["z_Start",    1, 3, "z start"],
-    ["x_Start",    1, 4, "x start"],
-    ["enc_Dir_In", 1, 5, "encoder direction in"],
+    ["s_z_Done_Int", 1, 0, "z done interrrupt"],
+    ["s_x_Done_Int", 1, 1, "x done interrupt"],
+    ["s_dbg_Done",   1, 2, "debug done"],
+    ["s_z_Start",    1, 3, "z start"],
+    ["s_x_Start",    1, 4, "x start"],
+    ["s_enc_Dir_In", 1, 5, "encoder direction in"],
 
     ""
 ]
