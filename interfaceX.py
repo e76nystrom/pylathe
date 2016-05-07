@@ -67,6 +67,11 @@ cmdList = \
     ["READLOC", "", "read location"],
     ["READDBG", "", "read debug message"],
 
+    "encoder commands",
+
+    ["ENCSTART", "", "encoder start"],
+    ["ENCSTOP", "", "encoder stop"],
+
     "load operation parameters",
 
     ["LOADZPRM", "", "call load xilinx z parameters"],
@@ -315,6 +320,14 @@ parmList = \
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
+    ["ENC_PRE_SCALER", "encoder prescaler", "int16_t"],
+    ["ENC_TIMER", "encoder timer counts", "int16_t"],
+    ["ENC_MAX", "encoder counts per revolution", "int16_t"]
+    ["ENC_RUN_COUNT", "encoder run count", "int"],
+
+    ["ENC_COUNTER", "encoder count in rev", "int16_t"],
+    ["ENC_REV_COUNTER", "encoder revolution counter", "int32_t"],
+ 
     # ["", "", ""],
     # ["", "", ""],
     
