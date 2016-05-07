@@ -676,7 +676,7 @@ class Test(Accel):
         setXReg('XLDDCTL', 0)      # disable debug mode
 
     def extClockInit(self, encoder):
-        global FCY
+        # global FCY
         command('ENCSTOP')
         if self.encoder != 0:
             preScaler = 1
