@@ -41,7 +41,6 @@ openSerial('com7', 57600)
 comm.cmds = cmds
 comm.parms = parms
 comm.xRegs = xRegs
-fcy = 84000000
 
 def bitSize(val):
     return(int(ceil(log(abs(val), 2))))
@@ -1124,6 +1123,8 @@ def test6(dist=100, dbgprint=True, prt=False):
             if rsp.find("z st 00000000") > 0:
                 break;
     dspXReg('XRDZLOC', "x loc", dbgprint)
+
+fcy = 84000000
 
 testId = ''
 testAxis = 'z'
