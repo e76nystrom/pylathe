@@ -1291,7 +1291,7 @@ else:
         fcy = 84000000
         preScaler = 1
         encTimer = int(fcy / encoder)
-        while encTimer <= 65536:
+        while encTimer >= 65536:
             preScaler += 1
             encTimer = int(fcy / (encoder * preScaler))
         print "preScaler %d encTimer %d" % (preScaler, encTimer)
