@@ -41,7 +41,7 @@ openSerial('com7', 57600)
 comm.cmds = cmds
 comm.parms = parms
 comm.xRegs = xRegs
-FCY = 84000000
+fcy = 84000000
 
 def bitSize(val):
     return(int(ceil(log(abs(val), 2))))
@@ -678,14 +678,14 @@ class Test(Accel):
         setXReg('XLDDCTL', 0)      # disable debug mode
 
     def extClockInit(self, encoder):
-        # global FCY
+        global fcy
         command('ENCSTOP')
         if self.encoder != 0:
             preScaler = 1
-            encTimer = int(FCY / encoder)
+            encTimer = int(fcy / encoder)
             while encTimer >= 65536:
                 preScaler += 1
-                encTimer = int(FCY / (encoder * preScaler))
+                encTimer = int(fcy / (encoder * preScaler))
             print "preScaler %d encTimer %d" % (preScaler, encTimer)
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
@@ -1314,12 +1314,12 @@ else:
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
     if testId == '9':           # test software encoder
-        global FCY
+        global fcy
         preScaler = 1
-        encTimer = int(FCY / encoder)
+        encTimer = int(fcy / encoder)
         while encTimer >= 65536:
             preScaler += 1
-            encTimer = int(FCY / (encoder * preScaler))
+            encTimer = int(fcy / (encoder * preScaler))
         print "preScaler %d encTimer %d" % (preScaler, encTimer)
         command('ENCSTOP')
         setParm('ENC_PRE_SCALER', preScaler)
