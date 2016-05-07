@@ -492,7 +492,7 @@ xilinxBitList = \
 
  "status register",
 
-    ["sReg"],
+    ["stat"],
     ["s_Z_Done_Int", 1, 0, "z done interrrupt"],
     ["s_X_Done_Int", 1, 1, "x done interrupt"],
     ["s_Dbg_Done",   1, 2, "debug done"],
