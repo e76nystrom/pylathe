@@ -356,6 +356,22 @@ T_MOVECTL_swigregister(T_MOVECTL)
 cvar = _lathe.cvar
 
 
+def pauseCmd():
+    return _lathe.pauseCmd()
+pauseCmd = _lathe.pauseCmd
+
+def resumeCmd():
+    return _lathe.resumeCmd()
+resumeCmd = _lathe.resumeCmd
+
+def stopCmd():
+    return _lathe.stopCmd()
+stopCmd = _lathe.stopCmd
+
+def clearCmd():
+    return _lathe.clearCmd()
+clearCmd = _lathe.clearCmd
+
 def allStop():
     return _lathe.allStop()
 allStop = _lathe.allStop
@@ -380,6 +396,26 @@ def spindleSetup():
     return _lathe.spindleSetup()
 spindleSetup = _lathe.spindleSetup
 
+def zMoveCmd():
+    return _lathe.zMoveCmd()
+zMoveCmd = _lathe.zMoveCmd
+
+def zJogCmd():
+    return _lathe.zJogCmd()
+zJogCmd = _lathe.zJogCmd
+
+def zHomeCmd():
+    return _lathe.zHomeCmd()
+zHomeCmd = _lathe.zHomeCmd
+
+def zLocCmd():
+    return _lathe.zLocCmd()
+zLocCmd = _lathe.zLocCmd
+
+def zGoHomeCmd():
+    return _lathe.zGoHomeCmd()
+zGoHomeCmd = _lathe.zGoHomeCmd
+
 def zStart():
     return _lathe.zStart()
 zStart = _lathe.zStart
@@ -403,6 +439,26 @@ zSynSetup = _lathe.zSynSetup
 def zTaperSetup():
     return _lathe.zTaperSetup()
 zTaperSetup = _lathe.zTaperSetup
+
+def xMoveCmd():
+    return _lathe.xMoveCmd()
+xMoveCmd = _lathe.xMoveCmd
+
+def xJogCmd():
+    return _lathe.xJogCmd()
+xJogCmd = _lathe.xJogCmd
+
+def xHomeCmd():
+    return _lathe.xHomeCmd()
+xHomeCmd = _lathe.xHomeCmd
+
+def xLocCmd():
+    return _lathe.xLocCmd()
+xLocCmd = _lathe.xLocCmd
+
+def xGoHomeCmd():
+    return _lathe.xGoHomeCmd()
+xGoHomeCmd = _lathe.xGoHomeCmd
 
 def xStart():
     return _lathe.xStart()
