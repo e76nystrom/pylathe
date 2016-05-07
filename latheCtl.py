@@ -8,7 +8,7 @@ from math import ceil, floor, log
 import lathe
 from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
 import comm
-from comm import openSerial, command, setXReg, getXReg, dspXReg
+from comm import openSerial, setParm, getParm, command, setXReg, getXReg, dspXReg
 
 fData = False
 # jLoc = '../../Java/Lathe/src/lathe/'
