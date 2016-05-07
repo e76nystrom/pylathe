@@ -41,6 +41,7 @@ openSerial('com7', 57600)
 comm.cmds = cmds
 comm.parms = parms
 comm.xRegs = xRegs
+FCY = 84000000
 
 def bitSize(val):
     return(int(ceil(log(abs(val), 2))))
@@ -443,9 +444,11 @@ class AccelPlot(Accel):
             show()
 
 class Test(Accel):
-    def __init__(self, dbgPrint=False):
+    def __init__(self, testAxis='z', dbgClock=True, dbgPrint=False):
         Accel.__init__(self, dbgPrint)
         self.dbgPrint = dbgPrint
+        self.dbgClock = dbgClock
+        self.testAxis = testAxis
 
         self.axis = None        # axis for accleration
         self.freqDivider = 0    # frequency divider
@@ -671,59 +674,80 @@ class Test(Accel):
         setXReg('XLDTCTL', 0)      # clear taper
         setXReg('XLDDCTL', 0)      # disable debug mode
 
+    def extClockInit(self, encoder):
+        global FCY
+        command('ENCSTOP')
+        if self.encoder != 0:
+            preScaler = 1
+            encTimer = int(FCY / encoder)
+            while encTimer >= 65536:
+                preScaler += 1
+                encTimer = int(FCY / (encoder * preScaler))
+            print "preScaler %d encTimer %d" % (preScaler, encTimer)
+            setParm('ENC_PRE_SCALER', preScaler)
+            setParm('ENC_TIMER', encTimer)
+            setParm('ENC_MAX', encoder)
+
+    def extClockRun(self, runClocks):
+        setParm('ENC_RUN_COUNT', runClocks)
+        command('ENCSTART')
+
     def testInit(self, encoder, dbgFreq=10000, dbgCount=4):
         self.resetAll()
-        setXReg('XLDDCTL', DBG_SEL) # select debug encoder
+        if self.dbgClock:
+            setXReg('XLDDCTL', DBG_SEL) # select debug encoder
 
-        setXReg('XLDTFREQ', dbgFreq - 1) # load test frequency
-        # setXReg('XLDTCOUNT', dbgCount-1) # load test count 
-        # setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
-        #                     DBG_INIT)) # initialize dbg and z modules
-        # setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
+            setXReg('XLDTFREQ', dbgFreq - 1) # load test frequency
+        else:
+            self.extClockInit(encoder)
 
-        # setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
-        #                     DBG_SEL |   # select dbg encoder
-        #                     DBG_COUNT)) # run for number in count
-        # setXReg('XLDDCTL', DBG_SEL)     # select debug encoder
-
-        # setXReg('XLDPHASE', encoder-1) # load phase count
-        setXReg('XLDPHASE', 15) # load phase count
+        setXReg('XLDPHASE', encoder-1) # load phase count
         setXReg('XLDDREG', 0x1234) # load display register
 
     def testMoveInit(self):
-        setXReg('XLDDCTL', DBG_INIT)      # initialize debug
-        setXReg('XLDDCTL', 0)             # initialize debug
-        setXReg('XLDDCTL', DBG_MOVE)      # clear init and set move
+        if self.dbgClock:
+            setXReg('XLDDCTL', DBG_INIT) # initialize debug
+            setXReg('XLDDCTL', 0)        # initialize debug
+            setXReg('XLDDCTL', DBG_MOVE) # clear init and set move
+        else:
+            if self.testAxis == 'z':
+                pass
+            elif self.testAxis == 'x':
+                pass
 
     def testMoveStart(self, runClocks, dbgFreq):
         setXReg('XLDTFREQ', dbgFreq) # load test frequency
         if runClocks != 0:
-            setXReg('XLDTCOUNT', runClocks-1) # load test count 
-            # dspXReg('XRDZXPOS')
-
-            setXReg('XLDDCTL', DBG_MOVE) # select debug frequency clock
-            # dspXReg('XRDZXPOS')
-            setXReg('XLDDCTL', (DBG_INIT | # initialize dbg
-                                DBG_MOVE))  # keep debug clock selected
-            # dspXReg('XRDZXPOS')
-            setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
-                                DBG_COUNT | # run for number in count
-                                DBG_MOVE)) # keep debug clock selected
-            # dspXReg('XRDZXPOS')
+            if self.dbgClock:
+                setXReg('XLDTCOUNT', runClocks-1) # load test count 
+                setXReg('XLDDCTL', DBG_MOVE) # select debug frequency clock
+                setXReg('XLDDCTL', (DBG_INIT | # initialize dbg
+                                    DBG_MOVE)) # keep debug clock selected
+                setXReg('XLDDCTL', (DBG_ENA |  # enable debugging
+                                    DBG_COUNT | # run for number in count
+                                    DBG_MOVE)) # keep debug clock selected
+            else:
+                if self.testAxis == 'z':
+                    pass
+                elif self.testAxis == 'x':
+                    pass
 
     def testRun(self, runClocks):
         if runClocks != 0:
-            setXReg('XLDTCOUNT', runClocks-1) # load test count 
+            if self.dbgClock:
+                setXReg('XLDTCOUNT', runClocks-1) # load test count 
 
-            setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
-                                DBG_INIT)) # initialize dbg and z modules
-            setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
+                setXReg('XLDDCTL', (DBG_SEL |  # select dbg encoder
+                                    DBG_INIT)) # initialize dbg and z modules
+                setXReg('XLDDCTL', DBG_SEL)    # select dbg encoder
 
-            setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
-                                DBG_SEL |   # select dbg encoder
-                                DBG_COUNT | # run for number in count
-                                DBG_RSYN |  # enable sync
-                                DBG_MOVE))  # debug axis move
+                setXReg('XLDDCTL', (DBG_ENA |   # enable debugging
+                                    DBG_SEL |   # select dbg encoder
+                                    DBG_COUNT | # run for number in count
+                                    DBG_RSYN |  # enable sync
+                                    DBG_MOVE))  # debug axis move
+        if not self.dbgClock:
+            self.extClockRun(runClocks)
 
     def zSetup(self, dist, loc, ac=None):
         if ac == None:
@@ -797,9 +821,9 @@ class Test(Accel):
             val = 0
 
         if val & 1:
-            setXReg('XLDZCTL', 0)      # clear z done flag
+            setXReg('XLDZCTL', 0) # clear z done flag
         if val & 2:
-            setXReg('XLDXCTL', 0)   # clear x done flag
+            setXReg('XLDXCTL', 0) # clear x done flag
 
         # comm.xDbgPrint = True
         zVal = getXReg('XRDZXPOS')
@@ -807,11 +831,6 @@ class Test(Accel):
         # comm.xDbgPrint = False
         maxClocks = max(zVal, xVal)
 
-        # setXReg('XLDZCTL', ZRESET) # reset z
-        # setXReg('XLDZCTL', 0)      # clear reset
-        # setXReg('XLDZCTL', XRESET) # reset x
-        # setXReg('XLDZCTL', 0)      # clear reset
-        # setXReg('XLDDCTL', 0)      # clear debug
         comm.xDbgPrint = tmp
 
         if maxClocks & (1 << 23):
@@ -1106,6 +1125,7 @@ testId = ''
 testAxis = 'z'
 repeat = 1
 dbgPrint = False
+dbgClock = True
 
 dx = 2540 * 6
 dy = 600
@@ -1154,6 +1174,8 @@ while True:
             testAxis = 'x';
         elif tmp == 'dbg':
             dbgPrint = True
+        elif tmp == 'ext':
+            dbgClock = False
         elif tmp.startswith('repeat'):
             repeat = extractVal(tmp, repeat, True)
         elif tmp.startswith('dx'):
@@ -1213,7 +1235,7 @@ else:
     axis.setup()
 
     if testId == '1':           # no accel
-        accel = Test(dbgPrint)
+        accel = Test(testAxis, dbgClock, dbgPrint)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
         accel.setDbgPrint(dbgPrint)
@@ -1223,7 +1245,7 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '2':           # taper without acceleration
-        accel = Test(dbgPrint)
+        accel = Test(testAxis, dbgClock, dbgPrint)
         accel.testNoAccelSetup(dx, dy)
         if testAxis == 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
@@ -1235,7 +1257,7 @@ else:
             if repeat > 1:
                 print "pass %d" % (i + 1)
             tmp = Move(axis, dbgPrint)
-            accel = Test(dbgPrint)
+            accel = Test(testAxis, dbgClock, dbgPrint)
             tmp.setup(accel, minV, maxV)
             if testAxis == 'z':
                 accel.zTestMove(arg1, arg2, arg3)
@@ -1248,7 +1270,7 @@ else:
             stdout.flush()
 
     if testId == '4':           # simple acceleration test
-        accel = Test(dbgPrint)
+        accel = Test(testAxis, dbgClock, dbgPrint)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
         accel.accel = aVal
@@ -1260,7 +1282,7 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '5':           # turn with acceleration
-        accel = Test(dbgPrint)
+        accel = Test(dbgClock, dbgPrint)
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.setDbgPrint(dbgPrint)
@@ -1277,7 +1299,7 @@ else:
 
     if testId == '7':           # turn setup
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
-        accel = Test(dbgPrint)
+        accel = Test(testAxis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.test()
 
@@ -1288,12 +1310,12 @@ else:
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
     if testId == '9':           # test software encoder
-        fcy = 84000000
+        global FCY
         preScaler = 1
-        encTimer = int(fcy / encoder)
+        encTimer = int(FCY / encoder)
         while encTimer >= 65536:
             preScaler += 1
-            encTimer = int(fcy / (encoder * preScaler))
+            encTimer = int(FCY / (encoder * preScaler))
         print "preScaler %d encTimer %d" % (preScaler, encTimer)
         command('ENCSTOP')
         setParm('ENC_PRE_SCALER', preScaler)
