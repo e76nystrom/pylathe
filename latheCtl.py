@@ -855,9 +855,6 @@ class Test(Accel):
         dspXReg('XRDFREQ', "freq")
         dspXReg('XRDPSYN', "phase syn")
         dspXReg('XRDTPHS', "tot phase")
-
-        dspXReg('XRDZDIST', "z dist")
-        dspXReg('XRDZLOC', "z loc")
         comm.xDbgPrint = tmp
 
     def zTestCheck(self, ac=None):
