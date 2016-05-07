@@ -497,7 +497,7 @@ class Test(Accel):
         setXReg('XLDZCTL', ZSRC_SYN | dir)
         setXReg('XLDZCTL', ZSTART | ZSRC_SYN | dir)
 
-        self.testRun(runClocks)
+        self.testStart(runClocks)
         self.testWait(runClocks, 0.5)
         self.readPhase()
         if self.accel == 0:
@@ -526,7 +526,7 @@ class Test(Accel):
         setXReg('XLDXCTL', XSRC_SYN | dir)
         setXReg('XLDXCTL', XSTART | XSRC_SYN | dir)
 
-        self.testRun(runClocks)
+        self.testStart(runClocks)
         self.testWait(runClocks, 0.5)
         self.readPhase()
         if self.accel == 0:
@@ -561,7 +561,7 @@ class Test(Accel):
         setXReg('XLDZCTL', ZSRC_SYN | zDir) # set source and direction
         setXReg('XLDZCTL', ZSTART | ZSRC_SYN | zDir) # start z
 
-        self.testRun(runClocks)
+        self.testStart(runClocks)
         self.testWait(runClocks, 2.0)
         self.readPhase()
         self.zTestCheck(None)
@@ -594,7 +594,7 @@ class Test(Accel):
         setXReg('XLDXCTL', XSRC_SYN | xDir) # set source and direction
         setXReg('XLDXCTL', XSTART | XSRC_SYN | xDir) # start x
 
-        self.testRun(runClocks)
+        self.testStart(runClocks)
         self.testWait(runClocks, 2.0)
         self.readPhase()
         self.xTestCheck(None)
@@ -688,7 +688,7 @@ class Test(Accel):
             setParm('ENC_TIMER', encTimer)
             setParm('ENC_MAX', encoder)
 
-    def extClockRun(self, runClocks):
+    def extClockStart(self, runClocks):
         setParm('ENC_RUN_COUNT', runClocks)
         command('ENCSTART')
 
@@ -726,13 +726,13 @@ class Test(Accel):
                 setXReg('XLDDCTL', (DBG_ENA |  # enable debugging
                                     DBG_COUNT | # run for number in count
                                     DBG_MOVE)) # keep debug clock selected
-            else:
-                if self.testAxis == 'z':
-                    pass
-                elif self.testAxis == 'x':
-                    pass
+        if not self.dbgClock:
+            if self.testAxis == 'z':
+                pass
+            elif self.testAxis == 'x':
+                pass
 
-    def testRun(self, runClocks):
+    def testStart(self, runClocks):
         if runClocks != 0:
             if self.dbgClock:
                 setXReg('XLDTCOUNT', runClocks-1) # load test count 
@@ -747,7 +747,7 @@ class Test(Accel):
                                     DBG_RSYN |  # enable sync
                                     DBG_MOVE))  # debug axis move
         if not self.dbgClock:
-            self.extClockRun(runClocks)
+            self.extClockStart(runClocks)
 
     def zSetup(self, dist, loc, ac=None):
         if ac == None:
