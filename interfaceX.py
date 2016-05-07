@@ -322,7 +322,7 @@ parmList = \
 
     ["ENC_PRE_SCALER", "encoder prescaler", "int16_t"],
     ["ENC_TIMER", "encoder timer counts", "int16_t"],
-    ["ENC_MAX", "encoder counts per revolution", "int16_t"]
+    ["ENC_MAX", "encoder counts per revolution", "int16_t"],
     ["ENC_RUN_COUNT", "encoder run count", "int"],
 
     ["ENC_COUNTER", "encoder count in rev", "int16_t"],
