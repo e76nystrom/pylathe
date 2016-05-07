@@ -805,18 +805,18 @@ class Test(Accel):
                 while True:
                     val = dspXReg('XRDSR')
                     # print val
-                    if (val & 7) != 0:
+                    if (val & (S_DBG_DONE | S_Z_DONE_INT | S_X_DONE_INT)) != 0:
                         break
-                    if (val & 0x18) == 0:
+                    if (val & (S_Z_START | S_X_START)) == 0:
                         print "no start"
                         break
             else:
                 while True:
                     val = dspXReg('XRDSR')
                     # print val
-                    if (val & 3) != 0:
+                    if (val & (S_Z_DONE_INT | S_X_DONE_INT)) != 0:
                         break
-                    if (val & 0x18) == 0:
+                    if (val & (S_Z_START | S_X_START)) == 0:
                         print "no start"
                         break
                     encRun = getParm('ENC_RUN')
@@ -827,9 +827,9 @@ class Test(Accel):
             delta = 0
             val = 0
 
-        if val & 1:
+        if val & S_Z_DONE_INT:
             setXReg('XLDZCTL', 0) # clear z done flag
-        if val & 2:
+        if val & S_X_DONE_INT:
             setXReg('XLDXCTL', 0) # clear x done flag
 
         # comm.xDbgPrint = True
