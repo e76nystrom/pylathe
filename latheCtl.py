@@ -1290,7 +1290,7 @@ else:
     if testId == '9':           # test software encoder
         fcy = 42000000
         encTimer = int(fcy / encoder)
-        print "encTimer %d", (encTimer))
+        print "encTimer %d", (encTimer)
         setParm('ENC_PRE_SCALER', 0)
         setParm('ENC_TIMER', encTimer)
         setParm('ENC_MAX', encoder)
