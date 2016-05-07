@@ -449,6 +449,7 @@ class Test(Accel):
         self.dbgPrint = dbgPrint
         self.dbgClock = dbgClock
         self.testAxis = testAxis
+        self.runClocks = 0
 
         self.axis = None        # axis for accleration
         self.freqDivider = 0    # frequency divider
@@ -689,6 +690,7 @@ class Test(Accel):
             setParm('ENC_MAX', encoder)
 
     def extClockStart(self, runClocks):
+        self.runClocks = runClocks
         setParm('ENC_RUN_COUNT', runClocks)
         command('ENCSTART')
 
@@ -794,27 +796,30 @@ class Test(Accel):
 
     def testWait(self, runClocks, interval=0.5):
         tmp = comm.xDbgPrint
-        if runClocks != 0:
+        if runClocks != 0 or not self.dbgClock:
             comm.xDbgPrint = False
             start = time()
-            # sleep(0.1)
-            # zLast = 0
-            # xLast = 0
-            # while True:
-                # zVal = getXReg('XRDZXPOS')
-                # xVal = getXReg('XRDXXPOS')
-                # if zVal == zLast and xVal == xLast:
-                #     break
-                # zLast = zVal
-                # xLast = xVal
-            while True:
-                val = dspXReg('XRDSR')
-                # print val
-                if (val & 7) != 0:
-                    break
-                if (val & 0x18) == 0:
-                    print "no start"
-                    break
+            if self.dbgClock:
+                while True:
+                    val = dspXReg('XRDSR')
+                    # print val
+                    if (val & 7) != 0:
+                        break
+                    if (val & 0x18) == 0:
+                        print "no start"
+                        break
+            else:
+                while True:
+                    val = dspXReg('XRDSR')
+                    # print val
+                    if (val & 3) != 0:
+                        break
+                    if (val & 0x18) == 0:
+                        print "no start"
+                        break
+                    encRun = getParm('ENC_RUN')
+                    if encRun == 0:
+                        break
             delta = time() - start
         else:
             delta = 0
