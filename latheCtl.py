@@ -1293,7 +1293,7 @@ else:
         encTimer = int(fcy / encoder)
         while encTimer <= 65536:
             preScaler += 1
-            encTimer = int((fcy / (encoder * preScaler))
+            encTimer = int(fcy / (encoder * preScaler))
         print "preScaler %d encTimer %d" % (preScaler, encTimer)
         command('ENCSTOP')
         setParm('ENC_PRE_SCALER', 1)
