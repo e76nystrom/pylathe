@@ -1291,6 +1291,7 @@ else:
         fcy = 42000000
         encTimer = int(fcy / encoder)
         print "encTimer %d", (encTimer)
+        command('ENCSTOP')
         setParm('ENC_PRE_SCALER', 1)
         setParm('ENC_TIMER', encTimer)
         setParm('ENC_MAX', encoder)
