@@ -1287,5 +1287,15 @@ else:
         tmp.setup(accel, rpm, pitch)
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
+    if testId == '9':           # test software encoder
+        fcy = 42000000
+        encTimer = int(fcy / encoder)
+        print "encTimer %d", (encTimer))
+        setParm('ENC_PRE_SCALER', 0)
+        setParm('ENC_TIMER', encTimer)
+        setParm('ENC_MAX', encoder)
+        setParm('ENC_RUN_COUNT', arg1)
+        command('ENCSTART')
+
 if not (comm.ser is None):
     comm.ser.close()
