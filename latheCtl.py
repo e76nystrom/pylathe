@@ -1296,7 +1296,7 @@ else:
             encTimer = int(fcy / (encoder * preScaler))
         print "preScaler %d encTimer %d" % (preScaler, encTimer)
         command('ENCSTOP')
-        setParm('ENC_PRE_SCALER', 1)
+        setParm('ENC_PRE_SCALER', preScaler)
         setParm('ENC_TIMER', encTimer)
         setParm('ENC_MAX', encoder)
         setParm('ENC_RUN_COUNT', arg1)
