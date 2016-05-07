@@ -490,6 +490,16 @@ xilinxBitList = \
     ["Dbg_Rsyn",   1, 5, "running in sync mode"],
     ["Dbg_Move",   1, 6, "used debug clock for move"],
 
+ "status register",
+
+    ["sReg"],
+    ["z_Done_Int", 1, 0, "z done interrrupt"],
+    ["x_Done_Int", 1, 1, "x done interrupt"],
+    ["dbg_Done",   1, 2, "debug done"],
+    ["z_Start",    1, 3, "z start"],
+    ["x_Start",    1, 4, "x start"],
+    ["enc_Dir_In", 1, 5, "encoder direction in"],
+
     ""
 ]
 
