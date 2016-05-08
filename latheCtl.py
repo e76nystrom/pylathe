@@ -1387,5 +1387,16 @@ else:
         setParm('ENC_RUN_COUNT', arg1)
         command('ENCSTART')
 
+    if testId == '9':           # test software encoder
+        
+        for i in range(0, repeat):
+            setXReg('XLDZCTL', 0)
+            setXReg('XLDZCTL', ZSTART)
+            for j in range(0, 100):
+                val = dspXReg('XRDSR')
+                if (val & S_Z_START) == 0:
+                    print "no start %x" % (val)
+                    break
+
 if not (comm.ser is None):
     comm.ser.close()
