@@ -1387,8 +1387,8 @@ else:
         setParm('ENC_RUN_COUNT', arg1)
         command('ENCSTART')
 
-    if testId == '9':           # test software encoder
-        
+    if testId == '10':
+        comm.xDbgPrint = True
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
             setXReg('XLDZCTL', ZSTART)
