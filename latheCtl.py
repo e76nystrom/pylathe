@@ -870,12 +870,20 @@ class Test(Accel):
 
         tmp = comm.xDbgPrint
         comm.xDbgPrint = True
-        freq = dspXReg('XRDFREQ', "freq")
+        setXreg('XCLRFREQ', 0)
+        freq = 0
+        count = 10
+        while freq == 0:
+            freq = dspXReg('XRDFREQ', "freq")
+            count -= 1
+            if count <= 0:
+                break
         dspXReg('XRDPSYN', "phase syn")
         dspXReg('XRDTPHS', "tot phase")
         comm.xDbgPrint = tmp
-        freq = int((600.0 * freq) / self.encoder)
-        print "freq %d" % (freq)
+        if freq != 0:
+            freq = int((600.0 * freq) / self.encoder)
+            print "freq %d" % (freq)
 
     def zTestCheck(self, ac=None):
         if self.dbgPrint:
