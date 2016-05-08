@@ -1388,7 +1388,6 @@ else:
         command('ENCSTART')
 
     if testId == '10':
-        comm.xDbgPrint = True
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
             setXReg('XLDZCTL', ZSTART)
