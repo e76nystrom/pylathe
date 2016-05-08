@@ -815,12 +815,14 @@ class Test(Accel):
                     val = dspXReg('XRDSR')
                     # print val
                     if (val & (S_Z_DONE_INT | S_X_DONE_INT)) != 0:
+                        print "done"
                         break
                     if (val & (S_Z_START | S_X_START)) == 0:
                         print "no start"
                         break
                     encRun = getParm('ENC_RUN')
                     if encRun == 0:
+                        print "encoder stop"
                         break
             delta = time() - start
         else:
