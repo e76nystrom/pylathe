@@ -1142,6 +1142,7 @@ fcy = 84000000
 
 testId = ''
 testAxis = 'z'
+waitSync = False
 repeat = 1
 dbgPrint = False
 dbgClock = True
@@ -1219,6 +1220,8 @@ while True:
             aVal = extractVal(tmp, aVal, True)
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
+        elif tmp.startswith('wait'):
+            waitSync = True
         else:
             print "invalid argument: %s" % (tmp)
             stdout.flush()
@@ -1264,6 +1267,7 @@ else:
             accel.setRPM(rpm)
             accel.setEncoder(encoder)
             accel.testNoAccelSetup(dx, dy)
+            accel.setWaitSync(waitSync)
             accel.setDbgPrint(dbgPrint)
             if testAxis == 'z':
                 accel.zTestSync(arg1, arg2, arg3)
@@ -1274,6 +1278,8 @@ else:
     if testId == '2':           # taper without acceleration
         for i in range(0, repeat):
             accel = Test(testAxis, dbgClock, dbgPrint)
+            accel.setRPM(rpm)
+            accel.setEncoder(encoder)
             accel.testNoAccelSetup(dx, dy)
             if testAxis == 'z':
                 accel.zTestXTaper(arg1, arg2, arg3)
@@ -1301,7 +1307,9 @@ else:
     if testId == '4':           # simple acceleration test
         for i in range(0, repeat):
             accel = Test(testAxis, dbgClock, dbgPrint)
-            accel.encoder = encoder
+            accel.setEncoder(encoder)
+            accel.setRPM(rpm)
+            accel.setWaitSync(waitSync)
             accel.testNoAccelSetup(dx, dy)
             accel.accel = aVal
             accel.accelClocks = aClks
@@ -1315,6 +1323,9 @@ else:
     if testId == '5':           # turn with acceleration
         for i in range(0, repeat):
             accel = Test(dbgClock, dbgPrint)
+            accel.setEncoder(encoder)
+            accel.setRPM(rpm)
+            accel.setWaitSync(waitSync)
             tmp = Turn(axis, minAccel, encoder, dbgPrint)
             tmp.setup(accel, rpm, pitch)
             accel.setDbgPrint(dbgPrint)
