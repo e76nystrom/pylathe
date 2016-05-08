@@ -465,7 +465,7 @@ class Test(Accel):
     def setRPM(self, rpm):
         self.rpm = rpm
 
-    def setRPM(self, encoder):
+    def setEncoder(self, encoder):
         self.encoder = encoder
 
     def testNoAccelSetup(self, dx, dy):
