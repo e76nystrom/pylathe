@@ -1147,7 +1147,7 @@ encoder = 20380
 minV = 10.0
 maxV = 40.0
 
-rpm = 300
+rpm = 180
 pitch = 0.05
 
 arg1 = 0
