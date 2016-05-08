@@ -692,10 +692,11 @@ class Test(Accel):
             preScaler = 1
             if self.rpm == 0:
                 self.rpm = 1
-            encTimer = int(fcy / (encoder * self.rpm))
+            rps = self.rpm / 60.0
+            encTimer = int(fcy / (encoder * rps))
             while encTimer >= 65536:
                 preScaler += 1
-                encTimer = int(fcy / (encoder * self.rpm * preScaler))
+                encTimer = int(fcy / (encoder * rps * preScaler))
             print "preScaler %d encTimer %d" % (preScaler, encTimer)
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
