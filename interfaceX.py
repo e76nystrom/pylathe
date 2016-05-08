@@ -499,7 +499,6 @@ xilinxBitList = \
     ["s_Z_Start",    1, 3, "z start"],
     ["s_X_Start",    1, 4, "x start"],
     ["s_Enc_Dir_In", 1, 5, "encoder direction in"],
-    ["s_Freq_Ready", 1, 6, "frequency reading ready"],
 
     ""
 ]
