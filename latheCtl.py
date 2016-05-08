@@ -449,6 +449,8 @@ class Test(Accel):
         self.dbgClock = dbgClock
         self.testAxis = testAxis
         self.runClocks = 0
+        self.encoder = 0
+        self.rpm = 0
 
         self.axis = None        # axis for accleration
         self.freqDivider = 0    # frequency divider
@@ -459,6 +461,9 @@ class Test(Accel):
     def setDbgPrint(self, val):
         self.dbgPrint = val
         comm.xDbgPrint = val
+
+    def setRPM(self, rpm):
+        self.rpm = rpm
 
     def testNoAccelSetup(self, dx, dy):
         self.dx = dx
@@ -682,10 +687,12 @@ class Test(Accel):
         command('ENCSTOP')
         if self.encoder != 0:
             preScaler = 1
-            encTimer = int(fcy / encoder)
+            if self.rpm == 0:
+                self.rpm = 1
+            encTimer = int(fcy / (encoder * self.rpm))
             while encTimer >= 65536:
                 preScaler += 1
-                encTimer = int(fcy / (encoder * preScaler))
+                encTimer = int(fcy / (encoder * self.rpm * preScaler))
             print "preScaler %d encTimer %d" % (preScaler, encTimer)
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
