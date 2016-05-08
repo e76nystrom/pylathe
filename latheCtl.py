@@ -1152,19 +1152,19 @@ repeat = 1
 dbgPrint = False
 dbgClock = True
 
-dx = 2540 * 6
+dx = 2540 * 8
 dy = 600
 
 aVal = 8
 aClks = 100
 
 minAccel = 5.0
-encoder = 20380
+encoder = dx
 
 minV = 10.0
 maxV = 40.0
 
-rpm = 180
+rpm = 240
 pitch = 0.05
 
 arg1 = 0
