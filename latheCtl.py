@@ -1390,7 +1390,9 @@ else:
     if testId == '10':
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
+            setXReg('XLDXCTL', 0)
             setXReg('XLDZCTL', ZSTART)
+            setXReg('XLDXCTL', XSTART)
             for j in range(0, arg1):
                 val = dspXReg('XRDSR')
                 if (val & S_Z_START) == 0:
