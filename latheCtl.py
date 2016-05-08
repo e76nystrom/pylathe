@@ -840,8 +840,8 @@ class Test(Accel):
 
         comm.xDbgPrint = tmp
 
-        if maxClocks & (1 << 23):
-            maxClocks = -((maxClocks ^ 0xffffff) + 1)
+        # if maxClocks & (1 << 23):
+        #     maxClocks = -((maxClocks ^ 0xffffff) + 1)
         if self.dbgPrint:
             print 
         print ("results %d %d clocks %4.2f sec\n" % 
