@@ -1254,6 +1254,7 @@ else:
     axis.setup()
 
     if testId == '1':           # no accel
+        for i in range(0, repeat):
         accel = Test(testAxis, dbgClock, dbgPrint)
         accel.setRPM(rpm)
         accel.setEncoder(encoder)
@@ -1265,12 +1266,14 @@ else:
             accel.xTestSync(arg1, arg2, arg3)
 
     if testId == '2':           # taper without acceleration
+        for i in range(0, repeat):
         accel = Test(testAxis, dbgClock, dbgPrint)
         accel.testNoAccelSetup(dx, dy)
         if testAxis == 'z':
             accel.zTestXTaper(arg1, arg2, arg3)
         elif testAxis == 'x':
             accel.xTestZTaper(arg1, arg2, arg3)
+            stdout.flush()
 
     if testId == '3':           # move with acceleration
         for i in range(0, repeat):
@@ -1290,6 +1293,7 @@ else:
             stdout.flush()
 
     if testId == '4':           # simple acceleration test
+        for i in range(0, repeat):
         accel = Test(testAxis, dbgClock, dbgPrint)
         accel.encoder = encoder
         accel.testNoAccelSetup(dx, dy)
@@ -1300,8 +1304,10 @@ else:
             accel.zTestSync(arg1, arg2, arg3)
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
+            stdout.flush()
 
     if testId == '5':           # turn with acceleration
+        for i in range(0, repeat):
         accel = Test(dbgClock, dbgPrint)
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         tmp.setup(accel, rpm, pitch)
@@ -1310,6 +1316,7 @@ else:
             accel.zTestSync(arg1, arg2, arg3)
         elif testAxis == 'x':
             accel.xTestSync(arg1, arg2, arg3)
+            stdout.flush()
 
     if testId == '6':           # move setup
         tmp = Move(axis, dbgPrint)
