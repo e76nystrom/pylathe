@@ -870,7 +870,7 @@ class Test(Accel):
 
         tmp = comm.xDbgPrint
         comm.xDbgPrint = True
-        setXreg('XCLRFREQ', 0)
+        setXReg('XCLRFREQ', 0)
         freq = 0
         count = 10
         while freq == 0:
