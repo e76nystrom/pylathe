@@ -1187,6 +1187,8 @@ n += 1
 while True:
     if len(sys.argv) > n:
         tmp = sys.argv[n]
+        if len(tmp) != 0 and tmp[0].isdigit():
+            break;
         if tmp == 'z':
             testAxis = 'z';
         elif tmp == 'x':
@@ -1218,6 +1220,8 @@ while True:
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
         else:
+            print "invalid argument %s" % (tmp)
+            n += 1
             break
     n += 1
 
