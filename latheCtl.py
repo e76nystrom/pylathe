@@ -1192,6 +1192,7 @@ while True:
         tmp = sys.argv[n]
         if len(tmp) != 0 and tmp[0].isdigit():
             break;
+        tmp = tmp.lower()
         if tmp == 'z':
             testAxis = 'z';
         elif tmp == 'x':
