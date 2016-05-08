@@ -1393,8 +1393,13 @@ else:
             setXReg('XLDXCTL', 0)
             setXReg('XLDZCTL', ZSTART)
             setXReg('XLDXCTL', XSTART)
+            k = 2
             for j in range(0, arg1):
                 val = dspXReg('XRDSR')
+                comm.setXRegN(k, 0)
+                k += 1
+                if k >= 0x30:
+                    k = 2
                 if (val & S_Z_START) == 0:
                     print "%2d %2d no start %x" % (i, j, val)
                     break
