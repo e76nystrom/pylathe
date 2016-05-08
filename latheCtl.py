@@ -816,7 +816,7 @@ class Test(Accel):
     def testWait(self, runClocks, interval=0.5):
         tmp = comm.xDbgPrint
         if runClocks != 0 or not self.dbgClock:
-            comm.xDbgPrint = True
+            comm.xDbgPrint = False
             start = time()
             if self.dbgClock:
                 while True:
