@@ -406,7 +406,8 @@ xilinxList = \
 
     "read frequency and state",
 
-    ["XRDFREQ", "read encoder freq"],
+    ["XRDFREQ",  "read encoder freq"],
+    ["XCLRFREQ", "clear freq register"],
     ["XRDSTATE", "read state info"],
 
     "read phase",
