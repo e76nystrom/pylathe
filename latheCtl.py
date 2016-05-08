@@ -825,7 +825,7 @@ class Test(Accel):
                     if (val & (S_DBG_DONE | S_Z_DONE_INT | S_X_DONE_INT)) != 0:
                         break
                     if (val & (S_Z_START | S_X_START)) == 0:
-                        print "no start"
+                        print "no start %x " % (val)
                         break
             else:
                 while True:
