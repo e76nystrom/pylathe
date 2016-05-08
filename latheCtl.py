@@ -509,7 +509,7 @@ class Test(Accel):
             flag = ZDIR_NEG
         setXReg('XLDZCTL', ZSRC_SYN | flag)
         if self.waitSync:
-            flag |= ZWAITSYNC
+            flag |= ZWAIT_SYNC
         setXReg('XLDZCTL', ZSTART | ZSRC_SYN | flag)
 
         self.testStart(runClocks)
