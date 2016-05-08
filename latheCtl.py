@@ -711,6 +711,7 @@ class Test(Accel):
         self.runClocks = runClocks
         setParm('ENC_RUN_COUNT', runClocks)
         command('ENCSTART')
+        self.readFreq()
 
     def testInit(self, encoder, dbgFreq=10000, dbgCount=4):
         self.resetAll()
@@ -865,11 +866,7 @@ class Test(Accel):
         print ("results %d %d clocks %4.2f sec\n" % 
                (runClocks, maxClocks, delta))
 
-    def readPhase(self):
-        dspXReg('XREADREG', "freq")
-
-        tmp = comm.xDbgPrint
-        comm.xDbgPrint = True
+    def readFreq(self):
         setXReg('XCLRFREQ', 0)
         freq = 0
         count = 10
@@ -878,12 +875,18 @@ class Test(Accel):
             count -= 1
             if count <= 0:
                 break
-        dspXReg('XRDPSYN', "phase syn")
-        dspXReg('XRDTPHS', "tot phase")
-        comm.xDbgPrint = tmp
         if freq != 0:
             freq = int((600.0 * freq) / self.encoder)
             print "freq %d" % (freq)
+
+    def readPhase(self):
+        dspXReg('XREADREG', "freq")
+
+        tmp = comm.xDbgPrint
+        comm.xDbgPrint = True
+        dspXReg('XRDPSYN', "phase syn")
+        dspXReg('XRDTPHS', "tot phase")
+        comm.xDbgPrint = tmp
 
     def zTestCheck(self, ac=None):
         if self.dbgPrint:
