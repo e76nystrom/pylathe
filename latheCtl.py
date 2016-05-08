@@ -1220,7 +1220,7 @@ while True:
         elif tmp.startswith('aClks'):
             aClks = extractVal(tmp, aClks, True)
         else:
-            print "invalid argument %s" % (tmp)
+            print "invalid argument: %s" % (tmp)
             stdout.flush()
             n += 1
             break
