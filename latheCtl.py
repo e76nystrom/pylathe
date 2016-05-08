@@ -465,6 +465,9 @@ class Test(Accel):
     def setRPM(self, rpm):
         self.rpm = rpm
 
+    def setRPM(self, encoder):
+        self.encoder = encoder
+
     def testNoAccelSetup(self, dx, dy):
         self.dx = dx
         self.dy = dy
@@ -1251,7 +1254,8 @@ else:
 
     if testId == '1':           # no accel
         accel = Test(testAxis, dbgClock, dbgPrint)
-        accel.encoder = encoder
+        accel.setRPM(rpm)
+        accel.setEncoder(encoder)
         accel.testNoAccelSetup(dx, dy)
         accel.setDbgPrint(dbgPrint)
         if testAxis == 'z':
