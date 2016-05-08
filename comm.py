@@ -155,6 +155,33 @@ def setXReg(reg, val):
         rsp = rsp + tmp;
     commLock.release()
 
+def setXRegN(reg, val):
+    global ser, xRegs, cmds, comLock, timeout, xDbgPrint
+    if ser is None:
+        return
+    val = int(val)
+    if xDbgPrint:
+        print "%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val)
+    cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], reg, \
+                               val & 0xffffffff)
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if len(tmp) == 0:
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "timeout"
+            raise commTimeout
+            break;
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp;
+    commLock.release()
+
 def getXReg(reg):
     global ser, xRegs, cmds, commLock, timeout
     if ser is None:
