@@ -869,7 +869,7 @@ class Test(Accel):
     def readFreq(self):
         setXReg('XCLRFREQ', 0)
         freq = 0
-        count = 10
+        count = 20
         while freq == 0:
             freq = dspXReg('XRDFREQ', "freq")
             count -= 1
