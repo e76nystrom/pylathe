@@ -501,11 +501,13 @@ class Test(Accel):
 
         setXReg('XLDZCTL', ZRESET);
         setXReg('XLDZCTL', 0);
-        dir = ZDIR_POS
+        flag = ZDIR_POS
         if dist < 0:
-            dir = ZDIR_NEG
-        setXReg('XLDZCTL', ZSRC_SYN | dir)
-        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | dir)
+            flag = ZDIR_NEG
+        setXReg('XLDZCTL', ZSRC_SYN | flag)
+        if self.waitSync:
+            flag |= ZWAITSYNC
+        setXReg('XLDZCTL', ZSTART | ZSRC_SYN | flag)
 
         self.testStart(runClocks)
         self.testWait(runClocks, 0.5)
