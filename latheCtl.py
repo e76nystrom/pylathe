@@ -1392,7 +1392,7 @@ else:
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
             setXReg('XLDZCTL', ZSTART)
-            for j in range(0, 100):
+            for j in range(0, arg1):
                 val = dspXReg('XRDSR')
                 if (val & S_Z_START) == 0:
                     print "no start %x" % (val)
