@@ -468,6 +468,9 @@ class Test(Accel):
     def setEncoder(self, encoder):
         self.encoder = encoder
 
+    def setWaitSync(self, waitSync):
+        self.waitSync = waitSync
+
     def testNoAccelSetup(self, dx, dy):
         self.dx = dx
         self.dy = dy
