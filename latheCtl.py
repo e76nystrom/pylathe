@@ -1395,7 +1395,7 @@ else:
             for j in range(0, arg1):
                 val = dspXReg('XRDSR')
                 if (val & S_Z_START) == 0:
-                    print "no start %x" % (val)
+                    print "%2d no start %x" % (i, val)
                     break
 
 if not (comm.ser is None):
