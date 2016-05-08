@@ -1221,6 +1221,7 @@ while True:
             aClks = extractVal(tmp, aClks, True)
         else:
             print "invalid argument %s" % (tmp)
+            stdout.flush()
             n += 1
             break
     n += 1
