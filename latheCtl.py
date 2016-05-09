@@ -1420,7 +1420,7 @@ else:
         tmp.setup(accel, 0.0, 20.0)
         tmp.setup(accel, 0.0, 5.0)
 
-        setParm('Z_PITCH', "%f0.1" % (axis.pitch))
+        setParm('Z_PITCH', "%0.1f" % (axis.pitch))
         setParm('Z_RATIO', "%d" % (axis.ratio))
         setParm('Z_MICRO', "%d" % (axis.microSteps))
         setParm('Z_MOTOR', "%d" % (axis.motorSteps))
