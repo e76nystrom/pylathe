@@ -27,23 +27,23 @@ cmdList = \
     
     "end operations",
     
-    ["CMD_PAUSE", "", "pause current operation"],
-    ["CMD_RESUME", "", "resume current operation"],
-    ["CMD_STOP", "", "stop current operation"],
+    ["CMD_PAUSE", "pauseCmd", "pause current operation"],
+    ["CMD_RESUME", "resumeCmd", "resume current operation"],
+    ["CMD_STOP", "stopCmd", "stop current operation"],
     
     "setup operations",
     
-    ["CMD_CLEAR", "", "clear all tables"],
-    ["CMD_SETUP", "", "setup everything"],
-    ["CMD_SPSETUP", "", "setup spindle"],
+    ["CMD_CLEAR", "clearCmd", "clear all tables"],
+    ["CMD_SETUP", "setup", "setup everything"],
+    ["CMD_SPSETUP", "spindleSetup", "setup spindle"],
 
     ["CMD_ZSETUP", "zSetup", "setup z axis"],
-    ["CMD_ZSYNSETUP", "", "setup z axis sync"],
-    ["CMD_ZTAPERSETUP", "", "setup z axis taper"],
+    ["CMD_ZSYNSETUP", "zSynSetup", "setup z axis sync"],
+    ["CMD_ZTAPERSETUP", "zTaperSetup", "setup z axis taper"],
 
     ["CMD_XSETUP", "xSetup", "setup x axis"],
-    ["CMD_XSYNSETUP", "", "setup z axis sync"],
-    ["CMD_XTAPERSETUP", "", "setup z axis taper"],
+    ["CMD_XSYNSETUP", "xSynSetup", "setup z axis sync"],
+    ["CMD_XTAPERSETUP", "xTaperSetup", "setup z axis taper"],
     
     "state information",
     
