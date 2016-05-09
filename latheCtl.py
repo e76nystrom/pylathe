@@ -87,19 +87,21 @@ class Move():
     def setup(self, accel, minFeed, maxFeed):
         self.minFeed = minFeed
         self.maxFeed = maxFeed
-        stepsMinMax = self.maxFeed * self.axis.stepsInch # max steps per min
-        stepsSecMax = stepsMinMax / 60.0       # max steps per second
+        if self.prt:
+            print("minFeed %0.1f maxFeed %0.2f" % (minFeed, maxFeed))
+
         freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
-
-        stepsMinMin = self.minFeed * self.axis.stepsInch # max steps per min
-        stepsSecMin = stepsMinMin / 60.0       # min steps per second
-
         self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
                             - 1)   # calc divider
         if self.prt:
-            print ("stepsSecMin %6.0f stepsSecMax %6.0f freqGenMax %7.0f "\
-                   "freqDivider %d" %
-                   (stepsSecMin, stepsSecMax, freqGenMax, self.freqDivider))
+            print ("freqGenMax %d freqDivider %d" %
+                   (freqGenMax, self.freqDivider))
+
+        stepsSecMax = int((stepsMinMax / 60.0) * self.axis.stepsInch)
+        stepsSecMin = int((self.minFeed / 60) * self.axis.stepsInch)
+        if self.prt:
+            print ("stepsSecMin %d stepsSecMax %d" %
+                   (stepsSecMin, stepsSecMax))
 
         stepsSec2 = self.axis.accel * self.axis.stepsInch
         accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
@@ -260,7 +262,6 @@ class Accel():
                         "err %d bits %d" %
                         (accel.dyIni, accel.dyMax, dyDelta, incPerClock,\
                          err, bits))
-                print
 
             if (bits >= 30) or (err == 0):
                 break
