@@ -90,18 +90,18 @@ class Move():
         if self.prt:
             print("minFeed %0.1f maxFeed %0.2f" % (minFeed, maxFeed))
 
+        stepsSecMax = int((self.maxFeed / 60.0) * self.axis.stepsInch)
+        stepsSecMin = int((self.minFeed / 60) * self.axis.stepsInch)
+        if self.prt:
+            print ("stepsSecMin %d stepsSecMax %d" %
+                   (stepsSecMin, stepsSecMax))
+
         freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
         self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
                             - 1)   # calc divider
         if self.prt:
             print ("freqGenMax %d freqDivider %d" %
                    (freqGenMax, self.freqDivider))
-
-        stepsSecMax = int((stepsMinMax / 60.0) * self.axis.stepsInch)
-        stepsSecMin = int((self.minFeed / 60) * self.axis.stepsInch)
-        if self.prt:
-            print ("stepsSecMin %d stepsSecMax %d" %
-                   (stepsSecMin, stepsSecMax))
 
         stepsSec2 = self.axis.accel * self.axis.stepsInch
         accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
