@@ -1404,5 +1404,21 @@ else:
                     print "%2d %2d no start %x" % (i, j, val)
                     stdout.flush()
 
+    if testId == '11':          # test accel code
+        setParm('Z_PITCH', "0.1")
+        setParm('Z_RATIO', "1")
+        setParm('Z_MICRO', "8")
+        setParm('Z_MOTOR', "200")
+        setParm('Z_ACCEL', "0.5")
+        setParm('Z_BACKLASH', "0.027")
+
+        setParm('Z_MOVE_MIN', "0")
+        setParm('Z_MOVE_MAX', "20")
+
+        setParm('Z_JOG_MIN', "0")
+        setParm('Z_JOG_MAX', "5")
+
+        command('CMD_ZSETUP')
+
 if not (comm.ser is None):
     comm.ser.close()
