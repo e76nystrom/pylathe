@@ -91,7 +91,7 @@ class Move():
             print("minFeed %0.1f maxFeed %0.2f" % (minFeed, maxFeed))
 
         stepsSecMax = int((self.maxFeed / 60.0) * self.axis.stepsInch)
-        stepsSecMin = int((self.minFeed / 60) * self.axis.stepsInch)
+        stepsSecMin = int((self.minFeed / 60.0) * self.axis.stepsInch)
         if self.prt:
             print ("stepsSecMin %d stepsSecMax %d" %
                    (stepsSecMin, stepsSecMax))
@@ -162,9 +162,16 @@ class Turn():
             accel.accelClocks = 0
             accel.intIncPerClock = 0
         else:
-            accel.accelTime = int((feedRate - self.minFeed) * 1000000 /
-                                  (60.0 * self.axis.accel))
-            accel.accelClocks = int(self.encPerSec * accel.accelTime) / 1000000
+            # accel.accelTime = int((feedRate - self.minFeed) * 1000000 /
+            #                       (60.0 * self.axis.accel))
+
+            stepsSecMax = int((feedRate / 60.0) * self.axis.stepsInch)
+            stepsSecMin = int((self.minFeed / 60.0) * self.axis.stepsInch)
+            if self.prt:
+                print ("stepsSecMin %d stepsSecMax %d" %
+                       (stepsSecMin, stepsSecMax))
+            accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
+            accel.accelClocks = int(self.encPerSec * accel.accelTime)
 
             stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
             stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
