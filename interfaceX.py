@@ -342,12 +342,14 @@ parmList = \
 
     "measured spindle speed",
 
-    ["xFrequency", "xilinx clock frequency", "int32_t"],
-    ["freqMult", "frequency multiplier", "int16_t"],
+    ["X_FREQUENCY", "xilinx clock frequency", "int32_t"],
+    ["FREQ_MULT", "frequency multiplier", "int16_t"],
 
     # ["", "", ""],
     # ["", "", ""],
     
+    "max parameter number",
+
     ["MAX_PARM", "maximum parameter", "int16_t"]
 ]
 
