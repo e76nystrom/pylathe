@@ -1393,7 +1393,7 @@ else:
             setXReg('XLDXCTL', 0)
             setXReg('XLDZCTL', ZSTART)
             setXReg('XLDXCTL', XSTART)
-            k = 2
+            k = 3
             for j in range(0, arg1):
                 val = dspXReg('XRDSR')
                 comm.setXRegN(k, 0)
