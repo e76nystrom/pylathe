@@ -288,6 +288,7 @@ class Accel():
                         (self.accelClocks, totalSum, totalInc, \
                         self.accelSteps))
         else:
+            self.accelStesp = 0
             self.accelClocks = 0
             self.accel = 0
 
