@@ -1398,8 +1398,8 @@ else:
                 val = dspXReg('XRDSR')
                 comm.setXRegN(k, 0)
                 k += 1
-                if k >= 0x30:
-                    k = 2
+                if k > 0x31:
+                    k = 3
                 if (val & S_Z_START) == 0:
                     print "%2d %2d no start %x" % (i, j, val)
                     stdout.flush()
