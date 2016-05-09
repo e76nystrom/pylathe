@@ -464,8 +464,8 @@ def xTaperSetup():
     return _lathe.xTaperSetup()
 xTaperSetup = _lathe.xTaperSetup
 
-def accelCalc(accel):
-    return _lathe.accelCalc(accel)
+def accelCalc(ac):
+    return _lathe.accelCalc(ac)
 accelCalc = _lathe.accelCalc
 
 def turnPitch(ac, pitch):
