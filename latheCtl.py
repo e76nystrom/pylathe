@@ -1402,7 +1402,6 @@ else:
                     k = 2
                 if (val & S_Z_START) == 0:
                     print "%2d %2d no start %x" % (i, j, val)
-                    break
 
 if not (comm.ser is None):
     comm.ser.close()
