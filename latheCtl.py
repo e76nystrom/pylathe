@@ -160,12 +160,11 @@ class Turn():
                                (60.0 * self.axis.accel))
             accel.accelClocks = int(self.encPerSec * accel.accelTime)
 
-            stepsPerRev = self.axis.stepsInch * pitch # steps per turn
             stepsSecMax = (feedRate / 60.0) * self.axis.stepsInch
             stepsSecMin = (self.minFeed / 60.0) * self.axis.stepsInch
             if self.prt:
-                print ("stepsPerRev %d stepsSecMin %5.2f stepsSecMax %5.2f" %
-                       (int(stepsPerRev), stepsSecMin, stepsSecMax))
+                print ("stepsSecMin %5.2f stepsSecMax %5.2f" %
+                       (stepsSecMin, stepsSecMax))
 
             stepsSec2 = self.axis.accel * self.axis.stepsInch
             accelMinStep = ((float(stepsSecMin) / stepsSec2) * stepsSecMin) / 2.0
