@@ -1204,7 +1204,8 @@ if len(sys.argv) > n:
 
 n += 1
 while True:
-    if len(sys.argv) > n:
+    if n > len(sys.argv):
+        break
         tmp = sys.argv[n]
         if len(tmp) != 0 and tmp[0].isdigit():
             break;
