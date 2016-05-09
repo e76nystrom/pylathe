@@ -111,7 +111,7 @@ class Move():
         accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
         accel.accelSteps = accelMaxStep - accelMinStep
         if self.prt:
-            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d clocks %d" %
+            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d accelClocks %d" %
                    (stepsSec2, accel.accelTime,\
                     accel.accelSteps, accel.accelClocks))
 
@@ -152,7 +152,7 @@ class Turn():
 
         self.encPerSec = int((spindleRPM / 60.0) * self.encoder) # cnts per sec
         self.encPerInch = int(self.encoder * pitch) # enc pulse inch
-        if self.prt:
+        if self.prt:PPPPPPPP
             print ("encPerSec %d stepsInch %d encoderPerIn %d" %
                    (self.encPerSec, self.axis.stepsInch, self.encPerInch))
 
