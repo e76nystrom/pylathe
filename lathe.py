@@ -512,6 +512,10 @@ def xTaperInit(ac, dir):
     return _lathe.xTaperInit(ac, dir)
 xTaperInit = _lathe.xTaperInit
 
+def i64toa(val, buf, buflen):
+    return _lathe.i64toa(val, buf, buflen)
+i64toa = _lathe.i64toa
+
 def tmp(x):
     return _lathe.tmp(x)
 tmp = _lathe.tmp
