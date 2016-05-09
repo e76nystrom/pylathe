@@ -164,14 +164,14 @@ class T_ACCEL(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, T_ACCEL, name)
     __repr__ = _swig_repr
-    __swig_setmethods__["minSpeed"] = _lathe.T_ACCEL_minSpeed_set
-    __swig_getmethods__["minSpeed"] = _lathe.T_ACCEL_minSpeed_get
+    __swig_setmethods__["minFeed"] = _lathe.T_ACCEL_minFeed_set
+    __swig_getmethods__["minFeed"] = _lathe.T_ACCEL_minFeed_get
     if _newclass:
-        minSpeed = _swig_property(_lathe.T_ACCEL_minSpeed_get, _lathe.T_ACCEL_minSpeed_set)
-    __swig_setmethods__["maxSpeed"] = _lathe.T_ACCEL_maxSpeed_set
-    __swig_getmethods__["maxSpeed"] = _lathe.T_ACCEL_maxSpeed_get
+        minFeed = _swig_property(_lathe.T_ACCEL_minFeed_get, _lathe.T_ACCEL_minFeed_set)
+    __swig_setmethods__["maxFeed"] = _lathe.T_ACCEL_maxFeed_set
+    __swig_getmethods__["maxFeed"] = _lathe.T_ACCEL_maxFeed_get
     if _newclass:
-        maxSpeed = _swig_property(_lathe.T_ACCEL_maxSpeed_get, _lathe.T_ACCEL_maxSpeed_set)
+        maxFeed = _swig_property(_lathe.T_ACCEL_maxFeed_get, _lathe.T_ACCEL_maxFeed_set)
     __swig_setmethods__["accel"] = _lathe.T_ACCEL_accel_set
     __swig_getmethods__["accel"] = _lathe.T_ACCEL_accel_get
     if _newclass:
@@ -192,74 +192,46 @@ class T_ACCEL(_object):
     __swig_getmethods__["taperInch"] = _lathe.T_ACCEL_taperInch_get
     if _newclass:
         taperInch = _swig_property(_lathe.T_ACCEL_taperInch_get, _lathe.T_ACCEL_taperInch_set)
-    __swig_setmethods__["stepsSec"] = _lathe.T_ACCEL_stepsSec_set
-    __swig_getmethods__["stepsSec"] = _lathe.T_ACCEL_stepsSec_get
+    __swig_setmethods__["encPerSec"] = _lathe.T_ACCEL_encPerSec_set
+    __swig_getmethods__["encPerSec"] = _lathe.T_ACCEL_encPerSec_get
     if _newclass:
-        stepsSec = _swig_property(_lathe.T_ACCEL_stepsSec_get, _lathe.T_ACCEL_stepsSec_set)
-    __swig_setmethods__["stepsSec2"] = _lathe.T_ACCEL_stepsSec2_set
-    __swig_getmethods__["stepsSec2"] = _lathe.T_ACCEL_stepsSec2_get
+        encPerSec = _swig_property(_lathe.T_ACCEL_encPerSec_get, _lathe.T_ACCEL_encPerSec_set)
+    __swig_setmethods__["encPerInch"] = _lathe.T_ACCEL_encPerInch_set
+    __swig_getmethods__["encPerInch"] = _lathe.T_ACCEL_encPerInch_get
     if _newclass:
-        stepsSec2 = _swig_property(_lathe.T_ACCEL_stepsSec2_get, _lathe.T_ACCEL_stepsSec2_set)
-    __swig_setmethods__["time"] = _lathe.T_ACCEL_time_set
-    __swig_getmethods__["time"] = _lathe.T_ACCEL_time_get
+        encPerInch = _swig_property(_lathe.T_ACCEL_encPerInch_get, _lathe.T_ACCEL_encPerInch_set)
+    __swig_setmethods__["accelTime"] = _lathe.T_ACCEL_accelTime_set
+    __swig_getmethods__["accelTime"] = _lathe.T_ACCEL_accelTime_get
     if _newclass:
-        time = _swig_property(_lathe.T_ACCEL_time_get, _lathe.T_ACCEL_time_set)
-    __swig_setmethods__["steps"] = _lathe.T_ACCEL_steps_set
-    __swig_getmethods__["steps"] = _lathe.T_ACCEL_steps_get
+        accelTime = _swig_property(_lathe.T_ACCEL_accelTime_get, _lathe.T_ACCEL_accelTime_set)
+    __swig_setmethods__["accelSteps"] = _lathe.T_ACCEL_accelSteps_set
+    __swig_getmethods__["accelSteps"] = _lathe.T_ACCEL_accelSteps_get
     if _newclass:
-        steps = _swig_property(_lathe.T_ACCEL_steps_get, _lathe.T_ACCEL_steps_set)
-    __swig_setmethods__["clocks"] = _lathe.T_ACCEL_clocks_set
-    __swig_getmethods__["clocks"] = _lathe.T_ACCEL_clocks_get
+        accelSteps = _swig_property(_lathe.T_ACCEL_accelSteps_get, _lathe.T_ACCEL_accelSteps_set)
+    __swig_setmethods__["scale"] = _lathe.T_ACCEL_scale_set
+    __swig_getmethods__["scale"] = _lathe.T_ACCEL_scale_get
     if _newclass:
-        clocks = _swig_property(_lathe.T_ACCEL_clocks_get, _lathe.T_ACCEL_clocks_set)
-    __swig_setmethods__["dist"] = _lathe.T_ACCEL_dist_set
-    __swig_getmethods__["dist"] = _lathe.T_ACCEL_dist_get
+        scale = _swig_property(_lathe.T_ACCEL_scale_get, _lathe.T_ACCEL_scale_set)
+    __swig_setmethods__["dx"] = _lathe.T_ACCEL_dx_set
+    __swig_getmethods__["dx"] = _lathe.T_ACCEL_dx_get
     if _newclass:
-        dist = _swig_property(_lathe.T_ACCEL_dist_get, _lathe.T_ACCEL_dist_set)
-    __swig_setmethods__["remainder"] = _lathe.T_ACCEL_remainder_set
-    __swig_getmethods__["remainder"] = _lathe.T_ACCEL_remainder_get
+        dx = _swig_property(_lathe.T_ACCEL_dx_get, _lathe.T_ACCEL_dx_set)
+    __swig_setmethods__["dyIni"] = _lathe.T_ACCEL_dyIni_set
+    __swig_getmethods__["dyIni"] = _lathe.T_ACCEL_dyIni_get
     if _newclass:
-        remainder = _swig_property(_lathe.T_ACCEL_remainder_get, _lathe.T_ACCEL_remainder_set)
-    __swig_setmethods__["initialCount"] = _lathe.T_ACCEL_initialCount_set
-    __swig_getmethods__["initialCount"] = _lathe.T_ACCEL_initialCount_get
+        dyIni = _swig_property(_lathe.T_ACCEL_dyIni_get, _lathe.T_ACCEL_dyIni_set)
+    __swig_setmethods__["dyMax"] = _lathe.T_ACCEL_dyMax_set
+    __swig_getmethods__["dyMax"] = _lathe.T_ACCEL_dyMax_get
     if _newclass:
-        initialCount = _swig_property(_lathe.T_ACCEL_initialCount_get, _lathe.T_ACCEL_initialCount_set)
-    __swig_setmethods__["finalCount"] = _lathe.T_ACCEL_finalCount_set
-    __swig_getmethods__["finalCount"] = _lathe.T_ACCEL_finalCount_get
+        dyMax = _swig_property(_lathe.T_ACCEL_dyMax_get, _lathe.T_ACCEL_dyMax_set)
+    __swig_setmethods__["intIncPerClock"] = _lathe.T_ACCEL_intIncPerClock_set
+    __swig_getmethods__["intIncPerClock"] = _lathe.T_ACCEL_intIncPerClock_get
     if _newclass:
-        finalCount = _swig_property(_lathe.T_ACCEL_finalCount_get, _lathe.T_ACCEL_finalCount_set)
-    __swig_setmethods__["isrCount"] = _lathe.T_ACCEL_isrCount_set
-    __swig_getmethods__["isrCount"] = _lathe.T_ACCEL_isrCount_get
+        intIncPerClock = _swig_property(_lathe.T_ACCEL_intIncPerClock_get, _lathe.T_ACCEL_intIncPerClock_set)
+    __swig_setmethods__["sum"] = _lathe.T_ACCEL_sum_set
+    __swig_getmethods__["sum"] = _lathe.T_ACCEL_sum_get
     if _newclass:
-        isrCount = _swig_property(_lathe.T_ACCEL_isrCount_get, _lathe.T_ACCEL_isrCount_set)
-    __swig_setmethods__["spindleSteps"] = _lathe.T_ACCEL_spindleSteps_set
-    __swig_getmethods__["spindleSteps"] = _lathe.T_ACCEL_spindleSteps_get
-    if _newclass:
-        spindleSteps = _swig_property(_lathe.T_ACCEL_spindleSteps_get, _lathe.T_ACCEL_spindleSteps_set)
-    __swig_setmethods__["spindleRem"] = _lathe.T_ACCEL_spindleRem_set
-    __swig_getmethods__["spindleRem"] = _lathe.T_ACCEL_spindleRem_get
-    if _newclass:
-        spindleRem = _swig_property(_lathe.T_ACCEL_spindleRem_get, _lathe.T_ACCEL_spindleRem_set)
-    __swig_setmethods__["cFactor"] = _lathe.T_ACCEL_cFactor_set
-    __swig_getmethods__["cFactor"] = _lathe.T_ACCEL_cFactor_get
-    if _newclass:
-        cFactor = _swig_property(_lathe.T_ACCEL_cFactor_get, _lathe.T_ACCEL_cFactor_set)
-    __swig_setmethods__["clocksStep"] = _lathe.T_ACCEL_clocksStep_set
-    __swig_getmethods__["clocksStep"] = _lathe.T_ACCEL_clocksStep_get
-    if _newclass:
-        clocksStep = _swig_property(_lathe.T_ACCEL_clocksStep_get, _lathe.T_ACCEL_clocksStep_set)
-    __swig_setmethods__["initialStep"] = _lathe.T_ACCEL_initialStep_set
-    __swig_getmethods__["initialStep"] = _lathe.T_ACCEL_initialStep_get
-    if _newclass:
-        initialStep = _swig_property(_lathe.T_ACCEL_initialStep_get, _lathe.T_ACCEL_initialStep_set)
-    __swig_setmethods__["finalStep"] = _lathe.T_ACCEL_finalStep_set
-    __swig_getmethods__["finalStep"] = _lathe.T_ACCEL_finalStep_get
-    if _newclass:
-        finalStep = _swig_property(_lathe.T_ACCEL_finalStep_get, _lathe.T_ACCEL_finalStep_set)
-    __swig_setmethods__["d"] = _lathe.T_ACCEL_d_set
-    __swig_getmethods__["d"] = _lathe.T_ACCEL_d_get
-    if _newclass:
-        d = _swig_property(_lathe.T_ACCEL_d_get, _lathe.T_ACCEL_d_set)
+        sum = _swig_property(_lathe.T_ACCEL_sum_get, _lathe.T_ACCEL_sum_set)
     __swig_setmethods__["incr1"] = _lathe.T_ACCEL_incr1_set
     __swig_getmethods__["incr1"] = _lathe.T_ACCEL_incr1_get
     if _newclass:
@@ -268,10 +240,14 @@ class T_ACCEL(_object):
     __swig_getmethods__["incr2"] = _lathe.T_ACCEL_incr2_get
     if _newclass:
         incr2 = _swig_property(_lathe.T_ACCEL_incr2_get, _lathe.T_ACCEL_incr2_set)
-    __swig_setmethods__["stepsCycle"] = _lathe.T_ACCEL_stepsCycle_set
-    __swig_getmethods__["stepsCycle"] = _lathe.T_ACCEL_stepsCycle_get
+    __swig_setmethods__["intAccel"] = _lathe.T_ACCEL_intAccel_set
+    __swig_getmethods__["intAccel"] = _lathe.T_ACCEL_intAccel_get
     if _newclass:
-        stepsCycle = _swig_property(_lathe.T_ACCEL_stepsCycle_get, _lathe.T_ACCEL_stepsCycle_set)
+        intAccel = _swig_property(_lathe.T_ACCEL_intAccel_get, _lathe.T_ACCEL_intAccel_set)
+    __swig_setmethods__["accelClocks"] = _lathe.T_ACCEL_accelClocks_set
+    __swig_getmethods__["accelClocks"] = _lathe.T_ACCEL_accelClocks_get
+    if _newclass:
+        accelClocks = _swig_property(_lathe.T_ACCEL_accelClocks_get, _lathe.T_ACCEL_accelClocks_set)
 
     def __init__(self):
         this = _lathe.new_T_ACCEL()
@@ -484,6 +460,10 @@ def xTaperSetup():
     return _lathe.xTaperSetup()
 xTaperSetup = _lathe.xTaperSetup
 
+def accelCalc(accel):
+    return _lathe.accelCalc(accel)
+accelCalc = _lathe.accelCalc
+
 def turnPitch(ac, pitch):
     return _lathe.turnPitch(ac, pitch)
 turnPitch = _lathe.turnPitch
@@ -504,9 +484,9 @@ def turnAccel(ac, accel):
     return _lathe.turnAccel(ac, accel)
 turnAccel = _lathe.turnAccel
 
-def accelCalc(accel):
-    return _lathe.accelCalc(accel)
-accelCalc = _lathe.accelCalc
+def accelSetup(ac, dxBase, dyMaxBase, dyMinBase):
+    return _lathe.accelSetup(ac, dxBase, dyMaxBase, dyMinBase)
+accelSetup = _lathe.accelSetup
 
 def taperCalc(a0, a1, taper):
     return _lathe.taperCalc(a0, a1, taper)
