@@ -1204,49 +1204,49 @@ if len(sys.argv) > n:
 
 n += 1
 while True:
-    if n > len(sys.argv):
+    if n >= len(sys.argv):
         break
-        tmp = sys.argv[n]
-        if len(tmp) != 0 and tmp[0].isdigit():
-            break;
-        tmp = tmp.lower()
-        if tmp == 'z':
-            testAxis = 'z';
-        elif tmp == 'x':
-            testAxis = 'x';
-        elif tmp == 'dbg':
-            dbgPrint = True
-        elif tmp == 'ext':
-            dbgClock = False
-        elif tmp.startswith('repeat'):
-            repeat = extractVal(tmp, repeat, True)
-        elif tmp.startswith('dx'):
-            dx = extractVal(tmp, dx, True)
-        elif tmp.startswith('dy'):
-            dy = extractVal(tmp, dy, True)
-        elif tmp.startswith('rpm'):
-            rpm = extractVal(tmp, rpm, True)
-        elif tmp.startswith('min'):
-            minV = extractVal(tmp, minV)
-        elif tmp.startswith('max'):
-            maxV = extractVal(tmp, maxV)
-        elif tmp.startswith('pitch'):
-            pitch = extractVal(tmp, pitch)
-        elif tmp.startswith('encoder'):
-            encoder = extractVal(tmp, encoder)
-        elif tmp.startswith('minAccel'):
-            minAccel = extractVal(tmp, minAccel)
-        elif tmp.startswith('aVal'):
-            aVal = extractVal(tmp, aVal, True)
-        elif tmp.startswith('aClks'):
-            aClks = extractVal(tmp, aClks, True)
-        elif tmp.startswith('wait'):
-            waitSync = True
-        else:
-            print "invalid argument: %s" % (tmp)
-            stdout.flush()
-            n += 1
-            break
+    tmp = sys.argv[n]
+    if len(tmp) != 0 and tmp[0].isdigit():
+        break;
+    tmp = tmp.lower()
+    if tmp == 'z':
+        testAxis = 'z';
+    elif tmp == 'x':
+        testAxis = 'x';
+    elif tmp == 'dbg':
+        dbgPrint = True
+    elif tmp == 'ext':
+        dbgClock = False
+    elif tmp.startswith('repeat'):
+        repeat = extractVal(tmp, repeat, True)
+    elif tmp.startswith('dx'):
+        dx = extractVal(tmp, dx, True)
+    elif tmp.startswith('dy'):
+        dy = extractVal(tmp, dy, True)
+    elif tmp.startswith('rpm'):
+        rpm = extractVal(tmp, rpm, True)
+    elif tmp.startswith('min'):
+        minV = extractVal(tmp, minV)
+    elif tmp.startswith('max'):
+        maxV = extractVal(tmp, maxV)
+    elif tmp.startswith('pitch'):
+        pitch = extractVal(tmp, pitch)
+    elif tmp.startswith('encoder'):
+        encoder = extractVal(tmp, encoder)
+    elif tmp.startswith('minAccel'):
+        minAccel = extractVal(tmp, minAccel)
+    elif tmp.startswith('aVal'):
+        aVal = extractVal(tmp, aVal, True)
+    elif tmp.startswith('aClks'):
+        aClks = extractVal(tmp, aClks, True)
+    elif tmp.startswith('wait'):
+        waitSync = True
+    else:
+        print "invalid argument: %s" % (tmp)
+        stdout.flush()
+        n += 1
+        break
     n += 1
 
 if len(sys.argv) > n:
@@ -1418,6 +1418,10 @@ else:
 
         setParm('Z_JOG_MIN', "0")
         setParm('Z_JOG_MAX', "5")
+
+        setParm('X_FREQUENCY', "50000000")
+        setParm('RPM', "300")
+        setParm('ENC_MAX', str(encoder))
 
         command('CMD_ZSETUP')
 
