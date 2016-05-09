@@ -208,6 +208,18 @@ class T_ACCEL(_object):
     __swig_getmethods__["accelSteps"] = _lathe.T_ACCEL_accelSteps_get
     if _newclass:
         accelSteps = _swig_property(_lathe.T_ACCEL_accelSteps_get, _lathe.T_ACCEL_accelSteps_set)
+    __swig_setmethods__["steps"] = _lathe.T_ACCEL_steps_set
+    __swig_getmethods__["steps"] = _lathe.T_ACCEL_steps_get
+    if _newclass:
+        steps = _swig_property(_lathe.T_ACCEL_steps_get, _lathe.T_ACCEL_steps_set)
+    __swig_setmethods__["stepsSec"] = _lathe.T_ACCEL_stepsSec_set
+    __swig_getmethods__["stepsSec"] = _lathe.T_ACCEL_stepsSec_get
+    if _newclass:
+        stepsSec = _swig_property(_lathe.T_ACCEL_stepsSec_get, _lathe.T_ACCEL_stepsSec_set)
+    __swig_setmethods__["time"] = _lathe.T_ACCEL_time_set
+    __swig_getmethods__["time"] = _lathe.T_ACCEL_time_get
+    if _newclass:
+        time = _swig_property(_lathe.T_ACCEL_time_get, _lathe.T_ACCEL_time_set)
     __swig_setmethods__["scale"] = _lathe.T_ACCEL_scale_set
     __swig_getmethods__["scale"] = _lathe.T_ACCEL_scale_get
     if _newclass:
