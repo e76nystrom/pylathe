@@ -340,7 +340,7 @@ parmList = \
 
     ["RPM", "current rpm", "int16_t"],
 
-    "measured spindle speed",
+    "xilinx frequency variables",
 
     ["X_FREQUENCY", "xilinx clock frequency", "int32_t"],
     ["FREQ_MULT", "frequency multiplier", "int16_t"],
