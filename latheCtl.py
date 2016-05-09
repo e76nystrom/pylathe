@@ -1422,6 +1422,7 @@ else:
         setParm('X_FREQUENCY', "50000000")
         setParm('RPM', "300")
         setParm('ENC_MAX', str(encoder))
+        setParm('FREQ_MULT', 16)
 
         command('CMD_ZSETUP')
 
