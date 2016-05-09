@@ -1418,7 +1418,9 @@ else:
         tmp = Move(axis, dbgPrint)
         accel = Accel(dbgPrint)
         tmp.setup(accel, 0.0, 20.0)
+        print
         tmp.setup(accel, 0.0, 5.0)
+        print
 
         setParm('Z_PITCH', "%0.1f" % (axis.pitch))
         setParm('Z_RATIO', "%d" % (axis.ratio))
