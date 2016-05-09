@@ -1387,7 +1387,7 @@ else:
         setParm('ENC_RUN_COUNT', arg1)
         command('ENCSTART')
 
-    if testId == '10':
+    if testId == '10':          # test for curruption of z control register
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
             setXReg('XLDXCTL', 0)
