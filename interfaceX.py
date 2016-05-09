@@ -337,7 +337,7 @@ parmList = \
 
 xilinxList = \
 [ \
-    "skip register zero"
+    "skip register zero",
 
     ["XNOOP", "register 0"],
 
