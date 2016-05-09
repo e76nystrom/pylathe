@@ -260,7 +260,7 @@ class Accel():
                 print ("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f "\
                         "err %d bits %d" %
                         (accel.dyIni, accel.dyMax, dyDelta, incPerClock,\
-                            err, bits))
+                         err, bits))
                 print
 
             if (bits >= 30) or (err == 0):
