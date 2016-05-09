@@ -248,6 +248,10 @@ class T_ACCEL(_object):
     __swig_getmethods__["accelClocks"] = _lathe.T_ACCEL_accelClocks_get
     if _newclass:
         accelClocks = _swig_property(_lathe.T_ACCEL_accelClocks_get, _lathe.T_ACCEL_accelClocks_set)
+    __swig_setmethods__["freqDivider"] = _lathe.T_ACCEL_freqDivider_set
+    __swig_getmethods__["freqDivider"] = _lathe.T_ACCEL_freqDivider_get
+    if _newclass:
+        freqDivider = _swig_property(_lathe.T_ACCEL_freqDivider_get, _lathe.T_ACCEL_freqDivider_set)
 
     def __init__(self):
         this = _lathe.new_T_ACCEL()
@@ -476,16 +480,12 @@ def threadMetric(ac, pitch):
     return _lathe.threadMetric(ac, pitch)
 threadMetric = _lathe.threadMetric
 
-def turnCalc(ac):
-    return _lathe.turnCalc(ac)
-turnCalc = _lathe.turnCalc
-
 def turnAccel(ac, accel):
     return _lathe.turnAccel(ac, accel)
 turnAccel = _lathe.turnAccel
 
-def accelSetup(ac, dxBase, dyMaxBase, dyMinBase):
-    return _lathe.accelSetup(ac, dxBase, dyMaxBase, dyMinBase)
+def accelSetup(ac, clockRate):
+    return _lathe.accelSetup(ac, clockRate)
 accelSetup = _lathe.accelSetup
 
 def taperCalc(a0, a1, taper):
