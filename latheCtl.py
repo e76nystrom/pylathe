@@ -1406,12 +1406,26 @@ else:
                     stdout.flush()
 
     if testId == '11':          # test accel code
-        setParm('Z_PITCH', "0.1")
-        setParm('Z_RATIO', "1")
-        setParm('Z_MICRO', "8")
-        setParm('Z_MOTOR', "200")
-        setParm('Z_ACCEL', "0.5")
-        setParm('Z_BACKLASH', "0.027")
+        dbgPrint = True
+        axis.pitch = 0.1
+        axis.ratio = 1
+        axis.microSteps = 8
+        axis.motorSteps = 200
+        axis.accel = 0.75
+        axis.backlashSteps = 0.023
+        axis.setup()
+
+        tmp = Move(axis, dbgPrint)
+        accel = Accel(dbgPrint)
+        tmp.setup(accel, 0.0, 20.0)
+        tmp.setup(accel, 0.0, 5.0)
+
+        setParm('Z_PITCH', "%f0.1" % (axis.pitch))
+        setParm('Z_RATIO', "%d" % (axis.ratio))
+        setParm('Z_MICRO', "%d" % (axis.microSteps))
+        setParm('Z_MOTOR', "%d" % (axis.motorSteps))
+        setParm('Z_ACCEL', "%0.2f" % (axis.accel))
+        setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
 
         setParm('Z_MOVE_MIN', "0")
         setParm('Z_MOVE_MAX', "20")
