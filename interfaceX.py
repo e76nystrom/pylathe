@@ -320,15 +320,26 @@ parmList = \
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
+    "encoder counts per revolution",
+
+    ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
+
+    "test encoder setup variables",
+
     ["ENC_PRE_SCALER", "encoder prescaler", "uint16_t"],
     ["ENC_TIMER", "encoder timer counts", "uint16_t"],
-    ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
     ["ENC_RUN_COUNT", "encoder run count", "int"],
+
+    "test encoder status variables",
 
     ["ENC_RUN", "encoder running flag", "char"],
     ["ENC_COUNTER", "encoder count in rev", "int16_t"],
     ["ENC_REV_COUNTER", "encoder revolution counter", "int32_t"],
  
+    "measured spindle speed",
+
+    ["RPM", "current rpm", "int16_t"],
+
     # ["", "", ""],
     # ["", "", ""],
     
