@@ -261,9 +261,9 @@ class Accel():
             err = int(abs(dyDelta - dyDeltaC)) >> scale
             accel.dyIni = accel.dyMax - intIncPerClock * accel.accelClocks
             if self.prt:
-                printf("dyIni %d dyMax %d intIncPerClock %d accelClocks %d" %
-                       (accel.dyIni, acccel.dyMax, intIncPerClock,
-                        accel.accelClocks))
+                print("dyIni %d dyMax %d intIncPerClock %d accelClocks %d" %
+                      (accel.dyIni, acccel.dyMax, intIncPerClock,
+                       accel.accelClocks))
             bits = bitSize(accel.dx) + 1
             if self.prt:
                 print ("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f "\
