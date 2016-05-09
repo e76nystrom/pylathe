@@ -192,14 +192,14 @@ class T_ACCEL(_object):
     __swig_getmethods__["taperInch"] = _lathe.T_ACCEL_taperInch_get
     if _newclass:
         taperInch = _swig_property(_lathe.T_ACCEL_taperInch_get, _lathe.T_ACCEL_taperInch_set)
-    __swig_setmethods__["encPerSec"] = _lathe.T_ACCEL_encPerSec_set
-    __swig_getmethods__["encPerSec"] = _lathe.T_ACCEL_encPerSec_get
+    __swig_setmethods__["clockFreq"] = _lathe.T_ACCEL_clockFreq_set
+    __swig_getmethods__["clockFreq"] = _lathe.T_ACCEL_clockFreq_get
     if _newclass:
-        encPerSec = _swig_property(_lathe.T_ACCEL_encPerSec_get, _lathe.T_ACCEL_encPerSec_set)
-    __swig_setmethods__["encPerInch"] = _lathe.T_ACCEL_encPerInch_set
-    __swig_getmethods__["encPerInch"] = _lathe.T_ACCEL_encPerInch_get
+        clockFreq = _swig_property(_lathe.T_ACCEL_clockFreq_get, _lathe.T_ACCEL_clockFreq_set)
+    __swig_setmethods__["clocksPerInch"] = _lathe.T_ACCEL_clocksPerInch_set
+    __swig_getmethods__["clocksPerInch"] = _lathe.T_ACCEL_clocksPerInch_get
     if _newclass:
-        encPerInch = _swig_property(_lathe.T_ACCEL_encPerInch_get, _lathe.T_ACCEL_encPerInch_set)
+        clocksPerInch = _swig_property(_lathe.T_ACCEL_clocksPerInch_get, _lathe.T_ACCEL_clocksPerInch_set)
     __swig_setmethods__["accelTime"] = _lathe.T_ACCEL_accelTime_set
     __swig_getmethods__["accelTime"] = _lathe.T_ACCEL_accelTime_get
     if _newclass:
@@ -496,8 +496,8 @@ def turnAccel(ac, accel):
     return _lathe.turnAccel(ac, accel)
 turnAccel = _lathe.turnAccel
 
-def accelSetup(ac, clockRate):
-    return _lathe.accelSetup(ac, clockRate)
+def accelSetup(ac):
+    return _lathe.accelSetup(ac)
 accelSetup = _lathe.accelSetup
 
 def taperCalc(a0, a1, taper):
