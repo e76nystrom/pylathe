@@ -150,7 +150,7 @@ class Turn():
             print ("minFeed %6.2f feedRate %6.2f ipm" % 
                    (self.minFeed, self.feedRate))
 
-        self.encPerSec = int((spindleRPM / 60.0) * self.encoder) # cnts per sec
+        self.encPerSec = int((spindleRPM * self.encoder) / 60.0) # cnts per sec
         self.encPerInch = int(self.encoder / pitch) # enc pulse inch
         if self.prt:
             print ("encPerSec %d stepsInch %d encoderPerIn %d" %
