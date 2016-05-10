@@ -80,7 +80,7 @@ readInfo(configFile)
 
 XILINX = False
 try:
-    info['cfgXilinx'].GetValue()
+    XILINX = info['cfgXilinx'].GetValue()
 except:
     print "no xilinx info"
     pass
@@ -229,13 +229,18 @@ def sendSpindleData(send=False):
     try:
         global spindleDataSent
         if send or (not spindleDataSent):
-            setParm('SPIN_STEPS', parmValue('spMotorSteps'))
-            setParm('SPIN_MICRO', parmValue('spMicroSteps'))
-            setParm('SPIN_MIN_RPM', parmValue('spMinRPM'))
-            setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
-            setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
+            if XILINX:
+                setParm('ENC_MAX', parmValue('cfgEncoder'))
+                setParm('X_FREQUENCY', parmValue('cfgXFreq'))
+                setParm('FREQ_MULT', parmValue('cfgFreqMult'))
+            else:
+                setParm('SPIN_STEPS', parmValue('spMotorSteps'))
+                setParm('SPIN_MICRO', parmValue('spMicroSteps'))
+                setParm('SPIN_MIN_RPM', parmValue('spMinRPM'))
+                setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
+                setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
 
-            command('CMD_SPSETUP')
+                command('CMD_SPSETUP')
             spindleDataSent = True
     except commTimeout as e:
         pass
@@ -2437,6 +2442,8 @@ class ConfigDialog(wx.Dialog):
         # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
 
         self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
+        self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
+        self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
