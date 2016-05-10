@@ -2427,7 +2427,7 @@ class ConfigDialog(wx.Dialog):
         sizerG.Add(cb, flag=wx.ALL, border=2)
         # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
 
-        sizerG.Add(sizerH, 0, wx.ALIGN_RIGHT)
+        sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
