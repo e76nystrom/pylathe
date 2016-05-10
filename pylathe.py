@@ -234,12 +234,12 @@ def xilinxTestMode():
     if testMode:
         encoder = 0
         try:
-            encoder = int(info['cfgEncoder'].getValue())
+            encoder = int(info['cfgEncoder'].GetValue())
         except:
             pass
         rpm = 0
         try:
-            rpm = int(float(info['testRPM'].getValue()))
+            rpm = int(float(info['testRPM'].GetValue()))
         except:
             pass
         if encoder != 0:
