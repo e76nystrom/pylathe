@@ -325,6 +325,9 @@ class Accel():
         clocks = 0
         incAccum = 0
         while clocks < (accelClocks * 1.2):
+            f.write("x %6d y %5d sum %12d incAccum %12d incr1 %8d "\
+                    "incr2 %11d\n" %
+                    (x, y, sum, incAccum, incr1 + incAccum, incr2 + incAccum))
             clocks += 1
             x += 1
             if sum < 0:
@@ -342,9 +345,6 @@ class Accel():
             sum += incAccum
             if clocks <= accelClocks:
                 incAccum += accel
-            f.write("x %6d y %5d sum %12d incAccum %12d incr1 %8d "\
-                    "incr2 %11d\n" %
-                    (x, y, sum, incAccum, incr1 + incAccum, incr2 + incAccum))
 
         print ("incr1 %d incr2 %d sum %d" %
                (incr1 + incAccum, incr2 + incAccum, sum))
