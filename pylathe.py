@@ -10,6 +10,10 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
+configFile = "config.txt"
+info = {}
+readInfo(configFile)
+
 XILINX = True
 
 from setup import createCommands, createParameters,\
@@ -36,7 +40,6 @@ stdout.flush()
 
 hdrFont = None
 testFont = None
-info = {}
 f = None
 jogPanel = None
 spindleDataSent = False
@@ -2138,7 +2141,7 @@ class MainFrame(wx.Frame):
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
 
-        readInfo('config.txt')
+        readInfo(configFile)
 
         self.showPanel()
 
