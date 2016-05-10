@@ -1475,7 +1475,7 @@ else:
         minAccel = 0
 
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
-        accel = Test(Axis, dbgClock, dbgPrint)
+        accel = Test(axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.test()
 
