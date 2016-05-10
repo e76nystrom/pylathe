@@ -1472,7 +1472,7 @@ else:
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(Axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
-        accel.Test()
+        accel.test()
 
         setParm('Z_PITCH', "%0.1f" % (axis.pitch))
         setParm('Z_RATIO', "%d" % (axis.ratio))
