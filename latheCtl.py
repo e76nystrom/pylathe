@@ -253,35 +253,35 @@ class Accel():
 
     def setup(self, dxBase, dyMaxBase, dyMinBase):
         for scale in range(0, 12):
-            accel.dx = dxBase << scale
-            accel.dyMax = dyMaxBase << scale
+            self.dx = dxBase << scale
+            self.dyMax = dyMaxBase << scale
             dyMin = dyMinBase << scale
-            dyDelta = accel.dyMax - dyMin
+            dyDelta = self.dyMax - dyMin
             if self.prt:
                 print ("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" %
-                        (scale, accel.dx, dyMin, accel.dyMax, dyDelta))
-            incPerClock = float(dyDelta) / accel.accelClocks
+                        (scale, self.dx, dyMin, self.dyMax, dyDelta))
+            incPerClock = float(dyDelta) / self.accelClocks
             intIncPerClock = int(incPerClock + 0.5)
             if intIncPerClock == 0:
                 continue
-            accel.intIncPerClock = intIncPerClock
-            dyDeltaC = intIncPerClock * accel.accelClocks
+            self.intIncPerClock = intIncPerClock
+            dyDeltaC = intIncPerClock * self.accelClocks
             err = int(abs(dyDelta - dyDeltaC)) >> scale
-            accel.dyIni = accel.dyMax - intIncPerClock * accel.accelClocks
+            self.dyIni = self.dyMax - intIncPerClock * self.accelClocks
             if self.prt:
                 print("dyIni %d dyMax %d intIncPerClock %d accelClocks %d" %
-                      (accel.dyIni, accel.dyMax, intIncPerClock,
-                       accel.accelClocks))
-            bits = bitSize(accel.dx) + 1
+                      (self.dyIni, self.dyMax, intIncPerClock,
+                       self.accelClocks))
+            bits = bitSize(self.dx) + 1
             if self.prt:
                 print ("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f "\
                         "err %d bits %d" %
-                        (accel.dyIni, accel.dyMax, dyDelta, incPerClock,\
+                        (self.dyIni, self.dyMax, dyDelta, incPerClock,\
                          err, bits))
 
             if (bits >= 30) or (err == 0):
                 break
-        accel.scale = scale
+        self.scale = scale
 
         self.incr1 = incr1 = 2 * self.dyIni
         self.incr2 = incr2 = incr1 - 2 * self.dx
