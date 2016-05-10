@@ -1508,7 +1508,7 @@ else:
         command('CMD_ZSYNSETUP');
 
     if testId == 13:
-        minAccel = 0
+        minAccel = 2.0
         for pitch in (0.001, 0.002, 0.005, 0.010, 0.020, 0.050, 0.1, 0.2):
             tmp = Turn(axis, minAccel, encoder, dbgPrint)
             accel = Test(axis, dbgClock, dbgPrint)
@@ -1519,7 +1519,7 @@ else:
         for i in (12, 24, 36, 48, 60):
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
-            tmp.setup(accel, 0.0, float(i))
+            tmp.setup(accel, 2.0, float(i))
             print
 
 if not (comm.ser is None):
