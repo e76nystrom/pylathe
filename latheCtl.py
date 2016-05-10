@@ -190,7 +190,7 @@ class Turn():
 
             dxBase = int(self.encPerInch)
             dyMaxBase = stepsSecMax
-            dyMinBase = steosSecMin
+            dyMinBase = stepsSecMin
 
             if self.prt:
                 print ("dxBase %d dyMaxBase %d dyMinBase %d" %
