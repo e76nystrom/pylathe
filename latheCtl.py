@@ -1464,12 +1464,12 @@ else:
         axis.ratio = 1
         axis.microSteps = 8
         axis.motorSteps = 200
-        axis.accel = 0.75
+        axis.accel = minAccel
         axis.backlashSteps = 0.023
         axis.setup()
 
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
-        accel = Test(testAxis, dbgClock, dbgPrint)
+        accel = Test(Axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
 
         setParm('Z_PITCH', "%0.1f" % (axis.pitch))
