@@ -1178,7 +1178,7 @@ def test6(dist=100, dbgprint=True, prt=False):
 
 fcy = 84000000
 
-testId = ''
+testId = 0
 testAxis = 'z'
 waitSync = False
 repeat = 1
@@ -1220,7 +1220,10 @@ def extractVal(arg, default, integer=False):
 
 n = 1
 if len(sys.argv) > n:
-    testId = sys.argv[n]
+    try:
+        testId = sys.argv[n]
+    except:
+        pass
 
 n += 1
 while True:
@@ -1301,7 +1304,7 @@ else:
     axis.testInit()
     axis.setup()
 
-    if testId == '1':           # no accel
+    if testId == 1:             # no accel
         for i in range(0, repeat):
             accel = Test(testAxis, dbgClock, dbgPrint)
             accel.setRPM(rpm)
@@ -1315,7 +1318,7 @@ else:
                 accel.xTestSync(arg1, arg2, arg3)
             stdout.flush()
 
-    if testId == '2':           # taper without acceleration
+    if testId == 2:             # taper without acceleration
         for i in range(0, repeat):
             accel = Test(testAxis, dbgClock, dbgPrint)
             accel.setRPM(rpm)
@@ -1327,7 +1330,7 @@ else:
                 accel.xTestZTaper(arg1, arg2, arg3)
             stdout.flush()
 
-    if testId == '3':           # move with acceleration
+    if testId == 3:             # move with acceleration
         for i in range(0, repeat):
             if repeat > 1:
                 print "pass %d" % (i + 1)
@@ -1344,7 +1347,7 @@ else:
                 accel.xTestMove(arg1, arg2, arg3)
             stdout.flush()
 
-    if testId == '4':           # simple acceleration test
+    if testId == 4:             # simple acceleration test
         for i in range(0, repeat):
             accel = Test(testAxis, dbgClock, dbgPrint)
             accel.setEncoder(encoder)
@@ -1360,7 +1363,7 @@ else:
                 accel.xTestSync(arg1, arg2, arg3)
             stdout.flush()
 
-    if testId == '5':           # turn with acceleration
+    if testId == 5:             # turn with acceleration
         for i in range(0, repeat):
             accel = Test(dbgClock, dbgPrint)
             accel.setEncoder(encoder)
@@ -1375,25 +1378,25 @@ else:
                 accel.xTestSync(arg1, arg2, arg3)
             stdout.flush()
 
-    if testId == '6':           # move setup
+    if testId == 6:             # move setup
         tmp = Move(axis, dbgPrint)
         accel = Accel(dbgPrint)
         tmp.setup(accel, min, maxV)
         accel.test()
 
-    if testId == '7':           # turn setup
+    if testId == 7:             # turn setup
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(testAxis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.test()
 
-    if testId == '8':           # acceleration plot for turn
+    if testId == 8:             # acceleration plot for turn
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = accelPlot(dbgPrint)
         tmp.setup(accel, rpm, pitch)
         accel.plot(arg1, arg2, "accelPlot.txt", dbgPrint)
 
-    if testId == '9':           # test software encoder
+    if testId == 9:             # test software encoder
         # global fcy
         preScaler = 1
         encTimer = int(fcy / encoder)
@@ -1408,7 +1411,7 @@ else:
         setParm('ENC_RUN_COUNT', arg1)
         command('ENCSTART')
 
-    if testId == '10':          # test for curruption of z control register
+    if testId == 10:		# test for curruption of z control register
         for i in range(0, repeat):
             setXReg('XLDZCTL', 0)
             setXReg('XLDXCTL', 0)
@@ -1425,7 +1428,7 @@ else:
                     print "%2d %2d no start %x" % (i, j, val)
                     stdout.flush()
 
-    if testId == '11':          # test move accel code
+    if testId == 11:            # test move accel code
         dbgPrint = True
         axis.pitch = 0.1
         axis.ratio = 1
@@ -1462,7 +1465,7 @@ else:
 
         command('CMD_ZSETUP')
 
-    if testId == '12':          # test turn accel code
+    if testId == 12:            # test turn accel code
         dbgPrint = True
         axis.pitch = 0.1
         axis.ratio = 1
@@ -1503,14 +1506,14 @@ else:
         setParm('FEED_TYPE', FEED_PITCH)
         command('CMD_ZSYNSETUP');
 
-    if testId == '13':
+    if testId == 13:
         for pitch in (0.001, 0.002, 0.005, 0.010, 0.020, 0.050, 0.1, 0.2):
             tmp = Turn(axis, minAccel, encoder, dbgPrint)
             accel = Test(axis, dbgClock, dbgPrint)
             tmp.setup(accel, rpm, pitch)
 
-    if testId == '14':
-        for i in range(2, 30, 2):
+    if testId == 14:
+        for i in range(10, 60, 4):
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
             tmp.setup(accel, 0.0, float(i))
