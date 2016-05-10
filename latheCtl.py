@@ -165,8 +165,8 @@ class Turn():
             # accel.accelTime = int((feedRate - self.minFeed) * 1000000 /
             #                       (60.0 * self.axis.accel))
 
-            stepsSecMax = int((feedRate / 60.0) * self.axis.stepsInch)
-            stepsSecMin = int((self.minFeed / 60.0) * self.axis.stepsInch)
+            stepsSecMax = int((feedRate * self.axis.stepsInch) / 60.0)
+            stepsSecMin = int((self.minFeed  * self.axis.stepsInch) / 60.0)
             if self.prt:
                 print ("stepsSecMin %d stepsSecMax %d" %
                        (stepsSecMin, stepsSecMax))
@@ -189,8 +189,8 @@ class Turn():
                 print
 
             dxBase = int(self.encPerInch)
-            dyMaxBase = self.axis.stepsInch
-            dyMinBase = int((dyMaxBase * self.minFeed) / self.feedRate)
+            dyMaxBase = stepsSecMax
+            dyMinBase = steosSecMin
 
             if self.prt:
                 print ("dxBase %d dyMaxBase %d dyMinBase %d" %
