@@ -2427,7 +2427,7 @@ class ConfigDialog(wx.Dialog):
         sizerG.Add(cb, flag=wx.ALL, border=2)
         # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
 
-        self.encoder = sizerG.addField(self, sizerG, "Encoder", "encoder")
+        self.encoder = addField(self, sizerG, "Encoder", "encoder")
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
