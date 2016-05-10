@@ -244,9 +244,9 @@ def xilinxTestMode():
             pass
         if encoder != 0:
             preScaler = 1
-            if self.rpm == 0:
-                self.rpm = 1
-            rps = self.rpm / 60.0
+            if rpm == 0:
+                rpm = 1
+            rps = rpm / 60.0
             encTimer = int(fcy / (encoder * rps))
             while encTimer >= 65536:
                 preScaler += 1
