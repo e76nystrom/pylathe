@@ -2001,6 +2001,7 @@ class MainFrame(wx.Frame):
         self.xDialog = XDialog(self)
         self.spindleDialog = SpindleDialog(self)
         self.portDialog = PortDialog(self)
+        self.configDialog = ConfigDialog(self)
 
         self.testSpindleDialog = None
         self.testSyncDialog = None
@@ -2052,6 +2053,10 @@ class MainFrame(wx.Frame):
         ID_PORT_SETUP = wx.NewId()
         menu = setupMenu.Append(ID_PORT_SETUP, 'Port')
         self.Bind(wx.EVT_MENU, self.OnPortSetup, menu)
+
+        ID_PORT_SETUP = wx.NewId()
+        menu = setupMenu.Append(ID_PORT_SETUP, 'Config')
+        self.Bind(wx.EVT_MENU, self.OnConfigSetup, menu)
 
         operationMenu = wx.Menu()
 
@@ -2165,6 +2170,10 @@ class MainFrame(wx.Frame):
     def OnPortSetup(self, e):
         self.portDialog.Raise()
         self.portDialog.Show(True)
+
+    def OnConfigSetup(self, e):
+        self.configDialog.Raise()
+        self.configDialog.Show(True)
 
     def showPanel(self):
         key = 'mainPanel'
@@ -2386,6 +2395,40 @@ class PortDialog(wx.Dialog):
         self.commPort = addField(self, sizerG, "Comm Port", "commPort")
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        sizerH.Add((0, 0), 0, wx.EXPAND)
+        btn = wx.Button(self, wx.ID_OK)
+        btn.SetDefault()
+        sizerH.Add(btn, 0, wx.ALL, 5)
+
+        btn = wx.Button(self, wx.ID_CANCEL)
+        sizerH.Add(btn, 0, wx.ALL, 5)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+class ConfigDialog(wx.Dialog):
+    def __init__(self, frame):
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Config Setup", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        sizerH.Add(wx.StaticText(self, -1, "Hw Control"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.xilinx = cb = wx.CheckBox(self, -1,
+                                       style=wx.ALIGN_LEFT)
+        sizerH.Add(cb, flag=wx.ALL, border=2)
+        # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
