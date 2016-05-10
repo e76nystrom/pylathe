@@ -1509,5 +1509,11 @@ else:
             accel = Test(axis, dbgClock, dbgPrint)
             tmp.setup(accel, rpm, pitch)
 
+    if testId == '14':
+        for i in range(2.0, 30.0, 2.0):
+            tmp = Move(axis, dbgPrint)
+            accel = Accel(dbgPrint)
+            tmp.setup(accel, 0.0, i)
+
 if not (comm.ser is None):
     comm.ser.close()
