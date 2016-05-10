@@ -1479,10 +1479,10 @@ else:
         setParm('Z_ACCEL', "%0.2f" % (axis.accel))
         setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
 
-        setParm('Z_MOVE_MIN', "0")
+        setParm('Z_MOVE_MIN', "%0.2" % (minAccel))
         setParm('Z_MOVE_MAX', "20")
 
-        setParm('Z_JOG_MIN', "0")
+        setParm('Z_JOG_MIN', "%0.2" % (minAccel))
         setParm('Z_JOG_MAX', "5")
 
         setParm('X_FREQUENCY', "50000000")
