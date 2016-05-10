@@ -195,6 +195,10 @@ class Turn():
             dyMaxBase = self.axis.stepsInch
             dyMinBase = int((dyMaxBase * self.minFeed) / self.feedRate)
 
+            if self.prt:
+                print ("dxBase %d dyMaxBase %d dyMinBase %d" %
+                       (dxBase, dyMaxBase, dyMinBase))
+
             accel.axis = self.axis
             accel.encoder = self.encoder
             accel.setup(dxBase, dyMaxBase, dyMinBase)
