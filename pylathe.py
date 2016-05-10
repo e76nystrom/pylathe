@@ -10,6 +10,60 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
+def saveInfo(file):
+    global info
+    f = open(file, 'w')
+    keyList = info.keys()
+    keyList.sort()
+    for key in keyList:
+        val = info[key]
+        valClass = val.__class__.__name__
+        # print key, valClass
+        # stdout.flush()
+        if valClass == 'TextCtrl':
+            f.write("%s=%s\n" % (key, val.GetValue()))
+        elif valClass == 'RadioButton':
+            f.write("%s=%s\n" % (key, val.GetValue()))
+        elif valClass == 'CheckBox':
+            f.write("%s=%s\n" % (key, val.GetValue()))
+        elif valClass == 'InfoValue':
+            f.write("%s=%s\n" % (key, val.GetValue()))
+        elif valClass == 'StaticText':
+            pass
+    f.close()
+
+def readInfo(file):
+    global info
+    try:
+        f = open(file, 'r')
+        for line in f:
+            line = line.rstrip()
+            if len(line) == 0:
+                continue
+            [key, val] = line.split('=')
+            if key in info:
+                func = info[key]
+                funcClass = func.__class__.__name__
+                # print key, val, funcClass
+                if funcClass == 'TextCtrl':
+                    func.SetValue(val)
+                elif funcClass == 'RadioButton':
+                    if val == 'True':
+                        func.SetValue(True)
+                elif funcClass == 'CheckBox':
+                    if val == 'True':
+                        func.SetValue(True)
+            else:
+                # print key, val
+                func = InfoValue(val)
+                info[key] = func
+            # stdout.flush()
+        f.close()
+    except Exception, e:
+        print line, "readInfo error"
+        print e
+        stdout.flush()
+
 configFile = "config.txt"
 info = {}
 readInfo(configFile)
@@ -73,60 +127,6 @@ class InfoValue():
 
     def SetValue(self, val):
         self.value = val
-
-def saveInfo(file):
-    global info
-    f = open(file, 'w')
-    keyList = info.keys()
-    keyList.sort()
-    for key in keyList:
-        val = info[key]
-        valClass = val.__class__.__name__
-        # print key, valClass
-        # stdout.flush()
-        if valClass == 'TextCtrl':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'RadioButton':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'CheckBox':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'InfoValue':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'StaticText':
-            pass
-    f.close()
-
-def readInfo(file):
-    global info
-    try:
-        f = open(file, 'r')
-        for line in f:
-            line = line.rstrip()
-            if len(line) == 0:
-                continue
-            [key, val] = line.split('=')
-            if key in info:
-                func = info[key]
-                funcClass = func.__class__.__name__
-                # print key, val, funcClass
-                if funcClass == 'TextCtrl':
-                    func.SetValue(val)
-                elif funcClass == 'RadioButton':
-                    if val == 'True':
-                        func.SetValue(True)
-                elif funcClass == 'CheckBox':
-                    if val == 'True':
-                        func.SetValue(True)
-            else:
-                # print key, val
-                func = InfoValue(val)
-                info[key] = func
-            # stdout.flush()
-        f.close()
-    except Exception, e:
-        print line, "readInfo error"
-        print e
-        stdout.flush()
 
 def addFieldText(panel, sizer, label, key):
     global info
