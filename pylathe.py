@@ -10,6 +10,16 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
+class InfoValue():
+    def __init__(self, val):
+        self.value = val
+
+    def GetValue(self):
+        return(self.value)
+
+    def SetValue(self, val):
+        self.value = val
+
 def saveInfo(file):
     global info
     f = open(file, 'w')
@@ -117,16 +127,6 @@ if XILINX:
 
 from setup import *
 print "test"
-
-class InfoValue():
-    def __init__(self, val):
-        self.value = val
-
-    def GetValue(self):
-        return(self.value)
-
-    def SetValue(self, val):
-        self.value = val
 
 def addFieldText(panel, sizer, label, key):
     global info
