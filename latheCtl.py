@@ -111,7 +111,7 @@ class Move():
         accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
         accel.accelSteps = accelMaxStep - accelMinStep
         if self.prt:
-            print ("stepsSec2 %4d accelTime %8.6f accelSteps %6d accelClocks %d" %
+            print ("stepsSec2 %d accelTime %0.6f accelSteps %d accelClocks %d" %
                    (stepsSec2, accel.accelTime,\
                     accel.accelSteps, accel.accelClocks))
 
@@ -122,6 +122,7 @@ class Move():
         if self.prt:
             print ("dxBase %d dyMaxBase %d dyMinBase %d" %
                    (dxBase, dyMaxBase, dyMinBase))
+            print
 
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
