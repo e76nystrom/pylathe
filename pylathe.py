@@ -2429,7 +2429,7 @@ class ConfigDialog(wx.Dialog):
 
         self.encoder = addField(self, sizerG, "Encoder", "encoder")
 
-        sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
