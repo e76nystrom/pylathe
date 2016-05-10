@@ -1186,7 +1186,8 @@ repeat = 1
 dbgPrint = False
 dbgClock = True
 
-dx = 2540 * 8
+# dx = 2540 * 8
+dx = 10000
 dy = 600
 
 aVal = 8
