@@ -1503,5 +1503,11 @@ else:
         setParm('FEED_TYPE', FEED_PITCH)
         command('CMD_ZSYNSETUP');
 
+    if testId == '13':
+        for pitch in (0.001, 0.002, 0.005, 0.010, 0.020, 0.050, 0.1, 0.2):
+            tmp = Turn(axis, minAccel, encoder, dbgPrint)
+            accel = Test(axis, dbgClock, dbgPrint)
+            tmp.setup(accel, rpm, pitch)
+
 if not (comm.ser is None):
     comm.ser.close()
