@@ -1511,6 +1511,7 @@ else:
             tmp = Turn(axis, minAccel, encoder, dbgPrint)
             accel = Test(axis, dbgClock, dbgPrint)
             tmp.setup(accel, rpm, pitch)
+            print
 
     if testId == 14:
         for i in (12, 24, 36, 48, 60):
