@@ -2418,16 +2418,16 @@ class ConfigDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        sizerG = wx.GridSizer(2, 0, 0)
 
-        sizerH.Add(wx.StaticText(self, -1, "Hw Control"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Hw Control"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         self.xilinx = cb = wx.CheckBox(self, -1,
                                        style=wx.ALIGN_LEFT)
-        sizerH.Add(cb, flag=wx.ALL, border=2)
+        sizerG.Add(cb, flag=wx.ALL, border=2)
         # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
 
-        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+        sizerG.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
