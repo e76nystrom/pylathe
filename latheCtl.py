@@ -280,7 +280,7 @@ class Accel():
                         (self.dyIni, self.dyMax, dyDelta, incPerClock,\
                          err, bits))
 
-            if (bits >= 28) or (err == 0):
+            if (bits >= 30) or (err == 0):
                 break
         self.scale = scale
 
