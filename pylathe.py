@@ -2445,6 +2445,15 @@ class ConfigDialog(wx.Dialog):
         self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
         self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
 
+        sizerG.Add(wx.StaticText(self, -1, "Test Mode"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.testMode = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+        info['cfgTestMode'] = cb
+
+        self.testRPM = addField(self, sizerG, "Test RPM", "cfgTestRPM")
+
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
