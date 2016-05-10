@@ -1468,9 +1468,11 @@ else:
         axis.ratio = 1
         axis.microSteps = 8
         axis.motorSteps = 200
-        axis.accel = minAccel
+        axis.accel = 0.75
         axis.backlashSteps = 0.023
         axis.setup()
+
+        minAccel = 0
 
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(Axis, dbgClock, dbgPrint)
