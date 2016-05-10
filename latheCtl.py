@@ -170,6 +170,7 @@ class Turn():
             if self.prt:
                 print ("stepsSecMin %d stepsSecMax %d" %
                        (stepsSecMin, stepsSecMax))
+            stepsSec2 = self.axis.accel * self.axis.stepsInch
             accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
             accel.accelClocks = int(self.encPerSec * accel.accelTime)
 
@@ -179,7 +180,6 @@ class Turn():
                 print ("stepsSecMin %5.2f stepsSecMax %5.2f" %
                        (stepsSecMin, stepsSecMax))
 
-            stepsSec2 = self.axis.accel * self.axis.stepsInch
             accelMinStep = ((float(stepsSecMin) / stepsSec2) * stepsSecMin) / 2.0
             accelMaxStep = ((float(stepsSecMax) / stepsSec2) * stepsSecMax) / 2.0
             accel.accelSteps = accelMaxStep - accelMinStep
