@@ -1513,7 +1513,7 @@ else:
             tmp.setup(accel, rpm, pitch)
 
     if testId == 14:
-        for i in (12, 14, 36, 48, 60):
+        for i in (12, 24, 36, 48, 60):
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
             tmp.setup(accel, 0.0, float(i))
