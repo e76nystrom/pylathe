@@ -225,10 +225,7 @@ def taperXZ(xLoc, taper):
     queMove(TAPER_XZ, xLoc)
     print "taperZX %7.4f %7.4f" % (xLoc, taper)
 
-def xilinxSpindle():
-    setParm('ENC_MAX', parmValue('cfgEncoder'))
-    setParm('X_FREQUENCY', parmValue('cfgXFreq'))
-    setParm('FREQ_MULT', parmValue('cfgFreqMult'))
+def xilinxTestMode():
     testMode = False
     try:
         testMode = info['cfgTestMode'].GetValue()
@@ -245,24 +242,28 @@ def xilinxSpindle():
             rpm = int(float(info['testRPM'].getValue()))
         except:
             pass
-        preScaler = 1
-        if self.rpm == 0:
-            self.rpm = 1
-        rps = self.rpm / 60.0
-        encTimer = int(fcy / (encoder * rps))
-        while encTimer >= 65536:
-            preScaler += 1
-            encTimer = int(fcy / (encoder * rps * preScaler))
-        print "preScaler %d encTimer %d" % (preScaler, encTimer)
-        setParm('ENC_PRE_SCALER', preScaler)
-        setParm('ENC_TIMER', encTimer)
+        if encoder != 0:
+            preScaler = 1
+            if self.rpm == 0:
+                self.rpm = 1
+            rps = self.rpm / 60.0
+            encTimer = int(fcy / (encoder * rps))
+            while encTimer >= 65536:
+                preScaler += 1
+                encTimer = int(fcy / (encoder * rps * preScaler))
+            print "preScaler %d encTimer %d" % (preScaler, encTimer)
+            setParm('ENC_PRE_SCALER', preScaler)
+            setParm('ENC_TIMER', encTimer)
 
 def sendSpindleData(send=False):
     try:
         global spindleDataSent
         if send or (not spindleDataSent):
             if XILINX:
-                xilinxSpindle()
+                setParm('ENC_MAX', parmValue('cfgEncoder'))
+                setParm('X_FREQUENCY', parmValue('cfgXFreq'))
+                setParm('FREQ_MULT', parmValue('cfgFreqMult'))
+                xilinxTestMode()
             else:
                 setParm('SPIN_STEPS', parmValue('spMotorSteps'))
                 setParm('SPIN_MICRO', parmValue('spMicroSteps'))
