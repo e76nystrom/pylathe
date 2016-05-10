@@ -120,9 +120,9 @@ class Move():
         dyMinBase = int(stepsSecMin)
 
         if self.prt:
+            print
             print ("dxBase %d dyMaxBase %d dyMinBase %d" %
                    (dxBase, dyMaxBase, dyMinBase))
-            print
 
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
