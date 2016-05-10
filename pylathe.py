@@ -2428,9 +2428,10 @@ class ConfigDialog(wx.Dialog):
         self.xilinx = cb = wx.CheckBox(self, -1,
                                        style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+        info['cfgXilinx'] = cb
         # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
 
-        self.encoder = addField(self, sizerG, "Encoder", "encoder")
+        self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
