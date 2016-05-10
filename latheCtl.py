@@ -1421,7 +1421,7 @@ else:
                     print "%2d %2d no start %x" % (i, j, val)
                     stdout.flush()
 
-    if testId == '11':          # test accel code
+    if testId == '11':          # test move accel code
         dbgPrint = True
         axis.pitch = 0.1
         axis.ratio = 1
@@ -1457,6 +1457,44 @@ else:
         setParm('FREQ_MULT', 16)
 
         command('CMD_ZSETUP')
+
+    if testId == '12':          # test turn accel code
+        dbgPrint = True
+        axis.pitch = 0.1
+        axis.ratio = 1
+        axis.microSteps = 8
+        axis.motorSteps = 200
+        axis.accel = 0.75
+        axis.backlashSteps = 0.023
+        axis.setup()
+
+        tmp = Turn(axis, minAccel, encoder, dbgPrint)
+        accel = Test(testAxis, dbgClock, dbgPrint)
+        tmp.setup(accel, rpm, pitch)
+
+        setParm('Z_PITCH', "%0.1f" % (axis.pitch))
+        setParm('Z_RATIO', "%d" % (axis.ratio))
+        setParm('Z_MICRO', "%d" % (axis.microSteps))
+        setParm('Z_MOTOR', "%d" % (axis.motorSteps))
+        setParm('Z_ACCEL', "%0.2f" % (axis.accel))
+        setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
+
+        setParm('Z_MOVE_MIN', "0")
+        setParm('Z_MOVE_MAX', "20")
+
+        setParm('Z_JOG_MIN', "0")
+        setParm('Z_JOG_MAX', "5")
+
+        setParm('X_FREQUENCY', "50000000")
+        setParm('RPM', str(rpm))
+        setParm('ENC_MAX', str(encoder))
+        setParm('FREQ_MULT', 16)
+
+        command('CMD_ZSETUP')
+
+        setParm('FEED', "%0.4f" % pitch)
+        setParm('FEED_TYPE', FEED_PITCH)
+        command('CMD_ZSYNSETUP');
 
 if not (comm.ser is None):
     comm.ser.close()
