@@ -326,6 +326,7 @@ parmList = \
 
     "test encoder setup variables",
 
+    ["ENC_ENABLE", "encoder enable flag", "char"],
     ["ENC_PRE_SCALER", "encoder prescaler", "uint16_t"],
     ["ENC_TIMER", "encoder timer counts", "uint16_t"],
     ["ENC_RUN_COUNT", "encoder run count", "int"],
