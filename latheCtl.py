@@ -1221,7 +1221,7 @@ def extractVal(arg, default, integer=False):
 n = 1
 if len(sys.argv) > n:
     try:
-        testId = sys.argv[n]
+        testId = int(sys.argv[n])
     except:
         pass
 
@@ -1517,6 +1517,7 @@ else:
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
             tmp.setup(accel, 0.0, float(i))
+            print
 
 if not (comm.ser is None):
     comm.ser.close()
