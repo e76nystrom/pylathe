@@ -78,7 +78,12 @@ configFile = "config.txt"
 info = {}
 readInfo(configFile)
 
-XILINX = True
+XILINX = False
+try:
+    info['cfgXilinx'].GetValue()
+except:
+    print "no xilinx info"
+    pass
 
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
