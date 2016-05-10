@@ -252,8 +252,11 @@ def xilinxTestMode():
                 preScaler += 1
                 encTimer = int(fcy / (encoder * rps * preScaler))
             print "preScaler %d encTimer %d" % (preScaler, encTimer)
+            setParm('ENC_ENABLE', '1')
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
+    else:
+        setParm('ENC_ENABLE', '0')
 
 def sendSpindleData(send=False):
     try:
