@@ -107,10 +107,10 @@ class Move():
                    (stepsSecMin, stepsSecMax))
         stepsSec2 = self.axis.accel * self.axis.stepsInch
         accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
-        accel.accelClocks = int(accel.accelTime * freqGenMax)
+        accelClocks = int(accel.accelTime * freqGenMax)
         if self.prt:
             print ("stepsSec2 %d accelTime %0.6f accelClocks %d" %
-                   (stepsSec2, accel.accelTime, accel.accelClocks))
+                   (stepsSec2, accel.accelTime, accelClocks))
 
         accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
         accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
@@ -119,18 +119,14 @@ class Move():
             print ("accelSteps %d accelMinStep %d accelMaxStep %d" %
                    (accel.accelSteps, accelMinStep, accelMaxStep))
 
+        accel.axis = self.axis
+        accel.freqDivider = self.freqDivider
+
         dxBase = int(freqGenMax)
         dyMaxBase = int(stepsSecMax)
         dyMinBase = int(stepsSecMin)
 
-        if self.prt:
-            print
-            print ("dxBase %d dyMaxBase %d dyMinBase %d" %
-                   (dxBase, dyMaxBase, dyMinBase))
-
-        accel.axis = self.axis
-        accel.freqDivider = self.freqDivider
-        accel.setup(dxBase, dyMaxBase, dyMinBase)
+        accel.setup(accelClocks, dxBase, dyMaxBase, dyMinBase)
 
 class Turn():
     def __init__(self, axis, minFeed, encoder, prt=False):
@@ -167,9 +163,6 @@ class Turn():
             accel.accelClocks = 0
             accel.intIncPerClock = 0
         else:
-            # accel.accelTime = int((feedRate - self.minFeed) * 1000000 /
-            #                       (60.0 * self.axis.accel))
-
             stepsSecMax = int((feedRate * self.axis.stepsInch) / 60.0)
             stepsSecMin = int((self.minFeed  * self.axis.stepsInch) / 60.0)
             if self.prt:
@@ -178,10 +171,10 @@ class Turn():
 
             stepsSec2 = self.axis.accel * self.axis.stepsInch
             accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
-            accel.accelClocks = int(self.encPerSec * accel.accelTime)
+            accelClocks = int(self.encPerSec * accel.accelTime)
             if self.prt:
                 print ("stepsSec2 %0.0f accelTime %8.6f accelClocks %d" %
-                       (stepsSec2, accel.accelTime, accel.accelClocks))
+                       (stepsSec2, accel.accelTime, accelClocks))
 
             accelMinStep = int(((float(stepsSecMin) / stepsSec2) *
                                 stepsSecMin) / 2.0)
@@ -193,17 +186,14 @@ class Turn():
                        (accel.accelSteps, accelMinStep, accelMaxStep))
                 print
 
+            accel.axis = self.axis
+            accel.encoder = self.encoder
+
             dxBase = int(self.encPerInch)
             dyMaxBase = stepsSecMax
             dyMinBase = stepsSecMin
 
-            if self.prt:
-                print ("dxBase %d dyMaxBase %d dyMinBase %d" %
-                       (dxBase, dyMaxBase, dyMinBase))
-
-            accel.axis = self.axis
-            accel.encoder = self.encoder
-            accel.setup(dxBase, dyMaxBase, dyMinBase)
+            accel.setup(accelClocks, dxBase, dyMaxBase, dyMinBase)
 
 class Taper():
     def __init__(self, turn, axis, prt=False):
@@ -256,7 +246,11 @@ class Accel():
         self.accel = 0          # inc per clock
         self.accelClocks = 0    # acceleration clocks
 
-    def setup(self, dxBase, dyMaxBase, dyMinBase):
+    def setup(self, accelClocks, dxBase, dyMaxBase, dyMinBase):
+        if self.prt:
+            print ("accelClocks %d dxBase %d dyMaxBase %d dyMinBase %d" %
+                   (accelClocks, dxBase, dyMaxBase, dyMinBase))
+
         for scale in range(0, 12):
             self.dx = dxBase << scale
             self.dyMax = dyMaxBase << scale
@@ -265,18 +259,18 @@ class Accel():
             if self.prt:
                 print ("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" %
                         (scale, self.dx, dyMin, self.dyMax, dyDelta))
-            incPerClock = float(dyDelta) / self.accelClocks
+            incPerClock = float(dyDelta) / accelClocks
             intIncPerClock = int(incPerClock + 0.5)
             if intIncPerClock == 0:
                 continue
             self.intIncPerClock = intIncPerClock
-            dyDeltaC = intIncPerClock * self.accelClocks
+            dyDeltaC = intIncPerClock * accelClocks
             err = int(abs(dyDelta - dyDeltaC)) >> scale
-            self.dyIni = self.dyMax - intIncPerClock * self.accelClocks
+            self.dyIni = self.dyMax - intIncPerClock * accelClocks
             if self.prt:
                 print("dyIni %d dyMax %d intIncPerClock %d accelClocks %d" %
                       (self.dyIni, self.dyMax, intIncPerClock,
-                       self.accelClocks))
+                       accelClocks))
             bits = bitSize(self.dx) + 1
             if self.prt:
                 print ("dyIni %d dyMax %d dyDelta %d incPerClock %0.3f "\
@@ -300,18 +294,18 @@ class Accel():
         if self.intIncPerClock != 0:
             self.accel = 2 * self.intIncPerClock
 
-            totalSum = (self.accelClocks * incr1) + self.sum
-            totalInc = (self.accelClocks * (self.accelClocks - 1) * 
+            totalSum = (accelClocks * incr1) + self.sum
+            totalInc = (accelClocks * (accelClocks - 1) * 
                         self.accel) / 2
             self.accelSteps = ((totalSum + totalInc) / (2 * self.dx))
 
             if self.prt:
                 print ("accelClocks %d totalSum %d totalInc %d "\
                         "accelSteps %d" % 
-                        (self.accelClocks, totalSum, totalInc, \
+                        (accelClocks, totalSum, totalInc, \
                         self.accelSteps))
         else:
-            self.accelStesp = 0
+            self.accelSteps = 0
             self.accelClocks = 0
             self.accel = 0
 
