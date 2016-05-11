@@ -275,8 +275,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
 
                 if fData:
                     tmp =  "#define %-12s  (%s << %s)" % (cVar, bit, shift)
-                    cFile.write("%s/* %s */\n" % 
-                                (tmp.ljust(32), comment));
+                    cFile.write("%s/* 0x%03x %s */\n" % 
+                                (tmp.ljust(32), bit << shift, comment));
                     if bit != 0:
                         if (shift != lastShift):
                             tmp =  "  \"%s\", " % (cVar)
