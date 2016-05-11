@@ -80,7 +80,7 @@ readInfo(configFile)
 
 XILINX = False
 try:
-    XILINX = info['cfgXilinx'].GetValue() == 'TRUE'
+    XILINX = info['cfgXilinx'].GetValue() == 'True'
 except:
     print "no xilinx info"
     pass
