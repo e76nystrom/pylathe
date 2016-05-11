@@ -1201,6 +1201,8 @@ encoder = dx
 minV = 10.0
 maxV = 40.0
 
+mult = 16
+
 rpm = 240
 pitch = 0.05
 
@@ -1253,6 +1255,8 @@ while True:
         dy = extractVal(tmp, dy, True)
     elif tmp.startswith('rpm'):
         rpm = extractVal(tmp, rpm, True)
+    elif tmp.startswith('mult'):
+        mult = extractVal(tmp, mult, True)
     elif tmp.startswith('min'):
         minV = extractVal(tmp, minV)
     elif tmp.startswith('max'):
@@ -1306,6 +1310,7 @@ else:
 
     axis = Axis()
     axis.testInit()
+    axis.mult = mult
     axis.setup()
 
     if testId == 1:             # no accel
