@@ -169,7 +169,7 @@ def addCheckBox(panel, sizer, label, key):
               border=2)
 
     cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
-    sizer.Add(tc, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+    sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
     if key in info:
         tmp = info[key]
         val = tmp.GetValue()
