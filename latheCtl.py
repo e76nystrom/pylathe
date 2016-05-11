@@ -1521,8 +1521,8 @@ while True:
         rpm = extractVal(tmp, rpm, True)
     elif tmp.startswith('mult'):
         mult = extractVal(tmp, mult, True)
-    elif tmp.startswith('minAccel'):
-        minAccel = extractVal(tmp, minaccel)
+    elif tmp.startswith('minaccel'):
+        minAccel = extractVal(tmp, minAccel)
     elif tmp.startswith('min'):
         minV = extractVal(tmp, minV)
     elif tmp.startswith('max'):
