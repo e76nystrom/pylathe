@@ -279,7 +279,7 @@ class Accel():
                        self.accelClocks))
             bits = bitSize(self.dx) + 1
             if self.prt:
-                print ("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f "\
+                print ("dyIni %d dyMax %d dyDelta %d incPerClock %0.3f "\
                         "err %d bits %d" %
                         (self.dyIni, self.dyMax, dyDelta, incPerClock,\
                          err, bits))
