@@ -1519,7 +1519,7 @@ else:
             print "move %d ipm\n" % (i)
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
-            tmp.setup(accel, 2.0, float(i))
+            tmp.setup(accel, 5.0, float(i))
             print
 
 if not (comm.ser is None):
