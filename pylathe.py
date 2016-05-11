@@ -519,16 +519,6 @@ class TurnPanel(wx.Panel):
 
             command('CMD_PAUSE')
 
-            # setParm('Z_START_LOC', parmValue('tuZStart'))
-            # setParm('Z_END_LOC', parmValue('tuZEnd'))
-            # setParm('X_START_LOC', parmValue('tuXStart'))
-            # setParm('X_END_LOC', parmValue('tuXEnd'))
-            # setParm('X_RETRACT', parmValue('tuXRetract'))
-            # setParm('X_FEED_PASS', parmValue('tuXFeed'))
-
-            # setParm('SPRING_PASSES', parmValue('tuSpring'))
-            # setParm('SPRING_PASS_INT', parmValue('tuSPInt'))
-
         except commTimeout as e:
             print "timeout error"
             stdout.flush()
@@ -541,10 +531,6 @@ class TurnPanel(wx.Panel):
 
     def OnStart(self, e):
         command('CMD_RESUME')
-        # setParm('TURN_FLAG', 0)
-        # command('CMD_TURN')
-        # passes = getParm('TOTAL_PASSES')
-        # self.passes.SetLabel("%d" % (passes))
         global jogPanel
         jogPanel.focus()
     
@@ -775,22 +761,11 @@ class FacePanel(wx.Panel):
 
     def OnStart(self, e):
         command('CMD_RESUME')
-        # setParm('TURN_FLAG', 0)
-        # command('CMD_FACE')
-        # passes = getParm('TOTAL_PASSES')
-        # self.passes.SetLabel("%d" % (passes))
         global jogPanel
         jogPanel.focus()
     
     def OnAdd(self, e):
         self.face.faceAdd()
-        # setParm('X_FEED_PASS', parmValue('tuAddFeed'))
-        # turnFlag = TURNADD
-        # setParm('TURN_FLAG' ,turnFlag)
-        # setParm('SPRING_PASSES' ,0)
-        # command('CMD_FACE')
-        # passes = getParm('TOTAL_PASSES')
-        # self.passes.SetLabel("%d" % (passes))
         global jogPanel
         jogPanel.focus()
 
@@ -1221,19 +1196,6 @@ class TaperPanel(wx.Panel):
 
             command('CMD_PAUSE')
 
-            # setParm('Z_START_LOC', parmValue('zStart'))
-            # setParm('Z_END_LOC', parmValue('zEnd'))
-            # setParm('FEED', parmValue('zFeed'))
-            # setParm('FEED_TYPE', FEED_PITCH)
-
-            # setParm('X_START_LOC', parmValue('xStart'))
-            # setParm('X_END_LOC', parmValue('xEnd'))
-            # setParm('X_RETRACT', parmValue('xRetract'))
-            # setParm('X_FEED_PASS', parmValue('xFeed'))
-
-            # setParm('SPRING_PASSES', parmValue('spring'))
-            # setParm('SPRING_PASS_INT', parmValue('sPInt'))
-
         except commTimeout as e:
             print "timeout error"
             stdout.flush()
@@ -1253,10 +1215,6 @@ class TaperPanel(wx.Panel):
 
     def OnStart(self, e):
         command('CMD_RESUME')
-        # setParm('TURN_FLAG', 0)
-        # command('CMD_TURN')
-        # passes = getParm('TOTAL_PASSES')
-        # self.passes.SetLabel("%d" % (passes))
         global jogPanel
         jogPanel.focus()
     
@@ -1553,33 +1511,6 @@ class ThreadPanel(wx.Panel):
             command('CMD_ZSYNSETUP');
 
             command('CMD_PAUSE')
-
-            # setParm('Z_START_LOC', parmValue('thZStart'))
-            # setParm('Z_END_LOC', parmValue('thZEnd'))
-            # setParm('FEED', parmValue('thPitch'))
-            # if self.tpi.GetValue():
-            #     feedType = FEED_TPI
-            # else:
-            #     feedType = FEED_METRIC
-            # setParm('FEED_TYPE', feedType)
-
-            # setParm('THREAD_DEPTH', parmValue('thXDepth'))
-            # setParm('THREAD_LAST_FEED', parmValue('thXLastFeed'))
-            # setParm('THREAD_H_FACTOR', parmValue('thHFactor'))
-            # setParm('THREAD_ANGLE', parmValue('thAngle'))
-
-            # setParm('X_START_LOC', parmValue('thXStart'))
-            # setParm('X_RETRACT', parmValue('thXRetract'))
-
-            # setParm('SPRING_PASSES', parmValue('thSpring'))
-            # setParm('SPRING_PASS_INT', parmValue('thSPInt'))
-
-            # turnFlag = THREAD
-            # if self.internal.GetValue():
-            #     turnFlag |= TINTERNAL
-
-            # setParm('TURN_FLAG', turnFlag)
-
         except commTimeout as e:
             print "timeout error"
             stdout.flush()
@@ -1592,9 +1523,6 @@ class ThreadPanel(wx.Panel):
 
     def OnStart(self, e):
         command('CMD_RESUME')
-        # command('CMD_THREAD')
-        # passes = getParm('TOTAL_PASSES')
-        # self.passes.SetLabel("%d" % (passes))
         global jogPanel
         jogPanel.focus()
     
