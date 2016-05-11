@@ -7,7 +7,6 @@
 #define uint16_t unsigned short int
 #define int16_t short int
 #include "../LatheX/include/remvardef.h"
-#include "../Lathex/include/runctl.h"
 %}
 
 #define EXT
