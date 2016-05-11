@@ -249,7 +249,7 @@ class Accel():
         self.dyMaxBase = 0
         self.dyMinBase = 0
 
-    def setup(self, accelClocks)
+    def setup(self, accelClocks):
         dxBase = self.dxBase
         dyMaxBase = self.dxMaxBase
         dyMinBase = self.dyMinBase
@@ -1537,7 +1537,8 @@ else:
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
-        for i in ():
+        for accelClocks in (1000, 1500, 2000, 2500):
+            accel.setup(accelClocks)
 
 if not (comm.ser is None):
     comm.ser.close()
