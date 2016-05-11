@@ -239,7 +239,7 @@ def xilinxTestMode():
             pass
         rpm = 0
         try:
-            rpm = int(float(info['testRPM'].GetValue()))
+            rpm = int(float(info['cfgTestRPM'].GetValue()))
         except:
             pass
         if encoder != 0:
@@ -267,6 +267,7 @@ def sendSpindleData(send=False):
                 setParm('X_FREQUENCY', parmValue('cfgXFreq'))
                 setParm('FREQ_MULT', parmValue('cfgFreqMult'))
                 xilinxTestMode()
+                setParm('RPM', parmValue('cfgTestRPM')
             else:
                 setParm('SPIN_STEPS', parmValue('spMotorSteps'))
                 setParm('SPIN_MICRO', parmValue('spMicroSteps'))
