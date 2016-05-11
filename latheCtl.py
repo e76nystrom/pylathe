@@ -87,14 +87,9 @@ class Move():
     def setup(self, accel, minFeed, maxFeed):
         self.minFeed = minFeed
         self.maxFeed = maxFeed
-        if self.prt:
-            print("minFeed %0.1f maxFeed %0.2f" % (minFeed, maxFeed))
 
         stepsSecMax = int((self.maxFeed / 60.0) * self.axis.stepsInch)
         stepsSecMin = int((self.minFeed / 60.0) * self.axis.stepsInch)
-        if self.prt:
-            print ("stepsSecMin %d stepsSecMax %d" %
-                   (stepsSecMin, stepsSecMax))
 
         freqGenMax = int(stepsSecMax) * self.axis.mult # freq gen min
         self.freqDivider = (int(floor(float(self.axis.cFreq) / freqGenMax))
@@ -103,17 +98,26 @@ class Move():
             print ("freqGenMax %d freqDivider %d" %
                    (freqGenMax, self.freqDivider))
 
+        if self.prt:
+            print("accel %0.2f minFeed %0.1f maxFeed %0.2f" %
+                  (axis.accel, minFeed, maxFeed))
+
+        if self.prt:
+            print ("stepsSecMin %d stepsSecMax %d" %
+                   (stepsSecMin, stepsSecMax))
         stepsSec2 = self.axis.accel * self.axis.stepsInch
         accel.accelTime = float(stepsSecMax - stepsSecMin) / stepsSec2
         accel.accelClocks = int(accel.accelTime * freqGenMax)
+        if self.prt:
+            print ("stepsSec2 %d accelTime %0.6f accelClocks %d" %
+                   (stepsSec2, accel.accelTime, accel.accelClocks))
 
         accelMinStep = (float(stepsSecMin) / stepsSec2 * stepsSecMin) / 2.0
         accelMaxStep = (float(stepsSecMax) / stepsSec2 * stepsSecMax) / 2.0
         accel.accelSteps = accelMaxStep - accelMinStep
         if self.prt:
-            print ("stepsSec2 %d accelTime %0.6f accelSteps %d accelClocks %d" %
-                   (stepsSec2, accel.accelTime,\
-                    accel.accelSteps, accel.accelClocks))
+            print ("accelSteps %d accelMinStep %d accelMaxStep %d" %
+                   (accel.accelSteps, accelMinStep, accelMaxStep))
 
         dxBase = int(freqGenMax)
         dyMaxBase = int(stepsSecMax)
@@ -149,8 +153,8 @@ class Turn():
         self.encPerSec = int((spindleRPM * self.encoder) / 60.0) # cnts per sec
         self.encPerInch = int(self.encoder / pitch) # enc pulse inch
         if self.prt:
-            print ("encoderPerIn %d encPerSec %d stepsInch %d" %
-                   (self.encPerInch, self.encPerSec, self.axis.stepsInch))
+            print ("encPerSec %d encoderPerIn %d stepsInch %d" %
+                   (self.encPerSec, self.encPerInch, self.axis.stepsInch))
 
         self.feedRate = feedRate = spindleRPM * pitch # feed rate inch per min
         if self.prt:
