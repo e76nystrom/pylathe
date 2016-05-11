@@ -1066,6 +1066,267 @@ class Test(Accel):
         print "%10s %10d %12d %12d diff" % ("", y - yPos, sum - xSum,\
                                             accelAccum - aclSum)
 
+# z synchronized move with acceleration
+
+def test4(runClocks=0, tpi=0, dist=20, dbgprint=True, pData=False):
+    print runClocks, tpi
+    if (tpi == 0):
+        return
+    if (tpi < 1):
+        tpi = 1.0 / tpi
+    if (runClocks == 0):
+        runClocks = 1
+    f = open('accel.txt', 'w')
+
+    if pData:
+        from pylab import plot, grid, show
+        from array import array
+        time = array('f')
+        data = array('f')
+        time.append(0)
+        data.append(0)
+
+    stepsRev = 1600             # steps per revolution
+    lsPitch = .1                # leadscrew pitch
+    spindleRPM = 300            # spindle speed
+    encoder = 20320             # encoder counts
+    threadPerIn = tpi           # threads per inch
+    minFeed = 2.0               # minimum speed
+    accelRate = 1               # acceleration inch per sec^2
+    scale = 8
+
+    print "tpi %5.2f pitch %5.3f" % (tpi, 1.0 / tpi)
+
+    zFeedRate = spindleRPM / threadPerIn # z feed rate inch per min
+    print "zFeedRate %6.2f ipm" % (zFeedRate)
+
+    spindleRPS = spindleRPM / 60.0 # spindle rev per second
+
+    encPerSec = spindleRPS * encoder # encoder counts per second
+    print "encPerSec %5.0f" % (encPerSec)
+
+    stepsPerInch = stepsRev / lsPitch # steps per inch
+    encPerInch = encoder * threadPerIn # encoder pulse per inch
+    print "stepsPerInch %d encoderPerIn %d" % (stepsPerInch, encPerInch)
+
+    stepsPerThread = stepsPerInch / threadPerIn # steps per thread
+    stepsPerSecond = zFeedRate * stepsPerInch / 60.0 # steps per second
+    print ("stepsPerThread %5.0f stepsPerSecond %5.0f" %
+           (stepsPerThread, stepsPerSecond))
+
+    dx = int(encPerInch) << scale
+    dy = int(stepsPerInch) << scale
+    print ("dx %d dy %d scale %d" % (dx, dy, 1 << scale))
+
+    accelTime = (zFeedRate - minFeed) / (60.0 * accelRate)
+    accelClocks = int(encPerSec * accelTime)
+    bits = int(floor(log(accelClocks, 2))) + 1
+    print ("accelTime %8.6f accelClocks %4.0f bits %d" %
+           (accelTime, accelClocks, bits))
+
+    iniDy = dy /  (zFeedRate / minFeed)
+    dyDelta = dy - iniDy
+    incPerClock = dyDelta / accelClocks
+    intIncPerClock = int(incPerClock)
+    iniDy = dy - intIncPerClock * accelClocks
+    print ("iniDy %d dy %d dyDelta %d incPerClock %6.2f" %
+           (iniDy, dy, dyDelta, incPerClock))
+
+    incr1 = 2 * dy
+    incr2 = incr1 - 2 * dx
+    sum = incr1 - dx
+
+    bits = int(floor(log(abs(incr2), 2))) + 1
+    print ("incr1 %d incr2 %d bits %d" %
+           (incr1, incr2, bits))
+    
+    stdout.flush()
+
+    # clocks = 0
+    # lastT = 0
+    # x = 0
+    # y = 0
+    # incr1 = 2 * iniDy
+    # incr2 = incr1 - 2 * dx
+    # sum = incr1 - dx
+    # inc = 2 * intIncPerClock
+    # print ("incr1 %d incr2 %d inc %d" % (incr1, incr2, intIncPerClock))
+    # stdout.flush()
+    # while (clocks < (accelClocks * 1.2)):
+    #     clocks += 1
+    #     x += 1
+    #     if (sum < 0):
+    #         sum += incr1
+    #     else:
+    #         y += 1
+    #         sum += incr2
+    #         curT = clocks / encPerSec
+    #         deltaT = curT - lastT
+    #         if pData:
+    #             if (lastT != 0):
+    #                 time.append(curT);
+    #                 data.append(1.0 / deltaT)
+    #         lastT = curT
+    #         f.write("x %6d y %5d sum %11d incr1 %8d incr2 %11d\n" %
+    #                 (x, y, sum, incr1, incr2))
+    #     if (clocks <= accelClocks):
+    #         incr1 += inc
+    #         incr2 += inc
+    # print "y %d incr1 %d incr2 %d sum %d" % (y, incr1, incr2, sum)
+    # stdout.flush()
+
+    clocks = 0
+    lastT = 0
+    x = 0
+    y = 0
+    incr1 = 2 * iniDy
+    incr2 = incr1 - 2 * dx
+    d = incr1 - dx
+    sum = d
+
+    zSynAccel = 2 * intIncPerClock
+    zSynAclCnt = accelClocks
+
+    totalSum = (accelClocks * incr1) + d
+    totalInc = (accelClocks * (accelClocks - 1) * zSynAccel) / 2
+    accelSteps = ((totalSum + totalInc) / (2 * dx)) + 1
+
+    print ("accelClocks %d totalSum %d totalInc %d %d" % 
+           (accelClocks, totalSum, totalInc, accelSteps))
+
+    incAccum = 0;
+    print ("incr1 %d incr2 %d zSynAccel %d" % (incr1, incr2, zSynAccel))
+    stdout.flush()
+    while (clocks < (accelClocks * 1.2)):
+        clocks += 1
+        x += 1
+        if (sum < 0):
+            sum += incr1
+        else:
+            y += 1
+            sum += incr2
+            curT = clocks / encPerSec
+            deltaT = curT - lastT
+            if pData:
+                if (lastT != 0):
+                    time.append(curT);
+                    data.append(1.0 / deltaT)
+            lastT = curT
+        sum += incAccum
+        if (clocks <= accelClocks):
+            incAccum += zSynAccel
+        f.write("x %6d y %5d sum %12d incAccum %12d incr1 %8d incr2 %11d\n" %
+                (x, y, sum, incAccum, incr1 + incAccum, incr2 + incAccum))
+    print ("y %d incr1 %d incr2 %d sum %d" %
+           (y, incr1 + incAccum, incr2 + incAccum, sum))
+    print ("y %d incr1 %d incr2 %d incAccum %d" %
+           (y, incr1, incr2, incAccum))
+    f.close()
+
+    # incr1 = 2 * iniDy
+    # incr2 = incr1 - 2 * dx
+    # d = incr1 - dx
+
+    # encPhase = 10
+
+    # setXReg('XLDDCTL', 0, dbgprint)    # disable debug mode
+    # setXReg('XLDZCTL', ZRESET, dbgprint) # reset z
+    # setXReg('XLDZCTL', 0, dbgprint)    # clear z mode
+    # setXReg('XLDDCTL', 0, dbgprint)
+    # setXReg('XLDZCTL', 0, dbgprint)
+
+    # setXReg('XLDTFREQ', 10000, dbgprint)	# load test frequency
+    # setXReg('XLDTCOUNT', runClocks-1, dbgprint) # load test count 
+
+    # setXReg('XLDPHASE', encPhase - 1, dbgprint) # load phase count
+
+    # setXReg('XLDZD', d, dbgprint)		# load d value
+    # setXReg('XLDZINCR1', incr1, dbgprint)	# load incr1 value
+    # setXReg('XLDZINCR2', incr2, dbgprint)	# load incr2 value
+
+    # setXReg('XLDZACCEL', zSynAccel, dbgprint)   # load z accel
+    # setXReg('XLDZACLCNT', zSynAclCnt, dbgprint) # load z accel count
+
+    # setXReg('XLDDCTL', DBG_INIT, dbgprint) # initialize z modules
+    # setXReg('XLDDCTL', 0, dbgprint)        # clear
+
+    # setXReg('XLDZLOC', 20, dbgprint)       # set location
+    # setXReg('XLDZCTL', ZSET_LOC, dbgprint) # set z location
+    # setXReg('XLDZCTL', 0, dbgprint)        # clear
+
+    # setXReg('XLDZDIST', dist, dbgprint) # load z distance
+    # setXReg('XLDZCTL', ZRESET, dbgprint)  # reset z to load distance
+    # setXReg('XLDZCTL', 0, dbgprint)     # clear reset
+
+    # setXReg('XLDZCTL', (ZSRC_SYN    # sync source
+    #                    | ZDIR_POS  # direction positive
+    #                    | ZWAIT_SYN # wait for sync pulse
+    #                ), dbgprint)
+
+    # setXReg('XLDZCTL', (ZSTART      # start
+    #                    | ZSRC_SYN  # sync source
+    #                    | ZDIR_POS  # direction positive
+    #                    | ZWAIT_SYN # wait for sync pulse
+    #                ), dbgprint)
+
+    # setXReg('XLDDCTL', (DBG_ENA     # enable debugging
+    #                    | DBG_COUNT # run for number in count
+    #                ), dbgprint)
+
+    # sleep(.5);
+    # if dbgprint:
+    #     print "\nresults %d clocks \n" % (runClocks)
+
+    # dspXReg('XRDFREQ', "freq", dbgprint)
+    # dspXReg('XRDPSYN', "phase syn", dbgprint)
+    # dspXReg('XRDTPHS', "tot phase", dbgprint)
+
+    # xPos = dspXReg('XRDZXPOS', "xpos", dbgprint)
+    # dspXReg('XRDZYPOS', "ypos", dbgprint)
+    # zsum = dspXReg('XRDZSUM', "sum", dbgprint)
+    # zAclSum = dspXReg('XRDZACLSUM', "aclsum", dbgprint)
+
+    # dspXReg('XRDZDIST', "dist", dbgprint)
+    # dspXReg('XRDZASTP', "a steps", dbgprint)
+    # dspXReg('XRDZLOC', "loc", dbgprint)
+    # dspXReg('XRDSTATE', "state", dbgprint)
+
+    # x = 0
+    # y = 0
+    # clocks = 0
+    # sum = d
+    # accelAccum = 0
+    # distCtr = dist
+    # l0 = dist
+    # while (clocks < xPos):
+    #     clocks += 1
+    #     x += 1
+    #     if (sum < 0):
+    #         sum += incr1
+    #     else:
+    #         y += 1
+    #         sum += incr2
+    #         distCtr -= 1
+    #         if (distCtr == 0):
+    #             break
+    #     sum += accelAccum
+    #     if (y >= l0):
+    #         if (accelAccum > 0):
+    #             accelAccum -= zSynAccel
+    #     else:
+    #         if (clocks <= accelClocks):
+    #             accelAccum += zSynAccel
+    #     l0 = distCtr
+
+    # print ("\nx %d y %d sum %d delta %d accelAccum %d delta %d" %
+    #        (x, y, sum, sum - zsum, accelAccum, accelAccum - zAclSum))
+
+    if pData:
+        plot(time, data, 'b', aa="true")
+        grid(True)
+        show()
+
+
 def test6(dist=100, dbgprint=True, prt=False):
     if dist == 0:
         dist = 100
