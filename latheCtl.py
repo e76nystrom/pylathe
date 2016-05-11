@@ -1092,7 +1092,7 @@ def test4(runClocks=0, tpi=0, dist=20, dbgprint=True, pData=False):
     encoder = 20320             # encoder counts
     threadPerIn = tpi           # threads per inch
     minFeed = 2.0               # minimum speed
-    accelRate = 1               # acceleration inch per sec^2
+    accelRate = 0.75            # acceleration inch per sec^2
     scale = 8
 
     print "tpi %5.2f pitch %5.3f" % (tpi, 1.0 / tpi)
