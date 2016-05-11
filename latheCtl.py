@@ -146,7 +146,7 @@ class Turn():
         self.spindleRPM = spindleRPM
         self.pitch = pitch
         if self.prt:
-            print "tpi %0.2 pitch %0.3" % (1.0 / pitch, pitch)
+            print "tpi %0.2f pitch %0.3f" % (1.0 / pitch, pitch)
             print "minFeed %0.2f spindleRPM %d" % (self.minFeed, spindleRPM)
 
         self.encPerSec = int((spindleRPM * self.encoder) / 60.0) # cnts per sec
