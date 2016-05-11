@@ -203,6 +203,10 @@ parmList = \
     ["X_FREQUENCY", "xilinx clock frequency", "int32_t"],
     ["FREQ_MULT", "frequency multiplier", "int16_t"],
 
+    "xilinx configuration register",
+
+    ["X_CFG_REG", "xilinx configuration register", "int16_t"],
+
     # ["", "", ""],
     # ["", "", ""],
     
