@@ -298,7 +298,7 @@ def sendSpindleData(send=False):
                 setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
                 setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
 
-                command('CMD_SPSETUP')
+            command('CMD_SPSETUP')
             spindleDataSent = True
     except commTimeout as e:
         pass
