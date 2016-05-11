@@ -1510,7 +1510,7 @@ else:
         command('CMD_ZSYNSETUP');
 
     if testId == 13:
-        for pitch in (.035, 0.050, .075, 0.1, 0.2):
+        for pitch in (.018, .035, 0.050, .075, 0.1, 0.2):
             print "turn %0.3f\n" % (pitch)
             tmp = Turn(axis, minAccel, encoder, dbgPrint)
             accel = Test(axis, dbgClock, dbgPrint)
