@@ -2420,17 +2420,19 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.xilinx = addCheckBox(self, sizerG, "HW Control", 'cfgXilinx')
-        self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
-        self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
-        self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
+        global XILINX
+        if XILINX:
+            self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
+            self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
+            self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
 
-        self.testMode = addCheckBox(self, sizerG, "Test Mode", 'cfgTestMode')
-        self.testRPM = addField(self, sizerG, "Test RPM", "cfgTestRPM")
+            self.testMode = addCheckBox(self, sizerG, "Test Mode", 'cfgTestMode')
+            self.testRPM = addField(self, sizerG, "Test RPM", "cfgTestRPM")
 
-        self.invEncDir = addCheckBox(self, sizerG, "Invert Enc Dir",
-                                     'cfgInvEncDir')
-        self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDIR')
-        self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDIR')
+            self.invEncDir = addCheckBox(self, sizerG, "Invert Enc Dir",
+                                         'cfgInvEncDir')
+            self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDIR')
+            self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDIR')
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
