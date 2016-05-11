@@ -124,8 +124,6 @@ def createCtlStates(stateList, cLoc, fData=False):
     val = 0
     for i in range(0, len(stateList)):
         data = stateList[i]
-        stdout.flush()
-        print data
         if not isinstance(data, basestring):
             state = data[0]
             comment = data[1]
