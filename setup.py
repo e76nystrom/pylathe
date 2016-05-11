@@ -135,8 +135,6 @@ def createCtlStates(stateList, cLoc, fData=False):
                             (tmp.ljust(32), val, comment));
                 # jFile.write('  "%-10s %s", \n' % (state, comment));
             globals()[state] = val
-            stdout.flush()
-            print "%8s %2x" % (state, val)
             val += 1
         else:
             if fData:
