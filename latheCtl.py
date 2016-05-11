@@ -251,7 +251,7 @@ class Accel():
 
     def setup(self, accelClocks):
         dxBase = self.dxBase
-        dyMaxBase = self.dxMaxBase
+        dyMaxBase = self.dyMaxBase
         dyMinBase = self.dyMinBase
         if self.prt:
             print
