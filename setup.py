@@ -145,8 +145,6 @@ def createCtlStates(stateList, cLoc, fData=False):
                     cFile.write("%s %s\n" % (tmp[0], tmp[1].upper()))
                     # tmp =  " public static final String[] %s = \n" % (tmp[1])
                     # jFile.write(tmp)
-                    print "clear val"
-                    stdout.flush()
                     val = 0
                 elif data.startswith("{") or data.startswith("}"):
                     cFile.write("%s\n" % (data))
@@ -154,6 +152,9 @@ def createCtlStates(stateList, cLoc, fData=False):
                 else:
                     cFile.write("\n// %s\n\n" % (data))
                     # jFile.write("\n // %s\n\n" % (data))
+            else:
+                if data.startswith("enum"):
+                    val = 0
     if fData:
         cFile.close()
         # jFile.write("};\n")
