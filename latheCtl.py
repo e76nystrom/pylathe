@@ -194,7 +194,8 @@ class Turn():
             accel.dxBase = int(self.encPerInch)
             accel.dyMaxBase = self.axis.stepsInch
             if self.minFeed != 0:
-                accel.dyMinBase = self.axis.stepsInch * (feedRate / self.minFeed)
+                accel.dyMinBase = int(self.axis.stepsInch *
+                                      (feedRate / self.minFeed))
             else:
                 accel.dyMinBase = 0
 
