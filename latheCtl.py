@@ -1530,7 +1530,7 @@ while True:
     elif tmp.startswith('encoder'):
         encoder = extractVal(tmp, encoder)
     elif tmp.startswith('minAccel'):
-        minAccel = extractVal(tmp, minAccel)
+        minAccel = extractVal(tmp, minaccel)
     elif tmp.startswith('aVal'):
         aVal = extractVal(tmp, aVal, True)
     elif tmp.startswith('aClks'):
