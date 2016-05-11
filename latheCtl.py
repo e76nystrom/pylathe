@@ -1459,6 +1459,7 @@ dy = 600
 aVal = 8
 aClks = 100
 
+accelRate = 0.75
 minAccel = 5.0
 encoder = dx
 
@@ -1467,8 +1468,8 @@ maxV = 40.0
 
 mult = 16
 
-rpm = 240
-pitch = 0.05
+rpm = 300
+pitch = 0.035
 
 arg1 = 0
 arg2 = 0
@@ -1523,6 +1524,8 @@ while True:
         mult = extractVal(tmp, mult, True)
     elif tmp.startswith('minaccel'):
         minAccel = extractVal(tmp, minAccel)
+    elif tmp.startswith('accelRate'):
+        accelRate = extractVal(tmp, accelRate)
     elif tmp.startswith('min'):
         minV = extractVal(tmp, minV)
     elif tmp.startswith('max'):
@@ -1575,6 +1578,7 @@ else:
     axis = Axis()
     axis.testInit()
     axis.mult = mult
+    axis.accel = accelRate
     axis.setup()
 
     if testId == 1:             # no accel
@@ -1744,7 +1748,7 @@ else:
         axis.ratio = 1
         axis.microSteps = 8
         axis.motorSteps = 200
-        axis.accel = 0.75
+        axis.accel = accelRate
         axis.backlashSteps = 0.023
         axis.setup()
 
