@@ -314,7 +314,7 @@ class Accel():
             totalSum = (accelClocks * incr1) + self.sum
             totalInc = (accelClocks * (accelClocks - 1) * 
                         self.accel) / 2
-            self.accelSteps = ((totalSum + totalInc + self.dx) / (2 * self.dx))
+            self.accelSteps = ((totalSum + totalInc) / (2 * self.dx))
 
             if self.prt:
                 print ("accelClocks %d totalSum %d totalInc %d "\
