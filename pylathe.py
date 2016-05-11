@@ -168,7 +168,7 @@ def addCheckBox(panel, sizer, label, key):
     sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
               border=2)
 
-    cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
+    cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
     sizer.Add(tc, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
     if key in info:
         tmp = info[key]
