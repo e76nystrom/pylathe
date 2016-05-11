@@ -1,3 +1,4 @@
+from sys import stdout
 cmds = None
 parms = None
 xRegs = None
@@ -123,6 +124,8 @@ def createCtlStates(stateList, cLoc, fData=False):
     val = 0
     for i in range(0, len(stateList)):
         data = stateList[i]
+        stdout.flush()
+        print data
         if not isinstance(data, basestring):
             state = data[0]
             comment = data[1]
@@ -132,6 +135,7 @@ def createCtlStates(stateList, cLoc, fData=False):
                             (tmp.ljust(32), val, comment));
                 # jFile.write('  "%-10s %s", \n' % (state, comment));
             globals()[state] = val
+            stdout.flush()
             print "%8s %2x" % (state, val)
             val += 1
         else:
@@ -139,8 +143,10 @@ def createCtlStates(stateList, cLoc, fData=False):
                 if data.startswith("enum"):
                     tmp = data.split()
                     cFile.write("%s %s\n" % (tmp[0], tmp[1].upper()))
-                    tmp =  " public static final String[] %s = \n" % (tmp[1])
+                    # tmp =  " public static final String[] %s = \n" % (tmp[1])
                     # jFile.write(tmp)
+                    print "clear val"
+                    stdout.flush()
                     val = 0
                 elif data.startswith("{") or data.startswith("}"):
                     cFile.write("%s\n" % (data))
