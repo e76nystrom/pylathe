@@ -100,6 +100,9 @@ DBG_P = _lathe.DBG_P
 _lathe.DBG_SETUP_swigconstant(_lathe)
 DBG_SETUP = _lathe.DBG_SETUP
 
+_lathe.DBG_DETAIL_swigconstant(_lathe)
+DBG_DETAIL = _lathe.DBG_DETAIL
+
 _lathe.JTIMEINITIAL_swigconstant(_lathe)
 JTIMEINITIAL = _lathe.JTIMEINITIAL
 
