@@ -162,6 +162,21 @@ def addField(panel, sizer, label, key):
     info[key] = tc
     return(tc)
 
+def addCheckBox(panel, sizer, label, key):
+    global info
+    txt = wx.StaticText(panel, -1, label)
+    sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+              border=2)
+
+    cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
+    sizer.Add(tc, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+    if key in info:
+        tmp = info[key]
+        val = tmp.GetValue()
+        cb.SetValue(val)
+    info[key] = cb
+    return(cb)
+
 def parmValue(key):
     global info
     tmp = info[key]
@@ -2396,26 +2411,18 @@ class ConfigDialog(wx.Dialog):
 
         sizerG = wx.GridSizer(2, 0, 0)
 
-        sizerG.Add(wx.StaticText(self, -1, "Hw Control"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.xilinx = cb = wx.CheckBox(self, -1,
-                                       style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-        info['cfgXilinx'] = cb
-        # self.Bind(wx.EVT_CHECKBOX, self.OnXilinx, cb)
-
+        self.xilinx = addCheckBox(self, sizerG, "HW Control", 'cfgXilinx')
         self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
         self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
         self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
 
-        sizerG.Add(wx.StaticText(self, -1, "Test Mode"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.testMode = cb = wx.CheckBox(self, -1,
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-        info['cfgTestMode'] = cb
-
+        self.testMode = addCheckBox(self, sizerG, "Test Mode", 'cfgTestMode')
         self.testRPM = addField(self, sizerG, "Test RPM", "cfgTestRPM")
+
+        self.invEncDir = addCheckBox(self, sizerG, "Invert Enc Dir",
+                                     'cfgInvEncDir')
+        self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDIR')
+        self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDIR')
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
