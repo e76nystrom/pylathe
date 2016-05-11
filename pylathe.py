@@ -173,7 +173,7 @@ def addCheckBox(panel, sizer, label, key):
     if key in info:
         tmp = info[key]
         val = tmp.GetValue()
-        cb.SetValue(val)
+        cb.SetValue(val == 'True')
     info[key] = cb
     return(cb)
 
