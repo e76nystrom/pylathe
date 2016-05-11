@@ -84,6 +84,7 @@ try:
 except:
     print "no xilinx info"
     pass
+info = {}
 
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
