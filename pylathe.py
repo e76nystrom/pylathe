@@ -285,13 +285,6 @@ def sendSpindleData(send=False):
                 xilinxTestMode()
                 setParm('RPM', parmValue('cfgTestRPM'))
                 cfgReg = 0
-                tmp = info['cfgInvEncDir'].GetValue()
-                print tmp
-                tmp = info['cfgInvZDir'].GetValue()
-                print tmp
-                tmp = info['cfgInvXDir'].GetValue()
-                print tmp
-                stdout.flush()
                 if info['cfgInvEncDir'].GetValue():
                     cfgReg |= ENC_POL
                 if info['cfgInvZDir'].GetValue():
@@ -2439,8 +2432,8 @@ class ConfigDialog(wx.Dialog):
 
             self.invEncDir = addCheckBox(self, sizerG, "Invert Enc Dir",
                                          'cfgInvEncDir')
-            self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDIR')
-            self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDIR')
+            self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDir')
+            self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDir')
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
