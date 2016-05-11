@@ -122,11 +122,11 @@ class Move():
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
 
-        dxBase = int(freqGenMax)
-        dyMaxBase = int(stepsSecMax)
-        dyMinBase = int(stepsSecMin)
+        accel.dxBase = int(freqGenMax)
+        accel.dyMaxBase = int(stepsSecMax)
+        accel.dyMinBase = int(stepsSecMin)
 
-        accel.setup(accelClocks, dxBase, dyMaxBase, dyMinBase)
+        accel.setup(accelClocks)
 
 class Turn():
     def __init__(self, axis, minFeed, encoder, prt=False):
@@ -188,11 +188,11 @@ class Turn():
             accel.axis = self.axis
             accel.encoder = self.encoder
 
-            dxBase = int(self.encPerInch)
-            dyMaxBase = stepsSecMax
-            dyMinBase = stepsSecMin
+            accel.dxBase = int(self.encPerInch)
+            accel.dyMaxBase = stepsSecMax
+            accel.dyMinBase = stepsSecMin
 
-            accel.setup(accelClocks, dxBase, dyMaxBase, dyMinBase)
+            accel.setup(accelClocks)
 
 class Taper():
     def __init__(self, turn, axis, prt=False):
@@ -245,7 +245,14 @@ class Accel():
         self.accel = 0          # inc per clock
         self.accelClocks = 0    # acceleration clocks
 
-    def setup(self, accelClocks, dxBase, dyMaxBase, dyMinBase):
+        self.dxBase = 0
+        self.dyMaxBase = 0
+        self.dyMinBase = 0
+
+    def setup(self, accelClocks)
+        dxBase = self.dxBase
+        dyMaxBase = self.dxMaxBase
+        dyMinBase = self.dyMinBase
         if self.prt:
             print
             print ("accelClocks %d dxBase %d dyMaxBase %d dyMinBase %d" %
@@ -1524,6 +1531,13 @@ else:
             accel = Accel(dbgPrint)
             tmp.setup(accel, minAccel, float(i))
             print
+
+    if testId == 15:
+        print "turn %0.3f\n" % (pitch)
+        tmp = Turn(axis, minAccel, encoder, dbgPrint)
+        accel = Test(axis, dbgClock, dbgPrint)
+        tmp.setup(accel, rpm, pitch)
+        for i in ():
 
 if not (comm.ser is None):
     comm.ser.close()
