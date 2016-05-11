@@ -123,8 +123,9 @@ class Move():
         accel.freqDivider = self.freqDivider
 
         accel.dxBase = int(freqGenMax)
-        accel.dyMaxBase = int(stepsSecMax)
-        accel.dyMinBase = int(stepsSecMin)
+        accel.dyMaxBase = self.axis.stepsInch
+        accel.dyMinBase = int((self.axis.stepsInch * self.minFeed) /
+                              maxFeed)
 
         accel.setup(accelClocks)
 
@@ -144,7 +145,12 @@ class Turn():
 
     def setup(self, accel, spindleRPM, pitch):
         self.spindleRPM = spindleRPM
-        self.pitch = pitch
+        if pitch >= 4:
+            self.pitch = 1.0 / pitchxo
+        elif pitch >= 0.3:
+            self.pitch = pitch / 25.4
+        else:
+            self.pitch = pitch
         if self.prt:
             print "tpi %0.2f pitch %0.3f" % (1.0 / pitch, pitch)
             print "minFeed %0.2f spindleRPM %d" % (self.minFeed, spindleRPM)
