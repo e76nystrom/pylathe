@@ -1521,6 +1521,8 @@ while True:
         rpm = extractVal(tmp, rpm, True)
     elif tmp.startswith('mult'):
         mult = extractVal(tmp, mult, True)
+    elif tmp.startswith('minAccel'):
+        minAccel = extractVal(tmp, minaccel)
     elif tmp.startswith('min'):
         minV = extractVal(tmp, minV)
     elif tmp.startswith('max'):
@@ -1529,8 +1531,6 @@ while True:
         pitch = extractVal(tmp, pitch)
     elif tmp.startswith('encoder'):
         encoder = extractVal(tmp, encoder)
-    elif tmp.startswith('minAccel'):
-        minAccel = extractVal(tmp, minaccel)
     elif tmp.startswith('aVal'):
         aVal = extractVal(tmp, aVal, True)
     elif tmp.startswith('aClks'):
