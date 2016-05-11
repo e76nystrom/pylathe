@@ -145,7 +145,8 @@ class Turn():
     def setup(self, accel, spindleRPM, pitch):
         self.spindleRPM = spindleRPM
         self.pitch = pitch
-
+        if self.prt:
+            print "minFeed %0.2f spindleRPM %d" % (self.minFeed, spindleRPM)
         self.encPerSec = int((spindleRPM * self.encoder) / 60.0) # cnts per sec
         self.encPerInch = int(self.encoder / pitch) # enc pulse inch
         if self.prt:
