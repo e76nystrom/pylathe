@@ -29,6 +29,7 @@ def command(cmd):
     if action != None:
         cmd = "lathe." + action + "()"
         eval(cmd)
+        stdout.flush()
         # action()
     if ser is None:
         return("");
