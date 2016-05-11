@@ -1093,7 +1093,8 @@ def test4(runClocks=0, tpi=0, dist=20, dbgprint=True, pData=False):
     spindleRPM = 300            # spindle speed
     encoder = 20320             # encoder counts
     threadPerIn = tpi           # threads per inch
-    minFeed = 2.0               # minimum speed
+    # minFeed = 2.0               # minimum speed
+    minFeed = 0.0
     accelRate = 0.75            # acceleration inch per sec^2
     scale = 8
 
