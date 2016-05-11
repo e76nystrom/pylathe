@@ -285,6 +285,13 @@ def sendSpindleData(send=False):
                 xilinxTestMode()
                 setParm('RPM', parmValue('cfgTestRPM'))
                 cfgReg = 0
+                tmp = info['cfgInvEncDir'].GetValue()
+                print tmp
+                tmp = info['cfgInvZDir'].GetValue()
+                print tmp
+                tmp = info['cfgInvXDir'].GetValue()
+                print tmp
+                stdout.flush()
                 if info['cfgInvEncDir'].GetValue():
                     cfgReg |= ENC_POL
                 if info['cfgInvZDir'].GetValue():
