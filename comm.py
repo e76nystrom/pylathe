@@ -27,9 +27,8 @@ def command(cmd):
     global ser, cmds, commLock, timeout
     (cmdVal, action) = cmds[cmd]
     if action != None:
-        cmd = "lathe." + action + "()"
-        eval(cmd)
-        stdout.flush()
+        actionCmd = "lathe." + action + "()"
+        eval(actionCmd)
         # action()
     if ser is None:
         return("");
