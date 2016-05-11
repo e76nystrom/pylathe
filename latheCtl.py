@@ -1191,7 +1191,7 @@ def test4(runClocks=0, tpi=0, dist=20, dbgprint=True, pData=False):
     totalInc = (accelClocks * (accelClocks - 1) * zSynAccel) / 2
     accelSteps = ((totalSum + totalInc) / (2 * dx)) + 1
 
-    print ("accelClocks %d totalSum %d totalInc %d %d" % 
+    print ("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
            (accelClocks, totalSum, totalInc, accelSteps))
 
     incAccum = 0;
