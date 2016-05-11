@@ -1515,7 +1515,7 @@ else:
             print
 
     if testId == 14:
-        for i in (12, 24, 36, 48, 60):
+        for i in (9.6, 12, 18, 24, 36, 48):
             print "move %d ipm\n" % (i)
             tmp = Move(axis, dbgPrint)
             accel = Accel(dbgPrint)
