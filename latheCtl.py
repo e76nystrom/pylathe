@@ -1537,7 +1537,7 @@ else:
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
-        for accelClocks in (1000, 1500, 2000, 2500):
+        for accelClocks in (1000, 1500, 2000, 2500, 5000, 10000, 20000):
             accel.setup(accelClocks)
 
 if not (comm.ser is None):
