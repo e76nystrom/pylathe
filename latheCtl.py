@@ -290,9 +290,8 @@ class Accel():
         incr2Max = incr1Max - 2 * self.dx
         self.sum = incr1 - self.dx
         if self.prt:
-            print ("\nincr1Ini %d incr1Max %d incr2Ini %d incr2Max %d "\
-                   "scale %d bits %d" %
-                   (incr1, incr1Max, incr2, incr2Max, self.scale, bitSize(incr2)))
+            print ("\nincr1Ini %d incr1Max %d incr2Ini %d incr2Max %d "
+                   (incr1, incr1Max, incr2, incr2Max))
 
         if self.intIncPerClock != 0:
             self.accel = 2 * self.intIncPerClock
