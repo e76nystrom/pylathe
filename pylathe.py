@@ -270,14 +270,6 @@ def xilinxTestMode():
             setParm('ENC_ENABLE', '1')
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
-            cfgReg = 0
-            if info['cfgInvEncDir'].GetValue():
-                cfgReg |= ENC_POL
-            if info['cfgInvZDir'].GetValue():
-                cfgReg |= ZDIR_POL
-            if info['cfgInvXDir'].GetValue():
-                cfgReg |= XDIR_POL
-            setParm('X_CFG_REG', cfgReg)
     else:
         setParm('ENC_ENABLE', '0')
 
@@ -291,6 +283,14 @@ def sendSpindleData(send=False):
                 setParm('FREQ_MULT', parmValue('cfgFreqMult'))
                 xilinxTestMode()
                 setParm('RPM', parmValue('cfgTestRPM'))
+                cfgReg = 0
+                if info['cfgInvEncDir'].GetValue():
+                    cfgReg |= ENC_POL
+                if info['cfgInvZDir'].GetValue():
+                    cfgReg |= ZDIR_POL
+                if info['cfgInvXDir'].GetValue():
+                    cfgReg |= XDIR_POL
+                setParm('X_CFG_REG', cfgReg)
             else:
                 setParm('SPIN_STEPS', parmValue('spMotorSteps'))
                 setParm('SPIN_MICRO', parmValue('spMicroSteps'))
