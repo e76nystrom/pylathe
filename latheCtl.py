@@ -1793,5 +1793,8 @@ else:
             tmp.setup(accel, minAccel, float(i))
             print
 
+    if testId == 15:
+        test4(arg1, pitch, arg2, dbgPrint, False)
+
 if not (comm.ser is None):
     comm.ser.close()
