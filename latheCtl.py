@@ -122,7 +122,7 @@ class Move():
         accel.axis = self.axis
         accel.freqDivider = self.freqDivider
 
-        accel.dxBase = int(freqGenMax)
+        accel.dxBase = self.axis.stepsInch * self.axis.mult
         accel.dyMaxBase = self.axis.stepsInch
         accel.dyMinBase = int((self.axis.stepsInch * self.minFeed) /
                               maxFeed)
