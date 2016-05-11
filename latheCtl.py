@@ -184,7 +184,6 @@ class Turn():
             if self.prt:
                 print ("accelSteps %d accelMinStep %d accelMaxStep %d" %
                        (accel.accelSteps, accelMinStep, accelMaxStep))
-                print
 
             accel.axis = self.axis
             accel.encoder = self.encoder
