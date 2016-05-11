@@ -1208,7 +1208,7 @@ rpm = 240
 pitch = 0.05
 
 arg1 = 0
-arg2 = 01
+arg2 = 0
 arg3 = 0
 
 def extractVal(arg, default, integer=False):
