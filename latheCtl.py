@@ -146,6 +146,7 @@ class Turn():
         self.spindleRPM = spindleRPM
         self.pitch = pitch
         if self.prt:
+            print "tpi %0.2 pitch %0.3" % (1.0 / pitch, pitch)
             print "minFeed %0.2f spindleRPM %d" % (self.minFeed, spindleRPM)
 
         self.encPerSec = int((spindleRPM * self.encoder) / 60.0) # cnts per sec
@@ -191,8 +192,11 @@ class Turn():
             accel.encoder = self.encoder
 
             accel.dxBase = int(self.encPerInch)
-            accel.dyMaxBase = stepsSecMax
-            accel.dyMinBase = stepsSecMin
+            accel.dyMaxBase = self.axis.stepsInch
+            if self.minFeed != 0:
+                accel.dyMinBase = self.axis.stepsInch * (feedRate / self.minFeed)
+            else:
+                accel.dyMinBase = 0
 
             accel.setup(accelClocks)
 
@@ -1470,6 +1474,7 @@ mult = 16
 
 rpm = 300
 pitch = 0.035
+tpi = 0
 
 arg1 = 0
 arg2 = 0
@@ -1532,6 +1537,10 @@ while True:
         maxV = extractVal(tmp, maxV)
     elif tmp.startswith('pitch'):
         pitch = extractVal(tmp, pitch)
+    elif tmp.startswith('tpi'):
+        tpi = extractVal(tmp, pitch)
+        if tpi >=4:
+            pitch = 1.0 / tpi
     elif tmp.startswith('encoder'):
         encoder = extractVal(tmp, encoder)
     elif tmp.startswith('aVal'):
