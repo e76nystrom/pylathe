@@ -351,6 +351,10 @@ T_MOVECTL_swigregister(T_MOVECTL)
 cvar = _lathe.cvar
 
 
+def bitSize(val):
+    return _lathe.bitSize(val)
+bitSize = _lathe.bitSize
+
 def pauseCmd():
     return _lathe.pauseCmd()
 pauseCmd = _lathe.pauseCmd
