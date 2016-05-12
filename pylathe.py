@@ -242,6 +242,7 @@ def taperXZ(xLoc, taper):
     print "taperZX %7.4f %7.4f" % (xLoc, taper)
 
 def sendClear():
+    global spindleDataSent, zDataSend, xDataSent
     command('CMD_CLEAR')
     spindleDataSent = False
     zDataSent = False
