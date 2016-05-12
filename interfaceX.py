@@ -326,7 +326,6 @@ xilinxBitList = \
     ["zBacklash",   1, 5, "backlash move no pos upd"],
     ["zWait_Sync",  1, 6, "wait for sync to start"],
     ["zPuls_Mult",  1, 7, "enable pulse multiplier"],
-    ["zEnc_Dir",    1, 8, "z direction from encoder"],
 
     "x control register",
 
