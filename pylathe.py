@@ -241,6 +241,12 @@ def taperXZ(xLoc, taper):
     queMove(TAPER_XZ, xLoc)
     print "taperZX %7.4f %7.4f" % (xLoc, taper)
 
+def sendClear():
+    command('CMD_CLEAR')
+    spindleDataSetn = False
+    zDataSent = False
+    xDataSent = False
+
 def xilinxTestMode():
     testMode = False
     try:
@@ -532,7 +538,7 @@ class TurnPanel(wx.Panel):
     def sendData(self):
         try:
             queClear()
-            command('CMD_CLEAR')
+            sendClear()
 
             sendSpindleData()
             sendZData()
@@ -760,7 +766,7 @@ class FacePanel(wx.Panel):
     def sendData(self):
         try:
             queClear()
-            command('CMD_CLEAR')
+            sendClear()
             sendSpindleData()
             sendZData()
             sendXData()
@@ -1206,7 +1212,7 @@ class TaperPanel(wx.Panel):
     def sendData(self):
         try:
             queClear()
-            command('CMD_CLEAR')
+            sendClear()
             sendSpindleData()
             sendZData()
             sendXData()
@@ -1523,7 +1529,7 @@ class ThreadPanel(wx.Panel):
 
     def sendData(self):
         try:
-            command('CMD_CLEAR')
+            sendClear()
             sendSpindleData()
             sendZData()
             sendXData()
@@ -2375,8 +2381,7 @@ class SpindleDialog(wx.Dialog):
 
     def OnStart(self, e):
         queClear()
-        command('CMD_CLEAR')
-        sendSpindleData(True)
+        sendClear()
         command('SPINDLE_START')
 
     def OnStop(self, e):
