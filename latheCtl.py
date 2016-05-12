@@ -1730,9 +1730,9 @@ else:
 
         tmp = Move(axis, dbgPrint)
         accel = Accel(dbgPrint)
-        tmp.setup(accel, 0.0, 20.0)
+        tmp.setup(accel, minV, 20.0)
         print
-        tmp.setup(accel, 0.0, 5.0)
+        tmp.setup(accel, minV, 5.0)
         print
 
         setParm('Z_PITCH', "%0.1f" % (axis.pitch))
@@ -1742,10 +1742,10 @@ else:
         setParm('Z_ACCEL', "%0.2f" % (axis.accel))
         setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
 
-        setParm('Z_MOVE_MIN', "0")
-        setParm('Z_MOVE_MAX', "20")
+        setParm('Z_MOVE_MIN', "%0.2f" % (minV))
+        setParm('Z_MOVE_MAX', "%0.2f" % (maxV))
 
-        setParm('Z_JOG_MIN', "0")
+        setParm('Z_JOG_MIN', "%0.2f" % (minV))
         setParm('Z_JOG_MAX', "5")
 
         setParm('X_FREQUENCY', "50000000")
@@ -1765,8 +1765,6 @@ else:
         axis.backlashSteps = 0.023
         axis.setup()
 
-        minAccel = 0
-
         tmp = Turn(axis, minAccel, encoder, dbgPrint)
         accel = Test(axis, dbgClock, dbgPrint)
         tmp.setup(accel, rpm, pitch)
@@ -1779,10 +1777,10 @@ else:
         setParm('Z_ACCEL', "%0.2f" % (axis.accel))
         setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
 
-        setParm('Z_MOVE_MIN', "%0.2f" % (minAccel))
-        setParm('Z_MOVE_MAX', "20")
+        setParm('Z_MOVE_MIN', "%0.2f" % (minV))
+        setParm('Z_MOVE_MAX', "%0.2f" % (maxV))
 
-        setParm('Z_JOG_MIN', "%0.2f" % (minAccel))
+        setParm('Z_JOG_MIN', "%0.2f" % (minV))
         setParm('Z_JOG_MAX', "5")
 
         setParm('X_FREQUENCY', "50000000")
