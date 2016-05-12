@@ -243,7 +243,7 @@ def taperXZ(xLoc, taper):
 
 def sendClear():
     command('CMD_CLEAR')
-    spindleDataSetn = False
+    spindleDataSent = False
     zDataSent = False
     xDataSent = False
 
@@ -2253,7 +2253,7 @@ class MainFrame(wx.Frame):
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
         global zDataSent
-        zDataSend = False
+        zDataSent = False
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -2295,7 +2295,7 @@ class ZDialog(wx.Dialog):
 class XDialog(wx.Dialog):
     def __init__(self, frame):
         global xDataSent
-        xDataSend = False
+        xDataSent = False
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
