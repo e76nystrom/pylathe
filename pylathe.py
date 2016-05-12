@@ -243,6 +243,7 @@ def taperXZ(xLoc, taper):
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
+    command('CLRDBG');
     command('CMD_CLEAR')
     spindleDataSent = False
     zDataSent = False
