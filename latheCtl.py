@@ -277,7 +277,7 @@ class Accel():
                 print ("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" %
                         (scale, self.dx, dyMin, self.dyMax, dyDelta))
             incPerClock = float(dyDelta) / accelClocks
-            intIncPerClock = int(incPerClock + 0.5)
+            intIncPerClock = int(incPerClock)
             if intIncPerClock == 0:
                 continue
             self.intIncPerClock = intIncPerClock
