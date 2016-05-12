@@ -411,10 +411,6 @@ def zGoHomeCmd():
     return _lathe.zGoHomeCmd()
 zGoHomeCmd = _lathe.zGoHomeCmd
 
-def zStart():
-    return _lathe.zStart()
-zStart = _lathe.zStart
-
 def zStop():
     return _lathe.zStop()
 zStop = _lathe.zStop
