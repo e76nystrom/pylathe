@@ -143,6 +143,7 @@ def getString():
             raise commTimeout()
             break;
         if tmp == '*':
+            commLock.release()
             timeout = False
             return(rsp)
         rsp = rsp + tmp;
