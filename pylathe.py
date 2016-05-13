@@ -91,7 +91,7 @@ from setup import createCommands, createParameters,\
 
 import comm
 from comm import openSerial, commTimeout, command, getParm, setParm,\
-    sendMove, getQueueStatus
+    getString, sendMove, getQueueStatus
 
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
@@ -1973,6 +1973,11 @@ class UpdateThread(Thread):
             i += 1
             if i >= 10:
                 i = 0
+            try:
+                result = getString()
+                print result
+            except commTimeout as e:
+                pass
         print "done"
         stdout.flush()
 
