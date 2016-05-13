@@ -1973,7 +1973,7 @@ class UpdateThread(Thread):
             i += 1
             if i >= 10:
                 i = 0
-            for count in range(0, 5):
+            for count in range(0, 10):
                 try:
                     result = getString()
                     if result:
