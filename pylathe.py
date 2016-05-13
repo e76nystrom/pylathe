@@ -1973,13 +1973,16 @@ class UpdateThread(Thread):
             i += 1
             if i >= 10:
                 i = 0
-            try:
-                result = getString()
-                if result:
-                    print result
-                stdout.flush()
-            except commTimeout as e:
-                pass
+            for count in range(0, 5):
+                try:
+                    result = getString()
+                    if result:
+                        print result
+                        stdout.flush()
+                    else:
+                        break
+                    except commTimeout as e:
+                        break
         print "done"
         stdout.flush()
 
