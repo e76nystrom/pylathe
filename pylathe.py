@@ -1981,8 +1981,8 @@ class UpdateThread(Thread):
                         stdout.flush()
                     else:
                         break
-                    except commTimeout as e:
-                        break
+                except commTimeout as e:
+                    break
         print "done"
         stdout.flush()
 
