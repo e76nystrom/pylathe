@@ -10,7 +10,7 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
-dbg = Null
+dbg = None
 
 class InfoValue():
     def __init__(self, val):
