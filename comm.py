@@ -139,7 +139,7 @@ def getString():
             commLock.release()
             if not timeout:
                 timeout = True
-                print "getParm timeout %s" % (parm)
+                print "getString timeout"
             raise commTimeout()
             break;
         if tmp == '*':
