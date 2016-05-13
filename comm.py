@@ -145,7 +145,9 @@ def getString():
         if tmp == '*':
             commLock.release()
             timeout = False
-            return(rsp)
+            if len(rsp) <= 3:
+                return ""
+            return(rsp[4:])
         rsp = rsp + tmp;
     commLock.release()
 
