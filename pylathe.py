@@ -1974,7 +1974,7 @@ class UpdateThread(Thread):
             if i >= 10:
                 i = 0
             try:
-                result = getString('READDBG')
+                result = getString()
                 print result
             except commTimeout as e:
                 pass
