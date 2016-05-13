@@ -10,6 +10,8 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
+dbg = Null
+
 class InfoValue():
     def __init__(self, val):
         self.value = val
@@ -564,6 +566,8 @@ class TurnPanel(wx.Panel):
 
     def OnStart(self, e):
         command('CMD_RESUME')
+        global dbg
+        dbg = open('dbg.txt', 'w')
         global jogPanel
         jogPanel.focus()
     
@@ -1977,8 +1981,12 @@ class UpdateThread(Thread):
                 try:
                     result = getString()
                     if result:
-                        print result
-                        stdout.flush()
+                        if dbg != None:
+                            dbg.write(result + '\n')
+                            dbg.flush()
+                        else:
+                            print result
+                            stdout.flush()
                     else:
                         break
                 except commTimeout as e:
