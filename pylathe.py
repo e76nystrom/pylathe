@@ -1976,6 +1976,7 @@ class UpdateThread(Thread):
             try:
                 result = getString()
                 print result
+                stdout.flush()
             except commTimeout as e:
                 pass
         print "done"
