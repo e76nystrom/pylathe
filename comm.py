@@ -125,6 +125,29 @@ def getParm(parm):
         rsp = rsp + tmp;
     commLock.release()
 
+def getString(parm):
+    global ser, cmds, parms, commLock, timeout
+    if ser is None:
+        return
+    cmd = '\x01%x %x ' % (cmds['READVAL'][0], parms[parm][0])
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if len(tmp) == 0:
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print "getParm timeout %s" % (parm)
+            raise commTimeout()
+            break;
+        if tmp == '*':
+            timeout = False
+            return(rsp)
+        rsp = rsp + tmp;
+    commLock.release()
+
 def setXReg(reg, val):
     global ser, xRegs, cmds, comLock, timeout, xDbgPrint
     if ser is None:
