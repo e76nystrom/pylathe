@@ -1821,8 +1821,7 @@ else:
             x = j and ((1 << (xCtl_size + 1)) - 1)
             z = j and ((1 << (zCtl_size + 1)) - 1)
             print x, z
-            testVal = ( << 8) or \
-                       ))
+            testVal = (x << 8) or z
             val = getXReg('XRDCTL')
             if val != testVal:
                 print "testVal %4x val %4x" % (testVal, val)
