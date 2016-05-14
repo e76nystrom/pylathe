@@ -1813,5 +1813,17 @@ else:
     if testId == 15:
         test4(arg1, pitch, arg2, dbgPrint, False)
 
+    if testId == 16:
+        for i in range(0, repeat):
+            setXReg('XLDZCTL', j)
+            setXReg('XLDXCTL', j)
+            testVal = ((j and ((1 << xCtlReg_size) - 1) << 8) or \
+                       (j and ((1 << zCtlReg_size) - 1)))
+            val = getXReg('xRDCTL')
+            if val != testVal:
+                print "testVal %4x val %4x" % (testVal, val)
+                        
+
+
 if not (comm.ser is None):
     comm.ser.close()
