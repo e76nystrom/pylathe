@@ -308,7 +308,7 @@ xilinxList = \
     "test info",
 
     ["XLDTFREQ", "load test freq"],
-    ["XLDTCOUNT", "load test count"]
+    ["XLDTCOUNT", "load test count"],
 
     "read control regs",
 
