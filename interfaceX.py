@@ -309,6 +309,10 @@ xilinxList = \
 
     ["XLDTFREQ", "load test freq"],
     ["XLDTCOUNT", "load test count"]
+
+    "read control regs",
+
+    ["XRDCTL", "read control regiisters"]
 ]
 
 xilinxBitList = \
