@@ -1820,7 +1820,6 @@ else:
             setXReg('XLDXCTL', j)
             xTest = j & ((1 << (xCtl_size + 1)) - 1)
             zTest = j & ((1 << (zCtl_size + 1)) - 1)
-            print xTest, zTest
             zVal = getXReg('XRDZCTL')
             xVal = getXReg('XRDXCTL')
             if zVal != zTest:
