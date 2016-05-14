@@ -330,7 +330,6 @@ xilinxBitList = \
     ["zSet_Loc",    1, 4, "set z location"],
     ["zBacklash",   1, 5, "backlash move no pos upd"],
     ["zWait_Sync",  1, 6, "wait for sync to start"],
-    ["zPuls_Mult",  1, 7, "enable pulse multiplier"],
 
     "x control register",
 
@@ -367,6 +366,7 @@ xilinxBitList = \
     ["xStep_Pol",  1, 2, "x step pulse polarity"],
     ["xDir_Pol",   1, 3, "x direction polarity"],
     ["enc_Pol",    1, 4, "encoder dir polarity"],
+    ["zPulse_Mult",1, 5, "enable pulse multiplier"],
 
     "debug control register",
 
