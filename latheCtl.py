@@ -1818,13 +1818,15 @@ else:
         for i in range(0, repeat):
             setXReg('XLDZCTL', j)
             setXReg('XLDXCTL', j)
-            x = j & ((1 << (xCtl_size + 1)) - 1)
-            z = j & ((1 << (zCtl_size + 1)) - 1)
-            print x, z
-            testVal = (x << 8) | z
-            val = getXReg('XRDCTL')
-            if val != testVal:
-                print "testVal %4x val %4x" % (testVal, val)
+            xTest = j & ((1 << (xCtl_size + 1)) - 1)
+            zTest = j & ((1 << (zCtl_size + 1)) - 1)
+            print xTest, zTest
+            zVal = getXReg('XRDZCTL')
+            xval = getXReg('XRDXCTL')
+            if zVal != zTest:
+                print "zTest %4x zVal %4x" % (zTest, zVal)
+            if xVal != xTest:
+                print "xTest %4x xVal %4x" % (xTest, xVal)
             stdout.flush()
             j += 1
 
