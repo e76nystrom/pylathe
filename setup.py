@@ -285,12 +285,12 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                         xLst.append((" alias %-10s : std_logic is %sreg(%d); " +
                                      "-- x%02x %s\n") %
                                     (xVar, regName, shift, 1 << shift, comment))
-                        if (shift > maxShift):
-                            maxShift = shift
                     # tmp =  (" public static final int %-10s = (%s << %s);" %
                     #         (cVar, bit, shift))
                     # jFile.write("%s /* %s */\n" % 
                     #             (tmp, comment));
+                if (shift > maxShift):
+                    maxShift = shift
                 globals()[cVar] = bit << shift
                 lastShift = shift
         else:
