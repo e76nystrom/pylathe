@@ -1825,6 +1825,7 @@ else:
             val = getXReg('XRDCTL')
             if val != testVal:
                 print "testVal %4x val %4x" % (testVal, val)
+            stdout.flush()
             j += 1
 
 if not (comm.ser is None):
