@@ -312,7 +312,8 @@ xilinxList = \
 
     "read control regs",
 
-    ["XRDCTL", "read control regiisters"]
+    ["XRDZCTL", "read control regiisters"],
+    ["XRDXCTL", "read control regiisters"]
 ]
 
 xilinxBitList = \
