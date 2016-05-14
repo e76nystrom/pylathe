@@ -313,6 +313,10 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     cFile.write("\n// %s\n\n" % (data))
                     xFile.write("\n-- %s\n\n" % (data))
                     # jFile.write("\n// %s\n\n" % (data))
+            else:
+                if (len(regName) > 0):
+                    var = "%s_size" % (regName)
+                    globals()[var] = maxShift + 1
     if fData:
         cFile.close()
         xFile.write("\nend CtlBits;\n\n")
