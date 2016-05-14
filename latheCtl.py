@@ -1815,12 +1815,14 @@ else:
 
     if testId == 16:
         j = 0
-        print "%x %x" % ((1 << (xCtl_size + 1)) - 1, (1 << (zCtl_size + 1)) - 1)
         for i in range(0, repeat):
             setXReg('XLDZCTL', j)
             setXReg('XLDXCTL', j)
-            testVal = ((j and ((1 << (xCtl_size + 1)) - 1) << 8) or \
-                       (j and ((1 << (zCtl_size + 1)) - 1)))
+            x = j and ((1 << (xCtl_size + 1)) - 1)
+            z = j and ((1 << (zCtl_size + 1)) - 1)
+            print x, z
+            testVal = ( << 8) or \
+                       ))
             val = getXReg('XRDCTL')
             if val != testVal:
                 print "testVal %4x val %4x" % (testVal, val)
