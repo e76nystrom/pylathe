@@ -1819,7 +1819,7 @@ else:
             setXReg('XLDZCTL', j)
             setXReg('XLDXCTL', j)
             x = j & ((1 << (xCtl_size + 1)) - 1)
-            z = j | ((1 << (zCtl_size + 1)) - 1)
+            z = j & ((1 << (zCtl_size + 1)) - 1)
             print x, z
             testVal = (x << 8) | z
             val = getXReg('XRDCTL')
