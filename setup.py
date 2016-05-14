@@ -317,6 +317,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                 if (len(regName) > 0):
                     var = "%s_size" % (regName)
                     globals()[var] = maxShift + 1
+                    print var
+                    stdout.flush()
     if fData:
         cFile.close()
         xFile.write("\nend CtlBits;\n\n")
