@@ -1822,7 +1822,7 @@ else:
             zTest = j & ((1 << (zCtl_size + 1)) - 1)
             print xTest, zTest
             zVal = getXReg('XRDZCTL')
-            xval = getXReg('XRDXCTL')
+            xVal = getXReg('XRDXCTL')
             if zVal != zTest:
                 print "zTest %4x zVal %4x" % (zTest, zVal)
             if xVal != xTest:
