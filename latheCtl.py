@@ -1815,7 +1815,7 @@ else:
 
     if testId == 16:
         j = 0
-        print (1 << xCtl_size), (1 << zCtl_size)b
+        print (1 << xCtl_size), (1 << zCtl_size)
         for i in range(0, repeat):
             setXReg('XLDZCTL', j)
             setXReg('XLDXCTL', j)
