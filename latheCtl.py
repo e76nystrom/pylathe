@@ -1818,8 +1818,8 @@ else:
         for i in range(0, repeat):
             setXReg('XLDZCTL', j)
             setXReg('XLDXCTL', j)
-            x = j and ((1 << (xCtl_size + 1)) - 1)
-            z = j and ((1 << (zCtl_size + 1)) - 1)
+            x = j & ((1 << (xCtl_size + 1)) - 1)
+            z = j | ((1 << (zCtl_size + 1)) - 1)
             print x, z
             testVal = (x << 8) or z
             val = getXReg('XRDCTL')
