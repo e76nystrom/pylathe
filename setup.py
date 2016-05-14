@@ -296,6 +296,9 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
         else:
             if fData:
                 if (len(regName) > 0):
+                    var = "%s_size" % (regName)
+                    tmp =  "#define %-12s %d" % (var, maxShift + 1)
+                    cFile.write("%s\n" % (tmp))
                     xFile.write(" constant %s_size : integer := %d;\n" %
                                 (regName, maxShift + 1))
                     xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
