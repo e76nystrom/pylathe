@@ -899,7 +899,7 @@ class Test(Accel):
         if self.dbgPrint:
             print 
         val = dspXReg('XRDSR')
-        print ("results %d %d clocks sr %2x %4.2f sec\n" % 
+        print ("results %d %d clocks sr 0x%2x %4.2f sec\n" % 
                (runClocks, maxClocks, val, delta))
 
     def readFreq(self):
