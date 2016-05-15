@@ -674,10 +674,10 @@ class Test(Accel):
         self.zSetup(dist, loc)
 
         setXReg('XLDZCTL',ZRESET )   # reset z
-        setXReg('XLDZCTL', zDir)      # clear reset set direction
+        setXReg('XLDZCTL', zDir)     # clear reset set direction
         # dspXReg('XRDZXPOS')
         setXReg('XLDZCTL', (ZSTART | # start
-                            zDir))    # and direction
+                            zDir))   # and direction
         # dspXReg('XRDZXPOS')
 
         self.testMoveStart(runClocks, self.freqDivider)
