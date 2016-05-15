@@ -723,6 +723,7 @@ class Test(Accel):
         setXReg('XLDXCTL', 0)      # clear x mode
         setXReg('XLDTCTL', 0)      # clear taper
         setXReg('XLDDCTL', 0)      # disable debug mode
+        setXReg('XLDCFG', 0)       # reset config
 
     def extClockInit(self, encoder):
         global fcy
