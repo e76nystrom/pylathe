@@ -305,6 +305,10 @@ class T_MOVECTL(_object):
     __swig_getmethods__["done"] = _lathe.T_MOVECTL_done_get
     if _newclass:
         done = _swig_property(_lathe.T_MOVECTL_done_get, _lathe.T_MOVECTL_done_set)
+    __swig_setmethods__["wait"] = _lathe.T_MOVECTL_wait_set
+    __swig_getmethods__["wait"] = _lathe.T_MOVECTL_wait_get
+    if _newclass:
+        wait = _swig_property(_lathe.T_MOVECTL_wait_get, _lathe.T_MOVECTL_wait_set)
     __swig_setmethods__["ctlreg"] = _lathe.T_MOVECTL_ctlreg_set
     __swig_getmethods__["ctlreg"] = _lathe.T_MOVECTL_ctlreg_get
     if _newclass:
@@ -325,6 +329,10 @@ class T_MOVECTL(_object):
     __swig_getmethods__["loc"] = _lathe.T_MOVECTL_loc_get
     if _newclass:
         loc = _swig_property(_lathe.T_MOVECTL_loc_get, _lathe.T_MOVECTL_loc_set)
+    __swig_setmethods__["expLoc"] = _lathe.T_MOVECTL_expLoc_set
+    __swig_getmethods__["expLoc"] = _lathe.T_MOVECTL_expLoc_get
+    if _newclass:
+        expLoc = _swig_property(_lathe.T_MOVECTL_expLoc_get, _lathe.T_MOVECTL_expLoc_set)
     __swig_setmethods__["iniDist"] = _lathe.T_MOVECTL_iniDist_set
     __swig_getmethods__["iniDist"] = _lathe.T_MOVECTL_iniDist_get
     if _newclass:
