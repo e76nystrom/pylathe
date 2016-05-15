@@ -725,7 +725,7 @@ class Test(Accel):
         setXReg('XLDDCTL', 0)      # disable debug mode
         setXReg('XLDCFG', 0)       # reset config
         command('CLRDBG')          # clear debug buffer
-        command('CMD_CLEAR)        # clear control variables
+        command('CMD_CLEAR')       # clear control variables
 
     def extClockInit(self, encoder):
         global fcy
