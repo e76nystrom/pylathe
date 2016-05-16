@@ -4,7 +4,8 @@ cmdList = \
 [\
     "z motion commands",
 
-    ["ZMOVE", "", "start z movement"],
+    ["ZMOVE", "", "move z absolute"],
+    ["ZMOVEREL", "", "move z relative"],
     ["ZJMOV", "", "start z jog"],
     ["ZSTOP", "", "stop z movement"],
     ["ZHOME", "", "set current z location as home"],
@@ -13,8 +14,8 @@ cmdList = \
 
     "x motion commands",
 
-    ["XMOVE", "", "start x movement"],
-    ["XJMOV", "", "start x jog"],
+    ["XMOVE", "", "move x absolute"],
+    ["XMOVEREL", "", "move x relative"],
     ["XSTOP", "", "stop x movement"],
     ["XHOME", "", "set current x location as home"],
     ["XSETLOC", "", "set current x location"],
@@ -132,48 +133,52 @@ parmList = \
     "axis move values",
      
     ["Z_MOVE_DIST", "z move distance", "float"],
+    ["Z_MOVE_POS", "z move position", "float"],
     ["Z_JOG_DIR", "x jog direction", "int"],
     ["Z_SET_LOC", "z location to set", "float"],
     ["Z_LOC", "z location", "int"],
+    ["Z_Flag", "z move flag", "int"],
      
     ["X_MOVE_DIST", "x move distance", "float"],
+    ["X_MOVE_POS", "x move position", "float"],
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
     ["X_LOC", "x location", "int"],
+    ["X_Flag", "x move flag", "int"],
      
-    "z turn/face parameters",
+    # "z turn/face parameters",
      
-    ["Z_START_LOC", "z start", "float"],
-    ["Z_END_LOC", "z end", "float"],
-    ["Z_RETRACT", "z retract", "float"],
-    ["Z_FEED_PASS", "z feed per pass", "float"],
+    # ["Z_START_LOC", "z start", "float"],
+    # ["Z_END_LOC", "z end", "float"],
+    # ["Z_RETRACT", "z retract", "float"],
+    # ["Z_FEED_PASS", "z feed per pass", "float"],
      
-    "x turn/face parameters",
+    # "x turn/face parameters",
      
-    ["X_START_LOC", "x start", "float"],
-    ["X_END_LOC", "x end", "float"],
-    ["X_RETRACT", "x retract", "float"],
-    ["X_FEED_PASS", "x feed per pass", "float"],
+    # ["X_START_LOC", "x start", "float"],
+    # ["X_END_LOC", "x end", "float"],
+    # ["X_RETRACT", "x retract", "float"],
+    # ["X_FEED_PASS", "x feed per pass", "float"],
      
-    "feed parameters",
+    # "feed parameters",
      
-    ["FEED_DIR", "feed direction", "int16_t"],
-    ["FEED_TYPE", "feed parameter type", "int16_t"],
-    ["FEED", "feed parameter", "float"],
+    # ["FEED_DIR", "feed direction", "int16_t"],
+    # ["FEED_TYPE", "feed parameter type", "int16_t"],
+    # ["FEED", "feed parameter", "float"],
      
-    "taper parameters",
+    # "taper parameters",
      
-    ["TAPER_Z", "z distance for taper", "float"],
-    ["TAPER_X", "x distance for taper", "float"],
-    ["TAPER_FLAG", "taper flag", "int16_t"],
+    # ["TAPER_Z", "z distance for taper", "float"],
+    # ["TAPER_X", "x distance for taper", "float"],
+    # ["TAPER_FLAG", "taper flag", "int16_t"],
      
-    "general turn thread parameters",
+    # "general turn thread parameters",
      
-    ["TURN_FLAG", "turn flag", "int16_t"],
-    ["THREAD_DEPTH", "thread depth", "float"],
-    ["THREAD_LAST_FEED", "thread last feed depth", "float"],
-    ["THREAD_H_FACTOR", "height Factor", "float"],
-    ["THREAD_ANGLE", "thread angle", "float"],
+    # ["TURN_FLAG", "turn flag", "int16_t"],
+    # ["THREAD_DEPTH", "thread depth", "float"],
+    # ["THREAD_LAST_FEED", "thread last feed depth", "float"],
+    # ["THREAD_H_FACTOR", "height Factor", "float"],
+    # ["THREAD_ANGLE", "thread angle", "float"],
      
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
