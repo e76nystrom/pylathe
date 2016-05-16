@@ -138,14 +138,14 @@ parmList = \
     ["Z_JOG_DIR", "x jog direction", "int"],
     ["Z_SET_LOC", "z location to set", "float"],
     ["Z_LOC", "z location", "int"],
-    ["Z_Flag", "z move flag", "int"],
+    ["Z_FLAG", "z move flag", "int"],
      
     ["X_MOVE_DIST", "x move distance", "float"],
     ["X_MOVE_POS", "x move position", "float"],
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
     ["X_LOC", "x location", "int"],
-    ["X_Flag", "x move flag", "int"],
+    ["X_FLAG", "x move flag", "int"],
      
     # "z turn/face parameters",
      
