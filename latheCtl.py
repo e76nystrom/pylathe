@@ -1518,7 +1518,7 @@ def xSetup():
     setParm('X_MOVE_MIN', "%0.2f" % (minV))
     setParm('X_MOVE_MAX', "%0.2f" % (maxV))
 
-    setParm('X_JOG_MIN', "%0.2f" % (minV))
+    setParm('X_JOG_MIN', "%0.2f" % (2))
     setParm('X_JOG_MAX', "5")
     
     command('CMD_XSETUP')
