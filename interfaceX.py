@@ -163,8 +163,8 @@ parmList = \
     # "feed parameters",
      
     # ["FEED_DIR", "feed direction", "int16_t"],
-    # ["FEED_TYPE", "feed parameter type", "int16_t"],
-    # ["FEED", "feed parameter", "float"],
+    ["FEED_TYPE", "feed parameter type", "int16_t"],
+    ["FEED", "feed parameter", "float"],
      
     # "taper parameters",
      
