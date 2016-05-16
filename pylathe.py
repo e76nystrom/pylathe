@@ -1946,6 +1946,7 @@ class UpdateThread(Thread):
     def run(self):
         i = 0
         op = None
+        sendClear()
         while True:
             sleep(0.1)
             if not self.threadRun:
