@@ -1893,6 +1893,8 @@ else:
             j += 1
 
     if testId == 17:
+        command('CLRDBG');
+        command('CMD_CLEAR')
         encoderStart()
         if testAxis == 'z':
             zSetup()
