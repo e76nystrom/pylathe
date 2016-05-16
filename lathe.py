@@ -407,6 +407,10 @@ def zMoveCmd():
     return _lathe.zMoveCmd()
 zMoveCmd = _lathe.zMoveCmd
 
+def zMoveRelCmd():
+    return _lathe.zMoveRelCmd()
+zMoveRelCmd = _lathe.zMoveRelCmd
+
 def zJogCmd():
     return _lathe.zJogCmd()
 zJogCmd = _lathe.zJogCmd
@@ -446,6 +450,10 @@ zTaperSetup = _lathe.zTaperSetup
 def xMoveCmd():
     return _lathe.xMoveCmd()
 xMoveCmd = _lathe.xMoveCmd
+
+def xMoveRelCmd():
+    return _lathe.xMoveRelCmd()
+xMoveRelCmd = _lathe.xMoveRelCmd
 
 def xJogCmd():
     return _lathe.xJogCmd()
