@@ -1501,7 +1501,7 @@ def zSetup():
     setParm('Z_MOVE_MIN', "%0.2f" % (minV))
     setParm('Z_MOVE_MAX', "%0.2f" % (maxV))
 
-    setParm('Z_JOG_MIN', "%0.2f" % (minV))
+    setParm('Z_JOG_MIN', "%0.2f" % (2))
     setParm('Z_JOG_MAX', "5")
     
     command('CMD_ZSETUP')
