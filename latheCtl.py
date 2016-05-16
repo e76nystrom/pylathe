@@ -1478,6 +1478,7 @@ encoder = dx
 minV = 10.0
 maxV = 40.0
 
+xFrequency = 50000000
 mult = 16
 
 rpm = 300
@@ -1538,10 +1539,11 @@ def xTurnSetup():
 
 def encoderStart():
     global rpm, encoder
-    setParm('X_FREQUENCY', "50000000")
+
+    setParm('X_FREQUENCY', str(xFrequency))
+    setParm('FREQ_MULT', str(mult))
     setParm('RPM', str(rpm))
     setParm('ENC_MAX', str(encoder))
-    setParm('FREQ_MULT', 16)
 
     command('ENCSTART')
 
@@ -1891,18 +1893,16 @@ else:
             j += 1
 
     if testId == 17:
+        encoderStart()
         if testAxis == 'z':
             zSetup()
             zTurnSetup()
-        elif testAxis == 'x':
-            xSetup()
-            xTurnSetup()
-        encoderStat()
-        if testAxis == 'z':
             setParm('Z_MOVE_DIST', arg1)
             setParm('Z_FLAG', ZSYN)
             command('ZMOVEREL')
         elif testAxis == 'x':
+            xSetup()
+            xTurnSetup()
             setParm('X_MOVE_DIST', arg1)
             setParm('X_FLAG', XSYN)
             command('XMOVEREL')
