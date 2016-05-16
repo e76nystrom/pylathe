@@ -1505,12 +1505,36 @@ def zSetup():
     
     command('CMD_ZSETUP')
 
+def xSetup():
+    global axis, minV, maxV
+    setParm('X_PITCH', "%0.1f" % (axis.pitch))
+    setParm('X_RATIO', "%d" % (axis.ratio))
+    setParm('X_MICRO', "%d" % (axis.microSteps))
+    setParm('X_MOTOR', "%d" % (axis.motorSteps))
+    setParm('X_ACCEL', "%0.2f" % (axis.accel))
+    setParm('X_BACKLASH', "%0.3f" % (axis.backlashSteps))
+
+    setParm('X_MOVE_MIN', "%0.2f" % (minV))
+    setParm('X_MOVE_MAX', "%0.2f" % (maxV))
+
+    setParm('X_JOG_MIN', "%0.2f" % (minV))
+    setParm('X_JOG_MAX', "5")
+    
+    command('CMD_XSETUP')
+
 def zTurnSetup():
     global pitch
     setParm('FEED', "%0.4f" % pitch)
     setParm('FEED_TYPE', FEED_PITCH)
 
     command('CMD_ZSYNSETUP');
+
+def xTurnSetup():
+    global pitch
+    setParm('FEED', "%0.4f" % pitch)
+    setParm('FEED_TYPE', FEED_PITCH)
+
+    command('CMD_XSYNSETUP');
 
 def encoderStart():
     global rpm, encoder
@@ -1867,9 +1891,21 @@ else:
             j += 1
 
     if testId == 17:
-        zSetup()
-        zTurnSetup()
+        if testAxis == 'z':
+            zSetup()
+            zTurnSetup()
+        elif testAxis == 'x':
+            xSetup()
+            xTurnSetup()
         encoderStat()
+        if testAxis == 'z':
+            setParm('Z_MOVE_DIST', arg1)
+            setParm('Z_FLAG', ZSYN)
+            command('ZMOVEREL')
+        elif testAxis == 'x':
+            setParm('X_MOVE_DIST', arg1)
+            setParm('X_FLAG', XSYN)
+            command('XMOVEREL')
 
 if not (comm.ser is None):
     comm.ser.close()
