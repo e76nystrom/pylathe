@@ -1488,6 +1488,39 @@ arg1 = 0
 arg2 = 0
 arg3 = 0
 
+def zSetup():
+    global axis, minV, maxV
+    setParm('Z_PITCH', "%0.1f" % (axis.pitch))
+    setParm('Z_RATIO', "%d" % (axis.ratio))
+    setParm('Z_MICRO', "%d" % (axis.microSteps))
+    setParm('Z_MOTOR', "%d" % (axis.motorSteps))
+    setParm('Z_ACCEL', "%0.2f" % (axis.accel))
+    setParm('Z_BACKLASH', "%0.3f" % (axis.backlashSteps))
+
+    setParm('Z_MOVE_MIN', "%0.2f" % (minV))
+    setParm('Z_MOVE_MAX', "%0.2f" % (maxV))
+
+    setParm('Z_JOG_MIN', "%0.2f" % (minV))
+    setParm('Z_JOG_MAX', "5")
+    
+    command('CMD_ZSETUP')
+
+def zTurnSetup():
+    global pitch
+    setParm('FEED', "%0.4f" % pitch)
+    setParm('FEED_TYPE', FEED_PITCH)
+
+    command('CMD_ZSYNSETUP');
+
+def encoderStart():
+    global rpm, encoder
+    setParm('X_FREQUENCY', "50000000")
+    setParm('RPM', str(rpm))
+    setParm('ENC_MAX', str(encoder))
+    setParm('FREQ_MULT', 16)
+
+    command('ENCSTART')
+
 def extractVal(arg, default, integer=False):
     tmp = arg.split('=')
     if len(tmp) == 2:
@@ -1832,6 +1865,11 @@ else:
                 print "xTest %4x xVal %4x" % (xTest, xVal)
             stdout.flush()
             j += 1
+
+    if testId == 17:
+        zSetup()
+        zTurnSetup()
+        encoderStat()
 
 if not (comm.ser is None):
     comm.ser.close()
