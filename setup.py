@@ -187,12 +187,16 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'xilinxreg.h', 'w')
         cFile.write("enum XILINX\n{\n");
-        xFile = open(xLoc + 'RegDef.vhd', 'w')
-        xFile.write("library IEEE;\n")
-        xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
-        xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
-        xFile.write("package RegDef is\n\n")
-        xFile.write("constant opb : positive := 8;\n\n")
+        try:
+            xFile = open(xLoc + 'RegDef.vhd', 'w')
+        except IOError as e:
+            xFile = None
+        if xFile:
+            xFile.write("library IEEE;\n")
+            xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
+            xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
+            xFile.write("package RegDef is\n\n")
+            xFile.write("constant opb : positive := 8;\n\n")
         # jFile = open(jLoc + 'Xilinx.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Xilinx\n {\n");
@@ -211,9 +215,10 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
                 tmp = " %s, " % (regName)
                 cFile.write("%s/* 0x%02x %s */\n" % 
                             (tmp.ljust(32), val, regComment));
-                xFile.write(('constant %-12s : unsigned(opb-1 downto 0) ' +
-                             ':= x"%02x"; -- %s\n') %
-                            (regName, val, regComment))
+                if xFile:
+                    xFile.write(('constant %-12s : unsigned(opb-1 downto 0) ' +
+                                 ':= x"%02x"; -- %s\n') %
+                                (regName, val, regComment))
                 # tmp = "  %s, " % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
                 #             (tmp.ljust(32), val, regComment));
@@ -226,19 +231,22 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
             if fData:
                 if (len(data) > 0):
                     cFile.write("\n// %s\n\n" % (data))
-                    xFile.write("\n-- %s\n\n" % (data))
+                    if xFile:
+                        xFile.write("\n-- %s\n\n" % (data))
                     # jFile.write("\n// %s\n\n" % (data))
                 else:
                     cFile.write("\n");
-                    xFile.write("\n");
+                    if xFile:
+                        xFile.write("\n");
                     # jFile.write("\n");
     if fData:
         cFile.write("};\n")
         cFile.close()
-        xFile.write("\nend RegDef;\n\n")
-        xFile.write("package body RegDef is\n\n")
-        xFile.write("end RegDef;\n")
-        xFile.close()
+        if xFile:
+            xFile.write("\nend RegDef;\n\n")
+            xFile.write("package body RegDef is\n\n")
+            xFile.write("end RegDef;\n")
+            xFile.close()
         # jFile.write("};\n")
         # jFile.close()
         # j1File.write(" };\n\n};\n")
@@ -250,11 +258,15 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
 def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'xilinxbits.h', 'w')
-        xFile = open(xLoc + 'CtlBits.vhd', 'w')
-        xFile.write("library IEEE;\n")
-        xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
-        xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
-        xFile.write("package CtlBits is\n")
+        try:
+            xFile = open(xLoc + 'CtlBits.vhd', 'w')
+        except IOError as e:
+            xFile = None
+        if xFile:
+            xFile.write("library IEEE;\n")
+            xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
+            xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
+            xFile.write("package CtlBits is\n")
         # jFile = open(jLoc + 'XilinxBits.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class XilinxBits\n{\n");
@@ -299,10 +311,11 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     var = "%s_size" % (regName)
                     tmp =  "#define %-12s %d" % (var, maxShift + 1)
                     cFile.write("%s\n" % (tmp))
-                    xFile.write(" constant %s_size : integer := %d;\n" %
-                                (regName, maxShift + 1))
-                    xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
-                                (regName, regName))
+                    if xFile:
+                        xFile.write(" constant %s_size : integer := %d;\n" %
+                                    (regName, maxShift + 1))
+                        xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
+                                    (regName, regName))
                     for i in range(0, len(xLst)):
                         xFile.write(xLst[i])
                     # if (len(bitStr) != 0):
@@ -314,7 +327,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     #     bitStr = []
                 if (len(data) != 0):
                     cFile.write("\n// %s\n\n" % (data))
-                    xFile.write("\n-- %s\n\n" % (data))
+                    if xFile:
+                        xFile.write("\n-- %s\n\n" % (data))
                     # jFile.write("\n// %s\n\n" % (data))
             else:
                 if (len(regName) > 0):
@@ -322,9 +336,10 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     globals()[var] = maxShift + 1
     if fData:
         cFile.close()
-        xFile.write("\nend CtlBits;\n\n")
-        xFile.write("package body CtlBits is\n\n")
-        xFile.write("end CtlBits;\n")
-        xFile.close()
+        if xFile:
+            xFile.write("\nend CtlBits;\n\n")
+            xFile.write("package body CtlBits is\n\n")
+            xFile.write("end CtlBits;\n")
+            xFile.close()
         # jFile.write("};\n")
         # jFile.close()
