@@ -189,7 +189,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         cFile.write("enum XILINX\n{\n");
         try:
             xFile = open(xLoc + 'RegDef.vhd', 'w')
-        except IOError as e:
+        except (OSError, IOError) as e:
             xFile = None
         if xFile:
             xFile.write("library IEEE;\n")
@@ -317,7 +317,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                         xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
                                     (regName, regName))
                     for i in range(0, len(xLst)):
-                        xFile.write(xLst[i])
+                        if xFile:
+                            xFile.write(xLst[i])
                     # if (len(bitStr) != 0):
                     #     jFile.write(("\n public static final " +
                     #                 "String[] %sBits =\n {\n") % (regName))
