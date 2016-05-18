@@ -75,44 +75,6 @@ cmdList = \
     ["CLRDBG", "", "clear debug message buffer"],
 ]
     
-# def createCommands(cLoc, fData=False):
-#     if fData:
-#         cFile = open(cLoc + 'cmdList.h','w')
-#         cFile.write("enum COMMANDS\n{\n");
-#         # jFile = open(jLoc + 'Cmd.java','w')
-#         # jFile.write("package lathe;\n\n");
-#         # jFile.write("public enum Cmd\n{\n");
-#     global cmds
-#     cmds = {}
-#     val = 0
-#     for i in range(0,len(cmdList)):
-#         data = cmdList[i]
-#         if not isinstance(data,basestring):
-#             if (len(data) != 0):
-#                 regName = data[0]
-#                 regComment = data[1]
-#                 if fData:
-#                     tmp = " %s," % (regName)
-#                     cFile.write("%s/* 0x%02x %s */\n" % 
-#                                 (tmp.ljust(32),val,regComment))
-#                     # jFile.write("%s/* 0x%02x %s */\n" % 
-#                     #             (tmp.ljust(32),val,regComment))
-#                 cmds[regName] = val
-#                 val += 1
-#         else:
-#             if fData:
-#                 if (len(data) > 0):
-#                     cFile.write("\n// %s\n\n" % (data))
-#                     # jFile.write("\n// %s\n\n" % (data))
-#                 else:
-#                     cFile.write("\n")
-#                     # jFile.write("\n")
-#     if fData:
-#         cFile.write("};\n")
-#         cFile.close()
-#         # jFile.write("};\n")
-#         # jFile.close()
-
 parmList = \
 [\
     "spindle parameters",
@@ -223,67 +185,6 @@ parmList = \
     ["MAX_PARM", "maximum parameter", "int16_t"],
 ]
     
-# def createParameters(cLoc, fData=False):
-#     if fData:
-#         cFile = open(cLoc + 'parmList.h','w')
-#         cFile.write("enum PARM\n{\n")
-    
-#         c1File = open(cLoc + 'remparm.h','w')
-#         c1File.write("T_PARM remparm[] =\n{\n")
-    
-#         c2File = open(cLoc + 'remvardef.h','w')
-#         # jFile = open(jLoc + 'Parm.java','w')
-#         # jFile.write("package lathe;\n\n");
-#         # jFile.write("public enum Parm\n{\n")
-#     global parms
-#     parms = {}
-#     val = 0
-#     for i in range(0,len(parmList)):
-#         data = parmList[i]
-#         if not isinstance(data,basestring):
-#             regName = data[0]
-#             tmp = regName.split("_")
-#             varName = ""
-#             first = True
-#             for s in tmp:
-#                 if first:
-#                     varName = s.lower()
-#                     first = False
-#                 else:
-#                     varName = varName + s[0].upper() + s[1:].lower()
-#             # varName = regName[3:].lower()
-#             regComment = data[1]
-#             varType = data[2]
-#             if fData:
-#                 tmp = "PRM_%s," % (regName)
-#                 cFile.write("%s/* 0x%02x %s */\n" % 
-#                             (tmp.ljust(32),val,regComment))
-#                 tmp = "PARM(%s)," % (varName)
-#                 c1File.write("%s/* 0x%02x %s */\n" % 
-#                              (tmp.ljust(32),val,regComment))
-#                 tmp = "EXT %s %s;" % (varType,varName)
-#                 c2File.write("%s/* 0x%02x %s */\n" % 
-#                              (tmp.ljust(32),val,regComment))
-#                 # tmp = "  %s," % (regName)
-#                 # jFile.write("%s/* 0x%02x %s */\n" % 
-#                 #             (tmp.ljust(32),val,regComment))
-#             parms[regName] = (val, varType)
-#             val += 1
-#         else:
-#             if fData:
-#                 cFile.write("\n// %s\n\n" % (data))
-#                 c1File.write("\n// %s\n\n" % (data))
-#                 c2File.write("\n// %s\n\n" % (data))
-#                 # jFile.write("\n// %s\n\n" % (data))
-#     if fData:
-#         cFile.write("};\n")
-#         cFile.close()
-#         c1File.write("};\n")
-#         c1File.close()
-#         c2File.close()
-#         # jFile.write("};\n")
-#         # jFile.close()
-    
 regList =\
 [\
     "z move command bits",
@@ -341,35 +242,6 @@ regList =\
     ["DBGSEQ", "(1 << 2)", "generate sequence data"]
 ]
     
-# def createControlBits(cLoc, fData=False):
-#     if fData:
-#         cFile = open(cLoc + 'ctlbits.h','w')
-#         # jFile = open(jLoc + 'CtlBits.java','w')
-#         # jFile.write("package lathe;\n\n");
-#         # jFile.write("public class CtlBits\n{\n");
-#     for i in range(0,len(regList)):
-#         data = regList[i]
-#         if not isinstance(data,basestring):
-#             var = data[0]
-#             val = data[1]
-#             comment = data[2]
-#             if fData:
-#                 tmp =  "#define %-12s %s" % (var,val)
-#                 cFile.write("%s /* %s */\n" % 
-#                             (tmp.ljust(32),comment));
-#                 # tmp =  " public static final int %-10s = %s;" % (var,val)
-#                 # jFile.write("%s /* %s */\n" % 
-#                 #             (tmp,comment));
-#             globals()[var] = eval(val)
-#         else:
-#             if fData:
-#                 cFile.write("\n// %s\n\n" % (data))
-#                 # jFile.write("\n// %s\n\n" % (data))
-#     if fData:
-#         cFile.close()
-#         # jFile.write("};\n")
-#         # jFile.close()
-
 stateList =\
 [\
     
@@ -393,53 +265,6 @@ stateList =\
     ["XDONE", "clean up state"],
     "};",
     
-#  "turn control states",
-    
-#  "enum tStates",
-#  "{",
-#  ["TIDLE", "idle"],
-#  ["TSTART", "Start"],
-# # ["TCKRTC", "check for x retracted"],
-# # ["TWTRTC0", "wait for x to retract"],
-# # ["TCKSTR", "check for at start position"],
-# # ["TWSTART", "wait for start position"],
-#  ["TFEED", "feed x in"],
-#  ["TWTFEED", "wait for x feed to complete"],
-#  ["TTURN", "set up turn move"],
-#  ["TWTTURN", "perform turn operation"],
-#  ["TRTC", "retract x after turn"],
-#  ["TWTRTC1", "wait for x retract to complete"],
-#  ["TRTN", "return to start position"],
-#  ["TWTRTN", "wait for return to start"],
-#  ["TWTRTNB", "wait for return backlash "],
-#  ["TUPDPASS", "update pass"],
-#  ["TUPDSPRING", "update spring pass"],
-#  ["TDONE", "clean up state"],
-#  "};",
-    
-#  "facing control states",
-    
-#  "enum fStates",
-#  "{",
-#  ["FIDLE", "idle"],
-#  ["FCKRTC", "check for z retracted"],
-#  ["FWTRTC0", "wait for z to retract"],
-#  ["FCKSTR", "check for x at start position"],
-#  ["FWSTART", "wait for x start position"],
-#  ["FFEED", "feed z in"],
-#  ["FWTFEED", "wait for z feed to complete"],
-#  ["FFACE", "set up facing move"],
-#  ["FWTFACE", "perform facing operation"],
-#  ["FRTC", "retract z after facing"],
-#  ["FWTRTC1", "wait for z retract to complete"],
-#  ["FRTN", "return to start position"],
-#  ["FWTRTN", "wait for return to start"],
-#  ["FWTRTNB", "wait for return backlash"],
-#  ["FUPDPASS", "update pass"],
-#  ["FUPDSPRING", "update spring pass"],
-#  ["FDONE", "clean up state"],
-#  "};",
-
     "move control states",
     
     "enum M_STATES",
@@ -469,44 +294,6 @@ stateList =\
     "};"
 ]
     
-# def createStateData(cLoc, fData=False):
-#     if fData:
-#         cFile = open(cLoc + 'ctlstates.h', 'w')
-#         # jFile = open(jLoc + 'CtlStates.java', 'w')
-#         # jFile.write("package lathe;\n\n");
-#         # jFile.write("public class CtlStates\n{\n");
-#     val = 0
-#     for i in range(0, len(stateList)):
-#         data = stateList[i]
-#         if not isinstance(data, basestring):
-#             state = data[0]
-#             comment = data[1]
-#             if fData:
-#                 tmp =  " %s," % (state)
-#                 cFile.write("%s/* %2d %s */\n" % 
-#                             (tmp.ljust(32), val, comment));
-#                 # jFile.write('  "%-10s %s", \n' % (state, comment));
-#             globals()[state] = val
-#             val += 1
-#         else:
-#             if fData:
-#                 if data.startswith("enum"):
-#                     tmp = data.split()
-#                     cFile.write("%s %s\n" % (tmp[0], tmp[1].upper()))
-#                     # tmp =  " public static final String[] %s = \n" % (tmp[1])
-#                     # jFile.write(tmp)
-#                     val = 0
-#                 elif data.startswith("{") or data.startswith("}"):
-#                     cFile.write("%s\n" % (data))
-#                     # jFile.write(" %s\n" % (data))
-#                 else:
-#                     cFile.write("\n// %s\n\n" % (data))
-#                     # jFile.write("\n // %s\n\n" % (data))
-#     if fData:
-#         cFile.close()
-#         # jFile.write("};\n")
-#         # jFile.close()
-
 if __name__ == '__main__':
     import os
     from setup import createCommands, createParameters,\
