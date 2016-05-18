@@ -11,7 +11,7 @@ cmds = None
 parms = None
 xRegs = None
 xDbgPrint = True
-swig = True
+SWIG = True
 
 def openSerial(port, rate):
     global ser
@@ -27,7 +27,7 @@ class commTimeout(Exception):
 def command(cmd):
     global ser, cmds, commLock, timeout
     (cmdVal, action) = cmds[cmd]
-    if swig and (action != None):
+    if SWIG and (action != None):
         actionCmd = "lathe." + action + "()"
         eval(actionCmd)
         # action()
@@ -61,7 +61,7 @@ def setParm(parm, val):
     cmdInfo = parms[parm]
     parmIndex = cmdInfo[0]
     parmType = cmdInfo[1]
-    if swig and (len(cmdInfo) == 3):
+    if SWIG and (len(cmdInfo) == 3):
         parmVar = cmdInfo[2]
         if parmType == 'float':
             valString = "%5.6f" % (float(val))
