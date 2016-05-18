@@ -11,7 +11,7 @@ cmds = None
 parms = None
 xRegs = None
 xDbgPrint = True
-SWIG = True
+SWIG = False
 
 def openSerial(port, rate):
     global ser
