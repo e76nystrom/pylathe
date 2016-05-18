@@ -72,6 +72,7 @@ cmdList = \
     
     ["READLOC", "", "read location"],
     ["READDBG", "", "read debug message"]
+    ["CLRDBG", "", "clear debug message buffer"],
 ]
     
 # def createCommands(cLoc, fData=False):
