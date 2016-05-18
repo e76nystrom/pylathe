@@ -21,6 +21,9 @@ if version_info >= (2, 6, 0):
             return _lathe
         if fp is not None:
             try:
+                print fp
+                print pathname
+                
                 _mod = imp.load_module('_lathe', fp, pathname, description)
             finally:
                 fp.close()

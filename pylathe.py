@@ -92,6 +92,8 @@ info = {}
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
 
+from comm import SWIG
+SWIG = False
 import comm
 from comm import openSerial, commTimeout, command, getParm, setParm,\
     getString, sendMove, getQueueStatus

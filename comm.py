@@ -1,7 +1,6 @@
 from sys import stdout
 from threading import Thread, Lock, Event
 import serial
-import lathe
 
 ser = None
 timeout = False
@@ -12,6 +11,7 @@ parms = None
 xRegs = None
 xDbgPrint = True
 SWIG = False
+importLathe = True
 
 def openSerial(port, rate):
     global ser
@@ -25,9 +25,13 @@ class commTimeout(Exception):
     pass
 
 def command(cmd):
-    global ser, cmds, commLock, timeout
+    global SWIG, ser, cmds, commLock, timeout
     (cmdVal, action) = cmds[cmd]
     if SWIG and (action != None):
+        global importLathe
+        if importLathe:
+            import lathe
+            importLathe = False
         actionCmd = "lathe." + action + "()"
         eval(actionCmd)
         # action()
@@ -62,6 +66,10 @@ def setParm(parm, val):
     parmIndex = cmdInfo[0]
     parmType = cmdInfo[1]
     if SWIG and (len(cmdInfo) == 3):
+        global importLathe
+        if importLathe:
+            import lathe
+            importLathe = False
         parmVar = cmdInfo[2]
         if parmType == 'float':
             valString = "%5.6f" % (float(val))
