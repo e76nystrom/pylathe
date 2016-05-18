@@ -81,6 +81,7 @@ info = {}
 readInfo(configFile)
 
 XILINX = False
+SWIG = False
 try:
     XILINX = info['cfgXilinx'].GetValue() == 'True'
 except:
@@ -94,6 +95,7 @@ from setup import createCommands, createParameters,\
 import comm
 from comm import openSerial, commTimeout, command, getParm, setParm,\
     getString, sendMove, getQueueStatus
+comm.SWIG = SWIG
 
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
@@ -103,8 +105,10 @@ if XILINX:
 else:
     from interface import cmdList, parmList, stateList, regList
 
-import lathe
-from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
+if SWIG:
+    import lathe
+    from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
+
 
 print sys.version
 print wx.version()
