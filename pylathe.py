@@ -2625,16 +2625,24 @@ class SpindleTest():
         while step < accelMaxSteps:
             step += 1
             count = int(cFactor * sqrt(step))
+            pre = 1
             ctr = count - lastCount
+            if ctr > 65535:
+                ctr >>= 1;
+                while ctr > 65535:
+                    pre <<= 1
+                    ctr >>= 1
+                count = lastCount + ctr * pre
             time = float(count) / fcy
             delta = time - lastTime
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
-            f.write("step %4d count %9d %7d %5d t %8.6f %8.6f "\
+            f.write("step %4d count %d %9d %7d %5d t %8.6f %8.6f "\
                     "f %8.2f rpm %4.1f\n" %
-                    (step, count, ctr, ctr - lastCtr, time, delta, freq, rpm))
+                    (step, count, pre, ctr, ctr * pre - lastCtr,
+                     time, delta, freq, rpm))
             lastCount = count
-            lastCtr = ctr
+            lastCtr = ctr * pre
             lastTime = time
         
         f.write("\n")
