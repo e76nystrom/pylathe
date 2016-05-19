@@ -2632,14 +2632,16 @@ class SpindleTest():
                 while ctr > 65535:
                     pre <<= 1
                     ctr >>= 1
-                count = lastCount + ctr * pre
+                actCount = lastCount + ctr * pre
+            else:
+                actCount = count
             time = float(count) / fcy
             delta = time - lastTime
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
-            f.write("step %4d count %9d %d %5d %6d t %8.6f %8.6f "\
+            f.write("step %4d count %9d %9d pre %d %5d %6d t %8.6f %8.6f "\
                     "f %8.2f rpm %4.1f\n" %
-                    (step, count, pre, ctr, ctr * pre - lastCtr,
+                    (step, count, actCount, pre, ctr, ctr * pre - lastCtr,
                      time, delta, freq, rpm))
             lastCount = count
             lastCtr = ctr * pre
