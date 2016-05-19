@@ -2637,7 +2637,7 @@ class SpindleTest():
             delta = time - lastTime
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
-            f.write("step %4d count %d %9d %7d %5d t %8.6f %8.6f "\
+            f.write("step %4d count %9d %d %7d %5d t %8.6f %8.6f "\
                     "f %8.2f rpm %4.1f\n" %
                     (step, count, pre, ctr, ctr * pre - lastCtr,
                      time, delta, freq, rpm))
