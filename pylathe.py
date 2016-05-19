@@ -2409,6 +2409,7 @@ class SpindleDialog(wx.Dialog):
     def OnStart(self, e):
         queClear()
         sendClear()
+        sendSpindleData(True)
         command('SPINDLE_START')
 
     def OnStop(self, e):
