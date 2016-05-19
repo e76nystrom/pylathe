@@ -2629,7 +2629,8 @@ class SpindleTest():
             pre = 1
             ctr = count - lastCount
             if ctr > 65535:
-                ctr >>= 1;
+                pre <<= 1
+                ctr >>= 1
                 while ctr > 65535:
                     pre <<= 1
                     ctr >>= 1
