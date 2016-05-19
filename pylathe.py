@@ -2635,7 +2635,7 @@ class SpindleTest():
                 actCount = lastCount + ctr * pre
             else:
                 actCount = count
-            time = float(count) / fcy
+            time = float(actCount) / fcy
             delta = time - lastTime
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
@@ -2643,7 +2643,7 @@ class SpindleTest():
                     "f %8.2f rpm %4.1f\n" %
                     (step, count, actCount, pre, ctr, ctr * pre - lastCtr,
                      time, delta, freq, rpm))
-            lastCount = count
+            lastCount = actCount
             lastCtr = ctr * pre
             lastTime = time
         
