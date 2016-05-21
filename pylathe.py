@@ -1613,6 +1613,7 @@ class JogPanel(wx.Panel):
         self.btnRpt = ButtonRepeat()
         self.initUI()
         self.setZPosDialog = None
+        self.setXPosDialog = None
 
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -1689,7 +1690,7 @@ class JogPanel(wx.Panel):
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        tc.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
+        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='Stop')
@@ -1712,6 +1713,23 @@ class JogPanel(wx.Panel):
         dialog = self.setZPosDialog
         if dialog == None:
             self.setZPosDialog = dialog = SetZPosDialog(self)
+        dialog.SetPosition((xPos, yPos))
+        dialog.Raise()
+        dialog.Show(True)
+
+    def OnSetZPos(self, e):
+        global mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = self.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = self.zPos.GetPosition()
+        xPos += x
+        yPos += y
+        stdout.flush()
+        dialog = self.setXPosDialog
+        if dialog == None:
+            self.setXPosDialog = dialog = SetXPosDialog(self)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
@@ -2403,6 +2421,66 @@ class SetZPosDialog(wx.Dialog):
         sendZData()
         setParm('Z_SET_LOC', 0)
         command('ZSETLOC')
+        self.Show(False)
+        jogPanel.focus()
+
+class SetXPosDialog(wx.Dialog):
+    def __init__(self, frame):
+        global info
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Set X Position", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        tc.SetFont(posFont)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        btn = wx.Button(self, label='Zero', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnZero)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        print "show event", self.IsShown()
+        stdout.flush()
+        if self.IsShown():
+            val = jogPanel.xPos.GetValue()
+            self.xPos.SetValue(val)
+
+    def OnOk(self, e):
+        print "ok event"
+        stdout.flush()
+        val = self.xPos.GetValue()
+        try:
+            val = float(val)
+            sendXData()
+            setParm('X_SET_LOC', val)
+            command('XSETLOC')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            val = jogPanel.xPos.GetValue()
+            self.xPos.SetValue(val)
+
+    def OnZero(self, e):
+        sendXData()
+        setParm('X_SET_LOC', 0)
+        command('XSETLOC')
         self.Show(False)
         jogPanel.focus()
 
