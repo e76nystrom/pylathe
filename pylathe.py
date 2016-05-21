@@ -1700,6 +1700,8 @@ class JogPanel(wx.Panel):
 
     def OnSetZPos(self, e):
         pos = self.zPos.GetPosition()
+        print pos
+        stdout.flush()
         self.setZPosDialog.SetPosition(pos)
         self.setZPosDialog.Raise()
         self.setZPosDialog.Show(True)
