@@ -1682,7 +1682,7 @@ class JogPanel(wx.Panel):
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
+        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetZPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
