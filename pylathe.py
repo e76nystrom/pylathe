@@ -1699,8 +1699,8 @@ class JogPanel(wx.Panel):
         sizerH.Fit(self)
 
     def OnSetZPos(self, e):
-        self.zPosDialog.Raise()
-        self.zPosDialog.Show(True)
+        self.setZPosDialog.Raise()
+        self.setZPosDialog.Show(True)
 
     def focus(self):
         self.combo.SetFocus()
