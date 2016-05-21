@@ -2357,6 +2357,8 @@ class SetZPosDialog(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.OnZero)
         sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
