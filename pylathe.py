@@ -2353,7 +2353,7 @@ class SetZPosDialog(wx.Dialog):
         self.sizerV.Fit(self)
         self.Show(False)
 
-    OnShow(self, e):
+    def OnShow(self, e):
         print "show event"
         stdout.flush()
 
