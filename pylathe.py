@@ -2364,15 +2364,17 @@ class SetZPosDialog(wx.Dialog):
 
     def OnOk(self, e):
         print "ok event"
+        stdout.flush()
         val = self.zPos.GetValue()
         try:
             val = float(val)
             setParm(Z_LOC, val)
             command('ZSETLOC')
-            stdout.flush()
             self.Show(False)
             jogPanel.focus()
         except ValueError:
+            print "value error"
+            stdout.flush()
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
 
