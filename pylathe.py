@@ -1701,14 +1701,15 @@ class JogPanel(wx.Panel):
 
     def OnSetZPos(self, e):
         global mainFrame
-        posFrame = mainFrame.GetPosition()
-        print posFrame
-        pos0 = self.GetPosition()
-        print pos0
-        pos1 = self.zPos.GetPosition()
-        print pos1
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = self.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = self.zPos.GetPosition()
+        xPos += x
+        yPos += y
         stdout.flush()
-        self.setZPosDialog.SetPosition(pos1)
+        self.setZPosDialog.SetPosition((xPos, yPos))
         self.setZPosDialog.Raise()
         self.setZPosDialog.Show(True)
 
