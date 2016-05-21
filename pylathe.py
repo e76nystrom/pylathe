@@ -1611,6 +1611,7 @@ class JogPanel(wx.Panel):
         # self.lastTime = 0
         self.btnRpt = ButtonRepeat()
         self.initUI()
+        self.setZPosDialog = SetZPosDialog(self)
 
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -1681,7 +1682,7 @@ class JogPanel(wx.Panel):
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        tc.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
+        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
@@ -1696,6 +1697,10 @@ class JogPanel(wx.Panel):
 
         self.SetSizer(sizerH)
         sizerH.Fit(self)
+
+    def OnSetZPos(self, e):
+        self.zPosDialog.Raise()
+        self.zPosDialog.Show(True)
 
     def focus(self):
         self.combo.SetFocus()
@@ -2326,6 +2331,31 @@ class ZDialog(wx.Dialog):
     def OnSetup(self, e):
         queClear()
         sendZData(True)
+
+class SetZPosDialog(wx.Dialog):
+    def __init__(self, frame):
+        global info
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Set Z Position", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
+        sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    OnShow(self, e):
+        print "show event"
+        stdout.flush()
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
