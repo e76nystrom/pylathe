@@ -2303,6 +2303,10 @@ class ZDialog(wx.Dialog):
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
+        btn = wx.Button(self, label='Setup Z', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnSetup)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
@@ -2318,6 +2322,10 @@ class ZDialog(wx.Dialog):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
+
+    def OnSetup(self, e):
+        queClear()
+        sendXData(True)
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
