@@ -2357,15 +2357,18 @@ class SetZPosDialog(wx.Dialog):
 
     def OnShow(self, e):
         print "show event", self.IsShown()
-        val = jogPanel.zPos.GetValue()
-        self.zPos.SetValue(val)
         stdout.flush()
+        if self.IsShown():
+            val = jogPanel.zPos.GetValue()
+            self.zPos.SetValue(val)
 
     def OnOk(self, e):
         print "ok event"
         val = self.zPos.GetValue()
         jogPanel.zPos.setValue(val)
         stdout.flush()
+        self.Show(False)
+        jogPanel.focus()
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
