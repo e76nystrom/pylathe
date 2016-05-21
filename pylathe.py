@@ -2325,7 +2325,7 @@ class ZDialog(wx.Dialog):
 
     def OnSetup(self, e):
         queClear()
-        sendXData(True)
+        sendZData(True)
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
