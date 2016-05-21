@@ -1711,7 +1711,7 @@ class JogPanel(wx.Panel):
         stdout.flush()
         dialog = self.setZPosDialog
         if dialog == None:
-            self.setZPosDialog = dialog = SetZPosDialog()
+            self.setZPosDialog = dialog = SetZPosDialog(self)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
