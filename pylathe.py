@@ -2347,12 +2347,20 @@ class SetZPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
     def OnShow(self, e):
         print "show event"
+        stdout.flush()
+
+        def OnOk(self, e):
+        print "ok event"
         stdout.flush()
 
 class XDialog(wx.Dialog):
