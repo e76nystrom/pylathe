@@ -2345,7 +2345,7 @@ class SetZPosDialog(wx.Dialog):
                           wx.NORMAL, False, u'Consolas')
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
         tc.SetFont(posFont)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -2365,12 +2365,16 @@ class SetZPosDialog(wx.Dialog):
     def OnOk(self, e):
         print "ok event"
         val = self.zPos.GetValue()
-        jogPanel.zPos.setValue(val)
-        setParm(Z_LOC, val)
-        command('ZSETLOC')
-        stdout.flush()
-        self.Show(False)
-        jogPanel.focus()
+        try:
+            val = float(val)
+            setParm(Z_LOC, val)
+            command('ZSETLOC')
+            stdout.flush()
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            val = jogPanel.zPos.GetValue()
+            self.zPos.SetValue(val)
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
