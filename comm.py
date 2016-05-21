@@ -127,7 +127,12 @@ def getParm(parm):
             result = rsp.split()
             if len(result) == 3:
                 commLock.release()
-                retVal = int(result[2], 16)
+                try:
+                    retVal = int(result[2], 16)
+                except:
+                    print "getParm error on %s" % (result)
+                    stdout.flush()
+                    retVal = 0
                 if retVal & 0x80000000:
                     retVal -= 0x100000000
                 return(retVal)
