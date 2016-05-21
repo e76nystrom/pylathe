@@ -2373,8 +2373,6 @@ class SetZPosDialog(wx.Dialog):
             self.Show(False)
             jogPanel.focus()
         except ValueError:
-            print "value error"
-            stdout.flush()
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
 
