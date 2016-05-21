@@ -1700,6 +1700,9 @@ class JogPanel(wx.Panel):
         sizerH.Fit(self)
 
     def OnSetZPos(self, e):
+        global mainFrame
+        posFrame = mainFrame.getPosition()
+        print posFrame
         pos0 = self.GetPosition()
         print pos0
         pos1 = self.zPos.GetPosition()
