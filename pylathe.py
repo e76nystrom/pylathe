@@ -2347,9 +2347,15 @@ class SetZPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
         btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        btn = wx.Button(self, label='Zero', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnZero)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -2375,6 +2381,12 @@ class SetZPosDialog(wx.Dialog):
         except ValueError:
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
+
+    def OnZero(self, e):
+        setParm('Z_LOC', 0)
+        command('ZSETLOC')
+        self.Show(False)
+        jogPanel.focus()
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
