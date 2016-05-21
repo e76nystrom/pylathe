@@ -2366,6 +2366,8 @@ class SetZPosDialog(wx.Dialog):
         print "ok event"
         val = self.zPos.GetValue()
         jogPanel.zPos.setValue(val)
+        setParm(Z_LOC, val)
+        command('ZSETLOC')
         stdout.flush()
         self.Show(False)
         jogPanel.focus()
