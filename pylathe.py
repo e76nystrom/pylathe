@@ -1709,7 +1709,6 @@ class JogPanel(wx.Panel):
         (x, y) = self.zPos.GetPosition()
         xPos += x
         yPos += y
-        stdout.flush()
         dialog = self.setZPosDialog
         if dialog == None:
             self.setZPosDialog = dialog = SetZPosDialog(self)
@@ -1726,7 +1725,6 @@ class JogPanel(wx.Panel):
         (x, y) = self.zPos.GetPosition()
         xPos += x
         yPos += y
-        stdout.flush()
         dialog = self.setXPosDialog
         if dialog == None:
             self.setXPosDialog = dialog = SetXPosDialog(self)
@@ -2396,15 +2394,11 @@ class SetZPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        print "show event", self.IsShown()
-        stdout.flush()
         if self.IsShown():
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
 
     def OnOk(self, e):
-        print "ok event"
-        stdout.flush()
         val = self.zPos.GetValue()
         try:
             val = float(val)
