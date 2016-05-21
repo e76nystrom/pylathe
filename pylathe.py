@@ -2450,15 +2450,11 @@ class SetXPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        print "show event", self.IsShown()
-        stdout.flush()
         if self.IsShown():
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
 
     def OnOk(self, e):
-        print "ok event"
-        stdout.flush()
         val = self.xPos.GetValue()
         try:
             val = float(val)
