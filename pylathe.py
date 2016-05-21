@@ -2356,7 +2356,9 @@ class SetZPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        print "show event", e.GetShow()
+        print "show event", self.IsShown()
+        val = jogPanel.zPos.GetValue()
+        self.zPos.SetValue(val)
         stdout.flush()
 
     def OnOk(self, e):
