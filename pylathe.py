@@ -2390,6 +2390,7 @@ class SetZPosDialog(wx.Dialog):
         val = self.zPos.GetValue()
         try:
             val = float(val)
+            sendZData()
             setParm('Z_SET_LOC', val)
             command('ZSETLOC')
             self.Show(False)
@@ -2399,7 +2400,8 @@ class SetZPosDialog(wx.Dialog):
             self.zPos.SetValue(val)
 
     def OnZero(self, e):
-        setParm('Z_LOC', 0)
+        sendZData()
+        setParm('Z_SET_LOC', 0)
         command('ZSETLOC')
         self.Show(False)
         jogPanel.focus()
