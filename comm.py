@@ -35,11 +35,11 @@ def command(cmd):
         actionCmd = "lathe." + action + "()"
         eval(actionCmd)
         # action()
-    if ser is None:
-        return("");
     cmdStr = '\x01%x ' % (cmdVal)
     print "%-15s %s" % (cmd, cmdStr)
     stdout.flush()
+    if ser is None:
+        return("");
     commLock.acquire(True)
     ser.write(cmdStr)
     rsp = ""
@@ -77,8 +77,6 @@ def setParm(parm, val):
             valString = "%d" % (int(val))
         cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
         exec(cmd)
-    if ser is None:
-        return
     if parmType == 'float':
         valString = "%5.6f" % (float(val))
     else:
@@ -86,6 +84,8 @@ def setParm(parm, val):
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     print "%-15s %s" % (parm, cmd)
     stdout.flush()
+    if ser is None:
+        return
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -167,14 +167,15 @@ def getString():
 
 def setXReg(reg, val):
     global ser, xRegs, cmds, comLock, timeout, xDbgPrint
-    if ser is None:
-        return
     if not (reg in xRegs):
         print "invalid register " + reg
         return
     val = int(val)
     if xDbgPrint:
         print "%-12s %2x %8x %12d" % (reg, xRegs[reg], val & 0xffffffff, val)
+        stdout.flush()
+    if ser is None:
+        return
     cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
                                val & 0xffffffff)
     commLock.acquire(True)
@@ -264,8 +265,6 @@ def dspXReg(reg, label=''):
 
 def sendMove(op, val):
     global ser, commLock, timeout
-    if ser is None:
-        return
     if isinstance(val, float):
         valStr = "%0.4f" % (val)
         prtStr = "%7.4f" % (val)
@@ -282,6 +281,8 @@ def sendMove(op, val):
     cmd = '\x01%x x%x %s ' % (cmds['SENDMOVE'][0], op, valStr)
     print "cmd %3x %s" % (op, prtStr)
     stdout.flush()
+    if ser is None:
+        return
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
