@@ -119,6 +119,7 @@ stdout.flush()
 hdrFont = None
 testFont = None
 f = None
+mainFrame = None
 jogPanel = None
 spindleDataSent = False
 zDataSent = False
@@ -1701,10 +1702,10 @@ class JogPanel(wx.Panel):
     def OnSetZPos(self, e):
         pos0 = self.GetPosition()
         print pos0
-        pos = self.zPos.GetPosition()
-        print pos
+        pos1 = self.zPos.GetPosition()
+        print pos1
         stdout.flush()
-        self.setZPosDialog.SetPosition(pos)
+        self.setZPosDialog.SetPosition(pos1)
         self.setZPosDialog.Raise()
         self.setZPosDialog.Show(True)
 
@@ -3196,7 +3197,8 @@ class MainApp(wx.App):
     def OnInit(self):
         """Init Main App."""
         print "mainapp"
-        self.frame = MainFrame(None, "Lathe Control")
+        global mainFrame
+        mainFrame = self.frame = MainFrame(None, "Lathe Control")
         self.frame.Show(True)
         self.SetTopWindow(self.frame)
         return True
