@@ -1717,7 +1717,7 @@ class JogPanel(wx.Panel):
         dialog.Raise()
         dialog.Show(True)
 
-    def OnSetZPos(self, e):
+    def OnSetXPos(self, e):
         global mainFrame
         (xPos, yPos) = mainFrame.GetPosition()
         (x, y) = self.GetPosition()
