@@ -1612,7 +1612,7 @@ class JogPanel(wx.Panel):
         # self.lastTime = 0
         self.btnRpt = ButtonRepeat()
         self.initUI()
-        self.setZPosDialog = SetZPosDialog(self)
+        self.setZPosDialog = None
 
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -1709,9 +1709,12 @@ class JogPanel(wx.Panel):
         xPos += x
         yPos += y
         stdout.flush()
-        self.setZPosDialog.SetPosition((xPos, yPos))
-        self.setZPosDialog.Raise()
-        self.setZPosDialog.Show(True)
+        dialog = self.setZPosDialog
+        if dialog == None:
+            self.setZPosDialog = dialog = self.SetZPosDialog()
+        dialog.SetPosition((xPos, yPos))
+        dialog.Raise()
+        dialog.Show(True)
 
     def focus(self):
         self.combo.SetFocus()
