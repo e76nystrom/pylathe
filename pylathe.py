@@ -324,6 +324,11 @@ def sendSpindleData(send=False):
 def sendZData(send=False):
     try:
         global zDataSent
+        pitch = getFloatVal('zPitch')
+        motorSteps = getIntVal('zMotorSteps')
+        microSteps = getIntVal('zMicroSteps')
+        motorRatio = getFloatVal('zMotorRatio')
+        jogPanel.zStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not zDataSent):
             setParm('Z_PITCH', parmValue('zPitch'))
             setParm('Z_RATIO', parmValue('zMotorRatio'))
@@ -346,6 +351,11 @@ def sendZData(send=False):
 def sendXData(send=False):
     try:
         global xDataSent
+        pitch = getFloatVal('xPitch')
+        motorSteps = getIntVal('xMotorSteps')
+        microSteps = getIntVal('xMicroSteps')
+        motorRatio = getFloatVal('xMotorRatio')
+        jogPanel.xStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not xDataSent):
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
@@ -1614,6 +1624,8 @@ class JogPanel(wx.Panel):
         self.initUI()
         self.setZPosDialog = None
         self.setXPosDialog = None
+        self.zStepsInch
+        self.xStepsInch
 
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -1943,11 +1955,11 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def updateZ(self, val):
-        txt = "%7.3f" % (float(val) / 16000)
+        txt = "%7.3f" % (float(val) / self.zStepsInch)
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
-        txt = "%7.3f" % (float(val) / 16000)
+        txt = "%7.3f" % (float(val) / self.xStepsInch)
         self.xPos.SetValue(txt)
 
     def OnStop(self, e):
