@@ -1701,7 +1701,7 @@ class JogPanel(wx.Panel):
 
     def OnSetZPos(self, e):
         global mainFrame
-        posFrame = mainFrame.getPosition()
+        posFrame = mainFrame.GetPosition()
         print posFrame
         pos0 = self.GetPosition()
         print pos0
