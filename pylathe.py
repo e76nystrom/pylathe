@@ -2345,7 +2345,7 @@ class XDialog(wx.Dialog):
 
         btn = wx.Button(self, label='Setup X', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnSetup)
-        sizerV.Add(btn, 0, wx.ALL, 5)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -2365,7 +2365,7 @@ class XDialog(wx.Dialog):
 
     def OnSetup(self, e):
         queClear()
-        setdXData(True)
+        sendXData(True)
 
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
