@@ -2338,7 +2338,7 @@ class SetZPosDialog(wx.Dialog):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Set Z Position", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        self.bind(wx.EVT_SHOW, self.OnShow)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
