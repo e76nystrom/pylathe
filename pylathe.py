@@ -2345,9 +2345,7 @@ class SetZPosDialog(wx.Dialog):
                           wx.NORMAL, False, u'Consolas')
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
         tc.SetFont(posFont)
-        tc.SetEditable(False)
-        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
-        sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
