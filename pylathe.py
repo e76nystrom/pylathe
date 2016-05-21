@@ -1699,6 +1699,8 @@ class JogPanel(wx.Panel):
         sizerH.Fit(self)
 
     def OnSetZPos(self, e):
+        pos0 = self.GetPosition()
+        print pos0
         pos = self.zPos.GetPosition()
         print pos
         stdout.flush()
