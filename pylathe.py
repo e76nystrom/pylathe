@@ -2356,7 +2356,7 @@ class SetZPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        print "show event", e
+        print "show event", e.GetShow()
         stdout.flush()
 
     def OnOk(self, e):
