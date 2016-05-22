@@ -198,9 +198,9 @@ def getFloatInfo(key):
         tmp = info[key]
         try:
             return(float(tmp.GetValue))
-        except ValueError e:
+        except ValueError as e:
             return(0.0)
-    except KeyError e:
+    except KeyError as e:
         print "invalid key %s" % (key)
         stdout.flush()
 
