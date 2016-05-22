@@ -1707,7 +1707,7 @@ class JogPanel(wx.Panel):
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1))
+        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
