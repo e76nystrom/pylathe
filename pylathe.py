@@ -1955,11 +1955,17 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def updateZ(self, val):
-        txt = "%7.3f" % (float(val) / self.zStepsInch)
+        if self.zStepsInch != 0.0:
+            txt = "%7.3f" % (float(val) / self.zStepsInch)
+        else:
+            txt = '0.000'
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
-        txt = "%7.3f" % (float(val) / self.xStepsInch)
+        if self.xStepsInch != 0.0:
+            txt = "%7.3f" % (float(val) / self.xStepsInch)
+        else:
+            txt = '0.000;
         self.xPos.SetValue(txt)
 
     def updateRPM(self, val):
