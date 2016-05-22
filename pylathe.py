@@ -2039,7 +2039,11 @@ class UpdateThread(Thread):
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
+
+        tmp = comm.xDbgPrint
+        comm.xDbgPrint = False
         result = command('READLOC')
+        comm.xDbgPrint = True
         if result == None:
             return
         try:
