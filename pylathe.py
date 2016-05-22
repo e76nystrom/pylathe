@@ -2065,7 +2065,6 @@ class UpdateThread(Thread):
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
-
         tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         result = command('READLOC')
@@ -2073,7 +2072,7 @@ class UpdateThread(Thread):
         if result == None:
             return
         try:
-            (z, x, rpm) = result.split(' ')
+            (z, x, rpm) = result.split(' ')[1:]
             result = (3, z, x, rpm)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
