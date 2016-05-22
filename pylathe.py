@@ -1965,7 +1965,7 @@ class JogPanel(wx.Panel):
         if self.xStepsInch != 0.0:
             txt = "%7.3f" % (float(val) / self.xStepsInch)
         else:
-            txt = '0.000;
+            txt = '0.000'
         self.xPos.SetValue(txt)
 
     def updateRPM(self, val):
