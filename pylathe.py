@@ -2017,7 +2017,7 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.start()
         # self.getParm = (self.zLoc, self.xLoc, self.rpm)
-        self.getParm = (self.readAll)
+        self.parmList = (self.readAll)
 
     def zLoc(self):
         val = getParm('Z_LOC')
@@ -2055,8 +2055,8 @@ class UpdateThread(Thread):
             sleep(0.1)
             if not self.threadRun:
                 break
-            if i < len(self.getParm):
-                func = self.getParm[i]
+            if i < len(self.parmList):
+                func = self.parmList[i]
                 try:
                     func()
                 except commTimeout as e:
