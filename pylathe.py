@@ -2027,6 +2027,7 @@ class UpdateThread(Thread):
                 if not moveQue.empty() or (op != None):
                     try:
                         num = getQueueStatus()
+                        if num != None:
                         while num > 0:
                             num -= 1
                             if op == None:
