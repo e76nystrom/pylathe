@@ -192,6 +192,30 @@ def parmValue(key):
     tmp = info[key]
     return(tmp.GetValue())
 
+def getFloatInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        try:
+            return(float(tmp.GetValue))
+        except ValueError e:
+            return(0.0)
+    except KeyError e:
+        print "invalid key %s" % (key)
+        stdout.flush()
+
+def getIntInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        try:
+            return(float(tmp.GetValue))
+        except ValueError e:
+            return(0.0)
+    except KeyError e:
+        print "invalid key %s" % (key)
+        stdout.flush()
+
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
@@ -324,10 +348,10 @@ def sendSpindleData(send=False):
 def sendZData(send=False):
     try:
         global zDataSent
-        pitch = getFloatVal('zPitch')
-        motorSteps = getIntVal('zMotorSteps')
-        microSteps = getIntVal('zMicroSteps')
-        motorRatio = getFloatVal('zMotorRatio')
+        pitch = getFloatInfo('zPitch')
+        motorSteps = getIntInfo('zMotorSteps')
+        microSteps = getIntInfo('zMicroSteps')
+        motorRatio = getFloatInfo('zMotorRatio')
         jogPanel.zStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not zDataSent):
             setParm('Z_PITCH', parmValue('zPitch'))
@@ -351,10 +375,10 @@ def sendZData(send=False):
 def sendXData(send=False):
     try:
         global xDataSent
-        pitch = getFloatVal('xPitch')
-        motorSteps = getIntVal('xMotorSteps')
-        microSteps = getIntVal('xMicroSteps')
-        motorRatio = getFloatVal('xMotorRatio')
+        pitch = getFloatInfo('xPitch')
+        motorSteps = getIntInfo('xMotorSteps')
+        microSteps = getIntInfo('xMicroSteps')
+        motorRatio = getFloatInfo('xMotorRatio')
         jogPanel.xStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not xDataSent):
             setParm('X_PITCH', parmValue('xPitch'))
