@@ -2017,7 +2017,7 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.start()
         # self.getParm = (self.zLoc, self.xLoc, self.rpm)
-        self.parmList = (self.readAll)
+        self.parmList = (self.readAll, None)
 
     def zLoc(self):
         val = getParm('Z_LOC')
