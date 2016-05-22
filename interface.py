@@ -156,11 +156,11 @@ parmList = \
     ["X_RETRACT", "x retract", "float"],
     ["X_FEED_PASS", "x feed per pass", "float"],
     
-    # "feed parameters",
+    "feed parameters",
     
     # ["FEED_DIR", "feed direction", "int16_t"],
-    # ["FEED_TYPE", "feed parameter type", "int16_t"],
-    # ["FEED", "feed parameter", "float"],
+    ["FEED_TYPE", "feed parameter type", "int16_t"],
+    ["FEED", "feed parameter", "float"],
     
     # "taper parameters",
     
