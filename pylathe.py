@@ -1973,8 +1973,13 @@ class JogPanel(wx.Panel):
         stdout.flush()
 
     def updateAll(self, val):
-        (code, z, x, rpm
-        stdout.flush()
+        (z, x, rpm) = val
+        if z != '#':
+            self.zPos.SetValue(z)
+        if x != '#':
+            self.xPos.SetValue(x)
+        if rpm != '#':
+            self.rpm.SetValue(rpm)
 
     def OnStop(self, e):
         queClear()
