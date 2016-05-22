@@ -84,7 +84,7 @@ XILINX = False
 SWIG = False
 try:
     XILINX = info['cfgXilinx'].GetValue() == 'True'
-except:
+except KeyError as e:
     print "no xilinx info"
     pass
 info = {}
@@ -219,13 +219,13 @@ def getIntInfo(key):
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
-    except:
+    except ValueError as e:
         return(0.0)
 
 def getIntVal(tc):
     try:
         return(int(tc.GetValue()))
-    except:
+    except ValueError as e:
         return(0)
 
 moveQue = Queue()
@@ -286,19 +286,19 @@ def xilinxTestMode():
     testMode = False
     try:
         testMode = info['cfgTestMode'].GetValue()
-    except:
-        pass
+    except KeyError as e:
+        testMode = False
     if testMode:
         encoder = 0
         try:
             encoder = int(info['cfgEncoder'].GetValue())
-        except:
-            pass
+        except KeyError as e:
+            encoder = 0
         rpm = 0
         try:
             rpm = int(float(info['cfgTestRPM'].GetValue()))
-        except:
-            pass
+        except KeyError as e:
+            rpm = 0
         if encoder != 0:
             preScaler = 1
             if rpm == 0:
@@ -1223,7 +1223,7 @@ class TaperPanel(wx.Panel):
                 deltaX = tan(radians(angle))
                 self.zDelta.ChangeValue("1.000")
                 self.xDelta.ChangeValue("%6.4f" % (deltaX))
-            except:
+            except ValueError as e:
                 pass
 
     def updateDelta(self):
@@ -1231,7 +1231,7 @@ class TaperPanel(wx.Panel):
             try:
                 deltaZ = float(self.zDelta.GetValue())
                 deltaX = float(self.xDelta.GetValue())
-            except:
+            except ValueError as e:
                 pass
             try:
                 angle = degrees(atan2(deltaX, deltaZ))
