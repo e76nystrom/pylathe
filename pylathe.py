@@ -2082,6 +2082,7 @@ class UpdateThread(Thread):
         i = 0
         op = None
         sendClear()
+        scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
             if not self.threadRun:
@@ -2112,7 +2113,7 @@ class UpdateThread(Thread):
                     except commTimeout as e:
                         pass
             i += 1
-            if i >= 10:
+            if i >= scanMax:
                 i = 0
             for count in range(0, 10):
                 try:
