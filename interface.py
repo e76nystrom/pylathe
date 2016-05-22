@@ -156,26 +156,20 @@ parmList = \
     ["X_RETRACT", "x retract", "float"],
     ["X_FEED_PASS", "x feed per pass", "float"],
     
-    "feed parameters",
+    # "feed parameters",
     
-    ["FEED_DIR", "feed direction", "int16_t"],
-    ["FEED_TYPE", "feed parameter type", "int16_t"],
-    ["FEED", "feed parameter", "float"],
+    # ["FEED_DIR", "feed direction", "int16_t"],
+    # ["FEED_TYPE", "feed parameter type", "int16_t"],
+    # ["FEED", "feed parameter", "float"],
     
-    "taper parameters",
+    # "taper parameters",
     
-    ["TAPER_Z", "z distance for taper", "float"],
-    ["TAPER_X", "x distance for taper", "float"],
-    ["TAPER_FLAG", "taper flag", "int16_t"],
-    
-    "general turn thread parameters",
-    
-    ["TURN_FLAG", "turn flag", "int16_t"],
-    ["THREAD_DEPTH", "thread depth", "float"],
-    ["THREAD_LAST_FEED", "thread last feed depth", "float"],
-    ["THREAD_H_FACTOR", "height Factor", "float"],
-    ["THREAD_ANGLE", "thread angle", "float"],
+    # ["TAPER_Z", "z distance for taper", "float"],
+    # ["TAPER_X", "x distance for taper", "float"],
+    # ["TAPER_FLAG", "taper flag", "int16_t"],
      
+    "index pulse variables",
+
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
@@ -224,22 +218,22 @@ regList =\
     
     # ["", "", ""],
     
-    "turn control bits",
+    # "turn control bits",
     
-    ["TURNSYN", "(1 << 0)", "turn with sync motion"],
-    ["TURNADD", "(1 << 1)", "add pass to turn operation"],
-    ["TAPERX", "(1 << 1)", "taper x axis"],
-    ["TAPERZ", "(1 << 3)", "taper z axis"],
-    ["TAPEROUT", "(1 << 4)", "one taper out, zero in"],
-    ["THREAD", "(1 << 5)", "threading enabled"],
-    ["TINTERNAL", "(1 << 6)", "internal threads"],
-    ["TDIAMETER", "(1 << 7)", "diameter mode"],
+    # ["TURNSYN", "(1 << 0)", "turn with sync motion"],
+    # ["TURNADD", "(1 << 1)", "add pass to turn operation"],
+    # ["TAPERX", "(1 << 1)", "taper x axis"],
+    # ["TAPERZ", "(1 << 3)", "taper z axis"],
+    # ["TAPEROUT", "(1 << 4)", "one taper out, zero in"],
+    # ["THREAD", "(1 << 5)", "threading enabled"],
+    # ["TINTERNAL", "(1 << 6)", "internal threads"],
+    # ["TDIAMETER", "(1 << 7)", "diameter mode"],
     
-    "debug control bits",
+    # "debug control bits",
     
-    ["DBGPASS", "(1 << 0)", "pause before each pass"],
-    ["DBGEND", "(1 << 1)", "pause at end of a pass"],
-    ["DBGSEQ", "(1 << 2)", "generate sequence data"]
+    # ["DBGPASS", "(1 << 0)", "pause before each pass"],
+    # ["DBGEND", "(1 << 1)", "pause at end of a pass"],
+    # ["DBGSEQ", "(1 << 2)", "generate sequence data"]
 ]
     
 stateList =\
