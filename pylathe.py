@@ -1972,6 +1972,10 @@ class JogPanel(wx.Panel):
         print val
         stdout.flush()
 
+    def updateAll(self, val):
+        (code, z, x, rpm
+        stdout.flush()
+
     def OnStop(self, e):
         queClear()
         command('CMD_STOP')
@@ -1994,7 +1998,8 @@ class UpdateThread(Thread):
         self.notifyWindow = notifyWindow
         self.threadRun = True
         self.start()
-        self.getParm = (self.zLoc, self.xLoc, self.rpm)
+        # self.getParm = (self.zLoc, self.xLoc, self.rpm)
+        self.getParm = (self.readLoc)
 
     def zLoc(self):
         val = getParm('Z_LOC')
@@ -2014,6 +2019,15 @@ class UpdateThread(Thread):
             preScaler = getParm('INDEX_PRE_SCALER')
             result = (2, period * preScaler)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+
+    def readLoc(self):
+        result = command('READLOC')
+        try:
+            (z, x, rpm) = result.split(' ')
+            result = (3, z, x, rpm)
+            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+        except ValueError:
+            pass
 
     def run(self):
         i = 0
@@ -2119,7 +2133,8 @@ class MainFrame(wx.Frame):
         self.update = UpdateThread(self)
         self.procUpdate = (self.jogPanel.updateZ,
                            self.jogPanel.updateX,
-                           self.jogPanel.updateRPM)
+                           self.jogPanel.updateRPM,
+                           self.jogPanel.updateAll)
 
     def onClose(self, event):
         self.update.threadRun = False
@@ -2340,10 +2355,13 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.Show()
 
     def OnUpdate(self, e):
-        (index, val) =  e.data
+        index = e.data[0]
+         val = e.data[1:]
+
         if val != None:
             if index < len(self.procUpdate):
                 update = self.procUpdate[index]
+         
                 update(val)
 
 class ZDialog(wx.Dialog):
