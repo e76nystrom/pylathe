@@ -348,12 +348,13 @@ def sendSpindleData(send=False):
 def sendZData(send=False):
     try:
         global zDataSent
-        pitch = getFloatInfo('zPitch')
-        motorSteps = getIntInfo('zMotorSteps')
-        microSteps = getIntInfo('zMicroSteps')
-        motorRatio = getFloatInfo('zMotorRatio')
-        jogPanel.zStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not zDataSent):
+            pitch = getFloatInfo('zPitch')
+            motorSteps = getIntInfo('zMotorSteps')
+            microSteps = getIntInfo('zMicroSteps')
+            motorRatio = getFloatInfo('zMotorRatio')
+            jogPanel.zStepsInch = (microSteps * motorSteps * motorRatio) / pitch
+
             setParm('Z_PITCH', parmValue('zPitch'))
             setParm('Z_RATIO', parmValue('zMotorRatio'))
             setParm('Z_MICRO', parmValue('zMicroSteps'))
@@ -375,12 +376,13 @@ def sendZData(send=False):
 def sendXData(send=False):
     try:
         global xDataSent
-        pitch = getFloatInfo('xPitch')
-        motorSteps = getIntInfo('xMotorSteps')
-        microSteps = getIntInfo('xMicroSteps')
-        motorRatio = getFloatInfo('xMotorRatio')
-        jogPanel.xStepsInch = (microSteps * motorSteps * motorRatio) / pitch
         if send or (not xDataSent):
+            pitch = getFloatInfo('xPitch')
+            motorSteps = getIntInfo('xMotorSteps')
+            microSteps = getIntInfo('xMicroSteps')
+            motorRatio = getFloatInfo('xMotorRatio')
+            jogPanel.xStepsInch = (microSteps * motorSteps * motorRatio) / pitch
+
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
             setParm('X_MICRO', parmValue('xMicroSteps'))
