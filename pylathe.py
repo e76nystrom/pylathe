@@ -1624,8 +1624,8 @@ class JogPanel(wx.Panel):
         self.initUI()
         self.setZPosDialog = None
         self.setXPosDialog = None
-        self.zStepsInch
-        self.xStepsInch
+        self.zStepsInch = 0
+        self.xStepsInch = 0
 
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
