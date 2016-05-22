@@ -2028,18 +2028,18 @@ class UpdateThread(Thread):
                     try:
                         num = getQueueStatus()
                         if num != None:
-                        while num > 0:
-                            num -= 1
-                            if op == None:
+                            while num > 0:
+                                num -= 1
+                                if op == None:
+                                    try:
+                                        (op, val) = moveQue.get(False)
+                                    except Empty as e:
+                                        break
                                 try:
-                                    (op, val) = moveQue.get(False)
-                                except Empty as e:
+                                    sendMove(op, val)
+                                    op = None
+                                except commTimeout as e:
                                     break
-                            try:
-                                sendMove(op, val)
-                                op = None
-                            except commTimeout as e:
-                                break
                     except commTimeout as e:
                         pass
             i += 1
