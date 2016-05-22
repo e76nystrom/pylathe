@@ -39,7 +39,7 @@ def command(cmd):
     print "%-15s %s" % (cmd, cmdStr)
     stdout.flush()
     if ser is None:
-        return("");
+        return(None);
     commLock.acquire(True)
     ser.write(cmdStr)
     rsp = ""
@@ -108,7 +108,7 @@ def setParm(parm, val):
 def getParm(parm):
     global ser, cmds, parms, commLock, timeout
     if ser is None:
-        return
+        return(None)
     cmd = '\x01%x %x ' % (cmds['READVAL'][0], parms[parm][0])
     commLock.acquire(True)
     ser.write(cmd)
@@ -142,7 +142,7 @@ def getParm(parm):
 def getString():
     global ser, cmds, parms, commLock, timeout
     if ser is None:
-        return
+        return(None)
     cmd = '\x01%x ' % (cmds['READDBG'][0])
     commLock.acquire(True)
     ser.write(cmd)
@@ -305,7 +305,7 @@ def sendMove(op, val):
 def getQueueStatus():
     global ser, commLock, timeout
     if ser is None:
-        return
+        return(None)
     cmd = '\x01%x ' % (cmds['MOVEQUESTATUS'][0])
     commLock.acquire(True)
     ser.write(cmd)
