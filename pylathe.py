@@ -197,7 +197,7 @@ def getFloatInfo(key):
     try:
         tmp = info[key]
         try:
-            return(float(tmp.GetValue))
+            return(float(tmp.GetValue()))
         except ValueError as e:
             return(0.0)
     except KeyError as e:
@@ -209,7 +209,7 @@ def getIntInfo(key):
     try:
         tmp = info[key]
         try:
-            return(float(tmp.GetValue))
+            return(float(tmp.GetValue()))
         except ValueError as e:
             return(0.0)
     except KeyError as e:
