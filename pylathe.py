@@ -1705,9 +1705,18 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1))
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
         btn = wx.Button(self, label='Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerH.Add(sizerV, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerH)
         sizerH.Fit(self)
@@ -1973,13 +1982,14 @@ class JogPanel(wx.Panel):
         stdout.flush()
 
     def updateAll(self, val):
-        (z, x, rpm) = val
-        if z != '#':
-            self.zPos.SetValue(z)
-        if x != '#':
-            self.xPos.SetValue(x)
-        if rpm != '#':
-            self.rpm.SetValue(rpm)
+        if len(val) == 3:
+            (z, x, rpm) = val
+            if z != '#':
+                self.zPos.SetValue(z)
+            if x != '#':
+                self.xPos.SetValue(x)
+            if rpm != '#':
+                self.rpm.SetValue(rpm)
 
     def OnStop(self, e):
         queClear()
@@ -2004,7 +2014,7 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.start()
         # self.getParm = (self.zLoc, self.xLoc, self.rpm)
-        self.getParm = (self.readLoc)
+        self.getParm = (self.readAll)
 
     def zLoc(self):
         val = getParm('Z_LOC')
@@ -2025,7 +2035,7 @@ class UpdateThread(Thread):
             result = (2, period * preScaler)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
-    def readLoc(self):
+    def readAll(self):
         result = command('READLOC')
         try:
             (z, x, rpm) = result.split(' ')
