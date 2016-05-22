@@ -1693,13 +1693,15 @@ class JogPanel(wx.Panel):
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetZPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -1707,7 +1709,8 @@ class JogPanel(wx.Panel):
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), style=wx.TE_RIGHT)
+        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
+                                    style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
