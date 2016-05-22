@@ -1992,19 +1992,22 @@ class UpdateThread(Thread):
 
     def zLoc(self):
         val = getParm('Z_LOC')
-        result = (0, val)
-        wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+        if val != None:
+            result = (0, val)
+            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def xLoc(self):
         val = getParm('X_LOC')
-        result = (1, val)
-        wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+        if val != None:
+            result = (1, val)
+            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def rpm(self):
         period = getParm('INDEX_PERIOD')
-        preScaler = getParm('INDEX_PRE_SCALER')
-        result = (2, period * preScaler)
-        wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+        if period != None:
+            preScaler = getParm('INDEX_PRE_SCALER')
+            result = (2, period * preScaler)
+            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def run(self):
         i = 0
