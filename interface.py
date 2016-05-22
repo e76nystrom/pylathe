@@ -168,7 +168,7 @@ parmList = \
 
     # ["", "", ""],
     
-    ["MAX_PARM", "maximum parameter", "int16_t"],
+    ["MAX_PARM", "maximum parameter", "int16_t"]
 ]
     
 regList =\
@@ -206,7 +206,7 @@ regList =\
     
     ["FEED_PITCH", "0", "feed inch per rev"],
     ["FEED_TPI", "1", "feed threads per inch"],
-    ["FEED_METRIC", "2", "feed mm per rev"],
+    ["FEED_METRIC", "2", "feed mm per rev"]
     
     # ["", "", ""],
 ]
