@@ -25,7 +25,7 @@ class commTimeout(Exception):
     pass
 
 def command(cmd):
-    global SWIG, ser, cmds, commLock, timeout
+    global SWIG, ser, cmds, commLock, timeout, xDbgPrint
     (cmdVal, action) = cmds[cmd]
     if SWIG and (action != None):
         global importLathe
@@ -36,8 +36,9 @@ def command(cmd):
         eval(actionCmd)
         # action()
     cmdStr = '\x01%x ' % (cmdVal)
-    print "%-15s %s" % (cmd, cmdStr)
-    stdout.flush()
+    if xDbgPrint:
+        print "%-15s %s" % (cmd, cmdStr)
+        stdout.flush()
     if ser is None:
         return(None);
     commLock.acquire(True)
@@ -61,7 +62,7 @@ def command(cmd):
     return(rsp.strip("\n\r"))
 
 def setParm(parm, val):
-    global ser, parms, cmds, commLock, timeout
+    global ser, parms, cmds, commLock, timeout, xDbgPrint
     cmdInfo = parms[parm]
     parmIndex = cmdInfo[0]
     parmType = cmdInfo[1]
@@ -82,8 +83,9 @@ def setParm(parm, val):
     else:
         valString = "x%x" % (int(val))
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
-    print "%-15s %s" % (parm, cmd)
-    stdout.flush()
+    if xDbgPrint:
+        print "%-15s %s" % (parm, cmd)
+        stdout.flush()
     if ser is None:
         return
     commLock.acquire(True)
@@ -120,6 +122,7 @@ def getParm(parm):
             if not timeout:
                 timeout = True
                 print "getParm timeout %s" % (parm)
+                stdout.flush()
             raise commTimeout()
             break;
         if tmp == '*':
@@ -154,6 +157,7 @@ def getString():
             if not timeout:
                 timeout = True
                 print "getString timeout"
+                stdout.flush()
             raise commTimeout()
             break;
         if tmp == '*':
@@ -169,6 +173,7 @@ def setXReg(reg, val):
     global ser, xRegs, cmds, comLock, timeout, xDbgPrint
     if not (reg in xRegs):
         print "invalid register " + reg
+        stdout.flush()
         return
     val = int(val)
     if xDbgPrint:
@@ -279,8 +284,9 @@ def sendMove(op, val):
         stdout.flush()
         return
     cmd = '\x01%x x%x %s ' % (cmds['SENDMOVE'][0], op, valStr)
-    print "cmd %3x %s" % (op, prtStr)
-    stdout.flush()
+    if xDbgPrint:
+        print "cmd %3x %s" % (op, prtStr)
+        stdout.flush()
     if ser is None:
         return
     commLock.acquire(True)
