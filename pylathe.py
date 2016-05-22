@@ -2371,13 +2371,12 @@ class MainFrame(wx.Frame):
 
     def OnUpdate(self, e):
         index = e.data[0]
-         val = e.data[1:]
-
-        if val != None:
-            if index < len(self.procUpdate):
-                update = self.procUpdate[index]
-         
-                update(val)
+        if index < len(self.procUpdate):
+            update = self.procUpdate[index]
+            val = e.data[1:]
+            if len(val) == 1:
+                val = val[0]
+            update(val)
 
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
