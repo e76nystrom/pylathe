@@ -2442,7 +2442,8 @@ class SetZPosDialog(wx.Dialog):
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
@@ -2498,7 +2499,8 @@ class SetXPosDialog(wx.Dialog):
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1))
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
