@@ -147,6 +147,13 @@ if XILINX:
 from setup import *
 print "test"
 
+def fieldList(panel, sizer, fields):
+    for (label, index) in self.fields:
+        if label.startswith('b'):
+            addCheckBox(panel, sizer, label[1:], index)
+        else:
+            addField(panel, sizer, label, index)
+
 def addFieldText(panel, sizer, label, key):
     global info
     if len(label) != 0:
@@ -2599,9 +2606,9 @@ class ZDialog(wx.Dialog):
             ("Min Speed", "zMinSpeed"),
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
-            ("Jog Max", "zJogMax"))
-        for (label, index) in self.fields:
-            addField(self, sizerG, label, index)
+            ("Jog Max", "zJogMax"),
+            ("bInvert Dir", 'zInvXDir'))
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2668,9 +2675,9 @@ class XDialog(wx.Dialog):
             ("Min Speed", "xMinSpeed"),
             ("Max Speed", "xMaxSpeed"),
             ("Jog Min", "xJogMin"),
-            ("Jog Max", "xJogMax"))
-        for (label, index) in self.fields:
-            addField(self, sizerG, label, index)
+            ("Jog Max", "xJogMax"),
+            ("bInvert Dir", 'xInvZDir'))
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2733,8 +2740,7 @@ class SpindleDialog(wx.Dialog):
             ("Min RPM", "spMinRPM"),
             ("Max RPM", "spMaxRPM"),
             ("Accel Time", "spAccelTime"))
-        for (label, index) in self.fields:
-            addField(self, sizerG, label, index)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2812,8 +2818,7 @@ class PortDialog(wx.Dialog):
 
         self.fields = (
             ("Comm Port", "commPort"),)
-        for (label, index) in self.fields:
-            addField(self, sizerG, label, index)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
@@ -2857,8 +2862,6 @@ class ConfigDialog(wx.Dialog):
 
         self.fields = (
             ("bHW Control", 'cfgXilinx'),
-            ("bInvert Z Dir", 'cfgInvZDir'),
-            ("bInvert X Dir", 'cfgInvXDir'))
         global XILINX
         if XILINX:
             self.fields += (
@@ -2868,11 +2871,7 @@ class ConfigDialog(wx.Dialog):
                 ("bTest Mode", 'cfgTestMode'),
                 ("Test RPM", "cfgTestRPM"))
                 ("bInvert Enc Dir", 'cfgInvEncDir'),
-        for (label, index) in self.fields:
-            if label.startswith('b'):
-                addCheckBox(self, sizerG, label[1:], index)
-            else:
-                addField(self, sizerG, label, index)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
