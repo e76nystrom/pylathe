@@ -1804,8 +1804,8 @@ class JogPanel(wx.Panel):
 
     def getInc(self):
         val = self.combo.GetValue()
-        print "combo %d" % (self.combo.GetSelection())
-        stdout.flush()
+        # print "combo %d" % (self.combo.GetSelection())
+        # stdout.flush()
         return(val)
 
     def zJogCmd(self, code, val):
@@ -2856,7 +2856,9 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", 'cfgXilinx'),)
+            ("bHW Control", 'cfgXilinx'),
+            ("bInvert Z Dir", 'cfgInvZDir'),
+            ("bInvert X Dir", 'cfgInvXDir'))
         global XILINX
         if XILINX:
             self.fields += (
@@ -2864,10 +2866,8 @@ class ConfigDialog(wx.Dialog):
                 ("Xilinx Freq", "cfgXFreq"),
                 ("Freq Mult", "cfgFreqMult"),
                 ("bTest Mode", 'cfgTestMode'),
-                ("Test RPM", "cfgTestRPM"),
+                ("Test RPM", "cfgTestRPM"))
                 ("bInvert Enc Dir", 'cfgInvEncDir'),
-                ("bInvert Z Dir", 'cfgInvZDir'),
-                ("bInvert X Dir", 'cfgInvXDir'))
         for (label, index) in self.fields:
             if label.startswith('b'):
                 addCheckBox(self, sizerG, label[1:], index)
