@@ -2185,10 +2185,8 @@ class UpdateThread(Thread):
         comm.xDbgPrint = True
         if result == None:
             return
-        print result
         try:
-            print result.split(' ')
-            (z, x, rpm) = result.split(' ')[1:]
+            (z, x, rpm) = result.rstrip().split(' ')[1:]
             result = (3, z, x, rpm)
             print z, x, rpm
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
