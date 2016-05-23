@@ -2202,7 +2202,7 @@ class UpdateThread(Thread):
             result = (3, z, x, rpm, curPass)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
-            print "readAll ValueError"
+            print "readAll ValueError %s" % (result)
             stdout.flush()
 
     def run(self):
