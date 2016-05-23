@@ -2012,7 +2012,15 @@ class JogPanel(wx.Panel):
             self.combo.SetSelection(0)
             return
         elif code == ord('i'):
-            self.combo.SetSelection(1)
+            combo = self.combo
+            val = combo.GetSelection()
+            if val == 0:
+                combo.SetSelection(1)
+            else:
+                if val >= len(self.step]:
+                    combo.SetSelection(1)
+                else:
+                    combo.SetSelection(val + 1)
             return
         print "key char %x" % (code)
         stdout.flush()
