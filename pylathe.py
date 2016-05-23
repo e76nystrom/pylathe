@@ -1712,6 +1712,7 @@ class JogPanel(wx.Panel):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
                                          style=wx.CB_READONLY)
+        info['jogInc'] = combo
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
@@ -2000,7 +2001,14 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def OnKeyChar(self, evt):
-        print "key char %x" % (evt.GetKeyCode())
+        code = evt.GetKeyCode()
+        if code == 'c':
+            pass
+            return
+        elif code == '1':
+            pass
+            return
+        print "key char %x" % (code)
         stdout.flush()
         evt.Skip()
 
