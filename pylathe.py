@@ -342,9 +342,9 @@ def sendSpindleData(send=False):
                 cfgReg = 0
                 if info['cfgInvEncDir'].GetValue():
                     cfgReg |= ENC_POL
-                if info['cfgInvZDir'].GetValue():
+                if info['zInvDir'].GetValue():
                     cfgReg |= ZDIR_POL
-                if info['cfgInvXDir'].GetValue():
+                if info['xInvDir'].GetValue():
                     cfgReg |= XDIR_POL
                 setParm('X_CFG_REG', cfgReg)
             else:
@@ -353,6 +353,7 @@ def sendSpindleData(send=False):
                 setParm('SPIN_MIN_RPM', parmValue('spMinRPM'))
                 setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
                 setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
+                setParm('SPIN_DIR_FLAG' str(int(parmValue(spinInvDir))))
 
             command('CMD_SPSETUP')
             spindleDataSent = True
@@ -382,6 +383,8 @@ def sendZData(send=False):
             setParm('Z_JOG_MIN', parmValue('zJogMin'))
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
+            setParm('Z_DIR_FLAG' str(int(parmValue(zInvDir))))
+
             command('CMD_ZSETUP')
             zDataSent = True
     except commTimeout as e:
@@ -409,6 +412,8 @@ def sendXData(send=False):
 
             setParm('X_JOG_MIN', parmValue('xJogMin'))
             setParm('X_JOG_MAX', parmValue('xJogMax'))
+
+            setParm('X_DIR_FLAG' str(int(parmValue(xInvDir))))
 
             command('CMD_XSETUP')
             xDataSent = True
@@ -2607,7 +2612,7 @@ class ZDialog(wx.Dialog):
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
-            ("bInvert Dir", 'zInvXDir'))
+            ("bInvert Dir", 'zInvDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -2676,7 +2681,7 @@ class XDialog(wx.Dialog):
             ("Max Speed", "xMaxSpeed"),
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
-            ("bInvert Dir", 'xInvZDir'))
+            ("bInvert Dir", 'xInvDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -2739,7 +2744,8 @@ class SpindleDialog(wx.Dialog):
             ("Micro Steps", "spMicroSteps"),
             ("Min RPM", "spMinRPM"),
             ("Max RPM", "spMaxRPM"),
-            ("Accel Time", "spAccelTime"))
+            ("Accel Time", "spAccelTime"),
+            ("bInvert Dir", 'spInvDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
