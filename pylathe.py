@@ -2804,7 +2804,7 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("HW Control", 'cfgXilinx'),)
+            ("bHW Control", 'cfgXilinx'),)
         global XILINX
         if XILINX:
             sub.fields += (
@@ -2817,7 +2817,10 @@ class ConfigDialog(wx.Dialog):
                 ("Invert Z Dir", 'cfgInvZDir'),
                 ("Invert X Dir", 'cfgInvXDir'))
         for (label, index) in self.fields:
-            addField(self, sizerG, label, index)
+            if label.startswith('b'):
+                addCheckBox(self, sizerG, label[1:], index)
+            else:
+                addField(self, sizerG, label, index)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
