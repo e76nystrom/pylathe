@@ -2030,7 +2030,7 @@ class JogPanel(wx.Panel):
             if x != '#':
                 self.xPos.SetValue(x)
             self.rpm.SetValue(rpm)
-            self.curPass.setValue(curPass)
+            self.curPass.SetValue(curPass)
 
     def OnStop(self, e):
         queClear()
