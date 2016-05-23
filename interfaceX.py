@@ -85,6 +85,7 @@ parmList = \
     ["SPIN_MIN_RPM", "spindle minimum rpm", "float"],
     ["SPIN_MAX_RPM", "spindle maxmum rpm", "float"],
     ["SPIN_ACCEL_TIME", "spindle accel time", "float"],
+    ["SPIN_DIR_FLAG", "spindle invert direction", "char"],
 
     "z axis parameters",
     
@@ -94,6 +95,7 @@ parmList = \
     ["Z_MOTOR", "z axis motor steps", "int16_t"],
     ["Z_ACCEL", "z axis acceleration", "float"],
     ["Z_BACKLASH", "z axis backlash", "float"],
+    ["Z_DIR_FLAG", "z invert direction", "char"],
     
     "x axis parameters",
     
@@ -103,6 +105,7 @@ parmList = \
     ["X_MOTOR", "x axis motor steps", "int16_t"],
     ["X_ACCEL", "x axis acceleration", "float"],
     ["X_BACKLASH", "x axis backlash", "float"],
+    ["X_DIR_FLAG", "x invert direction", "char"],
      
     "z move parameters",
      
