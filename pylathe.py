@@ -2420,7 +2420,7 @@ class ZDialog(wx.Dialog):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.GridSizer(2, 0, 0)
@@ -2462,6 +2462,10 @@ class ZDialog(wx.Dialog):
     def OnSetup(self, e):
         queClear()
         sendZData(True)
+
+    def OnShow(self, e):
+        if not self.IsShown():
+            xDataSent = False
 
 class SetZPosDialog(wx.Dialog):
     def __init__(self, frame):
@@ -2584,6 +2588,8 @@ class XDialog(wx.Dialog):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.GridSizer(2, 0, 0)
@@ -2624,6 +2630,10 @@ class XDialog(wx.Dialog):
     def OnSetup(self, e):
         queClear()
         sendXData(True)
+
+    def OnShow(self, e):
+        if not self.IsShown():
+            xDataSent = False
 
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
