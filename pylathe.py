@@ -2839,7 +2839,7 @@ class ConfigDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global info,
+        global info
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
