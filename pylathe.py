@@ -1657,6 +1657,7 @@ class JogPanel(wx.Panel):
         self.xStepsInch = 0
 
     def initUI(self):
+        global info
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
