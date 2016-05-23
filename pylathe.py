@@ -2584,7 +2584,7 @@ class SetXPosDialog(wx.Dialog):
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
-        global xDataSent
+        global xDataSent, info
         xDataSent = False
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
@@ -2595,16 +2595,29 @@ class XDialog(wx.Dialog):
 
         sizerG = wx.GridSizer(2, 0, 0)
 
-        self.pitch = addField(self, sizerG, "Pitch", "xPitch")
-        self.motor = addField(self, sizerG, "Motor Steps", "xMotorSteps")
-        self.micro = addField(self, sizerG, "Micro Steps", "xMicroSteps")
-        self.ratio = addField(self, sizerG, "Motor Ratio", "xMotorRatio")
-        self.backlash = addField(self, sizerG, "Backlash", "xBacklash")
+        self.fields = (
+            ("Pitch", "xPitch"),
+            ("Motor Steps", "xMotorSteps"),
+            ("Micro Steps", "xMicroSteps"),
+            ("Motor Ratio", "xMotorRatio"),
+            ("Backlash", "xBacklash"),
+            ("Min Speed", "xMinSpeed"),
+            ("Max Speed", "xMaxSpeed"),
+            ("Jog Min", "xJogMin"),
+            ("Jog Max", "xJogMax"))
+        for (label, index) in self.fields:
+            addField(self, sizerG, label, index)
 
-        self.minSpeed = addField(self, sizerG, "Min Speed", "xMinSpeed")
-        self.maxSpeed = addField(self, sizerG, "Max Speed", "xMaxSpeed")
-        self.jogMin = addField(self, sizerG, "Jog Min", "xJogMin")
-        self.jogMax = addField(self, sizerG, "Jog Max", "xJogMax")
+        # self.pitch = addField(self, sizerG, "Pitch", "xPitch")
+        # self.motor = addField(self, sizerG, "Motor Steps", "xMotorSteps")
+        # self.micro = addField(self, sizerG, "Micro Steps", "xMicroSteps")
+        # self.ratio = addField(self, sizerG, "Motor Ratio", "xMotorRatio")
+        # self.backlash = addField(self, sizerG, "Backlash", "xBacklash")
+
+        # self.minSpeed = addField(self, sizerG, "Min Speed", "xMinSpeed")
+        # self.maxSpeed = addField(self, sizerG, "Max Speed", "xMaxSpeed")
+        # self.jogMin = addField(self, sizerG, "Jog Min", "xJogMin")
+        # self.jogMax = addField(self, sizerG, "Jog Max", "xJogMax")
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2616,10 +2629,12 @@ class XDialog(wx.Dialog):
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
         btn = wx.Button(self, wx.ID_OK)
+        # btn.Bind(ex.EVT_BUTTON, self.OnOk)
         btn.SetDefault()
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
+        btn.Bind(ex.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
@@ -2633,9 +2648,19 @@ class XDialog(wx.Dialog):
         sendXData(True)
 
     def OnShow(self, e):
-        global xDataSent
-        if not self.IsShown():
-            xDataSent = False
+        global xDataSent, info
+        if self.IsShown():
+            self.fieldInfo = {}
+            for (label, index) in self.fields:
+                self.fieldInfo[index] = info[index].GetValue()
+        else:
+            for (label, index) in self.fields:
+                if self.fieldInfo[index] != info[index].GetValue():
+                    xDataSent = False
+
+    def OnCancel(self, e):
+        for (label, index) in self.fields:
+            info[index].SetValue(self.fieldInfo[index])
 
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
