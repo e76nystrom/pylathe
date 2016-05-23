@@ -2867,7 +2867,7 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", 'cfgXilinx'),
+            ("bHW Control", 'cfgXilinx'),)
         global XILINX
         if XILINX:
             self.fields += (
