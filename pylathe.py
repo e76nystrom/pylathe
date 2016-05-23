@@ -1741,8 +1741,8 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.pass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
-                                     style=wx.TE_RIGHT)
+        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
+                                        style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
