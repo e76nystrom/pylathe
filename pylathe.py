@@ -2811,11 +2811,11 @@ class ConfigDialog(wx.Dialog):
                 ("Encoder", "cfgEncoder"),
                 ("Xilinx Freq", "cfgXFreq"),
                 ("Freq Mult", "cfgFreqMult"),
-                ("Test Mode", 'cfgTestMode'),
+                ("bTest Mode", 'cfgTestMode'),
                 ("Test RPM", "cfgTestRPM"),
-                ("Invert Enc Dir", 'cfgInvEncDir'),
-                ("Invert Z Dir", 'cfgInvZDir'),
-                ("Invert X Dir", 'cfgInvXDir'))
+                ("bInvert Enc Dir", 'cfgInvEncDir'),
+                ("bInvert Z Dir", 'cfgInvZDir'),
+                ("bInvert X Dir", 'cfgInvXDir'))
         for (label, index) in self.fields:
             if label.startswith('b'):
                 addCheckBox(self, sizerG, label[1:], index)
