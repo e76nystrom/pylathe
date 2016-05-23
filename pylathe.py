@@ -1721,6 +1721,7 @@ class JogPanel(wx.Panel):
                           wx.NORMAL, False, u'Consolas')
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
+        info['jogZPos'] = tc
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetZPos)
@@ -1728,6 +1729,7 @@ class JogPanel(wx.Panel):
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
+        info['jogXPos'] = tc
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -2023,8 +2025,7 @@ class JogPanel(wx.Panel):
                 self.zPos.SetValue(z)
             if x != '#':
                 self.xPos.SetValue(x)
-            if rpm != '#':
-                self.rpm.SetValue(rpm)
+            self.rpm.SetValue(rpm)
             self.curPass.setValue(curPass)
 
     def OnStop(self, e):
