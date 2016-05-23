@@ -2529,8 +2529,7 @@ class MainFrame(wx.Frame):
 
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
-        global zDataSent
-        zDataSent = False
+        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -2539,17 +2538,18 @@ class ZDialog(wx.Dialog):
 
         sizerG = wx.GridSizer(2, 0, 0)
 
-        self.motor = addField(self, sizerG, "Motor Steps", "zMotorSteps")
-        self.micro = addField(self, sizerG, "Micro Steps", "zMicroSteps")
-        self.ratio = addField(self, sizerG, "Motor Ratio", "zMotorRatio")
-        self.pitch = addField(self, sizerG, "Pitch", "zPitch")
-        self.backlash = addField(self, sizerG, "Backlash", "zBacklash")
-        self.accel = addField(self, sizerG, "Accel", "zAccel")
-
-        self.minSpeed = addField(self, sizerG, "Min Speed", "zMinSpeed")
-        self.maxSpeed = addField(self, sizerG, "Max Speed", "zMaxSpeed")
-        self.jogMin = addField(self, sizerG, "Jog Min", "zJogMin")
-        self.jogMax = addField(self, sizerG, "Jog Max", "zJogMax")
+        self.fields = (
+            ("Pitch", "zPitch"),
+            ("Motor Steps", "zMotorSteps"),
+            ("Micro Steps", "zMicroSteps"),
+            ("Motor Ratio", "zMotorRatio"),
+            ("Backlash", "zBacklash"),
+            ("Min Speed", "zMinSpeed"),
+            ("Max Speed", "zMaxSpeed"),
+            ("Jog Min", "zJogMin"),
+            ("Jog Max", "zJogMax"))
+        for (label, index) in self.fields:
+            addField(self, sizerG, label, index)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2565,6 +2565,7 @@ class ZDialog(wx.Dialog):
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
+        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
@@ -2578,14 +2579,26 @@ class ZDialog(wx.Dialog):
         sendZData(True)
 
     def OnShow(self, e):
-        global zDataSent
-        if not self.IsShown():
-            zDataSent = False
+        global info, zDataSent
+        if self.IsShown():
+            self.fieldInfo = {}
+            for (label, index) in self.fields:
+                self.fieldInfo[index] = info[index].GetValue()
+        else:
+            for (label, index) in self.fields:
+                if self.fieldInfo[index] != info[index].GetValue():
+                    zDataSent = False
+                    break
+
+    def OnCancel(self, e):
+        global info
+        for (label, index) in self.fields:
+            info[index].SetValue(self.fieldInfo[index])
+        self.Show(False)
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
-        global xDataSent, info
-        xDataSent = False
+        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -2606,17 +2619,6 @@ class XDialog(wx.Dialog):
             ("Jog Max", "xJogMax"))
         for (label, index) in self.fields:
             addField(self, sizerG, label, index)
-
-        # self.pitch = addField(self, sizerG, "Pitch", "xPitch")
-        # self.motor = addField(self, sizerG, "Motor Steps", "xMotorSteps")
-        # self.micro = addField(self, sizerG, "Micro Steps", "xMicroSteps")
-        # self.ratio = addField(self, sizerG, "Motor Ratio", "xMotorRatio")
-        # self.backlash = addField(self, sizerG, "Backlash", "xBacklash")
-
-        # self.minSpeed = addField(self, sizerG, "Min Speed", "xMinSpeed")
-        # self.maxSpeed = addField(self, sizerG, "Max Speed", "xMaxSpeed")
-        # self.jogMin = addField(self, sizerG, "Jog Min", "xJogMin")
-        # self.jogMax = addField(self, sizerG, "Jog Max", "xJogMax")
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2646,7 +2648,7 @@ class XDialog(wx.Dialog):
         sendXData(True)
 
     def OnShow(self, e):
-        global xDataSent, info
+        global info, xDataSent
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
@@ -2658,24 +2660,29 @@ class XDialog(wx.Dialog):
                     break
 
     def OnCancel(self, e):
+        global info
         for (label, index) in self.fields:
             info[index].SetValue(self.fieldInfo[index])
         self.Show(False)
 
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
+        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
-        self.motorSteps = addField(self, sizerG, "Motor Steps", "spMotorSteps")
-        self.microSteps = addField(self, sizerG, "Micro Steps", "spMicroSteps")
-        self.minRPM = addField(self, sizerG, "Min RPM", "spMinRPM")
-        self.maxRPM = addField(self, sizerG, "Max RPM", "spMaxRPM")
-        self.accelTime = addField(self, sizerG, "Accel Time", "spAccelTime")
+        self.fields = (
+            ("Motor Steps", "spMotorSteps"),
+            ("Micro Steps", "spMicroSteps"),
+            ("Min RPM", "spMinRPM"),
+            ("Max RPM", "spMaxRPM"),
+            ("Accel Time", "spAccelTime"))
+        for (label, index) in self.fields:
+            addField(self, sizerG, label, index)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2702,6 +2709,7 @@ class SpindleDialog(wx.Dialog):
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
+        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
@@ -2710,14 +2718,36 @@ class SpindleDialog(wx.Dialog):
         self.sizerV.Fit(self)
 
     def OnStart(self, e):
+        global info, spindleDataSent
         queClear()
-        sendClear()
-        sendSpindleData(True)
+        for (label, index) in self.fields:
+            if self.fieldInfo[index] != info[index].GetValue():
+                spindleDataSent = False
+                break
+        sendSpindleData()
         command('SPINDLE_START')
 
     def OnStop(self, e):
         queClear()
         command('SPINDLE_STOP')
+
+    def OnShow(self, e):
+        global spindleDataSent, info
+        if self.IsShown():
+            self.fieldInfo = {}
+            for (label, index) in self.fields:
+                self.fieldInfo[index] = info[index].GetValue()
+        else:
+            for (label, index) in self.fields:
+                if self.fieldInfo[index] != info[index].GetValue():
+                    spindleDataSent = False
+                    break
+
+    def OnCancel(self, e):
+        global info
+        for (label, index) in self.fields:
+            info[index].SetValue(self.fieldInfo[index])
+        self.Show(False)
 
 class PortDialog(wx.Dialog):
     def __init__(self, frame):
@@ -2725,10 +2755,13 @@ class PortDialog(wx.Dialog):
         wx.Dialog.__init__(self, frame, -1, "Port Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
-        self.commPort = addField(self, sizerG, "Comm Port", "commPort")
+        self.fields = (
+            ("Comm Port", "commPort"),)
+        for (label, index) in self.fields:
+            addField(self, sizerG, label, index)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
@@ -2739,6 +2772,7 @@ class PortDialog(wx.Dialog):
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
+        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
@@ -2747,29 +2781,43 @@ class PortDialog(wx.Dialog):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnShow(self, e):
+        global info
+        if self.IsShown():
+            self.fieldInfo = {}
+            for (label, index) in self.fields:
+                self.fieldInfo[index] = info[index].GetValue()
+
+    def OnCancel(self, e):
+        for (label, index) in self.fields:
+            info[index].SetValue(self.fieldInfo[index])
+        self.Show(False)
+
 class ConfigDialog(wx.Dialog):
     def __init__(self, frame):
+        global XILINX, info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Config Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
-        self.xilinx = addCheckBox(self, sizerG, "HW Control", 'cfgXilinx')
+        self.fields = (
+            ("HW Control", 'cfgXilinx'),)
         global XILINX
         if XILINX:
-            self.encoder = addField(self, sizerG, "Encoder", "cfgEncoder")
-            self.xFreq = addField(self, sizerG, "Xilinx Freq", "cfgXFreq")
-            self.freqMult = addField(self, sizerG, "Freq Mult", "cfgFreqMult")
-
-            self.testMode = addCheckBox(self, sizerG, "Test Mode", 'cfgTestMode')
-            self.testRPM = addField(self, sizerG, "Test RPM", "cfgTestRPM")
-
-            self.invEncDir = addCheckBox(self, sizerG, "Invert Enc Dir",
-                                         'cfgInvEncDir')
-            self.invZDir = addCheckBox(self, sizerG, "Invert Z Dir", 'cfgInvZDir')
-            self.invXDir = addCheckBox(self, sizerG, "Invert X Dir", 'cfgInvXDir')
+            sub.fields += (
+                ("Encoder", "cfgEncoder"),
+                ("Xilinx Freq", "cfgXFreq"),
+                ("Freq Mult", "cfgFreqMult"),
+                ("Test Mode", 'cfgTestMode'),
+                ("Test RPM", "cfgTestRPM"),
+                ("Invert Enc Dir", 'cfgInvEncDir'),
+                ("Invert Z Dir", 'cfgInvZDir'),
+                ("Invert X Dir", 'cfgInvXDir'))
+        for (label, index) in self.fields:
+            addField(self, sizerG, label, index)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -2781,12 +2829,26 @@ class ConfigDialog(wx.Dialog):
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
+        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        global info,
+        if self.IsShown():
+            self.fieldInfo = {}
+            for (label, index) in self.fields:
+                self.fieldInfo[index] = info[index].GetValue()
+
+    def OnCancel(self, e):
+        global info
+        for (label, index) in self.fields:
+            info[index].SetValue(self.fieldInfo[index])
         self.Show(False)
 
 def testText(dialog):
