@@ -2629,12 +2629,12 @@ class XDialog(wx.Dialog):
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
         btn = wx.Button(self, wx.ID_OK)
-        # btn.Bind(ex.EVT_BUTTON, self.OnOk)
+        # btn.Bind(wx.EVT_BUTTON, self.OnOk)
         btn.SetDefault()
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(ex.EVT_BUTTON, self.OnCancel)
+        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
         sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
