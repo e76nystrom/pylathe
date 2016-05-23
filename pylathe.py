@@ -189,8 +189,11 @@ def addCheckBox(panel, sizer, label, key):
 
 def parmValue(key):
     global info
-    tmp = info[key]
-    return(tmp.GetValue())
+    try:
+        tmp = info[key]
+        return(tmp.GetValue())
+    except IndexError:
+        return('')
 
 def getFloatInfo(key):
     global info
@@ -2207,19 +2210,13 @@ class UpdateThread(Thread):
         sendClear()
         sendZData()
         if comm.ser != None:
-        try:
-            val = info['jogZPos']
-        except:
-            val = '0.000'
-        setParm('Z_SET_LOC', val)
-        command('ZSETLOC')
-        sendXData()
-        try:
-            val = info['jogXPos']
-        except:
-            val = '0.000'
-        setParm('X_SET_LOC', val)
-        command('XSETLOC')
+            val = parmValue('jogZPos')
+            setParm('Z_SET_LOC', val)
+            command('ZSETLOC')
+            sendXData()
+            val = parmValue('jogXPos')
+            setParm('X_SET_LOC', val)
+            command('XSETLOC')
         scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
