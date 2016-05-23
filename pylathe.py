@@ -38,6 +38,8 @@ def saveInfo(file):
             f.write("%s=%s\n" % (key, val.GetValue()))
         elif valClass == 'CheckBox':
             f.write("%s=%s\n" % (key, val.GetValue()))
+        elif valClass == 'ComboBox':
+            f.write("%s=%s\n" % (key, val.GetValue()))
         elif valClass == 'InfoValue':
             f.write("%s=%s\n" % (key, val.GetValue()))
         elif valClass == 'StaticText':
@@ -65,6 +67,8 @@ def readInfo(file):
                 elif funcClass == 'CheckBox':
                     if val == 'True':
                         func.SetValue(True)
+                elif funcClass == 'ComboBox':
+                    func.SetValue(val)
             else:
                 # print key, val
                 func = InfoValue(val)
