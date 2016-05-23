@@ -2188,9 +2188,11 @@ class UpdateThread(Thread):
         try:
             (z, x, rpm) = result.split(' ')[1:]
             result = (3, z, x, rpm)
+            print z, x, rpm
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
-            pass
+            print "readAll ValueError"
+            stdout.flush()
 
     def run(self):
         i = 0
