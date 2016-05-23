@@ -2875,8 +2875,8 @@ class ConfigDialog(wx.Dialog):
                 ("Xilinx Freq", "cfgXFreq"),
                 ("Freq Mult", "cfgFreqMult"),
                 ("bTest Mode", 'cfgTestMode'),
-                ("Test RPM", "cfgTestRPM"))
-                ("bInvert Enc Dir", 'cfgInvEncDir'),
+                ("Test RPM", "cfgTestRPM"),
+                ("bInvert Enc Dir", 'cfgInvEncDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
