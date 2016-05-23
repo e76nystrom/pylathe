@@ -2464,8 +2464,9 @@ class ZDialog(wx.Dialog):
         sendZData(True)
 
     def OnShow(self, e):
+        global zDataSent
         if not self.IsShown():
-            xDataSent = False
+            zDataSent = False
 
 class SetZPosDialog(wx.Dialog):
     def __init__(self, frame):
@@ -2632,6 +2633,7 @@ class XDialog(wx.Dialog):
         sendXData(True)
 
     def OnShow(self, e):
+        global xDataSent
         if not self.IsShown():
             xDataSent = False
 
