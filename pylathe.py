@@ -2657,6 +2657,7 @@ class XDialog(wx.Dialog):
             for (label, index) in self.fields:
                 if self.fieldInfo[index] != info[index].GetValue():
                     xDataSent = False
+                    break
 
     def OnCancel(self, e):
         for (label, index) in self.fields:
