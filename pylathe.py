@@ -148,7 +148,7 @@ from setup import *
 print "test"
 
 def fieldList(panel, sizer, fields):
-    for (label, index) in self.fields:
+    for (label, index) in fields:
         if label.startswith('b'):
             addCheckBox(panel, sizer, label[1:], index)
         else:
