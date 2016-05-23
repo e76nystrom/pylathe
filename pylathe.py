@@ -1804,6 +1804,8 @@ class JogPanel(wx.Panel):
 
     def getInc(self):
         val = self.combo.GetValue()
+        print "combo %d" % (self.combo.GetSelection())
+        stdout.flush()
         return(val)
 
     def zJogCmd(self, code, val):
