@@ -2017,7 +2017,7 @@ class JogPanel(wx.Panel):
             if val == 0:
                 combo.SetSelection(1)
             else:
-                if val >= len(self.step]:
+                if val >= len(self.step):
                     combo.SetSelection(1)
                 else:
                     combo.SetSelection(val + 1)
