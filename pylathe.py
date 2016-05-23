@@ -1741,6 +1741,12 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        self.pass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
         btn = wx.Button(self, label='Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
         sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
@@ -2011,14 +2017,15 @@ class JogPanel(wx.Panel):
         stdout.flush()
 
     def updateAll(self, val):
-        if len(val) == 3:
-            (z, x, rpm) = val
+        if len(val) == 4:
+            (z, x, rpm, curPass) = val
             if z != '#':
                 self.zPos.SetValue(z)
             if x != '#':
                 self.xPos.SetValue(x)
             if rpm != '#':
                 self.rpm.SetValue(rpm)
+            self.curPass.setValue(curPass)
 
     def OnStop(self, e):
         queClear()
@@ -2186,8 +2193,8 @@ class UpdateThread(Thread):
         if result == None:
             return
         try:
-            (z, x, rpm) = result.rstrip().split(' ')[1:]
-            result = (3, z, x, rpm)
+            (z, x, rpm, curPass) = result.rstrip().split(' ')[1:]
+            result = (3, z, x, rpm, curPass)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print "readAll ValueError"
