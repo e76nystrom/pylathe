@@ -2185,6 +2185,7 @@ class UpdateThread(Thread):
         comm.xDbgPrint = True
         if result == None:
             return
+        print result
         try:
             (z, x, rpm) = result.split(' ')[1:]
             result = (3, z, x, rpm)
