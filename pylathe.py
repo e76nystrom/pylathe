@@ -1985,7 +1985,8 @@ class JogPanel(wx.Panel):
         elif code == wx.WXK_DOWN:
             self.xJogCmd(code, val)
             return
-        print "key down %x" % (code)
+        # print "key down %x" % (code)
+        # stdout.flush()
         evt.Skip()
     
     def OnKeyUp(self, evt):
@@ -2002,8 +2003,8 @@ class JogPanel(wx.Panel):
         elif code == wx.WXK_DOWN:
             self.jogDone("XSTOP")
             return
-        print "key up %x" % (code)
-        stdout.flush()
+        # print "key up %x" % (code)
+        # stdout.flush()
         evt.Skip()
 
     def OnKeyChar(self, evt):
@@ -2021,6 +2022,13 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(1)
                 else:
                     combo.SetSelection(val + 1)
+            return
+        elif code == ord('I'):
+            combo = self.combo
+            val = combo.GetSelection()
+            if val > 0:
+                if val > 1:
+                    combo.SetSelection(val - 1)
             return
         print "key char %x" % (code)
         stdout.flush()
