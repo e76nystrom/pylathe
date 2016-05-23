@@ -2187,6 +2187,7 @@ class UpdateThread(Thread):
             return
         print result
         try:
+            print result.split(' ')
             (z, x, rpm) = result.split(' ')[1:]
             result = (3, z, x, rpm)
             print z, x, rpm
