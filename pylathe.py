@@ -2209,7 +2209,7 @@ class UpdateThread(Thread):
         i = 0
         op = None
         sendClear()
-        if comm.ser != None:
+        if False: #comm.ser != None:
             sendZData()
             val = parmValue('jogZPos')
             setParm('Z_SET_LOC', val)
