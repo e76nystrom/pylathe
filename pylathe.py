@@ -2310,7 +2310,7 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
-        # openSerial(parmValue('commPort'), 57600)
+        openSerial(parmValue('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
         comm.parms = parms
