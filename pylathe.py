@@ -2025,6 +2025,120 @@ class JogPanel(wx.Panel):
         command('CMD_STOP')
         self.combo.SetFocus()
 
+class SetZPosDialog(wx.Dialog):
+    def __init__(self, frame):
+        global info
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Set Z Position", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        btn = wx.Button(self, label='Zero', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnZero)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        if self.IsShown():
+            val = jogPanel.zPos.GetValue()
+            self.zPos.SetValue(val)
+
+    def OnOk(self, e):
+        val = self.zPos.GetValue()
+        try:
+            val = float(val)
+            sendZData()
+            setParm('Z_SET_LOC', val)
+            command('ZSETLOC')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            val = jogPanel.zPos.GetValue()
+            self.zPos.SetValue(val)
+
+    def OnZero(self, e):
+        sendZData()
+        setParm('Z_SET_LOC', 0)
+        command('ZSETLOC')
+        self.Show(False)
+        jogPanel.focus()
+
+class SetXPosDialog(wx.Dialog):
+    def __init__(self, frame):
+        global info
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Set X Position", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        btn = wx.Button(self, label='Zero', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnZero)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        if self.IsShown():
+            val = jogPanel.xPos.GetValue()
+            self.xPos.SetValue(val)
+
+    def OnOk(self, e):
+        val = self.xPos.GetValue()
+        try:
+            val = float(val)
+            sendXData()
+            setParm('X_SET_LOC', val)
+            command('XSETLOC')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            val = jogPanel.xPos.GetValue()
+            self.xPos.SetValue(val)
+
+    def OnZero(self, e):
+        sendXData()
+        setParm('X_SET_LOC', 0)
+        command('XSETLOC')
+        self.Show(False)
+        jogPanel.focus()
+
 EVT_UPDATE_ID = wx.NewId()
 
 def evtUpdate(win, func):
@@ -2468,120 +2582,6 @@ class ZDialog(wx.Dialog):
         if not self.IsShown():
             zDataSent = False
 
-class SetZPosDialog(wx.Dialog):
-    def __init__(self, frame):
-        global info
-        pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Set Z Position", pos,
-                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
-        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
-                          wx.NORMAL, False, u'Consolas')
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        btn = wx.Button(self, label='Zero', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnZero)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
-
-        self.SetSizer(sizerV)
-        self.sizerV.Fit(self)
-        self.Show(False)
-
-    def OnShow(self, e):
-        if self.IsShown():
-            val = jogPanel.zPos.GetValue()
-            self.zPos.SetValue(val)
-
-    def OnOk(self, e):
-        val = self.zPos.GetValue()
-        try:
-            val = float(val)
-            sendZData()
-            setParm('Z_SET_LOC', val)
-            command('ZSETLOC')
-            self.Show(False)
-            jogPanel.focus()
-        except ValueError:
-            val = jogPanel.zPos.GetValue()
-            self.zPos.SetValue(val)
-
-    def OnZero(self, e):
-        sendZData()
-        setParm('Z_SET_LOC', 0)
-        command('ZSETLOC')
-        self.Show(False)
-        jogPanel.focus()
-
-class SetXPosDialog(wx.Dialog):
-    def __init__(self, frame):
-        global info
-        pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Set X Position", pos,
-                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
-        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
-                          wx.NORMAL, False, u'Consolas')
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        btn = wx.Button(self, label='Zero', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnZero)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
-
-        self.SetSizer(sizerV)
-        self.sizerV.Fit(self)
-        self.Show(False)
-
-    def OnShow(self, e):
-        if self.IsShown():
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
-
-    def OnOk(self, e):
-        val = self.xPos.GetValue()
-        try:
-            val = float(val)
-            sendXData()
-            setParm('X_SET_LOC', val)
-            command('XSETLOC')
-            self.Show(False)
-            jogPanel.focus()
-        except ValueError:
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
-
-    def OnZero(self, e):
-        sendXData()
-        setParm('X_SET_LOC', 0)
-        command('XSETLOC')
-        self.Show(False)
-        jogPanel.focus()
-
 class XDialog(wx.Dialog):
     def __init__(self, frame):
         global xDataSent, info
@@ -2590,7 +2590,6 @@ class XDialog(wx.Dialog):
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
-
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.GridSizer(2, 0, 0)
@@ -2629,7 +2628,6 @@ class XDialog(wx.Dialog):
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
         btn = wx.Button(self, wx.ID_OK)
-        # btn.Bind(wx.EVT_BUTTON, self.OnOk)
         btn.SetDefault()
         sizerH.Add(btn, 0, wx.ALL, 5)
 
