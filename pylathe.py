@@ -2807,7 +2807,7 @@ class ConfigDialog(wx.Dialog):
             ("bHW Control", 'cfgXilinx'),)
         global XILINX
         if XILINX:
-            sub.fields += (
+            self.fields += (
                 ("Encoder", "cfgEncoder"),
                 ("Xilinx Freq", "cfgXFreq"),
                 ("Freq Mult", "cfgFreqMult"),
