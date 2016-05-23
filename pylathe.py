@@ -2009,10 +2009,10 @@ class JogPanel(wx.Panel):
     def OnKeyChar(self, evt):
         code = evt.GetKeyCode()
         if code == ord('c'):
-            self.combo.setSelection(0)
+            self.combo.SetSelection(0)
             return
         elif code == ord('i'):
-            self.combo.setSelection(1)
+            self.combo.SetSelection(1)
             return
         print "key char %x" % (code)
         stdout.flush()
