@@ -2205,6 +2205,14 @@ class UpdateThread(Thread):
         i = 0
         op = None
         sendClear()
+        sendZData()
+        val = info['jogZPos']
+        setParm('Z_SET_LOC', val)
+        command('ZSETLOC')
+        sendXData()
+        val = info['jogXPos']
+        setParm('X_SET_LOC', val)
+        command('XSETLOC')
         scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
