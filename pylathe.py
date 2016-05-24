@@ -209,7 +209,7 @@ def parmValue(key):
 def parmValueBool(key):
     global info
     try:
-        tmp = info[key]
+        tmp = info[key].GetValue()
         if tmp == 'True':
             return(1)
         else:
