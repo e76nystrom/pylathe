@@ -206,6 +206,17 @@ def parmValue(key):
     except IndexError:
         return('')
 
+def parmValueBool(key):
+    global info
+    try:
+        tmp = info[key]
+        if tmp = 'True':
+            return(1)
+        else:
+            return(0)
+    except IndexError:
+        return('')
+
 def getFloatInfo(key):
     global info
     try:
@@ -353,7 +364,7 @@ def sendSpindleData(send=False):
                 setParm('SPIN_MIN_RPM', parmValue('spMinRPM'))
                 setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
                 setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
-                setParm('SPIN_DIR_FLAG', str(int(parmValue('spinInvDir'))))
+                setParm('SPIN_DIR_FLAG', parmValueBool('spinInvDir'))
 
             command('CMD_SPSETUP')
             spindleDataSent = True
