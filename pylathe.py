@@ -397,7 +397,11 @@ def sendZData(send=False):
             setParm('Z_JOG_MIN', parmValue('zJogMin'))
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
+            print "send z dir"
+            stdout.flush()
             setParm('Z_DIR_FLAG', parmValueBool('zInvDir'))
+            print "z dir send"
+            stdout.flush()
 
             command('CMD_ZSETUP')
             zDataSent = True
