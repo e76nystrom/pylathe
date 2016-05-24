@@ -215,6 +215,8 @@ def parmValueBool(key):
         else:
             return(0)
     except IndexError:
+        print "parmValueBool IndexError %s" % (key)
+        stdout.flush()
         return('')
 
 def getFloatInfo(key):
