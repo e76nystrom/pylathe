@@ -364,7 +364,7 @@ def sendSpindleData(send=False):
                 setParm('SPIN_MIN_RPM', parmValue('spMinRPM'))
                 setParm('SPIN_MAX_RPM', parmValue('spMaxRPM'))
                 setParm('SPIN_ACCEL_TIME', parmValue('spAccelTime'))
-                setParm('SPIN_DIR_FLAG', parmValueBool('spinInvDir'))
+                setParm('SPIN_DIR_FLAG', parmValueBool('spInvDir'))
 
             command('CMD_SPSETUP')
             spindleDataSent = True
@@ -394,7 +394,7 @@ def sendZData(send=False):
             setParm('Z_JOG_MIN', parmValue('zJogMin'))
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
-            setParm('Z_DIR_FLAG', str(int(parmValue('zInvDir'))))
+            setParm('Z_DIR_FLAG', parmValueBool('zInvDir'))
 
             command('CMD_ZSETUP')
             zDataSent = True
@@ -424,7 +424,7 @@ def sendXData(send=False):
             setParm('X_JOG_MIN', parmValue('xJogMin'))
             setParm('X_JOG_MAX', parmValue('xJogMax'))
 
-            setParm('X_DIR_FLAG', str(int(parmValue('xInvDir'))))
+            setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
 
             command('CMD_XSETUP')
             xDataSent = True
@@ -2623,7 +2623,7 @@ class ZDialog(wx.Dialog):
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
-            ("bInvert Dir", 'spinInvDir'))
+            ("bInvert Dir", 'zInvDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
