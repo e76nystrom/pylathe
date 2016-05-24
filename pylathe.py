@@ -210,7 +210,7 @@ def parmValueBool(key):
     global info
     try:
         tmp = info[key]
-        if tmp = 'True':
+        if tmp == 'True':
             return(1)
         else:
             return(0)
