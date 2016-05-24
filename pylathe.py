@@ -2612,7 +2612,7 @@ class ZDialog(wx.Dialog):
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
-            ("bInvert Dir", 'zInvDir'))
+            ("bInvert Dir", 'spinInvDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
