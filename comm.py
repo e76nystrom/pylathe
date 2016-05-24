@@ -83,7 +83,7 @@ def setParm(parm, val):
     else:
         valString = "x%x" % (int(val))
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
-    if xDbgPrint:
+    if True: # xDbgPrint:
         print "%-15s %s" % (parm, cmd)
         stdout.flush()
     if ser is None:
