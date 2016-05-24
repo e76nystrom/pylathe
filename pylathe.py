@@ -210,7 +210,7 @@ def parmValueBool(key):
     global info
     try:
         tmp = info[key].GetValue()
-        if tmp == 'True':
+        if tmp:
             return(1)
         else:
             return(0)
