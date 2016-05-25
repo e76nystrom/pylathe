@@ -181,7 +181,7 @@ parmList = \
 
     "x home status",
 
-    ["X_HOME_STATS", "", "int"],
+    ["X_HOME_STATUS", "", "int"],
 
     # ["", "", ""],
     
