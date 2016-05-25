@@ -2212,7 +2212,7 @@ class SetXPosDialog(wx.Dialog):
             sendXData()
             command('CMD_PAUSE')
             command('CLEARQUE')
-            queMove(loc)
+            moveX(loc)
             command('CMD_RESUME')
             self.Show(False)
             jogPanel.focus()
