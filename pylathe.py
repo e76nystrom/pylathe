@@ -2174,6 +2174,18 @@ class SetXPosDialog(wx.Dialog):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
+        btn = wx.Button(self, label='Go To', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnGoTo)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        btn = wx.Button(self, label='Home', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnHome)
+        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
         btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
         sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
@@ -2192,6 +2204,26 @@ class SetXPosDialog(wx.Dialog):
         if self.IsShown():
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
+
+    dev OnGoTo(self, e):
+        try:
+            loc = float(self.xPos.GetValue())
+            queClear()
+            sendXData()
+            command('CMD_PAUSE')
+            command('CLEARQUE')
+            queMove(loc)
+            command('CMD_RESUME')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            print "ValueError"
+            stdout.flush()
+
+    dev OnHome(self, e):
+        command('XHOMEAXIS')
+        self.Show(False)
+        jogPanel.focus()
 
     def OnOk(self, e):
         val = self.xPos.GetValue()
