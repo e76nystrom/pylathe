@@ -2205,7 +2205,7 @@ class SetXPosDialog(wx.Dialog):
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
 
-    dev OnGoTo(self, e):
+    def OnGoTo(self, e):
         try:
             loc = float(self.xPos.GetValue())
             queClear()
