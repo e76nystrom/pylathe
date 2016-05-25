@@ -171,7 +171,6 @@ parmList = \
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
-
     "x home parameters",
 
     ["X_HOME_SPEED", "", "float"],
@@ -181,6 +180,7 @@ parmList = \
 
     "x home status",
 
+    ["X_HOME_DONE", "", "int"],
     ["X_HOME_STATUS", "", "int"],
 
     # ["", "", ""],
