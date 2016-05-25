@@ -2220,7 +2220,7 @@ class SetXPosDialog(wx.Dialog):
             print "ValueError"
             stdout.flush()
 
-    dev OnHome(self, e):
+    def OnHome(self, e):
         command('XHOMEAXIS')
         self.Show(False)
         jogPanel.focus()
