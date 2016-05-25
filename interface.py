@@ -19,6 +19,7 @@ cmdList = \
     ["XHOME", "", "set current x location as home"],
     ["XSETLOC", "", ""],
     ["XGOHOME", "", "x go to home position"],
+    ["XHOMEAXIS", "", "x home axis"],
     
     "spindle operations",
     
@@ -65,7 +66,8 @@ cmdList = \
 
     "move command operations",
 
-    ["SENDMOVE", "", "send move command"],
+    ["CLEARQUE", "", "clear move que"],
+    ["QUEMOVE", "", "que move command"],
     ["MOVEQUESTATUS", "", "read move queue status"],
     
     "location and debug info",
