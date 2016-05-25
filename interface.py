@@ -270,7 +270,7 @@ stateList =\
     ["QUE_START", "spindle start"],
     ["QUE_STOP", "spindle stop"],
     ["PASS_NUM", "set pass number"],
-    "};"
+    "};",
 
     "home control states",
     
