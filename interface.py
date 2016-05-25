@@ -198,7 +198,10 @@ regList =\
     ["XJOG", "(2 << 0)", "x while cmd are present"],
     ["XSYN", "(3 << 0)", "x dist sync to rotation"],
     ["XMAX", "(4 << 0)", "x rapid move"],
+    ["XJOGSLOW", "(5 << 0)", "slow jog for finding home"],
     ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
+    ["XFIND_HOME", "(1 << 6)", "find home"],
+    ["XCLEAR_HOME", "(1 << 7)", "move off of home"],
      
     "x direction",
     
@@ -264,6 +267,19 @@ stateList =\
     ["QUE_STOP", "spindle stop"],
     ["PASS_NUM", "set pass number"],
     "};"
+
+    "home control states",
+    
+    "enum H_STATES",
+    "{",
+    ["H_IDLE", "idle state"],
+    ["H_CHECK_ONHOME", ""],
+    ["H_WAIT_FINDHOME", ""],
+    ["H_BACKOFF_HOME", ""],
+    ["H_WAIT_BACKOFF", ""],
+    ["H_WAIT_SLOWFIND", ""],
+    # ["H_", ""],
+    "};",
 ]
     
 if __name__ == '__main__':
