@@ -72,7 +72,17 @@ cmdList = \
     
     ["READLOC", "", "read location"],
     ["READDBG", "", "read debug message"],
-    ["CLRDBG", "", "clear debug message buffer"]
+    ["CLRDBG", "", "clear debug message buffer"],
+
+    "x home parameters",
+
+    ["X_HOME_DIST", "", "float"],
+    ["X_HOME_BACKOFF_DIST", "", "float"],
+    ["X_HOME_DIR", "", "int"],
+
+    "x home status",
+
+    ["X_HOME_STATS", "", "int"],
 ]
     
 parmList = \
@@ -218,6 +228,9 @@ regList =\
 
     ["FIND_HOME", "(1 << 0)", ""],
     ["CLEAR_HOME", "(1 << 1)", ""],
+    ["HOME_ACTIVE", "0", ""],
+    ["HOME_SUCCESS", "1", ""],
+    ["HOME_FAIL", "-1", ""],
 
     # ["", "", ""],
 ]
