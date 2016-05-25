@@ -73,16 +73,6 @@ cmdList = \
     ["READLOC", "", "read location"],
     ["READDBG", "", "read debug message"],
     ["CLRDBG", "", "clear debug message buffer"],
-
-    "x home parameters",
-
-    ["X_HOME_DIST", "", "float"],
-    ["X_HOME_BACKOFF_DIST", "", "float"],
-    ["X_HOME_DIR", "", "int"],
-
-    "x home status",
-
-    ["X_HOME_STATS", "", "int"],
 ]
     
 parmList = \
@@ -178,6 +168,18 @@ parmList = \
 
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
+
+
+    "x home parameters",
+
+    ["X_HOME_SPEED", "", "float"],
+    ["X_HOME_DIST", "", "float"],
+    ["X_HOME_BACKOFF_DIST", "", "float"],
+    ["X_HOME_DIR", "", "int"],
+
+    "x home status",
+
+    ["X_HOME_STATS", "", "int"],
 
     # ["", "", ""],
     
