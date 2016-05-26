@@ -2737,7 +2737,7 @@ class XDialog(wx.Dialog):
             ("Max Speed", "xMaxSpeed"),
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
-            ("bInvert Dir", 'xInvDir'))
+            ("bInvert Dir", 'xInvDir'),
             ("Home Dist", "xHomeDist"),
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
