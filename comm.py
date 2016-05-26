@@ -74,6 +74,7 @@ def setParm(parm, val):
         parmVar = cmdInfo[2]
         if parmType == 'float':
             valString = "%5.6f" % (float(val))
+            valString = valString.rstrip('0')
         else:
             valString = "%d" % (int(val))
         cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
