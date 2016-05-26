@@ -2221,6 +2221,10 @@ class SetXPosDialog(wx.Dialog):
             stdout.flush()
 
     def OnHome(self, e):
+        setParm('X_HOME_DIST', parmValue('xHomeDist'))
+        setParm('X_HOME_BACKOFF_DIST', parmValue('xHomeBackoffDist'))
+        setParm('X_HOME_SPEED', parmValue('xHomeSpeed'))
+        setParm('X_HOME_DIR', parmValue('xHomeDir'))
         command('XHOMEAXIS')
         self.Show(False)
         jogPanel.focus()
@@ -2734,6 +2738,10 @@ class XDialog(wx.Dialog):
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
             ("bInvert Dir", 'xInvDir'))
+            ("Home Dist", "xHomeDist"),
+            ("Backoff Dist", "xHomeBackoffDist"),
+            ("Home Speed", "xHomeSpeed"),
+            ("bHome Dir", 'xHomeDir'))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
