@@ -3484,7 +3484,6 @@ class MoveTest(object):
         global fcy
         txt = self.txt
         txt.SetValue("")
-        f = open('move.txt','w')
         
         zPitch = float(parmValue('zPitch'))
         zMicroSteps = float(parmValue('zMicroSteps'))
@@ -3515,83 +3514,85 @@ class MoveTest(object):
                (zMDeltaV, zMAccelStepsSec2))
         
         if zMAccelStepsSec2 != 0:
-        zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
-        zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
-        dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d",
-               (zMAccelMinTime, zMAccelMaxTime))
+            zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
+            zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
+            dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d",
+                   (zMAccelMinTime, zMAccelMaxTime))
         
-        zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
-        zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
-        dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d",
-               (zMAccelMinSteps, zMAccelMaxSteps))
+            zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
+            zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
+            dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d",
+                   (zMAccelMinSteps, zMAccelMaxSteps))
         
-        zMAccelTime = zMDeltaV / zMAccelStepsSec2
-        zMAccelSteps = zMAccelMaxSteps - zMAccelMinSteps
-        zMAccelClocks = int(zMAccelTime * fcy)
-        dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d",
-               (zMAccelTime, zMAccelSteps, zMAccelClocks))
+            zMAccelTime = zMDeltaV / zMAccelStepsSec2
+            zMAccelSteps = zMAccelMaxSteps - zMAccelMinSteps
+            zMAccelClocks = int(zMAccelTime * fcy)
+            dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d",
+                   (zMAccelTime, zMAccelSteps, zMAccelClocks))
         
-        zMAccelDist = float(zMAccelSteps) / zStepsInch
-        dbgPrt(txt,"zMAccelDist %5.3f", (zMAccelDist))
+            zMAccelDist = float(zMAccelSteps) / zStepsInch
+            dbgPrt(txt,"zMAccelDist %5.3f", (zMAccelDist))
         
-        cFactorA = (fcy * sqrt(2)) / sqrt(zMAccelStepsSec2)
-        cFactorB = zMClocksStep / (sqrt(zMAccelSteps) - sqrt(zMAccelSteps - 1))
-        dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
-        zMCFactor = cFactorB
+            cFactorA = (fcy * sqrt(2)) / sqrt(zMAccelStepsSec2)
+            cFactorB = zMClocksStep / (sqrt(zMAccelSteps) -
+                                       sqrt(zMAccelSteps - 1))
+            dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
+            zMCFactor = cFactorB
         
-        lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
-        lastTime = float(lastCount) / fcy
+            lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
+            lastTime = float(lastCount) / fcy
         
-        f.write("\n")
+            f = open('move.txt','w')
+            f.write("\n")
         
-        lastCtr = 0
-        step = zMAccelMinSteps
-        while step < zMAccelMaxSteps:
-            step += 1
-            count = int(zMCFactor * sqrt(step))
-            ctr = count - lastCount
-            time = float(count) / fcy
-            delta = time - lastTime
-            freq = 1.0 / delta
-            ipm = (freq / zStepsInch) * 60
-            f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                    "f %7.2f rpm %3.1f\n" %
-                    (step, count, ctr, abs(ctr - lastCtr), time,
-                     delta, freq, ipm))
-            lastCount = count
-            lastCtr = ctr
-            lastTime = time
+            lastCtr = 0
+            step = zMAccelMinSteps
+            while step < zMAccelMaxSteps:
+                step += 1
+                count = int(zMCFactor * sqrt(step))
+                ctr = count - lastCount
+                time = float(count) / fcy
+                delta = time - lastTime
+                freq = 1.0 / delta
+                ipm = (freq / zStepsInch) * 60
+                f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
+                        "f %7.2f rpm %3.1f\n" %
+                        (step, count, ctr, abs(ctr - lastCtr), time,
+                         delta, freq, ipm))
+                lastCount = count
+                lastCtr = ctr
+                lastTime = time
         
-        f.write("\n")
+            f.write("\n")
         
-        finalCount = int(zMCFactor * (sqrt(zMAccelSteps) - 
-                                      sqrt(zMAccelSteps - 1)))
-        dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d",
-               (finalCount, ctr, zMClocksStep))
+            finalCount = int(zMCFactor * (sqrt(zMAccelSteps) - 
+                                          sqrt(zMAccelSteps - 1)))
+            dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d",
+                   (finalCount, ctr, zMClocksStep))
         
-        f.write("\n***\n\n");
+            f.write("\n***\n\n");
         
-        while step > zMAccelMinSteps:
-            step -= 1
-            count = int(zMCFactor * sqrt(step))
-            ctr = lastCount - count
-            time = float(count) / fcy
-            delta = lastTime - time
-            freq = 1.0 / delta
-            ipm = (freq / zStepsInch) * 60
-            f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                    "f %7.2f ipm %3.1f\n" %
-                    (step, count, ctr, abs(ctr - lastCtr), time,
-                     delta, freq, ipm))
-            lastCount = count
-            lastCtr = ctr
-            lastTime = time
+            while step > zMAccelMinSteps:
+                step -= 1
+                count = int(zMCFactor * sqrt(step))
+                ctr = lastCount - count
+                time = float(count) / fcy
+                delta = lastTime - time
+                freq = 1.0 / delta
+                ipm = (freq / zStepsInch) * 60
+                f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
+                        "f %7.2f ipm %3.1f\n" %
+                        (step, count, ctr, abs(ctr - lastCtr), time,
+                         delta, freq, ipm))
+                lastCount = count
+                lastCtr = ctr
+                lastTime = time
         
-        lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
-        f.write("\nzMAccelMinSteps %d lastCount %d\n" % 
-                (zMAccelMinSteps, lastCount))
+            lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
+            f.write("\nzMAccelMinSteps %d lastCount %d\n" % 
+                    (zMAccelMinSteps, lastCount))
         
-        f.close()
+            f.close()
 
 class MainApp(wx.App):
     def OnInit(self):
