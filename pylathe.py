@@ -2142,7 +2142,7 @@ class SetZPosDialog(wx.Dialog):
 
     def OnGoTo(self, e):
         try:
-            loc = float(self.xPos.GetValue())
+            loc = float(self.zPos.GetValue())
             queClear()
             sendXData()
             command('CMD_PAUSE')
