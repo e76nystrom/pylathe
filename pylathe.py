@@ -3514,6 +3514,7 @@ class MoveTest(object):
         dbgPrt(txt,"zMDeltaV %d zMAccelStepsSec2 %6.3f",
                (zMDeltaV, zMAccelStepsSec2))
         
+        if zMAccelStepsSec2 != 0:
         zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
         zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
         dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d",
