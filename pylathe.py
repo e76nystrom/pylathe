@@ -2115,6 +2115,10 @@ class SetZPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
+        btn = wx.Button(self, label='Go To', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnGoTo)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         btn = wx.Button(self, label='Ok', size=(60,-1))
@@ -2135,6 +2139,21 @@ class SetZPosDialog(wx.Dialog):
         if self.IsShown():
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
+
+    def OnGoTo(self, e):
+        try:
+            loc = float(self.xPos.GetValue())
+            queClear()
+            sendXData()
+            command('CMD_PAUSE')
+            command('CLEARQUE')
+            moveZ(loc)
+            command('CMD_RESUME')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            print "ValueError"
+            stdout.flush()
 
     def OnOk(self, e):
         val = self.zPos.GetValue()
