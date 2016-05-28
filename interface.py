@@ -173,15 +173,19 @@ parmList = \
 
     "x home parameters",
 
-    ["X_HOME_SPEED", "", "float"],
-    ["X_HOME_DIST", "", "float"],
-    ["X_HOME_BACKOFF_DIST", "", "float"],
-    ["X_HOME_DIR", "", "int"],
+    ["X_HOME_SPEED", "x final homing speed", "float"],
+    ["X_HOME_DIST", "x max homing distance", "float"],
+    ["X_HOME_BACKOFF_DIST", "x home backoff dist", "float"],
+    ["X_HOME_DIR", "x homing direction", "int"],
+
+    "x home offsetts",
+
+    ["X_HOME_OFFSET", "x offset home to zero", "float"],
 
     "x home status",
 
-    ["X_HOME_DONE", "", "int"],
-    ["X_HOME_STATUS", "", "int"],
+    ["X_HOME_DONE", "x home done", "int"],
+    ["X_HOME_STATUS", "x home status", "int"],
 
     # ["", "", ""],
     
