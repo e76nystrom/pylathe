@@ -2295,12 +2295,13 @@ class SetXPosDialog(wx.Dialog):
     def OnZero(self, e):
         global jogPanel, xHomeOffset
         sendXData()
-        val = getParm('X_LOC')
-        xHomeOffset = float(val) / jogpanel.xStepsInch
-        # setParm('X_SET_LOC', 0)
-        # command('XSETLOC')
-        self.Show(False)
-        jogPanel.focus()
+        xLoc = getParm('X_LOC')
+        if xLoc != None:
+            xHomeOffset = float(xLoc) / jogpanel.xStepsInch
+            # setParm('X_SET_LOC', 0)
+            # command('XSETLOC')
+            self.Show(False)
+            jogPanel.focus()
 
 EVT_UPDATE_ID = wx.NewId()
 
