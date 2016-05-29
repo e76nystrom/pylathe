@@ -2283,6 +2283,7 @@ class SetXPosDialog(wx.Dialog):
             if xLoc != None:
                 xLoc /= jogPanel.xStepsInch
                 xHomeOffset = xLoc - val
+                info['xHomeOffset'].SetValue("%0.4" % (xHomeOffset))
                 # sendXData()
                 # setParm('X_SET_LOC', val)
                 # command('XSETLOC')
@@ -2298,6 +2299,7 @@ class SetXPosDialog(wx.Dialog):
         xLoc = getParm('X_LOC')
         if xLoc != None:
             xHomeOffset = float(xLoc) / jogpanel.xStepsInch
+            info['xHomeOffset'].SetValue("%0.4" % (xHomeOffset))
             # setParm('X_SET_LOC', 0)
             # command('XSETLOC')
             self.Show(False)
@@ -2593,6 +2595,22 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile)
+
+        global zHomeOffset
+        key = 'zHomeOffset'
+        if not key in info:
+            info[key] = infoVal = InfoValue()
+            infoVal.SetValue("%0.4" % (zHomeOffset))
+        else:
+            zHomeOffset = float(info[key].GetValue())
+
+        global xHomeOffset
+        key = 'xHomeOffset'
+        if not key in info:
+            info[key] = infoVal = InfoValue()
+            infoVal.SetValue("%0.4" % (xHomeOffset))
+        else:
+            xHomeOffset = float(info[key].GetValue())
 
         self.showPanel()
 
