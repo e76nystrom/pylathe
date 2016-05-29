@@ -289,6 +289,8 @@ stateList =\
     ["MOVE_X", "move x"],
     ["SAVE_Z", "save z"],
     ["SAVE_X", "save x"],
+    ["SAVE_Z_OFFSET", "save z offset"],
+    ["SAVE_X_OFFSET", "save z offset"],
     ["SAVE_TAPER", "save taper"],
     ["MOVE_ZX", "move x in sync with z"],
     ["MOVE_XZ", "move z in sync with x"],
