@@ -2280,13 +2280,14 @@ class SetXPosDialog(wx.Dialog):
             val = float(val)
             sendXData()
             xLoc = getParm('X_LOC')
-            xLoc /= jogPanel.xStepsInch
-            xHomeOffset = xLoc - val
-            # sendXData()
-            # setParm('X_SET_LOC', val)
-            # command('XSETLOC')
-            self.Show(False)
-            jogPanel.focus()
+            if xLoc != None:
+                xLoc /= jogPanel.xStepsInch
+                xHomeOffset = xLoc - val
+                # sendXData()
+                # setParm('X_SET_LOC', val)
+                # command('XSETLOC')
+                self.Show(False)
+                jogPanel.focus()
         except ValueError:
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
