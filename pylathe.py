@@ -128,6 +128,8 @@ jogPanel = None
 spindleDataSent = False
 zDataSent = False
 xDataSent = False
+zHomeOffset = 0.0
+xHomeOffset = 0.0
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -280,6 +282,16 @@ def moveZ(zLoc, flag=ZMAX):
 def moveX(xLoc, flag=XMAX):
     queMove(MOVE_X | flag << 8, xLoc)
     print "moveX  %7.4f" % (xLoc)
+
+def saveZOffset():
+    global zHomeOffset
+    queMove(SAVE_Z_OFFSET, zHomeOffset)
+    print "saveZOffset  %7.4f" % (zHomeOffset)
+
+def saveXOffset(xHomeOffset):
+    global xHomeOffset
+    queMove(SAVE_X_OFFSET, xHomeOffset)
+    print "savexOffset  %7.4f" % (xHomeOffset)
 
 def moveXZ(zLoc, xLoc):
     queMove(SAVE_Z, zLoc)
@@ -1689,6 +1701,7 @@ class JogPanel(wx.Panel):
         self.initUI()
         self.setZPosDialog = None
         self.setXPosDialog = None
+        self.xHome = False
         self.zStepsInch = 0
         self.xStepsInch = 0
 
@@ -1794,7 +1807,8 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
         sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerV, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, border=2)
+        sizerH.Add(sizerV, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
 
         self.SetSizer(sizerH)
         sizerH.Fit(self)
@@ -2088,11 +2102,19 @@ class JogPanel(wx.Panel):
         if len(val) == 4:
             (z, x, rpm, curPass) = val
             if z != '#':
-                self.zPos.SetValue(z)
+                self.zPos.SetValue(z + zHomeOffset)
             if x != '#':
-                self.xPos.SetValue(x)
+                self.xPos.SetValue(x + xHomeOffset)
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
+            if self.xHome:
+                val = getParm('X_HOME_STATUS')
+                if val != HOME_ACTIVE:
+                    self.xHome = False
+                if val & HOME_SUCCESS:
+                    pass
+                elif val & HOME_FAIL:
+                    pass
 
     def OnStop(self, e):
         queClear()
