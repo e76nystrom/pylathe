@@ -288,7 +288,7 @@ def saveZOffset():
     queMove(SAVE_Z_OFFSET, zHomeOffset)
     print "saveZOffset  %7.4f" % (zHomeOffset)
 
-def saveXOffset(xHomeOffset):
+def saveXOffset():
     global xHomeOffset
     queMove(SAVE_X_OFFSET, xHomeOffset)
     print "savexOffset  %7.4f" % (xHomeOffset)
@@ -2274,7 +2274,7 @@ class SetXPosDialog(wx.Dialog):
         jogPanel.focus()
 
     def OnOk(self, e):
-        global jogPanel
+        global jogPanel, xHomeOffset
         val = self.xPos.GetValue()
         try:
             val = float(val)
@@ -2292,7 +2292,7 @@ class SetXPosDialog(wx.Dialog):
             self.xPos.SetValue(val)
 
     def OnZero(self, e):
-        global jogPanel
+        global jogPanel, xHomeOffset
         sendXData()
         val = getParm('X_LOC')
         xHomeOffset = float(val) / jogpanel.xStepsInch
