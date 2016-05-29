@@ -173,9 +173,9 @@ parmList = \
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
-    "z home offsetts",
+    # "z home offsetts",
 
-    ["z_HOME_OFFSET", "z offset home to zero", "float"],
+    # ["z_HOME_OFFSET", "z offset home to zero", "float"],
 
     "x home parameters",
 
@@ -184,9 +184,9 @@ parmList = \
     ["X_HOME_BACKOFF_DIST", "x home backoff dist", "float"],
     ["X_HOME_DIR", "x homing direction", "int"],
 
-    "x home offsetts",
+    # "x home offsetts",
 
-    ["X_HOME_OFFSET", "x offset home to zero", "float"],
+    # ["X_HOME_OFFSET", "x offset home to zero", "float"],
 
     "x home status",
 
