@@ -2599,16 +2599,14 @@ class MainFrame(wx.Frame):
         global zHomeOffset
         key = 'zHomeOffset'
         if not key in info:
-            info[key] = infoVal = InfoValue()
-            infoVal.SetValue("%0.4" % (zHomeOffset))
+            info[key] = InfoValue("%0.4" % (zHomeOffset))
         else:
             zHomeOffset = float(info[key].GetValue())
 
         global xHomeOffset
         key = 'xHomeOffset'
         if not key in info:
-            info[key] = infoVal = InfoValue()
-            infoVal.SetValue("%0.4" % (xHomeOffset))
+            info[key] = infoVal = InfoValue("%0.4" % (xHomeOffset))
         else:
             xHomeOffset = float(info[key].GetValue())
 
