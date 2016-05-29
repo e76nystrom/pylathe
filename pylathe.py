@@ -388,13 +388,14 @@ def sendSpindleData(send=False):
 
 def sendZData(send=False):
     try:
-        global zDataSent
+        global zDataSent, jogPanel
         if send or (not zDataSent):
-            # pitch = getFloatInfo('zPitch')
-            # motorSteps = getIntInfo('zMotorSteps')
-            # microSteps = getIntInfo('zMicroSteps')
-            # motorRatio = getFloatInfo('zMotorRatio')
-            # jogPanel.zStepsInch = (microSteps * motorSteps * motorRatio) / pitch
+            pitch = getFloatInfo('zPitch')
+            motorSteps = getIntInfo('zMotorSteps')
+            microSteps = getIntInfo('zMicroSteps')
+            motorRatio = getFloatInfo('zMotorRatio')
+            jogPanel.zStepsInch = (microSteps * motorSteps * \
+                                   motorRatio) / pitch
 
             setParm('Z_PITCH', parmValue('zPitch'))
             setParm('Z_RATIO', parmValue('zMotorRatio'))
@@ -423,13 +424,14 @@ def sendZData(send=False):
 
 def sendXData(send=False):
     try:
-        global xDataSent
+        global xDataSent, jogPanel
         if send or (not xDataSent):
-            # pitch = getFloatInfo('xPitch')
-            # motorSteps = getIntInfo('xMotorSteps')
-            # microSteps = getIntInfo('xMicroSteps')
-            # motorRatio = getFloatInfo('xMotorRatio')
-            # jogPanel.xStepsInch = (microSteps * motorSteps * motorRatio) / pitch
+            pitch = getFloatInfo('xPitch')
+            motorSteps = getIntInfo('xMotorSteps')
+            microSteps = getIntInfo('xMicroSteps')
+            motorRatio = getFloatInfo('xMotorRatio')
+            jogPanel.xStepsInch = (microSteps * motorSteps * \
+                                   motorRatio) / pitch
 
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
@@ -2099,12 +2101,13 @@ class JogPanel(wx.Panel):
         stdout.flush()
 
     def updateAll(self, val):
+        global zHomeOffset, xHomeOffset
         if len(val) == 4:
             (z, x, rpm, curPass) = val
             if z != '#':
-                self.zPos.SetValue(z + zHomeOffset)
+                self.zPos.SetValue(z - zHomeOffset)
             if x != '#':
-                self.xPos.SetValue(x + xHomeOffset)
+                self.xPos.SetValue(x - xHomeOffset)
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
             if self.xHome:
@@ -2271,12 +2274,17 @@ class SetXPosDialog(wx.Dialog):
         jogPanel.focus()
 
     def OnOk(self, e):
+        global jogPanel
         val = self.xPos.GetValue()
         try:
             val = float(val)
             sendXData()
-            setParm('X_SET_LOC', val)
-            command('XSETLOC')
+            xLoc = getParm('X_LOC')
+            xLoc /= jogPanel.xStepsInch
+            xHomeOffset = xLoc - val
+            # sendXData()
+            # setParm('X_SET_LOC', val)
+            # command('XSETLOC')
             self.Show(False)
             jogPanel.focus()
         except ValueError:
@@ -2284,9 +2292,12 @@ class SetXPosDialog(wx.Dialog):
             self.xPos.SetValue(val)
 
     def OnZero(self, e):
+        global jogPanel
         sendXData()
-        setParm('X_SET_LOC', 0)
-        command('XSETLOC')
+        val = getParm('X_LOC')
+        xHomeOffset = float(val) / jogpanel.xStepsInch
+        # setParm('X_SET_LOC', 0)
+        # command('XSETLOC')
         self.Show(False)
         jogPanel.focus()
 
