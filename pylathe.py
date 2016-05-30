@@ -2271,7 +2271,6 @@ class SetXPosDialog(wx.Dialog):
             val = getParm('X_HOME_STATUS')
             if val == None:
                 break
-            if val != HOME_ACTIVE:
             if val & HOME_SUCCESS:
                 jogPanel.xHome = True
                 pass
@@ -2279,6 +2278,7 @@ class SetXPosDialog(wx.Dialog):
             elif val & HOME_FAIL:
                 pass
                 break
+            sleep(0.1)
         self.Show(False)
         jogPanel.focus()
 
