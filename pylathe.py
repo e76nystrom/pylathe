@@ -322,6 +322,7 @@ def sendClear():
     xDataSent = False
 
 def xilinxTestMode():
+    global info, fcy
     testMode = False
     try:
         testMode = info['cfgTestMode'].GetValue()
@@ -355,8 +356,8 @@ def xilinxTestMode():
         setParm('ENC_ENABLE', '0')
 
 def sendSpindleData(send=False):
+    global info, spindleDataSent
     try:
-        global spindleDataSent
         if send or (not spindleDataSent):
             if XILINX:
                 setParm('ENC_MAX', parmValue('cfgEncoder'))
@@ -387,8 +388,8 @@ def sendSpindleData(send=False):
         stdout.flush()
 
 def sendZData(send=False):
+    global zDataSent, jogPanel
     try:
-        global zDataSent, jogPanel
         if send or (not zDataSent):
             pitch = getFloatInfo('zPitch')
             motorSteps = getIntInfo('zMotorSteps')
@@ -423,8 +424,8 @@ def sendZData(send=False):
         stdout.flush()
 
 def sendXData(send=False):
+    global xDataSent, jogPanel
     try:
-        global xDataSent, jogPanel
         if send or (not xDataSent):
             pitch = getFloatInfo('xPitch')
             motorSteps = getIntInfo('xMotorSteps')
@@ -566,9 +567,9 @@ class TurnPanel(wx.Panel):
         self.turn = Turn(self)
 
     def InitUI(self):
+        global hdrFont
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        global hdrFont
         txt = wx.StaticText(self, -1, "Turn")
         txt.SetFont(hdrFont)
 
@@ -655,19 +656,19 @@ class TurnPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
+        global jogPanel
         self.sendData()
         self.turn.turn()
-        global jogPanel
         jogPanel.focus()
 
     def OnStart(self, e):
+        global dbg, jogPanel
         command('CMD_RESUME')
-        global dbg
         dbg = open('dbg.txt', 'w')
-        global jogPanel
         jogPanel.focus()
     
     def OnAdd(self, e):
+        global jogPanel
         self.turn.turnAdd()
         setParm('X_FEED_PASS', parmValue('tuAddFeed'))
         turnFlag = TURNADD
@@ -676,7 +677,6 @@ class TurnPanel(wx.Panel):
         command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
-        global jogPanel
         jogPanel.focus()
 
 class Face():
@@ -797,9 +797,9 @@ class FacePanel(wx.Panel):
         self.face = Face(self)
 
     def InitUI(self):
+        global hdrFont
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        global hdrFont
         txt = wx.StaticText(self, -1, "Face")
         txt.SetFont(hdrFont)
 
@@ -887,19 +887,19 @@ class FacePanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
+        global jogPanel
         self.sendData()
         self.face.face()
-        global jogPanel
         jogPanel.focus()
 
     def OnStart(self, e):
-        command('CMD_RESUME')
         global jogPanel
+        command('CMD_RESUME')
         jogPanel.focus()
     
     def OnAdd(self, e):
-        self.face.faceAdd()
         global jogPanel
+        self.face.faceAdd()
         jogPanel.focus()
 
 class Taper():
@@ -1152,9 +1152,9 @@ class TaperPanel(wx.Panel):
         self.taper = Taper(self)
 
     def InitUI(self):
+        global hdrFont, info
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        global hdrFont
         txt = wx.StaticText(self, -1, "Taper")
         txt.SetFont(hdrFont)
 
@@ -1259,6 +1259,7 @@ class TaperPanel(wx.Panel):
         self.updateAngle()
 
     def updateUI(self):
+        global info
         val = self.deltaBtn.GetValue()
         self.zDelta.SetEditable(val)
         self.xDelta.SetEditable(val)
@@ -1334,6 +1335,7 @@ class TaperPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
+        global jogPanel
         self.sendData()
         if self.deltaBtn.GetValue():
             taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
@@ -1343,15 +1345,15 @@ class TaperPanel(wx.Panel):
             self.taper.internalTaper(taper)
         else:
             self.taper.externalTaper(taper)
-        global jogPanel
         jogPanel.focus()
 
     def OnStart(self, e):
-        command('CMD_RESUME')
         global jogPanel
+        command('CMD_RESUME')
         jogPanel.focus()
     
     def OnAdd(self, e):
+        global jogPanel
         if self.internal.GetValue():
             self.taper.internalAdd()
         else:
@@ -1364,7 +1366,6 @@ class TaperPanel(wx.Panel):
         command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
-        global jogPanel
         jogPanel.focus()
 
     def OnDebug(self, e):
@@ -1528,9 +1529,9 @@ class ThreadPanel(wx.Panel):
         self.screwThread = ScrewThread(self)
 
     def InitUI(self):
+        global hdrFont, info
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        global hdrFont
         txt = wx.StaticText(self, -1, "Thread")
         txt.SetFont(hdrFont)
 
@@ -1649,17 +1650,18 @@ class ThreadPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
+        global jogPanel
         self.sendData()
         self.screwThread.thread()
-        global jogPanel
         jogPanel.focus()
 
     def OnStart(self, e):
-        command('CMD_RESUME')
         global jogPanel
+        command('CMD_RESUME')
         jogPanel.focus()
     
     def OnAdd(self, e):
+        global jogPanel
         self.screwThread.threadAdd()
         setParm('X_FEED_PASS', parmValue('tuAddFeed'))
         turnFlag = TURNADD
@@ -1668,7 +1670,6 @@ class ThreadPanel(wx.Panel):
         command('CMD_THREAD')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
-        global jogPanel
         jogPanel.focus()
 
 class ButtonRepeat(Thread):
@@ -2110,14 +2111,6 @@ class JogPanel(wx.Panel):
                 self.xPos.SetValue(x - xHomeOffset)
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
-            if self.xHome:
-                val = getParm('X_HOME_STATUS')
-                if val != HOME_ACTIVE:
-                    self.xHome = False
-                if val & HOME_SUCCESS:
-                    pass
-                elif val & HOME_FAIL:
-                    pass
 
     def OnStop(self, e):
         queClear()
@@ -2161,11 +2154,13 @@ class SetZPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
+        global jogPanel
         if self.IsShown():
             val = jogPanel.zPos.GetValue()
             self.zPos.SetValue(val)
 
     def OnGoTo(self, e):
+        global jogPanel
         try:
             loc = float(self.zPos.GetValue())
             queClear()
@@ -2181,6 +2176,7 @@ class SetZPosDialog(wx.Dialog):
             stdout.flush()
 
     def OnOk(self, e):
+        global jogPanel
         val = self.zPos.GetValue()
         try:
             val = float(val)
@@ -2194,6 +2190,7 @@ class SetZPosDialog(wx.Dialog):
             self.zPos.SetValue(val)
 
     def OnZero(self, e):
+        global jogPanel
         sendZData()
         setParm('Z_SET_LOC', 0)
         command('ZSETLOC')
@@ -2245,11 +2242,13 @@ class SetXPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
+        global jogPanel
         if self.IsShown():
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
 
     def OnGoTo(self, e):
+        global jogPanel
         try:
             loc = float(self.xPos.GetValue())
             queClear()
@@ -2265,11 +2264,24 @@ class SetXPosDialog(wx.Dialog):
             stdout.flush()
 
     def OnHome(self, e):
+        global jogPanel
         setParm('X_HOME_DIST', parmValue('xHomeDist'))
         setParm('X_HOME_BACKOFF_DIST', parmValue('xHomeBackoffDist'))
         setParm('X_HOME_SPEED', parmValue('xHomeSpeed'))
         setParm('X_HOME_DIR', parmValue('xHomeDir'))
         command('XHOMEAXIS')
+        while True:
+            val = getParm('X_HOME_STATUS')
+            if val == None:
+                break
+            if val != HOME_ACTIVE:
+            if val & HOME_SUCCESS:
+                jogPanel.xHome = True
+                pass
+                break
+            elif val & HOME_FAIL:
+                pass
+                break
         self.Show(False)
         jogPanel.focus()
 
@@ -2360,6 +2372,7 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
+        global dbg
         i = 0
         op = None
         sendClear()
@@ -2441,13 +2454,12 @@ class KeyEventFilter(wx.EventFilter):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
+        global hdrFont, testFont
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self,self.OnUpdate)
-        global hdrFont
         hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
-        global testFont
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
 
@@ -2477,12 +2489,13 @@ class MainFrame(wx.Frame):
                            self.jogPanel.updateAll)
 
     def onClose(self, event):
-        self.update.threadRun = False
         global jogPanel
+        self.update.threadRun = False
         jogPanel.btnRpt.threadRun = False
         self.Destroy()
 
     def initUI(self):
+        global jogPanel, info, zHomeOffset, xHomeOffset
         fileMenu = wx.Menu()
 
         ID_FILE_SAVE = wx.NewId()
@@ -2586,17 +2599,14 @@ class MainFrame(wx.Frame):
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        self.jogPanel = panel = JogPanel(self, style=wx.WANTS_CHARS)
-        global jogPanel
-        jogPanel = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
+        sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile)
 
-        global info, zHomeOffset, xHomeOffset
         key = 'zHomeOffset'
         if not key in info:
             info[key] = InfoValue("%0.4f" % (zHomeOffset))
@@ -2645,6 +2655,7 @@ class MainFrame(wx.Frame):
         self.configDialog.Show(True)
 
     def showPanel(self):
+        global info
         key = 'mainPanel'
         if not key in info:
             info[key] = InfoValue('turnPanel')
@@ -2660,18 +2671,22 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def OnTurn(self, e):
+        global info
         info['mainPanel'].SetValue('turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
+        global info
         info['mainPanel'].SetValue('facePanel')
         self.showPanel()
 
     def OnTaper(self, e):
+        global info
         info['mainPanel'].SetValue('taperPanel')
         self.showPanel()
 
     def OnThread(self, e):
+        global info
         info['mainPanel'].SetValue('threadPanel')
         self.showPanel()
 
@@ -2925,7 +2940,7 @@ class SpindleDialog(wx.Dialog):
         command('SPINDLE_STOP')
 
     def OnShow(self, e):
-        global spindleDataSent, info
+        global info, spindleDataSent
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
@@ -2981,6 +2996,7 @@ class PortDialog(wx.Dialog):
                 self.fieldInfo[index] = info[index].GetValue()
 
     def OnCancel(self, e):
+        global info
         for (label, index) in self.fields:
             info[index].SetValue(self.fieldInfo[index])
         self.Show(False)
@@ -3238,8 +3254,7 @@ class SyncTest(object):
         self.txt = txt
 
     def test(self):
-        global f
-        global fcy
+        global f, fcy, info
         txt = self.txt
         txt.SetValue("")
         print ""
