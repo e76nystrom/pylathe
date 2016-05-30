@@ -85,13 +85,12 @@ info = {}
 readInfo(configFile)
 
 XILINX = False
-SWIG = False
 try:
     XILINX = info['cfgXilinx'].GetValue() == 'True'
 except KeyError as e:
     print "no xilinx info"
     pass
-info = {}
+info = {}                       # clear info
 
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
@@ -114,7 +113,6 @@ else:
 if SWIG:
     import lathe
     from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
-
 
 print sys.version
 print wx.version()
@@ -356,7 +354,7 @@ def xilinxTestMode():
         setParm('ENC_ENABLE', '0')
 
 def sendSpindleData(send=False):
-    global info, spindleDataSent
+    global info, spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
             if XILINX:
