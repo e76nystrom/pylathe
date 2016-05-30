@@ -102,13 +102,12 @@ from comm import openSerial, commTimeout, command, getParm, setParm,\
     getString, sendMove, getQueueStatus
 comm.SWIG = SWIG
 
+from interface import cmdList, parmList, stateList, regList
+
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
     from comm import setXReg, getXReg, dspXReg
-    from interfaceX import cmdList, parmList, stateList, regList,\
-        xilinxList, xilinxBitList
-else:
-    from interface import cmdList, parmList, stateList, regList
+    from interfaceX import xilinxList, xilinxBitList
 
 if SWIG:
     import lathe
