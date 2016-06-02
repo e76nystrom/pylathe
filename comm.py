@@ -79,8 +79,12 @@ def setParm(parm, val):
         cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
         exec(cmd)
     if parmType == 'float':
-        valString = "%5.6f" % (float(val))
-        valString = valString.rstrip('0')
+        try:
+            valString = "%5.6f" % (float(val))
+            valString = valString.rstrip('0')
+        except ValueError:
+            print "ValueError %s" % (val)
+            stdout.flush()
     else:
         valString = "x%x" % (int(val))
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
