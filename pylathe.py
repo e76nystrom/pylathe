@@ -2103,9 +2103,9 @@ class JogPanel(wx.Panel):
         if len(val) == 4:
             (z, x, rpm, curPass) = val
             if z != '#':
-                self.zPos.SetValue(z - zHomeOffset)
+                self.zPos.SetValue("%0.4f" % (float(z) - zHomeOffset))
             if x != '#':
-                self.xPos.SetValue(x - xHomeOffset)
+                self.xPos.SetValue("%0.4f" % (float(x) - xHomeOffset))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
 
