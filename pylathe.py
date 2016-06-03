@@ -2250,9 +2250,13 @@ class SetXPosDialog(wx.Dialog):
 
     def OnShow(self, e):
         global jogPanel
-        if self.IsShown():
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
+        try:
+            if self.IsShown():
+                val = jogPanel.xPos.GetValue()
+                self.xPos.SetValue(val)
+        except RuntimeError:
+            print "RuntimeError"
+            stdout.flush()
 
     def OnGoTo(self, e):
         global jogPanel
