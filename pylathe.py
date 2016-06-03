@@ -2275,7 +2275,7 @@ class SetXPosDialog(wx.Dialog):
         setParm('X_HOME_DIST', parmValue('xHomeDist'))
         setParm('X_HOME_BACKOFF_DIST', parmValue('xHomeBackoffDist'))
         setParm('X_HOME_SPEED', parmValue('xHomeSpeed'))
-        val = (-1, 1)[info['xHomeDir']]
+        val = (-1, 1)[info['xHomeDir'].GetValue()]
         setParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
         jogPanel.xHome = True
