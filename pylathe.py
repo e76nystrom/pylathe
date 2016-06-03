@@ -2108,6 +2108,16 @@ class JogPanel(wx.Panel):
                 self.xPos.SetValue("%0.4f" % (float(x) - xHomeOffset))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
+            if self.xHome:
+                val = getParm('X_HOME_STATUS')
+                if val != None:
+                    if val & HOME_SUCCESS:
+                        self.xHome = False
+                        jogPanel.xHome = True
+                        pass
+                    elif val & HOME_FAIL:
+                        self.xHome = False
+                        pass
 
     def OnStop(self, e):
         queClear()
@@ -2267,18 +2277,7 @@ class SetXPosDialog(wx.Dialog):
         setParm('X_HOME_SPEED', parmValue('xHomeSpeed'))
         setParm('X_HOME_DIR', parmValue('xHomeDir'))
         command('XHOMEAXIS')
-        while True:
-            val = getParm('X_HOME_STATUS')
-            if val == None:
-                break
-            if val & HOME_SUCCESS:
-                jogPanel.xHome = True
-                pass
-                break
-            elif val & HOME_FAIL:
-                pass
-                break
-            sleep(0.1)
+        jogPanel.xHome = True
         self.Show(False)
         jogPanel.focus()
 
