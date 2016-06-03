@@ -2250,9 +2250,13 @@ class SetXPosDialog(wx.Dialog):
 
     def OnShow(self, e):
         global jogPanel
-        if self.IsShown():
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
+        try:
+            if self.IsShown():
+                val = jogPanel.xPos.GetValue()
+                self.xPos.SetValue(val)
+        except RuntimeError:
+            print "RuntimeError"
+            stdout.flush()
 
     def OnGoTo(self, e):
         global jogPanel
@@ -2275,7 +2279,8 @@ class SetXPosDialog(wx.Dialog):
         setParm('X_HOME_DIST', parmValue('xHomeDist'))
         setParm('X_HOME_BACKOFF_DIST', parmValue('xHomeBackoffDist'))
         setParm('X_HOME_SPEED', parmValue('xHomeSpeed'))
-        setParm('X_HOME_DIR', parmValue('xHomeDir'))
+        val = (-1, 1)[info['xHomeDir'].GetValue()]
+        setParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
         jogPanel.xHome = True
         self.Show(False)
