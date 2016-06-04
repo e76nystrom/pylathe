@@ -10,6 +10,7 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
+HOME_TEST = True
 dbg = None
 
 class InfoValue():
@@ -445,6 +446,11 @@ def sendXData(send=False):
             setParm('X_JOG_MAX', parmValue('xJogMax'))
 
             setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
+
+            global HOME_TEST
+            if HOME_TEST:
+                setParm('X_HOME_START', parmValue('xHomeStart'))
+                setParm('X_HOME_END', parmValue('xHomeEnd'))
 
             command('CMD_XSETUP')
             xDataSent = True
@@ -2377,7 +2383,8 @@ class UpdateThread(Thread):
         i = 0
         op = None
         sendClear()
-        if False: #comm.ser != None:
+        # if False: #comm.ser != None:
+        if comm.ser != None:
             sendZData()
             val = parmValue('jogZPos')
             setParm('Z_SET_LOC', val)
@@ -2827,6 +2834,11 @@ class XDialog(wx.Dialog):
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
             ("bHome Dir", 'xHomeDir'))
+        global HOME_TEST
+        if HOME_TEST:
+            self.fields += (
+                ("Home Start", "xHomeStart"),
+                ("Home End", "xHomeEnd"))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
