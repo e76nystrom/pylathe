@@ -2850,7 +2850,7 @@ class XDialog(wx.Dialog):
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         if HOME_TEST:
-            btn = wx.Button(self, label='Set Home Loc', size=(60,-1))
+            btn = wx.Button(self, label='Set Home Loc')#, size=(60,-1))
             btn.Bind(wx.EVT_BUTTON, self.OnSetHomeLoc)
             sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
@@ -2876,6 +2876,7 @@ class XDialog(wx.Dialog):
         self.Show(False)
 
     def OnSetHomeLoc(self, e):
+        global jogPanel
         loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.stepsInch))
         setParm('X_HOME_loc', loc)
         
