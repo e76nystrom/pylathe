@@ -2398,6 +2398,8 @@ class UpdateThread(Thread):
             val = parmValue('jogXPos')
             setParm('X_SET_LOC', val)
             command('XSETLOC')
+            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+            setParm('X_HOME_LOC', loc)
         scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
