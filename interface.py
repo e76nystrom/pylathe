@@ -229,9 +229,9 @@ regList =\
     ["XSYN", "(3 << 0)", "x dist sync to rotation"],
     ["XMAX", "(4 << 0)", "x rapid move"],
     ["XJOGSLOW", "(5 << 0)", "slow jog for finding home"],
-    ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
-    ["XFIND_HOME", "(1 << 6)", "find home"],
-    ["XCLEAR_HOME", "(1 << 7)", "move off of home"],
+    ["Z_SYN_TAPER", "(1 << 4)", "taper on z"],
+    ["XFIND_HOME", "(1 << 5)", "find home"],
+    ["XCLEAR_HOME", "(1 << 6)", "move off of home"],
      
     "x direction",
     
