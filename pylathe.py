@@ -450,10 +450,12 @@ def sendXData(send=False):
             global HOME_TEST
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
-                val = str(int(getFloatInfo('xHomeStart') * stepsInch))
-                setParm('X_HOME_START', val)
-                val = str(int(getFloatInfo('xHomeEnd') * stepsInch))
-                setParm('X_HOME_END', val)
+                start = str(int(getFloatInfo('xHomeStart') * stepsInch))
+                end = str(int(getFloatInfo('xHomeEnd') * stepsInch))
+                if end > start:
+                    (start, end) = (end, start)
+                setParm('X_HOME_START', start)
+                setParm('X_HOME_END', end)
 
             command('CMD_XSETUP')
             xDataSent = True
