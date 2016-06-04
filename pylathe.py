@@ -2843,7 +2843,7 @@ class XDialog(wx.Dialog):
         if HOME_TEST:
             self.fields += (
                 ("Home Start", "xHomeStart"),
-                ("Home End", "xHomeEnd"))
+                ("Home End", "xHomeEnd"),
                 ("Home Loc", "xHomeLoc"))
         fieldList(self, sizerG, self.fields)
 
