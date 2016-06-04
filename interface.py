@@ -184,6 +184,12 @@ parmList = \
     ["X_HOME_BACKOFF_DIST", "x home backoff dist", "float"],
     ["X_HOME_DIR", "x homing direction", "int"],
 
+    "x home test parameters",
+
+    ["X_ABS_LOC", "x home test location", "int"],
+    ["X_HOME_START", "x start of home signal", "int"],
+    ["X_HOME_END", "x end of home signal", "int"],
+
     # "x home offsetts",
 
     # ["X_HOME_OFFSET", "x offset home to zero", "float"],
