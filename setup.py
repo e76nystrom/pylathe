@@ -168,8 +168,9 @@ def createCtlBits(regList, cLoc, fData=False):
             (var, val, comment) = data
             if fData:
                 tmp =  "#define %-12s %s" % (var, val)
-                cFile.write("%s /* %s */\n" % 
-                            (tmp.ljust(32), comment));
+                bitVal = eval(val)
+                cFile.write("%s /* %02x %s */\n" % 
+                            (tmp.ljust(32), bitVal, comment));
                 tmp =  " public static final int %-10s = %s;" % (var, val)
                 # jFile.write("%s /* %s */\n" % 
                 #             (tmp, comment));
@@ -292,8 +293,9 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     if bit != 0:
                         if (shift != lastShift):
                             tmp =  "  \"%s\", " % (cVar)
-                            bitStr.append("%s/* 0x%02x %s */\n"
-                                          % (tmp.ljust(32), bit << shift, comment))
+                            bitStr.append("%s/* 0x%02x %s */\n" % 
+                                          (tmp.ljust(32), bit << shift,
+                                           comment))
                         xLst.append((" alias %-10s : std_logic is %sreg(%d); " +
                                      "-- x%02x %s\n") %
                                     (xVar, regName, shift, 1 << shift, comment))
