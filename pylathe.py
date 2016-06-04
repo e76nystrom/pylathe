@@ -443,7 +443,7 @@ def sendXData(send=False):
             setParm('X_MOVE_MAX', parmValue('xMaxSpeed'))
 
             setParm('X_JOG_MIN', parmValue('xJogMin'))
-            snetParm('X_JOG_MAX', parmValue('xJogMax'))
+            setParm('X_JOG_MAX', parmValue('xJogMax'))
 
             setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
 
