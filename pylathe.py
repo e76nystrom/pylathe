@@ -2877,7 +2877,7 @@ class XDialog(wx.Dialog):
 
     def OnSetHomeLoc(self, e):
         global jogPanel
-        loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.stepsInch))
+        loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
         setParm('X_HOME_loc', loc)
         
     def OnSetup(self, e):
