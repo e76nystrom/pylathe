@@ -443,14 +443,17 @@ def sendXData(send=False):
             setParm('X_MOVE_MAX', parmValue('xMaxSpeed'))
 
             setParm('X_JOG_MIN', parmValue('xJogMin'))
-            setParm('X_JOG_MAX', parmValue('xJogMax'))
+            snetParm('X_JOG_MAX', parmValue('xJogMax'))
 
             setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
 
             global HOME_TEST
             if HOME_TEST:
-                setParm('X_HOME_START', parmValue('xHomeStart'))
-                setParm('X_HOME_END', parmValue('xHomeEnd'))
+                stepsInch = jogPanel.xStepsInch
+                val = str(int(floatInfo('xHomeStart') * stepsInch))
+                setParm('X_HOME_START', val)
+                val = str(int(floatInfo('xHomeEnd') * stepsInch))
+                setParm('X_HOME_END', val)
 
             command('CMD_XSETUP')
             xDataSent = True
