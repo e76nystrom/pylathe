@@ -186,7 +186,7 @@ parmList = \
 
     "x home test parameters",
 
-    ["X_ABS_LOC", "x home test location", "int"],
+    ["X_HOME_LOC", "x home test location", "int"],
     ["X_HOME_START", "x start of home signal", "int"],
     ["X_HOME_END", "x end of home signal", "int"],
 
