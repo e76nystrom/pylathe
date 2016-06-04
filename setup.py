@@ -169,7 +169,7 @@ def createCtlBits(regList, cLoc, fData=False):
             if fData:
                 tmp =  "#define %-12s %s" % (var, val)
                 bitVal = eval(val)
-                cFile.write("%s /* %02x %s */\n" % 
+                cFile.write("%s /* 0x%02x %s */\n" % 
                             (tmp.ljust(32), bitVal, comment));
                 tmp =  " public static final int %-10s = %s;" % (var, val)
                 # jFile.write("%s /* %s */\n" % 
