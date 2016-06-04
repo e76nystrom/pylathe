@@ -2844,9 +2844,15 @@ class XDialog(wx.Dialog):
             self.fields += (
                 ("Home Start", "xHomeStart"),
                 ("Home End", "xHomeEnd"))
+                ("Home Loc", "xHomeLoc"))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+
+        if HOME_TEST:
+            btn = wx.Button(self, label='Set Home Loc', size=(60,-1))
+            btn.Bind(wx.EVT_BUTTON, self.OnSetHomeLoc)
+            sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         btn = wx.Button(self, label='Setup X', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnSetup)
@@ -2869,6 +2875,10 @@ class XDialog(wx.Dialog):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnSetHomeLoc(self, e):
+        loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.stepsInch))
+        setParm('X_HOME_loc', loc)
+        
     def OnSetup(self, e):
         queClear()
         sendXData(True)
