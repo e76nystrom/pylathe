@@ -2122,13 +2122,13 @@ class JogPanel(wx.Panel):
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
                 if val != None:
+                    self.xHome = False
                     if val & HOME_SUCCESS:
-                        self.xHome = False
-                        jogPanel.xHome = True
-                        pass
+                        print "home success"
+                        stdout.flush()
                     elif val & HOME_FAIL:
-                        self.xHome = False
-                        pass
+                        print "home success"
+                        stdout.flush()
 
     def OnStop(self, e):
         queClear()
