@@ -2309,9 +2309,8 @@ class SetXPosDialog(wx.Dialog):
                 xLoc /= jogPanel.xStepsInch
                 xHomeOffset = xLoc - val
                 info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-                # sendXData()
-                # setParm('X_SET_LOC', val)
-                # command('XSETLOC')
+                print "xHomeOffset %0.4f" % (xHomeOffset)
+                stdout.flush()
                 self.Show(False)
                 jogPanel.focus()
         except ValueError:
@@ -2325,8 +2324,8 @@ class SetXPosDialog(wx.Dialog):
         if xLoc != None:
             xHomeOffset = float(xLoc) / jogPanel.xStepsInch
             info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-            # setParm('X_SET_LOC', 0)
-            # command('XSETLOC')
+            print "xHomeOffset %0.4f" % (xHomeOffset)
+            stdout.flush()
             self.Show(False)
             jogPanel.focus()
 
