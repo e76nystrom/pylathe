@@ -2323,7 +2323,7 @@ class SetXPosDialog(wx.Dialog):
         sendXData()
         xLoc = getParm('X_LOC')
         if xLoc != None:
-            xHomeOffset = float(xLoc) / jogpanel.xStepsInch
+            xHomeOffset = float(xLoc) / jogPanel.xStepsInch
             info['xHomeOffset'].SetValue("%0.4" % (xHomeOffset))
             # setParm('X_SET_LOC', 0)
             # command('XSETLOC')
