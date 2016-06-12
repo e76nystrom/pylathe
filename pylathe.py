@@ -266,6 +266,8 @@ def queClear():
 
 def startSpindle():
     moveQue.put((QUE_START, 0))
+    saveZOffset();
+    saveXOffset();
 
 def stopSpindle():
     moveQue.put((QUE_STOP, 0))
@@ -2186,6 +2188,7 @@ class SetZPosDialog(wx.Dialog):
             sendXData()
             command('CMD_PAUSE')
             command('CLEARQUE')
+            saveZOffset()
             moveZ(loc)
             command('CMD_RESUME')
             self.Show(False)
@@ -2278,6 +2281,7 @@ class SetXPosDialog(wx.Dialog):
             sendXData()
             command('CMD_PAUSE')
             command('CLEARQUE')
+            saveXOffset()
             moveX(loc)
             command('CMD_RESUME')
             self.Show(False)
