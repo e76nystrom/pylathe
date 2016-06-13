@@ -2420,6 +2420,8 @@ class UpdateThread(Thread):
                     try:
                         num = getQueueStatus()
                         if num != None:
+                            print "num %d" % (num)
+                            stdout.flush()
                             while num > 0:
                                 num -= 1
                                 if op == None:
