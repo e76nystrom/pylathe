@@ -288,7 +288,7 @@ def sendMove(op, val):
         print "sendMove val invalid type"
         stdout.flush()
         return
-    cmd = '\x01%x x%x %s ' % (cmds['SENDMOVE'][0], op, valStr)
+    cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
         print "cmd %3x %s" % (op, prtStr)
         stdout.flush()
