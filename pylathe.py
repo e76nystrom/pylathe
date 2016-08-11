@@ -400,10 +400,10 @@ def sendZData(send=False):
             val = jogPanel.combo.GetValue
             try:
                 val = float(val)
-                if val > .020:
-                    val = .020
+                if val > 0.020:
+                    val = 0.020
             except ValueError:
-                val = .001
+                val = 0.001
             setParm('Z_MPG_INC', val * jogPanel.zStepSInch)
 
             setParm('Z_PITCH', parmValue('zPitch'))
@@ -444,10 +444,10 @@ def sendXData(send=False):
             val = jogPanel.combo.GetValue
             try:
                 val = float(val)
-                if val > .020:
-                    val = .020
+                if val > 0.020:
+                    val = 0.020
             except ValueError:
-                val = .001
+                val = 0.001
             setParm('X_MPG_INC', val * xStepSInch)
 
             setParm('X_PITCH', parmValue('xPitch'))
@@ -2033,13 +2033,12 @@ class JogPanel(wx.Panel):
         print "combo val %s" % (val)
         try:
             val = float(val)
-            if val > .020:
-                val = .020
-            setParm('Z_MPG_INC', val * zStepSInch)
-            setParm('X_MPG_INC', val * xStepSInch)
-            stdout.flush()
+            if val > 0.020:
+                val = 0.020
         except ValueError:
-            pass
+            val = 0.001
+        setParm('Z_MPG_INC', val * self.zStepSInch)
+        setParm('X_MPG_INC', val * self.xStepSInch)
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
