@@ -397,6 +397,14 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            val = jogPanel.combo.GetValue
+            try:
+                val = float(val)
+                if val > .020:
+                    val = .020
+            except ValueError:
+                val = .001
+            setParm('Z_MPG_INC', val * jogPanel.zStepSInch)
 
             setParm('Z_PITCH', parmValue('zPitch'))
             setParm('Z_RATIO', parmValue('zMotorRatio'))
@@ -433,6 +441,14 @@ def sendXData(send=False):
             motorRatio = getFloatInfo('xMotorRatio')
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            val = jogPanel.combo.GetValue
+            try:
+                val = float(val)
+                if val > .020:
+                    val = .020
+            except ValueError:
+                val = .001
+            setParm('X_MPG_INC', val * xStepSInch)
 
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
