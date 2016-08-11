@@ -2017,6 +2017,8 @@ class JogPanel(wx.Panel):
         print "combo val %s" % (val)
         try:
             val = float(val)
+            if val > .020:
+                val = .020
             setParm('Z_MPG_INC', val * zStepSInch)
             setParm('X_MPG_INC', val * xStepSInch)
             stdout.flush()
