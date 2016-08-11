@@ -2013,7 +2013,15 @@ class JogPanel(wx.Panel):
         self.xDown(wx.WXK_UP)
 
     def OnCombo(self, e):
-        pass
+        val = self.combo.GetValue();
+        print "combo val %s" % (val)
+        try:
+            val = float(val)
+            setParm('Z_MPG_INC', val * zStepSInch)
+            setParm('X_MPG_INC', val * xStepSInch)
+            stdout.flush()
+        except ValueError:
+            pass
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
