@@ -397,7 +397,7 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            val = jogPanel.combo.GetValue
+            val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
                 if val > 0.020:
