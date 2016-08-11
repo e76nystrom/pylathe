@@ -404,7 +404,7 @@ def sendZData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            setParm('Z_MPG_INC', val * jogPanel.zStepSInch)
+            setParm('Z_MPG_INC', val * jogPanel.zStepsInch)
 
             setParm('Z_PITCH', parmValue('zPitch'))
             setParm('Z_RATIO', parmValue('zMotorRatio'))
@@ -448,7 +448,7 @@ def sendXData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            setParm('X_MPG_INC', val * xStepSInch)
+            setParm('X_MPG_INC', val * xStepsInch)
 
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
@@ -2037,8 +2037,8 @@ class JogPanel(wx.Panel):
                 val = 0.020
         except ValueError:
             val = 0.001
-        setParm('Z_MPG_INC', val * self.zStepSInch)
-        setParm('X_MPG_INC', val * self.xStepSInch)
+        setParm('Z_MPG_INC', val * self.zStepsInch)
+        setParm('X_MPG_INC', val * self.xStepsInch)
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
