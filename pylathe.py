@@ -441,7 +441,7 @@ def sendXData(send=False):
             motorRatio = getFloatInfo('xMotorRatio')
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            val = jogPanel.combo.GetValue
+            val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
                 if val > 0.020:
