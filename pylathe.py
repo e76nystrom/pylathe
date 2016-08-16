@@ -2435,22 +2435,6 @@ class UpdateThread(Thread):
         global dbg
         i = 0
         op = None
-        sendClear()
-        print "sendClear done"
-        print comm.ser
-        stdout.flush()
-        # if False: #comm.ser != None:
-        if comm.ser != None:
-            sendZData()
-            val = parmValue('jogZPos')
-            setParm('Z_SET_LOC', val)
-            command('ZSETLOC')
-            sendXData()
-            val = parmValue('jogXPos')
-            setParm('X_SET_LOC', val)
-            command('XSETLOC')
-            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-            setParm('X_HOME_LOC', loc)
         scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
@@ -2549,6 +2533,24 @@ class MainFrame(wx.Frame):
         # comm.xRegs = xRegs
 
         self.update = UpdateThread(self)
+        sendClear()
+        print "sendClear done"
+        print comm.ser
+        stdout.flush()
+
+        # if False: #comm.ser != None:
+        if comm.ser != None:
+            sendZData()
+            val = parmValue('jogZPos')
+            setParm('Z_SET_LOC', val)
+            command('ZSETLOC')
+            sendXData()
+            val = parmValue('jogXPos')
+            setParm('X_SET_LOC', val)
+            command('XSETLOC')
+            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+            setParm('X_HOME_LOC', loc)
+
         self.procUpdate = (self.jogPanel.updateZ,
                            self.jogPanel.updateX,
                            self.jogPanel.updateRPM,
