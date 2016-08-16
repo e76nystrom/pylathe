@@ -234,6 +234,7 @@ def getFloatInfo(key):
 def getIntInfo(key):
     global info
     print "getIntInfo %s " % (key)
+    stdout.flush()
     try:
         tmp = info[key]
         try:
