@@ -389,9 +389,11 @@ def sendSpindleData(send=False):
 
 def sendZData(send=False):
     global zDataSent, jogPanel
+    print "sendZData start 0"
+    stdout.flush()
     try:
         if send or (not zDataSent):
-            print "sendZData start"
+            print "sendZData start 1"
             stdout.flush()
             pitch = getFloatInfo('zPitch')
             motorSteps = getIntInfo('zMotorSteps')
