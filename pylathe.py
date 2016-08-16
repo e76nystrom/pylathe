@@ -399,9 +399,9 @@ def sendZData(send=False):
             motorSteps = getIntInfo('zMotorSteps')
             microSteps = getIntInfo('zMicroSteps')
             motorRatio = getFloatInfo('zMotorRatio')
+            print "sendZData start 2"
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            print "sendZData start 2"
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
