@@ -2437,6 +2437,7 @@ class UpdateThread(Thread):
         op = None
         sendClear()
         print "sendClear done"
+        print comm.ser
         stdout.flush()
         # if False: #comm.ser != None:
         if comm.ser != None:
