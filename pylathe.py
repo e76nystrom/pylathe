@@ -233,6 +233,7 @@ def getFloatInfo(key):
 
 def getIntInfo(key):
     global info
+    print "getIntInfo %s " % (key)
     try:
         tmp = info[key]
         try:
