@@ -2393,9 +2393,9 @@ class UpdateThread(Thread):
         Thread.__init__(self)
         self.notifyWindow = notifyWindow
         self.threadRun = True
+        self.parmList = (self.readAll, )
         self.start()
         # self.getParm = (self.zLoc, self.xLoc, self.rpm)
-        self.parmList = (self.readAll, )
 
     def zLoc(self):
         val = getParm('Z_LOC')
