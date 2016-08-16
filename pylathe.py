@@ -391,6 +391,8 @@ def sendZData(send=False):
     global zDataSent, jogPanel
     try:
         if send or (not zDataSent):
+            print "sendZData start"
+            stdout.flush()
             pitch = getFloatInfo('zPitch')
             motorSteps = getIntInfo('zMotorSteps')
             microSteps = getIntInfo('zMicroSteps')
