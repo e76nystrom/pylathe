@@ -401,6 +401,8 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            print "sendZData start 2"
+            stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -436,6 +438,8 @@ def sendZData(send=False):
     except commTimeout as e:
         print "sendZData Timeout"
         stdout.flush()
+    except:
+        print "setZData exception"
 
 def sendXData(send=False):
     global xDataSent, jogPanel
