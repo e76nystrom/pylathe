@@ -145,7 +145,6 @@ if XILINX:
     createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
 from setup import *
-print "test"
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
@@ -233,8 +232,6 @@ def getFloatInfo(key):
 
 def getIntInfo(key):
     global info
-    print "getIntInfo %s " % (key)
-    stdout.flush()
     try:
         tmp = info[key]
         try:
@@ -391,24 +388,12 @@ def sendSpindleData(send=False):
 
 def sendZData(send=False):
     global zDataSent, jogPanel
-    print "sendZData start 0"
-    stdout.flush()
     try:
         if send or (not zDataSent):
-            print "sendZData start 1"
-            stdout.flush()
             pitch = getFloatInfo('zPitch')
-            print "sendZData start 2"
-            stdout.flush()
             motorSteps = getIntInfo('zMotorSteps')
-            print "sendZData start 3"
-            stdout.flush()
             microSteps = getIntInfo('zMicroSteps')
-            print "sendZData start 4"
-            stdout.flush()
             motorRatio = getFloatInfo('zMotorRatio')
-            print "sendZData start 5"
-            stdout.flush()
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             stdout.flush()
@@ -419,8 +404,6 @@ def sendZData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            print "sendZData"
-            stdout.flush()
             setParm('Z_MPG_INC', val * jogPanel.zStepsInch)
 
             setParm('Z_PITCH', parmValue('zPitch'))
@@ -436,11 +419,7 @@ def sendZData(send=False):
             setParm('Z_JOG_MIN', parmValue('zJogMin'))
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
-            # print "send z dir"
-            # stdout.flush()
             setParm('Z_DIR_FLAG', parmValueBool('zInvDir'))
-            # print "z dir send"
-            # stdout.flush()
 
             command('CMD_ZSETUP')
             zDataSent = True
@@ -449,6 +428,7 @@ def sendZData(send=False):
         stdout.flush()
     except:
         print "setZData exception"
+        stdout.flush()
 
 def sendXData(send=False):
     global xDataSent, jogPanel
@@ -2507,7 +2487,7 @@ class MainFrame(wx.Frame):
         global hdrFont, testFont
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        evtUpdate(self,self.OnUpdate)
+        evtUpdate(self, self.OnUpdate)
         hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
@@ -2530,15 +2510,12 @@ class MainFrame(wx.Frame):
         global cmds, parms
         comm.cmds = cmds
         comm.parms = parms
-        # comm.xRegs = xRegs
+        if XILINX:
+            comm.xRegs = xRegs
 
-        self.update = UpdateThread(self)
         sendClear()
-        print "sendClear done"
-        print comm.ser
         stdout.flush()
 
-        # if False: #comm.ser != None:
         if comm.ser != None:
             sendZData()
             val = parmValue('jogZPos')
@@ -2555,6 +2532,8 @@ class MainFrame(wx.Frame):
                            self.jogPanel.updateX,
                            self.jogPanel.updateRPM,
                            self.jogPanel.updateAll)
+
+        self.update = UpdateThread(self)
 
     def onClose(self, event):
         global jogPanel
