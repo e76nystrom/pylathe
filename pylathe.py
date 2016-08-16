@@ -396,10 +396,17 @@ def sendZData(send=False):
             print "sendZData start 1"
             stdout.flush()
             pitch = getFloatInfo('zPitch')
-            motorSteps = getIntInfo('zMotorSteps')
-            microSteps = getIntInfo('zMicroSteps')
-            motorRatio = getFloatInfo('zMotorRatio')
             print "sendZData start 2"
+            stdout.flush()
+            motorSteps = getIntInfo('zMotorSteps')
+            print "sendZData start 3"
+            stdout.flush()
+            microSteps = getIntInfo('zMicroSteps')
+            print "sendZData start 4"
+            stdout.flush()
+            motorRatio = getFloatInfo('zMotorRatio')
+            print "sendZData start 5"
+            stdout.flush()
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             stdout.flush()
