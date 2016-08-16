@@ -404,6 +404,8 @@ def sendZData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
+            print "sendZData"
+            stdout.flush()
             setParm('Z_MPG_INC', val * jogPanel.zStepsInch)
 
             setParm('Z_PITCH', parmValue('zPitch'))
