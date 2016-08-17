@@ -202,7 +202,7 @@ def parmValue(key):
     try:
         tmp = info[key]
         return(tmp.GetValue())
-    except IndexError:
+    except KeyError:
         return('')
 
 def parmValueBool(key):
@@ -213,7 +213,7 @@ def parmValueBool(key):
             return(1)
         else:
             return(0)
-    except IndexError:
+    except KeyError:
         print "parmValueBool IndexError %s" % (key)
         stdout.flush()
         return('')
