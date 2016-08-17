@@ -10,7 +10,7 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
-HOME_TEST = True
+HOME_TEST = False
 dbg = None
 
 class InfoValue():
