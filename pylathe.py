@@ -420,7 +420,8 @@ def sendZData(send=False):
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
             setParm('Z_DIR_FLAG', parmValueBool('zInvDir'))
-
+            setParm('Z_MPG_FLAG', parmValueBool('zInvMpg'))
+                
             command('CMD_ZSETUP')
             zDataSent = True
     except commTimeout as e:
@@ -463,6 +464,7 @@ def sendXData(send=False):
             setParm('X_JOG_MAX', parmValue('xJogMax'))
 
             setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
+            setParm('X_MPG_FLAG', parmValueBool('xInvMpg'))
 
             global HOME_TEST
             if HOME_TEST:
@@ -2799,7 +2801,8 @@ class ZDialog(wx.Dialog):
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
-            ("bInvert Dir", 'zInvDir'))
+            ("bInvert Dir", 'zInvDir'),
+            ("bInvert MPG", 'zInvMPG'))        
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -2869,6 +2872,7 @@ class XDialog(wx.Dialog):
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
             ("bInvert Dir", 'xInvDir'),
+            ("bInvert MPG", 'xInvMPG'))        
             ("Home Dist", "xHomeDist"),
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
