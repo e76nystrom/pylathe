@@ -97,6 +97,7 @@ parmList = \
     ["Z_ACCEL", "z axis acceleration", "float"],
     ["Z_BACKLASH", "z axis backlash", "float"],
     ["Z_DIR_FLAG", "z invert direction", "char"],
+    ["Z_MPG_FLAG", "z invert mpg", "char"],
     
     "x axis parameters",
     
@@ -107,6 +108,7 @@ parmList = \
     ["X_ACCEL", "x axis acceleration", "float"],
     ["X_BACKLASH", "x axis backlash", "float"],
     ["X_DIR_FLAG", "x invert direction", "char"],
+    ["X_MPG_FLAG", "x invert mpg", "char"],
     
     "z move parameters",
     
