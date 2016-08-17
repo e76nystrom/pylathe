@@ -2802,7 +2802,7 @@ class ZDialog(wx.Dialog):
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
             ("bInvert Dir", 'zInvDir'),
-            ("bInvert MPG", 'zInvMPG'))        
+            ("bInvert MPG", 'zInvMpg'))        
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -2872,7 +2872,7 @@ class XDialog(wx.Dialog):
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
             ("bInvert Dir", 'xInvDir'),
-            ("bInvert MPG", 'xInvMPG'),
+            ("bInvert MPG", 'xInvMpg'),
             ("Home Dist", "xHomeDist"),
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
