@@ -10,7 +10,7 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 
-HOME_TEST = True
+HOME_TEST = False
 dbg = None
 
 class InfoValue():
@@ -145,7 +145,6 @@ if XILINX:
     createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
 from setup import *
-print "test"
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
@@ -203,7 +202,7 @@ def parmValue(key):
     try:
         tmp = info[key]
         return(tmp.GetValue())
-    except IndexError:
+    except KeyError:
         return('')
 
 def parmValueBool(key):
@@ -214,7 +213,7 @@ def parmValueBool(key):
             return(1)
         else:
             return(0)
-    except IndexError:
+    except KeyError:
         print "parmValueBool IndexError %s" % (key)
         stdout.flush()
         return('')
@@ -397,6 +396,7 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -419,16 +419,16 @@ def sendZData(send=False):
             setParm('Z_JOG_MIN', parmValue('zJogMin'))
             setParm('Z_JOG_MAX', parmValue('zJogMax'))
 
-            # print "send z dir"
-            # stdout.flush()
             setParm('Z_DIR_FLAG', parmValueBool('zInvDir'))
-            # print "z dir send"
-            # stdout.flush()
-
+            setParm('Z_MPG_FLAG', parmValueBool('zInvMpg'))
+                
             command('CMD_ZSETUP')
             zDataSent = True
     except commTimeout as e:
         print "sendZData Timeout"
+        stdout.flush()
+    except:
+        print "setZData exception"
         stdout.flush()
 
 def sendXData(send=False):
@@ -464,6 +464,7 @@ def sendXData(send=False):
             setParm('X_JOG_MAX', parmValue('xJogMax'))
 
             setParm('X_DIR_FLAG', parmValueBool('xInvDir'))
+            setParm('X_MPG_FLAG', parmValueBool('xInvMpg'))
 
             global HOME_TEST
             if HOME_TEST:
@@ -2374,9 +2375,9 @@ class UpdateThread(Thread):
         Thread.__init__(self)
         self.notifyWindow = notifyWindow
         self.threadRun = True
+        self.parmList = (self.readAll, )
         self.start()
         # self.getParm = (self.zLoc, self.xLoc, self.rpm)
-        self.parmList = (self.readAll, )
 
     def zLoc(self):
         val = getParm('Z_LOC')
@@ -2416,19 +2417,6 @@ class UpdateThread(Thread):
         global dbg, comm
         i = 0
         op = None
-        sendClear()
-        # if False: #comm.ser != None:
-        if comm.ser != None:
-            sendZData()
-            val = parmValue('jogZPos')
-            setParm('Z_SET_LOC', val)
-            command('ZSETLOC')
-            sendXData()
-            val = parmValue('jogXPos')
-            setParm('X_SET_LOC', val)
-            command('XSETLOC')
-            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-            setParm('X_HOME_LOC', loc)
         scanMax = len(self.parmList) + 1
         while True:
             sleep(0.1)
@@ -2501,7 +2489,7 @@ class MainFrame(wx.Frame):
         global hdrFont, testFont
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        evtUpdate(self,self.OnUpdate)
+        evtUpdate(self, self.OnUpdate)
         hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
@@ -2524,13 +2512,30 @@ class MainFrame(wx.Frame):
         global cmds, parms
         comm.cmds = cmds
         comm.parms = parms
-        # comm.xRegs = xRegs
+        if XILINX:
+            comm.xRegs = xRegs
 
-        self.update = UpdateThread(self)
+        sendClear()
+        stdout.flush()
+
+        if comm.ser != None:
+            sendZData()
+            val = parmValue('jogZPos')
+            setParm('Z_SET_LOC', val)
+            command('ZSETLOC')
+            sendXData()
+            val = parmValue('jogXPos')
+            setParm('X_SET_LOC', val)
+            command('XSETLOC')
+            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+            setParm('X_HOME_LOC', loc)
+
         self.procUpdate = (self.jogPanel.updateZ,
                            self.jogPanel.updateX,
                            self.jogPanel.updateRPM,
                            self.jogPanel.updateAll)
+
+        self.update = UpdateThread(self)
 
     def onClose(self, event):
         global jogPanel
@@ -2792,11 +2797,13 @@ class ZDialog(wx.Dialog):
             ("Micro Steps", "zMicroSteps"),
             ("Motor Ratio", "zMotorRatio"),
             ("Backlash", "zBacklash"),
+            ("Accel", "zAccel"),
             ("Min Speed", "zMinSpeed"),
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
-            ("bInvert Dir", 'zInvDir'))
+            ("bInvert Dir", 'zInvDir'),
+            ("bInvert MPG", 'zInvMpg'))        
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -2861,11 +2868,13 @@ class XDialog(wx.Dialog):
             ("Micro Steps", "xMicroSteps"),
             ("Motor Ratio", "xMotorRatio"),
             ("Backlash", "xBacklash"),
+            ("Accel", "xAccel"),
             ("Min Speed", "xMinSpeed"),
             ("Max Speed", "xMaxSpeed"),
             ("Jog Min", "xJogMin"),
             ("Jog Max", "xJogMax"),
             ("bInvert Dir", 'xInvDir'),
+            ("bInvert MPG", 'xInvMpg'),
             ("Home Dist", "xHomeDist"),
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
