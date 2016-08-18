@@ -448,7 +448,7 @@ def sendXData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            setParm('X_MPG_INC', val * xStepsInch)
+            setParm('X_MPG_INC', val * jogPanel.xStepsInch)
 
             setParm('X_PITCH', parmValue('xPitch'))
             setParm('X_RATIO', parmValue('xMotorRatio'))
@@ -2413,7 +2413,7 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
-        global dbg
+        global dbg, comm
         i = 0
         op = None
         sendClear()
