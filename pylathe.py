@@ -275,7 +275,7 @@ def nextPass(passNum):
     moveQue.put((PASS_NUM, passNum))
 
 def quePause():
-    moveQue.put(QUE_PAUSE, 0)
+    moveQue.put((QUE_PAUSE, 0))
 
 def moveZ(zLoc, flag=ZMAX):
     print "moveZ  %7.4f" % (zLoc)
