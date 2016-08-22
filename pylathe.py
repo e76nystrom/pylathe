@@ -574,6 +574,7 @@ class Turn():
 
     def turnPass(self):
         moveX(self.curX, XJOG)
+        print "pause"
         if self.turnPanel.pause.GetValue():
             quePause()
         moveZ(self.zEnd, ZSYN)
