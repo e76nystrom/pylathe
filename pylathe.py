@@ -573,9 +573,8 @@ class Turn():
                (self.passCount, feed, self.curX, self.curX * 2.0))
 
     def turnPass(self):
-        global turnPause
         moveX(self.curX, XJOG)
-        if self.pause.GetValue():
+        if self.turnPanel.pause.GetValue():
             quePause()
         moveZ(self.zEnd, ZSYN)
         moveX(self.safeX)
