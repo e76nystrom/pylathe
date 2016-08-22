@@ -12,7 +12,6 @@ from Queue import Queue, Empty
 
 HOME_TEST = False
 dbg = None
-turnPause = True
 
 class InfoValue():
     def __init__(self, val):
@@ -576,7 +575,7 @@ class Turn():
     def turnPass(self):
         global turnPause
         moveX(self.curX, XJOG)
-        if turnPause:
+        if self.pause.GetValue():
             quePause()
         moveZ(self.zEnd, ZSYN)
         moveX(self.safeX)
@@ -619,8 +618,12 @@ class TurnPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['tuPause'] = cb
         
         # x parameters
 
