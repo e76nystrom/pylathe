@@ -2187,7 +2187,7 @@ class JogPanel(wx.Panel):
         queClear()
         command('CMD_STOP')
 
-    def OnPasue(self, e):
+    def OnPause(self, e):
         command('CMD_PAUSE')
         self.combo.SetFocus()
 
