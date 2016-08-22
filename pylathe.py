@@ -1868,7 +1868,7 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnResume)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV.Add(sizerH, flag=wx.ALL, border=2)
+        sizerV.Add(sizerH, flag=wx.LEFT|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
