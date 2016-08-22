@@ -618,13 +618,9 @@ class TurnPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['tuPause'] = cb
-        
+        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(wx.StaticText(self, -1), border=2)
+
         # x parameters
 
         self.xStart = addField(self, sizerG, "X Start D", "tuXStart")
@@ -665,6 +661,13 @@ class TurnPanel(wx.Panel):
 
         self.add = addField(self, sizerG, "Feed", "tuAddFeed")
 
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['tuPause'] = cb
+        
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
