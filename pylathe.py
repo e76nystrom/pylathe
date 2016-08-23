@@ -505,7 +505,7 @@ class Turn():
     def turn(self):
         self.getTurnParameters()
 
-        self.xCut = self.xStart - self.xEnd
+        self.xCut = abs(self.xStart) - abs(self.xEnd)
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
         self.passes = int(ceil(self.xCut / self.xFeed))
