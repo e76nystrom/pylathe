@@ -496,7 +496,7 @@ class Turn():
 
         self.xStart = getFloatVal(tu.xStart) / 2.0
         self.xEnd = getFloatVal(tu.xEnd) / 2.0
-        self.xFeed = abs(getFloatVal(tu.xFeed)) / 2.0
+        self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
         self.sPassInt = getIntVal(tu.sPInt)
@@ -505,16 +505,34 @@ class Turn():
     def turn(self):
         self.getTurnParameters()
 
+        if self.xStart < 0:
+            if self.xEnd <= 0:
+                self.neg = True
+            else:
+                print "error"
+                return
+        else:
+            if self.xEnd >= 0:
+                self.neg = False
+            else:
+                print "error"
+                return
+
         self.xCut = abs(self.xStart) - abs(self.xEnd)
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
-        self.passes = int(ceil(self.xCut / self.xFeed))
+        self.passes = int(ceil(self.xCut / abs(self.xFeed)))
         self.turnPanel.passes.SetValue("%d" % (self.passes))
         print ("xCut %5.3f passes %d internal %s" %
                (self.xCut, self.passes, self.internal))
 
         if self.internal:
-            self.xRetract = -self.xRetract
+            if not self.neg:
+                self.xRetract = -self.xRetract
+        else:
+            if self.neg:
+                self.xRetract = -self.xRetract
+
         self.safeX = self.xStart + self.xRetract
         startSpindle();
         moveX(self.safeX)
@@ -566,8 +584,12 @@ class Turn():
     def calculateTurnPass(self):
         feed = self.feed
         if self.internal:
-            feed = -feed
-        self.curX = self.xStart - feed
+            if self.neg:
+                feed = -feed
+        else:
+            if not self.neg:
+                feed = -feed
+        self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
         print ("pass %2d feed %5.3f x %5.3f diameter %5.3f" %
                (self.passCount, feed, self.curX, self.curX * 2.0))
