@@ -2436,7 +2436,7 @@ class XPosMenu(wx.Menu):
         global jogPanel
         dialog = jogPanel.setXPosDialog
         if dialog == None:
-            self.setXPosDialog = dialog = SetXPosDialog(self)
+            jogPanel.setXPosDialog = dialog = SetXPosDialog(self)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
