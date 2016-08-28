@@ -2434,6 +2434,13 @@ class XPosMenu(wx.Menu):
 
     def OnFixX(self, e):
         global jogPanel
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = jogPanel.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = jogPanel.xPos.GetPosition()
+        xPos += x
+        yPos += y
         dialog = jogPanel.setXPosDialog
         if dialog == None:
             jogPanel.setXPosDialog = dialog = SetXPosDialog(self)
