@@ -2487,6 +2487,17 @@ class FixXPosDialog(wx.Dialog):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnShow(self, e):
+        pass
+        # global jogPanel
+        # try:
+        #     if self.IsShown():
+        #         val = jogPanel.xPos.GetValue()
+        #         self.xPos.SetValue(val)
+        # except RuntimeError:
+        #     print "RuntimeError"
+        #     stdout.flush()
+
     def OnFix(self, e):
         pass
 
