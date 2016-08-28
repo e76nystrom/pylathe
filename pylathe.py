@@ -2431,7 +2431,7 @@ class XPosMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
-    def self.OnFixX(self, e):
+    def OnFixX(self, e):
         dialog = self.setXPosDialog
         if dialog == None:
             self.setXPosDialog = dialog = SetXPosDialog(self)
