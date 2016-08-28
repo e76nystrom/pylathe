@@ -278,9 +278,12 @@ def nextPass(passNum):
 def quePause():
     moveQue.put((QUE_PAUSE, 0))
 
+def saveDiameter(val):
+    moveQue.put(QUE_PAUSE, val)
+
 def moveZ(zLoc, flag=ZMAX):
-    print "moveZ  %7.4f" % (zLoc)
     queMove(MOVE_Z | flag << 8, zLoc)
+    print "moveZ  %7.4f" % (zLoc)
 
 def moveX(xLoc, flag=XMAX):
     queMove(MOVE_X | flag << 8, xLoc)
@@ -597,6 +600,7 @@ class Turn():
 
     def turnPass(self):
         moveX(self.curX, XJOG)
+        saveDiameter(self.curX * 2.0)
         print "pause"
         if self.turnPanel.pause.GetValue():
             quePause()
