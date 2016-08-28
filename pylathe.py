@@ -2530,7 +2530,7 @@ class FixXPosDialog(wx.Dialog):
         offset = (actualX - curX) / 2.0
         xHomeOffset -= offset
         info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-        print "xHomeOffset %0.4f" % (xHomeOffset)
+        print "offset %0.4f xHomeOffset %0.4f" % (offset, xHomeOffset)
         stdout.flush()
 
         self.Show(False)
