@@ -1922,6 +1922,10 @@ class JogPanel(wx.Panel):
         # (x, y) = self.xPos.GetPosition()
         # xPos += x
         # yPos += y
+        (xPos, yPos) = self.xPos.GetPosition()
+        (x, y) = e.GetPosition()
+        xPos += x
+        yPos += y
         dialog = self.setXPosDialog
         if dialog == None:
             self.setXPosDialog = dialog = SetXPosDialog(self)
