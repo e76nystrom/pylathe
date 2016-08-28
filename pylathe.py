@@ -274,6 +274,9 @@ def stopSpindle():
 def nextPass(passNum):
     moveQue.put((PASS_NUM, passNum))
 
+def quePause():
+    moveQue.put((QUE_PAUSE, 0))
+
 def moveZ(zLoc, flag=ZMAX):
     print "moveZ  %7.4f" % (zLoc)
     queMove(MOVE_Z | flag << 8, zLoc)
@@ -493,7 +496,7 @@ class Turn():
 
         self.xStart = getFloatVal(tu.xStart) / 2.0
         self.xEnd = getFloatVal(tu.xEnd) / 2.0
-        self.xFeed = abs(getFloatVal(tu.xFeed)) / 2.0
+        self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
         self.sPassInt = getIntVal(tu.sPInt)
@@ -502,16 +505,34 @@ class Turn():
     def turn(self):
         self.getTurnParameters()
 
-        self.xCut = self.xStart - self.xEnd
+        if self.xStart < 0:
+            if self.xEnd <= 0:
+                self.neg = True
+            else:
+                print "error"
+                return
+        else:
+            if self.xEnd >= 0:
+                self.neg = False
+            else:
+                print "error"
+                return
+
+        self.xCut = abs(self.xStart) - abs(self.xEnd)
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
-        self.passes = int(ceil(self.xCut / self.xFeed))
+        self.passes = int(ceil(self.xCut / abs(self.xFeed)))
         self.turnPanel.passes.SetValue("%d" % (self.passes))
         print ("xCut %5.3f passes %d internal %s" %
                (self.xCut, self.passes, self.internal))
 
         if self.internal:
-            self.xRetract = -self.xRetract
+            if not self.neg:
+                self.xRetract = -self.xRetract
+        else:
+            if self.neg:
+                self.xRetract = -self.xRetract
+
         self.safeX = self.xStart + self.xRetract
         startSpindle();
         moveX(self.safeX)
@@ -563,14 +584,21 @@ class Turn():
     def calculateTurnPass(self):
         feed = self.feed
         if self.internal:
-            feed = -feed
-        self.curX = self.xStart - feed
+            if self.neg:
+                feed = -feed
+        else:
+            if not self.neg:
+                feed = -feed
+        self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
         print ("pass %2d feed %5.3f x %5.3f diameter %5.3f" %
                (self.passCount, feed, self.curX, self.curX * 2.0))
 
     def turnPass(self):
         moveX(self.curX, XJOG)
+        print "pause"
+        if self.turnPanel.pause.GetValue():
+            quePause()
         moveZ(self.zEnd, ZSYN)
         moveX(self.safeX)
         moveZ(self.zStart)
@@ -614,7 +642,7 @@ class TurnPanel(wx.Panel):
 
         sizerG.Add(wx.StaticText(self, -1), border=2)
         sizerG.Add(wx.StaticText(self, -1), border=2)
-        
+
         # x parameters
 
         self.xStart = addField(self, sizerG, "X Start D", "tuXStart")
@@ -655,6 +683,13 @@ class TurnPanel(wx.Panel):
 
         self.add = addField(self, sizerG, "Feed", "tuAddFeed")
 
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['tuPause'] = cb
+        
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
@@ -1739,6 +1774,8 @@ class JogPanel(wx.Panel):
         global info
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
+        sizerV = wx.BoxSizer(wx.VERTICAL)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
@@ -1761,7 +1798,7 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV = wx.BoxSizer(wx.VERTICAL)
+        sizerV1 = wx.BoxSizer(wx.VERTICAL)
 
         bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
@@ -1769,11 +1806,11 @@ class JogPanel(wx.Panel):
         self.xNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
         btn.Bind(wx.EVT_BUTTON, self.OnXHome)
-        sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
@@ -1781,9 +1818,9 @@ class JogPanel(wx.Panel):
         self.xPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerV, flag=wx.CENTER|wx.ALL, border=2)
+        sizerH.Add(sizerV1, flag=wx.CENTER|wx.ALL, border=2)
 
         self.step = step = ["Cont", "0.001", "0.002", "0.005",
                             "0.010", "0.020", "0.050",
@@ -1819,29 +1856,44 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV = wx.BoxSizer(wx.VERTICAL)
+        sizerV1 = wx.BoxSizer(wx.VERTICAL)
 
         self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV1.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV1.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+
+        sizerH.Add(sizerV1, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
+
+        sizerV.Add(sizerH, flag=wx.ALL, border=2)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         btn = wx.Button(self, label='Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerV.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerV, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
-                   border=2)
+        btn = wx.Button(self, label='Pause')
+        btn.Bind(wx.EVT_BUTTON, self.OnPause)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.SetSizer(sizerH)
-        sizerH.Fit(self)
+        btn = wx.Button(self, label='Resume')
+        btn.Bind(wx.EVT_BUTTON, self.OnResume)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerV.Add(sizerH, flag=wx.ALIGN_RIGHT|wx.ALL, border=2)
+
+        self.SetSizer(sizerV)
+        sizerV.Fit(self)
 
     def OnSetZPos(self, e):
         global mainFrame
@@ -2162,6 +2214,13 @@ class JogPanel(wx.Panel):
     def OnStop(self, e):
         queClear()
         command('CMD_STOP')
+
+    def OnPause(self, e):
+        command('CMD_PAUSE')
+        self.combo.SetFocus()
+
+    def OnResume(self, e):
+        command('CMD_RESUME')
         self.combo.SetFocus()
 
 class SetZPosDialog(wx.Dialog):
@@ -2414,7 +2473,7 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
-        global dbg, comm
+        global dbg
         i = 0
         op = None
         scanMax = len(self.parmList) + 1
