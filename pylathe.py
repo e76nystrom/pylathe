@@ -1854,6 +1854,7 @@ class JogPanel(wx.Panel):
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
+        tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV1 = wx.BoxSizer(wx.VERTICAL)
@@ -1926,6 +1927,11 @@ class JogPanel(wx.Panel):
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
+
+    def OnXMenu(self,e):
+        menu = XPosMenu()
+        self.PopupMen(menu, event.GetPosition())
+        menu.Destroy()
 
     def focus(self):
         self.combo.SetFocus()
@@ -2417,6 +2423,21 @@ class SetXPosDialog(wx.Dialog):
             stdout.flush()
             self.Show(False)
             jogPanel.focus()
+
+class XPosMenu(wx.Menu):
+    def__init__(self):
+    wx.Menu.__init__(self)
+    item = wx.MenuItem(self, wx.NewId(), "Fix X")
+    self.Append(item)
+    self.Bind(wx.EVT_MENU, self.OnFixX, item)
+
+    def self.OnFixX(self, e):
+        dialog = self.setXPosDialog
+        if dialog == None:
+            self.setXPosDialog = dialog = SetXPosDialog(self)
+        dialog.SetPosition((xPos, yPos))
+        dialog.Raise()
+        dialog.Show(True)
 
 EVT_UPDATE_ID = wx.NewId()
 
