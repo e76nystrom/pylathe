@@ -2425,11 +2425,11 @@ class SetXPosDialog(wx.Dialog):
             jogPanel.focus()
 
 class XPosMenu(wx.Menu):
-    def__init__(self):
-    wx.Menu.__init__(self)
-    item = wx.MenuItem(self, wx.NewId(), "Fix X")
-    self.Append(item)
-    self.Bind(wx.EVT_MENU, self.OnFixX, item)
+    def __init__(self):
+        wx.Menu.__init__(self)
+        item = wx.MenuItem(self, wx.NewId(), "Fix X")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def self.OnFixX(self, e):
         dialog = self.setXPosDialog
