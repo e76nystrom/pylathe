@@ -2466,18 +2466,18 @@ class FixXPosDialog(wx.Dialog):
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        txt = wx.StaticText(self, -1, "Current", border=2)
-        sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
-                  border=2)
+        txt = wx.StaticText(self, -1, "Current")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
 
         self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        txt = wx.StaticText(self, -1, "Measured", border=2)
-        sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
-                  border=2)
+        txt = wx.StaticText(self, -1, "Measured")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
 
         self.ActualXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
