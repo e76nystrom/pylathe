@@ -1766,6 +1766,7 @@ class JogPanel(wx.Panel):
         self.initUI()
         self.setZPosDialog = None
         self.setXPosDialog = None
+        self.fixXPosDialog = None
         self.xHome = False
         self.zStepsInch = 0
         self.xStepsInch = 0
@@ -2441,7 +2442,9 @@ class XPosMenu(wx.Menu):
         (x, y) = jogPanel.xPos.GetPosition()
         xPos += x
         yPos += y
-        dialog = FixXPosDialog(jogPanel)
+        dialog = self.setXPosDialog
+        if dialog == None:
+            self.FixXPosDialog = dialog = SetXPosDialog(jogPanel)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
@@ -2459,7 +2462,7 @@ class FixXPosDialog(wx.Dialog):
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        txt = wx.StaticText(self, -1, "Current")
+        txt = wx.StaticText(self, -1, "Current", border=2)
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
 
@@ -2468,7 +2471,7 @@ class FixXPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        txt = wx.StaticText(self, -1, "Measured")
+        txt = wx.StaticText(self, -1, "Measured", border=2)
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
 
@@ -2499,6 +2502,8 @@ class FixXPosDialog(wx.Dialog):
         #     stdout.flush()
 
     def OnFix(self, e):
+        self.Show(False)
+        jogPanel.focus()
         pass
 
 EVT_UPDATE_ID = wx.NewId()
