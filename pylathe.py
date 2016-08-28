@@ -2433,7 +2433,8 @@ class XPosMenu(wx.Menu):
         self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def OnFixX(self, e):
-        dialog = self.setXPosDialog
+        global jogPanel
+        dialog = jogPanel.setXPosDialog
         if dialog == None:
             self.setXPosDialog = dialog = SetXPosDialog(self)
         dialog.SetPosition((xPos, yPos))
