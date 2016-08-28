@@ -1930,10 +1930,13 @@ class JogPanel(wx.Panel):
         dialog.Show(True)
 
     def OnXMenu(self, e):
-        global mainFrame
-        global jogPanel
+        global mainFrame, jogPanel
         menu = XPosMenu()
-        jogPanel.PopupMenu(menu, e.GetPosition())
+        (xPos, yPos) = jogPanel.xPos.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = e.GetPosition()
+        jogPanel.PopupMenu(menu, (xPos, yPos))
         menu.Destroy()
 
     def focus(self):
@@ -2435,7 +2438,7 @@ class XPosMenu(wx.Menu):
         self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def OnFixX(self, e):
-        global jogPanel
+        global jogPanel, mainFrame
         (xPos, yPos) = mainFrame.GetPosition()
         (x, y) = jogPanel.GetPosition()
         xPos += x
@@ -2443,7 +2446,7 @@ class XPosMenu(wx.Menu):
         (x, y) = jogPanel.xPos.GetPosition()
         xPos += x
         yPos += y
-        dialog = self.setXPosDialog
+        dialog = jogPanel.setXPosDialog
         if dialog == None:
             self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
         dialog.SetPosition((xPos, yPos))
