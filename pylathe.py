@@ -2514,10 +2514,16 @@ class FixXPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        mainPanel = info['mainPanel'].GetValue()
-        if mainPanel == 'turnPanel':
-            diam = getFloatInfo('tuXEnd')
-            self.curXPos.SetValue("%0.4f" % (diam));
+        # mainPanel = info['mainPanel'].GetValue()
+        # if mainPanel == 'turnPanel':
+        #     diam = getFloatInfo('tuXEnd')
+        #     self.curXPos.SetValue("%0.4f" % (diam));
+        try:
+            xDiameter = float(getParm('X_DIAMETER'))
+        except ValueError:
+            xDiameter = 0.0
+        self.curXPos.SetValue("%0.4f" % (xDiameter));
+        
 
     def OnFix(self, e):
         global xHomeOffset
