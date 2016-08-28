@@ -2434,7 +2434,7 @@ class XPosMenu(wx.Menu):
         wx.Menu.__init__(self)
         item = wx.MenuItem(self, wx.NewId(), "Set X")
         self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnSeX, item)
+        self.Bind(wx.EVT_MENU, self.OnSetX, item)
 
         item = wx.MenuItem(self, wx.NewId(), "Fix X")
         self.Append(item)
