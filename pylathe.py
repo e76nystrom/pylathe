@@ -2432,9 +2432,29 @@ class SetXPosDialog(wx.Dialog):
 class XPosMenu(wx.Menu):
     def __init__(self):
         wx.Menu.__init__(self)
-        item = wx.MenuItem(self, wx.NewId(), "Fix X")
+        item = wx.MenuItem(self, wx.NewId(), "Set X")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnFixX, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Fix X")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnSetX, item)
+
+    def OnSetX(self, e):
+        global jogPanel, mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = jogPanel.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = jogPanel.xPos.GetPosition()
+        xPos += x
+        yPos += y
+        dialog = jogPanel.setXPosDialog
+        if dialog == None:
+            self.SetXPosDialog = dialog = SetXPosDialog(jogPanel)
+        dialog.SetPosition((xPos, yPos))
+        dialog.Raise()
+        dialog.Show(True)
 
     def OnFixX(self, e):
         global jogPanel, mainFrame
