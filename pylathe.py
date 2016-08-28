@@ -1928,9 +1928,10 @@ class JogPanel(wx.Panel):
         dialog.Raise()
         dialog.Show(True)
 
-    def OnXMenu(self,e):
+    def OnXMenu(self, e):
+        global mainFrame
         menu = XPosMenu()
-        self.PopupMen(menu, event.GetPosition())
+        mainFrame.PopupMenu(menu, e.GetPosition())
         menu.Destroy()
 
     def focus(self):
