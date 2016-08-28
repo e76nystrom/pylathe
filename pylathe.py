@@ -1914,16 +1914,12 @@ class JogPanel(wx.Panel):
         dialog.Show(True)
 
     def OnSetXPos(self, e):
-        # global mainFrame
-        # (xPos, yPos) = mainFrame.GetPosition()
-        # (x, y) = self.GetPosition()
-        # xPos += x
-        # yPos += y
-        # (x, y) = self.xPos.GetPosition()
-        # xPos += x
-        # yPos += y
-        (xPos, yPos) = self.xPos.GetPosition()
-        (x, y) = e.GetPosition()
+        global mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = self.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = self.xPos.GetPosition()
         xPos += x
         yPos += y
         dialog = self.setXPosDialog
