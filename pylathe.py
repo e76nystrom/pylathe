@@ -2520,7 +2520,7 @@ class FixXPosDialog(wx.Dialog):
         #     self.curXPos.SetValue("%0.4f" % (diam));
         try:
             xDiameter = float(getParm('X_DIAMETER'))
-        except ValueError:
+        except (ValueError, TypeError):
             xDiameter = 0.0
         self.curXPos.SetValue("%0.4f" % (xDiameter));
 
