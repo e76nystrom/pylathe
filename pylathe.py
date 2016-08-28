@@ -2449,7 +2449,7 @@ class XPosMenu(wx.Menu):
 class FixXPosDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Fix X Position", pos,
+        wx.Dialog.__init__(self, frame, -1, "Fix X Size", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2457,7 +2457,7 @@ class FixXPosDialog(wx.Dialog):
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
 
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         txt = wx.StaticText(self, -1, "Current")
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
@@ -2468,7 +2468,7 @@ class FixXPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        txt = wx.StaticText(self, -1, "Actual")
+        txt = wx.StaticText(self, -1, "Measured")
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
 
