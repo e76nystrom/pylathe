@@ -2523,7 +2523,6 @@ class FixXPosDialog(wx.Dialog):
         except ValueError:
             xDiameter = 0.0
         self.curXPos.SetValue("%0.4f" % (xDiameter));
-        
 
     def OnFix(self, e):
         global xHomeOffset
