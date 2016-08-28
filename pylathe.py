@@ -1933,9 +1933,9 @@ class JogPanel(wx.Panel):
         global mainFrame, jogPanel
         menu = XPosMenu()
         (xPos, yPos) = jogPanel.xPos.GetPosition()
+        (x, y) = e.GetPosition()
         xPos += x
         yPos += y
-        (x, y) = e.GetPosition()
         jogPanel.PopupMenu(menu, (xPos, yPos))
         menu.Destroy()
 
