@@ -2494,7 +2494,7 @@ class FixXPosDialog(wx.Dialog):
         sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
 
-        self.ActualXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.actualXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                            style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
