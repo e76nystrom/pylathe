@@ -2505,26 +2505,34 @@ class FixXPosDialog(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.OnFix)
         sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
-        mainPanel = info['mainPanel']
-        if mainPanel.GetValue() == 'turnPanel':
-            diam = getFloatInfo('tuXEnd')
-            self.curXPos.SetValue("%0.4f" % (diam));
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
     def OnShow(self, e):
-        pass
-        # global jogPanel
-        # try:
-        #     if self.IsShown():
-        #         val = jogPanel.xPos.GetValue()
-        #         self.xPos.SetValue(val)
-        # except RuntimeError:
-        #     print "RuntimeError"
-        #     stdout.flush()
+        mainPanel = info['mainPanel'].GetValue()
+        if mainPanel == 'turnPanel':
+            diam = getFloatInfo('tuXEnd')
+            self.curXPos.SetValue("%0.4f" % (diam));
 
     def OnFix(self, e):
+        global xHomeOffset
+        try:
+            curX = float(self.curXPos.GetValue())
+        except ValueError:
+            self.curXPos.SetValue('0.000')
+            return
+        try:
+            actualX = float(self.actualXPos.GetValue())
+        except ValueError:
+            self.actualXPos.SetValue('0.000')
+            return
+        offset = (actualX - curX) / 2.0
+        xHomeOffset -= offset
+        info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+        print "xHomeOffset %0.4f" % (xHomeOffset)
+        stdout.flush()
+
         self.Show(False)
         jogPanel.focus()
         pass
