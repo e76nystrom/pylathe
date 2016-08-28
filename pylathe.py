@@ -2459,7 +2459,7 @@ class FixXPosDialog(wx.Dialog):
 
         sizerG = wx.GridSizer(2, 0, 0)
 
-        txt = wx.StaticText(panel, -1, "Current")
+        txt = wx.StaticText(self, -1, "Current")
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
 
@@ -2468,7 +2468,7 @@ class FixXPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        txt = wx.StaticText(panel, -1, "Actual")
+        txt = wx.StaticText(self, -1, "Actual")
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
 
