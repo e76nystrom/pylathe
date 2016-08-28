@@ -2441,12 +2441,54 @@ class XPosMenu(wx.Menu):
         (x, y) = jogPanel.xPos.GetPosition()
         xPos += x
         yPos += y
-        dialog = jogPanel.setXPosDialog
-        if dialog == None:
-            jogPanel.setXPosDialog = dialog = SetXPosDialog(jogPanel)
+        dialog = FixXPosDialog()
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
+
+class FixXPosDialog(wx.Dialog):
+    def __init__(self, frame):
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Fix X Position", pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+
+        sizerG = wx.GridSizer(2, 0, 0)
+
+        txt = wx.StaticText(panel, -1, "Current")
+        sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                  border=2)
+
+        self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        txt = wx.StaticText(panel, -1, "Actual")
+        sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                  border=2)
+
+        self.ActualXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
+
+        btn = wx.Button(self, label='Fix', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnFix)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnFix(self, e):
+        pass
 
 EVT_UPDATE_ID = wx.NewId()
 
