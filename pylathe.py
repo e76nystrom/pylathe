@@ -2471,7 +2471,7 @@ class FixXPosDialog(wx.Dialog):
                    border=10)
 
         self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
+                                        style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
@@ -2480,7 +2480,7 @@ class FixXPosDialog(wx.Dialog):
                    border=10)
 
         self.ActualXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
+                                           style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
