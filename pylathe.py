@@ -2506,7 +2506,7 @@ class FixXPosDialog(wx.Dialog):
         sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         mainPanel = info['mainPanel']
-        if mainPanel.value == 'turnPanel':
+        if mainPanel.GetValue() == 'turnPanel':
             diam = getFloatInfo('tuXEnd')
             self.curXPos.SetValue("%0.4f" % (diam));
         self.SetSizer(sizerV)
