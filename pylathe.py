@@ -224,11 +224,12 @@ def getFloatInfo(key):
         tmp = info[key]
         try:
             return(float(tmp.GetValue()))
-        except ValueError as e:
-            return(0.0)
-    except KeyError as e:
+        except ValueError:
+            pass
+    except KeyError:
         print "invalid key %s" % (key)
         stdout.flush()
+    return(0.0)
 
 def getIntInfo(key):
     global info
@@ -2504,6 +2505,10 @@ class FixXPosDialog(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.OnFix)
         sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
+        mainPanel = info['mainPanel']
+        if mainPanel = 'turnPanel':
+            diam = getFloatInfo('tuXEnd')
+            self.curXPos.SetValue("0.4f" % (diam));
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
