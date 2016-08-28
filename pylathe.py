@@ -2438,7 +2438,7 @@ class XPosMenu(wx.Menu):
         (x, y) = jogPanel.GetPosition()
         xPos += x
         yPos += y
-        (x, y) = jogPanel.xPos.GetPosition()
+        (x, y) = jogPanel.xPos.GetPosition(jogPanel)
         xPos += x
         yPos += y
         dialog = FixXPosDialog()
