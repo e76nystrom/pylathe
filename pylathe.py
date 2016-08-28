@@ -2412,8 +2412,8 @@ class SetXPosDialog(wx.Dialog):
                 info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
                 print "xHomeOffset %0.4f" % (xHomeOffset)
                 stdout.flush()
-                self.Show(False)
-                jogPanel.focus()
+            self.Show(False)
+            jogPanel.focus()
         except ValueError:
             val = jogPanel.xPos.GetValue()
             self.xPos.SetValue(val)
