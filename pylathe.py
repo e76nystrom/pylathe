@@ -1785,6 +1785,8 @@ class JogPanel(wx.Panel):
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(5, 0, 0)
+        emptyCell = (0, 0)
+
         # first row
 
         sizerG.Add(emptyCell)
@@ -1869,7 +1871,6 @@ class JogPanel(wx.Panel):
                           wx.NORMAL, False, u'Consolas')
         txtFont = wx.Font(16, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        emptyCell = (0, 0)
 
         # z position
 
