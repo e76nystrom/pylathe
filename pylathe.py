@@ -1800,7 +1800,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
         info['jogZPos'] = tc
         tc.SetFont(posFont)
@@ -1815,7 +1815,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
         info['jogXPos'] = tc
         tc.SetFont(posFont)
@@ -1850,7 +1850,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                          style=wx.TE_RIGHT)
         info['jogXPosDiam'] = tc
         tc.SetFont(posFont)
@@ -1880,7 +1880,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.zEncPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.zEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                         style=wx.TE_RIGHT)
         info['encZPos'] = tc
         tc.SetFont(posFont)
@@ -1894,7 +1894,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xEncPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.xEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                         style=wx.TE_RIGHT)
         info['encXPos'] = tc
         tc.SetFont(posFont)
