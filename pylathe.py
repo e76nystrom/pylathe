@@ -1893,17 +1893,19 @@ class JogPanel(wx.Panel):
 
         # second row
 
+        sFlag = wx.ALL|wx.CENTER|wx.ALIGN_CENTER_VERTICAL
+
         bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.zNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
         btn.Bind(wx.EVT_BUTTON, self.OnZHome)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
@@ -1911,11 +1913,11 @@ class JogPanel(wx.Panel):
         self.zPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
         btn.Bind(wx.EVT_BUTTON, self.OnXHome)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
@@ -1935,7 +1937,7 @@ class JogPanel(wx.Panel):
         combo.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         combo.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         combo.SetFocus()
-        sizerG.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(combo, flag=sFlag, border=2)
 
         # third row
 
@@ -1946,7 +1948,7 @@ class JogPanel(wx.Panel):
         self.xPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         sizerG.Add(emptyCell)
 
