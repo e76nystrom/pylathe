@@ -168,7 +168,7 @@ parmList = \
     ["X_END_LOC", "x end", "float"],
     ["X_RETRACT", "x retract", "float"],
     ["X_FEED_PASS", "x feed per pass", "float"],
-    ["X_DIAMETER", "x diameter", "float"],
+    ["X_DIAMETER", "x diameter", "int"],
     
     "feed parameters",
     
