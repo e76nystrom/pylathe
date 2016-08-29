@@ -3189,8 +3189,10 @@ class SpindleDialog(wx.Dialog):
             if self.fieldInfo[index] != info[index].GetValue():
                 spindleDataSent = False
                 break
-        sendSpindleData()
-        command('CMD_SPSETUP')
+        if not spindleDataSent:
+            sendSpindleData()
+        else:
+            command('CMD_SPSETUP')
         command('SPINDLE_START')
 
     def OnStop(self, e):
