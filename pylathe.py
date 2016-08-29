@@ -1784,29 +1784,12 @@ class JogPanel(wx.Panel):
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        sizerG = wx.FlexGridSizer(5, 0, 0)
+        # first row
 
-        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
-        btn.Bind(wx.EVT_BUTTON, self.OnZHome)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        sizerV1 = wx.BoxSizer(wx.VERTICAL)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
@@ -1814,21 +1797,39 @@ class JogPanel(wx.Panel):
         self.xNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG.Add(emptyCell)
+
+        # second row
+
+        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.zNegButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
+        btn.Bind(wx.EVT_BUTTON, self.OnZHome)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.zPosButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
         btn.Bind(wx.EVT_BUTTON, self.OnXHome)
-        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.xPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerV1.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        sizerH.Add(sizerV1, flag=wx.CENTER|wx.ALL, border=2)
 
         self.step = step = ["Cont", "0.001", "0.002", "0.005",
                             "0.010", "0.020", "0.050",
@@ -1844,7 +1845,23 @@ class JogPanel(wx.Panel):
         combo.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         combo.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         combo.SetFocus()
-        sizerH.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
+
+        # third row
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
+        self.xPosButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG.Add(emptyCell)
+
+        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
 
@@ -1852,6 +1869,8 @@ class JogPanel(wx.Panel):
                           wx.NORMAL, False, u'Consolas')
         txtFont = wx.Font(16, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
+        emptyCell = (0, 0)
+
         # z position
 
         txt = wx.StaticText(self, -1, "Z")
@@ -1898,11 +1917,7 @@ class JogPanel(wx.Panel):
 
         # blank space
 
-        emptyCell = (0, 0)
-
-        # txt = wx.StaticText(self, -1)
         sizerG.Add(emptyCell)
-        # txt = wx.StaticText(self, -1)
         sizerG.Add(emptyCell)
 
         # x diameter
@@ -1934,10 +1949,8 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
-
-        sizerV.Add(sizerH, flag=wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
