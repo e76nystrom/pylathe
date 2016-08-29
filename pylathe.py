@@ -238,12 +238,13 @@ def getIntInfo(key):
     try:
         tmp = info[key]
         try:
-            return(float(tmp.GetValue()))
+            return(int(tmp.GetValue()))
         except ValueError as e:
-            return(0.0)
+            return(0)
     except KeyError as e:
         print "invalid key %s" % (key)
         stdout.flush()
+    return(0)
 
 def getFloatVal(tc):
     try:
@@ -406,6 +407,7 @@ def sendZData(send=False):
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.zEncInch = getIntInfo('zEncInch')
+            jogPanel.zEncInvert = getBoolInfo('zInvEnc') == 1
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -451,6 +453,8 @@ def sendXData(send=False):
             motorRatio = getFloatInfo('xMotorRatio')
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            jogPanel.xEncInch = getIntInfo('xEncInch')
+            jogPanel.xEncInvert = getBoolInfo('xInvEnc') == 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -1780,6 +1784,8 @@ class JogPanel(wx.Panel):
         self.xStepsInch = 0
         self.zEncInch = 0
         self.xEncInch = 0
+        self.zEncInvert = 0
+        self.xEncInvert = 0
 
     def initUI(self):
         global info
