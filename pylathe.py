@@ -3196,7 +3196,6 @@ class SpindleDialog(wx.Dialog):
 
     def OnStart(self, e):
         global info, spindleDataSent
-        queClear()
         for (label, index) in self.fields:
             if self.fieldInfo[index] != info[index].GetValue():
                 spindleDataSent = False
@@ -3208,7 +3207,6 @@ class SpindleDialog(wx.Dialog):
         command('SPINDLE_START')
 
     def OnStop(self, e):
-        queClear()
         command('SPINDLE_STOP')
 
     def OnShow(self, e):
