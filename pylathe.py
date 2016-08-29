@@ -1888,7 +1888,7 @@ class JogPanel(wx.Panel):
         self.xNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, 1, flag=sFlag, border=2)
+        sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
 
         sizerG.Add(emptyCell)
 
