@@ -2322,6 +2322,8 @@ class JogPanel(wx.Panel):
                 self.xPosDiam.SetValue("%0.4f" % (val * 2))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
+            self.zEncPos.setValue("%0.4f" % (zEncPos))
+            self.XEncPos.setValue("%0.4f" % (xEncPos))
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
                 if val != None:
