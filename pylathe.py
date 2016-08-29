@@ -1862,7 +1862,7 @@ class JogPanel(wx.Panel):
 
         sizerG.Add(emptyCell)
 
-        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
