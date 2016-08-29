@@ -1874,6 +1874,7 @@ class JogPanel(wx.Panel):
                    border=2)
 
         sizerG = wx.FlexGridSizer(5, 0, 0)
+        sFlag = wx.ALL|wx.CENTER|wx.ALIGN_CENTER_VERTICAL
 
         # first row
 
@@ -1887,13 +1888,11 @@ class JogPanel(wx.Panel):
         self.xNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, 1, flag=sFlag, border=2)
 
         sizerG.Add(emptyCell)
 
         # second row
-
-        sFlag = wx.ALL|wx.CENTER|wx.ALIGN_CENTER_VERTICAL
 
         bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
