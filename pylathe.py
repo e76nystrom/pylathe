@@ -1918,10 +1918,6 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnXHome)
         sizerG.Add(btn, flag=sFlag, border=2)
 
-        bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-
         self.step = step = ["Cont", "0.001", "0.002", "0.005",
                             "0.010", "0.020", "0.050",
                             "0.100", "0.200", "0.500", "1.000"]
@@ -1944,10 +1940,13 @@ class JogPanel(wx.Panel):
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
+        bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.xPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
         btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
 
         sizerG.Add(emptyCell)
 
