@@ -405,6 +405,7 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            jogPanel.zEncInch = getIntInfo('zEncInch')
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -1777,6 +1778,8 @@ class JogPanel(wx.Panel):
         self.xHome = False
         self.zStepsInch = 0
         self.xStepsInch = 0
+        self.zEncInch = 0
+        self.xEncInch = 0
 
     def initUI(self):
         global info
@@ -3123,7 +3126,7 @@ class ZDialog(wx.Dialog):
             ("Jog Max", "zJogMax"),
             ("bInvert Dir", 'zInvDir'),
             ("bInvert MPG", 'zInvMpg'))        
-            ("Enc Count", "zEncCount"),
+            ("Enc Inch", "zEncInch"),
             ("bInv Encoder", 'zInvEnc'))        
         fieldList(self, sizerG, self.fields)
 
@@ -3200,6 +3203,8 @@ class XDialog(wx.Dialog):
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
             ("bHome Dir", 'xHomeDir'))
+            ("Enc Inch", "xEncInch"),
+            ("bInv Encoder", 'xInvEnc'))        
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
