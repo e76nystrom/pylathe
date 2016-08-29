@@ -1887,8 +1887,8 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "RPM")
         txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
-                   border=10)
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=10)
 
         self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
                                     style=wx.TE_RIGHT)
@@ -1907,8 +1907,8 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "X D")
         txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
-                   border=10)
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=10)
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                          style=wx.TE_RIGHT)
@@ -1923,8 +1923,8 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "Pass")
         txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
-                   border=10)
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=10)
         self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
