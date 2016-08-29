@@ -2320,7 +2320,7 @@ class JogPanel(wx.Panel):
         stdout.flush()
 
     def updateAll(self, val):
-        global zHomeOffset, xHomeOffset
+        global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset
         if len(val) == 6:
             (z, x, rpm, curPass, zEncPos, xEncPos) = val
             if z != '#':
@@ -2331,8 +2331,16 @@ class JogPanel(wx.Panel):
                 self.xPosDiam.SetValue("%0.4f" % (val * 2))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
-            self.zEncPos.setValue("%0.4f" % (zEncPos))
-            self.XEncPos.setValue("%0.4f" % (xEncPos))
+            encPos = float(zEncPos) / self.zEncInch)
+            if self.zEncInvert:
+                encPos = -encPos
+            encPos -= zEncOffset
+            self.zEncPos.setValue("%0.4f" % (encPos))
+            encPos = float(xEncPos) / self.xEncInch)
+            if self.xEncInvert:
+                encPos = -encPos
+            encPos -= xEncOffset
+            self.XEncPos.setValue("%0.4f" % (encPos))
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
                 if val != None:
