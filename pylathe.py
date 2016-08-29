@@ -3117,7 +3117,7 @@ class ZDialog(wx.Dialog):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
             ("Pitch", "zPitch"),
@@ -3191,7 +3191,7 @@ class XDialog(wx.Dialog):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
             ("Pitch", "xPitch"),
@@ -3284,7 +3284,7 @@ class SpindleDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_SHOW, self.OnShow)
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
             ("Motor Steps", "spMotorSteps"),
@@ -3292,7 +3292,8 @@ class SpindleDialog(wx.Dialog):
             ("Min RPM", "spMinRPM"),
             ("Max RPM", "spMaxRPM"),
             ("Accel Time", "spAccelTime"),
-            ("bInvert Dir", 'spInvDir'))
+            ("bInvert Dir", 'spInvDir'),
+        )
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
