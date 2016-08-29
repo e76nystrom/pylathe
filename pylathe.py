@@ -1913,9 +1913,6 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
-                   border=2)
-
         # pass
 
         txt = wx.StaticText(self, -1, "Pass")
@@ -1927,7 +1924,7 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerV1, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
         sizerV.Add(sizerH, flag=wx.ALL, border=2)
