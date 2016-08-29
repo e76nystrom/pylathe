@@ -128,6 +128,8 @@ zDataSent = False
 xDataSent = False
 zHomeOffset = 0.0
 xHomeOffset = 0.0
+zEncOffset = 0.0
+xEncOffset = 0.0
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -2225,8 +2227,8 @@ class JogPanel(wx.Panel):
 
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset
-        if len(val) == 4:
-            (z, x, rpm, curPass) = val
+        if len(val) == 6:
+            (z, x, rpm, curPass, zEncPos, xEncPos) = val
             if z != '#':
                 self.zPos.SetValue("%0.4f" % (float(z) - zHomeOffset))
             if x != '#':
@@ -2761,7 +2763,8 @@ class MainFrame(wx.Frame):
         self.Destroy()
 
     def initUI(self):
-        global jogPanel, info, zHomeOffset, xHomeOffset
+        global jogPanel, info, zHomeOffset, xHomeOffset, \
+            zEncOffset, xEncOffset
         fileMenu = wx.Menu()
 
         ID_FILE_SAVE = wx.NewId()
@@ -2884,6 +2887,18 @@ class MainFrame(wx.Frame):
             info[key] = InfoValue("%0.4f" % (xHomeOffset))
         else:
             xHomeOffset = float(info[key].GetValue())
+
+        key = 'zEncOffset'
+        if not key in info:
+            info[key] = InfoValue("%0.4f" % (zEncOffset))
+        else:
+            zEncOffset = float(info[key].GetValue())
+
+        key = 'xEncOffset'
+        if not key in info:
+            info[key] = InfoValue("%0.4f" % (xEncOffset))
+        else:
+            xEncOffset = float(info[key].GetValue())
 
         self.showPanel()
 
