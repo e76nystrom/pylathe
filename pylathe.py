@@ -1854,7 +1854,7 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "Z")
         txt.SetFont(posFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
 
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
@@ -1869,7 +1869,7 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "X")
         txt.SetFont(posFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
@@ -1885,7 +1885,7 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "RPM")
         txt.SetFont(posFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
 
         self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
@@ -1905,7 +1905,7 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "X Diam")
         txt.SetFont(posFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
@@ -1921,7 +1921,7 @@ class JogPanel(wx.Panel):
 
         txt = wx.StaticText(self, -1, "Pass")
         txt.SetFont(posFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
         self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
                                         style=wx.TE_RIGHT)
