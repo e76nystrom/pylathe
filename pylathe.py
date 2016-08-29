@@ -1897,6 +1897,10 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnResume)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
+        btn = wx.Button(self, label='Start Spindle')
+        btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
         sizerV.Add(sizerH, flag=wx.ALIGN_RIGHT|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
@@ -2237,6 +2241,14 @@ class JogPanel(wx.Panel):
 
     def OnResume(self, e):
         command('CMD_RESUME')
+        self.combo.SetFocus()
+
+    def OnStartSpindle(self, e):
+        if not spindleDataSent:
+            sendSpindleData()
+        else:
+            command('CMD_SPSETUP')
+        command('SPINDLE_START')
         self.combo.SetFocus()
 
 class SetZPosDialog(wx.Dialog):
