@@ -279,7 +279,7 @@ def quePause():
     moveQue.put((QUE_PAUSE, 0))
 
 def saveDiameter(val):
-    moveQue.put(QUE_PAUSE, val)
+    moveQue.put((SAVE_DIAMETER, val))
 
 def moveZ(zLoc, flag=ZMAX):
     queMove(MOVE_Z | flag << 8, zLoc)
