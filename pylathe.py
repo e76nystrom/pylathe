@@ -1846,7 +1846,7 @@ class JogPanel(wx.Panel):
         combo.SetFocus()
         sizerH.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(4, 0, 0)
+        sizerG = wx.FlexGridSizer(6, 0, 0)
 
         # z position
 
@@ -1879,6 +1879,18 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        # rpm
+
+        txt = wx.StaticText(self, -1, "RPM")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
+
+        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
+                                    style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
         # blank space
 
         txt = wx.StaticText(self, -1)
@@ -1904,20 +1916,16 @@ class JogPanel(wx.Panel):
         sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
-        sizerV1 = wx.BoxSizer(wx.VERTICAL)
+        # pass
 
-        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
-                                    style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        sizerV1.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
-
+        txt = wx.StaticText(self, -1, "Pass")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
         self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        sizerV1.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
-
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH.Add(sizerV1, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
