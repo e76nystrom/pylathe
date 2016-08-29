@@ -1846,6 +1846,14 @@ class JogPanel(wx.Panel):
         combo.SetFocus()
         sizerH.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
 
+        sizerG = wx.FlexGridSizer(4, 0, 0)
+
+        # z position
+
+        txt = wx.StaticText(self, -1, "Z")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
+
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
         self.zPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
@@ -1854,9 +1862,13 @@ class JogPanel(wx.Panel):
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetZPos)
-        sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV0 = wx.BoxSizer(wx.VERTICAL)
+        # x Position
+
+        txt = wx.StaticText(self, -1, "X")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
@@ -1865,7 +1877,20 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
-        sizerV0.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        # blank space
+
+        txt = wx.StaticText(self, -1)
+        sizerG.Add(txt)
+        txt = wx.StaticText(self, -1)
+        sizerG.Add(txt)
+
+        # x diameter
+
+        txt = wx.StaticText(self, -1, "X Diam")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+                   border=10)
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                          style=wx.TE_RIGHT)
@@ -1876,7 +1901,7 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
         sizerV0.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerH.Add(sizerV0, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
         sizerV1 = wx.BoxSizer(wx.VERTICAL)
