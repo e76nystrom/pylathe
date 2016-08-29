@@ -3131,9 +3131,10 @@ class ZDialog(wx.Dialog):
             ("Jog Min", "zJogMin"),
             ("Jog Max", "zJogMax"),
             ("bInvert Dir", 'zInvDir'),
-            ("bInvert MPG", 'zInvMpg'))        
+            ("bInvert MPG", 'zInvMpg'),
             ("Enc Inch", "zEncInch"),
-            ("bInv Encoder", 'zInvEnc'))        
+            ("bInv Encoder", 'zInvEnc'),
+        )        
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -3208,9 +3209,10 @@ class XDialog(wx.Dialog):
             ("Home Dist", "xHomeDist"),
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
-            ("bHome Dir", 'xHomeDir'))
+            ("bHome Dir", 'xHomeDir'),
             ("Enc Inch", "xEncInch"),
-            ("bInv Encoder", 'xInvEnc'))        
+            ("bInv Encoder", 'xInvEnc'),
+        )        
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
