@@ -3123,6 +3123,8 @@ class ZDialog(wx.Dialog):
             ("Jog Max", "zJogMax"),
             ("bInvert Dir", 'zInvDir'),
             ("bInvert MPG", 'zInvMpg'))        
+            ("Enc Count", "zEncCount"),
+            ("bInv Encoder", 'zInvEnc'))        
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
