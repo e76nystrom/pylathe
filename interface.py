@@ -137,7 +137,7 @@ parmList = \
     ["SPRING_PASS_INT", "spring pass interval", "int16_t"],
     ["CURRENT_PASS", "current passes", "int16_t"],
     
-    "axis move values",
+    "z axis move values",
     
     ["Z_MOVE_DIST", "z move distance", "float"],
     ["Z_JOG_DIR", "x jog direction", "int"],
@@ -146,6 +146,8 @@ parmList = \
     ["Z_ABS_LOC", "z absolute location", "int"],
     ["Z_MPG_INC", "z man pulse gen incr", "int"],
     
+    "x axis move values",
+
     ["X_MOVE_DIST", "x move distance", "float"],
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
@@ -166,6 +168,7 @@ parmList = \
     ["X_END_LOC", "x end", "float"],
     ["X_RETRACT", "x retract", "float"],
     ["X_FEED_PASS", "x feed per pass", "float"],
+    ["X_DIAMETER", "x diameter", "float"],
     
     "feed parameters",
     
@@ -310,6 +313,7 @@ stateList =\
     ["QUE_STOP", "spindle stop"],
     ["PASS_NUM", "set pass number"],
     ["QUE_PAUSE", "pause queue"],
+    ["SAVE_DIAMETER", "save turn diameter"],
     "};",
 
     "home control states",
