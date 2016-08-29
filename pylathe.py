@@ -1784,88 +1784,8 @@ class JogPanel(wx.Panel):
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(5, 0, 0)
-        emptyCell = (0, 0)
-
-        # first row
-
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-
-        bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.xNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        sizerG.Add(emptyCell)
-
-        # second row
-
-        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
-        btn.Bind(wx.EVT_BUTTON, self.OnZHome)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
-        btn.Bind(wx.EVT_BUTTON, self.OnXHome)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-
-        self.step = step = ["Cont", "0.001", "0.002", "0.005",
-                            "0.010", "0.020", "0.050",
-                            "0.100", "0.200", "0.500", "1.000"]
-
-        self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
-                                         style=wx.CB_READONLY)
-        info['jogInc'] = combo
-        combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
-        combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-        combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
-        combo.Bind(wx.EVT_CHAR, self.OnKeyChar)
-        combo.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
-        combo.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
-        combo.SetFocus()
-        sizerG.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
-
-        # third row
-
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-
-        self.xPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        sizerG.Add(emptyCell)
-
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
-                   border=2)
-
         sizerG = wx.FlexGridSizer(6, 0, 0)
+        emptyCell = (0, 0)
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
@@ -1949,6 +1869,86 @@ class JogPanel(wx.Panel):
         tc.SetFont(posFont)
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
+
+        sizerG = wx.FlexGridSizer(5, 0, 0)
+
+        # first row
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
+        bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.xNegButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG.Add(emptyCell)
+
+        # second row
+
+        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.zNegButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
+        btn.Bind(wx.EVT_BUTTON, self.OnZHome)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.zPosButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
+        btn.Bind(wx.EVT_BUTTON, self.OnXHome)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+
+        self.step = step = ["Cont", "0.001", "0.002", "0.005",
+                            "0.010", "0.020", "0.050",
+                            "0.100", "0.200", "0.500", "1.000"]
+
+        self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
+                                         style=wx.CB_READONLY)
+        info['jogInc'] = combo
+        combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
+        combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+        combo.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        combo.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+        combo.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        combo.SetFocus()
+        sizerG.Add(combo, flag=wx.CENTER|wx.ALL, border=2)
+
+        # third row
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
+        self.xPosButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG.Add(emptyCell)
 
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
