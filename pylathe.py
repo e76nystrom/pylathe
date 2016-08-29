@@ -1792,6 +1792,7 @@ class JogPanel(wx.Panel):
         txtFont = wx.Font(16, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
 
+        # first row
         # z position
 
         txt = wx.StaticText(self, -1, "Z")
@@ -1836,6 +1837,7 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        # second row
         # blank space
 
         sizerG.Add(emptyCell)
@@ -1866,6 +1868,35 @@ class JogPanel(wx.Panel):
 
         self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
                                         style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        # third row
+        # z encoder position
+
+        txt = wx.StaticText(self, -1, "Z")
+        txt.SetFont(txtFont)
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=10)
+
+        self.zEncPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                        style=wx.TE_RIGHT)
+        info['encZPos'] = tc
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        # x encoder Position
+
+        txt = wx.StaticText(self, -1, "X")
+        txt.SetFont(txtFont)
+        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=10)
+
+        self.xEncPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                        style=wx.TE_RIGHT)
+        info['encXPos'] = tc
         tc.SetFont(posFont)
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
