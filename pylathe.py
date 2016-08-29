@@ -1905,7 +1905,7 @@ class JogPanel(wx.Panel):
 
         # x diameter
 
-        txt = wx.StaticText(self, -1, "X Diam")
+        txt = wx.StaticText(self, -1, "X D")
         txt.SetFont(txtFont)
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                    border=10)
