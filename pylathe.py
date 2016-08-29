@@ -1854,6 +1854,8 @@ class JogPanel(wx.Panel):
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetZPos)
         sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        sizerV0 = wx.BoxSizer(wx.VERTICAL)
+
         self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
                                      style=wx.TE_RIGHT)
         info['jogXPos'] = tc
@@ -1861,7 +1863,19 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
-        sizerH.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV0.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                         style=wx.TE_RIGHT)
+        info['jogXPosDiam'] = tc
+        tc.SetFont(posFont)
+        tc.SetEditable(False)
+        tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
+        tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
+        sizerV0.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerH.Add(sizerV0, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
 
         sizerV1 = wx.BoxSizer(wx.VERTICAL)
 
@@ -2216,7 +2230,9 @@ class JogPanel(wx.Panel):
             if z != '#':
                 self.zPos.SetValue("%0.4f" % (float(z) - zHomeOffset))
             if x != '#':
-                self.xPos.SetValue("%0.4f" % (float(x) - xHomeOffset))
+                val = float(x) - xHomeOffset
+                self.xPos.SetValue("%0.4f" % (val))
+                self.xPosDiam.SetValue("%0.4f" % (val * 2))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
             if self.xHome:
