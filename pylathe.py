@@ -1899,7 +1899,7 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
-        sizerV0.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
