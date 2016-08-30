@@ -2732,8 +2732,8 @@ class UpdateThread(Thread):
         if result == None:
             return
         try:
-            (z, x, rpm, curPass) = result.rstrip().split(' ')[1:]
-            result = (3, z, x, rpm, curPass)
+            (z, x, rpm, curPass, encZ, encX) = result.rstrip().split(' ')[1:]
+            result = (3, z, x, rpm, curPass, encZ, encX)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print "readAll ValueError %s" % (result)
