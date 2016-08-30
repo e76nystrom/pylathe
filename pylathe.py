@@ -2392,11 +2392,10 @@ class JogPanel(wx.Panel):
                 sendSpindleData()
                 self.jogCode = code
                 self.repeat = 0
-            try:
-                command("SPINDLE_JOG")
-            except commTimeout as e:
-                pass
-
+        try:
+            command("SPINDLE_JOG")
+        except commTimeout as e:
+            pass
 
     def OnJogSpindle(self, e):
         print "jog spingle"
