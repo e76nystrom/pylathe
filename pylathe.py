@@ -2604,7 +2604,7 @@ class SetXPosDialog(wx.Dialog):
             self.xPos.SetValue(val)
 
     def OnZero(self, e):
-        global jogPanel, xHomeOffset
+        global jogPanel, xHomeOffset, xEncOffset
         sendXData()
         xEncPos = getParm('X_ENC_POS')
         if xEncPos != None:
