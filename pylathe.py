@@ -2608,7 +2608,7 @@ class SetXPosDialog(wx.Dialog):
         sendXData()
         xEncPos = getParm('X_ENC_POS')
         if xEncPos != None:
-            encPos = float(xEncPos) / self.xEncInch
+            encPos = float(xEncPos) / jogPanel.xEncInch
             if self.xEncInvert:
                 encPos = -encPos
             xEncOffset = encPos
