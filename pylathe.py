@@ -2261,6 +2261,9 @@ class JogPanel(wx.Panel):
         elif code == wx.WXK_DOWN:
             self.xJogCmd(code, val)
             return
+        elif code == wx.WXK_NUMPAD_PAGEDOWN:
+            self.spindleJogCmd(code, 0)
+            return
         # print "key down %x" % (code)
         # stdout.flush()
         evt.Skip()
@@ -2278,6 +2281,9 @@ class JogPanel(wx.Panel):
             return
         elif code == wx.WXK_DOWN:
             self.jogDone("XSTOP")
+            return
+        elif code == wx.WXK_NUMPAD_PAGEDOWN:
+            command("SPINDLE_STOP")
             return
         # print "key up %x" % (code)
         # stdout.flush()
