@@ -390,7 +390,7 @@ def sendSpindleData(send=False):
                 setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
                 setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
-                setParm('SP_SOG_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
 
             command('CMD_SPSETUP')
