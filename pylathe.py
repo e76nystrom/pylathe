@@ -2385,17 +2385,30 @@ class JogPanel(wx.Panel):
         command('SPINDLE_START')
         self.combo.SetFocus()
 
+    def spindleJogCmd(self, code, val):
+        self.repeat += 1
+        if self.jogCode != code:
+            if self.jogCode == None:
+                sendSpindleData()
+                self.jogCode = code
+                self.repeat = 0
+            try:
+                command("SPINDLE_JOG")
+            except commTimeout as e:
+                pass
+
+
     def OnJogSpindle(self, e):
-        sendSpindleData();
         print "jog spingle"
         stdout.flush()
-        try:
-            command("SPINDLE_JOG")
-        except commTimeout as e:
-            pass
-        self.combo.SetFocus()
+        self.btnRpt.action = self.spindleJogCmd
+        self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
+        self.btnRpt.val = 0
+        self.btnRpt.event.set()
 
     def OnJogUp(self, e):
+        self.btnRpt.event.clear()
+        self.btnRpt.action = None
         try:
             command("SPINDLE_STOP")
         except commTimeout as e:
