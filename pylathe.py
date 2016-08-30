@@ -2606,6 +2606,13 @@ class SetXPosDialog(wx.Dialog):
     def OnZero(self, e):
         global jogPanel, xHomeOffset
         sendXData()
+        xEncPos = getParm('X_ENC_POS')
+        if xEncPos != None:
+            encPos = float(xEncPos) / self.xEncInch
+            if self.xEncInvert:
+                encPos = -encPos
+            xEncOffset = encPos
+
         xLoc = getParm('X_LOC')
         if xLoc != None:
             xHomeOffset = float(xLoc) / jogPanel.xStepsInch
