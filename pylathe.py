@@ -383,12 +383,15 @@ def sendSpindleData(send=False):
                     cfgReg |= XDIR_POL
                 setParm('X_CFG_REG', cfgReg)
             else:
-                setParm('SPIN_STEPS', getInfo('spMotorSteps'))
-                setParm('SPIN_MICRO', getInfo('spMicroSteps'))
-                setParm('SPIN_MIN_RPM', getInfo('spMinRPM'))
-                setParm('SPIN_MAX_RPM', getInfo('spMaxRPM'))
-                setParm('SPIN_ACCEL_TIME', getInfo('spAccelTime'))
-                setParm('SPIN_DIR_FLAG', getBoolInfo('spInvDir'))
+                setParm('SP_STEPS', getInfo('spMotorSteps'))
+                setParm('SP_MICRO', getInfo('spMicroSteps'))
+                setParm('SP_MIN_RPM', getInfo('spMinRPM'))
+                setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
+                setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
+                setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
+                setParm('SP_SOG_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
 
             command('CMD_SPSETUP')
             spindleDataSent = True
