@@ -2016,9 +2016,8 @@ class JogPanel(wx.Panel):
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='Jog Spindle')
-        btn.Bind(wx.EVT_BUTTON, self.OnJogSpindle)
-        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
-        # btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
