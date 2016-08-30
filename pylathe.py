@@ -2016,7 +2016,7 @@ class JogPanel(wx.Panel):
 
         btn = wx.Button(self, label='Jog Spindle')
         btn.Bind(wx.EVT_BUTTON, self.OnJogSpindle)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
@@ -2390,12 +2390,14 @@ class JogPanel(wx.Panel):
             command("SPINDLE_JOG")
         except commTimeout as e:
             pass
+        self.combo.SetFocus()
 
     def OnJogUp(self, e):
         try:
             command("SPINDLE_STOP")
         except commTimeout as e:
             pass
+        self.combo.SetFocus()
 
 class SetZPosDialog(wx.Dialog):
     def __init__(self, frame):
