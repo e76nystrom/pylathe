@@ -2391,7 +2391,7 @@ class JogPanel(wx.Panel):
         except commTimeout as e:
             pass
 
-    def OnJogStop(self, e):
+    def OnJogUp(self, e):
         try:
             command("SPINDLE_STOP")
         except commTimeout as e:
