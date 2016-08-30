@@ -3300,6 +3300,9 @@ class SpindleDialog(wx.Dialog):
             ("Min RPM", "spMinRPM"),
             ("Max RPM", "spMaxRPM"),
             ("Accel Time", "spAccelTime"),
+            ("Jog Min", "spJogMin"),
+            ("Jog Max", "spJogMax"),
+            ("Jog Accel Time", "spJogAccelTime"),
             ("bInvert Dir", 'spInvDir'),
         )
         fieldList(self, sizerG, self.fields)
