@@ -2386,6 +2386,8 @@ class JogPanel(wx.Panel):
 
     def OnJogSpindle(self, e):
         sendSpindleData();
+        print "jog spingle"
+        stdout.flush()
         try:
             command("SPINDLE_JOG")
         except commTimeout as e:
