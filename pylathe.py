@@ -1,6 +1,6 @@
 #!/cygdrive/c/Python27/Python.exe
 #!/usr/bin/python
-
+################################################################################
 import wx
 from time import sleep, time
 import sys
@@ -2014,6 +2014,11 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
+        btn = wx.Button(self, label='Jog Spindle')
+        btn.Bind(wx.EVT_BUTTON, self.OnJogSpindle)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
@@ -2378,6 +2383,18 @@ class JogPanel(wx.Panel):
             command('CMD_SPSETUP')
         command('SPINDLE_START')
         self.combo.SetFocus()
+
+    def OnJogSpindle(self, e):
+        try:
+            command("SPINDLE_JOG")
+        except commTimeout as e:
+            pass
+
+    def OnJogStop(self, e):
+        try:
+            command("SPINDLE_STOP")
+        except commTimeout as e:
+            pass
 
 class SetZPosDialog(wx.Dialog):
     def __init__(self, frame):
