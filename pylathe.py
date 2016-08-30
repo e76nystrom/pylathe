@@ -4141,7 +4141,7 @@ class MainApp(wx.App):
 
 app = MainApp(redirect=False)
 # app.SetCallFilterEvent(True)
-wx.lib.inspection.InspectionTool().Show()
+# wx.lib.inspection.InspectionTool().Show()
 app.MainLoop()
 
 if not (comm.ser is None):
