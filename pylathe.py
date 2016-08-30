@@ -2345,7 +2345,7 @@ class JogPanel(wx.Panel):
             if self.xEncInvert:
                 encPos = -encPos
             encPos -= xEncOffset
-            self.XEncPos.setValue("%0.4f" % (encPos))
+            self.xEncPos.SetValue("%0.4f" % (encPos))
 
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
