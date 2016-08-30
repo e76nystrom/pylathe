@@ -2334,16 +2334,19 @@ class JogPanel(wx.Panel):
                 self.xPosDiam.SetValue("%0.4f" % (val * 2))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
+
             encPos = float(zEncPos) / self.zEncInch
             if self.zEncInvert:
                 encPos = -encPos
             encPos -= zEncOffset
-            self.zEncPos.setValue("%0.4f" % (encPos))
+            self.zEncPos.SetValue("%0.4f" % (encPos))
+
             encPos = float(xEncPos) / self.xEncInch
             if self.xEncInvert:
                 encPos = -encPos
             encPos -= xEncOffset
             self.XEncPos.setValue("%0.4f" % (encPos))
+
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
                 if val != None:
