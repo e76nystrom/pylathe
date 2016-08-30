@@ -2385,6 +2385,7 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def OnJogSpindle(self, e):
+        sendSpindleData();
         try:
             command("SPINDLE_JOG")
         except commTimeout as e:
