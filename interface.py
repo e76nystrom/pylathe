@@ -81,15 +81,15 @@ parmList = \
 [\
     "spindle parameters",
     
-    ["SPIN_STEPS", "spindle motor steps", "int16_t"],
-    ["SPIN_MICRO", "spindle micro steps", "int16_t"],
-    ["SPIN_MIN_RPM", "spindle minimum rpm", "float"],
-    ["SPIN_MAX_RPM", "spindle maxmum rpm", "float"],
-    ["SPIN_ACCEL_TIME", "spindle accel time", "float"],
+    ["SP_STEPS", "spindle motor steps", "int16_t"],
+    ["SP_MICRO", "spindle micro steps", "int16_t"],
+    ["SP_MIN_RPM", "spindle minimum rpm", "float"],
+    ["SP_MAX_RPM", "spindle maxmum rpm", "float"],
+    ["SP_ACCEL_TIME", "spindle accel time", "float"],
     ["SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"],
     ["SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"],
     ["SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"],
-    ["SPIN_DIR_FLAG", "spindle invert direction", "char"],
+    ["SP_DIR_FLAG", "spindle invert direction", "char"],
     
     "z axis parameters",
     
