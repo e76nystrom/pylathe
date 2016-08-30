@@ -2,6 +2,7 @@
 #!/usr/bin/python
 ################################################################################
 import wx
+import wx.lib.inspection
 from time import sleep, time
 import sys
 from sys import stdout
@@ -2016,7 +2017,8 @@ class JogPanel(wx.Panel):
 
         btn = wx.Button(self, label='Jog Spindle')
         btn.Bind(wx.EVT_BUTTON, self.OnJogSpindle)
-        # btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
@@ -4139,6 +4141,7 @@ class MainApp(wx.App):
 
 app = MainApp(redirect=False)
 # app.SetCallFilterEvent(True)
+wx.lib.inspection.InspectionTool().Show()
 app.MainLoop()
 
 if not (comm.ser is None):
