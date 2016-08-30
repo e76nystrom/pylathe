@@ -24,6 +24,7 @@ cmdList = \
     "spindle operations",
     
     ["SPINDLE_START", "", "start spindle"],
+    ["SPINDLE_JOG", "", "spindle jog"],
     ["SPINDLE_STOP", "", "stop spindle"],
     
     "start operations",
