@@ -2612,6 +2612,7 @@ class SetXPosDialog(wx.Dialog):
             if jogPanel.xEncInvert:
                 encPos = -encPos
             xEncOffset = encPos
+            print "xEncOffset %0.4f" % (xEncOffset)
 
         xLoc = getParm('X_LOC')
         if xLoc != None:
