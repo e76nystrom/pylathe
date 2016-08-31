@@ -558,7 +558,10 @@ class Turn():
                 self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
-        startSpindle();
+        if STEPPER_DRIVE:
+            startSpindle()
+        else:
+            queZSetup()
         moveX(self.safeX)
         moveZ(self.zStart)
         self.passCount = 0
@@ -569,7 +572,8 @@ class Turn():
             pass
 
         moveX(self.xStart + self.xRetract)
-        stopSpindle();
+        if STEPPER_DRIVE:
+            stopSpindle();
         stdout.flush()
 
     def turnUpdate(self):
