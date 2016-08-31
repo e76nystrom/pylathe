@@ -184,6 +184,7 @@ parmList = \
     "index pulse variables",
 
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
+    ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
     # "z home offsetts",
