@@ -3377,17 +3377,18 @@ class SpindleDialog(wx.Dialog):
 
         # spindle start and stop
 
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        if STEPPER_DRIVE:
+            sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+            btn = wx.Button(self, label='Start', size=(60,-1))
+            btn.Bind(wx.EVT_BUTTON, self.OnStart)
+            sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, label='Stop', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+            btn = wx.Button(self, label='Stop', size=(60,-1))
+            btn.Bind(wx.EVT_BUTTON, self.OnStop)
+            sizerH.Add(btn, 0, wx.ALL, 5)
 
-        sizerV.Add(sizerH, 0, wx.CENTER)
+            sizerV.Add(sizerH, 0, wx.CENTER)
 
         # ok and cancel buttons
 
