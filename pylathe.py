@@ -636,6 +636,7 @@ class Turn():
             if STEPPER_DRIVE:
                 startSpindle()
             else:
+                queZSetup()
             moveX(self.safeX)
             moveZ(self.zStart)
             self.turnPass()
