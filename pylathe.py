@@ -379,6 +379,7 @@ def sendSpindleData(send=False):
     global info, spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
+            setParm('STEPPER_DRIVE', getBoolInfo('spStepDrive'))
             if STEPPER_DRIVE:
                 setParm('SP_STEPS', getInfo('spMotorSteps'))
                 setParm('SP_MICRO', getInfo('spMicroSteps'))
