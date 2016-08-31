@@ -275,6 +275,9 @@ def queClear():
     while not moveQue.empty():
         moveQue.get()
 
+def queZSetup():
+    moveQue.put((Z_FEED_SETUP,0))
+
 def startSpindle():
     moveQue.put((QUE_START, 0))
     saveZOffset();
@@ -376,7 +379,18 @@ def sendSpindleData(send=False):
     global info, spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
-            if XILINX:
+            if STEPPER_DRIVE:
+                setParm('SP_STEPS', getInfo('spMotorSteps'))
+                setParm('SP_MICRO', getInfo('spMicroSteps'))
+                setParm('SP_MIN_RPM', getInfo('spMinRPM'))
+                setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
+                setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
+                setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
+                setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
+                command('CMD_SPSETUP')
+            elif XILINX:
                 setParm('ENC_MAX', getInfo('cfgEncoder'))
                 setParm('X_FREQUENCY', getInfo('cfgXFreq'))
                 setParm('FREQ_MULT', getInfo('cfgFreqMult'))
@@ -390,18 +404,7 @@ def sendSpindleData(send=False):
                 if info['xInvDir'].GetValue():
                     cfgReg |= XDIR_POL
                 setParm('X_CFG_REG', cfgReg)
-            else:
-                setParm('SP_STEPS', getInfo('spMotorSteps'))
-                setParm('SP_MICRO', getInfo('spMicroSteps'))
-                setParm('SP_MIN_RPM', getInfo('spMinRPM'))
-                setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
-                setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
-                setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
-                setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
-                setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
-                setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
 
-            command('CMD_SPSETUP')
             spindleDataSent = True
     except commTimeout as e:
         print "sendSpindleData Timeout"
@@ -631,7 +634,9 @@ class Turn():
             add = getFloatVal(self.turnPanel.add)
             self.feed += add
             self.calculateTurnPass()
-            startSpindle()
+            if STEPPER_DRIVE:
+                startSpindle()
+            else:
             moveX(self.safeX)
             moveZ(self.zStart)
             self.turnPass()
@@ -732,7 +737,8 @@ class TurnPanel(wx.Panel):
 
             setParm('FEED', getInfo('tuZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
-            command('CMD_ZSYNSETUP');
+            if STEPPER_DRIVE:
+                command('CMD_ZSYNSETUP');
 
             command('CMD_PAUSE')
 
