@@ -404,7 +404,6 @@ def sendSpindleData(send=False):
                 if info['xInvDir'].GetValue():
                     cfgReg |= XDIR_POL
                 setParm('X_CFG_REG', cfgReg)
-
             spindleDataSent = True
     except commTimeout as e:
         print "sendSpindleData Timeout"
@@ -2024,14 +2023,15 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnResume)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start Spindle')
-        btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        if STEPPER_DRIVE:
+            btn = wx.Button(self, label='Start Spindle')
+            btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
+            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Jog Spindle')
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+            btn = wx.Button(self, label='Jog Spindle')
+            btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
+            btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
 
