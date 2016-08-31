@@ -212,6 +212,10 @@ parmList = \
     ["X_HOME_DONE", "x home done", "int"],
     ["X_HOME_STATUS", "x home status", "int"],
 
+    "configuration",
+
+    ["MOTOR_DRIVE", "motor driven spindle", "char"],
+
     # ["", "", ""],
     
     ["MAX_PARM", "maximum parameter", "int16_t"]
@@ -320,6 +324,8 @@ stateList =\
     ["PASS_NUM", "set pass number"],
     ["QUE_PAUSE", "pause queue"],
     ["SAVE_DIAMETER", "save turn diameter"],
+    ["Z_FEED_SETUP", "setup z feed"],
+    ["X_FEED_SETUP", "setup x feed"],
     "};",
 
     "home control states",
