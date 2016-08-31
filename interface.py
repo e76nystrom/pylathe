@@ -214,7 +214,7 @@ parmList = \
 
     "configuration",
 
-    ["MOTOR_DRIVE", "motor driven spindle", "char"],
+    ["STEPPER_DRIVE", "stepper driven spindle", "char"],
 
     # ["", "", ""],
     
