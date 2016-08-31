@@ -187,7 +187,7 @@ parmList = \
     ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
 
-    # "z home offsetts",
+    # "z home offsets",
 
     # ["z_HOME_OFFSET", "z offset home to zero", "float"],
 
