@@ -92,6 +92,13 @@ try:
 except KeyError as e:
     print "no xilinx info"
     pass
+STEPPER_DRIVE = True
+try:
+    STEPPER_DRIVE = info['spStepDrive'].GetValue() == 'True'
+except KeyError as e:
+    print "no stepper info"
+    pass
+stdout.flush()
 info = {}                       # clear info
 
 from setup import createCommands, createParameters,\
@@ -3350,16 +3357,20 @@ class SpindleDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Motor Steps", "spMotorSteps"),
-            ("Micro Steps", "spMicroSteps"),
-            ("Min RPM", "spMinRPM"),
-            ("Max RPM", "spMaxRPM"),
-            ("Accel Time", "spAccelTime"),
-            ("Jog Min", "spJogMin"),
-            ("Jog Max", "spJogMax"),
-            ("Jog Accel Time", "spJogAccelTime"),
-            ("bInvert Dir", 'spInvDir'),
+            ("bStepper Drive", 'spStepDrive'),
         )
+        if STEPPER_DRIVE:
+            self.fields += (
+                ("Motor Steps", "spMotorSteps"),
+                ("Micro Steps", "spMicroSteps"),
+                ("Min RPM", "spMinRPM"),
+                ("Max RPM", "spMaxRPM"),
+                ("Accel Time", "spAccelTime"),
+                ("Jog Min", "spJogMin"),
+                ("Jog Max", "spJogMax"),
+                ("Jog Accel Time", "spJogAccelTime"),
+                ("bInvert Dir", 'spInvDir'),
+            )
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
