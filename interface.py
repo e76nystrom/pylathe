@@ -187,6 +187,8 @@ parmList = \
     ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
     ["INDEX_UPDATE_TIME", "index update time", "int"],
+    ["REV_COUNTER", "revolutin counter", "int"],
+ 
 
     # "z home offsets",
 
