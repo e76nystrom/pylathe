@@ -277,6 +277,8 @@ def queClear():
 
 def queZSetup():
     moveQue.put((Z_FEED_SETUP,0))
+    saveZOffset();
+    saveXOffset();
 
 def startSpindle():
     moveQue.put((QUE_START, 0))
