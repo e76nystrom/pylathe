@@ -277,6 +277,13 @@ def queClear():
 
 def queZSetup():
     moveQue.put((Z_FEED_SETUP,0))
+    saveZOffset();
+    saveXOffset();
+
+def queXSetup():
+    moveQue.put((X_FEED_SETUP,0))
+    saveZOffset();
+    saveXOffset();
 
 def startSpindle():
     moveQue.put((QUE_START, 0))
@@ -2988,9 +2995,10 @@ class MainFrame(wx.Frame):
         menu = operationMenu.Append(ID_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTaper, menu)
 
-        ID_THREAD = wx.NewId()
-        menu = operationMenu.Append(ID_THREAD, 'Thread')
-        self.Bind(wx.EVT_MENU, self.OnThread, menu)
+        if STEPPER_DRIVE:
+            ID_THREAD = wx.NewId()
+            menu = operationMenu.Append(ID_THREAD, 'Thread')
+            self.Bind(wx.EVT_MENU, self.OnThread, menu)
 
         testMenu = wx.Menu()
 
@@ -3041,10 +3049,11 @@ class MainFrame(wx.Frame):
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        self.threadPanel = panel = ThreadPanel(self)
-        self.panels['threadPanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
-        panel.Hide()
+        if STEPPER_DRIVE:
+            self.threadPanel = panel = ThreadPanel(self)
+            self.panels['threadPanel'] = panel
+            sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+            panel.Hide()
 
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
@@ -3083,7 +3092,8 @@ class MainFrame(wx.Frame):
         self.turnPanel.update()
         self.facePanel.update()
         self.taperPanel.update()
-        self.threadPanel.update()
+        if STEPPER_DRIVE:
+            self.threadPanel.update()
 
         self.taperPanel.updateUI()
 
