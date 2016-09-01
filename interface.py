@@ -186,8 +186,8 @@ parmList = \
     ["INDEX_PRE_SCALER", "index prescaler", "int"],
     ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
-    ["INDEX_UPDATE_TIME", "index update time", "int"],
-    ["REV_COUNTER", "revolutin counter", "int"],
+    ["INDEX_UPDATE_TIME", "index update time", "unsigned int"],
+    ["REV_COUNTER", "revolutin counter", "unsigned int"],
  
 
     # "z home offsets",
