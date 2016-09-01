@@ -92,7 +92,7 @@ try:
 except KeyError as e:
     print "no xilinx info"
     pass
-STEPPER_DRIVE = True
+TEPPER_DRIVE = True
 try:
     STEPPER_DRIVE = info['spStepDrive'].GetValue() == 'True'
 except KeyError as e:
@@ -2028,6 +2028,10 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
+        btn = wx.Button(self, label='E Stop')
+        btn.Bind(wx.EVT_BUTTON, self.OnEStop)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
         btn = wx.Button(self, label='Pause')
         btn.Bind(wx.EVT_BUTTON, self.OnPause)
         sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
@@ -2396,6 +2400,10 @@ class JogPanel(wx.Panel):
                         self.xHome = False
                         print "home success"
                         stdout.flush()
+
+    def OnEStop(self, e):
+        queClear()
+        command('CMD_CLEAR')
 
     def OnStop(self, e):
         queClear()
