@@ -90,13 +90,13 @@ XILINX = False
 try:
     XILINX = info['cfgXilinx'].GetValue() == 'True'
 except KeyError as e:
-    print "no xilinx info"
+    print("no xilinx info")
     pass
 TEPPER_DRIVE = True
 try:
     STEPPER_DRIVE = info['spStepDrive'].GetValue() == 'True'
 except KeyError as e:
-    print "no stepper info"
+    print("no stepper info")
     pass
 stdout.flush()
 info = {}                       # clear info
@@ -224,7 +224,7 @@ def getBoolInfo(key):
         else:
             return(0)
     except KeyError:
-        print "getBoolInfo IndexError %s" % (key)
+        print("getBoolInfo IndexError %s" % (key))
         stdout.flush()
         return('')
 
@@ -237,7 +237,7 @@ def getFloatInfo(key):
         except ValueError:
             pass
     except KeyError:
-        print "invalid key %s" % (key)
+        print("invalid key %s" % (key))
         stdout.flush()
     return(0.0)
 
@@ -250,7 +250,7 @@ def getIntInfo(key):
         except ValueError as e:
             return(0)
     except KeyError as e:
-        print "invalid key %s" % (key)
+        print("invalid key %s" % (key))
         stdout.flush()
     return(0)
 
@@ -304,41 +304,41 @@ def saveDiameter(val):
 
 def moveZ(zLoc, flag=ZMAX):
     queMove(MOVE_Z | flag << 8, zLoc)
-    print "moveZ  %7.4f" % (zLoc)
+    print("moveZ  %7.4f" % (zLoc))
 
 def moveX(xLoc, flag=XMAX):
     queMove(MOVE_X | flag << 8, xLoc)
-    print "moveX  %7.4f" % (xLoc)
+    print("moveX  %7.4f" % (xLoc))
 
 def saveZOffset():
     global zHomeOffset
     queMove(SAVE_Z_OFFSET, zHomeOffset)
-    print "saveZOffset  %7.4f" % (zHomeOffset)
+    print("saveZOffset  %7.4f" % (zHomeOffset))
 
 def saveXOffset():
     global xHomeOffset
     queMove(SAVE_X_OFFSET, xHomeOffset)
-    print "savexOffset  %7.4f" % (xHomeOffset)
+    print("savexOffset  %7.4f" % (xHomeOffset))
 
 def moveXZ(zLoc, xLoc):
     queMove(SAVE_Z, zLoc)
     queMove(MOVE_XZ, xLoc)
-    print "moveZX %7.4f %7.4f" % (zLoc, xLoc)
+    print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
 
 def moveZX(zLoc, xLoc):
     queMove(SAVE_X, xLoc)
     queMove(MOVE_ZX, zLoc)
-    print "moveXZ %7.4f %7.4f" % (zLoc, xLoc)
+    print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
 def taperZX(zLoc, taper):
     queMove(SAVE_TAPER, taper)
     queMove(TAPER_ZX | (1 << 8), zLoc)
-    print "taperZX %7.4f %7.4f" % (zLoc, taper)
+    print("taperZX %7.4f %7.4f" % (zLoc, taper))
 
 def taperXZ(xLoc, taper):
     queMove(SAVE_TAPER, taper)
     queMove(TAPER_XZ, xLoc)
-    print "taperZX %7.4f %7.4f" % (xLoc, taper)
+    print("taperZX %7.4f %7.4f" % (xLoc, taper))
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
@@ -375,7 +375,7 @@ def xilinxTestMode():
             while encTimer >= 65536:
                 preScaler += 1
                 encTimer = int(fcy / (encoder * rps * preScaler))
-            print "preScaler %d encTimer %d" % (preScaler, encTimer)
+            print("preScaler %d encTimer %d" % (preScaler, encTimer))
             setParm('ENC_ENABLE', '1')
             setParm('ENC_PRE_SCALER', preScaler)
             setParm('ENC_TIMER', encTimer)
@@ -414,7 +414,7 @@ def sendSpindleData(send=False):
                 setParm('X_CFG_REG', cfgReg)
             spindleDataSent = True
     except commTimeout as e:
-        print "sendSpindleData Timeout"
+        print("sendSpindleData Timeout")
         stdout.flush()
 
 def sendZData(send=False):
@@ -458,10 +458,10 @@ def sendZData(send=False):
             command('CMD_ZSETUP')
             zDataSent = True
     except commTimeout as e:
-        print "sendZData Timeout"
+        print("sendZData Timeout")
         stdout.flush()
     except:
-        print "setZData exception"
+        print("setZData exception")
         stdout.flush()
 
 def sendXData(send=False):
@@ -514,7 +514,7 @@ def sendXData(send=False):
             command('CMD_XSETUP')
             xDataSent = True
     except commTimeout as e:
-        print "sendZData Timeout"
+        print("sendZData Timeout")
         stdout.flush()
 
 class Turn():
@@ -541,13 +541,13 @@ class Turn():
             if self.xEnd <= 0:
                 self.neg = True
             else:
-                print "error"
+                print("error")
                 return
         else:
             if self.xEnd >= 0:
                 self.neg = False
             else:
-                print "error"
+                print("error")
                 return
 
         self.xCut = abs(self.xStart) - abs(self.xEnd)
@@ -593,7 +593,7 @@ class Turn():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print "spring"
+                print("spring")
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
@@ -610,7 +610,7 @@ class Turn():
                 self.spring += 1
             if self.spring < self.sPasses:
                 self.spring += 1
-                print "spring"
+                print("spring")
                 nextPass(0x200 | self.spring)
                 self.turnPass()
             else:
@@ -633,7 +633,7 @@ class Turn():
     def turnPass(self):
         moveX(self.curX, XJOG)
         saveDiameter(self.curX * 2.0)
-        print "pause"
+        print("pause")
         if self.turnPanel.pause.GetValue():
             quePause()
         moveZ(self.zEnd, ZSYN)
@@ -755,7 +755,7 @@ class TurnPanel(wx.Panel):
             command('CMD_PAUSE')
 
         except commTimeout as e:
-            print "timeout error"
+            print("timeout error")
             stdout.flush()
 
     def OnSend(self, e):
@@ -840,7 +840,7 @@ class Face():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print "spring"
+                print("spring")
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
@@ -858,7 +858,7 @@ class Face():
             if self.spring < self.sPasses:
                 self.spring += 1
                 nextPass(0x200 | self.spring)
-                print "spring"
+                print("spring")
                 self.facePass()
             else:
                 return(False)
@@ -986,7 +986,7 @@ class FacePanel(wx.Panel):
             command('CMD_PAUSE')
 
         except commTimeout as e:
-            print "timeout error"
+            print("timeout error")
             stdout.flush()
 
     def OnSend(self, e):
@@ -1038,7 +1038,7 @@ class Taper():
                (totalTaper, taperInch))
 
     def externalTaper(self, taperInch):
-        print "externalTaper"
+        print("externalTaper")
         self.getTaperParameters(taperInch)
 
         self.halfTaper = taperInch / 2.0
@@ -1070,7 +1070,7 @@ class Taper():
         stdout.flush()
 
     def externalTaperUpdate(self):
-        print "pass %d" % (self.passCount)
+        print("pass %d" % (self.passCount))
         if self.passCount < self.passes:
             self.springFlag = False
             if self.sPassInt != 0:
@@ -1079,7 +1079,7 @@ class Taper():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print "spring"
+                print("spring")
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
@@ -1100,7 +1100,7 @@ class Taper():
             if self.spring < self.sPasses:
                 self.spring += 1
                 nextPass(0x200 | self.spring)
-                print "spring"
+                print("spring")
                 self.externalPass()
             else:
                 return(False)
@@ -1140,7 +1140,7 @@ class Taper():
             stopSpindle();
 
     def internalTaper(self, taperInch):
-        print "internalTaper"
+        print("internalTaper")
         self.getTaperParameters(taperInch)
 
         self.halfTaper = self.taper / 2.0
@@ -1180,7 +1180,7 @@ class Taper():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print "spring"
+                print("spring")
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
@@ -1201,7 +1201,7 @@ class Taper():
             if self.spring < self.sPasses:
                 self.spring += 1
                 nextPass(0x200 | self.spring)
-                print "spring"
+                print("spring")
                 self.internalPass()
             else:
                 return(False)
@@ -1210,7 +1210,7 @@ class Taper():
     def calcInternalPass(self):
         self.startX = self.boreRadius + self.feed
         self.endZ = self.feed / self.halfTaper
-        print "endZ %6.3f" % (self.endZ)
+        print("endZ %6.3f" % (self.endZ))
         if self.endZ <= self.zLength:
             self.endX = self.boreRadius
         else:
@@ -1434,7 +1434,7 @@ class TaperPanel(wx.Panel):
             command('CMD_PAUSE')
 
         except commTimeout as e:
-            print "timeout error"
+            print("timeout error")
             stdout.flush()
 
     def OnSend(self, e):
@@ -1552,7 +1552,7 @@ class ScrewThread():
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
-        print "pass     area  xfeed  zfeed  delta"
+        print("pass     area  xfeed  zfeed  delta")
 
         while self.threadUpdate():
             pass
@@ -1569,7 +1569,7 @@ class ScrewThread():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print "spring"
+                print("spring")
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
@@ -1585,7 +1585,7 @@ class ScrewThread():
             if self.spring < self.sPasses:
                 self.spring += 1
                 nextPass(0x200 | self.spring)
-                print "spring"
+                print("spring")
                 self.threadPass()
             else:
                 return(False)
@@ -1749,7 +1749,7 @@ class ThreadPanel(wx.Panel):
 
             command('CMD_PAUSE')
         except commTimeout as e:
-            print "timeout error"
+            print("timeout error")
             stdout.flush()
 
     def OnSend(self, e):
@@ -2101,7 +2101,7 @@ class JogPanel(wx.Panel):
 
     def getInc(self):
         val = self.combo.GetValue()
-        # print "combo %d" % (self.combo.GetSelection())
+        # print("combo %d" % (self.combo.GetSelection()))
         # stdout.flush()
         return(val)
 
@@ -2116,7 +2116,7 @@ class JogPanel(wx.Panel):
                     dir = 1
                     if code == wx.WXK_LEFT:
                         dir = -1
-                    print "zJogCmd %d" % (dir)
+                    print("zJogCmd %d" % (dir))
                     stdout.flush()
                     try:
                         setParm('Z_JOG_DIR', dir)
@@ -2133,7 +2133,7 @@ class JogPanel(wx.Panel):
                 self.jogCode = code
                 if code == wx.WXK_LEFT:
                     val = '-' + val
-                print "zJogCmd %s" % (val)
+                print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
                     setParm('Z_MOVE_DIST', val)
@@ -2145,7 +2145,7 @@ class JogPanel(wx.Panel):
         self.jogCode = None
         val = self.getInc()
         if val == "Cont":
-            print "jogDone %d" % (self.repeat)
+            print("jogDone %d" % (self.repeat))
             stdout.flush()
             try:
                 command(cmd)
@@ -2194,7 +2194,7 @@ class JogPanel(wx.Panel):
                     dir = 1
                     if code == wx.WXK_UP:
                         dir = -1
-                    print "xJogCmd %d" % (dir)
+                    print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
                         setParm('X_JOG_DIR', dir)
@@ -2211,7 +2211,7 @@ class JogPanel(wx.Panel):
                 self.jogCode = code
                 if code == wx.WXK_UP:
                     val = '-' + val
-                print "xJogCmd %s" % (val)
+                print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
                     setParm('X_MOVE_DIST', val)
@@ -2252,7 +2252,7 @@ class JogPanel(wx.Panel):
 
     def OnCombo(self, e):
         val = self.combo.GetValue();
-        print "combo val %s" % (val)
+        print("combo val %s" % (val))
         try:
             val = float(val)
             if val > 0.020:
@@ -2267,12 +2267,12 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def OnSetFocus(self, evt):
-        # print "focus set"
+        # print("focus set")
         # stdout.flush()
         evt.Skip()
 
     def OnKillFocus(self, evt):
-        # print "focus kill"
+        # print("focus kill")
         # stdout.flush()
         evt.Skip()
 
@@ -2294,7 +2294,7 @@ class JogPanel(wx.Panel):
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
             self.spindleJogCmd(code, 0)
             return
-        # print "key down %x" % (code)
+        # print("key down %x" % (code))
         # stdout.flush()
         evt.Skip()
     
@@ -2315,7 +2315,7 @@ class JogPanel(wx.Panel):
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
             command("SPINDLE_STOP")
             return
-        # print "key up %x" % (code)
+        # print("key up %x" % (code))
         # stdout.flush()
         evt.Skip()
 
@@ -2342,7 +2342,7 @@ class JogPanel(wx.Panel):
                 if val > 1:
                     combo.SetSelection(val - 1)
             return
-        print "key char %x" % (code)
+        print("key char %x" % (code))
         stdout.flush()
         evt.Skip()
 
@@ -2394,11 +2394,11 @@ class JogPanel(wx.Panel):
                 if val != None:
                     if val & HOME_SUCCESS:
                         self.xHome = False
-                        print "home success"
+                        print("home success")
                         stdout.flush()
                     elif val & HOME_FAIL:
                         self.xHome = False
-                        print "home success"
+                        print("home success")
                         stdout.flush()
 
     def OnEStop(self, e):
@@ -2445,7 +2445,7 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def OnJogSpindle(self, e):
-        print "jog spingle"
+        print("jog spingle")
         stdout.flush()
         self.btnRpt.action = self.spindleJogCmd
         self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
@@ -2517,7 +2517,7 @@ class SetZPosDialog(wx.Dialog):
             self.Show(False)
             jogPanel.focus()
         except ValueError:
-            print "ValueError"
+            print("ValueError")
             stdout.flush()
 
     def OnOk(self, e):
@@ -2593,7 +2593,7 @@ class SetXPosDialog(wx.Dialog):
                 val = jogPanel.xPos.GetValue()
                 self.xPos.SetValue(val)
         except RuntimeError:
-            print "RuntimeError"
+            print("RuntimeError")
             stdout.flush()
 
     def OnGoTo(self, e):
@@ -2610,7 +2610,7 @@ class SetXPosDialog(wx.Dialog):
             self.Show(False)
             jogPanel.focus()
         except ValueError:
-            print "ValueError"
+            print("ValueError")
             stdout.flush()
 
     def OnHome(self, e):
@@ -2636,7 +2636,7 @@ class SetXPosDialog(wx.Dialog):
                 xLoc /= jogPanel.xStepsInch
                 xHomeOffset = xLoc - val
                 info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-                print "xHomeOffset %0.4f" % (xHomeOffset)
+                print("xHomeOffset %0.4f" % (xHomeOffset))
                 stdout.flush()
             self.Show(False)
             jogPanel.focus()
@@ -2653,13 +2653,13 @@ class SetXPosDialog(wx.Dialog):
             if jogPanel.xEncInvert:
                 encPos = -encPos
             xEncOffset = encPos
-            print "xEncOffset %0.4f" % (xEncOffset)
+            print("xEncOffset %0.4f" % (xEncOffset))
 
         xLoc = getParm('X_LOC')
         if xLoc != None:
             xHomeOffset = float(xLoc) / jogPanel.xStepsInch
             info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-            print "xHomeOffset %0.4f" % (xHomeOffset)
+            print("xHomeOffset %0.4f" % (xHomeOffset))
             stdout.flush()
             self.Show(False)
             jogPanel.focus()
@@ -2829,7 +2829,7 @@ class UpdateThread(Thread):
             result = (3, z, x, rpm, curPass, encZ, encX)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
-            print "readAll ValueError %s" % (result)
+            print("readAll ValueError %s" % (result))
             stdout.flush()
 
     def run(self):
@@ -2883,7 +2883,7 @@ class UpdateThread(Thread):
                         break
                 except commTimeout as e:
                     break
-        print "done"
+        print("done")
         stdout.flush()
 
     def abort(self):
@@ -2900,7 +2900,7 @@ class KeyEventFilter(wx.EventFilter):
     def FilterEvent(self, event):
         t = event.GetEventType()
         if t == wx.EVT_KEY_DOWN:
-            print "key down"
+            print("key down")
         event.Skip()
 
 class MainFrame(wx.Frame):
@@ -3777,7 +3777,7 @@ class SyncTest(object):
         global f, fcy, info
         txt = self.txt
         txt.SetValue("")
-        print ""
+        print("")
         f = open('zsync.txt','w')
    
         zAxis = True
@@ -4201,7 +4201,7 @@ class MoveTest(object):
 class MainApp(wx.App):
     def OnInit(self):
         """Init Main App."""
-        print "mainapp"
+        print("mainapp")
         global mainFrame
         mainFrame = self.frame = MainFrame(None, "Lathe Control")
         self.frame.Show(True)
