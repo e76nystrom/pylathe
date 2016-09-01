@@ -774,8 +774,8 @@ class TurnPanel(wx.Panel):
         global jogPanel
         self.turn.turnAdd()
         setParm('X_FEED_PASS', getInfo('tuAddFeed'))
-        turnFlag = TURNADD
-        setParm('TURN_FLAG' ,turnFlag)
+        # turnFlag = TURNADD
+        # setParm('TURN_FLAG' ,turnFlag)
         setParm('SPRING_PASSES' ,0)
         command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
