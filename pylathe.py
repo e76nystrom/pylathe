@@ -280,6 +280,11 @@ def queZSetup():
     saveZOffset();
     saveXOffset();
 
+def queXSetup():
+    moveQue.put((X_FEED_SETUP,0))
+    saveZOffset();
+    saveXOffset();
+
 def startSpindle():
     moveQue.put((QUE_START, 0))
     saveZOffset();
