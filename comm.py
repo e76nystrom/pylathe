@@ -18,7 +18,7 @@ def openSerial(port, rate):
     try:
         ser = serial.Serial(port, 57600, timeout=1)
     except IOError:
-        print "unable to open port"
+        print("unable to open port")
         stdout.flush()
 
 class commTimeout(Exception):
@@ -37,7 +37,7 @@ def command(cmd):
         # action()
     cmdStr = '\x01%x ' % (cmdVal)
     if xDbgPrint:
-        print "%-15s %s" % (cmd, cmdStr)
+        print("%-15s %s" % (cmd, cmdStr))
         stdout.flush()
     if ser is None:
         return(None);
@@ -50,7 +50,7 @@ def command(cmd):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "timeout %s" % (cmd)
+                print("timeout %s" % (cmd))
                 stdout.flush()
             raise commTimeout()
             break
@@ -83,13 +83,13 @@ def setParm(parm, val):
             valString = "%5.6f" % (float(val))
             valString = valString.rstrip('0')
         except ValueError:
-            print "ValueError %s" % (val)
+            print("ValueError %s" % (val))
             stdout.flush()
     else:
         valString = "x%x" % (int(val))
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     if True: # xDbgPrint:
-        print "%-15s %s" % (parm, cmd)
+        print("%-15s %s" % (parm, cmd))
         stdout.flush()
     if ser is None:
         return
@@ -102,7 +102,7 @@ def setParm(parm, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "setParm timeout %s" % (parm)
+                print("setParm timeout %s" % (parm))
                 stdout.flush()
             raise commTimeout()
             break;
@@ -126,7 +126,7 @@ def getParm(parm):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "getParm timeout %s" % (parm)
+                print("getParm timeout %s" % (parm))
                 stdout.flush()
             raise commTimeout()
             break;
@@ -138,7 +138,7 @@ def getParm(parm):
                 try:
                     retVal = int(result[2], 16)
                 except:
-                    print "getParm error on %s" % (result)
+                    print("getParm error on %s" % (result))
                     stdout.flush()
                     retVal = 0
                 if retVal & 0x80000000:
@@ -161,7 +161,7 @@ def getString():
             commLock.release()
             if not timeout:
                 timeout = True
-                print "getString timeout"
+                print("getString timeout")
                 stdout.flush()
             raise commTimeout()
             break;
@@ -177,12 +177,12 @@ def getString():
 def setXReg(reg, val):
     global ser, xRegs, cmds, comLock, timeout, xDbgPrint
     if not (reg in xRegs):
-        print "invalid register " + reg
+        print("invalid register " + reg)
         stdout.flush()
         return
     val = int(val)
     if xDbgPrint:
-        print "%-12s %2x %8x %12d" % (reg, xRegs[reg], val & 0xffffffff, val)
+        print("%-12s %2x %8x %12d" % (reg, xRegs[reg], val & 0xffffffff, val))
         stdout.flush()
     if ser is None:
         return
@@ -197,7 +197,7 @@ def setXReg(reg, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "timeout"
+                print("timeout")
             raise commTimeout
             break;
         if (tmp == '*'):
@@ -212,7 +212,7 @@ def setXRegN(reg, val):
         return
     val = int(val)
     if xDbgPrint:
-        print "%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val)
+        print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
     cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], reg, \
                                val & 0xffffffff)
     commLock.acquire(True)
@@ -224,7 +224,7 @@ def setXRegN(reg, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "timeout"
+                print("timeout")
             raise commTimeout
             break;
         if (tmp == '*'):
@@ -238,7 +238,7 @@ def getXReg(reg):
     if ser is None:
         return(0)
     if not (reg in xRegs):
-        print "invalid register " + reg
+        print("invalid register " + reg)
         return(0);
     cmd = '\x01%x %x ' % (cmds['READXREG'][0], xRegs[reg])
     commLock.acquire(True)
@@ -250,7 +250,7 @@ def getXReg(reg):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "timeout"
+                print("timeout")
             raise commTimeout
             break;
         if (tmp == '*'):
@@ -285,12 +285,12 @@ def sendMove(op, val):
         valStr = val
         prtStr = str
     else:
-        print "sendMove val invalid type"
+        print("sendMove val invalid type")
         stdout.flush()
         return
     cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
-        print "cmd %3x %s" % (op, prtStr)
+        print("cmd %3x %s" % (op, prtStr))
         stdout.flush()
     if ser is None:
         return
@@ -303,7 +303,7 @@ def sendMove(op, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print "sendMove timeout"
+                print("sendMove timeout")
                 stdout.flush()
             raise commTimeout()
             break;
@@ -327,7 +327,7 @@ def getQueueStatus():
             commLock.release()
             if not timeout:
                 timeout = True
-                print "getQueStatus timeout"
+                print("getQueStatus timeout")
                 stdout.flush()
             raise commTimeout()
             break;
