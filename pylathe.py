@@ -633,8 +633,8 @@ class Turn():
     def turnPass(self):
         moveX(self.curX, XJOG)
         saveDiameter(self.curX * 2.0)
-        print("pause")
         if self.turnPanel.pause.GetValue():
+            print("pause")
             quePause()
         moveZ(self.zEnd, ZSYN)
         moveX(self.safeX)
@@ -1604,6 +1604,9 @@ class ScrewThread():
 
     def threadPass(self):
         moveX(self.curX, XJOG)
+        if self.threadPanel.pause.GetValue():
+            print("pause")
+            quePause()
         moveZ(self.zEnd, ZSYN)
         moveX(self.safeX)
         startZ = self.startZ - self.zOffset
