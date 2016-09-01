@@ -3087,7 +3087,8 @@ class MainFrame(wx.Frame):
         self.turnPanel.update()
         self.facePanel.update()
         self.taperPanel.update()
-        self.threadPanel.update()
+        if STEPPER_DRIVE:
+            self.threadPanel.update()
 
         self.taperPanel.updateUI()
 
