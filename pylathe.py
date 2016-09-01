@@ -875,6 +875,9 @@ class Face():
 
     def facePass(self):
         moveZ(self.curZ, XJOG)
+        if self.facePanel.pause.GetValue():
+            print("pause")
+            quePause()
         moveX(self.xEnd, ZSYN)
         moveZ(self.safeZ)
         moveX(self.xStart)
@@ -959,6 +962,13 @@ class FacePanel(wx.Panel):
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = addField(self, sizerG, "Feed", "faAddFeed")
+
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['fdPause'] = cb
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -1123,6 +1133,9 @@ class Taper():
 
     def externalPass(self):
         moveZ(self.startZ)
+        if self.taperPanel.pause.GetValue():
+            print("pause")
+            quePause()
         moveX(self.startX, XSYN)
         taperZX(self.endZ, self.halfTaper)
         moveX(self.safeX)
@@ -1228,6 +1241,9 @@ class Taper():
         moveX(self.startX + 0.002, XJOG)
         moveX(self.startX, XJOG)
         moveZ(self.startZ, XJOG)
+        if self.taperPanel.pause.GetValue():
+            print("pause")
+            quePause()
         taperZX(self.endZ, self.halfTaper)
         moveX(self.boreRadius, XSYN)
         moveX(self.safeX)
@@ -1345,11 +1361,18 @@ class TaperPanel(wx.Panel):
 
         self.add = addField(self, sizerG, "Feed", "tpAddFeed")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['tpPause'] = cb
 
-        btn = wx.Button(self, label='Debug', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnDebug)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        # sizerG.Add(wx.StaticText(self, -1), border=2)
+
+        # btn = wx.Button(self, label='Debug', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnDebug)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -1471,11 +1494,11 @@ class TaperPanel(wx.Panel):
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
 
-    def OnDebug(self, e):
-        self.sendData()
-        moveX(1.000)
-        moveZ(0.010)
-        taperZX(-0.25, 0.0251)
+    # def OnDebug(self, e):
+    #     self.sendData()
+    #     moveX(1.000)
+    #     moveZ(0.010)
+    #     taperZX(-0.25, 0.0251)
 
 class ScrewThread():
     def __init__(self, threadPanel):
@@ -1724,6 +1747,13 @@ class ThreadPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = addField(self, sizerG, "Feed", "thAddFeed")
+
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['thPause'] = cb
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
