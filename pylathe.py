@@ -2402,12 +2402,18 @@ class JogPanel(wx.Panel):
                         stdout.flush()
 
     def OnEStop(self, e):
+        global spindleDataSend, zDataSent, xDataSent
         queClear()
         command('CMD_CLEAR')
+        spindleDataSent = False
+        zDataSent = False
+        xDataSent = False
+        self.combo.SetFocus()
 
     def OnStop(self, e):
         queClear()
         command('CMD_STOP')
+        self.combo.SetFocus()
 
     def OnPause(self, e):
         command('CMD_PAUSE')
@@ -2436,6 +2442,7 @@ class JogPanel(wx.Panel):
             command("SPINDLE_JOG")
         except commTimeout as e:
             pass
+        self.combo.SetFocus()
 
     def OnJogSpindle(self, e):
         print "jog spingle"
