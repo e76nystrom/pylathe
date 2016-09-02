@@ -1643,7 +1643,7 @@ class ScrewThread():
         if self.threadPanel.pause.GetValue():
             print("pause")
             quePause()
-        moveZ(self.zEnd, ZSYN)
+        moveZ(self.zEnd, ZSYN | Z_SYN_START)
         moveX(self.safeX)
         startZ = self.startZ - self.zOffset
         moveZ(startZ + self.zBackInc)
