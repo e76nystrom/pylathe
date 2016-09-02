@@ -2135,7 +2135,7 @@ class JogPanel(wx.Panel):
     #     dialog.Raise()
     #     dialog.Show(True)
 
-    def menuPos(self, ctl):
+    def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
         (x, y) = e.GetPosition()
         xPos += x
@@ -2148,7 +2148,7 @@ class JogPanel(wx.Panel):
         # xPos += x
         # yPos += y
         menu = PosMenu(0)
-        self.PopupMenu(menu, self.menuPos(self.zPos))
+        self.PopupMenu(menu, self.menuPos(e, self.zPos))
         menu.Destroy()
 
     def OnXMenu(self, e):
@@ -2157,7 +2157,7 @@ class JogPanel(wx.Panel):
         # xPos += x
         # yPos += y
         menu = PosMenu(1)
-        self.PopupMenu(menu, self.menuPos(self.xPos))
+        self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
 
     def focus(self):
