@@ -1353,13 +1353,15 @@ class TaperPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStart)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        # sizerG.Add(wx.StaticText(self, -1), border=2)
 
         btn = wx.Button(self, label='Add', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "Feed", "tpAddFeed")
+        self.add = addField(self, sizerG, "", "tpAddFeed")
+
+        self.rpm = addField(self, sizerG, "", "tpRPM")
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
