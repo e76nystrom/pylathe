@@ -818,7 +818,10 @@ class Face():
             self.xRetract = -self.xRetract
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
-        startSpindle()
+        if STEPPER_DRIVE:
+            startSpindle()
+        else:
+            queXSetup()
         moveX(self.safeX)
         moveZ(self.zStart)
         moveX(self.xStart)
@@ -2111,7 +2114,7 @@ class JogPanel(wx.Panel):
         yPos += y
         dialog = self.setZPosDialog
         if dialog == None:
-            self.setZPosDialog = dialog = SetZPosDialog(self)
+            self.setZPosDialog = dialog = SetPosDialog(self, 0)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
