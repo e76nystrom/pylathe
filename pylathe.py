@@ -2587,12 +2587,12 @@ class SetZPosDialog(wx.Dialog):
             self.Show(False)
             jogPanel.focus()
 
-class SetPosDialog(wx.Dialog, type):
+class SetPosDialog(wx.Dialog, axis):
     def __init__(self, frame):
         global info
-        self.type = type
+        self.axis = axis
         pos = (10, 10)
-        title = "Set %c Position" % (('Z', 'X')[type])
+        title = "Set %c Position" % (('Z', 'X')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -2638,7 +2638,7 @@ class SetPosDialog(wx.Dialog, type):
         global jogPanel
         try:
             if self.IsShown():
-                if self.type == 0:
+                if self.axis == 0:
                     val = jogPanel.zPos.GetValue()
                 else:
                     val = jogPanel.xPos.GetValue()
@@ -2679,7 +2679,7 @@ class SetPosDialog(wx.Dialog, type):
     def OnOk(self, e):
         global jogPanel, zHomeOffset, xHomeOffset
         val = self.pos.GetValue()
-        if self.type == 0:
+        if self.axis == 0:
             try:
                 val = float(val)
                 sendZData()
