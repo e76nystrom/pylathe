@@ -271,7 +271,7 @@ regList =\
     ["CLEAR_HOME", "(1 << 1)", ""],
     ["HOME_ACTIVE", "0", ""],
     ["HOME_SUCCESS", "1", ""],
-    ["HOME_FAIL", "-1", ""],
+    ["HOME_FAIL", "2", ""],
 
     # ["", "", ""],
 ]
