@@ -991,6 +991,7 @@ class FacePanel(wx.Panel):
             sendZData()
             sendXData()
 
+            setParm('SP_MAX_RPM', getInfo('faRPM'))
             setParm('FEED', getInfo('faXFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             command('CMD_XSYNSETUP');
@@ -1453,6 +1454,7 @@ class TaperPanel(wx.Panel):
             sendZData()
             sendXData()
 
+            setParm('SP_MAX_RPM', getInfo('tpRPM'))
             setParm('FEED', getInfo('tpZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             command('CMD_ZSYNSETUP');
@@ -1782,6 +1784,7 @@ class ThreadPanel(wx.Panel):
             sendZData()
             sendXData()
 
+            setParm('SP_MAX_RPM', getInfo('thRPM'))
             setParm('FEED', getInfo('thPitch'))
             type = FEED_TPI
             if self.mm.GetValue():
