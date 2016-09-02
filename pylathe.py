@@ -2762,7 +2762,7 @@ class PosMenu(wx.Menu):
     def __init__(self, axis):
         wx.Menu.__init__(self)
         self.axis = axis
-        item = wx.MenuItem(self, wx.NewId(), "Set X")
+        item = wx.MenuItem(self, wx.NewId(), "Set")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnSet, item)
 
@@ -2785,7 +2785,7 @@ class PosMenu(wx.Menu):
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def OnSet(self, e):
-        SetPosDialog(jogPanel, self.axis)
+        dialog = SetPosDialog(jogPanel, self.axis)
         if self.axis == 0:
             ctl = jogPanel.zPos
         else:
