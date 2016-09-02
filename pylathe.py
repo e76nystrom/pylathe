@@ -2121,11 +2121,11 @@ class JogPanel(wx.Panel):
         dialog.Show(True)
 
     def OnXMenu(self, e):
-        menu = XPosMenu()
         (xPos, yPos) = self.xPos.GetPosition()
         (x, y) = e.GetPosition()
         xPos += x
         yPos += y
+        menu = XPosMenu()
         self.PopupMenu(menu, (xPos, yPos))
         menu.Destroy()
 
@@ -2703,6 +2703,18 @@ class XPosMenu(wx.Menu):
         item = wx.MenuItem(self, wx.NewId(), "Set X")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnSetX, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Zero")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnZeroX, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Home")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Go to")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnGotoX, item)
 
         item = wx.MenuItem(self, wx.NewId(), "Fix X")
         self.Append(item)
