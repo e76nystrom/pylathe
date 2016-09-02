@@ -2588,7 +2588,7 @@ class SetZPosDialog(wx.Dialog):
             jogPanel.focus()
 
 class SetPosDialog(wx.Dialog):
-    def __init__(self, frame, zxis):
+    def __init__(self, frame, axis):
         global info
         self.axis = axis
         pos = (10, 10)
