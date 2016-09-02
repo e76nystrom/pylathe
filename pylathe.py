@@ -2768,7 +2768,7 @@ class PosMenu(wx.Menu):
 
         item = wx.MenuItem(self, wx.NewId(), "Zero")
         self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnZeroX, item)
+        self.Bind(wx.EVT_MENU, self.OnZero, item)
 
         if self.axis == 1:
             item = wx.MenuItem(self, wx.NewId(), "Home")
