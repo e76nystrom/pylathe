@@ -1555,7 +1555,8 @@ class ScrewThread():
         print ("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
                (self.tpi, self.pitch, self.hFactor, self.lastFeed))
         
-        self.depth = (cosAngle * self.pitch) * self.hFactor
+        if self.depth == 0:
+            self.depth = (cosAngle * self.pitch) * self.hFactor
         
         actualWidth = 2 * self.depth * self.tanAngle
         print ("depth %6.4f actualWdith %6.4f" %
