@@ -2620,30 +2620,9 @@ class SetPosDialog(wx.Dialog):
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        # sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        # btn = wx.Button(self, label='Go To', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnGoTo)
-        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        # btn = wx.Button(self, label='Home', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnHome)
-        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        # sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
-
-        # sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
         btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
         sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
-
-        # btn = wx.Button(self, label='Zero', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnZero)
-        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        # sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -2661,35 +2640,6 @@ class SetPosDialog(wx.Dialog):
         except RuntimeError:
             print("RuntimeError")
             stdout.flush()
-
-    # def OnGoTo(self, e):
-    #     global jogPanel
-    #     try:
-    #         loc = float(self.xPos.GetValue())
-    #         queClear()
-    #         sendXData()
-    #         command('CMD_PAUSE')
-    #         command('CLEARQUE')
-    #         saveXOffset()
-    #         moveX(loc)
-    #         command('CMD_RESUME')
-    #         self.Show(False)
-    #         jogPanel.focus()
-    #     except ValueError:
-    #         print("ValueError")
-    #         stdout.flush()
-
-    # def OnHome(self, e):
-    #     global jogPanel
-    #     setParm('X_HOME_DIST', getInfo('xHomeDist'))
-    #     setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
-    #     setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-    #     val = (-1, 1)[info['xHomeDir'].GetValue()]
-    #     setParm('X_HOME_DIR', val)
-    #     command('XHOMEAXIS')
-    #     jogPanel.xHome = True
-    #     self.Show(False)
-    #     jogPanel.focus()
 
     def OnOk(self, e):
         global jogPanel, zHomeOffset, xHomeOffset
@@ -2727,25 +2677,77 @@ class SetPosDialog(wx.Dialog):
                 val = jogPanel.xPos.GetValue()
                 self.xPos.SetValue(val)
 
-    # def OnZero(self, e):
-    #     global jogPanel, xHomeOffset, xEncOffset
-    #     sendXData()
-    #     xEncPos = getParm('X_ENC_POS')
-    #     if xEncPos != None:
-    #         encPos = float(xEncPos) / jogPanel.xEncInch
-    #         if jogPanel.xEncInvert:
-    #             encPos = -encPos
-    #         xEncOffset = encPos
-    #         print("xEncOffset %0.4f" % (xEncOffset))
+class GotoDialog(wx.Dialog):
+    def __init__(self, frame, axis):
+        global info
+        self.axis = axis
+        pos = (10, 10)
+        title = "Go to %c Position" % (('Z', 'X')[axis])
+        wx.Dialog.__init__(self, frame, -1, title, pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-    #     xLoc = getParm('X_LOC')
-    #     if xLoc != None:
-    #         xHomeOffset = float(xLoc) / jogPanel.xStepsInch
-    #         info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-    #         print("xHomeOffset %0.4f" % (xHomeOffset))
-    #         stdout.flush()
-    #         self.Show(False)
-    #         jogPanel.focus()
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                    style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        global jogPanel
+        try:
+            if self.IsShown():
+                if self.axis == 0:
+                    val = jogPanel.zPos.GetValue()
+                else:
+                    val = jogPanel.xPos.GetValue()
+                self.pos.SetValue(val)
+        except RuntimeError:
+            print("RuntimeError")
+            stdout.flush()
+
+    def OnOk(self, e):
+        global jogPanel
+        try:
+            loc = float(self.pos.GetValue())
+            queClear()
+            command('CMD_PAUSE')
+            command('CLEARQUE')
+            if self.type == 0:
+                sendZData()
+                saveZOffset()
+                moveZ(loc)
+            else:
+                sendXData()
+                saveXOffset()
+                moveX(loc)
+            command('CMD_RESUME')
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            print("ValueError")
+            stdout.flush()
+
+def jogPanelPos(ctl):
+        global jogPanel, mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = jogPanel.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = ctl.GetPosition()
+        xPos += x
+        yPos += y
+        return(xPos, yPos)
 
 class XPosMenu(wx.Menu):
     def __init__(self):
@@ -2770,22 +2772,11 @@ class XPosMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
-    def getPos(Self):
-        global jogPanel, mainFrame
-        (xPos, yPos) = mainFrame.GetPosition()
-        (x, y) = jogPanel.GetPosition()
-        xPos += x
-        yPos += y
-        (x, y) = jogPanel.xPos.GetPosition()
-        xPos += x
-        yPos += y
-        return(xPos, yPos)
-
     def OnSetX(self, e):
         dialog = jogPanel.setXPosDialog
         if dialog == None:
             self.SetXPosDialog = dialog = SetPosDialog(jogPanel, 1)
-        dialog.SetPosition(self.getPos())
+        dialog.SetPosition(jogPanelPos(jogPanel.xPos))
         dialog.Raise()
         dialog.Show(True)
 
@@ -2808,7 +2799,10 @@ class XPosMenu(wx.Menu):
         self.comboBox.focus()
 
     def OnGotoX(self, e):
-        pass
+        dialog = GotoPosDialog(jogPanel, 1)
+        dialog.SetPosition(jogPanelPos(jogPanel.xPos))
+        dialog.Raise()
+        dialog.Show(True)
 
     def OnFixX(self, e):
         dialog = jogPanel.fixXPosDialog
