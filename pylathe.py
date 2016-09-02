@@ -2769,7 +2769,7 @@ class XPosMenu(wx.Menu):
     def OnSetX(self, e):
         dialog = jogPanel.setXPosDialog
         if dialog == None:
-            self.SetXPosDialog = dialog = SetXPosDialog(jogPanel, 1)
+            self.SetXPosDialog = dialog = SetPosDialog(jogPanel, 1)
         dialog.SetPosition(self.getPos())
         dialog.Raise()
         dialog.Show(True)
