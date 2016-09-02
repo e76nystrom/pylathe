@@ -2739,6 +2739,27 @@ class XPosMenu(wx.Menu):
         dialog.Raise()
         dialog.Show(True)
 
+    def OnZeroX(self, e):
+        sendZData()
+        setParm('Z_SET_LOC', 0)
+        command('ZSETLOC')
+        self.Show(False)
+        self.comboBox.focus()
+
+    def OnHomeX(self, e):
+        setParm('X_HOME_DIST', getInfo('xHomeDist'))
+        setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
+        setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
+        val = (-1, 1)[info['xHomeDir'].GetValue()]
+        setParm('X_HOME_DIR', val)
+        command('XHOMEAXIS')
+        jogPanel.xHome = True
+        self.Show(False)
+        self.comboBox.focus()
+
+    def OnGotoX(self, e):
+        pass
+
     def OnFixX(self, e):
         dialog = jogPanel.fixXPosDialog
         if dialog == None:
