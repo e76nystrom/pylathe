@@ -2799,7 +2799,7 @@ class XPosMenu(wx.Menu):
         self.comboBox.focus()
 
     def OnGotoX(self, e):
-        dialog = GotoPosDialog(jogPanel, 1)
+        dialog = GotoDialog(jogPanel, 1)
         dialog.SetPosition(jogPanelPos(jogPanel.xPos))
         dialog.Raise()
         dialog.Show(True)
