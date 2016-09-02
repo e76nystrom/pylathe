@@ -2115,7 +2115,7 @@ class JogPanel(wx.Panel):
         yPos += y
         dialog = self.setXPosDialog
         if dialog == None:
-            self.setXPosDialog = dialog = SetXPosDialog(self)
+            self.setXPosDialog = dialog = SetXPosDialog(self, 1)
         dialog.SetPosition((xPos, yPos))
         dialog.Raise()
         dialog.Show(True)
@@ -2568,116 +2568,6 @@ class SetZPosDialog(wx.Dialog):
             self.zPos.SetValue(val)
 
     def OnZero(self, e):
-        global jogPanel
-        sendZData()
-        setParm('Z_SET_LOC', 0)
-        command('ZSETLOC')
-        self.Show(False)
-        jogPanel.focus()
-
-class SetXPosDialog(wx.Dialog):
-    def __init__(self, frame):
-        global info
-        pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Set X Position", pos,
-                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
-        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
-                          wx.NORMAL, False, u'Consolas')
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        btn = wx.Button(self, label='Go To', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnGoTo)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        btn = wx.Button(self, label='Home', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnHome)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        btn = wx.Button(self, label='Zero', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnZero)
-        sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
-
-        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
-
-        self.SetSizer(sizerV)
-        self.sizerV.Fit(self)
-        self.Show(False)
-
-    def OnShow(self, e):
-        global jogPanel
-        try:
-            if self.IsShown():
-                val = jogPanel.xPos.GetValue()
-                self.xPos.SetValue(val)
-        except RuntimeError:
-            print("RuntimeError")
-            stdout.flush()
-
-    def OnGoTo(self, e):
-        global jogPanel
-        try:
-            loc = float(self.xPos.GetValue())
-            queClear()
-            sendXData()
-            command('CMD_PAUSE')
-            command('CLEARQUE')
-            saveXOffset()
-            moveX(loc)
-            command('CMD_RESUME')
-            self.Show(False)
-            jogPanel.focus()
-        except ValueError:
-            print("ValueError")
-            stdout.flush()
-
-    def OnHome(self, e):
-        global jogPanel
-        setParm('X_HOME_DIST', getInfo('xHomeDist'))
-        setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
-        setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-        val = (-1, 1)[info['xHomeDir'].GetValue()]
-        setParm('X_HOME_DIR', val)
-        command('XHOMEAXIS')
-        jogPanel.xHome = True
-        self.Show(False)
-        jogPanel.focus()
-
-    def OnOk(self, e):
-        global jogPanel, xHomeOffset
-        val = self.xPos.GetValue()
-        try:
-            val = float(val)
-            sendXData()
-            xLoc = getParm('X_LOC')
-            if xLoc != None:
-                xLoc /= jogPanel.xStepsInch
-                xHomeOffset = xLoc - val
-                info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-                print("xHomeOffset %0.4f" % (xHomeOffset))
-                stdout.flush()
-            self.Show(False)
-            jogPanel.focus()
-        except ValueError:
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
-
-    def OnZero(self, e):
         global jogPanel, xHomeOffset, xEncOffset
         sendXData()
         xEncPos = getParm('X_ENC_POS')
@@ -2696,6 +2586,137 @@ class SetXPosDialog(wx.Dialog):
             stdout.flush()
             self.Show(False)
             jogPanel.focus()
+
+class SetPosDialog(wx.Dialog, type):
+    def __init__(self, frame):
+        global info
+        self.type = type
+        pos = (10, 10)
+        title = "Set %c Position" % (('Z', 'X')[type])
+        wx.Dialog.__init__(self, frame, -1, title, pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                     style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        # sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        # btn = wx.Button(self, label='Go To', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnGoTo)
+        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        # btn = wx.Button(self, label='Home', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnHome)
+        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        # sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        # sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+        sizerV.Add(btn, 0, wx.CENTER)
+
+        # btn = wx.Button(self, label='Zero', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnZero)
+        # sizerH.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+
+        # sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        global jogPanel
+        try:
+            if self.IsShown():
+                if self.type == 0:
+                    val = jogPanel.zPos.GetValue()
+                else:
+                    val = jogPanel.xPos.GetValue()
+                self.pos.SetValue(val)
+        except RuntimeError:
+            print("RuntimeError")
+            stdout.flush()
+
+    # def OnGoTo(self, e):
+    #     global jogPanel
+    #     try:
+    #         loc = float(self.xPos.GetValue())
+    #         queClear()
+    #         sendXData()
+    #         command('CMD_PAUSE')
+    #         command('CLEARQUE')
+    #         saveXOffset()
+    #         moveX(loc)
+    #         command('CMD_RESUME')
+    #         self.Show(False)
+    #         jogPanel.focus()
+    #     except ValueError:
+    #         print("ValueError")
+    #         stdout.flush()
+
+    # def OnHome(self, e):
+    #     global jogPanel
+    #     setParm('X_HOME_DIST', getInfo('xHomeDist'))
+    #     setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
+    #     setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
+    #     val = (-1, 1)[info['xHomeDir'].GetValue()]
+    #     setParm('X_HOME_DIR', val)
+    #     command('XHOMEAXIS')
+    #     jogPanel.xHome = True
+    #     self.Show(False)
+    #     jogPanel.focus()
+
+    def OnOk(self, e):
+        global jogPanel, xHomeOffset
+        if self.type == 0:
+        val = self.xPos.GetValue()
+        try:
+            val = float(val)
+            sendXData()
+            xLoc = getParm('X_LOC')
+            if xLoc != None:
+                xLoc /= jogPanel.xStepsInch
+                xHomeOffset = xLoc - val
+                info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+                print("xHomeOffset %0.4f" % (xHomeOffset))
+                stdout.flush()
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            val = jogPanel.xPos.GetValue()
+            self.xPos.SetValue(val)
+        else:
+            pass
+
+    # def OnZero(self, e):
+    #     global jogPanel, xHomeOffset, xEncOffset
+    #     sendXData()
+    #     xEncPos = getParm('X_ENC_POS')
+    #     if xEncPos != None:
+    #         encPos = float(xEncPos) / jogPanel.xEncInch
+    #         if jogPanel.xEncInvert:
+    #             encPos = -encPos
+    #         xEncOffset = encPos
+    #         print("xEncOffset %0.4f" % (xEncOffset))
+
+    #     xLoc = getParm('X_LOC')
+    #     if xLoc != None:
+    #         xHomeOffset = float(xLoc) / jogPanel.xStepsInch
+    #         info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+    #         print("xHomeOffset %0.4f" % (xHomeOffset))
+    #         stdout.flush()
+    #         self.Show(False)
+    #         jogPanel.focus()
 
 class XPosMenu(wx.Menu):
     def __init__(self):
