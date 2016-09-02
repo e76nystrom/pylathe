@@ -2517,6 +2517,92 @@ class JogPanel(wx.Panel):
             pass
         self.combo.SetFocus()
 
+def jogPanelPos(ctl):
+        global jogPanel, mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = jogPanel.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = ctl.GetPosition()
+        xPos += x
+        yPos += y
+        return(xPos, yPos)
+
+class PosMenu(wx.Menu):
+    def __init__(self, axis):
+        wx.Menu.__init__(self)
+        self.axis = axis
+        item = wx.MenuItem(self, wx.NewId(), "Set")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnSet, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Zero")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnZero, item)
+
+        if self.axis == 1:
+            item = wx.MenuItem(self, wx.NewId(), "Home")
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Go to")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnGoto, item)
+
+        if self.axis == 1:
+            item = wx.MenuItem(self, wx.NewId(), "Fix X")
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnFixX, item)
+
+    def OnSet(self, e):
+        dialog = SetPosDialog(jogPanel, self.axis)
+        if self.axis == 0:
+            ctl = jogPanel.zPos
+        else:
+            ctl = jogPanel.xPos
+        dialog.SetPosition(jogPanelPos(ctl))
+        dialog.Raise()
+        dialog.Show(True)
+
+    def OnZero(self, e):
+        if self.axis == 0:
+            sendZData()
+            setParm('Z_SET_LOC', 0)
+            command('ZSETLOC')
+        else:
+            sendXData()
+            setParm('X_SET_LOC', 0)
+            command('XSETLOC')
+        self.comboBox.focus()
+
+    def OnHomeX(self, e):
+        setParm('X_HOME_DIST', getInfo('xHomeDist'))
+        setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
+        setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
+        val = (-1, 1)[info['xHomeDir'].GetValue()]
+        setParm('X_HOME_DIR', val)
+        command('XHOMEAXIS')
+        jogPanel.xHome = True
+        self.comboBox.focus()
+
+    def OnGoto(self, e):
+        dialog = GotoDialog(jogPanel, self.axis)
+        if self.axis == 0:
+            ctl = jogPanel.zPos
+        else:
+            ctl = jogPanel.xPos
+        dialog.SetPosition(jogPanelPos(ctl))
+        dialog.Raise()
+        dialog.Show(True)
+
+    def OnFixX(self, e):
+        dialog = jogPanel.fixXPosDialog
+        if dialog == None:
+            self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
+        dialog.SetPosition(self.getPos())
+        dialog.Raise()
+        dialog.Show(True)
+
 class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
         global info
@@ -2652,94 +2738,6 @@ class GotoDialog(wx.Dialog):
         except ValueError:
             print("ValueError")
             stdout.flush()
-
-def jogPanelPos(ctl):
-        global jogPanel, mainFrame
-        (xPos, yPos) = mainFrame.GetPosition()
-        (x, y) = jogPanel.GetPosition()
-        xPos += x
-        yPos += y
-        (x, y) = ctl.GetPosition()
-        xPos += x
-        yPos += y
-        return(xPos, yPos)
-
-class PosMenu(wx.Menu):
-    def __init__(self, axis):
-        wx.Menu.__init__(self)
-        self.axis = axis
-        item = wx.MenuItem(self, wx.NewId(), "Set")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnSet, item)
-
-        item = wx.MenuItem(self, wx.NewId(), "Zero")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnZero, item)
-
-        if self.axis == 1:
-            item = wx.MenuItem(self, wx.NewId(), "Home")
-            self.Append(item)
-            self.Bind(wx.EVT_MENU, self.OnHomeX, item)
-
-        item = wx.MenuItem(self, wx.NewId(), "Go to")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnGoto, item)
-
-        if self.axis == 1:
-            item = wx.MenuItem(self, wx.NewId(), "Fix X")
-            self.Append(item)
-            self.Bind(wx.EVT_MENU, self.OnFixX, item)
-
-    def OnSet(self, e):
-        dialog = SetPosDialog(jogPanel, self.axis)
-        if self.axis == 0:
-            ctl = jogPanel.zPos
-        else:
-            ctl = jogPanel.xPos
-        dialog.SetPosition(jogPanelPos(ctl))
-        dialog.Raise()
-        dialog.Show(True)
-
-    def OnZero(self, e):
-        if self.axis == 0:
-            sendZData()
-            setParm('Z_SET_LOC', 0)
-            command('ZSETLOC')
-        else:
-            sendXData()
-            setParm('X_SET_LOC', 0)
-            command('XSETLOC')
-        self.Show(False)
-        self.comboBox.focus()
-
-    def OnHomeX(self, e):
-        setParm('X_HOME_DIST', getInfo('xHomeDist'))
-        setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
-        setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-        val = (-1, 1)[info['xHomeDir'].GetValue()]
-        setParm('X_HOME_DIR', val)
-        command('XHOMEAXIS')
-        jogPanel.xHome = True
-        self.Show(False)
-        self.comboBox.focus()
-
-    def OnGoto(self, e):
-        dialog = GotoDialog(jogPanel, self.axis)
-        if self.axis == 0:
-            ctl = jogPanel.zPos
-        else:
-            ctl = jogPanel.xPos
-        dialog.SetPosition(jogPanelPos(ctl))
-        dialog.Raise()
-        dialog.Show(True)
-
-    def OnFixX(self, e):
-        dialog = jogPanel.fixXPosDialog
-        if dialog == None:
-            self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
-        dialog.SetPosition(self.getPos())
-        dialog.Raise()
-        dialog.Show(True)
 
 class FixXPosDialog(wx.Dialog):
     def __init__(self, frame):
