@@ -2723,7 +2723,7 @@ class GotoDialog(wx.Dialog):
             queClear()
             command('CMD_PAUSE')
             command('CLEARQUE')
-            if self.type == 0:
+            if self.axis == 0:
                 sendZData()
                 saveZOffset()
                 moveZ(loc)
