@@ -2790,7 +2790,7 @@ class PosMenu(wx.Menu):
             ctl = jogPanel.zPos
         else:
             ctl = jogPanel.xPos
-        dialog.SetPosition(ctl)
+        dialog.SetPosition(jogPanelPos(ctl))
         dialog.Raise()
         dialog.Show(True)
 
