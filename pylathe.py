@@ -2677,7 +2677,7 @@ class SetPosDialog(wx.Dialog, type):
     #     jogPanel.focus()
 
     def OnOk(self, e):
-        global jogPanel, zHomeOffset xHomeOffset
+        global jogPanel, zHomeOffset ,xHomeOffset
         val = self.pos.GetValue()
         if self.type == 0:
             try:
