@@ -2600,8 +2600,8 @@ class SetPosDialog(wx.Dialog, type):
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                     style=wx.TE_RIGHT)
+        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                    style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
@@ -2677,26 +2677,40 @@ class SetPosDialog(wx.Dialog, type):
     #     jogPanel.focus()
 
     def OnOk(self, e):
-        global jogPanel, xHomeOffset
+        global jogPanel, zHomeOffset xHomeOffset
+        val = self.pos.GetValue()
         if self.type == 0:
-        val = self.xPos.GetValue()
-        try:
-            val = float(val)
-            sendXData()
-            xLoc = getParm('X_LOC')
-            if xLoc != None:
-                xLoc /= jogPanel.xStepsInch
-                xHomeOffset = xLoc - val
-                info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-                print("xHomeOffset %0.4f" % (xHomeOffset))
-                stdout.flush()
-            self.Show(False)
-            jogPanel.focus()
-        except ValueError:
-            val = jogPanel.xPos.GetValue()
-            self.xPos.SetValue(val)
+            try:
+                val = float(val)
+                sendZData()
+                zLoc = getParm('Z_LOC')
+                if zLoc != None:
+                    zLoc /= jogPanel.zStepsInch
+                    zHomeOffset = zLoc - val
+                    info['zHomeOffset'].SetValue("%0.4f" % (zHomeOffset))
+                    print("zHomeOffset %0.4f" % (zHomeOffset))
+                    stdout.flush()
+                self.Show(False)
+                jogPanel.focus()
+            except ValueError:
+                val = jogPanel.zPos.GetValue()
+                self.zPos.SetValue(val)
         else:
-            pass
+            try:
+                val = float(val)
+                sendXData()
+                xLoc = getParm('X_LOC')
+                if xLoc != None:
+                    xLoc /= jogPanel.xStepsInch
+                    xHomeOffset = xLoc - val
+                    info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+                    print("xHomeOffset %0.4f" % (xHomeOffset))
+                    stdout.flush()
+                self.Show(False)
+                jogPanel.focus()
+            except ValueError:
+                val = jogPanel.xPos.GetValue()
+                self.xPos.SetValue(val)
 
     # def OnZero(self, e):
     #     global jogPanel, xHomeOffset, xEncOffset
