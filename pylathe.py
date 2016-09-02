@@ -2573,7 +2573,7 @@ class PosMenu(wx.Menu):
             sendXData()
             setParm('X_SET_LOC', 0)
             command('XSETLOC')
-        self.comboBox.focus()
+        jogPanel.focus()
 
     def OnHomeX(self, e):
         setParm('X_HOME_DIST', getInfo('xHomeDist'))
@@ -2583,7 +2583,7 @@ class PosMenu(wx.Menu):
         setParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
         jogPanel.xHome = True
-        self.comboBox.focus()
+        jogPanel.focus()
 
     def OnGoto(self, e):
         dialog = GotoDialog(jogPanel, self.axis)
