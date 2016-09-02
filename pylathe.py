@@ -749,6 +749,7 @@ class TurnPanel(wx.Panel):
             sendZData()
             sendXData()
 
+            setParm('SP_MAX_RPM', getInfo('tuRPM'))
             setParm('FEED', getInfo('tuZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             if STEPPER_DRIVE:
