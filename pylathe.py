@@ -1742,13 +1742,15 @@ class ThreadPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStart)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        # sizerG.Add(wx.StaticText(self, -1), border=2)
 
         btn = wx.Button(self, label='Add', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "Feed", "thAddFeed")
+        self.add = addField(self, sizerG, "", "thAddFeed")
+
+        self.rpm = addField(self, sizerG, "RPM", "thRPM")
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
