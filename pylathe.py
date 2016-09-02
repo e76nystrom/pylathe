@@ -2136,7 +2136,7 @@ class JogPanel(wx.Panel):
     #     dialog.Show(True)
 
     def OnZMenu(self, e):
-        (xPos, yPos) = self.ZPos.GetPosition()
+        (xPos, yPos) = self.zPos.GetPosition()
         (x, y) = e.GetPosition()
         xPos += x
         yPos += y
