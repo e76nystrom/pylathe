@@ -2400,11 +2400,11 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('s'):
-            self.OnResume(Null)
+            self.OnResume(None)
         elif code == wx.WXK_F9:
-            self.OnSpindleStart(Null)
+            self.OnSpindleStart(None)
         elif code == wx.WXK_ESCAPE:
-            self.OnStop(Null)
+            self.OnStop(None)
 
         print("key char %x" % (code))
         stdout.flush()
