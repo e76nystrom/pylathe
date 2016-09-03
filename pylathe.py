@@ -1801,7 +1801,6 @@ class ThreadPanel(wx.Panel):
             if self.mm.GetValue():
                 type = FEED_METRIC
             setParm('FEED_TYPE', type)
-            command('CMD_ZSYNSETUP');
 
         except commTimeout as e:
             print("timeout error")
