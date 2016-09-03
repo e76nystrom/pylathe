@@ -754,8 +754,6 @@ class TurnPanel(wx.Panel):
 
             setParm('FEED', getInfo('tuZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
-            if STEPPER_DRIVE:
-                command('CMD_ZSYNSETUP');
 
         except commTimeout as e:
             print("timeout error")
