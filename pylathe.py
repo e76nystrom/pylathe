@@ -2377,6 +2377,7 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def OnKeyChar(self, evt):
+        global info, mainFrame
         code = evt.GetKeyCode()
         if code == ord('c'):
             self.combo.SetSelection(0)
@@ -2401,7 +2402,8 @@ class JogPanel(wx.Panel):
             return
         elif code == ord('r'):
             mainPanel = info['mainPanel'].GetValue()
-            mainPanel.OnSend(None)
+            panel = mainFrame.panels[mainPanel]
+            panel.OnSend(None)
         elif code == ord('s'):
             self.OnResume(None)
         elif code == wx.WXK_F9:
