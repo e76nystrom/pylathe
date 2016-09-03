@@ -567,6 +567,8 @@ class Turn():
                 self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
+
+        quePause()
         if STEPPER_DRIVE:
             startSpindle(getInfo('tuRPM'))
         else:
@@ -750,13 +752,11 @@ class TurnPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('SP_MAX_RPM', getInfo('tuRPM'))
+            # setParm('SP_MAX_RPM', getInfo('tuRPM'))
             setParm('FEED', getInfo('tuZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             if STEPPER_DRIVE:
                 command('CMD_ZSYNSETUP');
-
-            command('CMD_PAUSE')
 
         except commTimeout as e:
             print("timeout error")
@@ -778,11 +778,11 @@ class TurnPanel(wx.Panel):
     def OnAdd(self, e):
         global jogPanel
         self.turn.turnAdd()
-        setParm('X_FEED_PASS', getInfo('tuAddFeed'))
+        # setParm('X_FEED_PASS', getInfo('tuAddFeed'))
         # turnFlag = TURNADD
         # setParm('TURN_FLAG' ,turnFlag)
-        setParm('SPRING_PASSES' ,0)
-        command('CMD_TURN')
+        # setParm('SPRING_PASSES' ,0)
+        # command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
@@ -820,8 +820,10 @@ class Face():
             self.xRetract = -self.xRetract
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
+
+        quePause()
         if STEPPER_DRIVE:
-            startSpindle(getInfo('fdRPM'))
+            startSpindle(getInfo('faRPM'))
         else:
             queXSetup()
         moveX(self.safeX)
@@ -996,15 +998,13 @@ class FacePanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('SP_MAX_RPM', getInfo('faRPM'))
+            # setParm('SP_MAX_RPM', getInfo('faRPM'))
             setParm('FEED', getInfo('faXFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             command('CMD_XSYNSETUP');
 
-            setParm('SPRING_PASSES', getInfo('tuSpring'))
-            setParm('SPRING_PASS_INT', getInfo('tuSPInt'))
-
-            command('CMD_PAUSE')
+            # setParm('SPRING_PASSES', getInfo('tuSpring'))
+            # setParm('SPRING_PASS_INT', getInfo('tuSPInt'))
 
         except commTimeout as e:
             print("timeout error")
@@ -1082,6 +1082,8 @@ class Taper():
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
+
+        quePause()
         startSpindle(getInfo('thRPM'))
         moveX(self.safeX)
         while self.externalTaperUpdate():
@@ -1186,6 +1188,8 @@ class Taper():
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
+
+        quePause()
         startSpindle(getInfo('tpRPM'))
         moveX(self.safeX)
         moveZ(self.safeZ)
@@ -1584,6 +1588,7 @@ class ScrewThread():
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
+        quePause()
         startSpindle(getInfo('thRPM'))
         moveX(self.safeX)
         moveZ(self.startZ + self.zBackInc)
@@ -1658,7 +1663,8 @@ class ScrewThread():
         if self.feed >= self.depth:
             add = getFloatVal(self.threadPanel.add)
             self.feed += add
-            command('CMD_PAUSE')
+
+            quePause()
             startSpindle(getInfo('thRPM'))
             moveX(self.safeX)
             moveZ(self.startZ + self.zBackInc)
