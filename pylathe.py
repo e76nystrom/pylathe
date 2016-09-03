@@ -752,7 +752,6 @@ class TurnPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            # setParm('SP_MAX_RPM', getInfo('tuRPM'))
             setParm('FEED', getInfo('tuZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             if STEPPER_DRIVE:
@@ -998,13 +997,9 @@ class FacePanel(wx.Panel):
             sendZData()
             sendXData()
 
-            # setParm('SP_MAX_RPM', getInfo('faRPM'))
             setParm('FEED', getInfo('faXFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             command('CMD_XSYNSETUP');
-
-            # setParm('SPRING_PASSES', getInfo('tuSpring'))
-            # setParm('SPRING_PASS_INT', getInfo('tuSPInt'))
 
         except commTimeout as e:
             print("timeout error")
