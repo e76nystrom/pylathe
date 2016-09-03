@@ -2401,7 +2401,7 @@ class JogPanel(wx.Panel):
             return
         elif code == ord('s'):
             self.onResume(Null)
-        elif code == wx.WXKF9:
+        elif code == wx.WXK_F9:
             self.OnSpindleStart(Null)
         elif code == wx.WXK_ESCAPE:
             self.OnStop(Null)
