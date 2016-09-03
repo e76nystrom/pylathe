@@ -4264,6 +4264,17 @@ class MoveTest(object):
         
             f.close()
 
+n = 1
+while True:
+    if n >= len(sys.argv):
+        break
+    tmp = sys.argv[n]
+    # if len(tmp) != 0 and tmp[0].isdigit():
+    #     break;
+    tmp = tmp.lower()
+    if tmp == 'xhomed':
+        xHomed = True
+
 class MainApp(wx.App):
     def OnInit(self):
         """Init Main App."""
