@@ -4147,6 +4147,8 @@ class MoveTest(object):
         txt = self.txt
         txt.SetValue("")
         
+        f = open('move.txt','w')
+
         zPitch = float(getInfo('zPitch'))
         zMicroSteps = float(getInfo('zMicroSteps'))
         zMotorSteps = float(getInfo('zMotorSteps'))
@@ -4204,7 +4206,6 @@ class MoveTest(object):
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
             lastTime = float(lastCount) / fcy
         
-            f = open('move.txt','w')
             f.write("\n")
         
             lastCtr = 0
