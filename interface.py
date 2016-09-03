@@ -325,6 +325,8 @@ stateList =\
     ["TAPER_XZ", "taper z"],
     ["QUE_START", "spindle start"],
     ["QUE_STOP", "spindle stop"],
+    ["Z_SYN_SETUP", "z sync setup"],
+    ["X_SYN_SETUP", "x sync setup"],
     ["PASS_NUM", "set pass number"],
     ["QUE_PAUSE", "pause queue"],
     ["SAVE_DIAMETER", "save turn diameter"],
