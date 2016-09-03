@@ -2399,10 +2399,13 @@ class JogPanel(wx.Panel):
                 if val > 1:
                     combo.SetSelection(val - 1)
             return
+        elif code == ord('r'):
+            mainPanel = info['mainPanel'].GetValue()
+            mainPanel.OnSend(None)
         elif code == ord('s'):
             self.OnResume(None)
         elif code == wx.WXK_F9:
-            self.OnSpindleStart(None)
+            self.OnStartSpindle(None)
         elif code == wx.WXK_ESCAPE:
             self.OnStop(None)
 
