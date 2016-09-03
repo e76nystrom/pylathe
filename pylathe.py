@@ -138,6 +138,7 @@ zHomeOffset = 0.0
 xHomeOffset = 0.0
 zEncOffset = 0.0
 xEncOffset = 0.0
+xHomed = False
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -762,9 +763,10 @@ class TurnPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
-        global jogPanel
-        self.sendData()
-        self.turn.turn()
+        global xHomed, jogPanel
+        if xHomed:
+            self.sendData()
+            self.turn.turn()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1009,9 +1011,10 @@ class FacePanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
-        global jogPanel
-        self.sendData()
-        self.face.face()
+        global xHomed, jogPanel
+        if xHomed:
+            self.sendData()
+            self.face.face()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1473,7 +1476,8 @@ class TaperPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
-        global jogPanel
+        global xHomed, jogPanel
+        if xHomed:
         self.sendData()
         if self.deltaBtn.GetValue():
             taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
@@ -2466,11 +2470,13 @@ class JogPanel(wx.Panel):
             self.xEncPos.SetValue("%0.4f" % (encPos))
 
             if self.xHome:
+                global xHomed
                 val = getParm('X_HOME_STATUS')
                 if val != None:
                     if val & HOME_SUCCESS:
                         self.xHome = False
                         print("home success")
+                        xHomed = True
                         stdout.flush()
                     elif val & HOME_FAIL:
                         self.xHome = False
