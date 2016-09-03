@@ -1464,7 +1464,6 @@ class TaperPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('SP_MAX_RPM', getInfo('tpRPM'))
             setParm('FEED', getInfo('tpZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
             command('CMD_ZSYNSETUP');
@@ -1472,8 +1471,6 @@ class TaperPanel(wx.Panel):
 
             command('CMD_XSYNSETUP');
             command('CMD_XTAPERSETUP');
-
-            command('CMD_PAUSE')
 
         except commTimeout as e:
             print("timeout error")
@@ -1800,7 +1797,6 @@ class ThreadPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('SP_MAX_RPM', getInfo('thRPM'))
             setParm('FEED', getInfo('thPitch'))
             type = FEED_TPI
             if self.mm.GetValue():
@@ -1808,7 +1804,6 @@ class ThreadPanel(wx.Panel):
             setParm('FEED_TYPE', type)
             command('CMD_ZSYNSETUP');
 
-            command('CMD_PAUSE')
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
