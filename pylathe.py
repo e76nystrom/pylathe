@@ -570,7 +570,7 @@ class Turn():
 
         quePause()
         if STEPPER_DRIVE:
-            startSpindle(getInfo('tuRPM'))
+            startSpindle(getIntInfo('tuRPM'))
         else:
             queZSetup()
         moveX(self.safeX)
@@ -649,7 +649,7 @@ class Turn():
             self.feed += add
             self.calculateTurnPass()
             if STEPPER_DRIVE:
-                startSpindle(getInfo('tuRPM'))
+                startSpindle(getIntInfo('tuRPM'))
             else:
                 queZSetup()
             moveX(self.safeX)
@@ -823,7 +823,7 @@ class Face():
 
         quePause()
         if STEPPER_DRIVE:
-            startSpindle(getInfo('faRPM'))
+            startSpindle(getIntInfo('faRPM'))
         else:
             queXSetup()
         moveX(self.safeX)
@@ -896,7 +896,7 @@ class Face():
         if self.feed >= self.zCut:
             add = getFloatVal(self.facePanel.add)
             self.feed += add
-            startSpindle(getInfo('fdRPM'))
+            startSpindle(getIntInfo('fdRPM'))
             moveX(self.safeX)
             moveZ(self.zStart)
             moveX(self.xStart)
@@ -1084,7 +1084,7 @@ class Taper():
         self.spring = 0
 
         quePause()
-        startSpindle(getInfo('thRPM'))
+        startSpindle(getIntInfo('thRPM'))
         moveX(self.safeX)
         while self.externalTaperUpdate():
             pass
@@ -1158,7 +1158,7 @@ class Taper():
         if self.feed >= self.cutAmount:
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
-            startSpindle(getInfo('tpRPM'))
+            startSpindle(getIntInfo('tpRPM'))
             moveX(self.safeX)
             self.calcExternalPass()
             self.externalPass()
@@ -1190,7 +1190,7 @@ class Taper():
         self.spring = 0
 
         quePause()
-        startSpindle(getInfo('tpRPM'))
+        startSpindle(getIntInfo('tpRPM'))
         moveX(self.safeX)
         moveZ(self.safeZ)
         while self.internalTaperUpdate():
@@ -1270,7 +1270,7 @@ class Taper():
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
             self.passCount += 1
-            startSpindle(getInfo('tpRPM'))
+            startSpindle(getIntInfo('tpRPM'))
             moveX(self.safeX)
             moveZ(self.safeZ)
             self.calcInternalPass()
@@ -1589,7 +1589,7 @@ class ScrewThread():
         self.startZ = self.zStart + self.zAccel
 
         quePause()
-        startSpindle(getInfo('thRPM'))
+        startSpindle(getIntInfo('thRPM'))
         moveX(self.safeX)
         moveZ(self.startZ + self.zBackInc)
         moveZ(self.startZ)
@@ -1665,7 +1665,7 @@ class ScrewThread():
             self.feed += add
 
             quePause()
-            startSpindle(getInfo('thRPM'))
+            startSpindle(getIntInfo('thRPM'))
             moveX(self.safeX)
             moveZ(self.startZ + self.zBackInc)
             moveZ(self.startZ)
