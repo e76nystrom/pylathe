@@ -2399,6 +2399,13 @@ class JogPanel(wx.Panel):
                 if val > 1:
                     combo.SetSelection(val - 1)
             return
+        elif code == ord('s'):
+            self.onResume(Null)
+        elif code == wx.WXKF9:
+            self.OnSpindleStart(Null)
+        elif code == wx.WXK_ESCAPE:
+            self.OnStop(Null)
+
         print("key char %x" % (code))
         stdout.flush()
         evt.Skip()
@@ -2481,11 +2488,12 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def OnStartSpindle(self, e):
-        if not spindleDataSent:
-            sendSpindleData()
-        else:
-            command('CMD_SPSETUP')
-        command('SPINDLE_START')
+        if STEPPER_DRIVE:
+            if not spindleDataSent:
+                sendSpindleData()
+            else:
+                command('CMD_SPSETUP')
+            command('SPINDLE_START')
         self.combo.SetFocus()
 
     def spindleJogCmd(self, code, val):
