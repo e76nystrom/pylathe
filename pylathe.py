@@ -2404,12 +2404,19 @@ class JogPanel(wx.Panel):
             mainPanel = info['mainPanel'].GetValue()
             panel = mainFrame.panels[mainPanel]
             panel.OnSend(None)
+            return
         elif code == ord('s'):
             self.OnResume(None)
+            return
+        elif code == ord('p'):
+            self.OnPause(None)
+            return
         elif code == wx.WXK_F9:
             self.OnStartSpindle(None)
+            return
         elif code == wx.WXK_ESCAPE:
             self.OnStop(None)
+            return
 
         print("key char %x" % (code))
         stdout.flush()
