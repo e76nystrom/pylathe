@@ -1504,11 +1504,6 @@ class TaperPanel(wx.Panel):
         else:
             self.taper.externalAdd()
 
-        setParm('X_FEED_PASS', getInfo('tpAddFeed'))
-        # turnFlag = TURNADD
-        # setParm('TURN_FLAG' ,turnFlag)
-        setParm('SPRING_PASSES' ,0)
-        command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
@@ -1589,6 +1584,7 @@ class ScrewThread():
 
         quePause()
         startSpindle(getIntInfo('thRPM'))
+        zSynSetup()
         moveX(self.safeX)
         moveZ(self.startZ + self.zBackInc)
         moveZ(self.startZ)
@@ -1665,6 +1661,7 @@ class ScrewThread():
 
             quePause()
             startSpindle(getIntInfo('thRPM'))
+            zSynSetup()
             moveX(self.safeX)
             moveZ(self.startZ + self.zBackInc)
             moveZ(self.startZ)
@@ -1825,11 +1822,6 @@ class ThreadPanel(wx.Panel):
     def OnAdd(self, e):
         global jogPanel
         self.screwThread.threadAdd()
-        setParm('X_FEED_PASS', getInfo('tuAddFeed'))
-        # turnFlag = TURNADD
-        # setParm('TURN_FLAG' ,turnFlag)
-        setParm('SPRING_PASSES' ,0)
-        command('CMD_THREAD')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
@@ -2113,38 +2105,6 @@ class JogPanel(wx.Panel):
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
-
-    # def OnSetZPos(self, e):
-    #     global mainFrame
-    #     (xPos, yPos) = mainFrame.GetPosition()
-    #     (x, y) = self.GetPosition()
-    #     xPos += x
-    #     yPos += y
-    #     (x, y) = self.zPos.GetPosition()
-    #     xPos += x
-    #     yPos += y
-    #     dialog = self.setZPosDialog
-    #     if dialog == None:
-    #         self.setZPosDialog = dialog = SetPosDialog(self, 0)
-    #     dialog.SetPosition((xPos, yPos))
-    #     dialog.Raise()
-    #     dialog.Show(True)
-
-    # def OnSetXPos(self, e):
-    #     global mainFrame
-    #     (xPos, yPos) = mainFrame.GetPosition()
-    #     (x, y) = self.GetPosition()
-    #     xPos += x
-    #     yPos += y
-    #     (x, y) = self.xPos.GetPosition()
-    #     xPos += x
-    #     yPos += y
-    #     dialog = self.setXPosDialog
-    #     if dialog == None:
-    #         self.setXPosDialog = dialog = SetPosDialog(self, 1)
-    #     dialog.SetPosition((xPos, yPos))
-    #     dialog.Raise()
-    #     dialog.Show(True)
 
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
