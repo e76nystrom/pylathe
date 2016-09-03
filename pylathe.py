@@ -1502,8 +1502,8 @@ class TaperPanel(wx.Panel):
             self.taper.externalAdd()
 
         setParm('X_FEED_PASS', getInfo('tpAddFeed'))
-        turnFlag = TURNADD
-        setParm('TURN_FLAG' ,turnFlag)
+        # turnFlag = TURNADD
+        # setParm('TURN_FLAG' ,turnFlag)
         setParm('SPRING_PASSES' ,0)
         command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
@@ -1821,8 +1821,8 @@ class ThreadPanel(wx.Panel):
         global jogPanel
         self.screwThread.threadAdd()
         setParm('X_FEED_PASS', getInfo('tuAddFeed'))
-        turnFlag = TURNADD
-        setParm('TURN_FLAG' ,turnFlag)
+        # turnFlag = TURNADD
+        # setParm('TURN_FLAG' ,turnFlag)
         setParm('SPRING_PASSES' ,0)
         command('CMD_THREAD')
         passes = getParm('TOTAL_PASSES')
@@ -2627,7 +2627,7 @@ class PosMenu(wx.Menu):
         dialog = jogPanel.fixXPosDialog
         if dialog == None:
             self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
-        dialog.SetPosition(self.getPos())
+        dialog.SetPosition(jogPanelPos())
         dialog.Raise()
         dialog.Show(True)
 
