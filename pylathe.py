@@ -294,6 +294,12 @@ def startSpindle(rpm):
 def stopSpindle():
     moveQue.put((QUE_STOP, 0))
 
+def zSynSetup():
+    moveQue.put((Z_SYN_SETUP, 0))
+
+def xSynSetup():
+    moveQue.put((X_SYN_SETUP, 0))
+
 def nextPass(passNum):
     moveQue.put((PASS_NUM, passNum))
 
@@ -571,6 +577,7 @@ class Turn():
         quePause()
         if STEPPER_DRIVE:
             startSpindle(getIntInfo('tuRPM'))
+            zSynSetup()
         else:
             queZSetup()
         moveX(self.safeX)
@@ -650,6 +657,7 @@ class Turn():
             self.calculateTurnPass()
             if STEPPER_DRIVE:
                 startSpindle(getIntInfo('tuRPM'))
+                zSynSetup()
             else:
                 queZSetup()
             moveX(self.safeX)
@@ -775,11 +783,6 @@ class TurnPanel(wx.Panel):
     def OnAdd(self, e):
         global jogPanel
         self.turn.turnAdd()
-        # setParm('X_FEED_PASS', getInfo('tuAddFeed'))
-        # turnFlag = TURNADD
-        # setParm('TURN_FLAG' ,turnFlag)
-        # setParm('SPRING_PASSES' ,0)
-        # command('CMD_TURN')
         passes = getParm('TOTAL_PASSES')
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
@@ -821,6 +824,7 @@ class Face():
         quePause()
         if STEPPER_DRIVE:
             startSpindle(getIntInfo('faRPM'))
+            xSynSetup()
         else:
             queXSetup()
         moveX(self.safeX)
@@ -832,6 +836,7 @@ class Face():
 
         while self.faceUpdate():
             pass
+
         moveX(self.safeX)
         moveZ(self.zStart + self.zRetract)
 
@@ -893,7 +898,11 @@ class Face():
         if self.feed >= self.zCut:
             add = getFloatVal(self.facePanel.add)
             self.feed += add
-            startSpindle(getIntInfo('fdRPM'))
+            if STEPPER_DRIVE:
+                startSpindle(getIntInfo('faRPM'))
+                xSynSetup()
+            else:
+                queXSetup()
             moveX(self.safeX)
             moveZ(self.zStart)
             moveX(self.xStart)
