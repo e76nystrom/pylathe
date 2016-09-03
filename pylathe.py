@@ -4274,6 +4274,11 @@ while True:
     tmp = tmp.lower()
     if tmp == 'xhomed':
         xHomed = True
+    else:
+        print "invalid argument: %s" % (tmp)
+        stdout.flush()
+        break
+    n += 1
 
 class MainApp(wx.App):
     def OnInit(self):
