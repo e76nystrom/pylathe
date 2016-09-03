@@ -2400,7 +2400,7 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('s'):
-            self.onResume(Null)
+            self.OnResume(Null)
         elif code == wx.WXK_F9:
             self.OnSpindleStart(Null)
         elif code == wx.WXK_ESCAPE:
