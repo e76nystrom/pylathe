@@ -1478,15 +1478,15 @@ class TaperPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
-        self.sendData()
-        if self.deltaBtn.GetValue():
-            taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-        else:
-            taper = tan(radians(getFloatVal(self.angle)))
-        if self.internal.GetValue():
-            self.taper.internalTaper(taper)
-        else:
-            self.taper.externalTaper(taper)
+            self.sendData()
+            if self.deltaBtn.GetValue():
+                taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
+            else:
+                taper = tan(radians(getFloatVal(self.angle)))
+            if self.internal.GetValue():
+                self.taper.internalTaper(taper)
+            else:
+                self.taper.externalTaper(taper)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1806,9 +1806,10 @@ class ThreadPanel(wx.Panel):
             stdout.flush()
 
     def OnSend(self, e):
-        global jogPanel
-        self.sendData()
-        self.screwThread.thread()
+        global xHomed, jogPanel
+        if xHomed:
+            self.sendData()
+            self.screwThread.thread()
         jogPanel.focus()
 
     def OnStart(self, e):
