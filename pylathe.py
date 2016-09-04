@@ -2919,7 +2919,7 @@ class FixXPosDialog(wx.Dialog):
         keyCode = e.GetKeyCode()
         if keyCode == wx.WXK_RETURN:
             self.OnFix(None)
-        print("key char %x" % (code))
+        print("key char %x" % (keyCode))
         stdout.flush()
         e.Skip()
     
