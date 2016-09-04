@@ -2475,13 +2475,10 @@ class JogPanel(wx.Panel):
 
     def OnStartSpindle(self, e):
         if STEPPER_DRIVE:
-            if not spindleDataSent:
-                mainPanel = info['mainPanel'].GetValue()
-                panel = mainFrame.panels[mainPanel]
-                rpm = panel.rpm.GetValue()
-                sendSpindleData(True, rpm)
-            else:
-                command('CMD_SPSETUP')
+            mainPanel = info['mainPanel'].GetValue()
+            panel = mainFrame.panels[mainPanel]
+            rpm = panel.rpm.GetValue()
+            sendSpindleData(True, rpm)
             command('SPINDLE_START')
         self.combo.SetFocus()
 
