@@ -2911,6 +2911,7 @@ class FixXPosDialog(wx.Dialog):
             except (ValueError, TypeError):
                 xDiameter = 0.0
             self.curXPos.SetValue("%0.4f" % (xDiameter));
+            self.actualXPos.SetFocus()
             self.actualXPos.SetSelection(-1, -1)
 
     def OnFix(self, e):
