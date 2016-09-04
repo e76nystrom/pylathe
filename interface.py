@@ -162,25 +162,20 @@ parmList = \
     ["X_ABS_LOC", "x absolute location", "int"],
     ["X_MPG_INC", "X man pulse gen incr", "int"],
     
-    "z turn/face parameters",
+    # "z turn/face parameters",
     
-    ["Z_START_LOC", "z start", "float"],
-    ["Z_END_LOC", "z end", "float"],
-    ["Z_RETRACT", "z retract", "float"],
-    ["Z_FEED_PASS", "z feed per pass", "float"],
+    # ["Z_START_LOC", "z start", "float"],
+    # ["Z_END_LOC", "z end", "float"],
+    # ["Z_RETRACT", "z retract", "float"],
+    # ["Z_FEED_PASS", "z feed per pass", "float"],
     
-    "x turn/face parameters",
+    # "x turn/face parameters",
     
-    ["X_START_LOC", "x start", "float"],
-    ["X_END_LOC", "x end", "float"],
-    ["X_RETRACT", "x retract", "float"],
-    ["X_FEED_PASS", "x feed per pass", "float"],
-    ["X_DIAMETER", "x diameter", "int"],
-    
-    "feed parameters",
-    
-    ["FEED_TYPE", "feed parameter type", "int16_t"],
-    ["FEED", "feed parameter", "float"],
+    # ["X_START_LOC", "x start", "float"],
+    # ["X_END_LOC", "x end", "float"],
+    # ["X_RETRACT", "x retract", "float"],
+    # ["X_FEED_PASS", "x feed per pass", "float"],
+    # ["X_DIAMETER", "x diameter", "int"],
     
     "index pulse variables",
 
