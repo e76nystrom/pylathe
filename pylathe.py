@@ -1092,8 +1092,10 @@ class Taper():
         quePause()
         startSpindle(getIntInfo('tpRPM'))
         moveX(self.safeX)
+
         while self.externalTaperUpdate():
             pass
+
         moveX(self.safeX)
         moveZ(self.startZ)
         stopSpindle();
