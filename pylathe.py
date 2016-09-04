@@ -3131,6 +3131,10 @@ class MainFrame(wx.Frame):
         else:
             xEncOffset = float(info[key].GetValue())
 
+        dw, dh = wx.DisplaySize()
+        w, h = self.GetSize()
+        self.SetPosition(((3 * dw) / 4 - w, 0))
+
         self.showPanel()
 
         self.turnPanel.update()
