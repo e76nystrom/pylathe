@@ -277,13 +277,13 @@ def queClear():
     while not moveQue.empty():
         moveQue.get()
 
-def queZSetup():
-    moveQue.put((Z_FEED_SETUP, 0))
+def queZSetup(feed):
+    moveQue.put((Z_FEED_SETUP, feed))
     saveZOffset();
     saveXOffset();
 
-def queXSetup():
-    moveQue.put((X_FEED_SETUP, 0))
+def queXSetup(feed):
+    moveQue.put((X_FEED_SETUP, feed))
     saveZOffset();
     saveXOffset();
 
@@ -603,7 +603,7 @@ class Turn():
             queFeedType(FEED_PITCH)
             zSynSetup(getFloatInfo('tuZFeed'))
         else:
-            queZSetup()
+            queZSetup(getFloatInfo('tuZFeed'))
         moveX(self.safeX)
         moveZ(self.zStart)
 
@@ -846,9 +846,9 @@ class Face():
         if STEPPER_DRIVE:
             startSpindle(getIntInfo('faRPM'))
             queFeedType(FEED_PITCH)
-            xSynSetup(getFloatInfo('faZFeed'))
+            xSynSetup(getFloatInfo('faXFeed'))
         else:
-            queXSetup()
+            queXSetup(getFloatInfo('faxFeed'))
         moveX(self.safeX)
         moveZ(self.zStart)
         moveX(self.xStart)
