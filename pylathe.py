@@ -2842,7 +2842,7 @@ class GotoDialog(wx.Dialog):
             if self.axis == 0:
                 val = jogPanel.zPos.GetValue()
             else:
-                val = jogPanel.xPos.GetValue()
+                val = jogPanel.xPos.GetValue() * 2.0
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
