@@ -2550,9 +2550,10 @@ class PosMenu(wx.Menu):
     def getPosCtl(self):
         global jogPanel
         if self.axis == 0:
-            return(jogPanel.zPos)
+            ctl = jogPanel.zPos
         else:
-            return(jogPanel.xPos)
+            ctl = jogPanel.xPos
+        return(ctl.GetPosition())
         
 
     def OnSet(self, e):
