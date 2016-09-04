@@ -389,7 +389,7 @@ def xilinxTestMode():
     else:
         setParm('ENC_ENABLE', '0')
 
-def sendSpindleData(send=False):
+def sendSpindleData(send=False, rpm=None):
     global info, spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
@@ -398,7 +398,10 @@ def sendSpindleData(send=False):
                 setParm('SP_STEPS', getInfo('spMotorSteps'))
                 setParm('SP_MICRO', getInfo('spMicroSteps'))
                 setParm('SP_MIN_RPM', getInfo('spMinRPM'))
-                setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
+                if rpm != None:
+                    setParm('SP_MAX_RPM', rpm)
+                else:
+                    setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
                 setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
                 setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
