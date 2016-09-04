@@ -3308,8 +3308,9 @@ class MainFrame(wx.Frame):
         self.xDialog.Show(True)
 
     def OnSpindleSetup(self, e):
-        self.spindleDialog.Raise()
-        self.spindleDialog.Show(True)
+        self.showDialog(self.spindleDialog)
+        # self.spindleDialog.Raise()
+        # self.spindleDialog.Show(True)
 
     def OnPortSetup(self, e):
         self.portDialog.Raise()
