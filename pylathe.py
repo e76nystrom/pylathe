@@ -2547,13 +2547,17 @@ class PosMenu(wx.Menu):
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
+    def getPosCtl(self):
+        globla jogPanel
+        if self.axis == 0:
+            return(jogPanel.zPos)
+        else:
+            return(jogPanel.xPos)
+        
+
     def OnSet(self, e):
         dialog = SetPosDialog(jogPanel, self.axis)
-        if self.axis == 0:
-            ctl = jogPanel.zPos
-        else:
-            ctl = jogPanel.xPos
-        dialog.SetPosition(jogPanelPos(ctl))
+        dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
@@ -2580,11 +2584,7 @@ class PosMenu(wx.Menu):
 
     def OnGoto(self, e):
         dialog = GotoDialog(jogPanel, self.axis)
-        if self.axis == 0:
-            ctl = jogPanel.zPos
-        else:
-            ctl = jogPanel.xPos
-        dialog.SetPosition(jogPanelPos(ctl))
+        dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
@@ -2592,7 +2592,7 @@ class PosMenu(wx.Menu):
         dialog = jogPanel.fixXPosDialog
         if dialog == None:
             self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
-        dialog.SetPosition(jogPanelPos(1))
+        dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
