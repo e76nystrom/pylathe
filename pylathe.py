@@ -1189,6 +1189,8 @@ class CutoffPanel(wx.Panel):
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
         
         # buttons
 
