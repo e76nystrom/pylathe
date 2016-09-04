@@ -1474,9 +1474,6 @@ class TaperPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('FEED', getInfo('tpZFeed'))
-            setParm('FEED_TYPE', FEED_PITCH)
-
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
@@ -1606,7 +1603,6 @@ class ScrewThread():
         feedType = FEED_TPI
         if self.mm.GetValue():
             feedType = FEED_METRIC
-            setParm('FEED_TYPE', type)
         queFeedType(feedType)
         zSynSetup(getFloatInfo('thPitch'))
         moveX(self.safeX)
