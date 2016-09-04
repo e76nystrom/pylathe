@@ -2842,8 +2842,12 @@ class GotoDialog(wx.Dialog):
             if self.axis == 0:
                 val = jogPanel.zPos.GetValue()
             else:
-                val = jogPanel.xPos.GetValue() * 2.0
-            self.pos.SetValue(val)
+                val = jogPanel.xPos.GetValue()
+            try:
+                val = float(val)
+            except ValueError:
+                val = 0.0
+            self.pos.SetValue("%0.4f" % (val))
             self.pos.SetSelection(-1, -1)
 
     def OnKeyChar(self, e):
