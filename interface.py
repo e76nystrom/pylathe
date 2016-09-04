@@ -112,6 +112,7 @@ parmList = \
     ["X_BACKLASH", "x axis backlash", "float"],
     ["X_DIR_FLAG", "x invert direction", "char"],
     ["X_MPG_FLAG", "x invert mpg", "char"],
+    ["X_DIAMETER", "x diameter", "int"],
     
     "z move parameters",
     
