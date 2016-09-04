@@ -1090,7 +1090,7 @@ class Taper():
         self.spring = 0
 
         quePause()
-        startSpindle(getIntInfo('thRPM'))
+        startSpindle(getIntInfo('tpRPM'))
         moveX(self.safeX)
         while self.externalTaperUpdate():
             pass
