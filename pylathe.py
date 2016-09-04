@@ -1035,46 +1035,27 @@ class Cutoff():
         self.cutoffPanel = cutoffPanel
 
     def getCutoffParameters(self):
-        fa = self.cutoffPanel
-        self.xStart = getFloatVal(fa.xStart) / 2.0
-        self.xEnd = getFloatVal(fa.xEnd) / 2.0
-        self.xFeed = abs(getFloatVal(fa.xFeed))
-        self.xRetract = abs(getFloatVal(fa.xRetract))
+        cu = self.cutoffPanel
+        self.xStart = getFloatVal(cu.xStart) / 2.0
+        self.xEnd = getFloatVal(cu.xEnd) / 2.0
+        self.xFeed = abs(getFloatVal(cu.xFeed))
+        self.xRetract = abs(getFloatVal(cu.xRetract))
+        if self.xStart < 0:
+            self.xRetract = -xRetract
 
-        self.zStart = getFloatVal(fa.zStart)
-        self.zEnd = getFloatVal(fa.zEnd)
-        self.zFeed = getFloatVal(fa.zFeed)
-        self.zRetract = abs(getFloatVal(fa.zRetract))
-
-        self.sPassInt = getIntVal(fa.sPInt)
-        self.sPasses = getIntVal(fa.spring)
+        self.zStart = getFloatVal(cu.zStart)
+        self.zCutoff = getFloatVal(cu.zCutoff)
 
     def cutoff(self):
         self.getCutoffParameters()
 
-        self.internal = self.xStart < self.xEnd
-        self.zCut = abs(self.zStart - self.zEnd)
-        self.passes = int(ceil(self.zCut / self.zFeed))
-        self.cutoffPanel.passes.SetValue("%d" % (self.passes))
-        print ("zCut %5.3f passes %d internal %s" %
-               (self.zCut, self.passes, self.internal))
-
-        if self.internal:
-            self.xRetract = -self.xRetract
         self.safeX = self.xStart + self.xRetract
-        self.safeZ = self.zStart + self.zRetract
 
         self.cutoffSetup()
 
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
-
-        while self.cutoffUpdate():
-            pass
-
+        moveX(self.xEnd, ZSYN)
         moveX(self.safeX)
-        moveZ(self.zStart + self.zRetract)
+        moveZ(self.zStart)
 
         stopSpindle()
         stdout.flush()
@@ -1088,71 +1069,8 @@ class Cutoff():
         else:
             queXSetup(getFloatInfo('cuxFeed'))
         moveX(self.safeX)
-        moveZ(self.zStart)
+        moveZ(self.zCutoff)
         moveX(self.xStart)
-
-    def cutoffUpdate(self):
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                nextPass(self.passCount)
-                feed = self.passCount * self.zFeed
-                if feed > self.zCut:
-                    feed = self.zCut
-                self.feed = feed
-                self.calculateCutoffPass()
-            self.cutoffPass()
-        else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                nextPass(0x200 | self.spring)
-                print("spring")
-                self.cutoffPass()
-            else:
-                return(False)
-        return(True)
-
-    def calculateCutoffPass(self):
-        feed = self.feed
-        if self.internal:
-            feed = -feed
-        self.curZ = self.zStart - feed
-        self.safeZ = self.curZ + self.zRetract
-        print ("pass %2d feed %5.3f z %5.3f" %
-               (self.passCount, feed, self.curZ))
-
-    def cutoffPass(self):
-        moveZ(self.curZ, XJOG)
-        if self.cutoffPanel.pause.GetValue():
-            print("pause")
-            quePause()
-        moveX(self.xEnd, ZSYN)
-        moveZ(self.safeZ)
-        moveX(self.xStart)
-
-    def cutoffAdd(self):
-        if self.feed >= self.zCut:
-            add = getFloatVal(self.cutoffPanel.add)
-            self.feed += add
-            self.cutoffSetup()
-            self.calculateCutoffPass()
-            self.cutoffPass()
-            moveX(self.safeX)
-            moveZ(self.zStart + self.zRetract)
-            stopSpindle()
-            command('CMD_RESUME')
 
 class CutoffPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -1202,10 +1120,10 @@ class CutoffPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnStart)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.rpm = addField(self, sizerG, "RPM", "cuRPM")
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        self.rpm = addField(self, sizerG, "RPM", "cuRPM")
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
