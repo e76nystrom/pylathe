@@ -3293,6 +3293,12 @@ class MainFrame(wx.Frame):
     def OnExit(self, e):
         self.Close(True)
 
+    def showDialog(self, dialog):
+        (xPos, yPos) = mainFrame.GetPosition()
+        self.dialog.Raise()
+        self.dialog.Show(True)
+        self.dialog.SetPosition((xPos, yPos))
+
     def OnZSetup(self, e):
         self.zDialog.Raise()
         self.zDialog.Show(True)
