@@ -1601,7 +1601,7 @@ class ScrewThread():
         quePause()
         startSpindle(getIntInfo('thRPM'))
         feedType = FEED_TPI
-        if self.mm.GetValue():
+        if self.threadPanel.mm.GetValue():
             feedType = FEED_METRIC
         queFeedType(feedType)
         zSynSetup(getFloatInfo('thPitch'))
