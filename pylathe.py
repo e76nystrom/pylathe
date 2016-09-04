@@ -2812,7 +2812,7 @@ class GotoDialog(wx.Dialog):
         global info
         self.axis = axis
         pos = (10, 10)
-        title = "Go to %c Position" % (('Z', 'X')[axis])
+        title = "Go to %s" % (('Z Position', 'X Diameter')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -2866,7 +2866,7 @@ class GotoDialog(wx.Dialog):
             else:
                 sendXData()
                 saveXOffset()
-                moveX(loc)
+                moveX(loc / 2.0)
             command('CMD_RESUME')
             self.Show(False)
             jogPanel.focus()
