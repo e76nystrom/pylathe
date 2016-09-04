@@ -2905,12 +2905,13 @@ class FixXPosDialog(wx.Dialog):
         global done
         if done:
             return
-        try:
-            xDiameter = float(getParm('X_DIAMETER')) / jogPanel.xStepsInch
-        except (ValueError, TypeError):
-            xDiameter = 0.0
-        self.curXPos.SetValue("%0.4f" % (xDiameter));
-        self.actualXPos.SetSelection(-1, -1)
+        if self.IsShown():
+            try:
+                xDiameter = float(getParm('X_DIAMETER')) / jogPanel.xStepsInch
+            except (ValueError, TypeError):
+                xDiameter = 0.0
+            self.curXPos.SetValue("%0.4f" % (xDiameter));
+            self.actualXPos.SetSelection(-1, -1)
 
     def OnFix(self, e):
         global xHomeOffset
