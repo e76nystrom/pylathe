@@ -2548,7 +2548,7 @@ class PosMenu(wx.Menu):
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def getPosCtl(self):
-        globla jogPanel
+        global jogPanel
         if self.axis == 0:
             return(jogPanel.zPos)
         else:
