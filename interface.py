@@ -331,6 +331,7 @@ stateList =\
     ["PASS_NUM", "set pass number"],
     ["QUE_PAUSE", "pause queue"],
     ["SAVE_DIAMETER", "save turn diameter"],
+    ["SAVE_FEED_TYPE", "save feed type"],
     ["Z_FEED_SETUP", "setup z feed"],
     ["X_FEED_SETUP", "setup x feed"],
     "};",
