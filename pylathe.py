@@ -3303,7 +3303,9 @@ class ZDialog(wx.Dialog):
         sendZData(True)
 
     def OnShow(self, e):
-        global info, zDataSent
+        global done, info, zDataSent
+        if done:
+            return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
@@ -3397,7 +3399,9 @@ class XDialog(wx.Dialog):
         sendXData(True)
 
     def OnShow(self, e):
-        global info, xDataSent
+        global done, info, xDataSent
+        if done:
+            return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
