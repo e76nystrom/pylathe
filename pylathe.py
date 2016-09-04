@@ -2595,7 +2595,7 @@ class SetPosDialog(wx.Dialog):
         global info
         self.axis = axis
         pos = (10, 10)
-        title = "Set %c Position" % (('Z', 'X')[axis])
+        title = "Set %s" % (('Z Position', 'X Diameter')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -2632,7 +2632,7 @@ class SetPosDialog(wx.Dialog):
         val = self.pos.GetValue()
         if self.axis == 0:
             try:
-                val = float(val)
+                val = float(val) / 2.0
                 sendZData()
                 zLoc = getParm('Z_LOC')
                 if zLoc != None:
