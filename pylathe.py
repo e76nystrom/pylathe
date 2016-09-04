@@ -2623,17 +2623,15 @@ class SetPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global jogPanel
-        try:
-            if self.IsShown():
-                if self.axis == 0:
-                    val = jogPanel.zPos.GetValue()
-                else:
-                    val = jogPanel.xPos.GetValue()
-                self.pos.SetValue(val)
-        except RuntimeError:
-            print("RuntimeError")
-            stdout.flush()
+        global done, jogPanel
+        if done:
+            return
+        if self.IsShown():
+            if self.axis == 0:
+                val = jogPanel.zPos.GetValue()
+            else:
+                val = jogPanel.xPos.GetValue()
+            self.pos.SetValue(val)
 
     def OnOk(self, e):
         global jogPanel, zHomeOffset, xHomeOffset
@@ -2698,17 +2696,15 @@ class GotoDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global jogPanel
-        try:
-            if self.IsShown():
-                if self.axis == 0:
-                    val = jogPanel.zPos.GetValue()
-                else:
-                    val = jogPanel.xPos.GetValue()
-                self.pos.SetValue(val)
-        except RuntimeError:
-            print("RuntimeError")
-            stdout.flush()
+        global done, jogPanel
+        if done:
+            return
+        if self.IsShown():
+            if self.axis == 0:
+                val = jogPanel.zPos.GetValue()
+            else:
+                val = jogPanel.xPos.GetValue()
+            self.pos.SetValue(val)
 
     def OnOk(self, e):
         global jogPanel
@@ -2774,10 +2770,13 @@ class FixXPosDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
+        global done
         # mainPanel = info['mainPanel'].GetValue()
         # if mainPanel == 'turnPanel':
         #     diam = getFloatInfo('tuXEnd')
         #     self.curXPos.SetValue("%0.4f" % (diam));
+        if done:
+            return
         try:
             xDiameter = float(getParm('X_DIAMETER')) / jogPanel.xStepsInch
         except (ValueError, TypeError):
@@ -3547,7 +3546,9 @@ class PortDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global info
+        global done, info
+        if done:
+            return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
@@ -3602,7 +3603,9 @@ class ConfigDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global info
+        global done, info
+        if done:
+            return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
