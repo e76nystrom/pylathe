@@ -1009,7 +1009,6 @@ class FacePanel(wx.Panel):
 
             setParm('FEED', getInfo('faXFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
-            command('CMD_XSYNSETUP');
 
         except commTimeout as e:
             print("timeout error")
@@ -1471,10 +1470,7 @@ class TaperPanel(wx.Panel):
 
             setParm('FEED', getInfo('tpZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
-            command('CMD_ZSYNSETUP');
             command('CMD_ZTAPERSETUP');
-
-            command('CMD_XSYNSETUP');
             command('CMD_XTAPERSETUP');
 
         except commTimeout as e:
