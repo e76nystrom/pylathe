@@ -91,6 +91,7 @@ parmList = \
     ["SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"],
     ["SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"],
     ["SP_DIR_FLAG", "spindle invert direction", "char"],
+    ["SP_TEST_FLAG", "generate test index pulse", "char"],
     
     "z axis parameters",
     
