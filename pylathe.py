@@ -128,6 +128,7 @@ stdout.flush()
 
 hdrFont = None
 testFont = None
+emptyCell = (0, 0)
 f = None
 mainFrame = None
 jogPanel = None
@@ -1029,6 +1030,220 @@ class FacePanel(wx.Panel):
         self.face.faceAdd()
         jogPanel.focus()
 
+class Cutoff():
+    def __init__(self, cutoffPanel):
+        self.cutoffPanel = cutoffPanel
+
+    def getCutoffParameters(self):
+        fa = self.cutoffPanel
+        self.xStart = getFloatVal(fa.xStart) / 2.0
+        self.xEnd = getFloatVal(fa.xEnd) / 2.0
+        self.xFeed = abs(getFloatVal(fa.xFeed))
+        self.xRetract = abs(getFloatVal(fa.xRetract))
+
+        self.zStart = getFloatVal(fa.zStart)
+        self.zEnd = getFloatVal(fa.zEnd)
+        self.zFeed = getFloatVal(fa.zFeed)
+        self.zRetract = abs(getFloatVal(fa.zRetract))
+
+        self.sPassInt = getIntVal(fa.sPInt)
+        self.sPasses = getIntVal(fa.spring)
+
+    def cutoff(self):
+        self.getCutoffParameters()
+
+        self.internal = self.xStart < self.xEnd
+        self.zCut = abs(self.zStart - self.zEnd)
+        self.passes = int(ceil(self.zCut / self.zFeed))
+        self.cutoffPanel.passes.SetValue("%d" % (self.passes))
+        print ("zCut %5.3f passes %d internal %s" %
+               (self.zCut, self.passes, self.internal))
+
+        if self.internal:
+            self.xRetract = -self.xRetract
+        self.safeX = self.xStart + self.xRetract
+        self.safeZ = self.zStart + self.zRetract
+
+        self.cutoffSetup()
+
+        self.passCount = 0
+        self.sPassCtr = 0
+        self.spring = 0
+
+        while self.cutoffUpdate():
+            pass
+
+        moveX(self.safeX)
+        moveZ(self.zStart + self.zRetract)
+
+        stopSpindle()
+        stdout.flush()
+
+    def cutoffSetup(self):
+        quePause()
+        if STEPPER_DRIVE:
+            startSpindle(getIntInfo('cuRPM'))
+            queFeedType(FEED_PITCH)
+            xSynSetup(getFloatInfo('cuXFeed'))
+        else:
+            queXSetup(getFloatInfo('cuxFeed'))
+        moveX(self.safeX)
+        moveZ(self.zStart)
+        moveX(self.xStart)
+
+    def cutoffUpdate(self):
+        if self.passCount < self.passes:
+            self.springFlag = False
+            if self.sPassInt != 0:
+                self.sPassCtr += 1
+                if self.sPassCtr > self.sPassInt:
+                    self.sPassCtr = 0
+                    self.springFlag = True
+            if self.springFlag:
+                print("spring")
+                nextPass(0x100 | self.passCount)
+            else:
+                self.passCount += 1
+                nextPass(self.passCount)
+                feed = self.passCount * self.zFeed
+                if feed > self.zCut:
+                    feed = self.zCut
+                self.feed = feed
+                self.calculateCutoffPass()
+            self.cutoffPass()
+        else:
+            if self.springFlag:
+                self.springFlag = False
+                self.spring += 1
+            if self.spring < self.sPasses:
+                self.spring += 1
+                nextPass(0x200 | self.spring)
+                print("spring")
+                self.cutoffPass()
+            else:
+                return(False)
+        return(True)
+
+    def calculateCutoffPass(self):
+        feed = self.feed
+        if self.internal:
+            feed = -feed
+        self.curZ = self.zStart - feed
+        self.safeZ = self.curZ + self.zRetract
+        print ("pass %2d feed %5.3f z %5.3f" %
+               (self.passCount, feed, self.curZ))
+
+    def cutoffPass(self):
+        moveZ(self.curZ, XJOG)
+        if self.cutoffPanel.pause.GetValue():
+            print("pause")
+            quePause()
+        moveX(self.xEnd, ZSYN)
+        moveZ(self.safeZ)
+        moveX(self.xStart)
+
+    def cutoffAdd(self):
+        if self.feed >= self.zCut:
+            add = getFloatVal(self.cutoffPanel.add)
+            self.feed += add
+            self.cutoffSetup()
+            self.calculateCutoffPass()
+            self.cutoffPass()
+            moveX(self.safeX)
+            moveZ(self.zStart + self.zRetract)
+            stopSpindle()
+            command('CMD_RESUME')
+
+class CutoffPanel(wx.Panel):
+    def __init__(self, parent, *args, **kwargs):
+        super(CutoffPanel, self).__init__(parent, *args, **kwargs)
+        self.InitUI()
+        self.cutoff = Cutoff(self)
+
+    def InitUI(self):
+        global hdrFont, emptyCell
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        txt = wx.StaticText(self, -1, "Cutoff")
+        txt.SetFont(hdrFont)
+
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+
+        # x parameters
+
+        sizerG = wx.GridSizer(8, 0, 0)
+
+        self.xStart = addField(self, sizerG, "X Start D", "cuXStart")
+
+        self.xEnd = addField(self, sizerG, "X End D", "cuXEnd")
+        
+        self.xFeed = addField(self, sizerG, "X Feed", "cuXFeed")
+        
+        self.xRetract = addField(self, sizerG, "X Retract", "cuXRetract")
+
+        # z parameters
+
+        self.zStart = addField(self, sizerG, "Z Start", "cuZStart")
+
+        self.zCutoff = addField(self, sizerG, "Z Cutoff", "cuZCutoff")
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        
+        # buttons
+
+        btn = wx.Button(self, label='Send', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='Start', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        self.rpm = addField(self, sizerG, "RPM", "cuRPM")
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.pause = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['cuPause'] = cb
+
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+
+    def update(self):
+        pass
+
+    def sendData(self):
+        try:
+            queClear()
+            sendClear()
+            sendSpindleData()
+            sendZData()
+            sendXData()
+
+        except commTimeout as e:
+            print("timeout error")
+            stdout.flush()
+
+    def OnSend(self, e):
+        global xHomed, jogPanel
+        if xHomed:
+            self.sendData()
+            self.cutoff.cutoff()
+        jogPanel.focus()
+
+    def OnStart(self, e):
+        global jogPanel
+        command('CMD_RESUME')
+        jogPanel.focus()
+
 class Taper():
     def __init__(self, taperPanel):
         self.taperPanel = taperPanel
@@ -1863,13 +2078,12 @@ class JogPanel(wx.Panel):
         self.xEncInvert = 0
 
     def initUI(self):
-        global info
+        global info, emptyCell
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
-        emptyCell = (0, 0)
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
@@ -3031,6 +3245,10 @@ class MainFrame(wx.Frame):
         menu = operationMenu.Append(ID_FACE, 'Face')
         self.Bind(wx.EVT_MENU, self.OnFace, menu)
 
+        ID_CUTOFF = wx.NewId()
+        menu = operationMenu.Append(ID_CUTOFF, 'Cutoff')
+        self.Bind(wx.EVT_MENU, self.OnCutoff, menu)
+
         ID_TAPER = wx.NewId()
         menu = operationMenu.Append(ID_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTaper, menu)
@@ -3081,6 +3299,11 @@ class MainFrame(wx.Frame):
 
         self.facePanel = panel = FacePanel(self)
         self.panels['facePanel'] = panel
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        panel.Hide()
+
+        self.cutoffPanel = panel = CutoffPanel(self)
+        self.panels['cutoffPanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
@@ -3135,6 +3358,7 @@ class MainFrame(wx.Frame):
 
         self.turnPanel.update()
         self.facePanel.update()
+        self.cutoffPanel.update()
         self.taperPanel.update()
         if STEPPER_DRIVE:
             self.threadPanel.update()
@@ -3191,6 +3415,11 @@ class MainFrame(wx.Frame):
     def OnFace(self, e):
         global info
         info['mainPanel'].SetValue('facePanel')
+        self.showPanel()
+
+    def OnCutoff(self, e):
+        global info
+        info['mainPanel'].SetValue('cutoffPanel')
         self.showPanel()
 
     def OnTaper(self, e):
@@ -3833,6 +4062,9 @@ class SyncTest(object):
             arg1 = float(getInfo('tuZFeed'))
         elif mainPanel == 'facePanel':
             arg1 = float(getInfo('faXFeed'))
+            zAxis = False
+        elif mainPanel == 'CutoffPanel':
+            arg1 = float(getInfo('cuXFeed'))
             zAxis = False
         elif mainPanel == 'taperPanel':
             arg1 = float(getInfo('tpZFeed'))
