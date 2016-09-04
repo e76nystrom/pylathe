@@ -3305,25 +3305,19 @@ class MainFrame(wx.Frame):
         dialog.SetPosition((xPos, yPos))
 
     def OnZSetup(self, e):
-        self.zDialog.Raise()
-        self.zDialog.Show(True)
+        self.showDialog(self.zDialog)
 
     def OnXSetup(self, e):
-        self.xDialog.Raise()
-        self.xDialog.Show(True)
+        self.showDialog(self.zDialog)
 
     def OnSpindleSetup(self, e):
         self.showDialog(self.spindleDialog)
-        # self.spindleDialog.Raise()
-        # self.spindleDialog.Show(True)
 
     def OnPortSetup(self, e):
-        self.portDialog.Raise()
-        self.portDialog.Show(True)
+        self.showDialog(self.portDialog)
 
     def OnConfigSetup(self, e):
-        self.configDialog.Raise()
-        self.configDialog.Show(True)
+        self.showDialog(self.configDialog)
 
     def showPanel(self):
         global info
