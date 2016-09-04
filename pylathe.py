@@ -277,13 +277,16 @@ def queClear():
     while not moveQue.empty():
         moveQue.get()
 
-def queZSetup():
-    moveQue.put((Z_FEED_SETUP, 0))
+def queFeedType(feedType):
+    moveQue.put((SAVE_FEED_TYPE, feedType))
+
+def queZSetup(feed):
+    moveQue.put((Z_FEED_SETUP, feed))
     saveZOffset();
     saveXOffset();
 
-def queXSetup():
-    moveQue.put((X_FEED_SETUP, 0))
+def queXSetup(feed):
+    moveQue.put((X_FEED_SETUP, feed))
     saveZOffset();
     saveXOffset();
 
@@ -1480,8 +1483,6 @@ class TaperPanel(wx.Panel):
 
             setParm('FEED', getInfo('tpZFeed'))
             setParm('FEED_TYPE', FEED_PITCH)
-            command('CMD_ZTAPERSETUP');
-            command('CMD_XTAPERSETUP');
 
         except commTimeout as e:
             print("timeout error")
