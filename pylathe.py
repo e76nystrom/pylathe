@@ -3012,8 +3012,9 @@ class UpdateThread(Thread):
             stdout.flush()
             return
         except serial.SerialException:
-            printf("readAll SerialException")
+            print("readAll SerialException")
             stdout.flush()
+            return
         comm.xDbgPrint = True
         if result == None:
             return
