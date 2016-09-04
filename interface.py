@@ -48,11 +48,9 @@ cmdList = \
     ["CMD_SPSETUP", "", "setup spindle"],
 
     ["CMD_ZSETUP", "", "setup z axis"],
-    ["CMD_ZSYNSETUP", "", "setup z axis sync"],
     ["CMD_ZTAPERSETUP", "", "setup z axis taper"],
 
     ["CMD_XSETUP", "", "setup x axis"],
-    ["CMD_XSYNSETUP", "", "setup z axis sync"],
     ["CMD_XTAPERSETUP", "", "setup z axis taper"],
     
     "state information",
