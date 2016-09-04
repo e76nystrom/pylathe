@@ -2836,6 +2836,7 @@ class GotoDialog(wx.Dialog):
             else:
                 val = jogPanel.xPos.GetValue()
             self.pos.SetValue(val)
+            self.pos.SetSelection(-1, -1)
 
     def OnOk(self, e):
         global jogPanel
@@ -2913,6 +2914,7 @@ class FixXPosDialog(wx.Dialog):
         except (ValueError, TypeError):
             xDiameter = 0.0
         self.curXPos.SetValue("%0.4f" % (xDiameter));
+        self.actualXPos.SetSelection(-1, -1)
 
     def OnFix(self, e):
         global xHomeOffset
