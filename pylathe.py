@@ -408,7 +408,7 @@ def sendSpindleData(send=False, rpm=None):
                 setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
                 setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
-                setParm('SP_TEST_FLAG', getBoolInfo('spTestIndex'))
+                setParm('SP_TEST_INDEX', getBoolInfo('spTestIndex'))
                 command('CMD_SPSETUP')
             elif XILINX:
                 setParm('ENC_MAX', getInfo('cfgEncoder'))
