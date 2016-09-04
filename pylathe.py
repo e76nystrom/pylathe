@@ -2740,8 +2740,9 @@ class SetPosDialog(wx.Dialog):
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
         self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                    style=wx.TE_RIGHT)
+                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
+        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         btn = wx.Button(self, label='Ok', size=(60,-1))
@@ -2764,6 +2765,12 @@ class SetPosDialog(wx.Dialog):
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnOk(None)
+        e.Skip()
+    
     def OnOk(self, e):
         global jogPanel, zHomeOffset, xHomeOffset
         val = self.pos.GetValue()
@@ -2814,8 +2821,9 @@ class GotoDialog(wx.Dialog):
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
         self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                    style=wx.TE_RIGHT)
+                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
+        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         btn = wx.Button(self, label='Ok', size=(60,-1))
@@ -2838,6 +2846,12 @@ class GotoDialog(wx.Dialog):
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnOk(None)
+        e.Skip()
+    
     def OnOk(self, e):
         global jogPanel
         try:
@@ -2919,8 +2933,6 @@ class FixXPosDialog(wx.Dialog):
         keyCode = e.GetKeyCode()
         if keyCode == wx.WXK_RETURN:
             self.OnFix(None)
-        print("key char %x" % (keyCode))
-        stdout.flush()
         e.Skip()
     
     def OnFix(self, e):
