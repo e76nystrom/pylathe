@@ -3007,10 +3007,13 @@ class UpdateThread(Thread):
         comm.xDbgPrint = False
         try:
             result = command('READLOC')
-        except (commTimeout, serial.SerialException):
+        except commTimeout:
             printf("readAll error")
             stdout.flush()
             return
+        except serial.SerialException:
+            printf("SerialException")
+            stdout.flush()
         comm.xDbgPrint = True
         if result == None:
             return
@@ -3071,8 +3074,11 @@ class UpdateThread(Thread):
                             stdout.flush()
                     else:
                         break
-                except (commTimeout, serial.SerialException) as e:
+                except commTimeout:
                     break
+                except serial.SerialException:
+                    print("SerialException")
+                    stdout.flush()
         print("done")
         stdout.flush()
 
