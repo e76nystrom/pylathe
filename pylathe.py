@@ -2612,7 +2612,6 @@ class SetPosDialog(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
         sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
-        self.pos.SetSelection(-1, -1)
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
@@ -2627,6 +2626,7 @@ class SetPosDialog(wx.Dialog):
             else:
                 val = jogPanel.xPos.GetValue()
             self.pos.SetValue(val)
+            self.pos.SetSelection(-1, -1)
 
     def OnOk(self, e):
         global jogPanel, zHomeOffset, xHomeOffset
