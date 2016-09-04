@@ -3298,6 +3298,10 @@ class MainFrame(wx.Frame):
         (xPos, yPos) = mainFrame.GetPosition()
         dialog.Raise()
         dialog.Show(True)
+        (w, h) = dialog.GetSize()
+        xPos -= w
+        if xPos < 1:
+            xPos = 1
         dialog.SetPosition((xPos, yPos))
 
     def OnZSetup(self, e):
