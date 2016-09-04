@@ -2592,7 +2592,7 @@ class PosMenu(wx.Menu):
         dialog = jogPanel.fixXPosDialog
         if dialog == None:
             self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
-        dialog.SetPosition(jogPanelPos())
+        dialog.SetPosition(jogPanelPos(1))
         dialog.Raise()
         dialog.Show(True)
 
