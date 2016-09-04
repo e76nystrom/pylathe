@@ -277,16 +277,13 @@ def queClear():
     while not moveQue.empty():
         moveQue.get()
 
-def queFeedType(feedType):
-    moveQue.put((SAVE_FEED_TYPE, feedType))
-
-def queZSetup(feed):
-    moveQue.put((Z_FEED_SETUP, feed))
+def queZSetup():
+    moveQue.put((Z_FEED_SETUP, 0))
     saveZOffset();
     saveXOffset();
 
-def queXSetup(feed):
-    moveQue.put((X_FEED_SETUP, feed))
+def queXSetup():
+    moveQue.put((X_FEED_SETUP, 0))
     saveZOffset();
     saveXOffset();
 
@@ -298,11 +295,14 @@ def startSpindle(rpm):
 def stopSpindle():
     moveQue.put((QUE_STOP, 0))
 
-def zSynSetup():
-    moveQue.put((Z_SYN_SETUP, 0))
+def queFeedType(feedType):
+    moveQue.put((SAVE_FEED_TYPE, feedType))
 
-def xSynSetup():
-    moveQue.put((X_SYN_SETUP, 0))
+def zSynSetup(feed):
+    moveQue.put((Z_SYN_SETUP, feed))
+
+def xSynSetup(feed):
+    moveQue.put((X_SYN_SETUP, feed))
 
 def nextPass(passNum):
     moveQue.put((PASS_NUM, passNum))
@@ -582,14 +582,8 @@ class Turn():
 
         self.safeX = self.xStart + self.xRetract
 
-        quePause()
-        if STEPPER_DRIVE:
-            startSpindle(getIntInfo('tuRPM'))
-            zSynSetup()
-        else:
-            queZSetup()
-        moveX(self.safeX)
-        moveZ(self.zStart)
+        self.turnSetup()
+
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
@@ -601,6 +595,17 @@ class Turn():
         if STEPPER_DRIVE:
             stopSpindle();
         stdout.flush()
+
+    def turnSetup(self):
+        quePause()
+        if STEPPER_DRIVE:
+            startSpindle(getIntInfo('tuRPM'))
+            queFeedType(FEED_PITCH)
+            zSynSetup(getFloatInfo('tuZFeed'))
+        else:
+            queZSetup()
+        moveX(self.safeX)
+        moveZ(self.zStart)
 
     def turnUpdate(self):
         if self.passCount < self.passes:
@@ -663,16 +668,11 @@ class Turn():
             add = getFloatVal(self.turnPanel.add)
             self.feed += add
             self.calculateTurnPass()
-            if STEPPER_DRIVE:
-                startSpindle(getIntInfo('tuRPM'))
-                zSynSetup()
-            else:
-                queZSetup()
-            moveX(self.safeX)
-            moveZ(self.zStart)
+            self.turnSetup()
             self.turnPass()
             moveX(self.xStart + self.xRetract)
             stopSpindle()
+            command('CMD_RESUME')
 
 class TurnPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -768,9 +768,6 @@ class TurnPanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('FEED', getInfo('tuZFeed'))
-            setParm('FEED_TYPE', FEED_PITCH)
-
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
@@ -829,15 +826,8 @@ class Face():
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        quePause()
-        if STEPPER_DRIVE:
-            startSpindle(getIntInfo('faRPM'))
-            xSynSetup()
-        else:
-            queXSetup()
-        moveX(self.safeX)
-        moveZ(self.zStart)
-        moveX(self.xStart)
+        self.faceSetup()
+
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
@@ -850,6 +840,18 @@ class Face():
 
         stopSpindle()
         stdout.flush()
+
+    def faceSetup(self):
+        quePause()
+        if STEPPER_DRIVE:
+            startSpindle(getIntInfo('faRPM'))
+            queFeedType(FEED_PITCH)
+            xSynSetup(getFloatInfo('faZFeed'))
+        else:
+            queXSetup()
+        moveX(self.safeX)
+        moveZ(self.zStart)
+        moveX(self.xStart)
 
     def faceUpdate(self):
         if self.passCount < self.passes:
@@ -906,19 +908,13 @@ class Face():
         if self.feed >= self.zCut:
             add = getFloatVal(self.facePanel.add)
             self.feed += add
-            if STEPPER_DRIVE:
-                startSpindle(getIntInfo('faRPM'))
-                xSynSetup()
-            else:
-                queXSetup()
-            moveX(self.safeX)
-            moveZ(self.zStart)
-            moveX(self.xStart)
+            self.faceSetup()
             self.calculateFacePass()
             self.facePass()
             moveX(self.safeX)
             moveZ(self.zStart + self.zRetract)
             stopSpindle()
+            command('CMD_RESUME')
 
 class FacePanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -1012,9 +1008,6 @@ class FacePanel(wx.Panel):
             sendZData()
             sendXData()
 
-            setParm('FEED', getInfo('faXFeed'))
-            setParm('FEED_TYPE', FEED_PITCH)
-
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
@@ -1092,11 +1085,7 @@ class Taper():
         self.sPassCtr = 0
         self.spring = 0
 
-        quePause()
-        startSpindle(getIntInfo('tpRPM'))
-        zSynSetup()
-        xSynSetup()
-        moveX(self.safeX)
+        self.taperSetup()
 
         while self.externalTaperUpdate():
             pass
@@ -1105,6 +1094,14 @@ class Taper():
         moveZ(self.startZ)
         stopSpindle();
         stdout.flush()
+
+    def taperSetup(self):
+        quePause()
+        startSpindle(getIntInfo('tpRPM'))
+        queFeedType(FEED_PITCH)
+        zSynSetup(getFloatInfo('tpZFeed'))
+        xSynSetup(getFloatInfo('tpXFeed'))
+        moveX(self.safeX)
 
     def externalTaperUpdate(self):
         print("pass %d" % (self.passCount))
@@ -1171,13 +1168,13 @@ class Taper():
         if self.feed >= self.cutAmount:
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
-            startSpindle(getIntInfo('tpRPM'))
-            moveX(self.safeX)
+            self.taperSetup()
             self.calcExternalPass()
             self.externalPass()
             moveX(self.safeX)
             moveZ(self.startZ)
             stopSpindle();
+            command('CMD_RESUME')
 
     def internalTaper(self, taperInch):
         print("internalTaper")
@@ -1202,11 +1199,7 @@ class Taper():
         self.sPassCtr = 0
         self.spring = 0
 
-        quePause()
-        startSpindle(getIntInfo('tpRPM'))
-        zSynSetup()
-        xSynSetup()
-        moveX(self.safeX)
+        self.taperSetup()
         moveZ(self.safeZ)
 
         while self.internalTaperUpdate():
@@ -1287,14 +1280,14 @@ class Taper():
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
             self.passCount += 1
-            startSpindle(getIntInfo('tpRPM'))
-            moveX(self.safeX)
+            self.taperSetup()
             moveZ(self.safeZ)
             self.calcInternalPass()
             self.internalPass()
             moveX(self.safeX)
             moveZ(self.safeZ)
             stopSpindle();
+            command('CMD_RESUME')
             stdout.flush()
 
 class TaperPanel(wx.Panel):
@@ -1592,12 +1585,8 @@ class ScrewThread():
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
-        quePause()
-        startSpindle(getIntInfo('thRPM'))
-        zSynSetup()
-        moveX(self.safeX)
-        moveZ(self.startZ + self.zBackInc)
-        moveZ(self.startZ)
+        self.threadSetup()
+
         self.curArea = 0.0
         self.prevFeed = 0.0
         self.passCount = 0
@@ -1610,6 +1599,19 @@ class ScrewThread():
 
         stopSpindle();
         stdout.flush()
+
+    def threadSetup(self):
+        quePause()
+        startSpindle(getIntInfo('thRPM'))
+        feedType = FEED_TPI
+        if self.mm.GetValue():
+            feedType = FEED_METRIC
+            setParm('FEED_TYPE', type)
+        queFeedType(feedType)
+        zSynSetup(getFloatInfo('thPitch'))
+        moveX(self.safeX)
+        moveZ(self.startZ + self.zBackInc)
+        moveZ(self.startZ)
 
     def threadUpdate(self):
         if self.passCount < self.passes:
@@ -1668,13 +1670,7 @@ class ScrewThread():
         if self.feed >= self.depth:
             add = getFloatVal(self.threadPanel.add)
             self.feed += add
-
-            quePause()
-            startSpindle(getIntInfo('thRPM'))
-            zSynSetup()
-            moveX(self.safeX)
-            moveZ(self.startZ + self.zBackInc)
-            moveZ(self.startZ)
+            self.threadSetup()
             self.calculateThread()
             self.threadPass()
             stopSpindle();
@@ -1802,15 +1798,9 @@ class ThreadPanel(wx.Panel):
         try:
             sendClear()
             sendSpindleData()
-
             sendZData()
             sendXData()
 
-            setParm('FEED', getInfo('thPitch'))
-            type = FEED_TPI
-            if self.mm.GetValue():
-                type = FEED_METRIC
-            setParm('FEED_TYPE', type)
 
         except commTimeout as e:
             print("timeout error")
