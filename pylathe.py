@@ -139,6 +139,7 @@ xHomeOffset = 0.0
 zEncOffset = 0.0
 xEncOffset = 0.0
 xHomed = False
+done = False
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -2986,7 +2987,8 @@ class MainFrame(wx.Frame):
         self.update = UpdateThread(self)
 
     def onClose(self, event):
-        global jogPanel
+        global done, jogPanel
+        done = True
         self.update.threadRun = False
         jogPanel.btnRpt.threadRun = False
         self.Destroy()
@@ -3490,7 +3492,9 @@ class SpindleDialog(wx.Dialog):
         command('SPINDLE_STOP')
 
     def OnShow(self, e):
-        global info, spindleDataSent
+        global done, info, spindleDataSent
+        if done:
+            return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
