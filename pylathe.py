@@ -3509,6 +3509,7 @@ class SpindleDialog(wx.Dialog):
                 tmp = info[index].GetValue()
                 self.cancelInfo[index] = tmp
                 self.fieldInfo[index] = tmp
+            spindleDataSent = False
         else:
             for (label, index) in self.fields:
                 if self.fieldInfo[index] != info[index].GetValue():
