@@ -1201,10 +1201,14 @@ class Taper():
 
         quePause()
         startSpindle(getIntInfo('tpRPM'))
+        zSynSetup()
+        xSynSetup()
         moveX(self.safeX)
         moveZ(self.safeZ)
+
         while self.internalTaperUpdate():
             pass
+
         moveX(self.safeX)
         moveZ(self.safeZ)
         stopSpindle();
