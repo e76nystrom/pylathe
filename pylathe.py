@@ -2548,13 +2548,11 @@ class PosMenu(wx.Menu):
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def getPosCtl(self):
-        global jogPanel
         if self.axis == 0:
             ctl = jogPanel.zPos
         else:
             ctl = jogPanel.xPos
-        return(ctl.GetPosition())
-        
+        return(jogPanelPos(ctl))
 
     def OnSet(self, e):
         dialog = SetPosDialog(jogPanel, self.axis)
