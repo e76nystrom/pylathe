@@ -1041,7 +1041,7 @@ class Cutoff():
         self.xFeed = abs(getFloatVal(cu.xFeed))
         self.xRetract = abs(getFloatVal(cu.xRetract))
         if self.xStart < 0:
-            self.xRetract = -xRetract
+            self.xRetract = -self.xRetract
 
         self.zStart = getFloatVal(cu.zStart)
         self.zCutoff = getFloatVal(cu.zCutoff)
@@ -1053,6 +1053,9 @@ class Cutoff():
 
         self.cutoffSetup()
 
+        if self.cutoffPanel.pause.GetValue():
+            print("pause")
+            quePause()
         moveX(self.xEnd, ZSYN)
         moveX(self.safeX)
         moveZ(self.zStart)
@@ -1147,7 +1150,6 @@ class CutoffPanel(wx.Panel):
             sendSpindleData()
             sendZData()
             sendXData()
-
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
