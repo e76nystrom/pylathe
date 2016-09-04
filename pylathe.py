@@ -3012,7 +3012,7 @@ class UpdateThread(Thread):
             stdout.flush()
             return
         except serial.SerialException:
-            printf("SerialException")
+            printf("readAll SerialException")
             stdout.flush()
         comm.xDbgPrint = True
         if result == None:
@@ -3077,7 +3077,7 @@ class UpdateThread(Thread):
                 except commTimeout:
                     break
                 except serial.SerialException:
-                    print("SerialException")
+                    print("getString SerialException")
                     stdout.flush()
         print("done")
         stdout.flush()
