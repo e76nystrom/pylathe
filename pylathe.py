@@ -2889,6 +2889,7 @@ class FixXPosDialog(wx.Dialog):
         self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                            style=wx.TE_RIGHT)
         tc.SetFont(posFont)
+        tc.Bind(wx.EVT_KEY_CHAR, self.OnKeyChar)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
@@ -2914,6 +2915,12 @@ class FixXPosDialog(wx.Dialog):
             self.actualXPos.SetFocus()
             self.actualXPos.SetSelection(-1, -1)
 
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnFix(None)
+        e.Skip()
+    
     def OnFix(self, e):
         global xHomeOffset
         try:
