@@ -722,8 +722,8 @@ class TurnPanel(wx.Panel):
 
         self.spring = addField(self, sizerG, "Spring", "tuSpring")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         # buttons
 
@@ -924,7 +924,7 @@ class FacePanel(wx.Panel):
         self.face = Face(self)
 
     def InitUI(self):
-        global hdrFont
+        global hdrFont, emptyCell
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Face")
@@ -963,8 +963,8 @@ class FacePanel(wx.Panel):
 
         self.spring = addField(self, sizerG, "Spring", "faSpring")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         # buttons
 
@@ -1817,7 +1817,7 @@ class ThreadPanel(wx.Panel):
         self.screwThread = ScrewThread(self)
 
     def InitUI(self):
-        global hdrFont, info
+        global hdrFont, info, emptyCell
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Thread")
@@ -1874,8 +1874,8 @@ class ThreadPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['thInternal'] = cb
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         # pass info
 
@@ -1886,8 +1886,8 @@ class ThreadPanel(wx.Panel):
 
         self.spring = addField(self, sizerG, "Spring", "thSpring")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         # buttons
 
@@ -2903,10 +2903,6 @@ class FixXPosDialog(wx.Dialog):
 
     def OnShow(self, e):
         global done
-        # mainPanel = info['mainPanel'].GetValue()
-        # if mainPanel == 'turnPanel':
-        #     diam = getFloatInfo('tuXEnd')
-        #     self.curXPos.SetValue("%0.4f" % (diam));
         if done:
             return
         try:
