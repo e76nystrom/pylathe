@@ -2612,7 +2612,7 @@ class SetPosDialog(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
         sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
-        self.pos.SetFocus()
+        self.pos.SetSelection(-1, -1)
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
