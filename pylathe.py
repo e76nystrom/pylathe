@@ -3485,9 +3485,10 @@ class SpindleDialog(wx.Dialog):
     def OnStart(self, e):
         global info, spindleDataSent
         for (label, index) in self.fields:
-            if self.fieldInfo[index] != info[index].GetValue():
+            tmp = info[index].GetValue()
+            if self.fieldInfo[index] != tmp:
+                self.fieldInfo[index] = tmp 
                 spindleDataSent = False
-                break
         if not spindleDataSent:
             sendSpindleData()
         else:
@@ -3503,8 +3504,11 @@ class SpindleDialog(wx.Dialog):
             return
         if self.IsShown():
             self.fieldInfo = {}
+            self.cancelInfo = {}
             for (label, index) in self.fields:
-                self.fieldInfo[index] = info[index].GetValue()
+                tmp = info[index].GetValue()
+                self.cancelInfo[index] = tmp
+                self.fieldInfo[index] = tmp
         else:
             for (label, index) in self.fields:
                 if self.fieldInfo[index] != info[index].GetValue():
@@ -3514,7 +3518,7 @@ class SpindleDialog(wx.Dialog):
     def OnCancel(self, e):
         global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.fieldInfo[index])
+            info[index].SetValue(self.cancelInfo[index])
         self.Show(False)
 
 class PortDialog(wx.Dialog):
