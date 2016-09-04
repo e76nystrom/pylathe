@@ -2776,7 +2776,7 @@ class SetPosDialog(wx.Dialog):
         val = self.pos.GetValue()
         if self.axis == 0:
             try:
-                val = float(val) / 2.0
+                val = float(val)
                 sendZData()
                 zLoc = getParm('Z_LOC')
                 if zLoc != None:
