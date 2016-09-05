@@ -1177,9 +1177,7 @@ class Taper():
     
     def getTaperParameters(self, taperInch):
         tp = self.taperPanel
-        self.angle = getFloatVal(tp.angle)
-        self.taperX = self.angle <= 45
-
+        self.taperX = taperInch > 1.0
         self.taper = taperInch
         self.zSafe = getFloatVal(tp.zSafe)
         self.zStart = getFloatVal(tp.zStart)
@@ -1212,10 +1210,17 @@ class Taper():
             self.cutAmount = self.stockRadius - smallRadius
             cutToFinish = self.cutAmount - self.finishPass
             self.passes = int(ceil(cutToFinish / self.feedPass))
-            self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
             self.actualFeed = cutToFinish / self.passes
             print ("passes %d cutAmount %5.3f feed %6.3f" %
                    (self.passes, self.cutAmount, self.actualFeed))
+
+            feedTable = []
+            for pass in range(0, self.passes):
+                feedTable.append(pass * self.actualFeed)
+            feedTable.append(self.cutAmount)
+
+            self.passes += 1
+            self.taperPanel.passes.SetValue("%d" % (self.passes))
 
             self.endX = 0.0
             self.startZ = 0.0
@@ -1226,9 +1231,17 @@ class Taper():
             self.sPassCtr = 0
             self.spring = 0
         else:
-            self.xStart = stockDiameter / 2.0
+            self.xStart = self.stockDiameter / 2.0
             self.xEnd = self.refDiameter / 2.0
             self.zEnd = self.zStart - self.zLength
+            self.cutAmount = abs(self.zStart - self.zEnd)
+            cutToFinish = self.cutAmount - self.finishPass
+            self.passes = int(ceil(cutToFinish / self.zFeed))
+            self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
+            self.actualFeed = cutToFinish / self.passes
+            print ("passes %d cutAmount %5.3f feed %6.3f" %
+                   (self.passes, self.cutAmount, self.actualFeed))
+
 
         self.taperSetup()
 
@@ -1261,9 +1274,9 @@ class Taper():
                 print("spring")
                 nextPass(0x100 | self.passCount)
             else:
+                self.feed = self.feedTable[self.passCount]
                 self.passCount += 1
                 nextPass(self.passCount)
-                self.feed = self.passCount * self.actualFeed
                 self.calcExternalPass()
             self.externalPass()
         elif self.passCount == self.passes:
