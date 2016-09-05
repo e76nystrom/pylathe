@@ -1207,11 +1207,14 @@ class Taper():
         smallRadius = self.refDiameter / 2.0
         self.cutAmount = self.stockRadius - smallRadius
         cutToFinish = self.cutAmount - self.finishPass
-        self.passes = int(ceil(cutToFinish / self.feedPass))
-        self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
-        self.actualFeed = cutToFinish / self.passes
-        print ("passes %d cutAmount %5.3f feed %6.3f" %
-               (self.passes, self.cutAmount, self.actualFeed))
+        if self.cutAmount < self.zLength:
+            self.passes = int(ceil(cutToFinish / self.feedPass))
+            self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
+            self.actualFeed = cutToFinish / self.passes
+            print ("passes %d cutAmount %5.3f feed %6.3f" %
+                   (self.passes, self.cutAmount, self.actualFeed))
+        else:
+            pass
 
         self.endX = 0.0
         self.startZ = 0.0
@@ -3080,6 +3083,7 @@ class UpdateThread(Thread):
                 except serial.SerialException:
                     print("getString SerialException")
                     stdout.flush()
+                    break
         print("done")
         stdout.flush()
 
