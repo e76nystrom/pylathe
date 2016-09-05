@@ -1182,6 +1182,9 @@ class Taper():
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = getFloatVal(tp.zLength)
 
+        self.angle = getFloatVal(tp.angle)
+        self.taperX = self.angle <= 45
+
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
         self.xFinal = getFloatVal(tp.xFinal)
@@ -1202,19 +1205,21 @@ class Taper():
         print("externalTaper")
         self.getTaperParameters(taperInch)
 
-        self.halfTaper = taperInch / 2.0
-        self.stockRadius = self.stockDiameter / 2.0
-        smallRadius = self.refDiameter / 2.0
-        self.cutAmount = self.stockRadius - smallRadius
-        cutToFinish = self.cutAmount - self.finishPass
-        if self.cutAmount < self.zLength:
+        if self.taperX:
+            self.halfTaper = taperInch / 2.0
+            self.stockRadius = self.stockDiameter / 2.0
+            smallRadius = self.refDiameter / 2.0
+            self.cutAmount = self.stockRadius - smallRadius
+            cutToFinish = self.cutAmount - self.finishPass
             self.passes = int(ceil(cutToFinish / self.feedPass))
             self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
             self.actualFeed = cutToFinish / self.passes
             print ("passes %d cutAmount %5.3f feed %6.3f" %
                    (self.passes, self.cutAmount, self.actualFeed))
         else:
-            pass
+            self.xStart = stockDiameter / 2.0
+            self.xEnd = self.refDiameter / 2.0
+            self.zEnd = self.zStart - self.zLength
 
         self.endX = 0.0
         self.startZ = 0.0
@@ -1281,6 +1286,7 @@ class Taper():
         return(True)
 
     def calcExternalPass(self):
+        if self.taperX:
         self.endX = self.stockRadius - self.feed
         taperLength = self.feed / self.halfTaper
         if taperLength < self.zLength:
@@ -1296,6 +1302,7 @@ class Taper():
                  self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
 
     def externalPass(self):
+        if self.taperX:
         moveZ(self.startZ)
         if self.taperPanel.pause.GetValue():
             print("pause")
