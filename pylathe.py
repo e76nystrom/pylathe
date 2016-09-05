@@ -1182,6 +1182,7 @@ class Taper():
         self.zSafe = getFloatVal(tp.zSafe)
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = getFloatVal(tp.zLength)
+        self.zFeed = getFloatVal(tp.zFeed)
 
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
