@@ -1177,7 +1177,7 @@ class Taper():
     
     def getTaperParameters(self, taperInch):
         tp = self.taperPanel
-        self.taperX = taperInch > 1.0
+        self.taperX = taperInch <= 1.0
         self.taper = taperInch
         self.zSafe = getFloatVal(tp.zSafe)
         self.zStart = getFloatVal(tp.zStart)
