@@ -1215,14 +1215,6 @@ class Taper():
             print ("passes %d cutAmount %5.3f feed %6.3f" %
                    (self.passes, self.cutAmount, self.actualFeed))
 
-            self.feedTable = []
-            for passCount in range(0, self.passes):
-                self.feedTable.append(passCount * self.actualFeed)
-            self.feedTable.append(self.cutAmount)
-
-            self.passes += 1
-            self.taperPanel.passes.SetValue("%d" % (self.passes))
-
             self.endX = 0.0
             self.startZ = 0.0
             self.endZ = 0.0
@@ -1243,6 +1235,10 @@ class Taper():
             print ("passes %d cutAmount %5.3f feed %6.3f" %
                    (self.passes, self.cutAmount, self.actualFeed))
 
+        self.feedTable = []
+        for passCount in range(0, self.passes):
+            self.feedTable.append(passCount * self.actualFeed)
+        # self.feedTable.append(self.cutAmount)
 
         self.taperSetup()
 
