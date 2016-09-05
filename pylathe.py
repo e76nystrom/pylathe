@@ -1177,13 +1177,13 @@ class Taper():
     
     def getTaperParameters(self, taperInch):
         tp = self.taperPanel
+        self.angle = getFloatVal(tp.angle)
+        self.taperX = self.angle <= 45
+
         self.taper = taperInch
         self.zSafe = getFloatVal(tp.zSafe)
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = getFloatVal(tp.zLength)
-
-        self.angle = getFloatVal(tp.angle)
-        self.taperX = self.angle <= 45
 
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
@@ -1216,19 +1216,19 @@ class Taper():
             self.actualFeed = cutToFinish / self.passes
             print ("passes %d cutAmount %5.3f feed %6.3f" %
                    (self.passes, self.cutAmount, self.actualFeed))
+
+            self.endX = 0.0
+            self.startZ = 0.0
+            self.endZ = 0.0
+            self.safeX = self.stockRadius + self.retract
+            self.safeZ = 0.0
+            self.passCount = 0
+            self.sPassCtr = 0
+            self.spring = 0
         else:
             self.xStart = stockDiameter / 2.0
             self.xEnd = self.refDiameter / 2.0
             self.zEnd = self.zStart - self.zLength
-
-        self.endX = 0.0
-        self.startZ = 0.0
-        self.endZ = 0.0
-        self.safeX = self.stockRadius + self.retract
-        self.safeZ = 0.0
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
 
         self.taperSetup()
 
@@ -1287,28 +1287,34 @@ class Taper():
 
     def calcExternalPass(self):
         if self.taperX:
-        self.endX = self.stockRadius - self.feed
-        taperLength = self.feed / self.halfTaper
-        if taperLength < self.zLength:
-            self.startZ = taperLength
-            self.startX = self.stockRadius
+            self.endX = self.stockRadius - self.feed
+            taperLength = self.feed / self.halfTaper
+            if taperLength < self.zLength:
+                self.startZ = taperLength
+                self.startX = self.stockRadius
+            else:
+                self.startZ = self.zLength
+                self.startX = self.endX + self.halfTaper * self.zLength
+            self.startZ = -self.startZ
+            print ("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+                    "%6.3f %6.3f" %
+                    (self.passCount, self.startZ, self.startX, 
+                     self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
         else:
-            self.startZ = self.zLength
-            self.startX = self.endX + self.halfTaper * self.zLength
-        self.startZ = -self.startZ
-        print ("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-                "%6.3f %6.3f" %
-                (self.passCount, self.startZ, self.startX, 
-                 self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
+            pass
 
     def externalPass(self):
-        if self.taperX:
         moveZ(self.startZ)
         if self.taperPanel.pause.GetValue():
             print("pause")
             quePause()
-        moveX(self.startX, XSYN)
-        taperZX(self.endZ, self.halfTaper)
+        if self.taperX:
+            moveX(self.startX, XSYN)
+            taperZX(self.endZ, self.halfTaper)
+        else:
+            moveX(self.startX)
+            taperXZ(self.endZ, self.halfTaper)
+            pass
         moveX(self.safeX)
 
     def externalAdd(self):
