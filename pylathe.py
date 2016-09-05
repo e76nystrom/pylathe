@@ -1218,7 +1218,7 @@ class Taper():
             self.feedTable = []
             for passCount in range(0, self.passes):
                 self.feedTable.append(passCount * self.actualFeed)
-            feedTable.append(self.cutAmount)
+            self.feedTable.append(self.cutAmount)
 
             self.passes += 1
             self.taperPanel.passes.SetValue("%d" % (self.passes))
