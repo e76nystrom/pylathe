@@ -1215,8 +1215,8 @@ class Taper():
                    (self.passes, self.cutAmount, self.actualFeed))
 
             feedTable = []
-            for pass in range(0, self.passes):
-                feedTable.append(pass * self.actualFeed)
+            for passCount in range(0, self.passes):
+                feedTable.append(passCount * self.actualFeed)
             feedTable.append(self.cutAmount)
 
             self.passes += 1
