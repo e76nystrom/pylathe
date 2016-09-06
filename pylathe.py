@@ -1179,15 +1179,15 @@ class Taper():
         tp = self.taperPanel
         self.taperX = taperInch <= 1.0
         self.taper = taperInch
-        self.zSafe = getFloatVal(tp.zSafe)
+        self.zSafe = abs(getFloatVal(tp.zSafe))
         self.zStart = getFloatVal(tp.zStart)
-        self.zLength = getFloatVal(tp.zLength)
-        self.zFeed = getFloatVal(tp.zFeed)
+        self.zLength = abs(getFloatVal(tp.zLength))
+        self.zFeed = abs(getFloatVal(tp.zFeed))
 
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
-        self.xFinal = getFloatVal(tp.xFinal)
-        self.retract = getFloatVal(tp.xRetract)
+        self.xFinal = abs(getFloatVal(tp.xFinal))
+        self.retract = abs(getFloatVal(tp.xRetract))
 
         self.feedPass = getFloatVal(tp.xFeed) / 2.0
         self.finishPass = getFloatVal(tp.xFinal)
@@ -1204,41 +1204,29 @@ class Taper():
         print("externalTaper")
         self.getTaperParameters(taperInch)
 
+        self.xStart = self.stockDiameter / 2.0
+        self.xEnd = self.refDiameter / 2.0
+
         if self.taperX:
-            self.halfTaper = taperInch / 2.0
-            self.stockRadius = self.stockDiameter / 2.0
-            smallRadius = self.refDiameter / 2.0
-            self.cutAmount = self.stockRadius - smallRadius
-            cutToFinish = self.cutAmount - self.finishPass
-            self.passes = int(ceil(cutToFinish / self.feedPass))
-            self.actualFeed = cutToFinish / self.passes
-            print ("passes %d cutAmount %5.3f feed %6.3f" %
-                   (self.passes, self.cutAmount, self.actualFeed))
+            self.cutAmount = self.xStart - self.xEnd
 
-            self.endX = 0.0
             self.startZ = 0.0
-            self.endZ = 0.0
-            self.safeX = self.stockRadius + self.retract
-            self.safeZ = 0.0
-            self.passCount = 0
-            self.sPassCtr = 0
-            self.spring = 0
+            self.endZ = self.startZ
+            self.safeZ = self.startZ + self.zSafe
+            self.endX = 0.0
+            self.safeX = self.xStart + self.retract
         else:
-            self.xStart = self.stockDiameter / 2.0
-            self.xEnd = self.refDiameter / 2.0
-            self.zEnd = self.zStart - self.zLength
-            self.cutAmount = abs(self.zStart - self.zEnd)
-            cutToFinish = self.cutAmount - self.finishPass
-            self.passes = int(ceil(cutToFinish / self.zFeed))
-            self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
-            self.actualFeed = cutToFinish / self.passes
-            print ("passes %d cutAmount %5.3f feed %6.3f" %
-                   (self.passes, self.cutAmount, self.actualFeed))
+            self.cutAmount = self.zLength
 
-        self.feedTable = []
-        for passCount in range(0, self.passes):
-            self.feedTable.append(passCount * self.actualFeed)
-        # self.feedTable.append(self.cutAmount)
+        cutToFinish = self.cutAmount - self.finishPass
+        self.passes = int(ceil(cutToFinish / self.zFeed))
+        self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
+        self.actualFeed = cutToFinish / self.passes
+        print ("passes %d cutAmount %5.3f feed %6.3f" %
+               (self.passes, self.cutAmount, self.actualFeed))
+        self.passCount = 0
+        self.sPassCtr = 0
+        self.spring = 0
 
         self.taperSetup()
 
@@ -1271,8 +1259,8 @@ class Taper():
                 print("spring")
                 nextPass(0x100 | self.passCount)
             else:
-                self.feed = self.feedTable[self.passCount]
                 self.passCount += 1
+                self.feed = self.passCount * self.actualFeed
                 nextPass(self.passCount)
                 self.calcExternalPass()
             self.externalPass()
@@ -1297,21 +1285,28 @@ class Taper():
 
     def calcExternalPass(self):
         if self.taperX:
-            self.endX = self.stockRadius - self.feed
-            taperLength = self.feed / self.halfTaper
+            self.endX = self.startX - self.feed
+            taperLength = self.feed / self.taper
             if taperLength < self.zLength:
                 self.startZ = taperLength
-                self.startX = self.stockRadius
+                self.startX = self.xStart
             else:
                 self.startZ = self.zLength
-                self.startX = self.endX + self.halfTaper * self.zLength
+                self.startX = self.endX + self.taper * self.zLength
             self.startZ = -self.startZ
-            print ("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-                    "%6.3f %6.3f" %
-                    (self.passCount, self.startZ, self.startX, 
-                     self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
         else:
-            pass
+            self.startZ = self.zStart - self.feed
+            self.startX = self.xStart
+            self.endZ = self.zStart
+            taperLength = self.feed * self.taper
+            if taperLength < self.xLength:
+                self.endX = self.xStart -taperLength
+            else:
+                self.endX = self.xEnd
+        print ("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+               "%6.3f %6.3f" %
+               (self.passCount, self.startZ, self.startX, 
+                self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
 
     def externalPass(self):
         moveZ(self.startZ)
@@ -1320,10 +1315,10 @@ class Taper():
             quePause()
         if self.taperX:
             moveX(self.startX, XSYN)
-            taperZX(self.endZ, self.halfTaper)
+            taperZX(self.endZ, self.taper)
         else:
             moveX(self.startX)
-            taperXZ(self.endZ, self.halfTaper)
+            taperXZ(self.endZ, self.taper)
             pass
         moveX(self.safeX)
 
@@ -1343,7 +1338,6 @@ class Taper():
         print("internalTaper")
         self.getTaperParameters(taperInch)
 
-        self.halfTaper = self.taper / 2.0
         self.boreRadius = self.stockDiameter / 2.0
         largeRadius = self.refDiameter / 2.0
         self.cutAmount = largeRadius - self.boreRadius
@@ -1411,14 +1405,14 @@ class Taper():
 
     def calcInternalPass(self):
         self.startX = self.boreRadius + self.feed
-        self.endZ = self.feed / self.halfTaper
+        self.endZ = self.feed / self.taper
         print("endZ %6.3f" % (self.endZ))
         if self.endZ <= self.zLength:
             self.endX = self.boreRadius
         else:
             self.endZ = self.zLength
             self.endX = (self.boreRadius + self.feed - 
-                         self.zLength * self.halfTaper)
+                         self.zLength * self.taper)
         self.endZ = -self.endZ
         print ("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
                 "%6.3f %6.3f" %
@@ -1433,7 +1427,7 @@ class Taper():
         if self.taperPanel.pause.GetValue():
             print("pause")
             quePause()
-        taperZX(self.endZ, self.halfTaper)
+        taperZX(self.endZ, self.taper)
         moveX(self.boreRadius, XSYN)
         moveX(self.safeX)
         moveZ(self.safeZ)
