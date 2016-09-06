@@ -588,11 +588,6 @@ class UpdatePass():
                 self.calcPass(self.passCount == self.passes)
                 self.passCount += 1
             self.genPass()
-        # elif self.passCount == self.passes:
-        #     nextPass(self.passCount)
-        #     self.calcPass(True)
-        #     self.genPass()
-        #     self.passCount += 1
         else:
             if self.springFlag:
                 self.springFlag = False
@@ -643,10 +638,6 @@ class Turn(UpdatePass):
         self.xCut = abs(self.xStart) - abs(self.xEnd)
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
-        # self.passes = int(ceil(self.xCut / abs(self.xFeed)))
-        # self.turnPanel.passes.SetValue("%d" % (self.passes))
-        # print ("xCut %5.3f passes %d internal %s" %
-        #        (self.xCut, self.passes, self.internal))
 
         if self.internal:
             if not self.neg:
@@ -667,13 +658,6 @@ class Turn(UpdatePass):
 
         self.turnSetup()
 
-        # self.passCount = 0
-        # self.sPassCtr = 0
-        # self.spring = 0
-
-        # while self.turnUpdate():
-        #     pass
-
         while self.updatePass():
             pass
 
@@ -692,39 +676,6 @@ class Turn(UpdatePass):
             queZSetup(getFloatInfo('tuZFeed'))
         moveX(self.safeX)
         moveZ(self.zStart)
-
-    # def turnUpdate(self):
-    #     if self.passCount < self.passes:
-    #         self.springFlag = False
-    #         if self.sPassInt != 0:
-    #             self.sPassCtr += 1
-    #             if self.sPassCtr > self.sPassInt:
-    #                 self.sPassCtr = 0
-    #                 self.springFlag = True
-    #         if self.springFlag:
-    #             print("spring")
-    #             nextPass(0x100 | self.passCount)
-    #         else:
-    #             self.passCount += 1
-    #             nextPass(self.passCount)
-    #             feed = self.passCount * self.xFeed
-    #             if feed > self.xCut:
-    #                 feed = self.xCut
-    #             self.feed = feed
-    #             self.calculateTurnPass()
-    #         self.turnPass()
-    #     else:
-    #         if self.springFlag:
-    #             self.springFlag = False
-    #             self.spring += 1
-    #         if self.spring < self.sPasses:
-    #             self.spring += 1
-    #             print("spring")
-    #             nextPass(0x200 | self.spring)
-    #             self.turnPass()
-    #         else:
-    #             return(False)
-    #     return(True)
 
     def calculateTurnPass(self, final=False):
         if final:
@@ -756,8 +707,8 @@ class Turn(UpdatePass):
     def turnAdd(self):
         if self.feed >= self.xCut:
             add = getFloatVal(self.turnPanel.add)
-            self.feed += add
-            self.calculateTurnPass()
+            self.cutAmount += add
+            self.calculateTurnPass(True)
             self.turnSetup()
             self.turnPass()
             moveX(self.xStart + self.xRetract)
@@ -882,8 +833,9 @@ class TurnPanel(wx.Panel):
         self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
 
-class Face():
+class Face(UpdatePass):
     def __init__(self, facePanel):
+        UpdatePass.__init__(self)
         self.facePanel = facePanel
 
     def getFaceParameters(self):
@@ -898,15 +850,16 @@ class Face():
         self.zFeed = getFloatVal(fa.zFeed)
         self.zRetract = abs(getFloatVal(fa.zRetract))
 
-        self.sPassInt = getIntVal(fa.sPInt)
-        self.sPasses = getIntVal(fa.spring)
-
     def face(self):
         self.getFaceParameters()
 
         self.internal = self.xStart < self.xEnd
         self.zCut = abs(self.zStart - self.zEnd)
-        self.passes = int(ceil(self.zCut / self.zFeed))
+
+        self.calcFeed(self.zFeed, self.zCut)
+        self.setupSpringPasses(self.turnPanel)
+        self.setupAction(self.calculateFacePass, self.FacePass)
+
         self.facePanel.passes.SetValue("%d" % (self.passes))
         print ("zCut %5.3f passes %d internal %s" %
                (self.zCut, self.passes, self.internal))
@@ -918,11 +871,7 @@ class Face():
 
         self.faceSetup()
 
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
-
-        while self.faceUpdate():
+        while self.updatePass():
             pass
 
         moveX(self.safeX)
@@ -943,41 +892,12 @@ class Face():
         moveZ(self.zStart)
         moveX(self.xStart)
 
-    def faceUpdate(self):
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                nextPass(self.passCount)
-                feed = self.passCount * self.zFeed
-                if feed > self.zCut:
-                    feed = self.zCut
-                self.feed = feed
-                self.calculateFacePass()
-            self.facePass()
+    def calculateFacePass(self, final=False):
+        if final:
+            feed = self.cutAmount
         else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                nextPass(0x200 | self.spring)
-                print("spring")
-                self.facePass()
-            else:
-                return(False)
-        return(True)
-
-    def calculateFacePass(self):
-        feed = self.feed
+            feed = self.passCount * self.zFeed
+        self.feed = feed
         if self.internal:
             feed = -feed
         self.curZ = self.zStart - feed
@@ -997,9 +917,9 @@ class Face():
     def faceAdd(self):
         if self.feed >= self.zCut:
             add = getFloatVal(self.facePanel.add)
-            self.feed += add
+            self.cutAmount += add
             self.faceSetup()
-            self.calculateFacePass()
+            self.calculateFacePass(True)
             self.facePass()
             moveX(self.safeX)
             moveZ(self.zStart + self.zRetract)
