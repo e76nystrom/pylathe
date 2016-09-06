@@ -1223,6 +1223,7 @@ class Taper(UpdatePass):
             self.endX = 0.0
         else:
             self.cut = self.zLength
+            self.xLength = self.xStart - self.xEnd
 
         self.safeX = self.xStart + self.retract
 
