@@ -1712,9 +1712,9 @@ class ScrewThread(UpdatePass):
     def calculateThread(self, final=False, add=False):
         if not add:
             if final:
-                self.curArea += self.areaPass
-            else:
                 self.curArea = self.area
+            else:
+                self.curArea += self.areaPass
             feed = sqrt(self.curArea / self.tanAngle)
         feed = self.feed
         self.zOffset = feed * self.tanAngle
