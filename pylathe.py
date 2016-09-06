@@ -616,9 +616,6 @@ class Turn(UpdatePass):
         self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
-        # self.sPassInt = getIntVal(tu.sPInt)
-        # self.sPasses = getIntVal(tu.spring)
-
     def turn(self):
         self.getTurnParameters()
 
@@ -1647,9 +1644,6 @@ class ScrewThread(UpdatePass):
         self.hFactor = getFloatVal(th.hFactor)
         self.angle = radians(getFloatVal(th.angle))
 
-        self.sPassInt = getIntVal(th.sPInt)
-        self.sPasses = getIntVal(th.spring)
-
     def thread(self):
         self.getThreadParameters()
 
@@ -1980,7 +1974,6 @@ class JogPanel(wx.Panel):
         info['jogXPos'] = tc
         tc.SetFont(posFont)
         tc.SetEditable(False)
-        # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2921,7 +2914,6 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.parmList = (self.readAll, )
         self.start()
-        # self.getParm = (self.zLoc, self.xLoc, self.rpm)
 
     def zLoc(self):
         val = getParm('Z_LOC')
