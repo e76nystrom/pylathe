@@ -1716,7 +1716,7 @@ class ScrewThread(UpdatePass):
             else:
                 self.curArea += self.areaPass
             feed = sqrt(self.curArea / self.tanAngle)
-        feed = self.feed
+        self.feed = feed
         self.zOffset = feed * self.tanAngle
         print ("%4d %8.6f %6.4f %6.4f %6.4f" % 
                (self.passCount, self.curArea, feed, self.zOffset,
