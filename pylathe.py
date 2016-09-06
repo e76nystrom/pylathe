@@ -609,7 +609,7 @@ class UpdatePass():
 
 class Turn(UpdatePass):
     def __init__(self, turnPanel):
-        UpdatePass.__init__()
+        UpdatePass.__init__(self)
         self.turnPanel = turnPanel
 
     def getTurnParameters(self):
