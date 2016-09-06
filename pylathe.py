@@ -1221,9 +1221,10 @@ class Taper(UpdatePass):
             self.endZ = self.startZ
             self.safeZ = self.startZ + self.zSafe
             self.endX = 0.0
-            self.safeX = self.xStart + self.retract
         else:
             self.cut = self.zLength
+
+        self.safeX = self.xStart + self.retract
 
         self.calcFeed(self.xFeed, self.cut, self.finishPass)
         self.setupSpringPasses(self.taperPanel)
