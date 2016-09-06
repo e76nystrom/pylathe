@@ -562,7 +562,7 @@ class UpdatePass():
 
     def setupAction(self, calcPass, genPass):
         self.calcPass = calcPass
-        self.getPass = genPass
+        self.genPass = genPass
 
     def initPass(self):
         self.passCount = 0
