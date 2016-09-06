@@ -585,8 +585,8 @@ class UpdatePass():
                 nextPass(0x100 | self.passCount)
             else:
                 nextPass(self.passCount)
-                self.calcPass()
-            self.genPass(self.passCount == self.passes)
+                self.calcPass(self.passCount == self.passes)
+            self.genPass()
             self.passCount += 1
         # elif self.passCount == self.passes:
         #     nextPass(self.passCount)
