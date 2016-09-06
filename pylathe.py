@@ -591,8 +591,8 @@ class UpdatePass():
             self.passCount += 1
             nextPass(self.passCount)
             self.feed = self.cutAmount
-            self.calcPass()
-            self.genPass(True)
+            self.calcPass(True)
+            self.genPass()
         else:
             if self.springFlag:
                 self.springFlag = False
