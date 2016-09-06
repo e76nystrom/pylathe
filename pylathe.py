@@ -858,7 +858,7 @@ class Face(UpdatePass):
 
         self.calcFeed(self.zFeed, self.zCut)
         self.setupSpringPasses(self.facePanel)
-        self.setupAction(self.calculateFacePass, self.FacePass)
+        self.setupAction(self.calculateFacePass, self.facePass)
 
         self.facePanel.passes.SetValue("%d" % (self.passes))
         print ("zCut %5.3f passes %d internal %s" %
