@@ -543,26 +543,34 @@ class UpdatePass():
         self.calcPass = None
         self.genPass = None
 
+    def calcFeed(self, feed, cutAmount, finish=0):
+        self.cutAmount = cutAmount
+        cutToFinish = cutAmount - finish
+        self.passes = int(ceil(cutToFinish / abs(feed)))
+        self.actualFeed = cutToFinish / self.passes
+        if finish != 0:
+            self.passes += 1
+        self.initPass()
+        
     def setupFeed(self, actualFeed, cutAmount):
         self.actualFeed = actualFeed
         self.cutAmount = cutAmount
 
-    def setupPasses(self, passes, sPassInt, sPasses):
-        self.passes = passes
-        self.sPassInt = sPassInt
-        self.sPasses = sPasses
+    def setupSpringPasses(self, panel):
+        self.sPassInt = getIntVal(panel.sPInt)
+        self.sPasses = getIntVal(panel.spring)
 
     def setupAction(self, calcPass, genPass):
         self.calcPass = calcPass
         self.getPass = genPass
 
-    def init(self):
+    def initPass(self):
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
         self.feed = 0.0
 
-    def update(self):
+    def updatePass(self):
         print("pass %d" % (self.passCount))
         if self.passCount < self.passes:
             self.springFlag = False
@@ -599,8 +607,9 @@ class UpdatePass():
                 return(False)
         return(True)
 
-class Turn():
+class Turn(UpdatePass):
     def __init__(self, turnPanel):
+        super(Turn, self).__init__(parent)
         self.turnPanel = turnPanel
 
     def getTurnParameters(self):
@@ -613,8 +622,8 @@ class Turn():
         self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
-        self.sPassInt = getIntVal(tu.sPInt)
-        self.sPasses = getIntVal(tu.spring)
+        # self.sPassInt = getIntVal(tu.sPInt)
+        # self.sPasses = getIntVal(tu.spring)
 
     def turn(self):
         self.getTurnParameters()
@@ -635,10 +644,10 @@ class Turn():
         self.xCut = abs(self.xStart) - abs(self.xEnd)
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
-        self.passes = int(ceil(self.xCut / abs(self.xFeed)))
-        self.turnPanel.passes.SetValue("%d" % (self.passes))
-        print ("xCut %5.3f passes %d internal %s" %
-               (self.xCut, self.passes, self.internal))
+        # self.passes = int(ceil(self.xCut / abs(self.xFeed)))
+        # self.turnPanel.passes.SetValue("%d" % (self.passes))
+        # print ("xCut %5.3f passes %d internal %s" %
+        #        (self.xCut, self.passes, self.internal))
 
         if self.internal:
             if not self.neg:
@@ -649,15 +658,24 @@ class Turn():
 
         self.safeX = self.xStart + self.xRetract
 
-        turnUpdate = UpdatePass()
-        turnUpdate.setupFeed(self.actualFeed, self.cutAmount)
+        self.calcFeed(self.xCut, self.xFeed)
+        self.setupSpringPasses(self.turnPanel)
+        self.setupAction(self.calculateTurnPass, self.turnPass)
+
+        self.turnPanel.passes.SetValue("%d" % (self.passes))
+        print ("xCut %5.3f passes %d internal %s" %
+               (self.xCut, self.passes, self.internal))
+
         self.turnSetup()
 
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
+        # self.passCount = 0
+        # self.sPassCtr = 0
+        # self.spring = 0
 
-        while self.turnUpdate():
+        # while self.turnUpdate():
+        #     pass
+
+        while turnUpdate.update():
             pass
 
         moveX(self.xStart + self.xRetract)
@@ -676,38 +694,38 @@ class Turn():
         moveX(self.safeX)
         moveZ(self.zStart)
 
-    def turnUpdate(self):
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                nextPass(self.passCount)
-                feed = self.passCount * self.xFeed
-                if feed > self.xCut:
-                    feed = self.xCut
-                self.feed = feed
-                self.calculateTurnPass()
-            self.turnPass()
-        else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                print("spring")
-                nextPass(0x200 | self.spring)
-                self.turnPass()
-            else:
-                return(False)
-        return(True)
+    # def turnUpdate(self):
+    #     if self.passCount < self.passes:
+    #         self.springFlag = False
+    #         if self.sPassInt != 0:
+    #             self.sPassCtr += 1
+    #             if self.sPassCtr > self.sPassInt:
+    #                 self.sPassCtr = 0
+    #                 self.springFlag = True
+    #         if self.springFlag:
+    #             print("spring")
+    #             nextPass(0x100 | self.passCount)
+    #         else:
+    #             self.passCount += 1
+    #             nextPass(self.passCount)
+    #             feed = self.passCount * self.xFeed
+    #             if feed > self.xCut:
+    #                 feed = self.xCut
+    #             self.feed = feed
+    #             self.calculateTurnPass()
+    #         self.turnPass()
+    #     else:
+    #         if self.springFlag:
+    #             self.springFlag = False
+    #             self.spring += 1
+    #         if self.spring < self.sPasses:
+    #             self.spring += 1
+    #             print("spring")
+    #             nextPass(0x200 | self.spring)
+    #             self.turnPass()
+    #         else:
+    #             return(False)
+    #     return(True)
 
     def calculateTurnPass(self):
         feed = self.feed
