@@ -1303,9 +1303,9 @@ class Taper(UpdatePass):
     def externalAdd(self):
         if self.feed >= self.cutAmount:
             add = getFloatVal(self.taperPanel.add) / 2
-            self.feed += add
+            self.cutAmount += add
             self.taperSetup()
-            self.calcExternalPass()
+            self.calcExternalPass(True)
             self.externalPass()
             moveX(self.safeX)
             moveZ(self.startZ)
