@@ -1587,7 +1587,10 @@ class TaperPanel(wx.Panel):
         if self.angleBtn.GetValue():
             try:
                 angle = getFloatVal(self.angle)
-                deltaX = tan(radians(angle))
+                if angle <= 90:
+                    deltaX = tan(radians(angle))
+                else:
+                    deltaX = tan(radians(angle / 2)) * 2
                 self.zDelta.ChangeValue("1.000")
                 self.xDelta.ChangeValue("%6.4f" % (deltaX))
             except ValueError as e:
@@ -1599,7 +1602,10 @@ class TaperPanel(wx.Panel):
             deltaX = getFloatVal(self.xDelta)
 
             try:
-                angle = degrees(atan2(deltaX, deltaZ))
+                if xDelta < zDelta:
+                    angle = degrees(atan2(deltaX, deltaZ))
+                else:
+                    angle = degrees(atan2(deltaX / 2, deltaZ)) * 2
                 self.angle.ChangeValue("%5.3f" % (angle))
             except:
                 pass
