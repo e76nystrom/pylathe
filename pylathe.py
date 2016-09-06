@@ -569,11 +569,11 @@ class UpdatePass():
         self.sPassCtr = 0
         self.spring = 0
         self.feed = 0.0
+        self.springFlag = False
 
     def updatePass(self):
         print("pass %d" % (self.passCount))
         if self.passCount < self.passes:
-            self.springFlag = False
             if self.sPassInt != 0:
                 self.sPassCtr += 1
                 if self.sPassCtr > self.sPassInt:
