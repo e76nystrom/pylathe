@@ -565,7 +565,7 @@ class UpdatePass():
         self.genPass = genPass
 
     def initPass(self):
-        self.passCount = 0
+        self.passCount = 1
         self.sPassCtr = 0
         self.spring = 0
         self.feed = 0.0
@@ -583,16 +583,15 @@ class UpdatePass():
                 print("spring")
                 nextPass(0x100 | self.passCount)
             else:
-                self.passCount += 1
                 nextPass(self.passCount)
                 self.calcPass()
             self.genPass()
-        elif self.passCount == self.passes:
             self.passCount += 1
+        elif self.passCount == self.passes:
             nextPass(self.passCount)
-            self.feed = self.cutAmount
             self.calcPass(True)
             self.genPass()
+            self.passCount += 1
         else:
             if self.springFlag:
                 self.springFlag = False
