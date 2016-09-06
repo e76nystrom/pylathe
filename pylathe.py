@@ -857,7 +857,7 @@ class Face(UpdatePass):
         self.zCut = abs(self.zStart - self.zEnd)
 
         self.calcFeed(self.zFeed, self.zCut)
-        self.setupSpringPasses(self.turnPanel)
+        self.setupSpringPasses(self.facePanel)
         self.setupAction(self.calculateFacePass, self.FacePass)
 
         self.facePanel.passes.SetValue("%d" % (self.passes))
