@@ -586,13 +586,13 @@ class UpdatePass():
             else:
                 nextPass(self.passCount)
                 self.calcPass()
-            self.genPass()
+            self.genPass(self.passCount == self.passes)
             self.passCount += 1
-        elif self.passCount == self.passes:
-            nextPass(self.passCount)
-            self.calcPass(True)
-            self.genPass()
-            self.passCount += 1
+        # elif self.passCount == self.passes:
+        #     nextPass(self.passCount)
+        #     self.calcPass(True)
+        #     self.genPass()
+        #     self.passCount += 1
         else:
             if self.springFlag:
                 self.springFlag = False
