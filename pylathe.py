@@ -534,7 +534,7 @@ def sendXData(send=False):
         stdout.flush()
 
 class UpdatePass():
-    def __init__(self, passCount, sPassInt, sPasses, actualFeed, cutAmount):
+    def __init__(self):
         self.passes = 0
         self.passInt = 0
         self.sPasses = 0
@@ -585,7 +585,7 @@ class UpdatePass():
             nextPass(self.passCount)
             self.feed = self.cutAmount
             self.calcPass()
-            self.genPass()
+            self.genPass(self.feed)
         else:
             if self.springFlag:
                 self.springFlag = False
@@ -649,6 +649,8 @@ class Turn():
 
         self.safeX = self.xStart + self.xRetract
 
+        turnUpdate = UpdatePass()
+        turnUpdate.setupFeed(self.actualFeed, self.cutAmount)
         self.turnSetup()
 
         self.passCount = 0
