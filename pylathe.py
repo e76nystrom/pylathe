@@ -572,7 +572,6 @@ class UpdatePass():
         self.springFlag = False
 
     def updatePass(self):
-        print("pass %d" % (self.passCount))
         if self.passCount <= self.passes:
             self.springFlag = False
             if self.sPassInt != 0:
@@ -584,6 +583,7 @@ class UpdatePass():
                 print("spring")
                 nextPass(0x100 | self.passCount)
             else:
+                print("pass %d" % (self.passCount))
                 nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
                 self.passCount += 1
@@ -595,7 +595,7 @@ class UpdatePass():
             if self.spring < self.sPasses:
                 self.spring += 1
                 nextPass(0x200 | self.spring)
-                print("spring")
+                print("spring %d" % (self.spring))
                 self.genPass()
             else:
                 return(False)
