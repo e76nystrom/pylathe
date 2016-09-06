@@ -584,16 +584,15 @@ class UpdatePass():
                 nextPass(0x100 | self.passCount)
             else:
                 self.passCount += 1
-                self.feed = self.passCount * self.actualFeed
                 nextPass(self.passCount)
                 self.calcPass()
-            self.genPass(self.feed)
+            self.genPass()
         elif self.passCount == self.passes:
             self.passCount += 1
             nextPass(self.passCount)
             self.feed = self.cutAmount
             self.calcPass()
-            self.genPass(self.feed)
+            self.genPass(True)
         else:
             if self.springFlag:
                 self.springFlag = False
@@ -602,7 +601,7 @@ class UpdatePass():
                 self.spring += 1
                 nextPass(0x200 | self.spring)
                 print("spring")
-                self.genPass(self.feed)
+                self.genPass()
             else:
                 return(False)
         return(True)
@@ -727,8 +726,12 @@ class Turn(UpdatePass):
     #             return(False)
     #     return(True)
 
-    def calculateTurnPass(self):
-        feed = self.feed
+    def calculateTurnPass(self, final=False):
+        if final:
+            feed = self.cutAmount
+        else:
+            feed = self.passCount * self.xFeed
+        self.feed = feed
         if self.internal:
             if self.neg:
                 feed = -feed
