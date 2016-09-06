@@ -1193,11 +1193,10 @@ class Taper(UpdatePass):
 
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
-        self.xFinal = abs(getFloatVal(tp.xFinal))
         self.retract = abs(getFloatVal(tp.xRetract))
-
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
-        self.finishPass = getFloatVal(tp.xFinal)
+
+        self.finish = abs(getFloatVal(tp.finish))
 
         totalTaper = taperInch * self.zLength
         taperInch = totalTaper / self.zLength
@@ -1323,7 +1322,7 @@ class Taper(UpdatePass):
         largeRadius = self.refDiameter / 2.0
         self.cut = largeRadius - self.boreRadius
 
-        self.calcFeed(self.xFeed, self.cut, self.finishPass)
+        self.calcFeed(self.xFeed, self.cut, self.finish)
         self.setupSpringPasses(self.taperPanel)
         self.setupAction(self.calcInternalPass, self.internalPass)
 
@@ -1473,7 +1472,7 @@ class TaperPanel(wx.Panel):
 
         self.spring = addField(self, sizerG, "Spring", "tpSpring")
 
-        self.xFinal = addField(self, sizerG, "X Final", "tpXFinal")
+        self.finish = addField(self, sizerG, "Finish", "tpXFinish")
 
         # control buttons
 
