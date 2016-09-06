@@ -533,6 +533,72 @@ def sendXData(send=False):
         print("sendZData Timeout")
         stdout.flush()
 
+class UpdatePass():
+    def __init__(self, passCount, sPassInt, sPasses, actualFeed, cutAmount):
+        self.passes = 0
+        self.passInt = 0
+        self.sPasses = 0
+        self.actualFeed = 0.0
+        self.cutAmount = 0.0
+        self.calcPass = None
+        self.genPass = None
+
+    def setupFeed(self, actualFeed, cutAmount):
+        self.actualFeed = actualFeed
+        self.cutAmount = cutAmount
+
+    def setupPasses(self, passes, sPassInt, sPasses):
+        self.passes = passes
+        self.sPassInt = sPassInt
+        self.sPasses = sPasses
+
+    def setupAction(self, calcPass, genPass):
+        self.calcPass = calcPass
+        self.getPass = genPass
+
+    def init(self):
+        self.passCount = 0
+        self.sPassCtr = 0
+        self.spring = 0
+        self.feed = 0.0
+
+    def update(self):
+        print("pass %d" % (self.passCount))
+        if self.passCount < self.passes:
+            self.springFlag = False
+            if self.sPassInt != 0:
+                self.sPassCtr += 1
+                if self.sPassCtr > self.sPassInt:
+                    self.sPassCtr = 0
+                    self.springFlag = True
+            if self.springFlag:
+                print("spring")
+                nextPass(0x100 | self.passCount)
+            else:
+                self.passCount += 1
+                self.feed = self.passCount * self.actualFeed
+                nextPass(self.passCount)
+                self.calcPass()
+            self.genPass(self.feed)
+        elif self.passCount == self.passes:
+            self.passCount += 1
+            nextPass(self.passCount)
+            self.feed = self.cutAmount
+            self.calcPass()
+            self.genPass()
+        else:
+            if self.springFlag:
+                self.springFlag = False
+                self.spring += 1
+            if self.spring < self.sPasses:
+                self.spring += 1
+                nextPass(0x200 | self.spring)
+                print("spring")
+                self.genPass(self.feed)
+            else:
+                return(False)
+        return(True)
+
 class Turn():
     def __init__(self, turnPanel):
         self.turnPanel = turnPanel
