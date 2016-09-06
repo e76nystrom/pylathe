@@ -675,7 +675,7 @@ class Turn(UpdatePass):
         # while self.turnUpdate():
         #     pass
 
-        while turnUpdate.update():
+        while self.updatePass():
             pass
 
         moveX(self.xStart + self.xRetract)
