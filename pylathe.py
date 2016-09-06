@@ -1662,7 +1662,7 @@ class ScrewThread():
         print ("depth %6.4f actualWdith %6.4f" %
                (self.depth, actualWidth))
         
-        self.area = 0.5 * self.depth * actualWidth
+        self.area = area = 0.5 * self.depth * actualWidth
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
