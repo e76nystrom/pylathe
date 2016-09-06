@@ -1587,9 +1587,9 @@ class TaperPanel(wx.Panel):
         if self.angleBtn.GetValue():
             try:
                 angle = getFloatVal(self.angle)
-                deltaX = tan(radians(angle / 2)) * 2
+                deltaX = tan(radians(angle))
                 self.zDelta.ChangeValue("1.000")
-                self.xDelta.ChangeValue("%6.4f" % (deltaX))
+                self.xDelta.ChangeValue("%0.5f" % (deltaX))
             except ValueError as e:
                 pass
 
@@ -1637,10 +1637,7 @@ class TaperPanel(wx.Panel):
         global xHomed, jogPanel
         if xHomed:
             self.sendData()
-            if self.deltaBtn.GetValue():
-                taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-            else:
-                taper = tan(radians(getFloatVal(self.angle)))
+            taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
             if self.internal.GetValue():
                 self.taper.internalTaper(taper)
             else:
