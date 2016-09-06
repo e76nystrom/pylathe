@@ -657,7 +657,7 @@ class Turn(UpdatePass):
 
         self.safeX = self.xStart + self.xRetract
 
-        self.calcFeed(self.xCut, self.xFeed)
+        self.calcFeed(self.xFeed, self.xCut)
         self.setupSpringPasses(self.turnPanel)
         self.setupAction(self.calculateTurnPass, self.turnPass)
 
