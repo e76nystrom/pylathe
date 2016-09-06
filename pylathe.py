@@ -1318,11 +1318,13 @@ class Taper(UpdatePass):
 
         self.boreRadius = self.stockDiameter / 2.0
         largeRadius = self.refDiameter / 2.0
-        self.cutAmount = largeRadius - self.boreRadius
-        cutToFinish = self.cutAmount - self.finishPass
-        self.passes = int(ceil(cutToFinish / self.feedPass))
-        self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
-        self.actualFeed = cutToFinish / self.passes
+        self.cut = largeRadius - self.boreRadius
+
+        self.calcFeed(self.xFeed, self.cut, self.finishPass)
+        self.setupSpringPasses(self.taperPanel)
+        self.setupAction(self.calcInternalPass, self.internalPass)
+
+        self.taperPanel.passes.SetValue("%d" % (self.passes))
         print ("passes %d cutAmount %5.3f feed %6.3f" %
                (self.passes, self.cutAmount, self.actualFeed))
 
@@ -1330,14 +1332,11 @@ class Taper(UpdatePass):
         self.endZ = 0.0
         self.safeX = self.boreRadius - self.retract
         self.safeZ = self.retract
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
 
         self.taperSetup()
         moveZ(self.safeZ)
 
-        while self.internalTaperUpdate():
+        while self.updatePass():
             pass
 
         moveX(self.safeX)
@@ -1345,44 +1344,13 @@ class Taper(UpdatePass):
         stopSpindle();
         stdout.flush()
 
-    def internalTaperUpdate(self):
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                nextPass(self.passCount)
-                self.feed = self.passCount * self.actualFeed
-                self.calcInternalPass()
-            self.internalPass()
-        elif self.passCount == self.passes:
-            self.passCount += 1
-            nextPass(self.passCount)
-            self.feed = self.cutAmount
-            self.calcInternalPass()
-            self.internalPass()
+    def calcInternalPass(self, final=False):
+        if final:
+            feed = self.cutAmount
         else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                nextPass(0x200 | self.spring)
-                print("spring")
-                self.internalPass()
-            else:
-                return(False)
-        return(True)
-
-    def calcInternalPass(self):
-        self.startX = self.boreRadius + self.feed
+            feed = self.passCount * self.actualFeed
+        self.feed = feed
+        self.startX = self.boreRadius + feed
         self.endZ = self.feed / self.taper
         print("endZ %6.3f" % (self.endZ))
         if self.endZ <= self.zLength:
@@ -1694,7 +1662,7 @@ class ScrewThread():
         print ("depth %6.4f actualWdith %6.4f" %
                (self.depth, actualWidth))
         
-        area = 0.5 * self.depth * actualWidth
+        self.area = 0.5 * self.depth * actualWidth
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
@@ -1706,6 +1674,10 @@ class ScrewThread():
         print ("passes %d areaPass %8.6f" %
                (self.passes, self.areaPass))
         
+        self.setupSpringPasses(self.threadPanel)
+        self.setupAction(self.calculateThread, self.threadPass)
+        self.initPass()
+
         if self.internal:
             self.xRetract = -self.xRetract
         
@@ -1716,12 +1688,9 @@ class ScrewThread():
 
         self.curArea = 0.0
         self.prevFeed = 0.0
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
         print("pass     area  xfeed  zfeed  delta")
 
-        while self.threadUpdate():
+        while self.UpdatePass():
             pass
 
         stopSpindle();
@@ -1739,38 +1708,13 @@ class ScrewThread():
         moveZ(self.startZ + self.zBackInc)
         moveZ(self.startZ)
 
-    def threadUpdate(self):
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                nextPass(self.passCount)
+    def calculateThread(self, final=False, add=False):
+        if not add:
+            if final:
                 self.curArea += self.areaPass
-                self.feed = sqrt(self.curArea / self.tanAngle)
-                self.calculateThread()
-            self.threadPass()
-        else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                nextPass(0x200 | self.spring)
-                print("spring")
-                self.threadPass()
             else:
-                return(False)
-        return(True)
-
-    def calculateThread(self):
+                self.curArea = self.area
+            feed = sqrt(self.curArea / self.tanAngle)
         feed = self.feed
         self.zOffset = feed * self.tanAngle
         print ("%4d %8.6f %6.4f %6.4f %6.4f" % 
@@ -1797,7 +1741,7 @@ class ScrewThread():
             add = getFloatVal(self.threadPanel.add)
             self.feed += add
             self.threadSetup()
-            self.calculateThread()
+            self.calculateThread(add=True)
             self.threadPass()
             stopSpindle();
             command('CMD_RESUME')
