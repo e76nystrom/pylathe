@@ -1235,7 +1235,7 @@ class Taper(UpdatePass):
 
         self.taperSetup()
 
-        while self.externalTaperUpdate():
+        while self.updatePass():
             pass
 
         moveX(self.safeX)
