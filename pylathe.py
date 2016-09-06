@@ -1691,7 +1691,7 @@ class ScrewThread(UpdatePass):
         self.prevFeed = 0.0
         print("pass     area  xfeed  zfeed  delta")
 
-        while self.UpdatePass():
+        while self.updatePass():
             pass
 
         stopSpindle();
