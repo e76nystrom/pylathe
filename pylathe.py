@@ -608,8 +608,8 @@ class UpdatePass():
         return(True)
 
 class Turn(UpdatePass):
-    def __init__(self, parent, turnPanel):
-        super(Turn, self).__init__(parent)
+    def __init__(self, turnPanel):
+        super(Turn, self).__init__()
         self.turnPanel = turnPanel
 
     def getTurnParameters(self):
