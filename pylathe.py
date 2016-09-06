@@ -1612,8 +1612,9 @@ class TaperPanel(wx.Panel):
     #     moveZ(0.010)
     #     taperZX(-0.25, 0.0251)
 
-class ScrewThread():
+class ScrewThread(UpdatePass):
     def __init__(self, threadPanel):
+        UpdatePass.__init__(self)
         self.threadPanel = threadPanel
 
     def getThreadParameters(self):
