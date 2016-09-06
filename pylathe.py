@@ -639,6 +639,14 @@ class Turn(UpdatePass):
         self.internal = self.xCut < 0
         self.xCut = abs(self.xCut)
 
+        self.calcFeed(self.xFeed, self.xCut)
+        self.setupSpringPasses(self.turnPanel)
+        self.setupAction(self.calculateTurnPass, self.turnPass)
+
+        self.turnPanel.passes.SetValue("%d" % (self.passes))
+        print ("xCut %5.3f passes %d internal %s" %
+               (self.xCut, self.passes, self.internal))
+
         if self.internal:
             if not self.neg:
                 self.xRetract = -self.xRetract
@@ -647,14 +655,6 @@ class Turn(UpdatePass):
                 self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
-
-        self.calcFeed(self.xFeed, self.xCut)
-        self.setupSpringPasses(self.turnPanel)
-        self.setupAction(self.calculateTurnPass, self.turnPass)
-
-        self.turnPanel.passes.SetValue("%d" % (self.passes))
-        print ("xCut %5.3f passes %d internal %s" %
-               (self.xCut, self.passes, self.internal))
 
         self.turnSetup()
 
@@ -1175,8 +1175,9 @@ class CutoffPanel(wx.Panel):
         command('CMD_RESUME')
         jogPanel.focus()
 
-class Taper():
+class Taper(UpdatePass):
     def __init__(self, taperPanel):
+        UpdatePass.__init__(self)
         self.taperPanel = taperPanel
         # morse #3 taper
         # taper = 0.0502
@@ -1201,9 +1202,6 @@ class Taper():
         self.feedPass = getFloatVal(tp.xFeed) / 2.0
         self.finishPass = getFloatVal(tp.xFinal)
 
-        self.sPassInt = getIntVal(tp.sPInt)
-        self.sPasses = getIntVal(tp.spring)
-
         totalTaper = taperInch * self.zLength
         taperInch = totalTaper / self.zLength
         print ("totalTaper %5.3f taperInch %6.4f" %
@@ -1217,7 +1215,7 @@ class Taper():
         self.xEnd = self.refDiameter / 2.0
 
         if self.taperX:
-            self.cutAmount = self.xStart - self.xEnd
+            self.cut = self.xStart - self.xEnd
 
             self.startZ = 0.0
             self.endZ = self.startZ
@@ -1225,17 +1223,15 @@ class Taper():
             self.endX = 0.0
             self.safeX = self.xStart + self.retract
         else:
-            self.cutAmount = self.zLength
+            self.cut = self.zLength
 
-        cutToFinish = self.cutAmount - self.finishPass
-        self.passes = int(ceil(cutToFinish / self.zFeed))
-        self.taperPanel.passes.SetValue("%d" % (self.passes + 1))
-        self.actualFeed = cutToFinish / self.passes
+        self.calcFeed(self.xFeed, self.Cut, self.finishPass)
+        self.setupSpringPasses(self.taperPanel)
+        self.setupAction(self.calcExternalPass, self.externalPass)
+
+        self.taperPanel.passes.SetValue("%d" % (self.passes))
         print ("passes %d cutAmount %5.3f feed %6.3f" %
                (self.passes, self.cutAmount, self.actualFeed))
-        self.passCount = 0
-        self.sPassCtr = 0
-        self.spring = 0
 
         self.taperSetup()
 
@@ -1255,46 +1251,14 @@ class Taper():
         xSynSetup(getFloatInfo('tpXFeed'))
         moveX(self.safeX)
 
-    def externalTaperUpdate(self):
-        print("pass %d" % (self.passCount))
-        if self.passCount < self.passes:
-            self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
-            if self.springFlag:
-                print("spring")
-                nextPass(0x100 | self.passCount)
-            else:
-                self.passCount += 1
-                self.feed = self.passCount * self.actualFeed
-                nextPass(self.passCount)
-                self.calcExternalPass()
-            self.externalPass()
-        elif self.passCount == self.passes:
-            self.passCount += 1
-            nextPass(self.passCount)
-            self.feed = self.cutAmount
-            self.calcExternalPass()
-            self.externalPass()
-        else:
-            if self.springFlag:
-                self.springFlag = False
-                self.spring += 1
-            if self.spring < self.sPasses:
-                self.spring += 1
-                nextPass(0x200 | self.spring)
-                print("spring")
-                self.externalPass()
-            else:
-                return(False)
-        return(True)
-
-    def calcExternalPass(self):
+    def calcExternalPass(self, final=False):
         if self.taperX:
-            self.endX = self.startX - self.feed
+            if final:
+                feed = self.cutAmount
+            else:
+                feed = self.passCount * self.xFeed
+            self.feed = feed
+            self.endX = self.startX - feed
             taperLength = self.feed / self.taper
             if taperLength < self.zLength:
                 self.startZ = taperLength
@@ -1304,7 +1268,12 @@ class Taper():
                 self.startX = self.endX + self.taper * self.zLength
             self.startZ = -self.startZ
         else:
-            self.startZ = self.zStart - self.feed
+            if final:
+                feed = self.cutAmount
+            else:
+                feed = self.passCount * self.zFeed
+            self.feed = feed
+            self.startZ = self.zStart - feed
             self.startX = self.xStart
             self.endZ = self.zStart
             taperLength = self.feed * self.taper
