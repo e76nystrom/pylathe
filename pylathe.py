@@ -681,7 +681,7 @@ class Turn(UpdatePass):
         if final:
             feed = self.cutAmount
         else:
-            feed = self.passCount * self.xFeed
+            feed = self.passCount * self.actualFeed
         self.feed = feed
         if self.internal:
             if self.neg:
@@ -896,7 +896,7 @@ class Face(UpdatePass):
         if final:
             feed = self.cutAmount
         else:
-            feed = self.passCount * self.zFeed
+            feed = self.passCount * self.actualFeed
         self.feed = feed
         if self.internal:
             feed = -feed
@@ -1256,7 +1256,7 @@ class Taper(UpdatePass):
             if final:
                 feed = self.cutAmount
             else:
-                feed = self.passCount * self.xFeed
+                feed = self.passCount * self.actualFeed
             self.feed = feed
             self.endX = self.xStart - feed
             taperLength = self.feed / self.taper
@@ -1271,7 +1271,7 @@ class Taper(UpdatePass):
             if final:
                 feed = self.cutAmount
             else:
-                feed = self.passCount * self.zFeed
+                feed = self.passCount * self.actualFeed
             self.feed = feed
             self.startZ = self.zStart - feed
             self.startX = self.xStart
