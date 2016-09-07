@@ -1591,7 +1591,7 @@ class TaperPanel(wx.Panel):
             self.zLength.SetValue("%0.3f" % (length))
             self.stockDiam.SetValue("%0.3f" % (large))
             self.diam.SetValue("%0.3f" % (small))
-            if taper < 2.0:
+            if taper < 1.0:
                 self.deltaBtn.SetValue(True)
                 self.zDelta.SetValue("1.000")
                 self.xDelta.SetValue("%0.5f" % (taper / 2))
