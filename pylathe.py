@@ -1420,11 +1420,12 @@ class TaperPanel(wx.Panel):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         txt = wx.StaticText(self, -1, "Select Taper")
-        sizerH.Add(txt, flag=wx.ALL, border=2)
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
 
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
                                             choices=self.taperList,
                                             style=wx.CB_READONLY)
+        info['tpTaperSel'] = combo
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
