@@ -1597,7 +1597,7 @@ class TaperPanel(wx.Panel):
                 self.xDelta.SetValue("%0.5f" % (taper / 2))
             else:
                 self.angleBtn.SetValue(True)
-                self.angle.SetValue("%0.3f" % radians(angle / 2))
+                self.angle.SetValue("%0.3f" % radians(taper / 2))
             self.update()
 
     def OnDeltaFocus(self, e):
