@@ -1187,20 +1187,21 @@ class Taper(UpdatePass):
         tp = self.taperPanel
         self.taperX = taperInch <= 1.0
         self.taper = taperInch
-        self.zSafe = abs(getFloatVal(tp.zSafe))
+
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = abs(getFloatVal(tp.zLength))
         self.zFeed = abs(getFloatVal(tp.zFeed))
+        self.zRetract = abs(getFloatVal(tp.zRetract))
 
         self.stockDiameter = getFloatVal(tp.stockDiam)
         self.refDiameter = getFloatVal(tp.diam)
-        self.retract = abs(getFloatVal(tp.xRetract))
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
+        self.xRetract = abs(getFloatVal(tp.xRetract))
 
         self.finish = abs(getFloatVal(tp.finish))
 
         totalTaper = taperInch * self.zLength
-        taperInch = totalTaper / self.zLength
+        # taperInch = totalTaper / self.zLength
         print ("totalTaper %5.3f taperInch %6.4f" %
                (totalTaper, taperInch))
 
@@ -1216,7 +1217,7 @@ class Taper(UpdatePass):
 
             self.startZ = 0.0
             self.endZ = self.startZ
-            self.safeZ = self.startZ + self.zSafe
+            self.safeZ = self.startZ + self.zRetract
             self.endX = 0.0
             feed = self.xFeed
             finish = self.finish / 2
@@ -1226,7 +1227,7 @@ class Taper(UpdatePass):
             feed = self.zFeed
             finish = self.finish
 
-        self.safeX = self.xStart + self.retract
+        self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
         self.setupSpringPasses(self.taperPanel)
@@ -1333,8 +1334,8 @@ class Taper(UpdatePass):
 
         self.startZ = 0.0
         self.endZ = 0.0
-        self.safeX = self.boreRadius - self.retract
-        self.safeZ = self.retract
+        self.safeX = self.boreRadius - self.xRetract
+        self.safeZ = self.xRetract
 
         self.taperSetup()
         moveZ(self.safeZ)
@@ -1407,7 +1408,7 @@ class TaperPanel(wx.Panel):
                          ("BS5",  0.5388, 0.4500, 2.13, 0.5016/12),
                          ("BS11", 1.4978, 1.2500, 5.94, 0.5010/12),
                          ("5C",   1.4800, 1.2500, 0.61, 20.0),
-                         ("ER32", 0., 0., 0, 16.0),
+                         ("ER32", 1.2598, 0.9252, 0, 16.0),
                          ("R8",   1.2500, 0.9400, 0.95, 16.51),
                          ("", 0., 0., 0, 0.),
                          ("", 0., 0., 0, 0.),
@@ -1453,7 +1454,7 @@ class TaperPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tpZFeed")
         
-        self.zSafe = addField(self, sizerG, "Z Retract", "tpZSafe")
+        self.zRetract = addField(self, sizerG, "Z Retract", "tpZRetract")
 
         # x parameters
 
@@ -1676,8 +1677,6 @@ class ScrewThread(UpdatePass):
         self.zEnd = getFloatVal(th.zEnd)
         self.zAccel = 0.0
         self.zBackInc = 0.003
-
-        self.xScale = 16000
 
         if th.tpi.GetValue():
             self.tpi = getFloatVal(th.thread)
