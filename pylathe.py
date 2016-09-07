@@ -1464,6 +1464,7 @@ class TaperPanel(wx.Panel):
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
+
         self.xDelta = addField(self, sizerG, "X", "tpXDelta")
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
@@ -1566,7 +1567,6 @@ class TaperPanel(wx.Panel):
         if self.deltaBtn.GetValue():
             deltaZ = getFloatVal(self.zDelta)
             deltaX = getFloatVal(self.xDelta)
-
             try:
                 angle = degrees(atan2(deltaX, deltaZ))
                 self.angle.ChangeValue("%5.3f" % (angle))
@@ -1574,7 +1574,16 @@ class TaperPanel(wx.Panel):
                 pass
 
     def OnCombo(self, e):
-        pass
+        index = self.taperSel.GetSelection()
+        if index != 0:
+            (name, large, small, length, taper) = taperDef[index]
+            self.zLength.SetValue("%0.3f" % length)
+            self.stockDiam.SetValue("%0.3f" % large)
+            self.diam.SetValue("%0.3f" % small)
+            self.deltaBtn.SetValue(True)
+            self.zDelta.SetValue("1.000")
+            self.xDelta.SetValue("%0.5f" % taper)
+            self.updateDelta()
 
     def OnDeltaFocus(self, e):
         self.updateDelta()
