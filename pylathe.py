@@ -1000,7 +1000,7 @@ class FacePanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['fdPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -1142,7 +1142,7 @@ class CutoffPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['cuPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -1541,7 +1541,7 @@ class TaperPanel(wx.Panel):
         # btn.Bind(wx.EVT_BUTTON, self.OnDebug)
         # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
@@ -1902,7 +1902,7 @@ class ThreadPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['thPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
