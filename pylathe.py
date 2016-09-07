@@ -1404,9 +1404,9 @@ class TaperPanel(wx.Panel):
                     ("MT2", 0.7000, 0.5720, 2.56, .0500),
                     ("MT3", 0.9380, 0.7780, 3.19, .0502),
         ]
-        taper = []
+        self.taperList = []
         for t in taperDef:
-            taper.append[t[0]]
+            self.taperList.append[t[0]]
 
     def InitUI(self):
         global hdrFont, info
@@ -1422,7 +1422,8 @@ class TaperPanel(wx.Panel):
         txt = wx.StaticText(self, -1, "Select Taper")
         sizerH.Add(txt, flag=wx.ALL, border=2)
 
-        self.taperSel = combo = wx.ComboBox(self, -1, taper[0], choices=taper,
+        self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
+                                            choices=self.taperList,
                                             style=wx.CB_READONLY)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
