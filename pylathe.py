@@ -1404,6 +1404,7 @@ class TaperPanel(wx.Panel):
         ]
         self.taperList = []
         for t in taperDef:
+            print t[0]
             self.taperList.append[t[0]]
         self.InitUI()
         self.taper = Taper(self)
