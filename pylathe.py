@@ -790,7 +790,7 @@ class TurnPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['tuPause'] = cb
         
-        sizefV.AddStrechSpacer()
+        sizerV.AddStrechSpacer()
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
