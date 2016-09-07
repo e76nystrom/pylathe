@@ -1587,14 +1587,17 @@ class TaperPanel(wx.Panel):
     def OnCombo(self, e):
         index = self.taperSel.GetSelection()
         if index != 0:
-            self.deltaBtn.SetValue(True)
-            self.angleBtn.SetValue(False)
             (name, large, small, length, taper) = self.taperDef[index]
             self.zLength.SetValue("%0.3f" % (length))
             self.stockDiam.SetValue("%0.3f" % (large))
             self.diam.SetValue("%0.3f" % (small))
-            self.zDelta.SetValue("1.000")
-            self.xDelta.SetValue("%0.5f" % (taper / 2))
+            if taper < 2.0:
+                self.deltaBtn.SetValue(True)
+                self.zDelta.SetValue("1.000")
+                self.xDelta.SetValue("%0.5f" % (taper / 2))
+            else:
+                self.angleBtn.SetValue(True)
+                self.angle.SetValue("%0.3f" % radians(angle / 2))
             self.update()
 
     def OnDeltaFocus(self, e):
