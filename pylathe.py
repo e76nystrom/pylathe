@@ -1569,6 +1569,9 @@ class TaperPanel(wx.Panel):
             except:
                 pass
 
+    def OnCombo(self, e):
+        pass
+
     def OnDeltaFocus(self, e):
         self.updateDelta()
         e.Skip()
