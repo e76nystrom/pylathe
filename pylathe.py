@@ -721,7 +721,7 @@ class TurnPanel(wx.Panel):
     def InitUI(self):
         global hdrFont
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizefV.AddStrechSpacer()
+        sizerV.AddStrechSpacer()
 
         txt = wx.StaticText(self, -1, "Turn")
         txt.SetFont(hdrFont)
