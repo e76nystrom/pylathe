@@ -1414,14 +1414,14 @@ class TaperPanel(wx.Panel):
 
         # z parameters
 
-        self.zSafe = addField(self, sizerG, "Z Safe", "tpZSafe")
-
         self.zStart = addField(self, sizerG, "Z Start", "tpZStart")
 
         self.zLength = addField(self, sizerG, "Z Length", "tpZLength")
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tpZFeed")
         
+        self.zSafe = addField(self, sizerG, "Z Retract", "tpZSafe")
+
         # x parameters
 
         self.stockDiam = addFieldText(self, sizerG, "Stock Diam",
