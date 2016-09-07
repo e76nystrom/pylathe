@@ -1398,12 +1398,12 @@ class Taper(UpdatePass):
 class TaperPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
-        taperDef = [("Custom",),
+        self.taperDef = [("Custom",),
                     ("MT2", 0.7000, 0.5720, 2.56, .0500),
                     ("MT3", 0.9380, 0.7780, 3.19, .0502),
         ]
         self.taperList = []
-        for t in taperDef:
+        for t in self.taperDef:
             self.taperList.append(t[0])
         self.InitUI()
         self.taper = Taper(self)
