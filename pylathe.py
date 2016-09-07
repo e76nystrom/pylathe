@@ -1576,7 +1576,7 @@ class TaperPanel(wx.Panel):
     def OnCombo(self, e):
         index = self.taperSel.GetSelection()
         if index != 0:
-            (name, large, small, length, taper) = taperDef[index]
+            (name, large, small, length, taper) = self.taperDef[index]
             self.zLength.SetValue("%0.3f" % length)
             self.stockDiam.SetValue("%0.3f" % large)
             self.diam.SetValue("%0.3f" % small)
