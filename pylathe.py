@@ -1690,7 +1690,7 @@ class ScrewThread(UpdatePass):
         self.lastFeed = getFloatVal(th.lastFeed)
         self.depth = getFloatVal(th.depth)
         
-        self.xRetract = getFloatVal(th.xRetract)
+        self.xRetract = abs(getFloatVal(th.xRetract))
         
         self.hFactor = getFloatVal(th.hFactor)
         self.angle = radians(getFloatVal(th.angle))
@@ -1698,24 +1698,23 @@ class ScrewThread(UpdatePass):
     def thread(self):
         self.getThreadParameters()
 
-        cosAngle = cos(self.angle)
-        self.tanAngle = tan(self.angle)
         print ("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
                (self.tpi, self.pitch, self.hFactor, self.lastFeed))
         
         if self.depth == 0:
-            self.depth = (cosAngle * self.pitch) * self.hFactor
-        
+            self.depth = (cos(self.angle) * self.pitch) * self.hFactor
         actualWidth = 2 * self.depth * self.tanAngle
         print ("depth %6.4f actualWdith %6.4f" %
                (self.depth, actualWidth))
         
+        self.tanAngle = tan(self.angle)
         self.area = area = 0.5 * self.depth * actualWidth
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
         print ("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % 
                (area, lastDepth, lastArea, self.areaPass))
+
         self.passes = int(ceil(area / self.areaPass))
         self.threadPanel.passes.SetValue("%d" % (self.passes))
         self.areaPass = area / self.passes
@@ -1763,7 +1762,9 @@ class ScrewThread(UpdatePass):
             else:
                 self.curArea += self.areaPass
             feed = sqrt(self.curArea / self.tanAngle)
-        self.feed = feed
+            self.feed = feed
+        else:
+            feed = self.feed
         self.zOffset = feed * self.tanAngle
         print ("%4d %8.6f %6.4f %6.4f %6.4f" % 
                (self.passCount, self.curArea, feed, self.zOffset,
