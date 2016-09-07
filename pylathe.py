@@ -1400,8 +1400,10 @@ class TaperPanel(wx.Panel):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
         self.taper = Taper(self)
-        taperDef = [("MT2", 0.7000, 0.5720, 2.56, .0500),
-                    ("MT3", 0.9380, 0.7780, 3.19, .0502)]
+        taperDef = [("Custom",),
+                    ("MT2", 0.7000, 0.5720, 2.56, .0500),
+                    ("MT3", 0.9380, 0.7780, 3.19, .0502),
+        ]
         taper = []
         for t in taperDef:
             taper.append[t[0]]
@@ -1420,7 +1422,7 @@ class TaperPanel(wx.Panel):
         txt = wx.StaticText(self, -1, "Select Taper")
         sizerH.Add(txt, flag=wx.ALL, border=2)
 
-        self.taperSel = combo = wx.ComboBox(self, -1, step[1], choices=taper,
+        self.taperSel = combo = wx.ComboBox(self, -1, taper[0], choices=taper,
                                             style=wx.CB_READONLY)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
