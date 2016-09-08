@@ -2678,11 +2678,13 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnZero(self, e):
+        global jogPanel, zEncOffset, xEncOffset
         if self.axis == 0:
             sendZData()
             setParm('Z_SET_LOC', 0)
             command('ZSETLOC')
             zEncPos = getParm('Z_ENC_POS')
+            print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
             if zEncPos != None:
                 encPos = float(zEncPos) / jogPanel.zEncInch
                 if jogPanel.zEncInvert:
