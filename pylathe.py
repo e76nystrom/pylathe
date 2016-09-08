@@ -3332,7 +3332,7 @@ class MainFrame(wx.Frame):
         self.showDialog(self.zDialog)
 
     def OnXSetup(self, e):
-        self.showDialog(self.zDialog)
+        self.showDialog(self.xDialog)
 
     def OnSpindleSetup(self, e):
         self.showDialog(self.spindleDialog)
