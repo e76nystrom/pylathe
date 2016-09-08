@@ -1593,7 +1593,7 @@ class TaperPanel(wx.Panel):
             (name, large, small, length, taper) = self.taperDef[index]
             self.zLength.SetValue("%0.3f" % (length))
             self.largeDiam.SetValue("%0.3f" % (large))
-            self.diam.SetValue("%0.3f" % (small))
+            self.smallDiam.SetValue("%0.3f" % (small))
             if taper < 1.0:
                 self.deltaBtn.SetValue(True)
                 self.zDelta.SetValue("1.000")
