@@ -2682,10 +2682,24 @@ class PosMenu(wx.Menu):
             sendZData()
             setParm('Z_SET_LOC', 0)
             command('ZSETLOC')
+            zEncPos = getParm('Z_ENC_POS')
+            if zEncPos != None:
+                encPos = float(zEncPos) / jogPanel.zEncInch
+                if jogPanel.zEncInvert:
+                    encPos = -encPos
+                zEncOffset = encPos
+                print("zEncOffset %0.4f" % (zEncOffset))
         else:
             sendXData()
             setParm('X_SET_LOC', 0)
             command('XSETLOC')
+            xEncPos = getParm('X_ENC_POS')
+            if xEncPos != None:
+                encPos = float(xEncPos) / jogPanel.xEncInch
+                if jogPanel.xEncInvert:
+                    encPos = -encPos
+                xEncOffset = encPos
+                print("xEncOffset %0.4f" % (xEncOffset))
         jogPanel.focus()
 
     def OnHomeX(self, e):
