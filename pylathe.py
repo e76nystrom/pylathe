@@ -1195,7 +1195,7 @@ class Taper(UpdatePass):
         self.zRetract = abs(getFloatVal(tp.zRetract))
 
         self.largeDiameter = getFloatVal(tp.largeDiam)
-        self.smallDiameter = getFloatVal(tp.smallDdiam)
+        self.smallDiameter = getFloatVal(tp.smallDiam)
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
@@ -1462,7 +1462,7 @@ class TaperPanel(wx.Panel):
         self.largeDiam = addFieldText(self, sizerG, "Large Diam",
                                       "tpLargeDiam")
 
-        self.diam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
+        self.smallDiam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
 
         self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
 
@@ -1593,7 +1593,7 @@ class TaperPanel(wx.Panel):
             (name, large, small, length, taper) = self.taperDef[index]
             self.zLength.SetValue("%0.3f" % (length))
             self.largeDiam.SetValue("%0.3f" % (large))
-            self.diam.SetValue("%0.3f" % (small))
+            self.smallDiam.SetValue("%0.3f" % (small))
             if taper < 1.0:
                 self.deltaBtn.SetValue(True)
                 self.zDelta.SetValue("1.000")
@@ -2678,14 +2678,30 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnZero(self, e):
+        global jogPanel, zEncOffset, xEncOffset
         if self.axis == 0:
             sendZData()
             setParm('Z_SET_LOC', 0)
             command('ZSETLOC')
+            zEncPos = getParm('Z_ENC_POS')
+            print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
+            if zEncPos != None:
+                encPos = float(zEncPos) / jogPanel.zEncInch
+                if jogPanel.zEncInvert:
+                    encPos = -encPos
+                zEncOffset = encPos
+                print("zEncOffset %0.4f" % (zEncOffset))
         else:
             sendXData()
             setParm('X_SET_LOC', 0)
             command('XSETLOC')
+            xEncPos = getParm('X_ENC_POS')
+            if xEncPos != None:
+                encPos = float(xEncPos) / jogPanel.xEncInch
+                if jogPanel.xEncInvert:
+                    encPos = -encPos
+                xEncOffset = encPos
+                print("xEncOffset %0.4f" % (xEncOffset))
         jogPanel.focus()
 
     def OnHomeX(self, e):
@@ -3332,7 +3348,7 @@ class MainFrame(wx.Frame):
         self.showDialog(self.zDialog)
 
     def OnXSetup(self, e):
-        self.showDialog(self.zDialog)
+        self.showDialog(self.xDialog)
 
     def OnSpindleSetup(self, e):
         self.showDialog(self.spindleDialog)
