@@ -1193,8 +1193,8 @@ class Taper(UpdatePass):
         self.zFeed = abs(getFloatVal(tp.zFeed))
         self.zRetract = abs(getFloatVal(tp.zRetract))
 
-        self.stockDiameter = getFloatVal(tp.stockDiam)
-        self.refDiameter = getFloatVal(tp.diam)
+        self.largeDiameter = getFloatVal(tp.largeDiam)
+        self.smallDiameter = getFloatVal(tp.diam)
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
@@ -1209,8 +1209,8 @@ class Taper(UpdatePass):
         print("externalTaper")
         self.getTaperParameters(taperInch)
 
-        self.xStart = self.stockDiameter / 2.0
-        self.xEnd = self.refDiameter / 2.0
+        self.xStart = self.largeDiameter / 2.0
+        self.xEnd = self.smallDiameter / 2.0
 
         if self.taperX:
             self.cut = self.xStart - self.xEnd
@@ -1320,8 +1320,8 @@ class Taper(UpdatePass):
         print("internalTaper")
         self.getTaperParameters(taperInch)
 
-        self.boreRadius = self.stockDiameter / 2.0
-        largeRadius = self.refDiameter / 2.0
+        self.boreRadius = self.largeDiameter / 2.0
+        largeRadius = self.smallDiameter / 2.0
         self.cut = largeRadius - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
@@ -1458,10 +1458,10 @@ class TaperPanel(wx.Panel):
 
         # x parameters
 
-        self.stockDiam = addFieldText(self, sizerG, "Stock Diam",
-                                      "tpStockDiam")
+        self.largeDiam = addFieldText(self, sizerG, "Large Diam",
+                                      "tpLargeDiam")
 
-        self.diam = addFieldText(self, sizerG, "Small Diam", "tpDiam")
+        self.diam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
 
         self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
 
@@ -1559,10 +1559,10 @@ class TaperPanel(wx.Panel):
         self.xDelta.SetEditable(val)
         self.angle.SetEditable(not val)
         if self.internal.GetValue():
-            info['tpStockDiamText'].SetLabel("Bore Diam")
+            info['tpLargeDiamText'].SetLabel("Bore Diam")
             info['tpDiamText'].SetLabel("Large Diam")
         else:
-            info['tpStockDiamText'].SetLabel("Stock Diam")
+            info['tpLargeDiamText'].SetLabel("Large Diam")
             info['tpDiamText'].SetLabel("Small Diam")
         self.sizerV.Layout()
 
@@ -1591,7 +1591,7 @@ class TaperPanel(wx.Panel):
         if index != 0:
             (name, large, small, length, taper) = self.taperDef[index]
             self.zLength.SetValue("%0.3f" % (length))
-            self.stockDiam.SetValue("%0.3f" % (large))
+            self.largeDiam.SetValue("%0.3f" % (large))
             self.diam.SetValue("%0.3f" % (small))
             if taper < 1.0:
                 self.deltaBtn.SetValue(True)
