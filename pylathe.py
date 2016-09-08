@@ -2891,7 +2891,8 @@ class FixXPosDialog(wx.Dialog):
                    border=10)
 
         self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
-                                           style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+                                           style=wx.TE_RIGHT|\
+                                           wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
