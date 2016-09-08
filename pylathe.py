@@ -1194,7 +1194,7 @@ class Taper(UpdatePass):
         self.zRetract = abs(getFloatVal(tp.zRetract))
 
         self.largeDiameter = getFloatVal(tp.largeDiam)
-        self.smallDiameter = getFloatVal(tp.diam)
+        self.smallDiameter = getFloatVal(tp.smallDdiam)
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
@@ -1560,10 +1560,10 @@ class TaperPanel(wx.Panel):
         self.angle.SetEditable(not val)
         if self.internal.GetValue():
             info['tpLargeDiamText'].SetLabel("Bore Diam")
-            info['tpDiamText'].SetLabel("Large Diam")
+            info['tpSmallDiamText'].SetLabel("Large Diam")
         else:
             info['tpLargeDiamText'].SetLabel("Large Diam")
-            info['tpDiamText'].SetLabel("Small Diam")
+            info['tpSmallDiamText'].SetLabel("Small Diam")
         self.sizerV.Layout()
 
     def updateAngle(self):
