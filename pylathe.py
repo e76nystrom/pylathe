@@ -2993,7 +2993,7 @@ class UpdateThread(Thread):
         try:
             result = command('READLOC')
         except commTimeout:
-            printf("readAll error")
+            print("readAll error")
             stdout.flush()
             return
         except serial.SerialException:
