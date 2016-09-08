@@ -1462,7 +1462,7 @@ class TaperPanel(wx.Panel):
         self.largeDiam = addFieldText(self, sizerG, "Large Diam",
                                       "tpLargeDiam")
 
-        self.diam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
+        self.smallDiam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
 
         self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
 
