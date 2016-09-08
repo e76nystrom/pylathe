@@ -3758,7 +3758,6 @@ class ConfigDialog(wx.Dialog):
 
         self.fields = (
             ("bHW Control", 'cfgXilinx'),)
-        global XILINX
         if XILINX:
             self.fields += (
                 ("Encoder", "cfgEncoder"),
