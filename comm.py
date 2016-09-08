@@ -66,6 +66,7 @@ def setParm(parm, val):
     cmdInfo = parms[parm]
     parmIndex = cmdInfo[0]
     parmType = cmdInfo[1]
+    valString = "0"
     if SWIG and (len(cmdInfo) == 3):
         global importLathe
         if importLathe:

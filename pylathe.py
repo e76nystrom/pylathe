@@ -407,10 +407,11 @@ def sendSpindleData(send=False, rpm=None):
                     setParm('SP_MAX_RPM', rpm)
                 else:
                     setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
-                setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                # setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_ACCEL', getInfo('spAccel'))
                 setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
                 setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
-                setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
+                # setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
                 setParm('SP_TEST_INDEX', getBoolInfo('spTestIndex'))
                 command('CMD_SPSETUP')
@@ -720,6 +721,7 @@ class TurnPanel(wx.Panel):
 
     def InitUI(self):
         global hdrFont
+
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Turn")
@@ -789,7 +791,7 @@ class TurnPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['tuPause'] = cb
         
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -999,7 +1001,7 @@ class FacePanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['fdPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -1141,7 +1143,7 @@ class CutoffPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['cuPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -1186,20 +1188,21 @@ class Taper(UpdatePass):
         tp = self.taperPanel
         self.taperX = taperInch <= 1.0
         self.taper = taperInch
-        self.zSafe = abs(getFloatVal(tp.zSafe))
+
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = abs(getFloatVal(tp.zLength))
         self.zFeed = abs(getFloatVal(tp.zFeed))
+        self.zRetract = abs(getFloatVal(tp.zRetract))
 
-        self.stockDiameter = getFloatVal(tp.stockDiam)
-        self.refDiameter = getFloatVal(tp.diam)
-        self.retract = abs(getFloatVal(tp.xRetract))
+        self.largeDiameter = getFloatVal(tp.largeDiam)
+        self.smallDiameter = getFloatVal(tp.smallDdiam)
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
+        self.xRetract = abs(getFloatVal(tp.xRetract))
 
         self.finish = abs(getFloatVal(tp.finish))
 
         totalTaper = taperInch * self.zLength
-        taperInch = totalTaper / self.zLength
+        # taperInch = totalTaper / self.zLength
         print ("totalTaper %5.3f taperInch %6.4f" %
                (totalTaper, taperInch))
 
@@ -1207,15 +1210,15 @@ class Taper(UpdatePass):
         print("externalTaper")
         self.getTaperParameters(taperInch)
 
-        self.xStart = self.stockDiameter / 2.0
-        self.xEnd = self.refDiameter / 2.0
+        self.xStart = self.largeDiameter / 2.0
+        self.xEnd = self.smallDiameter / 2.0
 
         if self.taperX:
             self.cut = self.xStart - self.xEnd
 
             self.startZ = 0.0
             self.endZ = self.startZ
-            self.safeZ = self.startZ + self.zSafe
+            self.safeZ = self.startZ + self.zRetract
             self.endX = 0.0
             feed = self.xFeed
             finish = self.finish / 2
@@ -1225,7 +1228,7 @@ class Taper(UpdatePass):
             feed = self.zFeed
             finish = self.finish
 
-        self.safeX = self.xStart + self.retract
+        self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
         self.setupSpringPasses(self.taperPanel)
@@ -1318,8 +1321,8 @@ class Taper(UpdatePass):
         print("internalTaper")
         self.getTaperParameters(taperInch)
 
-        self.boreRadius = self.stockDiameter / 2.0
-        largeRadius = self.refDiameter / 2.0
+        self.boreRadius = self.largeDiameter / 2.0
+        largeRadius = self.smallDiameter / 2.0
         self.cut = largeRadius - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
@@ -1332,8 +1335,8 @@ class Taper(UpdatePass):
 
         self.startZ = 0.0
         self.endZ = 0.0
-        self.safeX = self.boreRadius - self.retract
-        self.safeZ = self.retract
+        self.safeX = self.boreRadius - self.xRetract
+        self.safeZ = self.xRetract
 
         self.taperSetup()
         moveZ(self.safeZ)
@@ -1398,6 +1401,24 @@ class Taper(UpdatePass):
 class TaperPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
+        self.taperDef = [("Custom",),
+                         ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12),
+                         ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12),
+                         ("MT3",  0.9380, 0.7780, 3.19, 0.6024/12),
+                         ("MT4",  1.2310, 1.0200, 4.06, 0.5233/12),
+                         ("BS5",  0.5388, 0.4500, 2.13, 0.5016/12),
+                         ("BS11", 1.4978, 1.2500, 5.94, 0.5010/12),
+                         ("5C",   1.4800, 1.2500, 0.61, 20.0),
+                         ("ER32", 1.2598, 0.9252, 0, 16.0),
+                         ("R8",   1.2500, 0.9400, 0.95, 16.51),
+                         ("", 0., 0., 0, 0.),
+                         ("", 0., 0., 0, 0.),
+                         ("", 0., 0., 0, 0.),
+        ]
+
+        self.taperList = []
+        for t in self.taperDef:
+            self.taperList.append(t[0])
         self.InitUI()
         self.taper = Taper(self)
 
@@ -1410,11 +1431,23 @@ class TaperPanel(wx.Panel):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        txt = wx.StaticText(self, -1, "Select Taper")
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
+                                            choices=self.taperList,
+                                            style=wx.CB_READONLY)
+        info['tpTaperSel'] = combo
+        combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
+        sizerH.Add(combo, flag=wx.ALL, border=2)
+
+        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
+ 
         sizerG = wx.GridSizer(8, 0, 0)
 
         # z parameters
-
-        self.zSafe = addField(self, sizerG, "Z Safe", "tpZSafe")
 
         self.zStart = addField(self, sizerG, "Z Start", "tpZStart")
 
@@ -1422,12 +1455,14 @@ class TaperPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tpZFeed")
         
+        self.zRetract = addField(self, sizerG, "Z Retract", "tpZRetract")
+
         # x parameters
 
-        self.stockDiam = addFieldText(self, sizerG, "Stock Diam",
-                                      "tpStockDiam")
+        self.largeDiam = addFieldText(self, sizerG, "Large Diam",
+                                      "tpLargeDiam")
 
-        self.diam = addFieldText(self, sizerG, "Small Diam", "tpDiam")
+        self.diam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
 
         self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
 
@@ -1443,6 +1478,7 @@ class TaperPanel(wx.Panel):
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
+
         self.xDelta = addField(self, sizerG, "X", "tpXDelta")
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
@@ -1507,7 +1543,7 @@ class TaperPanel(wx.Panel):
         # btn.Bind(wx.EVT_BUTTON, self.OnDebug)
         # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
@@ -1524,11 +1560,11 @@ class TaperPanel(wx.Panel):
         self.xDelta.SetEditable(val)
         self.angle.SetEditable(not val)
         if self.internal.GetValue():
-            info['tpStockDiamText'].SetLabel("Bore Diam")
-            info['tpDiamText'].SetLabel("Large Diam")
+            info['tpLargeDiamText'].SetLabel("Bore Diam")
+            info['tpSmallDiamText'].SetLabel("Large Diam")
         else:
-            info['tpStockDiamText'].SetLabel("Stock Diam")
-            info['tpDiamText'].SetLabel("Small Diam")
+            info['tpLargeDiamText'].SetLabel("Large Diam")
+            info['tpSmallDiamText'].SetLabel("Small Diam")
         self.sizerV.Layout()
 
     def updateAngle(self):
@@ -1545,12 +1581,27 @@ class TaperPanel(wx.Panel):
         if self.deltaBtn.GetValue():
             deltaZ = getFloatVal(self.zDelta)
             deltaX = getFloatVal(self.xDelta)
-
             try:
                 angle = degrees(atan2(deltaX, deltaZ))
                 self.angle.ChangeValue("%5.3f" % (angle))
             except:
                 pass
+
+    def OnCombo(self, e):
+        index = self.taperSel.GetSelection()
+        if index != 0:
+            (name, large, small, length, taper) = self.taperDef[index]
+            self.zLength.SetValue("%0.3f" % (length))
+            self.largeDiam.SetValue("%0.3f" % (large))
+            self.diam.SetValue("%0.3f" % (small))
+            if taper < 1.0:
+                self.deltaBtn.SetValue(True)
+                self.zDelta.SetValue("1.000")
+                self.xDelta.SetValue("%0.5f" % (taper / 2))
+            else:
+                self.angleBtn.SetValue(True)
+                self.angle.SetValue("%0.3f" % (taper / 2))
+            self.update()
 
     def OnDeltaFocus(self, e):
         self.updateDelta()
@@ -1628,8 +1679,6 @@ class ScrewThread(UpdatePass):
         self.zAccel = 0.0
         self.zBackInc = 0.003
 
-        self.xScale = 16000
-
         if th.tpi.GetValue():
             self.tpi = getFloatVal(th.thread)
             self.pitch = 1.0 / self.tpi
@@ -1642,7 +1691,7 @@ class ScrewThread(UpdatePass):
         self.lastFeed = getFloatVal(th.lastFeed)
         self.depth = getFloatVal(th.depth)
         
-        self.xRetract = getFloatVal(th.xRetract)
+        self.xRetract = abs(getFloatVal(th.xRetract))
         
         self.hFactor = getFloatVal(th.hFactor)
         self.angle = radians(getFloatVal(th.angle))
@@ -1650,14 +1699,12 @@ class ScrewThread(UpdatePass):
     def thread(self):
         self.getThreadParameters()
 
-        cosAngle = cos(self.angle)
-        self.tanAngle = tan(self.angle)
         print ("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
                (self.tpi, self.pitch, self.hFactor, self.lastFeed))
         
         if self.depth == 0:
-            self.depth = (cosAngle * self.pitch) * self.hFactor
-        
+            self.depth = (cos(self.angle) * self.pitch) * self.hFactor
+        self.tanAngle = tan(self.angle)
         actualWidth = 2 * self.depth * self.tanAngle
         print ("depth %6.4f actualWdith %6.4f" %
                (self.depth, actualWidth))
@@ -1668,6 +1715,7 @@ class ScrewThread(UpdatePass):
         self.areaPass = area - lastArea
         print ("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % 
                (area, lastDepth, lastArea, self.areaPass))
+
         self.passes = int(ceil(area / self.areaPass))
         self.threadPanel.passes.SetValue("%d" % (self.passes))
         self.areaPass = area / self.passes
@@ -1715,7 +1763,9 @@ class ScrewThread(UpdatePass):
             else:
                 self.curArea += self.areaPass
             feed = sqrt(self.curArea / self.tanAngle)
-        self.feed = feed
+            self.feed = feed
+        else:
+            feed = self.feed
         self.zOffset = feed * self.tanAngle
         print ("%4d %8.6f %6.4f %6.4f %6.4f" % 
                (self.passCount, self.curArea, feed, self.zOffset,
@@ -1853,7 +1903,7 @@ class ThreadPanel(wx.Panel):
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['thPause'] = cb
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -2841,7 +2891,8 @@ class FixXPosDialog(wx.Dialog):
                    border=10)
 
         self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
-                                           style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+                                           style=wx.TE_RIGHT|\
+                                           wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
@@ -2943,7 +2994,7 @@ class UpdateThread(Thread):
         try:
             result = command('READLOC')
         except commTimeout:
-            printf("readAll error")
+            print("readAll error")
             stdout.flush()
             return
         except serial.SerialException:
@@ -3391,11 +3442,11 @@ class ZDialog(wx.Dialog):
             ("Micro Steps", "zMicroSteps"),
             ("Motor Ratio", "zMotorRatio"),
             ("Backlash", "zBacklash"),
-            ("Accel", "zAccel"),
-            ("Min Speed", "zMinSpeed"),
-            ("Max Speed", "zMaxSpeed"),
-            ("Jog Min", "zJogMin"),
-            ("Jog Max", "zJogMax"),
+            ("Accel Unit/Sec2", "zAccel"),
+            ("Min Speed U/Min", "zMinSpeed"),
+            ("Max Speed U/Min", "zMaxSpeed"),
+            ("Jog Min U/Min", "zJogMin"),
+            ("Jog Max U/Min", "zJogMax"),
             ("bInvert Dir", 'zInvDir'),
             ("bInvert MPG", 'zInvMpg'),
             ("Enc Inch", "zEncInch"),
@@ -3467,11 +3518,11 @@ class XDialog(wx.Dialog):
             ("Micro Steps", "xMicroSteps"),
             ("Motor Ratio", "xMotorRatio"),
             ("Backlash", "xBacklash"),
-            ("Accel", "xAccel"),
-            ("Min Speed", "xMinSpeed"),
-            ("Max Speed", "xMaxSpeed"),
-            ("Jog Min", "xJogMin"),
-            ("Jog Max", "xJogMax"),
+            ("Accel Unit/Sec2", "xAccel"),
+            ("Min Speed U/Min", "xMinSpeed"),
+            ("Max Speed U/Min", "xMaxSpeed"),
+            ("Jog Min U/Min", "xJogMin"),
+            ("Jog Max U/Min", "xJogMax"),
             ("bInvert Dir", 'xInvDir'),
             ("bInvert MPG", 'xInvMpg'),
             ("Home Dist", "xHomeDist"),
@@ -3565,10 +3616,10 @@ class SpindleDialog(wx.Dialog):
                 ("Micro Steps", "spMicroSteps"),
                 ("Min RPM", "spMinRPM"),
                 ("Max RPM", "spMaxRPM"),
-                ("Accel Time", "spAccelTime"),
+                ("Accel RPM/Sec2", "spAccel"),
                 ("Jog Min", "spJogMin"),
                 ("Jog Max", "spJogMax"),
-                ("Jog Accel Time", "spJogAccelTime"),
+                # ("Jog Accel Time", "spJogAccelTime"),
                 ("bInvert Dir", 'spInvDir'),
                 ("bTest Index", 'spTestIndex'),
             )
