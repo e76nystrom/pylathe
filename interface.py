@@ -111,7 +111,7 @@ parmList = \
     ["X_MICRO", "x axis micro steps", "int16_t"],
     ["X_MOTOR", "x axis motor steps", "int16_t"],
     ["X_ACCEL_TIME", "x axis acceleration", "float"],
-    ["X_AccEL", "z accel rpm/sec^2", "floag"],
+    ["X_AccEL", "z accel rpm/sec^2", "float"],
     ["X_BACKLASH", "x axis backlash", "float"],
     ["X_DIR_FLAG", "x invert direction", "char"],
     ["X_MPG_FLAG", "x invert mpg", "char"],
