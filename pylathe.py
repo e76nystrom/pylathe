@@ -1704,11 +1704,11 @@ class ScrewThread(UpdatePass):
         
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch) * self.hFactor
+        self.tanAngle = tan(self.angle)
         actualWidth = 2 * self.depth * self.tanAngle
         print ("depth %6.4f actualWdith %6.4f" %
                (self.depth, actualWidth))
         
-        self.tanAngle = tan(self.angle)
         self.area = area = 0.5 * self.depth * actualWidth
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
