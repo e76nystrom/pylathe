@@ -48,11 +48,9 @@ cmdList = \
     ["CMD_SPSETUP", "", "setup spindle"],
 
     ["CMD_ZSETUP", "", "setup z axis"],
-    ["CMD_ZSYNSETUP", "", "setup z axis sync"],
     ["CMD_ZTAPERSETUP", "", "setup z axis taper"],
 
     ["CMD_XSETUP", "", "setup x axis"],
-    ["CMD_XSYNSETUP", "", "setup z axis sync"],
     ["CMD_XTAPERSETUP", "", "setup z axis taper"],
     
     "state information",
@@ -114,6 +112,7 @@ parmList = \
     ["X_BACKLASH", "x axis backlash", "float"],
     ["X_DIR_FLAG", "x invert direction", "char"],
     ["X_MPG_FLAG", "x invert mpg", "char"],
+    ["X_DIAMETER", "x diameter", "int"],
     
     "z move parameters",
     
@@ -162,25 +161,20 @@ parmList = \
     ["X_ABS_LOC", "x absolute location", "int"],
     ["X_MPG_INC", "X man pulse gen incr", "int"],
     
-    "z turn/face parameters",
+    # "z turn/face parameters",
     
-    ["Z_START_LOC", "z start", "float"],
-    ["Z_END_LOC", "z end", "float"],
-    ["Z_RETRACT", "z retract", "float"],
-    ["Z_FEED_PASS", "z feed per pass", "float"],
+    # ["Z_START_LOC", "z start", "float"],
+    # ["Z_END_LOC", "z end", "float"],
+    # ["Z_RETRACT", "z retract", "float"],
+    # ["Z_FEED_PASS", "z feed per pass", "float"],
     
-    "x turn/face parameters",
+    # "x turn/face parameters",
     
-    ["X_START_LOC", "x start", "float"],
-    ["X_END_LOC", "x end", "float"],
-    ["X_RETRACT", "x retract", "float"],
-    ["X_FEED_PASS", "x feed per pass", "float"],
-    ["X_DIAMETER", "x diameter", "int"],
-    
-    "feed parameters",
-    
-    ["FEED_TYPE", "feed parameter type", "int16_t"],
-    ["FEED", "feed parameter", "float"],
+    # ["X_START_LOC", "x start", "float"],
+    # ["X_END_LOC", "x end", "float"],
+    # ["X_RETRACT", "x retract", "float"],
+    # ["X_FEED_PASS", "x feed per pass", "float"],
+    # ["X_DIAMETER", "x diameter", "int"],
     
     "index pulse variables",
 
@@ -251,9 +245,10 @@ regList =\
     ["XSYN", "(3 << 0)", "x dist sync to rotation"],
     ["XMAX", "(4 << 0)", "x rapid move"],
     ["XJOGSLOW", "(5 << 0)", "slow jog for finding home"],
-    ["Z_SYN_TAPER", "(1 << 4)", "taper on z"],
-    ["XFIND_HOME", "(1 << 5)", "find home"],
-    ["XCLEAR_HOME", "(1 << 6)", "move off of home"],
+    ["X_SYN_START", "(1 << 4)", "start on sync pulse"],
+    ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
+    ["XFIND_HOME", "(1 << 6)", "find home"],
+    ["XCLEAR_HOME", "(1 << 7)", "move off of home"],
      
     "x direction",
     
@@ -331,6 +326,7 @@ stateList =\
     ["PASS_NUM", "set pass number"],
     ["QUE_PAUSE", "pause queue"],
     ["SAVE_DIAMETER", "save turn diameter"],
+    ["SAVE_FEED_TYPE", "save feed type"],
     ["Z_FEED_SETUP", "setup z feed"],
     ["X_FEED_SETUP", "setup x feed"],
     "};",
