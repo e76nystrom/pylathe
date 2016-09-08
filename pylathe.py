@@ -1195,7 +1195,7 @@ class Taper(UpdatePass):
         self.zRetract = abs(getFloatVal(tp.zRetract))
 
         self.largeDiameter = getFloatVal(tp.largeDiam)
-        self.smallDiameter = getFloatVal(tp.smallDdiam)
+        self.smallDiameter = getFloatVal(tp.smallDiam)
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
