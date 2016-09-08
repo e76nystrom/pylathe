@@ -407,10 +407,11 @@ def sendSpindleData(send=False, rpm=None):
                     setParm('SP_MAX_RPM', rpm)
                 else:
                     setParm('SP_MAX_RPM', getInfo('spMaxRPM'))
-                setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                # setParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
+                setParm('SP_ACCEL', getInfo('spAccel'))
                 setParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
                 setParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
-                setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
+                # setParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
                 setParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
                 setParm('SP_TEST_INDEX', getBoolInfo('spTestIndex'))
                 command('CMD_SPSETUP')
@@ -3440,7 +3441,7 @@ class ZDialog(wx.Dialog):
             ("Micro Steps", "zMicroSteps"),
             ("Motor Ratio", "zMotorRatio"),
             ("Backlash", "zBacklash"),
-            ("Accel", "zAccel"),
+            ("Accel Unit/sec^2", "zAccel"),
             ("Min Speed", "zMinSpeed"),
             ("Max Speed", "zMaxSpeed"),
             ("Jog Min", "zJogMin"),
@@ -3516,7 +3517,7 @@ class XDialog(wx.Dialog):
             ("Micro Steps", "xMicroSteps"),
             ("Motor Ratio", "xMotorRatio"),
             ("Backlash", "xBacklash"),
-            ("Accel", "xAccel"),
+            ("Accel Unit/sec^2", "xAccel"),
             ("Min Speed", "xMinSpeed"),
             ("Max Speed", "xMaxSpeed"),
             ("Jog Min", "xJogMin"),
@@ -3614,10 +3615,10 @@ class SpindleDialog(wx.Dialog):
                 ("Micro Steps", "spMicroSteps"),
                 ("Min RPM", "spMinRPM"),
                 ("Max RPM", "spMaxRPM"),
-                ("Accel Time", "spAccelTime"),
+                ("Accel RPM/sec^2", "spAccel"),
                 ("Jog Min", "spJogMin"),
                 ("Jog Max", "spJogMax"),
-                ("Jog Accel Time", "spJogAccelTime"),
+                # ("Jog Accel Time", "spJogAccelTime"),
                 ("bInvert Dir", 'spInvDir'),
                 ("bTest Index", 'spTestIndex'),
             )
