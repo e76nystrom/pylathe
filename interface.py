@@ -85,7 +85,7 @@ parmList = \
     ["SP_MIN_RPM", "spindle minimum rpm", "float"],
     ["SP_MAX_RPM", "spindle maxmum rpm", "float"],
     ["SP_ACCEL_TIME", "spindle accel time", "float"],
-    ["SP_AccEL", "spindle accel rpm/sec^2", "floag"],
+    ["SP_AccEL", "spindle accel rpm/sec^2", "float"],
     ["SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"],
     ["SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"],
     ["SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"],
