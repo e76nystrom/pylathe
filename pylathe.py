@@ -86,6 +86,7 @@ configFile = "config.txt"
 info = {}
 readInfo(configFile)
 
+global XILINX
 XILINX = False
 try:
     XILINX = info['cfgXilinx'].GetValue() == 'True'
