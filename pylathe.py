@@ -2730,6 +2730,7 @@ def updateZPos(val):
     print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
     if zEncPos != None:
         encPos = float(zEncPos) / jogPanel.zEncInch
+        setInfo('zEncPosition', "%0.4f" % (encPos))
         if jogPanel.zEncInvert:
             encPos = -encPos
         zEncOffset = encPos - val
@@ -2751,6 +2752,7 @@ def updateXPos(val):
     print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
     if xEncPos != None:
         encPos = float(xEncPos) / jogPanel.xEncInch
+        setInfo('xEncPosition', "%0.4f" % (encPos))
         if jogPanel.xEncInvert:
             encPos = -encPos
         xEncOffset = encPos - val
@@ -3155,6 +3157,10 @@ class MainFrame(wx.Frame):
             val = getInfo('jogXPos')
             setParm('X_SET_LOC', val)
             command('XSETLOC')
+            val = getInfo('zEncPosition')
+            setParm('Z_ENC_POS', val)
+            val = getInfo('xEncPosition')
+            setParm('X_ENC_POS', val)
             loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
             setParm('X_HOME_LOC', loc)
 
@@ -3306,7 +3312,6 @@ class MainFrame(wx.Frame):
                 info[key] = InfoValue("%0.4f" % (eval(key)))
             else:
                 exp = key + ' = getFloatInfo(\'' + key + '\')'
-                print(exp)
                 exec(exp)
                 print("%s = %s" % (key, eval(key)))
             stdout.flush()
