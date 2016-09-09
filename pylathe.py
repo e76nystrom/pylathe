@@ -3307,32 +3307,9 @@ class MainFrame(wx.Frame):
             else:
                 exp = key + ' = getFloatInfo(\'' + key + '\')'
                 print(exp)
+                print("%s = %s" % (key, eval(key))
                 exec(exp)
             stdout.flush()
-
-        # key = 'zHomeOffset'
-        # if not key in info:
-        #     info[key] = InfoValue("%0.4f" % (zHomeOffset))
-        # else:
-        #     zHomeOffset = float(info[key].GetValue())
-
-        # key = 'xHomeOffset'
-        # if not key in info:
-        #     info[key] = InfoValue("%0.4f" % (xHomeOffset))
-        # else:
-        #     xHomeOffset = float(info[key].GetValue())
-
-        # key = 'zEncOffset'
-        # if not key in info:
-        #     info[key] = InfoValue("%0.4f" % (zEncOffset))
-        # else:
-        #     zEncOffset = float(info[key].GetValue())
-
-        # key = 'xEncOffset'
-        # if not key in info:
-        #     info[key] = InfoValue("%0.4f" % (xEncOffset))
-        # else:
-        #     xEncOffset = float(info[key].GetValue())
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
