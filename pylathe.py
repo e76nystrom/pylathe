@@ -2138,6 +2138,10 @@ class JogPanel(wx.Panel):
         else:
             sizerG.add(emptyCell)
 
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
         btn = wx.Button(self, label='Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
