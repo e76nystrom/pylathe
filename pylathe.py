@@ -3295,29 +3295,47 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile)
 
-        key = 'zHomeOffset'
-        if not key in info:
-            info[key] = InfoValue("%0.4f" % (zHomeOffset))
-        else:
-            zHomeOffset = float(info[key].GetValue())
+        vars = ('zHomeOffset', 'xHomeOffset', 'zEncOffset', 'xEncOffset',
+                'zEncPosition', 'xEncPosition')
 
-        key = 'xHomeOffset'
-        if not key in info:
-            info[key] = InfoValue("%0.4f" % (xHomeOffset))
-        else:
-            xHomeOffset = float(info[key].GetValue())
+        for key in vars:
+            exp = 'global ' + key
+            print(exp)
+            eval(exp)
+            if not key in info:
+                exp = 'val = ' + key
+                print(exp)
+                eval(exp)
+                info[key] = InfoValue("%0.4f" % (val))
+            else:
+                exp = key + ' = getFloatInfo(' + key ')'
+                print(exp)
+                eval(exp)
+            stdout.flush()
 
-        key = 'zEncOffset'
-        if not key in info:
-            info[key] = InfoValue("%0.4f" % (zEncOffset))
-        else:
-            zEncOffset = float(info[key].GetValue())
+        # key = 'zHomeOffset'
+        # if not key in info:
+        #     info[key] = InfoValue("%0.4f" % (zHomeOffset))
+        # else:
+        #     zHomeOffset = float(info[key].GetValue())
 
-        key = 'xEncOffset'
-        if not key in info:
-            info[key] = InfoValue("%0.4f" % (xEncOffset))
-        else:
-            xEncOffset = float(info[key].GetValue())
+        # key = 'xHomeOffset'
+        # if not key in info:
+        #     info[key] = InfoValue("%0.4f" % (xHomeOffset))
+        # else:
+        #     xHomeOffset = float(info[key].GetValue())
+
+        # key = 'zEncOffset'
+        # if not key in info:
+        #     info[key] = InfoValue("%0.4f" % (zEncOffset))
+        # else:
+        #     zEncOffset = float(info[key].GetValue())
+
+        # key = 'xEncOffset'
+        # if not key in info:
+        #     info[key] = InfoValue("%0.4f" % (xEncOffset))
+        # else:
+        #     xEncOffset = float(info[key].GetValue())
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
