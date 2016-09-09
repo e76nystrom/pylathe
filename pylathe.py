@@ -3303,8 +3303,7 @@ class MainFrame(wx.Frame):
         for key in vars:
             exec 'global ' + key
             if not key in info:
-                val = eval(key)
-                info[key] = InfoValue("%0.4f" % (val))
+                info[key] = InfoValue("%0.4f" % (eval(key)))
             else:
                 exp = key + ' = getFloatInfo(\'' + key + '\')'
                 print(exp)
