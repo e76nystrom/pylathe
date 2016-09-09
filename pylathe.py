@@ -1532,7 +1532,7 @@ class TaperPanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "tpRPM")
 
-        sizerH = wx.BoxSizer(wx.Horizontal)
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1544,7 +1544,7 @@ class TaperPanel(wx.Panel):
 
         sizerG.Add(sizerH)
 
-        sizerH = wx.BoxSizer(wx.Horizontal)
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
