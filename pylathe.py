@@ -2682,15 +2682,9 @@ class PosMenu(wx.Menu):
     def OnZero(self, e):
         global jogPanel
         if self.axis == 0:
-            sendZData()
-            setParm('Z_SET_LOC', 0)
-            command('ZSETLOC')
-            updateZEncPos(0)
+            updateZPos(0)
         else:
-            sendXData()
-            setParm('X_SET_LOC', 0)
-            command('XSETLOC')
-            updateXEncPOs(1)
+            updateXPOs(0)
         jogPanel.focus()
 
     def OnHomeX(self, e):
@@ -2717,8 +2711,15 @@ class PosMenu(wx.Menu):
         dialog.Raise()
         dialog.Show(True)
 
-def updateZEncPos(val):
-    global jogPanel, zEncOffset
+def updateZPos(val):
+    global jogPanel, zHomeOffset, zEncOffset
+    sendZData()
+    zLoc = getParm('Z_LOC')
+    if zLoc != None:
+        zLoc /= jogPanel.zStepsInch
+        zHomeOffset = zLoc - val
+        info['zHomeOffset'].SetValue("%0.4f" % (zHomeOffset))
+        print("zHomeOffset %0.4f" % (zHomeOffset))
     zEncPos = getParm('Z_ENC_POS')
     print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
     if zEncPos != None:
@@ -2729,8 +2730,16 @@ def updateZEncPos(val):
         print("zEncOffset %0.4f" % (zEncOffset))
     stdout.flush()
 
-def updateXEncPos(val):
-    global jogPanel, xEncOffset
+def updateXPos(val):
+    global jogPanel, xHomeOffset, xEncOffset
+    val /= 2.0
+    sendXData()
+    xLoc = getParm('X_LOC')
+    if xLoc != None:
+        xLoc /= jogPanel.xStepsInch
+        xHomeOffset = xLoc - val
+        info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+        print("xHomeOffset %0.4f" % (xHomeOffset))
     xEncPos = getParm('X_ENC_POS')
     print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
     if xEncPos != None:
@@ -2787,40 +2796,17 @@ class SetPosDialog(wx.Dialog):
         e.Skip()
     
     def OnOk(self, e):
-        global jogPanel, zHomeOffset, xHomeOffset
+        global jogPanel
         val = self.pos.GetValue()
-        if self.axis == 0:
-            try:
-                val = float(val)
-                sendZData()
-                zLoc = getParm('Z_LOC')
-                if zLoc != None:
-                    zLoc /= jogPanel.zStepsInch
-                    zHomeOffset = zLoc - val
-                    info['zHomeOffset'].SetValue("%0.4f" % (zHomeOffset))
-                    print("zHomeOffset %0.4f" % (zHomeOffset))
-                    stdout.flush()
-            except ValueError:
-                val = jogPanel.zPos.GetValue()
-                self.zPos.SetValue(val)
-            updateZEncPos(val)
-        else:
-            try:
-                val = float(val) / 2.0
-                sendXData()
-                xLoc = getParm('X_LOC')
-                if xLoc != None:
-                    xLoc /= jogPanel.xStepsInch
-                    xHomeOffset = xLoc - val
-                    info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-                    print("xHomeOffset %0.4f" % (xHomeOffset))
-                    stdout.flush()
-                self.Show(False)
-                jogPanel.focus()
-            except ValueError:
-                val = jogPanel.xPos.GetValue()
-                self.xPos.SetValue(val)
-            updateXEncPos(val)
+        try:
+            val = float(val)
+            if self.axis == 0:
+                updateZPos(val)
+            else:
+                updateXPos(val)
+        except ValueError:
+            print("ValueError on %s" % (val))
+            stdout.flush()
         self.Show(False)
         jogPanel.focus()
 
