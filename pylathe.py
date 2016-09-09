@@ -2120,7 +2120,7 @@ class JogPanel(wx.Panel):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerG = wx.GridSizer(3, 0)
+        sizerG = wx.GridSizer(3, 0, 0)
 
         btn = wx.Button(self, label='E Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnEStop)
