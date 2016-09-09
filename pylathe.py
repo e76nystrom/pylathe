@@ -3306,7 +3306,7 @@ class MainFrame(wx.Frame):
                 val = eval(key)
                 info[key] = InfoValue("%0.4f" % (val))
             else:
-                exp = key + ' = getFloatInfo(' + key + ')'
+                exp = key + ' = getFloatInfo(\'' + key + '\')'
                 print(exp)
                 exec(exp)
             stdout.flush()
