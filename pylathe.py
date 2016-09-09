@@ -1246,7 +1246,7 @@ class Taper(UpdatePass):
             pass
 
         moveX(self.safeX)
-        moveZ(self.startZ)
+        moveZ(self.safeZ)
         stopSpindle();
         stdout.flush()
 
