@@ -1,4 +1,4 @@
-s#!/cygdrive/c/Python27/Python.exe
+#!/cygdrive/c/Python27/Python.exe
 #!/usr/bin/python
 ################################################################################
 import wx
