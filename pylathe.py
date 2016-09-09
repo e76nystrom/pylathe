@@ -143,6 +143,8 @@ zHomeOffset = 0.0
 xHomeOffset = 0.0
 zEncOffset = 0.0
 xEncOffset = 0.0
+zEncPosition = 0.0
+xEncPosition = 0.0
 xHomed = False
 done = False
 
