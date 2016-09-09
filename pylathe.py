@@ -2140,16 +2140,16 @@ class JogPanel(wx.Panel):
 
         btn = wx.Button(self, label='Stop')
         btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='Resume')
         btn.Bind(wx.EVT_BUTTON, self.OnResume)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         if STEPPER_DRIVE:
             btn = wx.Button(self, label='Start Spindle')
             btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
-            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+            sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         else:
             sizerG.add(emptyCell)
 
