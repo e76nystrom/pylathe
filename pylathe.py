@@ -3299,18 +3299,14 @@ class MainFrame(wx.Frame):
                 'zEncPosition', 'xEncPosition')
 
         for key in vars:
-            exp = 'global ' + key
-            print(exp)
-            eval(exp)
+            exec 'global ' + key
             if not key in info:
-                exp = 'val = ' + key
-                print(exp)
-                eval(exp)
+                val = eval(key)
                 info[key] = InfoValue("%0.4f" % (val))
             else:
                 exp = key + ' = getFloatInfo(' + key + ')'
                 print(exp)
-                eval(exp)
+                exec(exp)
             stdout.flush()
 
         # key = 'zHomeOffset'
