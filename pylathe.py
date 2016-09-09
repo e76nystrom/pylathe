@@ -2684,7 +2684,7 @@ class PosMenu(wx.Menu):
         if self.axis == 0:
             updateZPos(0)
         else:
-            updateXPOs(0)
+            updateXPos(0)
         jogPanel.focus()
 
     def OnHomeX(self, e):
