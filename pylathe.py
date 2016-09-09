@@ -1220,6 +1220,7 @@ class Taper(UpdatePass):
         self.xEnd = self.smallDiameter / 2.0
 
         if self.taperX:
+            xSynSetup(getFloatInfo('tpXInFeed'))
             zCut = self.zLength * taperInch
             xCut = self.xStart - self.xEnd
             self.cut = min(zCut, xCut)
@@ -1261,7 +1262,6 @@ class Taper(UpdatePass):
         startSpindle(getIntInfo('tpRPM'))
         queFeedType(FEED_PITCH)
         zSynSetup(getFloatInfo('tpZFeed'))
-        xSynSetup(getFloatInfo('tpXFeed'))
         moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
@@ -1474,7 +1474,7 @@ class TaperPanel(wx.Panel):
 
         self.xInFeed = addField(self, sizerG, "X In Feed R", "tpXInFeed")
 
-        self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
+        self.xFeed = addField(self, sizerG, "X Pass D", "tpXFeed")
 
         # taper parameters
 
