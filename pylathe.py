@@ -3308,7 +3308,7 @@ class MainFrame(wx.Frame):
                 exp = key + ' = getFloatInfo(\'' + key + '\')'
                 print(exp)
                 exec(exp)
-                print("%s = %s" % (key, eval(key))
+                print("%s = %s" % (key, eval(key)))
             stdout.flush()
 
         dw, dh = wx.DisplaySize()
