@@ -2801,7 +2801,7 @@ class SetPosDialog(wx.Dialog):
             except ValueError:
                 val = jogPanel.zPos.GetValue()
                 self.zPos.SetValue(val)
-            updateZEncPos(axis, val)
+            updateZEncPos(val)
         else:
             try:
                 val = float(val) / 2.0
@@ -2818,7 +2818,7 @@ class SetPosDialog(wx.Dialog):
             except ValueError:
                 val = jogPanel.xPos.GetValue()
                 self.xPos.SetValue(val)
-            updateXEncPos(axis, val)
+            updateXEncPos(val)
         self.Show(False)
         jogPanel.focus()
 
