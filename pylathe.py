@@ -1499,13 +1499,7 @@ class TaperPanel(wx.Panel):
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.internal = cb = wx.CheckBox(self, -1,
-                                         style=wx.ALIGN_LEFT)
-        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['tpInternal'] = cb
+        self.xInFeed = addField(self, sizerG, "X Infeed", "tpXInFeed")
 
         # pass info
 
@@ -1538,13 +1532,28 @@ class TaperPanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "tpRPM")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerH = wx.BoxSizer(wx.Horizontal)
+
+        sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        self.internal = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
+        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['tpInternal'] = cb
+
+        sizerG.Add(sizerH)
+
+        sizerH = wx.BoxSizer(wx.Horizontal)
+
+        sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2,
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         info['tpPause'] = cb
 
+        sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
 
         # btn = wx.Button(self, label='Debug', size=(60,-1))
