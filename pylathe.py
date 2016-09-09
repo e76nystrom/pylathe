@@ -1276,7 +1276,7 @@ class Taper(UpdatePass):
                 self.startX = self.xStart
             else:
                 self.startZ = self.zLength
-ss                self.startX = self.endX + self.taper * self.zLength
+                self.startX = self.endX + self.taper * self.zLength
             self.startZ = -self.startZ
         else:
             if final:
