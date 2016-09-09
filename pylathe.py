@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python27/Python.exe
+s#!/cygdrive/c/Python27/Python.exe
 #!/usr/bin/python
 ################################################################################
 import wx
@@ -2118,6 +2118,43 @@ class JogPanel(wx.Panel):
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        sizerG = wx.GridSizer(3, 0)
+
+        btn = wx.Button(self, label='E Stop')
+        btn.Bind(wx.EVT_BUTTON, self.OnEStop)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='Pause')
+        btn.Bind(wx.EVT_BUTTON, self.OnPause)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        if STEPPER_DRIVE:
+            btn = wx.Button(self, label='Jog Spindle')
+            btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
+            btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+            sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        else:
+            sizerG.add(emptyCell)
+
+        btn = wx.Button(self, label='Stop')
+        btn.Bind(wx.EVT_BUTTON, self.OnStop)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        btn = wx.Button(self, label='Resume')
+        btn.Bind(wx.EVT_BUTTON, self.OnResume)
+        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
+        if STEPPER_DRIVE:
+            btn = wx.Button(self, label='Start Spindle')
+            btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
+            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        else:
+            sizerG.add(emptyCell)
+
+        sizerH.Add(sizerG)
+
         sizerG = wx.FlexGridSizer(5, 0, 0)
         sFlag = wx.ALL|wx.CENTER|wx.ALIGN_CENTER_VERTICAL
 
@@ -2195,38 +2232,12 @@ class JogPanel(wx.Panel):
 
         sizerG.Add(emptyCell)
 
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerH.Add(sizerG)
+
+        sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        btn = wx.Button(self, label='Stop')
-        btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='E Stop')
-        btn.Bind(wx.EVT_BUTTON, self.OnEStop)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='Pause')
-        btn.Bind(wx.EVT_BUTTON, self.OnPause)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        btn = wx.Button(self, label='Resume')
-        btn.Bind(wx.EVT_BUTTON, self.OnResume)
-        sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        if STEPPER_DRIVE:
-            btn = wx.Button(self, label='Start Spindle')
-            btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
-            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-            btn = wx.Button(self, label='Jog Spindle')
-            btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
-            btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
-            sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-
-        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
+        # sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
