@@ -1472,10 +1472,10 @@ class TaperPanel(wx.Panel):
 
         self.smallDiam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
 
+        self.xInFeed = addField(self, sizerG, "X In Feed R", "tpXInFeed")
+
         self.xFeed = addField(self, sizerG, "X Feed D", "tpXFeed")
 
-        self.xRetract = addField(self, sizerG, "X Retract", "tpXRetract")
-        
         # taper parameters
 
         self.deltaBtn = btn = wx.RadioButton(self, label="Z")
@@ -1499,8 +1499,8 @@ class TaperPanel(wx.Panel):
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        self.xInFeed = addField(self, sizerG, "X Infeed", "tpXInFeed")
-
+        self.xRetract = addField(self, sizerG, "X Retract", "tpXRetract")
+        
         # pass info
 
         self.passes = addField(self, sizerG, "Passes", "tpPasses")
