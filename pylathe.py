@@ -24,6 +24,10 @@ class InfoValue():
     def SetValue(self, val):
         self.value = val
 
+def setInfo(field, val):
+    global info
+    info[field].SetValue(val)
+
 def saveInfo(file):
     global info
     f = open(file, 'w')
@@ -1272,7 +1276,7 @@ class Taper(UpdatePass):
                 self.startX = self.xStart
             else:
                 self.startZ = self.zLength
-                self.startX = self.endX + self.taper * self.zLength
+ss                self.startX = self.endX + self.taper * self.zLength
             self.startZ = -self.startZ
         else:
             if final:
@@ -2718,7 +2722,7 @@ def updateZPos(val):
     if zLoc != None:
         zLoc /= jogPanel.zStepsInch
         zHomeOffset = zLoc - val
-        info['zHomeOffset'].SetValue("%0.4f" % (zHomeOffset))
+        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
         print("zHomeOffset %0.4f" % (zHomeOffset))
     zEncPos = getParm('Z_ENC_POS')
     print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
@@ -2727,6 +2731,7 @@ def updateZPos(val):
         if jogPanel.zEncInvert:
             encPos = -encPos
         zEncOffset = encPos - val
+        setInfo('zEncOffset', "%0.4f" % (zEncOffset))
         print("zEncOffset %0.4f" % (zEncOffset))
     stdout.flush()
 
@@ -2738,7 +2743,7 @@ def updateXPos(val):
     if xLoc != None:
         xLoc /= jogPanel.xStepsInch
         xHomeOffset = xLoc - val
-        info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
         print("xHomeOffset %0.4f" % (xHomeOffset))
     xEncPos = getParm('X_ENC_POS')
     print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
@@ -2747,6 +2752,7 @@ def updateXPos(val):
         if jogPanel.xEncInvert:
             encPos = -encPos
         xEncOffset = encPos - val
+        setInfo('xEncOffset', "%0.4f" % (xEncOffset))
         print("xEncOffset %0.4f" % (xEncOffset))
     stdout.flush()
 
