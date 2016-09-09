@@ -1220,7 +1220,6 @@ class Taper(UpdatePass):
 
             self.startZ = 0.0
             self.endZ = self.startZ
-            self.safeZ = self.startZ + self.zRetract
             self.endX = 0.0
             feed = self.xFeed
             finish = self.finish / 2
@@ -1230,6 +1229,7 @@ class Taper(UpdatePass):
             feed = self.zFeed
             finish = self.finish
 
+        self.safeZ = self.startZ + self.zRetract
         self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
