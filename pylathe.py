@@ -2685,25 +2685,12 @@ class PosMenu(wx.Menu):
             sendZData()
             setParm('Z_SET_LOC', 0)
             command('ZSETLOC')
-            zEncPos = getParm('Z_ENC_POS')
-            print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
-            if zEncPos != None:
-                encPos = float(zEncPos) / jogPanel.zEncInch
-                if jogPanel.zEncInvert:
-                    encPos = -encPos
-                zEncOffset = encPos
-                print("zEncOffset %0.4f" % (zEncOffset))
+            updateZEncPos(0)
         else:
             sendXData()
             setParm('X_SET_LOC', 0)
             command('XSETLOC')
-            xEncPos = getParm('X_ENC_POS')
-            if xEncPos != None:
-                encPos = float(xEncPos) / jogPanel.xEncInch
-                if jogPanel.xEncInvert:
-                    encPos = -encPos
-                xEncOffset = encPos
-                print("xEncOffset %0.4f" % (xEncOffset))
+            updateXEncPOs()
         jogPanel.focus()
 
     def OnHomeX(self, e):
@@ -2729,6 +2716,28 @@ class PosMenu(wx.Menu):
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
+
+def updateZEncPos(val):
+    global jogPanel
+    zEncPos = getParm('Z_ENC_POS')
+    print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
+    if zEncPos != None:
+        encPos = float(zEncPos) / jogPanel.zEncInch
+        if jogPanel.zEncInvert:
+            encPos = -encPos
+        zEncOffset = encPos - val
+        print("zEncOffset %0.4f" % (zEncOffset))
+
+def updateXEncPos(val):
+    global jogPanel
+    xEncPos = getParm('X_ENC_POS')
+    print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
+    if xEncPos != None:
+        encPos = float(xEncPos) / jogPanel.xEncInch
+        if jogPanel.xEncInvert:
+            encPos = -encPos
+        xEncOffset = encPos - val
+        print("xEncOffset %0.4f" % (xEncOffset))
 
 class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
@@ -2789,14 +2798,13 @@ class SetPosDialog(wx.Dialog):
                     info['zHomeOffset'].SetValue("%0.4f" % (zHomeOffset))
                     print("zHomeOffset %0.4f" % (zHomeOffset))
                     stdout.flush()
-                self.Show(False)
-                jogPanel.focus()
             except ValueError:
                 val = jogPanel.zPos.GetValue()
                 self.zPos.SetValue(val)
+            updateZEncPos(axis, val)
         else:
             try:
-                val = float(val)
+                val = float(val) / 2.0
                 sendXData()
                 xLoc = getParm('X_LOC')
                 if xLoc != None:
@@ -2810,6 +2818,9 @@ class SetPosDialog(wx.Dialog):
             except ValueError:
                 val = jogPanel.xPos.GetValue()
                 self.xPos.SetValue(val)
+            updateXEncPos(axis, val)
+        self.Show(False)
+        jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
     def __init__(self, frame, axis):
