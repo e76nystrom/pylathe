@@ -3222,7 +3222,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
 
         ID_FILE_EXIT = wx.NewId()
-        menu = fileMenu.Append(ID_FILE_EXIT, 'Restart')
+        menu = fileMenu.Append(ID_FILE_EXIT, 'Save & Restart')
         self.Bind(wx.EVT_MENU, self.OnRestat, menu)
 
         ID_FILE_EXIT = wx.NewId()
@@ -3374,6 +3374,7 @@ class MainFrame(wx.Frame):
         
     def OnRestat(self, e):
         import os
+        saveInfo('config.txt')
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnExit(self, e):
