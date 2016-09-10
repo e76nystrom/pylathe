@@ -300,12 +300,12 @@ def queXSetup(feed):
     saveXOffset();
 
 def startSpindle(rpm):
-    queMove('QUE_START', rpm)
+    queMove('START_SPINDLE', rpm)
     saveZOffset();
     saveXOffset();
 
 def stopSpindle():
-    queMove('QUE_STOP', 0)
+    queMove('STOP_SPINDLE', 0)
 
 def queFeedType(feedType):
     queMove('SAVE_FEED_TYPE', feedType)
