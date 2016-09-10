@@ -2155,7 +2155,7 @@ class JogPanel(wx.Panel):
             btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
             sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         else:
-            sizerG.add(emptyCell)
+            sizerG.Add(emptyCell)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
