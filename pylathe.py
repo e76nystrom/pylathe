@@ -3373,6 +3373,7 @@ class MainFrame(wx.Frame):
         saveInfo('config.txt')
         
     def OnRestat(self, e):
+        import os
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnExit(self, e):
