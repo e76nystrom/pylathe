@@ -277,13 +277,13 @@ def getIntVal(tc):
 
 moveQue = Queue()
 
-def queMove(op, val):
-    op = eval(op)
-    moveQue.put((op, val))
+def queMove(opString, val):
+    op = eval(opString)
+    moveQue.put((opString, op, val))
 
 def queMoveF(op, flag, val):
-    op = eval(op) | (flag << 8)
-    moveQue.put((op, val))
+    op = eval(opString) | (flag << 8)
+    moveQue.put((opString, op, val))
 
 def queClear():
     while not moveQue.empty():
@@ -3092,11 +3092,11 @@ class UpdateThread(Thread):
                                 num -= 1
                                 if op == None:
                                     try:
-                                        (op, val) = moveQue.get(False)
+                                        (opString, op, val) = moveQue.get(False)
                                     except Empty as e:
                                         break
                                 try:
-                                    sendMove(op, val)
+                                    sendMove(opString, op, val)
                                     op = None
                                 except commTimeout as e:
                                     break
