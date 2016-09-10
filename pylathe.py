@@ -353,7 +353,7 @@ def moveZX(zLoc, xLoc):
     queMove('MOVE_ZX', zLoc)
     print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
-def taperZX(zLoc', taper):
+def taperZX(zLoc, taper):
     queMove('SAVE_TAPER', taper)
     queMoveF('TAPER_ZX', 1, zLoc)
     print("taperZX %7.4f %7.4f" % (zLoc, taper))
