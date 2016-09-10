@@ -278,6 +278,11 @@ def getIntVal(tc):
 moveQue = Queue()
 
 def queMove(op, val):
+    op = eval(op)
+    moveQue.put((op, val))
+
+def queMoveF(op, flag, val):
+    op = eval(op) | (flag << 8)
     moveQue.put((op, val))
 
 def queClear():
@@ -285,77 +290,77 @@ def queClear():
         moveQue.get()
 
 def queZSetup(feed):
-    moveQue.put((Z_FEED_SETUP, feed))
+    queMove('Z_FEED_SETUP', feed)
     saveZOffset();
     saveXOffset();
 
 def queXSetup(feed):
-    moveQue.put((X_FEED_SETUP, feed))
+    queMove('X_FEED_SETUP', feed)
     saveZOffset();
     saveXOffset();
 
 def startSpindle(rpm):
-    moveQue.put((QUE_START, rpm))
+    queMove('QUE_START', rpm)
     saveZOffset();
     saveXOffset();
 
 def stopSpindle():
-    moveQue.put((QUE_STOP, 0))
+    queMove('QUE_STOP', 0)
 
 def queFeedType(feedType):
-    moveQue.put((SAVE_FEED_TYPE, feedType))
+    queMove('SAVE_FEED_TYPE', feedType)
 
 def zSynSetup(feed):
-    moveQue.put((Z_SYN_SETUP, feed))
+    queMove('Z_SYN_SETUP', feed)
 
 def xSynSetup(feed):
-    moveQue.put((X_SYN_SETUP, feed))
+    queMove('X_SYN_SETUP', feed)
 
 def nextPass(passNum):
-    moveQue.put((PASS_NUM, passNum))
+    queMove('PASS_NUM', passNum)
 
 def quePause():
-    moveQue.put((QUE_PAUSE, 0))
+    queMove('QUE_PAUSE', 0)
 
 def saveDiameter(val):
-    moveQue.put((SAVE_DIAMETER, val))
+    queMove('SAVE_DIAMETER', val)
 
 def moveZ(zLoc, flag=ZMAX):
-    queMove(MOVE_Z | flag << 8, zLoc)
-    print("moveZ  %7.4f" % (zLoc))
+    queMoveF('MOVE_Z', flag, zLoc)
+    print("moveZ  %7.4f" % (zLoc)
 
 def moveX(xLoc, flag=XMAX):
-    queMove(MOVE_X | flag << 8, xLoc)
-    print("moveX  %7.4f" % (xLoc))
+    queMoveF('MOVE_X, flag, xLoc)
+    print("moveX  %7.4f" % (xLoc)
 
 def saveZOffset():
     global zHomeOffset
-    queMove(SAVE_Z_OFFSET, zHomeOffset)
+    queMove('SAVE_Z_OFFSET', zHomeOffset)
     print("saveZOffset  %7.4f" % (zHomeOffset))
 
 def saveXOffset():
     global xHomeOffset
-    queMove(SAVE_X_OFFSET, xHomeOffset)
+    queMove('SAVE_X_OFFSET', xHomeOffset)
     print("savexOffset  %7.4f" % (xHomeOffset))
 
 def moveXZ(zLoc, xLoc):
-    queMove(SAVE_Z, zLoc)
-    queMove(MOVE_XZ, xLoc)
+    queMove('SAVE_Z', zLoc)
+    queMove('MOVE_XZ', xLoc)
     print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
 
 def moveZX(zLoc, xLoc):
-    queMove(SAVE_X, xLoc)
-    queMove(MOVE_ZX, zLoc)
+    queMove('SAVE_X', xLoc)
+    queMove('MOVE_ZX', zLoc)
     print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
-def taperZX(zLoc, taper):
-    queMove(SAVE_TAPER, taper)
-    queMove(TAPER_ZX | (1 << 8), zLoc)
+def taperZX(zLoc', taper):
+    queMove('SAVE_TAPER', taper)
+    queMoveF('TAPER_ZX', 1, zLoc)
     print("taperZX %7.4f %7.4f" % (zLoc, taper))
 
 def taperXZ(xLoc, taper):
-    queMove(SAVE_TAPER, taper)
-    queMove(TAPER_XZ, xLoc)
+    queMove('SAVE_TAPER', taper)
+    queMove('TAPER_XZ', 1, xLoc)
     print("taperZX %7.4f %7.4f" % (xLoc, taper))
 
 def sendClear():
