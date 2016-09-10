@@ -327,11 +327,11 @@ def saveDiameter(val):
 
 def moveZ(zLoc, flag=ZMAX):
     queMoveF('MOVE_Z', flag, zLoc)
-    print("moveZ  %7.4f" % (zLoc)
+    print("moveZ  %7.4f" % (zLoc))
 
 def moveX(xLoc, flag=XMAX):
-    queMoveF('MOVE_X, flag, xLoc)
-    print("moveX  %7.4f" % (xLoc)
+    queMoveF('MOVE_X', flag, xLoc)
+    print("moveX  %7.4f" % (xLoc))
 
 def saveZOffset():
     global zHomeOffset
