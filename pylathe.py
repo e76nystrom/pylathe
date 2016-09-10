@@ -3222,6 +3222,10 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
 
         ID_FILE_EXIT = wx.NewId()
+        menu = fileMenu.Append(ID_FILE_EXIT, 'Restart')
+        self.Bind(wx.EVT_MENU, self.OnRestat, menu)
+
+        ID_FILE_EXIT = wx.NewId()
         menu = fileMenu.Append(ID_FILE_EXIT, 'Exit')
         self.Bind(wx.EVT_MENU, self.OnExit, menu)
 
@@ -3368,6 +3372,9 @@ class MainFrame(wx.Frame):
     def OnSave(self, e):
         saveInfo('config.txt')
         
+    def OnRestat(self, e):
+        os.execl(sys.executable, sys.executable, *sys.argv)
+
     def OnExit(self, e):
         self.Close(True)
 
