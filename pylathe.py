@@ -353,15 +353,17 @@ def moveZX(zLoc, xLoc):
     queMove('MOVE_ZX', zLoc)
     print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
-def taperZX(zLoc, taper):
+def saveTaper(taper):
     queMove('SAVE_TAPER', taper)
+    print("saveTaper %7.4f" % (taper))
+
+def taperZX(zLoc, taper):
     queMoveF('TAPER_ZX', 1, zLoc)
-    print("taperZX %7.4f %7.4f" % (zLoc, taper))
+    print("taperZX %7.4f" % (zLoc))
 
 def taperXZ(xLoc, taper):
-    queMove('SAVE_TAPER', taper)
     queMove('TAPER_XZ', 1, xLoc)
-    print("taperZX %7.4f %7.4f" % (xLoc, taper))
+    print("taperZX %7.4f" % (xLoc))
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
@@ -1257,7 +1259,6 @@ class Taper(UpdatePass):
         while self.updatePass():
             pass
 
-        moveX(self.safeX)
         moveZ(self.safeZ)
         stopSpindle();
         stdout.flush()
@@ -1267,6 +1268,7 @@ class Taper(UpdatePass):
         startSpindle(getIntInfo('tpRPM'))
         queFeedType(FEED_PITCH)
         zSynSetup(getFloatInfo('tpZFeed'))
+        saveTaper(taper)
         moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
