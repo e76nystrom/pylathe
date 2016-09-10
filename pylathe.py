@@ -3222,7 +3222,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
 
         ID_FILE_EXIT = wx.NewId()
-        menu = fileMenu.Append(ID_FILE_EXIT, 'Save & Restart')
+        menu = fileMenu.Append(ID_FILE_EXIT, 'Save and Restart')
         self.Bind(wx.EVT_MENU, self.OnRestat, menu)
 
         ID_FILE_EXIT = wx.NewId()
