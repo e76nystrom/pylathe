@@ -281,8 +281,8 @@ def queMove(opString, val):
     op = eval(opString)
     moveQue.put((opString, op, val))
 
-def queMoveF(opString, op, flag, val):
-    op = eval(op) | (flag << 8)
+def queMoveF(opString, flag, val):
+    op = eval(opString) | (flag << 8)
     moveQue.put((opString, op, val))
 
 def queClear():
