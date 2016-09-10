@@ -3063,7 +3063,7 @@ class UpdateThread(Thread):
             stdout.flush()
             return
         comm.xDbgPrint = True
-        if result == None:
+        if done or (result == None):
             return
         try:
             (z, x, rpm, curPass, encZ, encX) = result.rstrip().split(' ')[1:]
