@@ -274,7 +274,7 @@ def dspXReg(reg, label=''):
                (reg, xRegs[reg], val & 0xffffffff, val, label))
     return(val)
 
-def sendMove(op, val):
+def sendMove(opString, op, val):
     global ser, commLock, timeout
     if isinstance(val, float):
         valStr = "%0.4f" % (val)
@@ -291,7 +291,7 @@ def sendMove(op, val):
         return
     cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
-        print("cmd %3x %s" % (op, prtStr))
+        print("cmd %12s %3x %s" % (opString, op, prtStr))
         stdout.flush()
     if ser is None:
         return
