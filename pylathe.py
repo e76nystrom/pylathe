@@ -1268,7 +1268,7 @@ class Taper(UpdatePass):
         startSpindle(getIntInfo('tpRPM'))
         queFeedType(FEED_PITCH)
         zSynSetup(getFloatInfo('tpZFeed'))
-        saveTaper(taper)
+        saveTaper(self.taper)
         moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
