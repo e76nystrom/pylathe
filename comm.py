@@ -291,7 +291,7 @@ def sendMove(opString, op, val):
         return
     cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
-        print("cmd %12s %3x %s" % (opString, op, prtStr))
+        print("cmd %-14s %3x %s" % (opString, op, prtStr))
         stdout.flush()
     if ser is None:
         return
