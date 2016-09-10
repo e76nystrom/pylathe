@@ -1226,6 +1226,8 @@ class Taper(UpdatePass):
         self.xStart = self.largeDiameter / 2.0
         self.xEnd = self.smallDiameter / 2.0
 
+        self.taperSetup()
+
         if self.taperX:
             xSynSetup(getFloatInfo('tpXInFeed'))
             zCut = self.zLength * taperInch
@@ -1254,8 +1256,6 @@ class Taper(UpdatePass):
         print ("passes %d cutAmount %5.3f feed %6.3f" %
                (self.passes, self.cutAmount, self.actualFeed))
 
-        self.taperSetup()
-
         while self.updatePass():
             pass
 
@@ -1265,10 +1265,10 @@ class Taper(UpdatePass):
 
     def taperSetup(self):
         quePause()
+        saveTaper(self.taper)
         startSpindle(getIntInfo('tpRPM'))
         queFeedType(FEED_PITCH)
         zSynSetup(getFloatInfo('tpZFeed'))
-        saveTaper(self.taper)
         moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
