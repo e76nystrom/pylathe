@@ -3934,8 +3934,7 @@ class SpindleTest():
         txt.SetValue("")
         minRPM = float(getInfo('spMinRPM')) # minimum rpm
         maxRPM = float(getInfo('spMaxRPM')) # maximum rpm
-        aTime = float(getInfo('spAccelTime'))  # accel time sec
-        # accel = 10                      # rpm per sec
+        accel = float(getInfo('spAccel'))   # accel rpm per sec
         
         f = open('spindle.txt','w')
         
@@ -3959,11 +3958,16 @@ class SpindleTest():
         sStepsSecMin = float(minRPM * spindleStepsRev) / 60
         sStepsSecMax = float(maxRPM * spindleStepsRev) / 60
         deltaV = sStepsSecMax - sStepsSecMin
-        accelStepsSec2 = deltaV / aTime
-        dbgPrt(txt,"accel %0.1f rpm per sec", ((accelStepsSec2 / 
-                                            spindleStepsRev) * 60))
         dbgPrt(txt,"deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f",
                (deltaV, sStepsSecMin, sStepsSecMax))
+        if False:
+            accelStepsSec2 = deltaV / aTime
+            accel = (accelStepsSec2 / spindleStepsRev) * 60
+        else:
+            accelStepsSec2 = (accel / 60) * spindleStepsRev
+            aTime = deltaV / accelStepsSec2
+
+        dbgPrt(txt,"accel %0.1f rpm per sec", (accel))
         
         accelMinTime = sStepsSecMin / accelStepsSec2
         accelMaxTime = sStepsSecMax / accelStepsSec2
