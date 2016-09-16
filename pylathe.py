@@ -3820,16 +3820,18 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", 'cfgXilinx'),)
+            ("bHW Control", 'cfgXilinx'),
+            ("fcy", "cfgFcy"),
+        )
         if XILINX:
-                ("fcy", "cfgFcy"),
             self.fields += (
                 ("Encoder", "cfgEncoder"),
                 ("Xilinx Freq", "cfgXFreq"),
                 ("Freq Mult", "cfgFreqMult"),
                 ("bTest Mode", 'cfgTestMode'),
                 ("Test RPM", "cfgTestRPM"),
-                ("bInvert Enc Dir", 'cfgInvEncDir'))
+                ("bInvert Enc Dir", 'cfgInvEncDir'),
+            )
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
