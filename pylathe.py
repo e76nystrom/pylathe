@@ -3921,7 +3921,7 @@ def dbgPrt(txt, format, values):
     txt.AppendText((format + "\n") % values)
     f.write((format + "\n") % values)
 
-fcy = 84000000
+fcy = 90000000
 
 class SpindleTest():
     def __init__(self, txt):
