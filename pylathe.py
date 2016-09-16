@@ -3183,6 +3183,7 @@ class MainFrame(wx.Frame):
         stdout.flush()
 
         if comm.ser != None:
+            setParm('CFG_FCY', getInfo('cfgFcy'))
             sendZData()
             val = getInfo('jogZPos')
             setParm('Z_SET_LOC', val)
@@ -3821,6 +3822,7 @@ class ConfigDialog(wx.Dialog):
         self.fields = (
             ("bHW Control", 'cfgXilinx'),)
         if XILINX:
+                ("fcy", "cfgFcy"),
             self.fields += (
                 ("Encoder", "cfgEncoder"),
                 ("Xilinx Freq", "cfgXFreq"),
@@ -3830,7 +3832,7 @@ class ConfigDialog(wx.Dialog):
                 ("bInvert Enc Dir", 'cfgInvEncDir'))
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
