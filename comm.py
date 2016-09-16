@@ -84,10 +84,14 @@ def setParm(parm, val):
             valString = "%5.6f" % (float(val))
             valString = valString.rstrip('0')
         except ValueError:
+            valString = "0.0"
             print("ValueError %s" % (val))
             stdout.flush()
     else:
-        valString = "x%x" % (int(val))
+        try:
+            valString = "x%x" % (int(val))
+        except ValueError:
+            valString = "0"
     cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     if True: # xDbgPrint:
         print("%-15s %s" % (parm, cmd))
