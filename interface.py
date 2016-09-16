@@ -219,6 +219,7 @@ parmList = \
     ["STEPPER_DRIVE", "stepper driven spindle", "char"],
 
     # ["", "", ""],
+    ["fcy", "system clock speed", "int"],
     
     ["MAX_PARM", "maximum parameter", "int16_t"]
 ]
