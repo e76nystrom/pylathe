@@ -35,9 +35,10 @@ def command(cmd):
         actionCmd = "lathe." + action + "()"
         eval(actionCmd)
         # action()
-    cmdStr = '\x01%x ' % (cmdVal)
+    # cmdStr = '\x01%x ' % (cmdVal)
+    cmdStr = '\x01%x\n' % (cmdVal)
     if xDbgPrint:
-        print("%-15s %s" % (cmd, cmdStr))
+        print("%-15s %s" % (cmd, cmdStr.strip()))
         stdout.flush()
     if ser is None:
         return(None);
@@ -50,7 +51,7 @@ def command(cmd):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("timeout %s" % (cmd))
+                print("timeout %s" % (cmd.strip()))
                 stdout.flush()
             raise commTimeout()
             break
@@ -92,9 +93,10 @@ def setParm(parm, val):
             valString = "x%x" % (int(val))
         except ValueError:
             valString = "0"
-    cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
+    # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
+    cmd = '\x01%x %x %s\n' % (cmds['LOADVAL'][0], parmIndex, valString)
     if True: # xDbgPrint:
-        print("%-15s %s" % (parm, cmd))
+        print("%-15s %s" % (parm, cmd.strip()))
         stdout.flush()
     if ser is None:
         return
@@ -156,7 +158,8 @@ def getString():
     global ser, cmds, parms, commLock, timeout
     if ser is None:
         return(None)
-    cmd = '\x01%x ' % (cmds['READDBG'][0])
+    # cmd = '\x01%x ' % (cmds['READDBG'][0])
+    cmd = '\x01%x\n' % (cmds['READDBG'][0])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -191,7 +194,9 @@ def setXReg(reg, val):
         stdout.flush()
     if ser is None:
         return
-    cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
+    # cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
+    #                            val & 0xffffffff)
+    cmd = '\x01%x %x %08x\n' % (cmds['LOADXREG'][0], xRegs[reg], \
                                val & 0xffffffff)
     commLock.acquire(True)
     ser.write(cmd)
@@ -218,7 +223,9 @@ def setXRegN(reg, val):
     val = int(val)
     if xDbgPrint:
         print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
-    cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], reg, \
+    # cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], reg, \
+    #                            val & 0xffffffff)
+    cmd = '\x01%x %x %08x\n' % (cmds['LOADXREG'][0], reg, \
                                val & 0xffffffff)
     commLock.acquire(True)
     ser.write(cmd)
@@ -245,7 +252,8 @@ def getXReg(reg):
     if not (reg in xRegs):
         print("invalid register " + reg)
         return(0);
-    cmd = '\x01%x %x ' % (cmds['READXREG'][0], xRegs[reg])
+    # cmd = '\x01%x %x ' % (cmds['READXREG'][0], xRegs[reg])
+    cmd = '\x01%x %x\n' % (cmds['READXREG'][0], xRegs[reg])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -294,6 +302,7 @@ def sendMove(opString, op, val):
         stdout.flush()
         return
     cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
+    # cmd = '\x01%x x%x %s\n' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
         print("cmd %-14s %3x %s" % (opString, op, prtStr))
         stdout.flush()
@@ -322,7 +331,8 @@ def getQueueStatus():
     global ser, commLock, timeout
     if ser is None:
         return(None)
-    cmd = '\x01%x ' % (cmds['MOVEQUESTATUS'][0])
+    # cmd = '\x01%x ' % (cmds['MOVEQUESTATUS'][0])
+    cmd = '\x01%x\n' % (cmds['MOVEQUESTATUS'][0])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
