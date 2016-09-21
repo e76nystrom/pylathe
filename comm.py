@@ -36,7 +36,7 @@ def command(cmd):
         eval(actionCmd)
         # action()
     # cmdStr = '\x01%x ' % (cmdVal)
-    cmdStr = '\x01%x\r' % (cmdVal)
+    cmdStr = '\x01%x \r' % (cmdVal)
     if xDbgPrint:
         print("%-15s %s" % (cmd, cmdStr.strip()))
         stdout.flush()
@@ -94,7 +94,7 @@ def setParm(parm, val):
         except ValueError:
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
-    cmd = '\x01%x %x %s\r' % (cmds['LOADVAL'][0], parmIndex, valString)
+    cmd = '\x01%x %x %s \r' % (cmds['LOADVAL'][0], parmIndex, valString)
     if True: # xDbgPrint:
         print("%-15s %s" % (parm, cmd.strip()))
         stdout.flush()
@@ -159,7 +159,7 @@ def getString():
     if ser is None:
         return(None)
     # cmd = '\x01%x ' % (cmds['READDBG'][0])
-    cmd = '\x01%x\r' % (cmds['READDBG'][0])
+    cmd = '\x01%x \r' % (cmds['READDBG'][0])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -196,7 +196,7 @@ def setXReg(reg, val):
         return
     # cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
     #                            val & 0xffffffff)
-    cmd = '\x01%x %x %08x\r' % (cmds['LOADXREG'][0], xRegs[reg], \
+    cmd = '\x01%x %x %08x \r' % (cmds['LOADXREG'][0], xRegs[reg], \
                                val & 0xffffffff)
     commLock.acquire(True)
     ser.write(cmd)
@@ -225,7 +225,7 @@ def setXRegN(reg, val):
         print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
     # cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], reg, \
     #                            val & 0xffffffff)
-    cmd = '\x01%x %x %08x\r' % (cmds['LOADXREG'][0], reg, \
+    cmd = '\x01%x %x %08x \r' % (cmds['LOADXREG'][0], reg, \
                                val & 0xffffffff)
     commLock.acquire(True)
     ser.write(cmd)
@@ -253,7 +253,7 @@ def getXReg(reg):
         print("invalid register " + reg)
         return(0);
     # cmd = '\x01%x %x ' % (cmds['READXREG'][0], xRegs[reg])
-    cmd = '\x01%x %x\r' % (cmds['READXREG'][0], xRegs[reg])
+    cmd = '\x01%x %x \r' % (cmds['READXREG'][0], xRegs[reg])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -302,7 +302,7 @@ def sendMove(opString, op, val):
         stdout.flush()
         return
     # cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
-    cmd = '\x01%x x%x %s\r' % (cmds['QUEMOVE'][0], op, valStr)
+    cmd = '\x01%x x%x %s \r' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
         print("cmd %-14s %3x %s" % (opString, op, prtStr))
         stdout.flush()
@@ -332,7 +332,7 @@ def getQueueStatus():
     if ser is None:
         return(None)
     # cmd = '\x01%x ' % (cmds['MOVEQUESTATUS'][0])
-    cmd = '\x01%x\r' % (cmds['MOVEQUESTATUS'][0])
+    cmd = '\x01%x \r' % (cmds['MOVEQUESTATUS'][0])
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
