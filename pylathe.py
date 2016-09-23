@@ -3077,7 +3077,7 @@ class UpdateThread(Thread):
         global dbg
         i = 0
         op = None
-        scanMax = len(self.parmList) + 1
+        scanMax = len(self.parmList)
         while True:
             sleep(0.1)
             if not self.threadRun:
