@@ -150,7 +150,6 @@ parmList = \
     ["Z_JOG_DIR", "x jog direction", "int"],
     ["Z_SET_LOC", "z location to set", "float"],
     ["Z_LOC", "z dro location", "int"],
-    ["Z_ENC_POS", "z encoder location", "int"],
     ["Z_ABS_LOC", "z absolute location", "int"],
     ["Z_MPG_INC", "z man pulse gen incr", "int"],
     
@@ -160,7 +159,6 @@ parmList = \
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
     ["X_LOC", "x dro location", "int"],
-    ["X_ENC_POS", "x encoder location", "int"],
     ["X_ABS_LOC", "x absolute location", "int"],
     ["X_MPG_INC", "X man pulse gen incr", "int"],
     
@@ -189,7 +187,13 @@ parmList = \
 
     # "z home offsets",
 
-    # ["z_HOME_OFFSET", "z offset home to zero", "float"],
+    ["Z_HOME_OFFSET", "z offset home to zero", "float"],
+
+    # "z encoder",
+
+    ["Z_ENC_POS", "z encoder location", "int"],
+    ["Z_ENC_OFFSET", "z encoder to zero", "float"],
+    ["Z_ENC_DIR", "z encoder direction", "int"],
 
     "x home parameters",
 
@@ -204,9 +208,15 @@ parmList = \
     ["X_HOME_START", "x start of home signal", "int"],
     ["X_HOME_END", "x end of home signal", "int"],
 
-    # "x home offsetts",
+    # "x home offset",
 
-    # ["X_HOME_OFFSET", "x offset home to zero", "float"],
+    ["X_HOME_OFFSET", "x offset home to zero", "float"],
+
+    # "x encoder",
+
+    ["X_ENC_POS", "x encoder location", "int"],
+    ["X_ENC_OFFSET", "x encoder to zero", "float"],
+    ["X_ENC_DIR", "x encoder direction", "int"],
 
     "x home status",
 
