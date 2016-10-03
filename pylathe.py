@@ -3204,9 +3204,9 @@ class MainFrame(wx.Frame):
             setParm('X_ENC_OFFSET', xEncOffset)
             setParm('Z_ENC_INCH', jogPanel.zEncInch)
             setParm('X_ENC_INCH', jogPanel.xEncInch)
-            val = (-1, 1)[getBoolInfo('zInvEnc')
+            val = (-1, 1)[getBoolInfo('zInvEnc')]
             setParm('Z_ENC_DIR', val)
-            val = (-1, 1)[getBoolInfo('xInvEnc')
+            val = (-1, 1)[getBoolInfo('xInvEnc')]
             setParm('X_ENC_DIR', val)
 
         self.procUpdate = (self.jogPanel.updateZ,
