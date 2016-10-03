@@ -564,6 +564,7 @@ class UpdatePass():
         self.actualFeed = cutToFinish / self.passes
         if finish != 0:
             self.passes += 1
+        setParm('TOTAL_PASSES', self.passes)
         self.initPass()
         
     def setupFeed(self, actualFeed, cutAmount):
