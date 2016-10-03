@@ -140,8 +140,8 @@ parmList = \
     "pass information",
     
     ["TOTAL_PASSES", "total passes", "int16_t"],
-    ["SPRING_PASSES", "spring passes", "int16_t"],
-    ["SPRING_PASS_INT", "spring pass interval", "int16_t"],
+    # ["SPRING_PASSES", "spring passes", "int16_t"],
+    # ["SPRING_PASS_INT", "spring pass interval", "int16_t"],
     ["CURRENT_PASS", "current passes", "int16_t"],
     
     "z axis move values",
@@ -183,7 +183,6 @@ parmList = \
     ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
     ["REV_COUNTER", "revolutin counter", "unsigned int"],
- 
 
     # "z home offsets",
 
