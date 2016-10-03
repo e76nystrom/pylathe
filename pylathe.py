@@ -3088,25 +3088,25 @@ class UpdateThread(Thread):
                     func()
                 except commTimeout as e:
                     pass
-            else:
-                if not moveQue.empty() or (op != None):
-                    try:
-                        num = getQueueStatus()
-                        if num != None:
-                            while num > 0:
-                                num -= 1
-                                if op == None:
-                                    try:
-                                        (opString, op, val) = moveQue.get(False)
-                                    except Empty as e:
-                                        break
+
+            if not moveQue.empty() or (op != None):
+                try:
+                    num = getQueueStatus()
+                    if num != None:
+                        while num > 0:
+                            num -= 1
+                            if op == None:
                                 try:
-                                    sendMove(opString, op, val)
-                                    op = None
-                                except commTimeout as e:
+                                    (opString, op, val) = moveQue.get(False)
+                                except Empty as e:
                                     break
-                    except commTimeout as e:
-                        pass
+                            try:
+                                sendMove(opString, op, val)
+                                op = None
+                            except commTimeout as e:
+                                break
+                except commTimeout as e:
+                    pass
             i += 1
             if i >= scanMax:
                 i = 0
@@ -3196,8 +3196,18 @@ class MainFrame(wx.Frame):
             setParm('Z_ENC_POS', val)
             val = int(getFloatInfo('xEncPosition') * jogPanel.xStepsInch)
             setParm('X_ENC_POS', val)
-            loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-            setParm('X_HOME_LOC', loc)
+            val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+            setParm('X_HOME_LOC', val)
+            setParm('Z_HOME_OFFSET', zHomeOffset)
+            setParm('X_HOME_OFFSET', xHomeOffset)
+            setParm('Z_ENC_OFFSET', zEncOffset)
+            setParm('X_ENC_OFFSET', xEncOffset)
+            setParm('Z_ENC_INCH', jogPanel.zEncInch)
+            setParm('X_ENC_INCH', jogPanel.xEncInch)
+            val = (-1, 1)[getBoolInfo('zInvEnc')
+            setParm('Z_ENC_DIR', val)
+            val = (-1, 1)[getBoolInfo('xInvEnc')
+            setParm('X_ENC_DIR', val)
 
         self.procUpdate = (self.jogPanel.updateZ,
                            self.jogPanel.updateX,
