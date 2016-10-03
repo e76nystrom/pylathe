@@ -2770,6 +2770,7 @@ def updateZPos(val):
             encPos = -encPos
         zEncOffset = encPos - val
         setInfo('zEncOffset', "%0.4f" % (zEncOffset))
+        setParm('Z_ENC_OFFSET', zEncOffset)
         print("zEncOffset %0.4f" % (zEncOffset))
     stdout.flush()
 
@@ -2793,6 +2794,7 @@ def updateXPos(val):
             encPos = -encPos
         xEncOffset = encPos - val
         setInfo('xEncOffset', "%0.4f" % (xEncOffset))
+        setParm('X_ENC_OFFSET', xEncOffset)
         print("xEncOffset %0.4f" % (xEncOffset))
     stdout.flush()
 
