@@ -2759,6 +2759,7 @@ def updateZPos(val):
         zLoc /= jogPanel.zStepsInch
         zHomeOffset = zLoc - val
         setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
+        setParm('Z_HOME_OFFSET', zHomeOffset)
         print("zHomeOffset %0.4f" % (zHomeOffset))
     zEncPos = getParm('Z_ENC_POS')
     print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
@@ -2780,7 +2781,8 @@ def updateXPos(val):
     if xLoc != None:
         xLoc /= jogPanel.xStepsInch
         xHomeOffset = xLoc - val
-        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
+        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
+        setParm('X_HOME_OFFSET', xHomeOffset)
         print("xHomeOffset %0.4f" % (xHomeOffset))
     xEncPos = getParm('X_ENC_POS')
     print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
