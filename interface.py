@@ -193,6 +193,7 @@ parmList = \
 
     ["Z_ENC_POS", "z encoder location", "int"],
     ["Z_ENC_OFFSET", "z encoder to zero", "float"],
+    ["X_ENC_INCH", "z encoder scale", "int"],
     ["Z_ENC_DIR", "z encoder direction", "int"],
 
     "x home parameters",
@@ -216,6 +217,7 @@ parmList = \
 
     ["X_ENC_POS", "x encoder location", "int"],
     ["X_ENC_OFFSET", "x encoder to zero", "float"],
+    ["X_ENC_INCH", "x encoder scale", "int"],
     ["X_ENC_DIR", "x encoder direction", "int"],
 
     "x home status",
