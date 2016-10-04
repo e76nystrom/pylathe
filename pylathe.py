@@ -842,8 +842,6 @@ class TurnPanel(wx.Panel):
     def OnAdd(self, e):
         global jogPanel
         self.turn.turnAdd()
-        passes = getParm('TOTAL_PASSES')
-        self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
 
 class Face(UpdatePass):
@@ -1682,9 +1680,6 @@ class TaperPanel(wx.Panel):
             self.taper.internalAdd()
         else:
             self.taper.externalAdd()
-
-        passes = getParm('TOTAL_PASSES')
-        self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
 
     # def OnDebug(self, e):
@@ -1969,8 +1964,6 @@ class ThreadPanel(wx.Panel):
     def OnAdd(self, e):
         global jogPanel
         self.screwThread.threadAdd()
-        passes = getParm('TOTAL_PASSES')
-        self.passes.SetLabel("%d" % (passes))
         jogPanel.focus()
 
 class ButtonRepeat(Thread):
