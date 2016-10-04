@@ -3028,24 +3028,24 @@ class UpdateThread(Thread):
         self.parmList = (self.readAll, )
         self.start()
 
-    def zLoc(self):
-        val = getParm('Z_LOC')
-        if val != None:
-            result = (0, val)
-            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+    # def zLoc(self):
+    #     val = getParm('Z_LOC')
+    #     if val != None:
+    #         result = (0, val)
+    #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
-    def xLoc(self):
-        val = getParm('X_LOC')
-        if val != None:
-            result = (1, val)
-            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+    # def xLoc(self):
+    #     val = getParm('X_LOC')
+    #     if val != None:
+    #         result = (1, val)
+    #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
-    def rpm(self):
-        period = getParm('INDEX_PERIOD')
-        if period != None:
-            preScaler = getParm('INDEX_PRE_SCALER')
-            result = (2, period * preScaler)
-            wx.PostEvent(self.notifyWindow, UpdateEvent(result))
+    # def rpm(self):
+    #     period = getParm('INDEX_PERIOD')
+    #     if period != None:
+    #         preScaler = getParm('INDEX_PRE_SCALER')
+    #         result = (2, period * preScaler)
+    #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
         tmp = comm.xDbgPrint
