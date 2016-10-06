@@ -3202,6 +3202,8 @@ class MainFrame(wx.Frame):
             setParm('X_ENC_OFFSET', xEncOffset)
             setParm('Z_ENC_INCH', jogPanel.zEncInch)
             setParm('X_ENC_INCH', jogPanel.xEncInch)
+            if xHomed:
+                setParm('X_HOME_STATUS', HOME_SUCCESS)
             val = (-1, 1)[getBoolInfo('zInvEnc')]
             setParm('Z_ENC_DIR', val)
             val = (-1, 1)[getBoolInfo('xInvEnc')]
