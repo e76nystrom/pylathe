@@ -2572,7 +2572,7 @@ class JogPanel(wx.Panel):
             if x != '#':
                 val = float(x) - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (val))
-                self.xPosDiam.SetValue("%0.4f" % (val * 2))
+                self.xPosDiam.SetValue("%0.4f" % (abs(val * 2)))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
 
