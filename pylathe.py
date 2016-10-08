@@ -2069,6 +2069,7 @@ class JogPanel(wx.Panel):
 
         sizerG.Add(emptyCell)
         self.statusText = txt = wx.StaticText(self, -1, "")
+        txt.SetFont(txtFont)
         sizerG.Add(txt)
 
         # x diameter
