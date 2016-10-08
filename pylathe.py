@@ -753,8 +753,8 @@ class TurnPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
 
-        sizerG.Add(wx.StaticText(self, -1), border=2)
-        sizerG.Add(wx.StaticText(self, -1), border=2)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         # x parameters
 
@@ -2068,7 +2068,8 @@ class JogPanel(wx.Panel):
         # blank space
 
         sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        self.statusText = txt = wx.StaticText(self, -1, "")
+        sizerG.Add(txt)
 
         # x diameter
 
