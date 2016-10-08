@@ -2548,23 +2548,23 @@ class JogPanel(wx.Panel):
         stdout.flush()
         evt.Skip()
 
-    # def updateZ(self, val):
-    #     if self.zStepsInch != 0.0:
-    #         txt = "%7.3f" % (float(val) / self.zStepsInch)
-    #     else:
-    #         txt = '0.000'
-    #     self.zPos.SetValue(txt)
+    def updateZ(self, val):
+        if self.zStepsInch != 0.0:
+            txt = "%7.3f" % (float(val) / self.zStepsInch)
+        else:
+            txt = '0.000'
+        self.zPos.SetValue(txt)
 
-    # def updateX(self, val):
-    #     if self.xStepsInch != 0.0:
-    #         txt = "%7.3f" % (float(val) / self.xStepsInch)
-    #     else:
-    #         txt = '0.000'
-    #     self.xPos.SetValue(txt)
+    def updateX(self, val):
+        if self.xStepsInch != 0.0:
+            txt = "%7.3f" % (float(val) / self.xStepsInch)
+        else:
+            txt = '0.000'
+        self.xPos.SetValue(txt)
 
-    # def updateRPM(self, val):
-    #     print val
-    #     stdout.flush()
+    def updateRPM(self, val):
+        print val
+        stdout.flush()
 
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset, xHomed
@@ -3220,9 +3220,9 @@ class MainFrame(wx.Frame):
             setParm('X_ENC_DIR', val)
 
         self.procUpdate = (
-            # self.jogPanel.updateZ,
-            # self.jogPanel.updateX,
-            # self.jogPanel.updateRPM,
+            self.jogPanel.updateZ,
+            self.jogPanel.updateX,
+            self.jogPanel.updateRPM,
             self.jogPanel.updateAll,
         )
 
