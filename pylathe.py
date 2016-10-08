@@ -564,7 +564,6 @@ class UpdatePass():
         self.actualFeed = cutToFinish / self.passes
         if finish != 0:
             self.passes += 1
-        setParm('TOTAL_PASSES', self.passes)
         self.initPass()
         
     def setupFeed(self, actualFeed, cutAmount):
@@ -580,6 +579,7 @@ class UpdatePass():
         self.genPass = genPass
 
     def initPass(self):
+        setParm('TOTAL_PASSES', self.passes)
         self.passCount = 1
         self.sPassCtr = 0
         self.spring = 0
@@ -2548,23 +2548,23 @@ class JogPanel(wx.Panel):
         stdout.flush()
         evt.Skip()
 
-    def updateZ(self, val):
-        if self.zStepsInch != 0.0:
-            txt = "%7.3f" % (float(val) / self.zStepsInch)
-        else:
-            txt = '0.000'
-        self.zPos.SetValue(txt)
+    # def updateZ(self, val):
+    #     if self.zStepsInch != 0.0:
+    #         txt = "%7.3f" % (float(val) / self.zStepsInch)
+    #     else:
+    #         txt = '0.000'
+    #     self.zPos.SetValue(txt)
 
-    def updateX(self, val):
-        if self.xStepsInch != 0.0:
-            txt = "%7.3f" % (float(val) / self.xStepsInch)
-        else:
-            txt = '0.000'
-        self.xPos.SetValue(txt)
+    # def updateX(self, val):
+    #     if self.xStepsInch != 0.0:
+    #         txt = "%7.3f" % (float(val) / self.xStepsInch)
+    #     else:
+    #         txt = '0.000'
+    #     self.xPos.SetValue(txt)
 
-    def updateRPM(self, val):
-        print val
-        stdout.flush()
+    # def updateRPM(self, val):
+    #     print val
+    #     stdout.flush()
 
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset, xHomed
