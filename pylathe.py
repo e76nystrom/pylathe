@@ -2590,7 +2590,7 @@ class JogPanel(wx.Panel):
             self.xEncPos.SetValue("%0.4f" % (encPos))
 
             if xHomed:
-                self.statusText.SetValue('H')
+                self.statusText.SetLabel('H')
 
             if self.xHome:
                 val = getParm('X_HOME_STATUS')
