@@ -3219,10 +3219,12 @@ class MainFrame(wx.Frame):
             val = (-1, 1)[getBoolInfo('xInvEnc')]
             setParm('X_ENC_DIR', val)
 
-        self.procUpdate = (self.jogPanel.updateZ,
-                           self.jogPanel.updateX,
-                           self.jogPanel.updateRPM,
-                           self.jogPanel.updateAll)
+        self.procUpdate = (
+            # self.jogPanel.updateZ,
+            # self.jogPanel.updateX,
+            # self.jogPanel.updateRPM,
+            self.jogPanel.updateAll,
+        )
 
         self.update = UpdateThread(self)
 
