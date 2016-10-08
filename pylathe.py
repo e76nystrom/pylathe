@@ -2594,6 +2594,7 @@ class JogPanel(wx.Panel):
             label = ''
             if xHomed:
                 text = 'H'
+            flag = int(flag)
             if flag & 1:
                 text  = text + 'P'
             self.statusText.SetLabel(text)
