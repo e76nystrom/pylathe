@@ -3084,7 +3084,7 @@ class UpdateThread(Thread):
             result = command('READLOC')
         except commTimeout:
             self.readAllError = True
-            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "readAll error"))
+            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "readAll error")))
             print("readAll error")
             stdout.flush()
             return
