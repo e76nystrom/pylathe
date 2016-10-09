@@ -3214,32 +3214,36 @@ class MainFrame(wx.Frame):
         stdout.flush()
 
         if comm.ser != None:
-            setParm('CFG_FCY', getInfo('cfgFcy'))
-            sendZData()
-            val = getInfo('jogZPos')
-            setParm('Z_SET_LOC', val)
-            command('ZSETLOC')
-            sendXData()
-            val = getInfo('jogXPos')
-            setParm('X_SET_LOC', val)
-            command('XSETLOC')
-            val = int(getFloatInfo('zEncPosition') * jogPanel.zStepsInch)
-            setParm('Z_ENC_POS', val)
-            val = int(getFloatInfo('xEncPosition') * jogPanel.xStepsInch)
-            setParm('X_ENC_POS', val)
-            val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-            setParm('X_HOME_LOC', val)
-            setParm('Z_HOME_OFFSET', zHomeOffset)
-            setParm('X_HOME_OFFSET', xHomeOffset)
-            setParm('Z_ENC_OFFSET', zEncOffset)
-            setParm('X_ENC_OFFSET', xEncOffset)
-            setParm('Z_ENC_INCH', jogPanel.zEncInch)
-            setParm('X_ENC_INCH', jogPanel.xEncInch)
-            setParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
-            val = (-1, 1)[getBoolInfo('zInvEnc')]
-            setParm('Z_ENC_DIR', val)
-            val = (-1, 1)[getBoolInfo('xInvEnc')]
-            setParm('X_ENC_DIR', val)
+            try:
+                setParm('CFG_FCY', getInfo('cfgFcy'))
+                sendZData()
+                val = getInfo('jogZPos')
+                setParm('Z_SET_LOC', val)
+                command('ZSETLOC')
+                sendXData()
+                val = getInfo('jogXPos')
+                setParm('X_SET_LOC', val)
+                command('XSETLOC')
+                val = int(getFloatInfo('zEncPosition') * jogPanel.zStepsInch)
+                setParm('Z_ENC_POS', val)
+                val = int(getFloatInfo('xEncPosition') * jogPanel.xStepsInch)
+                setParm('X_ENC_POS', val)
+                val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+                setParm('X_HOME_LOC', val)
+                setParm('Z_HOME_OFFSET', zHomeOffset)
+                setParm('X_HOME_OFFSET', xHomeOffset)
+                setParm('Z_ENC_OFFSET', zEncOffset)
+                setParm('X_ENC_OFFSET', xEncOffset)
+                setParm('Z_ENC_INCH', jogPanel.zEncInch)
+                setParm('X_ENC_INCH', jogPanel.xEncInch)
+                setParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
+                val = (-1, 1)[getBoolInfo('zInvEnc')]
+                setParm('Z_ENC_DIR', val)
+                val = (-1, 1)[getBoolInfo('xInvEnc')]
+                setParm('X_ENC_DIR', val)
+            except commTimeout:
+                print "comm timeout on setup"
+                setStatus("comm timeout on setup")
 
         self.procUpdate = (
             self.jogPanel.updateZ,
