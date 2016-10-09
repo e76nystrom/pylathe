@@ -2628,6 +2628,9 @@ class JogPanel(wx.Panel):
                         print("home success")
                         stdout.flush()
 
+    def updateError(self, text):
+        self.statusLine.SetLabel(text)
+
     def OnEStop(self, e):
         global spindleDataSend, zDataSent, xDataSent
         queClear()
@@ -3081,7 +3084,7 @@ class UpdateThread(Thread):
             result = command('READLOC')
         except commTimeout:
             self.readAllError = True
-            setStatus("readAll error")
+            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "readAll error"))
             print("readAll error")
             stdout.flush()
             return
@@ -3092,7 +3095,7 @@ class UpdateThread(Thread):
         comm.xDbgPrint = True
         if self.readAllError:
             self.readAllError = False
-            setStatus("")
+            wx.PostEvent(self.notifyWindow, UpdateEvent((4, ""))
         if done or (result == None):
             return
         try:
@@ -3254,6 +3257,7 @@ class MainFrame(wx.Frame):
             self.jogPanel.updateX,
             self.jogPanel.updateRPM,
             self.jogPanel.updateAll,
+            self.jogPanel.updateError,
         )
 
         self.update = UpdateThread(self)
