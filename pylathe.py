@@ -1989,9 +1989,12 @@ class ButtonRepeat(Thread):
                 timeout = .05
 
 def setStatus(text):
-    global jogPanel
+    global done, jogPanel
+    if done:
+        return
     jogPanel.SetLabel(text)
     jogPanel.Refresh()
+    jogPanel.Update()
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
