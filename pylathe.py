@@ -3095,7 +3095,7 @@ class UpdateThread(Thread):
         comm.xDbgPrint = True
         if self.readAllError:
             self.readAllError = False
-            wx.PostEvent(self.notifyWindow, UpdateEvent((4, ""))
+            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "")))
         if done or (result == None):
             return
         try:
