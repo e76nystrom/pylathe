@@ -3078,6 +3078,8 @@ class UpdateThread(Thread):
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
+        if done:
+            return
         tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         try:
@@ -3096,7 +3098,7 @@ class UpdateThread(Thread):
         if self.readAllError:
             self.readAllError = False
             wx.PostEvent(self.notifyWindow, UpdateEvent((4, "")))
-        if done or (result == None):
+        if result == None:
             return
         try:
             (z, x, rpm, curPass, encZ, encX, flag) = \
