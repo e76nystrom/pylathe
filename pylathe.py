@@ -2134,6 +2134,11 @@ class JogPanel(wx.Panel):
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
                    border=2)
 
+        self.statusLine = txt = wx.StaticText(self, -1, "")
+        txt.SetFont(txtFont)
+        sizerV.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=2)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerG = wx.GridSizer(3, 0, 0)
