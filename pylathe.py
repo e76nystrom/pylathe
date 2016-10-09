@@ -370,7 +370,7 @@ def sendClear():
     try:
         command('CLRDBG');
         command('CMD_CLEAR')
-    except CommTimeout:
+    except commTimeout:
         setStatus('clear timeout')
     spindleDataSent = False
     zDataSent = False
