@@ -1988,6 +1988,10 @@ class ButtonRepeat(Thread):
                 sleep(timeout)
                 timeout = .05
 
+def setStatus(text):
+    global jogPanel
+    jogPanel.SetLabel(text)
+
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(JogPanel, self).__init__(parent, *args, **kwargs)
@@ -3038,6 +3042,7 @@ class UpdateEvent(wx.PyEvent):
 class UpdateThread(Thread):
     def __init__(self, notifyWindow):
         Thread.__init__(self)
+        self.readAllError = False
         self.notifyWindow = notifyWindow
         self.threadRun = True
         self.parmList = (self.readAll, )
@@ -3068,6 +3073,8 @@ class UpdateThread(Thread):
         try:
             result = command('READLOC')
         except commTimeout:
+            self.readAllError = True
+            setStatus("readAll error")
             print("readAll error")
             stdout.flush()
             return
@@ -3076,6 +3083,9 @@ class UpdateThread(Thread):
             stdout.flush()
             return
         comm.xDbgPrint = True
+        if self.readAllError:
+            self.readAllError = False
+            setStatus("")
         if done or (result == None):
             return
         try:
