@@ -1991,6 +1991,7 @@ class ButtonRepeat(Thread):
 def setStatus(text):
     global jogPanel
     jogPanel.SetLabel(text)
+    jogPanel.Refresh()
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
