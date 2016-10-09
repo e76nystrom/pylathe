@@ -2607,6 +2607,7 @@ class JogPanel(wx.Panel):
             encPos -= xEncOffset
             self.xEncPos.SetValue("%0.4f" % (encPos))
 
+            text = ''
             label = ''
             if xHomed:
                 text = 'H'
