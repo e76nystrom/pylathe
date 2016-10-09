@@ -1992,7 +1992,7 @@ def setStatus(text):
     global done, jogPanel
     if done:
         return
-    jogPanel.SetLabel(text)
+    jogPanel.StatusLine.SetLabel(text)
     jogPanel.Refresh()
     jogPanel.Update()
 
