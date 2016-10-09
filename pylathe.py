@@ -3130,6 +3130,8 @@ class UpdateThread(Thread):
 
             if not moveQue.empty() or (op != None):
                 try:
+                    if not self.threadRun:
+                        break
                     num = getQueueStatus()
                     if num != None:
                         while num > 0:
@@ -3152,6 +3154,8 @@ class UpdateThread(Thread):
                 i = 0
             for count in range(0, 10):
                 try:
+                    if not self.threadRun:
+                        break
                     result = getString()
                     if result:
                         if dbg != None:
