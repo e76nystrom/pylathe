@@ -3118,7 +3118,8 @@ class UpdateThread(Thread):
                 try:
                     func()
                 except commTimeout as e:
-                    pass
+                    print "commTimeout on func"
+                    stdout.flush()
 
             if not moveQue.empty() or (op != None):
                 try:
@@ -3137,7 +3138,8 @@ class UpdateThread(Thread):
                             except commTimeout as e:
                                 break
                 except commTimeout as e:
-                    pass
+                    print "commTimeout on queue"
+                    stdout.flush()
             i += 1
             if i >= scanMax:
                 i = 0
@@ -3154,6 +3156,8 @@ class UpdateThread(Thread):
                     else:
                         break
                 except commTimeout:
+                    print "commTimeout on dbg"
+                    stdout.flush()
                     break
                 except serial.SerialException:
                     print("getString SerialException")
