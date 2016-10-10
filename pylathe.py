@@ -3234,6 +3234,7 @@ class MainFrame(wx.Frame):
                 setParm('CFG_FCY', getInfo('cfgFcy'))
                 setParm('CFG_MPG', getInfo('cfgMPG'))
                 setParm('CFG_DRO', getInfo('cfgDRO'))
+                setParm('CFG_LCD', getInfo('cfgLCD'))
                 command('CMD_SETUP')
                 sendZData()
                 val = getInfo('jogZPos')
