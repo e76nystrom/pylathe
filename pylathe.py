@@ -90,19 +90,20 @@ configFile = "config.txt"
 info = {}
 readInfo(configFile)
 
-XILINX = False
-try:
-    XILINX = info['cfgXilinx'].GetValue() == 'True'
-except KeyError as e:
-    print("no xilinx info")
-    pass
-TEPPER_DRIVE = True
-try:
-    STEPPER_DRIVE = info['spStepDrive'].GetValue() == 'True'
-except KeyError as e:
-    print("no stepper info")
-    pass
-stdout.flush()
+def getInitialInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        return(tmp.GetValue() == 'True')
+    except KeyError:
+        print 'no config for %s' % key
+        stdout.flush()
+        return(False)
+
+XILINX = getInitialInfo('cfgXilinx')
+DRO = getInitialInfo('cfgDRO')
+STEPPER_DRIVE = getInitialInfo('spStepDrive')
+
 info = {}                       # clear info
 
 from setup import createCommands, createParameters,\
@@ -2113,6 +2114,7 @@ class JogPanel(wx.Panel):
         tc.SetEditable(False)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
+        if DRO:
         # third row
         # z encoder position
 
