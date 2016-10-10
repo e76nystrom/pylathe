@@ -3886,6 +3886,8 @@ class ConfigDialog(wx.Dialog):
 
         self.fields = (
             ("bHW Control", 'cfgXilinx'),
+            ("bMPG", 'cfgMPG'),
+            ("bDRO", 'cfgDRO'),
             ("fcy", "cfgFcy"),
         )
         if XILINX:
