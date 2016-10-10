@@ -2144,8 +2144,8 @@ class JogPanel(wx.Panel):
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-            sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
-                       border=2)
+        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                   border=2)
 
         # status line
 
