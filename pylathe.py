@@ -3232,6 +3232,9 @@ class MainFrame(wx.Frame):
         if comm.ser != None:
             try:
                 setParm('CFG_FCY', getInfo('cfgFcy'))
+                setParm('CFG_MPG', getInfo('cfgMPG'))
+                setParm('CFG_DRO', getInfo('cfgDRO'))
+                command('CMD_SETUP')
                 sendZData()
                 val = getInfo('jogZPos')
                 setParm('Z_SET_LOC', val)
