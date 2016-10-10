@@ -229,6 +229,8 @@ parmList = \
     ["STEPPER_DRIVE", "stepper driven spindle", "char"],
     ["CFG_MPG", "manual pulse generator", "char"],
     ["CFG_DRO", "digital readout", "char"],
+    ["CFG_LCD", "lcd display", "char"],
+
 
     # ["", "", ""],
     ["CFG_FCY", "system clock speed", "int"],
