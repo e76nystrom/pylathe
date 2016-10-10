@@ -2115,42 +2115,46 @@ class JogPanel(wx.Panel):
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         if DRO:
-        # third row
-        # z encoder position
+            # third row
+            # z encoder position
 
-        txt = wx.StaticText(self, -1, "Z")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+            txt = wx.StaticText(self, -1, "Z")
+            txt.SetFont(txtFont)
+            sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                       wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.zEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
-                                        style=wx.TE_RIGHT)
-        info['encZPos'] = tc
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+            self.zEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+                                            style=wx.TE_RIGHT)
+            info['encZPos'] = tc
+            tc.SetFont(posFont)
+            tc.SetEditable(False)
+            sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        # x encoder Position
+            # x encoder Position
 
-        txt = wx.StaticText(self, -1, "X")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+            txt = wx.StaticText(self, -1, "X")
+            txt.SetFont(txtFont)
+            sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+                       wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
-                                        style=wx.TE_RIGHT)
-        info['encXPos'] = tc
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+            self.xEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+                                            style=wx.TE_RIGHT)
+            info['encXPos'] = tc
+            tc.SetFont(posFont)
+            tc.SetEditable(False)
+            sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
-                   border=2)
+            sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+                       border=2)
+
+        # status line
 
         self.statusLine = txt = wx.StaticText(self, -1, "")
         txt.SetFont(txtFont)
         sizerV.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        # control buttons and jog
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -2597,17 +2601,18 @@ class JogPanel(wx.Panel):
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
 
-            encPos = float(zEncPos) / self.zEncInch
-            if self.zEncInvert:
-                encPos = -encPos
-            encPos -= zEncOffset
-            self.zEncPos.SetValue("%0.4f" % (encPos))
+            if DRO:
+                encPos = float(zEncPos) / self.zEncInch
+                if self.zEncInvert:
+                    encPos = -encPos
+                encPos -= zEncOffset
+                self.zEncPos.SetValue("%0.4f" % (encPos))
 
-            encPos = float(xEncPos) / self.xEncInch
-            if self.xEncInvert:
-                encPos = -encPos
-            encPos -= xEncOffset
-            self.xEncPos.SetValue("%0.4f" % (encPos))
+                encPos = float(xEncPos) / self.xEncInch
+                if self.xEncInvert:
+                    encPos = -encPos
+                encPos -= xEncOffset
+                self.xEncPos.SetValue("%0.4f" % (encPos))
 
             text = ''
             label = ''
@@ -2787,17 +2792,18 @@ def updateZPos(val):
         setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
         setParm('Z_HOME_OFFSET', zHomeOffset)
         print("zHomeOffset %0.4f" % (zHomeOffset))
-    zEncPos = getParm('Z_ENC_POS')
-    print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
-    if zEncPos != None:
-        encPos = float(zEncPos) / jogPanel.zEncInch
-        setInfo('zEncPosition', "%0.4f" % (encPos))
-        if jogPanel.zEncInvert:
-            encPos = -encPos
-        zEncOffset = encPos - val
-        setInfo('zEncOffset', "%0.4f" % (zEncOffset))
-        setParm('Z_ENC_OFFSET', zEncOffset)
-        print("zEncOffset %0.4f" % (zEncOffset))
+    if DRO:
+        zEncPos = getParm('Z_ENC_POS')
+        print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
+        if zEncPos != None:
+            encPos = float(zEncPos) / jogPanel.zEncInch
+            setInfo('zEncPosition', "%0.4f" % (encPos))
+            if jogPanel.zEncInvert:
+                encPos = -encPos
+            zEncOffset = encPos - val
+            setInfo('zEncOffset', "%0.4f" % (zEncOffset))
+            setParm('Z_ENC_OFFSET', zEncOffset)
+            print("zEncOffset %0.4f" % (zEncOffset))
     stdout.flush()
 
 def updateXPos(val):
@@ -2811,17 +2817,18 @@ def updateXPos(val):
         setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
         setParm('X_HOME_OFFSET', xHomeOffset)
         print("xHomeOffset %0.4f" % (xHomeOffset))
-    xEncPos = getParm('X_ENC_POS')
-    print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
-    if xEncPos != None:
-        encPos = float(xEncPos) / jogPanel.xEncInch
-        setInfo('xEncPosition', "%0.4f" % (encPos))
-        if jogPanel.xEncInvert:
-            encPos = -encPos
-        xEncOffset = encPos - val
-        setInfo('xEncOffset', "%0.4f" % (xEncOffset))
-        setParm('X_ENC_OFFSET', xEncOffset)
-        print("xEncOffset %0.4f" % (xEncOffset))
+    if DRO:
+        xEncPos = getParm('X_ENC_POS')
+        print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
+        if xEncPos != None:
+            encPos = float(xEncPos) / jogPanel.xEncInch
+            setInfo('xEncPosition', "%0.4f" % (encPos))
+            if jogPanel.xEncInvert:
+                encPos = -encPos
+            xEncOffset = encPos - val
+            setInfo('xEncOffset', "%0.4f" % (xEncOffset))
+            setParm('X_ENC_OFFSET', xEncOffset)
+            print("xEncOffset %0.4f" % (xEncOffset))
     stdout.flush()
 
 class SetPosDialog(wx.Dialog):
@@ -3246,18 +3253,21 @@ class MainFrame(wx.Frame):
                 val = getInfo('jogXPos')
                 setParm('X_SET_LOC', val)
                 command('XSETLOC')
-                val = int(getFloatInfo('zEncPosition') * jogPanel.zStepsInch)
-                setParm('Z_ENC_POS', val)
-                val = int(getFloatInfo('xEncPosition') * jogPanel.xStepsInch)
-                setParm('X_ENC_POS', val)
+                if DRO:
+                    val = int(getFloatInfo('zEncPosition') * \
+                              jogPanel.zStepsInch)
+                    setParm('Z_ENC_POS', val)
+                    val = int(getFloatInfo('xEncPosition') * \
+                              jogPanel.xStepsInch)
+                    setParm('X_ENC_POS', val)
+                    setParm('Z_ENC_OFFSET', zEncOffset)
+                    setParm('X_ENC_OFFSET', xEncOffset)
+                    setParm('Z_ENC_INCH', jogPanel.zEncInch)
+                    setParm('X_ENC_INCH', jogPanel.xEncInch)
                 val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
                 setParm('X_HOME_LOC', val)
                 setParm('Z_HOME_OFFSET', zHomeOffset)
                 setParm('X_HOME_OFFSET', xHomeOffset)
-                setParm('Z_ENC_OFFSET', zEncOffset)
-                setParm('X_ENC_OFFSET', xEncOffset)
-                setParm('Z_ENC_INCH', jogPanel.zEncInch)
-                setParm('X_ENC_INCH', jogPanel.xEncInch)
                 setParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
                 val = (-1, 1)[getBoolInfo('zInvEnc')]
                 setParm('Z_ENC_DIR', val)
@@ -3413,8 +3423,10 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile)
 
-        vars = ('zHomeOffset', 'xHomeOffset', 'zEncOffset', 'xEncOffset',
-                'zEncPosition', 'xEncPosition')
+        vars = ('zHomeOffset', 'xHomeOffset')
+        if DRO:
+            vars += ('zEncOffset', 'xEncOffset', \
+                     'zEncPosition', 'xEncPosition')
 
         for key in vars:
             exec 'global ' + key
