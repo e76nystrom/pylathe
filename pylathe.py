@@ -3240,6 +3240,7 @@ class MainFrame(wx.Frame):
 
         if comm.ser != None:
             try:
+                setParm('CFG_XILINX', getInfo('cfgXilinx'))
                 setParm('CFG_FCY', getInfo('cfgFcy'))
                 setParm('CFG_MPG', getInfo('cfgMPG'))
                 setParm('CFG_DRO', getInfo('cfgDRO'))
