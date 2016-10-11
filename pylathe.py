@@ -2341,6 +2341,7 @@ class JogPanel(wx.Panel):
                 print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
+                    setParm('Z_FLAG', ZJOG)
                     setParm('Z_MOVE_DIST', val)
                     command('ZMOVEREL')
                 except commTimeout as e:
@@ -2419,6 +2420,7 @@ class JogPanel(wx.Panel):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
+                    setParm('X_FLAG', XJOG)
                     setParm('X_MOVE_DIST', val)
                     command('XMOVEREL')
                 except commTimeout as e:
