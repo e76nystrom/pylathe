@@ -5,6 +5,7 @@ cmdList = \
     "z motion commands",
     
     ["ZMOVE", "", "start z movement"],
+    ["ZMOVEREL", "", "move z relative"],
     ["ZJMOV", "", "start z jog"],
     ["ZSTOP", "", "stop z movement"],
     ["ZHOME", "", "set current z location as home"],
@@ -14,6 +15,7 @@ cmdList = \
     "x motion commands",
     
     ["XMOVE", "", "start x movement"],
+    ["XMOVEREL", "", "move x relative"],
     ["XJMOV", "", "start z jog"],
     ["XSTOP", "", "stop x movement"],
     ["XHOME", "", "set current x location as home"],
@@ -23,9 +25,9 @@ cmdList = \
     
     "spindle operations",
     
-    ["SPINDLE_START", "", "start spindle"],
+    ["SPINDLE_START", "spindleStart", "start spindle"],
     ["SPINDLE_JOG", "", "spindle jog"],
-    ["SPINDLE_STOP", "", "stop spindle"],
+    ["SPINDLE_STOP", "spindleStop", "stop spindle"],
     
     "start operations",
     
@@ -37,21 +39,23 @@ cmdList = \
     
     "end operations",
     
-    ["CMD_PAUSE", "", "pause current operation"],
-    ["CMD_RESUME", "", "resume current operation"],
-    ["CMD_STOP", "", "stop current operation"],
+    ["CMD_PAUSE", "pauseCmd", "pause current operation"],
+    ["CMD_RESUME", "resumeCmd", "resume current operation"],
+    ["CMD_STOP", "stopCmd", "stop current operation"],
     
     "setup operations",
     
-    ["CMD_CLEAR", "", "clear all tables"],
-    ["CMD_SETUP", "", "setup everything"],
-    ["CMD_SPSETUP", "", "setup spindle"],
+    ["CMD_CLEAR", "clearCmd", "clear all tables"],
+    ["CMD_SETUP", "setup", "setup everything"],
+    ["CMD_SPSETUP", "spindleSetup", "setup spindle"],
 
-    ["CMD_ZSETUP", "", "setup z axis"],
-    ["CMD_ZTAPERSETUP", "", "setup z axis taper"],
+    ["CMD_ZSETUP", "zSetup", "setup z axis"],
+    ["CMD_ZSYNSETUP", "zSynSetup", "setup z axis sync"],
+    ["CMD_ZTAPERSETUP", "zTaperSetup", "setup z axis taper"],
 
-    ["CMD_XSETUP", "", "setup x axis"],
-    ["CMD_XTAPERSETUP", "", "setup z axis taper"],
+    ["CMD_XSETUP", "xSetup", "setup x axis"],
+    ["CMD_XSYNSETUP", "xSynSetup", "setup z axis sync"],
+    ["CMD_XTAPERSETUP", "xTaperSetup", "setup z axis taper"],
     
     "state information",
     
@@ -62,6 +66,8 @@ cmdList = \
     
     ["LOADVAL", "", "load parameters"],
     ["READVAL", "", "read parameters"],
+    ["LOADXREG", "", "load xilinx registers"],
+    ["READXREG", "", "read xilinx registers"],
 
     "move command operations",
 
@@ -74,6 +80,11 @@ cmdList = \
     ["READLOC", "", "read location"],
     ["READDBG", "", "read debug message"],
     ["CLRDBG", "", "clear debug message buffer"],
+
+    "encoder commands",
+
+    ["ENCSTART", "", "encoder start"],
+    ["ENCSTOP", "", "encoder stop"],
 ]
     
 parmList = \
@@ -147,6 +158,7 @@ parmList = \
     "z axis move values",
     
     ["Z_MOVE_DIST", "z move distance", "float"],
+    ["Z_MOVE_POS", "z move position", "float"],
     ["Z_JOG_DIR", "x jog direction", "int"],
     ["Z_SET_LOC", "z location to set", "float"],
     ["Z_LOC", "z dro location", "int"],
@@ -156,6 +168,7 @@ parmList = \
     "x axis move values",
 
     ["X_MOVE_DIST", "x move distance", "float"],
+    ["X_MOVE_POS", "x move position", "float"],
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
     ["X_LOC", "x dro location", "int"],
@@ -230,11 +243,43 @@ parmList = \
     ["CFG_MPG", "manual pulse generator", "char"],
     ["CFG_DRO", "digital readout", "char"],
     ["CFG_LCD", "lcd display", "char"],
-
-
-    # ["", "", ""],
     ["CFG_FCY", "system clock speed", "int"],
+
+    "encoder counts per revolution",
+
+    ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
+
+    "test encoder setup variables",
+
+    ["ENC_ENABLE", "encoder enable flag", "char"],
+    ["ENC_PRE_SCALER", "encoder prescaler", "uint16_t"],
+    ["ENC_TIMER", "encoder timer counts", "uint16_t"],
+    ["ENC_RUN_COUNT", "encoder run count", "int"],
+
+    "test encoder status variables",
+
+    ["ENC_RUN", "encoder running flag", "char"],
+    ["ENC_COUNTER", "encoder count in rev", "int16_t"],
+    ["ENC_REV_COUNTER", "encoder revolution counter", "int32_t"],
+ 
+    "measured spindle speed",
+
+    ["RPM", "current rpm", "int16_t"],
+
+    "xilinx frequency variables",
+
+    ["X_FREQUENCY", "xilinx clock frequency", "int32_t"],
+    ["FREQ_MULT", "frequency multiplier", "int16_t"],
+
+    "xilinx configuration register",
+
+    ["X_CFG_REG", "xilinx configuration register", "int16_t"],
+ 
     
+    # ["", "", ""],
+
+    "max parameter number",
+
     ["MAX_PARM", "maximum parameter", "int16_t"]
 ]
     
@@ -289,9 +334,187 @@ regList =\
 
     # ["", "", ""],
 ]
+xilinxList = \
+[ \
+    "skip register zero",
+
+    ["XNOOP", "register 0"],
+
+    "load control registers",
+
+    ["XLDZCTL", "z control register"],
+    ["XLDXCTL", "x control register"],
+    ["XLDTCTL", "load taper control"],
+    ["XLDPCTL", "position control"],
+    ["XLDCFG", "configuration"],
+    ["XLDDCTL", "load debug control"],
+    ["XLDDREG", "load display reg"],
+    ["XREADREG", "read register"],
+
+    "status register",
+
+    ["XRDSR", "read status register"],
+
+    "phase counter",
+
+    ["XLDPHASE", "load phase max"],
+
+    "load z motion",
+
+    ["XLDZFREQ", "load z frequency"],
+    ["XLDZD", "load z initial d"],
+    ["XLDZINCR1", "load z incr1"],
+    ["XLDZINCR2", "load z incr2"],
+    ["XLDZACCEL", "load z syn accel"],
+    ["XLDZACLCNT", "load z syn acl cnt"],
+    ["XLDZDIST", "load z distance"],
+    ["XLDZLOC", "load z location"],
+
+    "load x motion",
+
+    ["XLDXFREQ", "load x frequency"],
+    ["XLDXD", "load x initial d"],
+    ["XLDXINCR1", "load x incr1"],
+    ["XLDXINCR2", "load x incr2"],
+    ["XLDXACCEL", "load x syn accel"],
+    ["XLDXACLCNT", "load x syn acl cnt"],
+    ["XLDXDIST", "load x distance"],
+    ["XLDXLOC", "load x location"],
+
+    "read z motion",
+
+    ["XRDZSUM", "read z sync sum"],
+    ["XRDZXPOS", "read z sync x pos"],
+    ["XRDZYPOS", "read z sync y pos"],
+    ["XRDZACLSUM", "read z acl sum"],
+    ["XRDZASTP", "read z acl stps"],
+
+    "read x motion",
+
+    ["XRDXSUM", "read x sync sum"],
+    ["XRDXXPOS", "read x sync x pos"],
+    ["XRDXYPOS", "read x sync y pos"],
+    ["XRDXACLSUM", "read x acl sum"],
+    ["XRDXASTP", "read z acl stps"],
+
+    "read distance",
+
+    ["XRDZDIST", "read z distance"],
+    ["XRDXDIST", "read x distance"],
+
+    "read location",
+
+    ["XRDZLOC", "read z location"],
+    ["XRDXLOC", "read x location"],
+
+    "read frequency and state",
+
+    ["XRDFREQ",  "read encoder freq"],
+    ["XCLRFREQ", "clear freq register"],
+    ["XRDSTATE", "read state info"],
+
+    "read phase",
+
+    ["XRDPSYN", "read sync phase val"],
+    ["XRDTPHS", "read tot phase val"],
+
+    "phase limit info",
+
+    ["XLDZLIM", "load z limit"],
+    ["XRDZPOS", "read z position"],
+
+    "test info",
+
+    ["XLDTFREQ", "load test freq"],
+    ["XLDTCOUNT", "load test count"],
+
+    "read control regs",
+
+    ["XRDZCTL", "read control regiisters"],
+    ["XRDXCTL", "read control regiisters"]
+]
+
+xilinxBitList = \
+[\
+    "z control register",
+
+    ["zCtl"],
+    ["zReset",      1, 0, "reset flag"],
+    ["zStart",      1, 1, "start z"],
+    ["zSrc_Syn",    1, 2, "run z synchronized"],
+    ["zSrc_Frq",    0, 2, "run z from clock source"],
+    ["zDir_In",     1, 3, "move z in positive dir"],
+    ["zDir_Pos",    1, 3, "move z in positive dir"],
+    ["zDir_Neg",    0, 3, "move z in negative dir"],
+    ["zSet_Loc",    1, 4, "set z location"],
+    ["zBacklash",   1, 5, "backlash move no pos upd"],
+    ["zWait_Sync",  1, 6, "wait for sync to start"],
+
+    "x control register",
+
+    ["xCtl"],
+    ["xReset",      1, 0, "x reset"],
+    ["xStart",      1, 1, "start x"],
+    ["xSrc_Syn",    1, 2, "run x synchronized"],
+    ["xSrc_Frq",    0, 2, "run x from clock source"],
+    ["xDir_In",     1, 3, "move x in positive dir"],
+    ["xDir_Pos",    1, 3, "x positive direction"],
+    ["xDir_Neg",    0, 3, "x negative direction"],
+    ["xSet_Loc",    1, 4, "set x location"],
+    ["xBacklash",   1, 5, "x backlash move no pos upd"],
+
+    "taper control register",
+
+    ["tCtl"],
+    ["tEna",     1, 0, "taper enable"],
+    ["tZ",       1, 1, "one for taper z"],
+    ["tX",       0, 1, "zero for taper x"],
+
+    "position control register",
+
+    ["pCtl"],
+    ["pReset",    1, 0, "reset position"],
+    ["pLimit",    1, 1, "set flag on limit reached"],
+    ["pZero",     1, 2, "set flag on zero reached"],
+
+    "configuration register",
+
+    ["cCtl"],
+    ["zStep_Pol",  1, 0, "z step pulse polarity"],
+    ["zDir_Pol",   1, 1, "z direction polarity"],
+    ["xStep_Pol",  1, 2, "x step pulse polarity"],
+    ["xDir_Pol",   1, 3, "x direction polarity"],
+    ["enc_Pol",    1, 4, "encoder dir polarity"],
+    ["zPulse_Mult",1, 5, "enable pulse multiplier"],
+
+    "debug control register",
+
+    ["dCtl"],
+    ["Dbg_Ena",    1, 0, "enable debugging"],
+    ["Dbg_Sel",    1, 1, "select dbg encoder"],
+    ["Dbg_Dir",    1, 2, "debug direction"],
+    ["Dbg_Count",  1, 3, "gen count num dbg clks"],
+    ["Dbg_Init",   1, 4, "init z modules"],
+    ["Dbg_Rsyn",   1, 5, "running in sync mode"],
+    ["Dbg_Move",   1, 6, "used debug clock for move"],
+
+ "status register",
+
+    ["stat"],
+    ["s_Z_Done_Int", 1, 0, "z done interrrupt"],
+    ["s_X_Done_Int", 1, 1, "x done interrupt"],
+    ["s_Dbg_Done",   1, 2, "debug done"],
+    ["s_Z_Start",    1, 3, "z start"],
+    ["s_X_Start",    1, 4, "x start"],
+    ["s_Enc_Dir_In", 1, 5, "encoder direction in"],
+
+    ""
+]
     
 stateList =\
 [\
+    "z control states",
+
     "enum zStates",
     "{",
     ["ZIDLE", "idle"],
