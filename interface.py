@@ -4,7 +4,7 @@ cmdList = \
 [\
     "z motion commands",
     
-    ["ZMOVE", "", "start z movement"],
+    ["ZMOVEABS", "", "start z movement"],
     ["ZMOVEREL", "", "move z relative"],
     ["ZJMOV", "", "start z jog"],
     ["ZSTOP", "", "stop z movement"],
@@ -14,7 +14,7 @@ cmdList = \
     
     "x motion commands",
     
-    ["XMOVE", "", "start x movement"],
+    ["XMOVEABS", "", "start x movement"],
     ["XMOVEREL", "", "move x relative"],
     ["XJMOV", "", "start z jog"],
     ["XSTOP", "", "stop x movement"],
@@ -162,6 +162,7 @@ parmList = \
     ["Z_JOG_DIR", "x jog direction", "int"],
     ["Z_SET_LOC", "z location to set", "float"],
     ["Z_LOC", "z dro location", "int"],
+    ["Z_FLAG", "z move flag", "int"],
     ["Z_ABS_LOC", "z absolute location", "int"],
     ["Z_MPG_INC", "z man pulse gen incr", "int"],
     
@@ -172,6 +173,7 @@ parmList = \
     ["X_JOG_DIR", "x jog direction", "int"],
     ["X_SET_LOC", "x location to set", "float"],
     ["X_LOC", "x dro location", "int"],
+    ["X_FLAG", "x move flag", "int"],
     ["X_ABS_LOC", "x absolute location", "int"],
     ["X_MPG_INC", "X man pulse gen incr", "int"],
     
