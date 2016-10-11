@@ -240,6 +240,7 @@ parmList = \
     "configuration",
 
     ["STEPPER_DRIVE", "stepper driven spindle", "char"],
+    ["CFG_XILINX", "using xilinx", "char"],
     ["CFG_MPG", "manual pulse generator", "char"],
     ["CFG_DRO", "digital readout", "char"],
     ["CFG_LCD", "lcd display", "char"],
