@@ -590,7 +590,7 @@ stateList =\
 if __name__ == '__main__':
     import os
     from setup import createCommands, createParameters,\
-        createCtlBits, createCtlStates
+        createCtlBits, createCtlStates, createXilinxReg, createXilinxBits
 
     # print os.path.realpath(__file__)
     # print os.getcwd()
