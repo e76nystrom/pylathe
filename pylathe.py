@@ -2342,7 +2342,7 @@ class JogPanel(wx.Panel):
                 stdout.flush()
                 try:
                     setParm('Z_MOVE_DIST', val)
-                    command('ZMOVE')
+                    command('ZMOVEREL')
                 except commTimeout as e:
                     pass
 
@@ -2420,7 +2420,7 @@ class JogPanel(wx.Panel):
                 stdout.flush()
                 try:
                     setParm('X_MOVE_DIST', val)
-                    command('XMOVE')
+                    command('XMOVEREL')
                 except commTimeout as e:
                     pass
 
