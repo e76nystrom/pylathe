@@ -13,7 +13,6 @@ xDbgPrint = True
 SWIG = False
 importLathe = True
 
-
 def openSerial(port, rate):
     global ser
     try:
