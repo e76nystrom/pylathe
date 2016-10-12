@@ -248,6 +248,10 @@ parmList = \
     ["CFG_LCD", "lcd display", "char"],
     ["CFG_FCY", "system clock speed", "int"],
 
+    "setup",
+
+    ["SETUP_DONE", "setup done", "char"],
+
     "encoder counts per revolution",
 
     ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
