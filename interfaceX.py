@@ -225,6 +225,59 @@ parmList = \
     ["MAX_PARM", "maximum parameter", "int16_t"]
 ]
 
+regList =\
+[\
+    "z move command bits",
+
+    ["ZMSK", "(7 << 0)", "z move mask"],
+    ["ZMOV", "(1 << 0)", "z a set distance"],
+    ["ZJOG", "(2 << 0)", "z while cmd are present"],
+    ["ZSYN", "(3 << 0)", "z dist sync to rotation"],
+    ["ZMAX", "(4 << 0)", "z rapid move"],
+    ["ZPOS", "(1 << 3)", "z in positive direction"],
+    ["ZNEG", "(0 << 3)", "z in negative direction"],
+    ["Z_SYN_START", "(1 << 4)", "start on sync pulse"],
+    ["X_SYN_TAPER", "(1 << 5)", "taper on x"],
+
+    "x move command bits",
+
+    ["XMSK", "(7 << 0)", "xmove mask"],
+    ["XMOV", "(1 << 0)", "x a set distance"],
+    ["XJOG", "(2 << 0)", "x while cmd are present"],
+    ["XSYN", "(3 << 0)", "x dist sync to rotation"],
+    ["XMAX", "(4 << 0)", "x rapid move"],
+    ["XPOS", "(1 << 3)", "x in positive direction"],
+    ["XNEG", "(0 << 3)", "x in negative direction"],
+    ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
+
+    "feed types",
+    
+    ["FEED_PITCH", "0", "feed inch per rev"],
+    ["FEED_TPI", "1", "feed threads per inch"],
+    ["FEED_METRIC", "2", "feed mm per rev"],
+    
+    "turn control bits",
+
+    ["TURNSYN", "(1 << 0)", "turn with sync motion"],
+    ["TURNCONT", "(1 << 1)", "cont turning operation"],
+
+    "taper control bits",
+
+    ["TAPERX", "(1 << 0)", "taper x axis"],
+    ["TAPERZ", "(1 << 1)", "taper z axis"],
+    ["TAPEROUT", "(1 << 2)", "one taper out, zero in"],
+
+    "thread control bits",
+
+    ["THREAD", "(1 << 0)", "threading enabled"],
+    ["TINTERNAL", "(1 << 1)", "internal threads"],
+
+    "debug control bits",
+
+    ["DBGPASS", "(1 << 0)", "pause before each pass"],
+    ["DBGEND", "(1 << 1)", "pause at end of a pass"],
+    ["DBGSEQ", "(1 << 2)", "generate sequence data"]
+]
 xilinxList = \
 [ \
     "skip register zero",
@@ -455,59 +508,6 @@ stateList = \
     "};"
 ]
 
-regList =\
-[\
-    "z move command bits",
-
-    ["ZMSK", "(7 << 0)", "z move mask"],
-    ["ZMOV", "(1 << 0)", "z a set distance"],
-    ["ZJOG", "(2 << 0)", "z while cmd are present"],
-    ["ZSYN", "(3 << 0)", "z dist sync to rotation"],
-    ["ZMAX", "(4 << 0)", "z rapid move"],
-    ["ZPOS", "(1 << 3)", "z in positive direction"],
-    ["ZNEG", "(0 << 3)", "z in negative direction"],
-    ["Z_SYN_START", "(1 << 4)", "start on sync pulse"],
-    ["X_SYN_TAPER", "(1 << 5)", "taper on x"],
-
-    "x move command bits",
-
-    ["XMSK", "(7 << 0)", "xmove mask"],
-    ["XMOV", "(1 << 0)", "x a set distance"],
-    ["XJOG", "(2 << 0)", "x while cmd are present"],
-    ["XSYN", "(3 << 0)", "x dist sync to rotation"],
-    ["XMAX", "(4 << 0)", "x rapid move"],
-    ["XPOS", "(1 << 3)", "x in positive direction"],
-    ["XNEG", "(0 << 3)", "x in negative direction"],
-    ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
-
-    "feed types",
-    
-    ["FEED_PITCH", "0", "feed inch per rev"],
-    ["FEED_TPI", "1", "feed threads per inch"],
-    ["FEED_METRIC", "2", "feed mm per rev"],
-    
-    "turn control bits",
-
-    ["TURNSYN", "(1 << 0)", "turn with sync motion"],
-    ["TURNCONT", "(1 << 1)", "cont turning operation"],
-
-    "taper control bits",
-
-    ["TAPERX", "(1 << 0)", "taper x axis"],
-    ["TAPERZ", "(1 << 1)", "taper z axis"],
-    ["TAPEROUT", "(1 << 2)", "one taper out, zero in"],
-
-    "thread control bits",
-
-    ["THREAD", "(1 << 0)", "threading enabled"],
-    ["TINTERNAL", "(1 << 1)", "internal threads"],
-
-    "debug control bits",
-
-    ["DBGPASS", "(1 << 0)", "pause before each pass"],
-    ["DBGEND", "(1 << 1)", "pause at end of a pass"],
-    ["DBGSEQ", "(1 << 2)", "generate sequence data"]
-]
 
 if __name__ == '__main__':
     import os
