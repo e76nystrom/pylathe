@@ -3135,12 +3135,13 @@ class UpdateThread(Thread):
             if i < len(self.parmList):
                 func = self.parmList[i]
                 try:
-                    if done:
-                        return
                     func()
                 except commTimeout as e:
                     print "commTimeout on func"
                     stdout.flush()
+                except RuntimeError:
+                    if done:
+                        break
 
             if not moveQue.empty() or (op != None):
                 try:
