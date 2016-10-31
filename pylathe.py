@@ -3912,6 +3912,7 @@ class ConfigDialog(wx.Dialog):
             ("bHW Control", 'cfgXilinx'),
             ("bMPG", 'cfgMPG'),
             ("bDRO", 'cfgDRO'),
+            ("bLCD", 'cfgLCD'),
             ("fcy", "cfgFcy"),
         )
         if XILINX:
