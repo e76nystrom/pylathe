@@ -179,13 +179,13 @@ class ThreadCalc():
 
     def fixPoint(self, p0):
         (x, y) = p0
-        x0 = self.p0 + self.xBase + (x + self.xOffset) * self.scale
+        x0 = self.x0 + self.xBase + (x + self.xOffset) * self.scale
         y0 = self.yBase - (y + self.yOffset) * self.scale
         return (x0, y0)
 
     def dxfPoint(self, p0)
         (x, y) = p0
-        x += self.p0
+        x += self.x0
         return (x, y)
 
     def drawLine(self, p0, p1, layer=0):
