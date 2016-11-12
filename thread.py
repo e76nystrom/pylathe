@@ -479,7 +479,7 @@ class ThreadCalc():
             txt = "Max Wire %0.4f" % (self.maxWire)
             self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
-        if dc != None:
+        if self.dc != None:
             txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" % 
                    (self.actualWire, self.minWire, self.maxWire))
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
