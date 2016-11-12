@@ -183,7 +183,7 @@ class ThreadCalc():
         y0 = self.yBase - (y + self.yOffset) * self.scale
         return (x0, y0)
 
-    def dxfPoint(self, p0)
+    def dxfPoint(self, p0):
         (x, y) = p0
         x += self.x0
         return (x, y)
