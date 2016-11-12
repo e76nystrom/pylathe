@@ -833,8 +833,11 @@ class TurnPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
+            clrStatus()
             self.sendData()
             self.turn.turn()
+        else:
+            notHomed()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1040,8 +1043,11 @@ class FacePanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
+            clrStatus()
             self.sendData()
             self.face.face()
+        else:
+            notHomed()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1181,8 +1187,11 @@ class CutoffPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
+            clrStatus()
             self.sendData()
             self.cutoff.cutoff()
+        else:
+            notHomed()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1665,12 +1674,15 @@ class TaperPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
+            clrStatus()
             self.sendData()
             taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
             if self.internal.GetValue():
                 self.taper.internalTaper(taper)
             else:
                 self.taper.externalTaper(taper)
+        else:
+            notHomed()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1956,8 +1968,11 @@ class ThreadPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if xHomed:
+            clrStatus()
             self.sendData()
             self.screwThread.thread()
+        else:
+            notHomed()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1999,6 +2014,13 @@ def setStatus(text):
     jogPanel.statusLine.SetLabel(text)
     jogPanel.Refresh()
     jogPanel.Update()
+
+
+def clrStatus():
+    setStatus("")
+
+def notHomed():
+    setStatus("X Not Homed")
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
