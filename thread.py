@@ -355,6 +355,7 @@ class ThreadCalc():
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
+        extMeasuredDiam = self.extMinMajDiam
 
         self.x0 = -1.275 * pitch
 
@@ -383,8 +384,6 @@ class ThreadCalc():
 
         extAvgMajDiam = (self.extMinMajDiam +
                          (self.extMaxMajDiam - self.extMinMajDiam) / 2)
-
-        extMeasuredDiam = self.extMinMajDiam
 
         x0 = 0 - halfP
         for x0 in (-halfP, 0 + halfP):
@@ -492,6 +491,7 @@ class ThreadCalc():
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
+        extMeasuredDiam = self.extMinMajDiam
 
         self.x0 = 1.275 * pitch
 
