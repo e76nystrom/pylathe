@@ -350,6 +350,7 @@ class ThreadCalc():
         # external threads
 
     def drawExternal(self):
+        radius = self.diam / 2
         pitch = self.pitch
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
@@ -369,7 +370,6 @@ class ThreadCalc():
         self.addText(txt, (0, -self.diam / 2 + self.height),
                      CENTER|ABOVE)
 
-        radius = self.diam / 2
         p0 = (-halfP, -radius)
         p1 = (halfP , -radius)
         p2 = (0, -radius + self.height)
@@ -487,6 +487,7 @@ class ThreadCalc():
         # internal threads
 
     def drawInternal(self):
+        radius = self.diam / 2
         pitch = self.pitch
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
