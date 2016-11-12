@@ -467,7 +467,7 @@ class ThreadCalc():
         self.drawCircle(wireRadius, p0, layer="WIRE")
 
         yWire -= wireRadius
-        if d != None:
+        if self.d != None:
             txt = "Wire Size %0.4f" % (self.actualWire)
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
