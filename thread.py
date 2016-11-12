@@ -179,7 +179,7 @@ class ThreadCalc():
 
     def fixPoint(self, p0):
         (x, y) = p0
-        x0 = self.x0 + self.xBase + (x + self.xOffset) * self.scale
+        x0 = self.xBase + (x + self.x0 + self.xOffset) * self.scale
         y0 = self.yBase - (y + self.yOffset) * self.scale
         return (x0, y0)
 
