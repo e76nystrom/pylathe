@@ -344,6 +344,9 @@ class ThreadCalc():
             
             self.vS1 = 3
             self.hS1 = 3
+
+        self.extMeasuredDiam = self.extMinMajDiam
+        self.tipRadius = 0.06 / 25.4
         self.drawExternal()
         self.drawInternal()
 
@@ -352,10 +355,11 @@ class ThreadCalc():
     def drawExternal(self):
         radius = self.diam / 2
         pitch = self.pitch
+        tipRadius = self.tipRadius
+        extMeasuredDiam = self.extMeasuredDiam
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
-        extMeasuredDiam = self.extMinMajDiam
 
         self.x0 = -1.275 * pitch
 
@@ -416,7 +420,6 @@ class ThreadCalc():
         self.drawRefLine(self.extMinMinorDiam, 'Min Minor', MINOR,
                          AL_RIGHT|LEFT|MIDDLE)
 
-        tipRadius = 0.06 / 25.4
         tipDepth = (self.height - tipRadius)
         p0 = (0, -self.diam / 2 + tipDepth - tipRadius)
         self.drawCircle(tipRadius, p0, layer="TIP")
@@ -488,6 +491,8 @@ class ThreadCalc():
     def drawInternal(self):
         radius = self.diam / 2
         pitch = self.pitch
+        tipRadius = self.tipRadius
+        extMeasuredDiam = self.extMeasuredDiam
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
