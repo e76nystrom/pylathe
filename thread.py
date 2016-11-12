@@ -245,7 +245,7 @@ class ThreadCalc():
             color = self.color[layer]
             if color != None:
                 self.dc.SetTextForeground(color)
-            (x, y) = self.fixPoint(pos)
+            (x, y) = self.fixPoint(p0)
             self.dc.DrawText(text, x + hOffset, y + vOffset)
 
     def drawCircle(self, radius, center, layer):
