@@ -344,13 +344,16 @@ class ThreadCalc():
             
             self.vS1 = 3
             self.hS1 = 3
+        self.drawExternal()
+        self.drawInternal()
 
+        # external threads
+
+    def drawExternal(self):
         pitch = self.pitch
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
-
-        # external threads
 
         self.x0 = -1.275 * pitch
 
@@ -482,6 +485,12 @@ class ThreadCalc():
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
         # internal threads
+
+    def drawInternal(self):
+        pitch = self.pitch
+        halfP = pitch / 2
+        cos295 = cos(radians(29.5))
+        sqrt3 = sqrt(3)
 
         self.x0 = 1.275 * pitch
 
