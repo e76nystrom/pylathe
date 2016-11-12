@@ -203,7 +203,7 @@ class ThreadCalc():
 
     def addText(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
-            (x, y) = self.dxfPoint
+            (x, y) = self.dxfPoint(p0)
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
