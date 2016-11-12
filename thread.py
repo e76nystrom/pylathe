@@ -179,13 +179,19 @@ class ThreadCalc():
 
     def fixPoint(self, p0):
         (x, y) = p0
-        x0 = self.xBase + (x + self.xOffset) * self.scale
+        x0 = self.p0 + self.xBase + (x + self.xOffset) * self.scale
         y0 = self.yBase - (y + self.yOffset) * self.scale
         return (x0, y0)
 
+    def dxfPoint(self, p0)
+        (x, y) = p0
+        x += self.p0
+        return (x, y)
+
     def drawLine(self, p0, p1, layer=0):
         if self.d != None:
-            self.d.add(dxf.line(p0, p1, layer=layer))
+            self.d.add(dxf.line(self.dxfPoint(p0), self.dxfPoint(p1),
+                                layer=layer))
 
         if self.dc != None:
             (x0, y0) = self.fixPoint(p0)
@@ -195,9 +201,9 @@ class ThreadCalc():
                 self.dc.SetPen(pen)
             self.dc.DrawLine(x0, y0, x1, y1)
 
-    def addText(self, text, pos, align=None, layer='TEXT'):
+    def addText(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
-            (x, y) = pos
+            (x, y) = self.dxfPoint
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
@@ -244,7 +250,7 @@ class ThreadCalc():
 
     def drawCircle(self, radius, center, layer):
         if self.d != None:
-            self.d.add(dxf.circle(radius, center, layer=layer))
+            self.d.add(dxf.circle(radius, self.dxfPoint(center), layer=layer))
 
         if self.dc != None:
             pen = self.pen[layer]
@@ -258,7 +264,10 @@ class ThreadCalc():
 
     def drawShape(self, path, color, colorName):
         if self.d != None:
-            self.d.add(dxf.solid(path, color=color))
+            points = []
+            for p in path:
+                points.append(self.dxfPoint(p))
+            self.d.add(dxf.solid(points, color=color))
 
         if self.dc != None:
             points = []
@@ -272,8 +281,8 @@ class ThreadCalc():
     def drawRefLine(self, y, label, layer, align=AL_RIGHT):
         yPos = -y / 2
         txt = "%0.4f" % (y)
-        self.drawLine((self.x0 - self.pitch, yPos),
-                      (self.x0 + self.pitch, yPos), layer=layer)
+        self.drawLine((0 - self.pitch, yPos),
+                      (0 + self.pitch, yPos), layer=layer)
         if align != None:
             hOffset = 0
             if align & AL_LEFT:
@@ -284,7 +293,7 @@ class ThreadCalc():
                 txt = label + ' ' + txt
             elif align & AL_CENTER:
                 hOffset = 0
-            self.addText(txt, (self.x0 + hOffset, yPos), align | MIDDLE)
+            self.addText(txt, (0 + hOffset, yPos), align | MIDDLE)
 
     def draw(self, dc=None):
         self.dc = dc
@@ -347,26 +356,26 @@ class ThreadCalc():
 
         self.drawRefLine(self.diam, '', REF, AL_CENTER|CENTER|BELOW)
         # txt = "Diameter %0.4f" % (self.diam)
-        # self.addText(txt, (self.x0, -self.diam / 2), CENTER|BELOW)
+        # self.addText(txt, (0, -self.diam / 2), CENTER|BELOW)
 
         txt = "Pitch %0.4f" % (pitch)
-        self.addText(txt, (self.x0 + halfP, -self.diam / 2),
+        self.addText(txt, (0 + halfP, -self.diam / 2),
                      CENTER|BELOW)
 
         txt = "Height %0.4f" % (self.height)
-        self.addText(txt, (self.x0, -self.diam / 2 + self.height),
+        self.addText(txt, (0, -self.diam / 2 + self.height),
                      CENTER|ABOVE)
 
         radius = self.diam / 2
-        p0 = (self.x0 - halfP, -radius)
-        p1 = (self.x0 + halfP , -radius)
-        p2 = (self.x0, -radius + self.height)
+        p0 = (0 - halfP, -radius)
+        p1 = (0 + halfP , -radius)
+        p2 = (0, -radius + self.height)
         self.drawLine(p0, p1, layer=REF)
         self.drawLine(p1, p2, layer=REF)
         self.drawLine(p2, p0, layer=REF)
-        p2 = (self.x0 - pitch , -radius + self.height)
+        p2 = (0 - pitch , -radius + self.height)
         self.drawLine(p0, p2, layer=REF)
-        p2 = (self.x0 + pitch , -radius + self.height)
+        p2 = (0 + pitch , -radius + self.height)
         self.drawLine(p1, p2, layer=REF)
 
         extAvgMajDiam = (self.extMinMajDiam +
@@ -374,8 +383,8 @@ class ThreadCalc():
 
         extMeasuredDiam = self.extMinMajDiam
 
-        x0 = self.x0 - halfP
-        for x0 in (self.x0 - halfP, self.x0 + halfP):
+        x0 = 0 - halfP
+        for x0 in (0 - halfP, 0 + halfP):
             y = -extMeasuredDiam / 2
             ofs =  (self.diam / 2 + y) / sqrt3
             p0 = (x0 - ofs, y)
@@ -407,12 +416,12 @@ class ThreadCalc():
 
         tipRadius = 0.06 / 25.4
         tipDepth = (self.height - tipRadius)
-        p0 = (self.x0, -self.diam / 2 + tipDepth - tipRadius)
+        p0 = (0, -self.diam / 2 + tipDepth - tipRadius)
         self.drawCircle(tipRadius, p0, layer="TIP")
 
         tipDepth -= (self.diam - extMeasuredDiam) / 2
         txt = "Tip depth %0.4f" % (tipDepth)
-        p0 = (self.x0 + halfP, -self.extMinMinorDiam / 2)
+        p0 = (0 + halfP, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
         txt = "29.5 feed %0.4f" % (tipDepth / cos295)
@@ -420,22 +429,22 @@ class ThreadCalc():
 
         flatWidth = .125 * pitch
         txt = "Flat width %0.4f" % (flatWidth)
-        p0 = (self.x0 - flatWidth / 2, -self.extMinMinorDiam / 2)
+        p0 = (0 - flatWidth / 2, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, RIGHT|ABOVE)
 
         txt = "Tip Radius %0.4f" % (tipRadius)
-        p0 = (self.x0 + flatWidth / 2, -self.extMinMinorDiam / 2)
+        p0 = (0 + flatWidth / 2, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, LEFT|ABOVE)
 
         flatDepth = self.height - sqrt3 / 2 * flatWidth
         y = -self.diam / 2 + flatDepth
-        p0 = (self.x0 - flatWidth / 2, y)
-        p1 = (self.x0 + flatWidth / 2, y)
+        p0 = (0 - flatWidth / 2, y)
+        p1 = (0 + flatWidth / 2, y)
         self.drawLine(p0, p1, layer=REF)
 
         flatDepth = self.height - (self.diam - extMeasuredDiam) / 2
         txt = "Flat depth %0.4f" % (flatDepth)
-        p0 = (self.x0 - halfP, -self.extMinMinorDiam / 2)
+        p0 = (0 - halfP, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
         txt = "29.5 feed %0.4f" % (flatDepth / cos295)
@@ -446,31 +455,31 @@ class ThreadCalc():
         y =  -self.extMaxMinorDiam / 2
         minDepth = extMeasuredDiam / 2 + y
         txt = "Min depth %0.4f" % (minDepth)
-        self.addText(txt, (self.x0 - halfP, y), CENTER|ABOVE)
+        self.addText(txt, (0 - halfP, y), CENTER|ABOVE)
 
         wireRadius = self.actualWire / 2
         wireDepth = self.height - self.actualWire
         yWire = -self.diam / 2 + wireDepth
-        p0 = (self.x0, yWire)
+        p0 = (0, yWire)
         self.drawCircle(wireRadius, p0, layer="WIRE")
 
         yWire -= wireRadius
         if d != None:
             txt = "Wire Size %0.4f" % (self.actualWire)
-            self.addText(txt, (self.x0, yWire), CENTER | BELOW, WIRE)
+            self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
             textH = -(self.textH + self.vS)
             txt = "Min Wire %0.4f" % (self.minWire)
-            self.addText(txt, (self.x0, yWire + textH), CENTER | BELOW, WIRE)
+            self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
             textH = -2 * (self.textH + self.vS)
             txt = "Max Wire %0.4f" % (self.maxWire)
-            self.addText(txt, (self.x0, yWire + textH), CENTER | BELOW, WIRE)
+            self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
         if dc != None:
             txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" % 
                    (self.actualWire, self.minWire, self.maxWire))
-            self.addText(txt, (self.x0, yWire), CENTER | BELOW, WIRE)
+            self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
         # internal threads
 
@@ -481,32 +490,32 @@ class ThreadCalc():
         print ("intFlatWidth %0.4f intFlatDiam %0.4f" %
                (intFlatWidth, intFlatDiam))
 
-        p0 = (self.x0 - halfP, -radius)
-        p1 = (self.x0 + halfP , -radius)
-        p2 = (self.x0, -radius + self.height)
+        p0 = (0 - halfP, -radius)
+        p1 = (0 + halfP , -radius)
+        p2 = (0, -radius + self.height)
         self.drawLine(p0, p1, layer=REF)
         self.drawLine(p1, p2, layer=REF)
         self.drawLine(p2, p0, layer=REF)
 
-        p2 = (self.x0 - pitch , -radius + self.height)
+        p2 = (0 - pitch , -radius + self.height)
         self.drawLine(p0, p2, layer=REF)
-        p2 = (self.x0 + pitch , -radius + self.height)
+        p2 = (0 + pitch , -radius + self.height)
         self.drawLine(p1, p2, layer=REF)
 
         y = -self.intMinMinorDiam / 2
         ofs = (self.height -self.intMinMajDiam / 2 - y) / sqrt3
-        p2 = (self.x0 + ofs, y)
-        p3 = (self.x0 - ofs, y)
+        p2 = (0 + ofs, y)
+        p3 = (0 - ofs, y)
         self.drawShape([p0, p1, p2, p3], color=0, colorName="lightblue")
 
-        px = (self.x0 - pitch + ofs, y)
-        p2 = (self.x0 - pitch, y)
-        p3 = (self.x0 - pitch, -radius)
+        px = (0 - pitch + ofs, y)
+        p2 = (0 - pitch, y)
+        p3 = (0 - pitch, -radius)
         self.drawShape([p0, px, p2, p3], color=0, colorName="lightblue")
 
-        px = (self.x0 + pitch - ofs, y)
-        p2 = (self.x0 + pitch, y)
-        p3 = (self.x0 + pitch , -radius)
+        px = (0 + pitch - ofs, y)
+        p2 = (0 + pitch, y)
+        p3 = (0 + pitch , -radius)
         self.drawShape([p1, px, p2, p3], color=0, colorName="lightblue")
 
         self.drawRefLine(self.intMinMajDiam, 'Min Major', MAJOR,
@@ -529,12 +538,12 @@ class ThreadCalc():
                          AL_LEFT|RIGHT|MIDDLE)
 
         for x in (-halfP, halfP):
-            p0 = (self.x0 + x, -self.intMinMajDiam / 2 + 2 * tipRadius)
+            p0 = (0 + x, -self.intMinMajDiam / 2 + 2 * tipRadius)
             self.drawCircle(tipRadius, p0, layer="TIP")
 
         intTipDepth = self.intDblHeight / 2 - tipRadius
         txt = "Tip depth %0.4f" % (intTipDepth)
-        p0 = (self.x0 + halfP, -self.intMinMinorDiam / 2)
+        p0 = (0 + halfP, -self.intMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
         txt = "Tip feed %0.4f" % (intTipDepth / cos295)
@@ -542,7 +551,7 @@ class ThreadCalc():
 
         intFlatDepth = (intFlatDiam - self.intMinMinorDiam) / 2
         txt = "Flat depth %0.4f" % (intFlatDepth)
-        p0 = (self.x0 - halfP, -self.intMinMinorDiam / 2)
+        p0 = (0 - halfP, -self.intMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
         txt = "Flat feed %0.4f" % (intFlatDepth / cos295)
