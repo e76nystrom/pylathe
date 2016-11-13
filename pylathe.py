@@ -689,6 +689,7 @@ class Turn(UpdatePass):
             queFeedType(FEED_PITCH)
             zSynSetup(getFloatInfo('tuZFeed'))
         else:
+            queFeedType(FEED_PITCH)
             queZSetup(getFloatInfo('tuZFeed'))
         moveX(self.safeX)
         moveZ(self.zStart)
