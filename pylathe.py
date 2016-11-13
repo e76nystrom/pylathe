@@ -446,8 +446,6 @@ def sendSpindleData(send=False, rpm=None):
                 if info['xInvDir'].GetValue():
                     cfgReg |= XDIR_POL
                 setParm('X_CFG_REG', cfgReg)
-            else:
-                command('CMD_SPSETUP')
             spindleDataSent = True
     except commTimeout as e:
         print("sendSpindleData Timeout")
