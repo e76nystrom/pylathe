@@ -1101,7 +1101,8 @@ class Cutoff():
             queFeedType(FEED_PITCH)
             xSynSetup(getFloatInfo('cuXFeed'))
         else:
-            queXSetup(getFloatInfo('cuxFeed'))
+            queFeedType(FEED_PITCH)
+            queXSetup(getFloatInfo('cuXFeed'))
         moveX(self.safeX)
         moveZ(self.zCutoff)
         moveX(self.xStart)
