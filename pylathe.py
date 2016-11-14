@@ -2336,8 +2336,8 @@ class JogPanel(wx.Panel):
         self.repeat += 1
         sendZData()
         if val == 'Cont':
-            if self.jogCode != code:
-                if self.jogCode == None:
+            if self.jogCode != code: # new jog code
+                if self.jogCode == None: # jogging stopped
                     self.jogCode = code
                     self.repeat = 0
                     dir = 1
@@ -2346,6 +2346,7 @@ class JogPanel(wx.Panel):
                     print("zJogCmd %d" % (dir))
                     stdout.flush()
                     try:
+                        setParm('Z_JOG_MAX', getInfo('zJogMax'))
                         setParm('Z_JOG_DIR', dir)
                         command("ZJMOV")
                     except commTimeout as e:
@@ -2425,6 +2426,7 @@ class JogPanel(wx.Panel):
                     print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
+                        setParm('X_JOG_MAX', getInfo('xJogMax'))
                         setParm('X_JOG_DIR', dir)
                         command("XJMOV")
                     except commTimeout as e:
