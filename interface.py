@@ -7,6 +7,7 @@ cmdList = \
     ["ZMOVEABS", "", "start z movement"],
     ["ZMOVEREL", "", "move z relative"],
     ["ZJMOV", "", "start z jog"],
+    ["ZJSPEED", "", "start z jog at speed"],
     ["ZSTOP", "", "stop z movement"],
     ["ZHOME", "", "set current z location as home"],
     ["ZSETLOC", "", ""],
@@ -17,6 +18,7 @@ cmdList = \
     ["XMOVEABS", "", "start x movement"],
     ["XMOVEREL", "", "move x relative"],
     ["XJMOV", "", "start z jog"],
+    ["xJSPEED", "", "start x jog at speed"],
     ["XSTOP", "", "stop x movement"],
     ["XHOME", "", "set current x location as home"],
     ["XSETLOC", "", ""],
@@ -27,6 +29,7 @@ cmdList = \
     
     ["SPINDLE_START", "spindleStart", "start spindle"],
     ["SPINDLE_JOG", "", "spindle jog"],
+    ["SPINDLE_JOG_SPEED", "", "spindle jog at speed"],
     ["SPINDLE_STOP", "spindleStop", "stop spindle"],
     
     "start operations",
@@ -99,6 +102,7 @@ parmList = \
     ["SP_ACCEL", "spindle accel rpm/sec^2", "float"],
     ["SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"],
     ["SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"],
+    ["SP_JOG_RPM", "spindle jog rpm", "float"],
     ["SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"],
     ["SP_DIR_FLAG", "spindle invert direction", "char"],
     ["SP_TEST_INDEX", "generate test index pulse", "char"],
@@ -137,6 +141,7 @@ parmList = \
     
     ["Z_JOG_MIN", "z jog min speed", "float"],
     ["Z_JOG_MAX", "z jog max speed", "float"],
+    ["Z_JOG_SPEED", "z jog speed", "float"],
     
     "x move parameters",
     
@@ -147,12 +152,11 @@ parmList = \
     
     ["X_JOG_MIN", "x jog min speed", "float"],
     ["X_JOG_MAX", "x jog max speed", "float"],
+    ["X_JOG_SPEED", "x jog speed", "float"],
     
     "pass information",
     
     ["TOTAL_PASSES", "total passes", "int16_t"],
-    # ["SPRING_PASSES", "spring passes", "int16_t"],
-    # ["SPRING_PASS_INT", "spring pass interval", "int16_t"],
     ["CURRENT_PASS", "current passes", "int16_t"],
     
     "z axis move values",
