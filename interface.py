@@ -18,7 +18,7 @@ cmdList = \
     ["XMOVEABS", "", "start x movement"],
     ["XMOVEREL", "", "move x relative"],
     ["XJMOV", "", "start z jog"],
-    ["xJSPEED", "", "start x jog at speed"],
+    ["XJSPEED", "", "start x jog at speed"],
     ["XSTOP", "", "stop x movement"],
     ["XHOME", "", "set current x location as home"],
     ["XSETLOC", "", ""],
