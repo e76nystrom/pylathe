@@ -303,6 +303,7 @@ regList =\
     ["ZJOG", "(2 << 0)", "z while cmd are present"],
     ["ZSYN", "(3 << 0)", "z dist sync to rotation"],
     ["ZMAX", "(4 << 0)", "z rapid move"],
+    ["ZSPEED", "(5 << 0)", "z jog at speed"],
     ["Z_SYN_START", "(1 << 4)", "start on sync pulse"],
     ["X_SYN_TAPER", "(1 << 5)", "taper on x"],
     
@@ -318,7 +319,8 @@ regList =\
     ["XJOG", "(2 << 0)", "x while cmd are present"],
     ["XSYN", "(3 << 0)", "x dist sync to rotation"],
     ["XMAX", "(4 << 0)", "x rapid move"],
-    ["XJOGSLOW", "(5 << 0)", "slow jog for finding home"],
+    ["ZSPEED", "(6 << 0)", "z jog at speed"],
+    ["XJOGSLOW", "(7 << 0)", "slow jog for finding home"],
     ["X_SYN_START", "(1 << 4)", "start on sync pulse"],
     ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
     ["XFIND_HOME", "(1 << 6)", "find home"],
