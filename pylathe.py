@@ -10,6 +10,7 @@ import serial
 from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
+from pywinusb.hid import find_all_hid_devices
 
 HOME_TEST = False
 dbg = None
@@ -3257,6 +3258,10 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
+        allHids = find_all_hid_devices()
+        if allHids:
+            for index, device in enumerate(allHids):
+                print device
         openSerial(getInfo('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
