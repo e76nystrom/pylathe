@@ -2493,20 +2493,20 @@ class JogPanel(wx.Panel):
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
-        def setX(self, val):
-            print "set x"
-            stdout.flush()
-            pass
+    def setX(self, val):
+        print "set x"
+        stdout.flush()
+        pass
 
-        def setZ(self, val):
-            print "set z"
-            stdout.flush()
-            pass
+    def setZ(self, val):
+        print "set z"
+        stdout.flush()
+        pass
 
-        def setSpindleZ(self, val):
-            print "set spindle"
-            stdout.flush()
-            pass
+    def setSpindleZ(self, val):
+        print "set spindle"
+        stdout.flush()
+        pass
 
     def ShuttleInput(self, data):
         print data
