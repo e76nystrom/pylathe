@@ -3261,7 +3261,7 @@ class MainFrame(wx.Frame):
         allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
-                print device
+                print index, device
         openSerial(getInfo('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
