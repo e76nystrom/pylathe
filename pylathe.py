@@ -2050,6 +2050,7 @@ class JogPanel(wx.Panel):
         self.buttonAction = ((16, self.setX), (32, self.setZ),
                              (64, self.setSpindle),
                              (128, None), (1, None))
+        self.axisAction = None
 
     def initUI(self):
         global info, emptyCell
@@ -2494,25 +2495,42 @@ class JogPanel(wx.Panel):
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
     def setX(self, val):
+        self.axisAction = self.jogX
         print "set x"
         stdout.flush()
         pass
 
     def setZ(self, val):
+        self.axisAction = self.jogZ
         print "set z"
         stdout.flush()
         pass
 
     def setSpindle(self, val):
+        self.axisAction = self.jogZ
         print "set spindle"
         stdout.flush()
         pass
+
+    def jogX(self, val):
+        print "jog x %d" % (val)
+        stdout.flush()
+
+    def jogZ(self, val):
+        print "jog z %d" % (val)
+        stdout.flush()
+
+    def jogSpindle(self, val):
+        print "jog spindle %d" % (val)
+        stdout.flush()
 
     def ShuttleInput(self, data):
         print data
         stdout.flush()
         outerRing = data[1]
         if outerRing != self.lastOuterRing:
+            if self.axisAction != None:
+                self.axisAction(outerRing)
             self.lastOuterRing = outerRing
         knob = data[2]
         if knob != self.lastKnob:
