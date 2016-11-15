@@ -2546,6 +2546,8 @@ class JogPanel(wx.Panel):
         outerRing = data[1]
         if outerRing != self.lastOuterRing:
             if self.axisAction != None:
+                if outerRing > 128:
+                    outerRing = -(256 - outerRing)
                 self.axisAction(outerRing)
             self.lastOuterRing = outerRing
         knob = data[2]
