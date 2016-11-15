@@ -2044,6 +2044,12 @@ class JogPanel(wx.Panel):
         self.xEncInch = 0
         self.zEncInvert = 0
         self.xEncInvert = 0
+        self.lastOuterRing = 0
+        self.lastKnob = None
+        self.lastButton = 0
+        self.buttonAction = ((16, self.setX), (32, self.setZ),
+                             (64, self.setSpindle),
+                             (128, None), (1, None))
 
     def initUI(self):
         global info, emptyCell
@@ -2485,9 +2491,43 @@ class JogPanel(wx.Panel):
         self.xNegButton.SetFocus()
         self.xDown(wx.WXK_UP)
 
+        # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
+
+        def setX(self, val):
+            print "set x"
+            stdout.flush()
+            pass
+
+        def setZ(self, val):
+            print "set z"
+            stdout.flush()
+            pass
+
+        def setSpindleZ(self, val):
+            print "set spindle"
+            stdout.flush()
+            pass
+
     def ShuttleInput(self, data):
         print data
         stdout.flush()
+        outerRing = data[1]
+        if outerRing != self.lastOuterRing:
+            self.lastOuterRing = outerRing
+        knob = data[2]
+        if knob != self.lastKnob:
+            if self.lastKnob != None:
+                pass
+            self.lastKnob = knob
+        button = data[4] | data[5]
+        if button | self.lastButton:
+            changed = button ^ lastButton
+            for action in self.buttonAction:
+                (val, function) = action
+                if changed & val:
+                    if function != None:
+                        function((button & val) != 0)
+            self.lastButton = button
 
     def OnCombo(self, e):
         val = self.combo.GetValue();
