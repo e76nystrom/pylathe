@@ -2515,19 +2515,19 @@ class JogPanel(wx.Panel):
     def jogX(self, val):
         print "jog x %d" % (val)
         stdout.flush()
-        setparm('X_JOG_SPEED', 0)
+        setParm('X_JOG_SPEED', 0)
         command('XJSPEED')
 
     def jogZ(self, val):
         print "jog z %d" % (val)
         stdout.flush()
-        setparm('Z_JOG_SPEED', 0)
+        setParm('Z_JOG_SPEED', 0)
         command('ZJSPEED')
 
     def jogSpindle(self, val):
         print "jog spindle %d" % (val)
         stdout.flush()
-        setparm('SP_JOG_RPM', 0)
+        setParm('SP_JOG_RPM', 0)
         command('SPINDLE_JOG_SPEED')
 
     def ShuttleInput(self, data):
