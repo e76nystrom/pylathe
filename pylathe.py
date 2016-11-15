@@ -2051,6 +2051,7 @@ class JogPanel(wx.Panel):
                              (64, self.setSpindle),
                              (128, None), (1, None))
         self.axisAction = None
+        self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
 
     def initUI(self):
         global info, emptyCell
@@ -2515,19 +2516,28 @@ class JogPanel(wx.Panel):
     def jogX(self, val):
         print "jog x %d" % (val)
         stdout.flush()
-        setParm('X_JOG_SPEED', 0)
+        speed = getFloatInfo('xMaxSpeed') * self.factor[abs(val)]
+        if val < 0:
+            speed = -speed
+        setParm('X_JOG_SPEED', speed)
         command('XJSPEED')
 
     def jogZ(self, val):
         print "jog z %d" % (val)
         stdout.flush()
-        setParm('Z_JOG_SPEED', 0)
+        speed = getFloatInfo('zMaxSpeed') * self.factor[abs(val)]
+        if val < 0:
+            speed = -speed
+        setParm('Z_JOG_SPEED', speed)
         command('ZJSPEED')
 
     def jogSpindle(self, val):
         print "jog spindle %d" % (val)
         stdout.flush()
-        setParm('SP_JOG_RPM', 0)
+        rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
+        if val < 0:
+            rpm = -rpm
+        setParm('SP_JOG_RPM', rpm)
         command('SPINDLE_JOG_SPEED')
 
     def ShuttleInput(self, data):
