@@ -2521,7 +2521,7 @@ class JogPanel(wx.Panel):
             self.lastKnob = knob
         button = data[4] | data[5]
         if button | self.lastButton:
-            changed = button ^ lastButton
+            changed = button ^ self.lastButton
             for action in self.buttonAction:
                 (val, function) = action
                 if changed & val:
