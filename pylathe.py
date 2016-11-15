@@ -2494,19 +2494,19 @@ class JogPanel(wx.Panel):
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
-    def setX(self, val):
+    def setX(self, button, val):
         self.axisAction = self.jogX
         print "set x"
         stdout.flush()
         pass
 
-    def setZ(self, val):
+    def setZ(self, buggon, val):
         self.axisAction = self.jogZ
         print "set z"
         stdout.flush()
         pass
 
-    def setSpindle(self, val):
+    def setSpindle(self, button, val):
         self.axisAction = self.jogZ
         print "set spindle"
         stdout.flush()
@@ -2544,7 +2544,7 @@ class JogPanel(wx.Panel):
                 (val, function) = action
                 if changed & val:
                     if function != None:
-                        function((button & val) != 0)
+                        function(button, val)
             self.lastButton = button
 
     def OnCombo(self, e):
