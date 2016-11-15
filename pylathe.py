@@ -2482,6 +2482,10 @@ class JogPanel(wx.Panel):
         self.xNegButton.SetFocus()
         self.xDown(wx.WXK_UP)
 
+    def ShuttleInput(data):
+        print data
+        stdout.flush()
+
     def OnCombo(self, e):
         val = self.combo.GetValue();
         print("combo val %s" % (val))
@@ -3261,7 +3265,14 @@ class MainFrame(wx.Frame):
         allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
-                print index, device.product_name
+                print index, device.product_name, device.
+                if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
+                    try:
+                        device.open()
+                        device.set_raw_data_handler(jogPanel.ShuttleInput)
+                    except:
+                        pass
+                    break
         openSerial(getInfo('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
