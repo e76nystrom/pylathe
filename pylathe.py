@@ -2503,7 +2503,7 @@ class JogPanel(wx.Panel):
         stdout.flush()
         pass
 
-    def setSpindleZ(self, val):
+    def setSpindle(self, val):
         print "set spindle"
         stdout.flush()
         pass
