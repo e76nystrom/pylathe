@@ -11,7 +11,7 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 from platform import system
-print system
+print system()
 stdout.flush()
 #linux = platform.system() == 'Linux'
 from pywinusb.hid import find_all_hid_devices
