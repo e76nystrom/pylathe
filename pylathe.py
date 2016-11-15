@@ -3265,7 +3265,7 @@ class MainFrame(wx.Frame):
         allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
-                print index, device.product_name, device.
+                print index, device.product_name, device.vendor_id
                 if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
                     try:
                         device.open()
