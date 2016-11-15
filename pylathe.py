@@ -2482,7 +2482,7 @@ class JogPanel(wx.Panel):
         self.xNegButton.SetFocus()
         self.xDown(wx.WXK_UP)
 
-    def ShuttleInput(data):
+    def ShuttleInput(self, data):
         print data
         stdout.flush()
 
