@@ -2500,7 +2500,7 @@ class JogPanel(wx.Panel):
         stdout.flush()
         pass
 
-    def setZ(self, buggon, val):
+    def setZ(self, button, val):
         self.axisAction = self.jogZ
         print "set z"
         stdout.flush()
@@ -2515,14 +2515,20 @@ class JogPanel(wx.Panel):
     def jogX(self, val):
         print "jog x %d" % (val)
         stdout.flush()
+        setparm('X_JOG_SPEED', 0)
+        command('XJSPEED')
 
     def jogZ(self, val):
         print "jog z %d" % (val)
         stdout.flush()
+        setparm('Z_JOG_SPEED', 0)
+        command('ZJSPEED')
 
     def jogSpindle(self, val):
         print "jog spindle %d" % (val)
         stdout.flush()
+        setparm('SP_JOG_RPM', 0)
+        command('SPINDLE_JOG_SPEED')
 
     def ShuttleInput(self, data):
         print data
