@@ -11,10 +11,9 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 from platform import system
-print system()
-stdout.flush()
-#linux = platform.system() == 'Linux'
-from pywinusb.hid import find_all_hid_devices
+windows = system() == 'Windows'
+if windows:
+    from pywinusb.hid import find_all_hid_devices
 
 HOME_TEST = False
 dbg = None
@@ -3266,10 +3265,11 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
-        allHids = find_all_hid_devices()
+        allHids = None
+        if windows:
+            allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
-                print index, device.product_name, device.vendor_id
                 if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
                     try:
                         device.open()
