@@ -2533,8 +2533,9 @@ class JogPanel(wx.Panel):
         if val < 0:
             speed = -speed
         try:
-            setParm('Z_JOG_SPEED', speed)
-            command('ZJSPEED')
+            # setParm('Z_JOG_SPEED', speed)
+            # command('ZJSPEED')
+            pass
         except commTimeout:
             pass
 
