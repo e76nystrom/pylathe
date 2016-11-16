@@ -2523,7 +2523,7 @@ class JogPanel(wx.Panel):
         try:
             setParm('X_JOG_SPEED', speed)
             command('XJSPEED')
-        except: CommTimeout:
+        except CommTimeout:
             pass
 
     def jogZ(self, val):
@@ -2535,7 +2535,7 @@ class JogPanel(wx.Panel):
         try:
             setParm('Z_JOG_SPEED', speed)
             command('ZJSPEED')
-        except: CommTimeout:
+        except CommTimeout:
             pass
 
     def jogSpindle(self, val):
@@ -2547,7 +2547,7 @@ class JogPanel(wx.Panel):
         try:
             setParm('SP_JOG_RPM', rpm)
             command('SPINDLE_JOG_SPEED')
-        except: CommTimeout:
+        except CommTimeout:
             pass
 
     def ShuttleInput(self, data):
