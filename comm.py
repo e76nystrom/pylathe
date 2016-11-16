@@ -106,7 +106,7 @@ def queParm(parm, val):
     parmList.append(cmd)
 
 def sendMulti():
-    global ser, parmList, cmds, commLock, timeout
+    global ser, parmList, cmdLen, cmdOverhead, cmds, commLock, timeout
     count = len(parmList)
     if count == 0:
         return
