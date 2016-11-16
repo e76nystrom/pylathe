@@ -114,7 +114,7 @@ def sendMulti():
     for parm in parmList:
         cmd += parm
     cmd += ' \r';
-    print "cmdlen %d len(cmd) %d" % (cmdLen, cmdOverhead)
+    print "cmdlen %d len(cmd) %d" % (cmdLen, len(cmd))
     parmList = []
     cmdLen = cmdOverhead
     if ser is None:
