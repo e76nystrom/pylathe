@@ -62,10 +62,12 @@ def command(cmd):
     commLock.release()
     return(rsp.strip("\n\r"))
 
+cmdOverhead = 9
 parmList = []
+cmdLen = cmdOverhead
 
 def queParm(parm, val):
-    global parms, parmList
+    global parms, parmList, cmdLen
     cmdInfo = parms[parm]
     parmIndex = cmdInfo[0]
     parmType = cmdInfo[1]
@@ -96,7 +98,11 @@ def queParm(parm, val):
         except ValueError:
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
-    cmd = '%x %s' % (parmIndex, valString)
+    cmd = ' %x %s' % (parmIndex, valString)
+    length = len(cmd)
+    if cmdLen + length > 80:
+        sendMulti()
+    cmdLen += length
     parmList.append(cmd)
 
 def sendMulti():
@@ -106,9 +112,11 @@ def sendMulti():
         return
     cmd = '\x01%x %x' %  (cmds['LOADMULTI'][0], count)
     for parm in parmList:
-        cmd += ' ' + parm
+        cmd += parm
     cmd += ' \r';
+    print "cmdlen %d len(cmd) %d" % (cmdLen, cmdOverhead)
     parmList = []
+    cmdLen = cmdOverhead
     if ser is None:
         return
     commLock.acquire(True)
