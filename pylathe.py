@@ -3365,11 +3365,12 @@ class MainFrame(wx.Frame):
 
         if comm.ser != None:
             try:
-                setParm('CFG_XILINX', getInfo('cfgXilinx'))
-                setParm('CFG_FCY', getInfo('cfgFcy'))
-                setParm('CFG_MPG', getInfo('cfgMPG'))
-                setParm('CFG_DRO', getInfo('cfgDRO'))
-                setParm('CFG_LCD', getInfo('cfgLCD'))
+                queParm('CFG_XILINX', getInfo('cfgXilinx'))
+                queParm('CFG_FCY', getInfo('cfgFcy'))
+                queParm('CFG_MPG', getInfo('cfgMPG'))
+                queParm('CFG_DRO', getInfo('cfgDRO'))
+                queParm('CFG_LCD', getInfo('cfgLCD'))
+                sendMulti()
                 command('CMD_SETUP')
                 sendZData()
                 val = getInfo('jogZPos')
@@ -3382,23 +3383,25 @@ class MainFrame(wx.Frame):
                 if DRO:
                     val = int(getFloatInfo('zEncPosition') * \
                               jogPanel.zStepsInch)
-                    setParm('Z_ENC_POS', val)
+                    queParm('Z_ENC_POS', val)
                     val = int(getFloatInfo('xEncPosition') * \
                               jogPanel.xStepsInch)
-                    setParm('X_ENC_POS', val)
-                    setParm('Z_ENC_OFFSET', zEncOffset)
-                    setParm('X_ENC_OFFSET', xEncOffset)
-                    setParm('Z_ENC_INCH', jogPanel.zEncInch)
-                    setParm('X_ENC_INCH', jogPanel.xEncInch)
+                    queParm('X_ENC_POS', val)
+                    queParm('Z_ENC_OFFSET', zEncOffset)
+                    queParm('X_ENC_OFFSET', xEncOffset)
+                    queParm('Z_ENC_INCH', jogPanel.zEncInch)
+                    queParm('X_ENC_INCH', jogPanel.xEncInch)
+                    sendMulti()
                 val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-                setParm('X_HOME_LOC', val)
-                setParm('Z_HOME_OFFSET', zHomeOffset)
-                setParm('X_HOME_OFFSET', xHomeOffset)
-                setParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
+                queParm('X_HOME_LOC', val)
+                queParm('Z_HOME_OFFSET', zHomeOffset)
+                queParm('X_HOME_OFFSET', xHomeOffset)
+                queParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
                 val = (-1, 1)[getBoolInfo('zInvEnc')]
-                setParm('Z_ENC_DIR', val)
+                queParm('Z_ENC_DIR', val)
                 val = (-1, 1)[getBoolInfo('xInvEnc')]
-                setParm('X_ENC_DIR', val)
+                queParm('X_ENC_DIR', val)
+                sendMulti()
             except commTimeout:
                 print "comm timeout on setup"
                 setStatus("comm timeout on setup")
