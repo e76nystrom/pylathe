@@ -62,7 +62,7 @@ def command(cmd):
     commLock.release()
     return(rsp.strip("\n\r"))
 
-cmdOverhead = 9
+cmdOverhead = 8
 parmList = []
 cmdLen = cmdOverhead
 
