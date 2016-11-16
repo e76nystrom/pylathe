@@ -102,10 +102,13 @@ def queParm(parm, val):
 def sendMulti():
     global ser, parmList, cmds, commLock, timeout
     count = len(parmList)
+    if count == 0:
+        return
     cmd = '\x01%x %x' %  (cmds['LOADMULTI'][0], count)
     for parm in parmList:
         cmd += ' ' + parm
     cmd += ' \r';
+    parmList = []
     if ser is None:
         return
     commLock.acquire(True)
