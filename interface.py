@@ -68,6 +68,7 @@ cmdList = \
     "load processor and xilinx parameters",
     
     ["LOADVAL", "", "load parameters"],
+    ["LOADMULTI", "", "load multiple parameters"],
     ["READVAL", "", "read parameters"],
     ["LOADXREG", "", "load xilinx registers"],
     ["READXREG", "", "read xilinx registers"],
