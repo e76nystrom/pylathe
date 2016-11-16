@@ -3313,19 +3313,19 @@ class UpdateThread(Thread):
     def abort(self):
         self.run = False
 
-class KeyEventFilter(wx.EventFilter):
-    def __init__(self):
-        wx.EventFilter.__init__(self)
-        wx.EvtHandler.AddFilter(self)
+# class KeyEventFilter(wx.EventFilter):
+#     def __init__(self):
+#         wx.EventFilter.__init__(self)
+#         wx.EvtHandler.AddFilter(self)
 
-    def __del__(self):
-        wx.EvtHandler.RemoveFilter(self)
+#     def __del__(self):
+#         wx.EvtHandler.RemoveFilter(self)
 
-    def FilterEvent(self, event):
-        t = event.GetEventType()
-        if t == wx.EVT_KEY_DOWN:
-            print("key down")
-        event.Skip()
+#     def FilterEvent(self, event):
+#         t = event.GetEventType()
+#         if t == wx.EVT_KEY_DOWN:
+#             print("key down")
+#         event.Skip()
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
