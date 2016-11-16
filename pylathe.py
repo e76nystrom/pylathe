@@ -2027,43 +2027,6 @@ def clrStatus():
 def notHomed():
     setStatus("X Not Homed")
 
-def jogX(self, val):
-    print "jog x %d" % (val)
-    stdout.flush()
-    speed = getFloatInfo('xMaxSpeed') * self.factor[abs(val)]
-    if val < 0:
-        speed = -speed
-    try:
-        setParm('X_JOG_SPEED', speed)
-        command('XJSPEED')
-    except commTimeout:
-        pass
-
-def jogZ(self, val):
-    print "jog z %d" % (val)
-    stdout.flush()
-    speed = getFloatInfo('zMaxSpeed') * self.factor[abs(val)]
-    if val < 0:
-        speed = -speed
-    try:
-        # setParm('Z_JOG_SPEED', speed)
-        # command('ZJSPEED')
-        pass
-    except commTimeout:
-        pass
-
-def jogSpindle(self, val):
-    print "jog spindle %d" % (val)
-    stdout.flush()
-    rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
-    if val < 0:
-        rpm = -rpm
-    try:
-        setParm('SP_JOG_RPM', rpm)
-        command('SPINDLE_JOG_SPEED')
-    except commTimeout:
-        pass
-
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(JogPanel, self).__init__(parent, *args, **kwargs)
@@ -2552,7 +2515,7 @@ class JogPanel(wx.Panel):
         stdout.flush()
         pass
 
-    def jogX(self, val):
+    def jogX(self, code, val):
         print "jog x %d" % (val)
         stdout.flush()
         speed = getFloatInfo('xMaxSpeed') * self.factor[abs(val)]
@@ -2564,7 +2527,7 @@ class JogPanel(wx.Panel):
         except commTimeout:
             pass
 
-    def jogZ(self, val):
+    def jogZ(self, code, val):
         print "jog z %d" % (val)
         stdout.flush()
         speed = getFloatInfo('zMaxSpeed') * self.factor[abs(val)]
@@ -2573,11 +2536,15 @@ class JogPanel(wx.Panel):
         try:
             # setParm('Z_JOG_SPEED', speed)
             # command('ZJSPEED')
+            if speed == 0:
+                self.btnRpt.action = None
+                print "jogZ done"
+                stdout.flush()
             pass
         except commTimeout:
             pass
 
-    def jogSpindle(self, val):
+    def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
         stdout.flush()
         rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
@@ -2598,6 +2565,10 @@ class JogPanel(wx.Panel):
                 if outerRing > 128:
                     outerRing = -(256 - outerRing)
                 # self.axisAction(outerRing)
+                self.btnRpt.action = self.axisAction
+                self.btnRpt.code = 0
+                self.btnRpt.val = outerRing
+                self.btnRpt.event.set()
             self.lastOuterRing = outerRing
         knob = data[2]
         if knob != self.lastKnob:
