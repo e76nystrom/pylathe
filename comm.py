@@ -121,7 +121,7 @@ def sendMulti():
     parmList = []
     cmdLen = cmdOverhead
     if xDbgPrint:
-        print("%-15s %s" % (cmd, cmdStr.strip()))
+        print("%-15s %s" % ('LOADMULTI', cmd))
         stdout.flush()
     if ser is None:
         return
