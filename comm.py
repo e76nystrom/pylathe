@@ -62,6 +62,71 @@ def command(cmd):
     commLock.release()
     return(rsp.strip("\n\r"))
 
+parmList = []
+
+def queParm(parm, val)
+    global parms, parmList
+    cmdInfo = parms[parm]
+    parmIndex = cmdInfo[0]
+    parmType = cmdInfo[1]
+    valString = "0"
+    if SWIG and (len(cmdInfo) == 3):
+        global importLathe
+        if importLathe:
+            import lathe
+            importLathe = False
+        parmVar = cmdInfo[2]
+        if parmType == 'float':
+            valString = "%5.6f" % (float(val))
+        else:
+            valString = "%d" % (int(val))
+        cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
+        exec(cmd)
+    if parmType == 'float':
+        try:
+            valString = "%5.6f" % (float(val))
+            valString = valString.rstrip('0')
+        except ValueError:
+            valString = "0.0"
+            print("ValueError %s" % (val))
+            stdout.flush()
+    else:
+        try:
+            valString = "x%x" % (int(val))
+        except ValueError:
+            valString = "0"
+    # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
+    cmd = '%x %s' % (parmIndex, valString)
+    parmList.append(cmd)
+
+def sendMulti():
+    global ser, parmList, cmds, commLock, timeout
+    count = len(parmList)
+    cmd = '\x01%x %x' %  (cmds['LOADMULTI'][0], count)
+    for parm in parmList:
+        cmd += ' ' + parm
+    cmd += ' \r';
+    if ser is None:
+        return
+    commLock.acquire(True)
+    ser.write(cmd)
+    rsp = "";
+    while True:
+        tmp = ser.read(1)
+        if (len(tmp) == 0):
+            commLock.release()
+            if not timeout:
+                timeout = True
+                print("setParm timeout %s" % (parm))
+                stdout.flush()
+            raise commTimeout()
+            break;
+        if (tmp == '*'):
+            timeout = False
+            break
+        rsp = rsp + tmp
+    commLock.release()
+
 def setParm(parm, val):
     global ser, parms, cmds, commLock, timeout, xDbgPrint
     cmdInfo = parms[parm]
