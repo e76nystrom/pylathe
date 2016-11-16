@@ -2546,7 +2546,8 @@ class JogPanel(wx.Panel):
         pass
 
     def setSpindle(self, button, val):
-        self.axisAction = self.jogZ
+        # self.axisAction = self.jogZ
+        self.axisAction = jogZ
         print "set spindle"
         stdout.flush()
         pass
