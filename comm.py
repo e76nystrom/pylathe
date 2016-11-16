@@ -99,6 +99,9 @@ def queParm(parm, val):
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = ' %x %s' % (parmIndex, valString)
+    if True: # xDbgPrint:
+        print("%-15s %s" % (parm, cmd.strip()))
+        stdout.flush()
     length = len(cmd)
     if cmdLen + length > 80:
         sendMulti()
