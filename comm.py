@@ -13,6 +13,10 @@ xDbgPrint = True
 SWIG = False
 importLathe = True
 
+cmdOverhead = 8
+parmList = []
+cmdLen = cmdOverhead
+
 def openSerial(port, rate):
     global ser
     try:
@@ -25,7 +29,9 @@ class commTimeout(Exception):
     pass
 
 def command(cmd):
-    global SWIG, ser, cmds, commLock, timeout, xDbgPrint
+    global SWIG, ser, cmds, commLock, timeout, xDbgPrint, parmList
+    if len(parmList) > 0:
+        sendMulti()
     (cmdVal, action) = cmds[cmd]
     if SWIG and (action != None):
         global importLathe
@@ -61,10 +67,6 @@ def command(cmd):
         rsp = rsp + tmp;
     commLock.release()
     return(rsp.strip("\n\r"))
-
-cmdOverhead = 8
-parmList = []
-cmdLen = cmdOverhead
 
 def queParm(parm, val):
     global parms, parmList, cmdLen
