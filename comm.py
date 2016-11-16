@@ -120,6 +120,9 @@ def sendMulti():
     print "cmdlen %d len(cmd) %d" % (cmdLen, len(cmd))
     parmList = []
     cmdLen = cmdOverhead
+    if xDbgPrint:
+        print("%-15s %s" % (cmd, cmdStr.strip()))
+        stdout.flush()
     if ser is None:
         return
     commLock.acquire(True)
