@@ -64,7 +64,7 @@ def command(cmd):
 
 parmList = []
 
-def queParm(parm, val)
+def queParm(parm, val):
     global parms, parmList
     cmdInfo = parms[parm]
     parmIndex = cmdInfo[0]
