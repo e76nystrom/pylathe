@@ -2552,25 +2552,25 @@ class JogPanel(wx.Panel):
     def jogX(self, code, val):
         print "jog x %d" % (val)
         stdout.flush()
-        if val < 0:
-            speed = -speed
-        try:
-            setParm('X_JOG_SPEED', speed)
-            command('XJSPEED')
-        except commTimeout:
-            pass
+        # if val < 0:
+        #     speed = -speed
+        # try:
+        #     setParm('X_JOG_SPEED', speed)
+        #     command('XJSPEED')
+        # except commTimeout:
+        #     pass
 
     def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
         stdout.flush()
-        rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
-        if val < 0:
-            rpm = -rpm
-        try:
-            setParm('SP_JOG_RPM', rpm)
-            command('SPINDLE_JOG_SPEED')
-        except commTimeout:
-            pass
+        # rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
+        # if val < 0:
+        #     rpm = -rpm
+        # try:
+        #     setParm('SP_JOG_RPM', rpm)
+        #     command('SPINDLE_JOG_SPEED')
+        # except commTimeout:
+        #     pass
 
     def ShuttleInput(self, data):
         # print data
