@@ -2045,6 +2045,7 @@ def jogZ(code, val):
         try:
             if index != zCurIndex:
                 zCurIndex = index
+                setParm('Z_JOG_SPEED', speed)
             command('ZJSPEED')
         except commTimeout:
             pass
