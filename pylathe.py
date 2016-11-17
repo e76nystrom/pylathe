@@ -2040,21 +2040,20 @@ def jogZ(code, val):
     speed = zSpeed[index]
     if val < 0:
         speed = -speed
-    if zCurSpeed >= 0 and speed > 0 or zCurSpeed <= 0 and speed < 0:
-    try:
-        if index != zCurIndex:
-            zCurIndex = index
-            setParm('Z_JOG_SPEED', speed)
-        command('ZJSPEED')
-        pass
-    except commTimeout:
-        pass
-    if index == 0:
-        buttonRepeat.action = None
-        buttonRepeat.event.clear()
-        zCurIndex = -1
-        print "jogZ done"
-        stdout.flush()
+    if (zCurSpeed >= 0 and speed > 0) or (zCurSpeed <= 0 and speed < 0):
+        zCurSpeed = speed
+        try:
+            if index != zCurIndex:
+                zCurIndex = index
+            command('ZJSPEED')
+        except commTimeout:
+            pass
+        if index == 0:
+            buttonRepeat.action = None
+            buttonRepeat.event.clear()
+            zCurIndex = -1
+            print "jogZ done"
+            stdout.flush()
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -2573,8 +2572,8 @@ class JogPanel(wx.Panel):
             pass
 
     def ShuttleInput(self, data):
-        print data
-        stdout.flush()
+        # print data
+        # stdout.flush()
         outerRing = data[1]
         if outerRing != self.lastOuterRing:
             if self.axisAction != None:
