@@ -2040,7 +2040,7 @@ def jogZ(code, val):
     speed = zSpeed[index]
     if val < 0:
         speed = -speed
-    if (zCurSpeed >= 0 and speed > 0) or (zCurSpeed <= 0 and speed < 0):
+    if (zCurSpeed >= 0 and speed >= 0) or (zCurSpeed <= 0 and speed <= 0):
         zCurSpeed = speed
         try:
             if index != zCurIndex:
