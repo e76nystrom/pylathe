@@ -153,6 +153,9 @@ xEncPosition = 0.0
 xHomed = False
 done = False
 
+buttonRepeat = None
+zSpeed = None
+
 if XILINX:
     cLoc = "../LatheX/include/"
 else:
@@ -2027,13 +2030,32 @@ def clrStatus():
 def notHomed():
     setStatus("X Not Homed")
 
+    def jogZ(self, code, val):
+        global zSpeed
+        print "jog z %d" % (val)
+        stdout.flush()
+        speed = zSpeed[abs(val)]
+        if val < 0:
+            speed = -speed
+        try:
+            # setParm('Z_JOG_SPEED', speed)
+            # command('ZJSPEED')
+            pass
+        except commTimeout:
+            pass
+        if speed == 0:
+            buttonRepeat.action = None
+            print "jogZ done"
+            stdout.flush()
+
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
+        global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
         self.jogCode = None
         self.repeat = 0
         # self.lastTime = 0
-        self.btnRpt = ButtonRepeat()
+        self.btnRpt = buttonRepeat = ButtonRepeat()
         self.initUI()
         self.setZPosDialog = None
         self.setXPosDialog = None
@@ -2503,7 +2525,11 @@ class JogPanel(wx.Panel):
         pass
 
     def setZ(self, button, val):
+        global zSpeed
         self.axisAction = self.jogZ
+        maxSpeed = getFloatInfo('zMaxSpeed')
+        for val in range(0, 7):
+            zSpeed =  maxSpeed * self.factor[val]
         print "set z"
         stdout.flush()
         pass
@@ -2518,7 +2544,6 @@ class JogPanel(wx.Panel):
     def jogX(self, code, val):
         print "jog x %d" % (val)
         stdout.flush()
-        speed = getFloatInfo('xMaxSpeed') * self.factor[abs(val)]
         if val < 0:
             speed = -speed
         try:
@@ -2528,21 +2553,22 @@ class JogPanel(wx.Panel):
             pass
 
     def jogZ(self, code, val):
+        global zSpeed
         print "jog z %d" % (val)
         stdout.flush()
-        speed = getFloatInfo('zMaxSpeed') * self.factor[abs(val)]
+        speed = zSpeed[abs(val)]
         if val < 0:
             speed = -speed
         try:
             # setParm('Z_JOG_SPEED', speed)
             # command('ZJSPEED')
-            if speed == 0:
-                self.btnRpt.action = None
-                print "jogZ done"
-                stdout.flush()
             pass
         except commTimeout:
             pass
+        if speed == 0:
+            buttonRepeat.action = None
+            print "jogZ done"
+            stdout.flush()
 
     def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
