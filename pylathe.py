@@ -2529,7 +2529,7 @@ class JogPanel(wx.Panel):
         self.axisAction = jogZ
         maxSpeed = getFloatInfo('zMaxSpeed')
         for val in range(0, 7):
-            zSpeed =  maxSpeed * self.factor[val]
+            zSpeed[val] =  maxSpeed * self.factor[val]
         print "set z"
         stdout.flush()
         pass
