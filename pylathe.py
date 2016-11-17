@@ -2030,7 +2030,7 @@ def clrStatus():
 def notHomed():
     setStatus("X Not Homed")
 
-def jogZ(self, code, val):
+def jogZ(code, val):
     global zSpeed
     print "jog z %d" % (val)
     stdout.flush()
