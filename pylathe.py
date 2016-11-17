@@ -154,7 +154,7 @@ xHomed = False
 done = False
 
 buttonRepeat = None
-zSpeed = None
+zSpeed = [None, None, None, None, None, None, None, None]
 
 if XILINX:
     cLoc = "../LatheX/include/"
