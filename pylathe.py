@@ -2049,6 +2049,7 @@ def jogZ(code, val):
         pass
     if speed == 0:
         buttonRepeat.action = None
+        buttonRepeat.event.clear()
         zCurIndex = -1
         print "jogZ done"
         stdout.flush()
