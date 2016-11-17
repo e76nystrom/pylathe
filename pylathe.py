@@ -2033,7 +2033,7 @@ def notHomed():
 
 def jogZ(code, val):
     global zSpeed, zCurIndex
-    print "jog z %d" % (val)
+    print "jog z %d %d" % (val, zCurIndex)
     stdout.flush()
     index = abs(val)
     speed = zSpeed[index]
