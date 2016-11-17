@@ -156,6 +156,7 @@ done = False
 buttonRepeat = None
 zSpeed = [None, None, None, None, None, None, None, None]
 zCurIndex = -1
+zCurSpeed = 0.0
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -2032,13 +2033,14 @@ def notHomed():
     setStatus("X Not Homed")
 
 def jogZ(code, val):
-    global zSpeed, zCurIndex
+    global zSpeed, zCurIndex, zCurSpeed
     print "jog z %d %d" % (val, zCurIndex)
     stdout.flush()
     index = abs(val)
     speed = zSpeed[index]
     if val < 0:
         speed = -speed
+    if zCurSpeed >= 0 and speed > 0 or zCurSpeed <= 0 and speed < 0:
     try:
         if index != zCurIndex:
             zCurIndex = index
@@ -2047,7 +2049,7 @@ def jogZ(code, val):
         pass
     except commTimeout:
         pass
-    if speed == 0:
+    if index == 0:
         buttonRepeat.action = None
         buttonRepeat.event.clear()
         zCurIndex = -1
