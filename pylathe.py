@@ -2048,8 +2048,8 @@ class JogShuttle():
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, jogShuttle..setX), (32, jogShuttle..setZ),
-                             (64, jogShuttle..setSpindle),
+        self.buttonAction = ((16, jogShuttle.setX), (32, jogShuttle.setZ),
+                             (64, jogShuttle.setSpindle),
                              (128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
@@ -2090,10 +2090,10 @@ class JogShuttle():
             self.lastButton = button
 
     def setZ(self, button, val):
-        jogShuttle..axisAction = jogShuttle..jogZ
+        jogShuttle.axisAction = jogShuttle.jogZ
         maxSpeed = getFloatInfo('zMaxSpeed')
-        for val in range(len(jogShuttle..factor)):
-            jogShuttle..zSpeed[val] = maxSpeed * jogShuttle..factor[val]
+        for val in range(len(jogShuttle.factor)):
+            jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
         print "set z"
         stdout.flush()
         pass
@@ -2113,18 +2113,18 @@ class JogShuttle():
 
     def jogZ(self, code, val):
         global jogShuttle, XSbuttonRepeat
-        print "jog z %d %d" % (val, jogShuttle..zCurIndex)
+        print "jog z %d %d" % (val, jogShuttle.zCurIndex)
         stdout.flush()
         index = abs(val)
-        speed = jogShuttle..zSpeed[index]
+        speed = jogShuttle.zSpeed[index]
         if val < 0:
             speed = -speed
-        if ((jogShuttle..zCurSpeed >= 0 and speed >= 0) or 
-            (jogShuttle..zCurSpeed <= 0 and speed <= 0)):
-            jogShuttle..zCurSpeed = speed
+        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or 
+            (jogShuttle.zCurSpeed <= 0 and speed <= 0)):
+            jogShuttle.zCurSpeed = speed
             try:
-                if index != jogShuttle..zCurIndex:
-                    jogShuttle..zCurIndex = index
+                if index != jogShuttle.zCurIndex:
+                    jogShuttle.zCurIndex = index
                     setParm('Z_JOG_SPEED', speed)
                 command('ZJSPEED')
             except commTimeout:
@@ -2132,7 +2132,7 @@ class JogShuttle():
             if index == 0:
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
-                jogShuttle..zCurIndex = -1
+                jogShuttle.zCurIndex = -1
                 print "jogZ done"
                 stdout.flush()
 
