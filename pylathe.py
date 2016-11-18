@@ -154,9 +154,6 @@ xHomed = False
 done = False
 
 buttonRepeat = None
-zSpeed = [None, None, None, None, None, None, None, None]
-zCurIndex = -1
-zCurSpeed = 0.0
 
 if XILINX:
     cLoc = "../LatheX/include/"
@@ -2032,8 +2029,110 @@ def clrStatus():
 def notHomed():
     setStatus("X Not Homed")
 
+class JogShuttle():
+    def __init__(self):
+        allHids = None
+        if windows:
+            allHids = find_all_hid_devices()
+        if allHids:
+            for index, device in enumerate(allHids):
+                if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
+                    try:
+                        device.open()
+                        device.set_raw_data_handler(self.ShuttleInput)
+                    except:
+                        pass
+                    break
+
+        self.lastOuterRing = 0
+        self.lastKnob = None
+        self.lastButton = 0
+        self.buttonAction = ((16, self.setX), (32, self.setZ),
+                             (64, self.setSpindle),
+                             (128, None), (1, None))
+        self.axisAction = None
+        self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
+        self.zSpeed = [None, None, None, None, None, None, None, None]
+        self.zCurIndex = -1
+        self.zCurSpeed = 0.0
+
+        # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
+
+    def ShuttleInput(self, data):
+        # print data
+        # stdout.flush()
+        outerRing = data[1]
+        if outerRing != self.lastOuterRing:
+            if self.axisAction != None:
+                if outerRing > 128:
+                    outerRing = -(256 - outerRing)
+                # self.axisAction(outerRing)
+                self.btnRpt.action = self.axisAction
+                self.btnRpt.code = 0
+                self.btnRpt.val = outerRing
+                self.btnRpt.event.set()
+            self.lastOuterRing = outerRing
+        knob = data[2]
+        if knob != self.lastKnob:
+            if self.lastKnob != None:
+                pass
+            self.lastKnob = knob
+        button = data[4] | data[5]
+        if button | self.lastButton:
+            changed = button ^ self.lastButton
+            for action in self.buttonAction:
+                (val, function) = action
+                if changed & val:
+                    if function != None:
+                        function(button, val)
+            self.lastButton = button
+
+    def setX(self, button, val):
+        self.axisAction = self.jogX
+        print "set x"
+        stdout.flush()
+        pass
+
+    def setZ(self, button, val):
+        self.axisAction = jogZ
+        maxSpeed = getFloatInfo('zMaxSpeed')
+        for val in range(8):
+            zSpeed[val] = maxSpeed * self.factor[val]
+        print "set z"
+        stdout.flush()
+        pass
+
+    def setSpindle(self, button, val):
+        # self.axisAction = self.jogZ
+        self.axisAction = jogZ
+        print "set spindle"
+        stdout.flush()
+        pass
+
+    def jogX(self, code, val):
+        print "jog x %d" % (val)
+        stdout.flush()
+        # if val < 0:
+        #     speed = -speed
+        # try:
+        #     setParm('X_JOG_SPEED', speed)
+        #     command('XJSPEED')
+        # except commTimeout:
+        #     pass
+
+    def jogSpindle(self, code, val):
+        print "jog spindle %d" % (val)
+        stdout.flush()
+        # rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
+        # if val < 0:
+        #     rpm = -rpm
+        # try:
+        #     setParm('SP_JOG_RPM', rpm)
+        #     command('SPINDLE_JOG_SPEED')
+        # except commTimeout:
+        #     pass
+
 def jogZ(code, val):
-    global zSpeed, zCurIndex, zCurSpeed
     print "jog z %d %d" % (val, zCurIndex)
     stdout.flush()
     index = abs(val)
@@ -2075,14 +2174,6 @@ class JogPanel(wx.Panel):
         self.xEncInch = 0
         self.zEncInvert = 0
         self.xEncInvert = 0
-        self.lastOuterRing = 0
-        self.lastKnob = None
-        self.lastButton = 0
-        self.buttonAction = ((16, self.setX), (32, self.setZ),
-                             (64, self.setSpindle),
-                             (128, None), (1, None))
-        self.axisAction = None
-        self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
 
     def initUI(self):
         global info, emptyCell
@@ -2523,83 +2614,6 @@ class JogPanel(wx.Panel):
     def OnXNegDown(self, e):
         self.xNegButton.SetFocus()
         self.xDown(wx.WXK_UP)
-
-        # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
-
-    def setX(self, button, val):
-        self.axisAction = self.jogX
-        print "set x"
-        stdout.flush()
-        pass
-
-    def setZ(self, button, val):
-        global zSpeed
-        self.axisAction = jogZ
-        maxSpeed = getFloatInfo('zMaxSpeed')
-        for val in range(8):
-            zSpeed[val] = maxSpeed * self.factor[val]
-        print "set z"
-        stdout.flush()
-        pass
-
-    def setSpindle(self, button, val):
-        # self.axisAction = self.jogZ
-        self.axisAction = jogZ
-        print "set spindle"
-        stdout.flush()
-        pass
-
-    def jogX(self, code, val):
-        print "jog x %d" % (val)
-        stdout.flush()
-        # if val < 0:
-        #     speed = -speed
-        # try:
-        #     setParm('X_JOG_SPEED', speed)
-        #     command('XJSPEED')
-        # except commTimeout:
-        #     pass
-
-    def jogSpindle(self, code, val):
-        print "jog spindle %d" % (val)
-        stdout.flush()
-        # rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
-        # if val < 0:
-        #     rpm = -rpm
-        # try:
-        #     setParm('SP_JOG_RPM', rpm)
-        #     command('SPINDLE_JOG_SPEED')
-        # except commTimeout:
-        #     pass
-
-    def ShuttleInput(self, data):
-        # print data
-        # stdout.flush()
-        outerRing = data[1]
-        if outerRing != self.lastOuterRing:
-            if self.axisAction != None:
-                if outerRing > 128:
-                    outerRing = -(256 - outerRing)
-                # self.axisAction(outerRing)
-                self.btnRpt.action = self.axisAction
-                self.btnRpt.code = 0
-                self.btnRpt.val = outerRing
-                self.btnRpt.event.set()
-            self.lastOuterRing = outerRing
-        knob = data[2]
-        if knob != self.lastKnob:
-            if self.lastKnob != None:
-                pass
-            self.lastKnob = knob
-        button = data[4] | data[5]
-        if button | self.lastButton:
-            changed = button ^ self.lastButton
-            for action in self.buttonAction:
-                (val, function) = action
-                if changed & val:
-                    if function != None:
-                        function(button, val)
-            self.lastButton = button
 
     def OnCombo(self, e):
         val = self.combo.GetValue();
@@ -3377,18 +3391,6 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
-        allHids = None
-        if windows:
-            allHids = find_all_hid_devices()
-        if allHids:
-            for index, device in enumerate(allHids):
-                if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
-                    try:
-                        device.open()
-                        device.set_raw_data_handler(jogPanel.ShuttleInput)
-                    except:
-                        pass
-                    break
         openSerial(getInfo('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
