@@ -2059,6 +2059,7 @@ class JogShuttle():
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
     def ShuttleInput(self, data):
+        global buttonRepeat
         # print data
         # stdout.flush()
         outerRing = data[1]
@@ -2067,10 +2068,10 @@ class JogShuttle():
                 if outerRing > 128:
                     outerRing = -(256 - outerRing)
                 # self.axisAction(outerRing)
-                self.btnRpt.action = self.axisAction
-                self.btnRpt.code = 0
-                self.btnRpt.val = outerRing
-                self.btnRpt.event.set()
+                buttonRepeat.action = self.axisAction
+                buttonRepeat.code = 0
+                buttonRepeat.val = outerRing
+                buttonRepeat.event.set()
             self.lastOuterRing = outerRing
         knob = data[2]
         if knob != self.lastKnob:
@@ -2087,18 +2088,18 @@ class JogShuttle():
                         function(button, val)
             self.lastButton = button
 
-    def setX(self, button, val):
-        self.axisAction = self.jogX
-        print "set x"
+    def setZ(self, button, val):
+        self.axisAction = self.jogZ
+        maxSpeed = getFloatInfo('zMaxSpeed')
+        for val in range(len(self.factor)):
+            self.zSpeed[val] = maxSpeed * self.factor[val]
+        print "set z"
         stdout.flush()
         pass
 
-    def setZ(self, button, val):
-        self.axisAction = jogZ
-        maxSpeed = getFloatInfo('zMaxSpeed')
-        for val in range(8):
-            zSpeed[val] = maxSpeed * self.factor[val]
-        print "set z"
+    def setX(self, button, val):
+        self.axisAction = self.jogX
+        print "set x"
         stdout.flush()
         pass
 
@@ -2108,6 +2109,31 @@ class JogShuttle():
         print "set spindle"
         stdout.flush()
         pass
+
+    def jogZ(code, val):
+        global buttonRepeat
+        print "jog z %d %d" % (val, self.zCurIndex)
+        stdout.flush()
+        index = abs(val)
+        speed = self.zSpeed[index]
+        if val < 0:
+            speed = -speed
+        if ((self.zCurSpeed >= 0 and speed >= 0) or 
+            (self.zCurSpeed <= 0 and speed <= 0)):
+            self.zCurSpeed = speed
+            try:
+                if index != self.zCurIndex:
+                    self.zCurIndex = index
+                    setParm('Z_JOG_SPEED', speed)
+                command('ZJSPEED')
+            except commTimeout:
+                pass
+            if index == 0:
+                buttonRepeat.action = None
+                buttonRepeat.event.clear()
+                self.zCurIndex = -1
+                print "jogZ done"
+                stdout.flush()
 
     def jogX(self, code, val):
         print "jog x %d" % (val)
@@ -2131,29 +2157,6 @@ class JogShuttle():
         #     command('SPINDLE_JOG_SPEED')
         # except commTimeout:
         #     pass
-
-def jogZ(code, val):
-    print "jog z %d %d" % (val, zCurIndex)
-    stdout.flush()
-    index = abs(val)
-    speed = zSpeed[index]
-    if val < 0:
-        speed = -speed
-    if (zCurSpeed >= 0 and speed >= 0) or (zCurSpeed <= 0 and speed <= 0):
-        zCurSpeed = speed
-        try:
-            if index != zCurIndex:
-                zCurIndex = index
-                setParm('Z_JOG_SPEED', speed)
-            command('ZJSPEED')
-        except commTimeout:
-            pass
-        if index == 0:
-            buttonRepeat.action = None
-            buttonRepeat.event.clear()
-            zCurIndex = -1
-            print "jogZ done"
-            stdout.flush()
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
