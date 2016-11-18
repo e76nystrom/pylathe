@@ -3394,7 +3394,7 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
-        self.jogShuttle = jogShuttle()
+        self.jogShuttle = JogShuttle()
         openSerial(getInfo('commPort'), 57600)
         global cmds, parms
         comm.cmds = cmds
