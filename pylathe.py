@@ -125,7 +125,7 @@ from interface import cmdList, parmList, stateList, regList
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
     from comm import setXReg, getXReg, dspXReg
-    from interfaceX import xilinxList, xilinxBitList
+    from interface import xilinxList, xilinxBitList
 
 if SWIG:
     import lathe
@@ -156,10 +156,7 @@ jogShuttle = None
 
 buttonRepeat = None
 
-if XILINX:
-    cLoc = "../LatheX/include/"
-else:
-    cLoc = "../Lathe/include/"
+cLoc = "../Lathe/include/"
 
 fData = False
 createCommands(cmdList, cLoc, fData)
