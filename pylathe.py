@@ -2048,8 +2048,8 @@ class JogShuttle():
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, jogShuttle.setX), (32, jogShuttle.setZ),
-                             (64, jogShuttle.setSpindle),
+        self.buttonAction = ((16, self.setX), (32, self.setZ),
+                             (64, self.setSpindle),
                              (128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
