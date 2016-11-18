@@ -2060,34 +2060,34 @@ class JogShuttle():
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
     def ShuttleInput(self, data):
-        global buttonRepeat
+        global jogShuttle, buttonRepeat
         # print data
         # stdout.flush()
         outerRing = data[1]
-        if outerRing != self.lastOuterRing:
-            if self.axisAction != None:
+        if outerRing != jogShuttle.lastOuterRing:
+            if jogShuttle.axisAction != None:
                 if outerRing > 128:
                     outerRing = -(256 - outerRing)
-                # self.axisAction(outerRing)
-                buttonRepeat.action = self.axisAction
+                # jogShuttle.axisAction(outerRing)
+                buttonRepeat.action = jogShuttle.axisAction
                 buttonRepeat.code = 0
                 buttonRepeat.val = outerRing
                 buttonRepeat.event.set()
-            self.lastOuterRing = outerRing
+            jogShuttle.lastOuterRing = outerRing
         knob = data[2]
-        if knob != self.lastKnob:
-            if self.lastKnob != None:
+        if knob != jogShuttle.lastKnob:
+            if jogShuttle.lastKnob != None:
                 pass
-            self.lastKnob = knob
+            jogShuttle.lastKnob = knob
         button = data[4] | data[5]
-        if button | self.lastButton:
-            changed = button ^ self.lastButton
-            for action in self.buttonAction:
+        if button | jogShuttle.lastButton:
+            changed = button ^ jogShuttle.lastButton
+            for action in jogShuttle.buttonAction:
                 (val, function) = action
                 if changed & val:
                     if function != None:
                         function(button, val)
-            self.lastButton = button
+            jogShuttle.lastButton = button
 
     def setZ(self, button, val):
         jogShuttle.axisAction = jogShuttle.jogZ
