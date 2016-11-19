@@ -309,12 +309,6 @@ regList =\
 
     "z move command bits",
     
-    ["ZMSK", "(7 << 0)", "z move mask"],
-    ["ZMOV", "(1 << 0)", "z a set distance"],
-    ["ZJOG", "(2 << 0)", "z while cmd are present"],
-    ["ZSYN", "(3 << 0)", "z dist sync to rotation"],
-    ["ZMAX", "(4 << 0)", "z rapid move"],
-    ["ZSPEED", "(5 << 0)", "z jog at speed"],
     ["Z_SYN_START", "(1 << 4)", "start on sync pulse"],
     ["X_SYN_TAPER", "(1 << 5)", "taper on x"],
     
@@ -325,12 +319,6 @@ regList =\
     
     "x move command bits",
     
-    ["XMSK", "(7 << 0)", "xmove mask"],
-    ["XMOV", "(1 << 0)", "x a set distance"],
-    ["XJOG", "(2 << 0)", "x while cmd are present"],
-    ["XSYN", "(3 << 0)", "x dist sync to rotation"],
-    ["XMAX", "(4 << 0)", "x rapid move"],
-    ["XSPEED", "(5 << 0)", "z jog at speed"],
     ["XJOGSLOW", "(6 << 0)", "slow jog for finding home"],
     ["X_SYN_START", "(1 << 4)", "start on sync pulse"],
     ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
