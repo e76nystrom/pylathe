@@ -298,6 +298,15 @@ parmList = \
     
 regList =\
 [\
+    "common move command bits",
+    
+    ["CMD_MSK", "(7 << 0)", "move mask"],
+    ["CMD_MOV", "(1 << 0)", "move a set distance"],
+    ["CMD_JOG", "(2 << 0)", "move while cmd are present"],
+    ["CMD_SYN", "(3 << 0)", "move dist synchronized to rotation"],
+    ["CMD_MAX", "(4 << 0)", "rapid move"],
+    ["CMD_SPEED", "(5 << 0)", "jog at speed"],
+
     "z move command bits",
     
     ["ZMSK", "(7 << 0)", "z move mask"],
