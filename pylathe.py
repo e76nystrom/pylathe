@@ -330,11 +330,11 @@ def quePause():
 def saveDiameter(val):
     queMove('SAVE_DIAMETER', val)
 
-def moveZ(zLoc, flag=ZMAX):
+def moveZ(zLoc, flag=CMD_MAX):
     queMoveF('MOVE_Z', flag, zLoc)
     print("moveZ  %7.4f" % (zLoc))
 
-def moveX(xLoc, flag=XMAX):
+def moveX(xLoc, flag=CMD_MAX):
     queMoveF('MOVE_X', flag, xLoc)
     print("moveX  %7.4f" % (xLoc))
 
