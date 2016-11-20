@@ -2110,8 +2110,8 @@ class JogShuttle():
 
     def jogZ(self, code, val):
         global jogShuttle, XSbuttonRepeat
-        print "jog z %d %d" % (val, jogShuttle.zCurIndex)
-        stdout.flush()
+        # print "jog z %d %d" % (val, jogShuttle.zCurIndex)
+        # stdout.flush()
         index = abs(val)
         speed = jogShuttle.zSpeed[index]
         if val < 0:
