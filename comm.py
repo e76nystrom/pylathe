@@ -30,7 +30,7 @@ class commTimeout(Exception):
     pass
 
 def command(cmd):
-    global SWIG, ser, cmds, commLock, timeout, xDbgPrint, parmList
+    global SWIG, ser, cmds, commLock, timeout, xDbgPrint, parmList, lastCmd
     if len(parmList) > 0:
         sendMulti()
     (cmdVal, action) = cmds[cmd]
