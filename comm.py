@@ -12,6 +12,7 @@ xRegs = None
 xDbgPrint = True
 SWIG = False
 importLathe = True
+lastCmd = ''
 
 cmdOverhead = 8
 parmList = []
@@ -44,8 +45,10 @@ def command(cmd):
     # cmdStr = '\x01%x ' % (cmdVal)
     cmdStr = '\x01%x \r' % (cmdVal)
     if xDbgPrint:
-        print("%-15s %s" % (cmd, cmdStr.strip()))
-        stdout.flush()
+        if cmd != lastCmd:
+            lastCmd = cmd
+            print("%-15s %s" % (cmd, cmdStr.strip()))
+            stdout.flush()
     if ser is None:
         return(None);
     commLock.acquire(True)
