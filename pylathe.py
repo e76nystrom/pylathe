@@ -716,7 +716,7 @@ class Turn(UpdatePass):
                (self.passCount, feed, self.curX, self.curX * 2.0))
 
     def turnPass(self):
-        moveX(self.curX, XJOG)
+        moveX(self.curX, CMD_JOG)
         saveDiameter(self.curX * 2.0)
         if self.turnPanel.pause.GetValue():
             print("pause")
@@ -929,7 +929,7 @@ class Face(UpdatePass):
                (self.passCount, feed, self.curZ))
 
     def facePass(self):
-        moveZ(self.curZ, XJOG)
+        moveZ(self.curZ, CMD_JOG)
         if self.facePanel.pause.GetValue():
             print("pause")
             quePause()
@@ -1407,9 +1407,9 @@ class Taper(UpdatePass):
                 2.0 * self.startX, 2.0 * self.endX))
 
     def internalPass(self):
-        moveX(self.startX + 0.002, XJOG)
-        moveX(self.startX, XJOG)
-        moveZ(self.startZ, XJOG)
+        moveX(self.startX + 0.002, CMD_JOG)
+        moveX(self.startX, CMD_JOG)
+        moveZ(self.startZ, CMD_JOG)
         if self.taperPanel.pause.GetValue():
             print("pause")
             quePause()
@@ -1820,7 +1820,7 @@ class ScrewThread(UpdatePass):
         self.curX = self.xStart - feed
 
     def threadPass(self):
-        moveX(self.curX, XJOG)
+        moveX(self.curX, CMD_JOG)
         if self.threadPanel.pause.GetValue():
             print("pause")
             quePause()
@@ -2521,7 +2521,7 @@ class JogPanel(wx.Panel):
                 print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    setParm('Z_FLAG', ZJOG)
+                    setParm('Z_FLAG', CMD_JOG)
                     setParm('Z_MOVE_DIST', val)
                     command('ZMOVEREL')
                 except commTimeout as e:
@@ -2601,7 +2601,7 @@ class JogPanel(wx.Panel):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    setParm('X_FLAG', XJOG)
+                    setParm('X_FLAG', CMD_JOG)
                     setParm('X_MOVE_DIST', val)
                     command('XMOVEREL')
                 except commTimeout as e:
