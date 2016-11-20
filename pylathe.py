@@ -2053,6 +2053,9 @@ class JogShuttle():
         self.zSpeed = [None, None, None, None, None, None, None, None]
         self.zCurIndex = -1
         self.zCurSpeed = 0.0
+        self.xSpeed = [None, None, None, None, None, None, None, None]
+        self.xCurIndex = -1
+        self.xCurSpeed = 0.0
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
@@ -2096,7 +2099,10 @@ class JogShuttle():
         pass
 
     def setX(self, button, val):
-        self.axisAction = self.jogX
+        jogShuttle.axisAction = jogShuttle.jogX
+        maxSpeed = getFloatInfo('xMaxSpeed')
+        for val in range(len(jogShuttle.factor)):
+            jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
         print "set x"
         stdout.flush()
         pass
@@ -2136,13 +2142,26 @@ class JogShuttle():
     def jogX(self, code, val):
         print "jog x %d" % (val)
         stdout.flush()
-        # if val < 0:
-        #     speed = -speed
-        # try:
-        #     setParm('X_JOG_SPEED', speed)
-        #     command('XJSPEED')
-        # except commTimeout:
-        #     pass
+        index = abs(val)
+        speed = jogShuttle.xSpeed[index]
+        if val < 0:
+            speed = -speed
+        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or 
+            (jogShuttle.xCurSpeed <= 0 and speed <= 0)):
+            jogShuttle.xCurSpeed = speed
+            try:
+                if index != jogShuttle.xCurIndex:
+                    jogShuttle.xCurIndex = index
+                    setParm('X_JOG_SPEED', speed)
+                command('XJSPEED')
+            except commTimeout:
+                pass
+            if index == 0:
+                buttonRepeat.action = None
+                buttonRepeat.event.clear()
+                jogShuttle.xCurIndex = -1
+                print "jogX done"
+                stdout.flush()
 
     def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
