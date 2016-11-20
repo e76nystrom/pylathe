@@ -2050,9 +2050,11 @@ class JogShuttle():
                              (128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
+
         self.zSpeed = [None, None, None, None, None, None, None, None]
         self.zCurIndex = -1
         self.zCurSpeed = 0.0
+
         self.xSpeed = [None, None, None, None, None, None, None, None]
         self.xCurIndex = -1
         self.xCurSpeed = 0.0
@@ -2090,22 +2092,22 @@ class JogShuttle():
             jogShuttle.lastButton = button
 
     def setZ(self, button, val):
-        jogShuttle.axisAction = jogShuttle.jogZ
-        maxSpeed = getFloatInfo('zMaxSpeed')
-        for val in range(len(jogShuttle.factor)):
-            jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
-        print "set z"
-        stdout.flush()
-        pass
+        if button & val:
+            jogShuttle.axisAction = jogShuttle.jogZ
+            maxSpeed = getFloatInfo('zMaxSpeed')
+            for val in range(len(jogShuttle.factor)):
+                jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
+            # print "set z"
+            # stdout.flush()
 
     def setX(self, button, val):
-        jogShuttle.axisAction = jogShuttle.jogX
-        maxSpeed = getFloatInfo('xMaxSpeed')
-        for val in range(len(jogShuttle.factor)):
-            jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
-        print "set x"
-        stdout.flush()
-        pass
+        if button & val:
+            jogShuttle.axisAction = jogShuttle.jogX
+            maxSpeed = getFloatInfo('xMaxSpeed')
+            for val in range(len(jogShuttle.factor)):
+                jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
+            # print "set x"
+            # stdout.flush()
 
     def setSpindle(self, button, val):
         # self.axisAction = self.jogZ
@@ -2115,7 +2117,7 @@ class JogShuttle():
         pass
 
     def jogZ(self, code, val):
-        global jogShuttle, XSbuttonRepeat
+        global jogShuttle, buttonRepeat
         # print "jog z %d %d" % (val, jogShuttle.zCurIndex)
         # stdout.flush()
         index = abs(val)
@@ -2136,12 +2138,13 @@ class JogShuttle():
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
                 jogShuttle.zCurIndex = -1
-                print "jogZ done"
-                stdout.flush()
+                # print "jogZ done"
+                # stdout.flush()
 
     def jogX(self, code, val):
-        print "jog x %d" % (val)
-        stdout.flush()
+        global jogShuttle, buttonRepeat
+        # print "jog x %d" % (val)
+        # stdout.flush()
         index = abs(val)
         speed = jogShuttle.xSpeed[index]
         if val < 0:
@@ -2160,8 +2163,8 @@ class JogShuttle():
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
                 jogShuttle.xCurIndex = -1
-                print "jogX done"
-                stdout.flush()
+                # print "jogX done"
+                # stdout.flush()
 
     def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
