@@ -32,14 +32,6 @@ cmdList = \
     ["SPINDLE_JOG_SPEED", "", "spindle jog at speed"],
     ["SPINDLE_STOP", "spindleStop", "stop spindle"],
     
-    "start operations",
-    
-    ["CMD_TURN", "", "start turn operation"],
-    ["CMD_FACE", "", "start face operation"],
-    ["CMD_TAPER", "", "start taper operation"],
-    ["CMD_ARC", "", "start arc operation"],
-    ["CMD_THREAD", "", "start threading operation"],
-    
     "end operations",
     
     ["CMD_PAUSE", "pauseCmd", "pause current operation"],
