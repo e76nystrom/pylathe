@@ -2059,6 +2059,10 @@ class JogShuttle():
         self.xCurIndex = -1
         self.xCurSpeed = 0.0
 
+        self.spindleSpeed = [None, None, None, None, None, None, None, None]
+        self.spindleCurIndex = -1
+        self.spindleCurSpeed = 0.0
+
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
     def ShuttleInput(self, data):
@@ -2110,11 +2114,13 @@ class JogShuttle():
             # stdout.flush()
 
     def setSpindle(self, button, val):
-        # self.axisAction = self.jogZ
-        self.axisAction = jogZ
-        print "set spindle"
-        stdout.flush()
-        pass
+        if button & val:
+            jogShuttle.axisAction = jogShuttle.jogSpindle
+            maxSpeed = getFloatInfo('spMaxRPM')
+            for val in range(len(jogShuttle.factor)):
+                jogShuttle.spindleSpeed[val] = maxSpeed * jogShuttle.factor[val]
+            print "set spindle"
+            stdout.flush()
 
     def jogZ(self, code, val):
         global jogShuttle, buttonRepeat
@@ -2169,14 +2175,29 @@ class JogShuttle():
     def jogSpindle(self, code, val):
         print "jog spindle %d" % (val)
         stdout.flush()
-        # rpm = getFloatInfo('spMaxSpeed') * self.factor[abs(val)]
-        # if val < 0:
-        #     rpm = -rpm
-        # try:
-        #     setParm('SP_JOG_RPM', rpm)
-        #     command('SPINDLE_JOG_SPEED')
-        # except commTimeout:
-        #     pass
+        global jogShuttle, buttonRepeat
+        # print "jog spindle %d %d" % (val, jogShuttle.spindleCurIndex)
+        # stdout.flush()
+        index = abs(val)
+        speed = jogShuttle.spindleSpeed[index]
+        if val < 0:
+            speed = -speed
+        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or 
+            (jogShuttle.spindleCurSpeed <= 0 and speed <= 0)):
+            jogShuttle.spindleCurSpeed = speed
+            try:
+                if index != jogShuttle.spindleCurIndex:
+                    jogShuttle.spindleCurIndex = index
+                    setParm('SPINDLE_JOG_RPM', speed)
+                command('SPINDLE_JOG_SPEED')
+            except commTimeout:
+                pass
+            if index == 0:
+                buttonRepeat.action = None
+                buttonRepeat.event.clear()
+                jogShuttle.spindleCurIndex = -1
+                # print "jogSPINDLE done"
+                # stdout.flush()
 
 class JogPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
