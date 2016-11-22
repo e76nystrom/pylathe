@@ -2524,8 +2524,8 @@ class JogPanel(wx.Panel):
                     print("zJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        setParm('Z_JOG_MAX', getInfo('zJogMax'))
-                        setParm('Z_JOG_DIR', dir)
+                        queParm('Z_JOG_MAX', getInfo('zJogMax'))
+                        queParm('Z_JOG_DIR', dir)
                         command("ZJMOV")
                     except commTimeout as e:
                         pass
@@ -2542,8 +2542,8 @@ class JogPanel(wx.Panel):
                 print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    setParm('Z_FLAG', CMD_JOG)
-                    setParm('Z_MOVE_DIST', val)
+                    queParm('Z_FLAG', CMD_JOG)
+                    queParm('Z_MOVE_DIST', val)
                     command('ZMOVEREL')
                 except commTimeout as e:
                     pass
@@ -2604,8 +2604,8 @@ class JogPanel(wx.Panel):
                     print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        setParm('X_JOG_MAX', getInfo('xJogMax'))
-                        setParm('X_JOG_DIR', dir)
+                        queParm('X_JOG_MAX', getInfo('xJogMax'))
+                        queParm('X_JOG_DIR', dir)
                         command("XJMOV")
                     except commTimeout as e:
                         pass
@@ -2622,8 +2622,8 @@ class JogPanel(wx.Panel):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    setParm('X_FLAG', CMD_JOG)
-                    setParm('X_MOVE_DIST', val)
+                    queParm('X_FLAG', CMD_JOG)
+                    queParm('X_MOVE_DIST', val)
                     command('XMOVEREL')
                 except commTimeout as e:
                     pass
@@ -2668,8 +2668,9 @@ class JogPanel(wx.Panel):
                 val = 0.020
         except ValueError:
             val = 0.001
-        setParm('Z_MPG_INC', val * self.zStepsInch)
-        setParm('X_MPG_INC', val * self.xStepsInch)
+        queParm('Z_MPG_INC', val * self.zStepsInch)
+        queParm('X_MPG_INC', val * self.xStepsInch)
+        sendMulti()
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
@@ -2963,11 +2964,11 @@ class PosMenu(wx.Menu):
         jogPanel.focus()
 
     def OnHomeX(self, e):
-        setParm('X_HOME_DIST', getInfo('xHomeDist'))
-        setParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
-        setParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
+        queParm('X_HOME_DIST', getInfo('xHomeDist'))
+        queParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
+        queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
         val = (-1, 1)[info['xHomeDir'].GetValue()]
-        setParm('X_HOME_DIR', val)
+        queParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
         jogPanel.xHome = True
         jogPanel.focus()
@@ -3484,6 +3485,7 @@ class MainFrame(wx.Frame):
                 val = (-1, 1)[getBoolInfo('xInvEnc')]
                 queParm('X_ENC_DIR', val)
                 sendMulti()
+                sendSpindleData()
             except commTimeout:
                 print "comm timeout on setup"
                 setStatus("comm timeout on setup")
