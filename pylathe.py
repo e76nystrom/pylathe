@@ -2188,7 +2188,7 @@ class JogShuttle():
             try:
                 if index != jogShuttle.spindleCurIndex:
                     jogShuttle.spindleCurIndex = index
-                    setParm('SPINDLE_JOG_RPM', speed)
+                    setParm('SP_JOG_RPM', speed)
                 command('SPINDLE_JOG_SPEED')
             except commTimeout:
                 pass
