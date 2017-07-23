@@ -1,4 +1,5 @@
 #!/cygdrive/c/Python27/Python.exe
+#!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 #!/usr/bin/python
 ################################################################################
 import wx
@@ -11,6 +12,8 @@ from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
 from Queue import Queue, Empty
 from platform import system
+from dxfwrite import DXFEngine as dxf
+import re
 windows = system() == 'Windows'
 if windows:
     from pywinusb.hid import find_all_hid_devices
@@ -35,12 +38,12 @@ def setInfo(field, val):
 def saveInfo(file):
     global info
     f = open(file, 'w')
-    keyList = info.keys()
-    keyList.sort()
-    for key in keyList:
+    # keyList = info.keys()
+    # keyList.sort()
+    for key in sorted(info.keys()):
         val = info[key]
         valClass = val.__class__.__name__
-        # print key, valClass
+        # print(key, valClass)
         # stdout.flush()
         if valClass == 'TextCtrl':
             f.write("%s=%s\n" % (key, val.GetValue()))
@@ -68,7 +71,7 @@ def readInfo(file):
             if key in info:
                 func = info[key]
                 funcClass = func.__class__.__name__
-                # print key, val, funcClass
+                # print(key, val, funcClass)
                 if funcClass == 'TextCtrl':
                     func.SetValue(val)
                 elif funcClass == 'RadioButton':
@@ -80,14 +83,14 @@ def readInfo(file):
                 elif funcClass == 'ComboBox':
                     func.SetValue(val)
             else:
-                # print key, val
+                # print(key, val)
                 func = InfoValue(val)
                 info[key] = func
             # stdout.flush()
         f.close()
-    except Exception, e:
-        print line, "readInfo error"
-        print e
+    except Exception as e:
+        print(line, "readInfo error")
+        print(e)
         stdout.flush()
 
 configFile = "config.txt"
@@ -100,7 +103,7 @@ def getInitialInfo(key):
         tmp = info[key]
         return(tmp.GetValue() == 'True')
     except KeyError:
-        print 'no config for %s' % key
+        print('no config for %s' % key)
         stdout.flush()
         return(False)
 
@@ -131,8 +134,8 @@ if SWIG:
     import lathe
     from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
 
-print sys.version
-print wx.version()
+print(sys.version)
+print(wx.version())
 stdout.flush()
 
 hdrFont = None
@@ -153,6 +156,7 @@ xEncPosition = 0.0
 xHomed = False
 done = False
 jogShuttle = None
+moveCommands = None
 
 buttonRepeat = None
 
@@ -282,93 +286,200 @@ def getIntVal(tc):
 
 moveQue = Queue()
 
-def queMove(opString, val):
-    op = eval(opString)
-    moveQue.put((opString, op, val))
+AL_LEFT   = 0x001
+AL_RIGHT  = 0x002
+AL_CENTER = 0x004
+ABOVE     = 0x008
+BELOW     = 0x010
+MIDDLE    = 0x020
+LEFT      = 0x040
+RIGHT     = 0x080
+CENTER    = 0x100
 
-def queMoveF(opString, flag, val):
-    op = eval(opString) | (flag << 8)
-    moveQue.put((opString, op, val))
+class MoveCommands():
+    def __init__(self):
+        self.d = None
+        self.lastX = 0.0
+        self.lastZ = 0.0
+        self.passNum = 0
+        self.send = False
+        self.textH = 0.005
+        self.vS = self.textH / 2
+        self.hS = self.textH
+        self.angle = 0.0
 
-def queClear():
-    while not moveQue.empty():
-        moveQue.get()
+    def draw(self, type, diam, parm):
+        tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
+        tmp = tmp.replace("." , "-")
+        tmp = re.sub("-0$", "", tmp) + ".dxf"
+        d = dxf.drawing(tmp)
+        d.add_layer(TEXT, color=0)
+        d.add_layer(REF, color=1)
+        self.angle = 0.0
+        self.d = d
 
-def queZSetup(feed):
-    queMove('Z_FEED_SETUP', feed)
-    saveZOffset();
-    saveXOffset();
+    def setAlign(self, angle):
+        self.angle = angle
 
-def queXSetup(feed):
-    queMove('X_FEED_SETUP', feed)
-    saveZOffset();
-    saveXOffset();
+    def setLoc(self, z, x):
+        if self.d != None:
+            self.lastX = x
+            self.lastZ = z
 
-def startSpindle(rpm):
-    queMove('START_SPINDLE', rpm)
-    saveZOffset();
-    saveXOffset();
+    def drawLineX(self, x, layer=0):
+        if self.d != None:
+            self.d.add(dxf.line((self.lastZ, self.lastX), \
+                                (self.lastZ, x), layer=layer))
+            self.lastX = x
 
-def stopSpindle():
-    queMove('STOP_SPINDLE', 0)
+    def drawLineZ(self, z, layer=0):
+        if self.d != None:
+            self.d.add(dxf.line((self.lastZ, self.lastX), \
+                                (z, self.lastX), layer=layer))
+            self.lastZ = z
 
-def queFeedType(feedType):
-    queMove('SAVE_FEED_TYPE', feedType)
+    def drawLine(self, x, z, layer=0):
+        if self.d != None:
+            self.d.add(dxf.line((self.lastZ, self.lastX), \
+                                (self.lastZ, self.lastX), layer=layer))
+            self.lastX = x
+            self.lastZ = z
+            
+    def text(self, text, p0, align=None, layer='TEXT'):
+        if self.d != None:
+            (x, y) = p0
+            hOffset = self.hS
+            vOffset = -self.textH / 2
+            if align != None:
+                textW = len(text) * self.textH * .75
+                if align & RIGHT:
+                    hOffset = -textW
+                elif align & CENTER:
+                    hOffset = -textW / 2
+                elif align & LEFT:
+                    hOffset = self.hS
 
-def zSynSetup(feed):
-    queMove('Z_SYN_SETUP', feed)
+                if align & ABOVE:
+                    vOffset = self.vS
+                elif align & BELOW:
+                    vOffset = -self.textH - self.vS
+                elif align & MIDDLE:
+                    vOffset = -self.textH / 2
 
-def xSynSetup(feed):
-    queMove('X_SYN_SETUP', feed)
+            if self.angle != 0.0:
+                (vOffset, hOffset) = (hOffset, vOffset)
+            self.d.add(dxf.text(text, (x + hOffset, y + vOffset), \
+                                height=self.textH, rotation=self.angle, \
+                                layer=layer))
+    def drawClose(self):
+        if self.d != None:
+            try:
+                if self.d != None:
+                    self.d.save()
+                    self.d = None
+            except:
+                print("dxf file save error")
 
-def nextPass(passNum):
-    queMove('PASS_NUM', passNum)
+    def queMove(self, opString, val):
+        if self.send:
+            op = eval(opString)
+            moveQue.put((opString, op, val))
 
-def quePause():
-    queMove('QUE_PAUSE', 0)
+    def queMoveF(self, opString, flag, val):
+        if self.send:
+            op = eval(opString) | (flag << 8)
+            moveQue.put((opString, op, val))
 
-def saveDiameter(val):
-    queMove('SAVE_DIAMETER', val)
+    def queClear(self):
+        while not moveQue.empty():
+            moveQue.get()
 
-def moveZ(zLoc, flag=CMD_MAX):
-    queMoveF('MOVE_Z', flag, zLoc)
-    print("moveZ  %7.4f" % (zLoc))
+    def queZSetup(self, feed):
+        self.queMove('Z_FEED_SETUP', feed)
+        self.saveZOffset();
+        self.saveXOffset();
 
-def moveX(xLoc, flag=CMD_MAX):
-    queMoveF('MOVE_X', flag, xLoc)
-    print("moveX  %7.4f" % (xLoc))
+    def queXSetup(self, feed):
+        self.queMove('X_FEED_SETUP', feed)
+        self.saveZOffset();
+        self.saveXOffset();
 
-def saveZOffset():
-    global zHomeOffset
-    queMove('SAVE_Z_OFFSET', zHomeOffset)
-    print("saveZOffset  %7.4f" % (zHomeOffset))
+    def startSpindle(self, rpm):
+        self.queMove('START_SPINDLE', rpm)
+        self.saveZOffset();
+        self.saveXOffset();
 
-def saveXOffset():
-    global xHomeOffset
-    queMove('SAVE_X_OFFSET', xHomeOffset)
-    print("savexOffset  %7.4f" % (xHomeOffset))
+    def stopSpindle(self):
+        self.queMove('STOP_SPINDLE', 0)
 
-def moveXZ(zLoc, xLoc):
-    queMove('SAVE_Z', zLoc)
-    queMove('MOVE_XZ', xLoc)
-    print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
+    def queFeedType(self, feedType):
+        self.queMove('SAVE_FEED_TYPE', feedType)
 
-def moveZX(zLoc, xLoc):
-    queMove('SAVE_X', xLoc)
-    queMove('MOVE_ZX', zLoc)
-    print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
+    def zSynSetup(self, feed):
+        self.queMove('Z_SYN_SETUP', feed)
 
-def saveTaper(taper):
-    queMove('SAVE_TAPER', taper)
-    print("saveTaper %7.4f" % (taper))
+    def xSynSetup(self, feed):
+        self.queMove('X_SYN_SETUP', feed)
 
-def taperZX(zLoc, taper):
-    queMoveF('TAPER_ZX', 1, zLoc)
-    print("taperZX %7.4f" % (zLoc))
+    def nextPass(self, passNum):
+        self.passNum = passNum
+        self.queMove('PASS_NUM', passNum)
 
-def taperXZ(xLoc, taper):
-    queMove('TAPER_XZ', 1, xLoc)
-    print("taperZX %7.4f" % (xLoc))
+    def quePause(self):
+        self.queMove('QUE_PAUSE', 0)
+
+    def saveDiameter(self, val):
+        self.queMove('SAVE_DIAMETER', val)
+
+    def moveZ(self, zLoc, flag=CMD_MAX):
+        self.queMoveF('MOVE_Z', flag, zLoc)
+        self.drawLineZ(zLoc)
+        print("moveZ  %7.4f" % (zLoc))
+
+    def moveX(self, xLoc, flag=CMD_MAX):
+        self.queMoveF('MOVE_X', flag, xLoc)
+        self.drawLineX(xLoc)
+        print("moveX  %7.4f" % (xLoc))
+
+    def saveZOffset(self):
+        global zHomeOffset
+        self.queMove('SAVE_Z_OFFSET', zHomeOffset)
+        print("saveZOffset  %7.4f" % (zHomeOffset))
+
+    def saveXOffset(self):
+        global xHomeOffset
+        self.queMove('SAVE_X_OFFSET', xHomeOffset)
+        print("savexOffset  %7.4f" % (xHomeOffset))
+
+    def moveXZ(self, zLoc, xLoc):
+        self.queMove('SAVE_Z', zLoc)
+        self.queMove('MOVE_XZ', xLoc)
+        print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
+
+    def moveZX(self, zLoc, xLoc):
+        self.queMove('SAVE_X', xLoc)
+        self.queMove('MOVE_ZX', zLoc)
+        print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
+
+    def saveTaper(self, taper):
+        self.queMove('SAVE_TAPER', taper)
+        print("saveTaper %7.4f" % (taper))
+
+    def saveRunout(self, runout):
+        self.queMove('SAVE_RUNOUT', runout)
+        print("saveRunout %7.4f" % (runout))
+
+    def saveDepth(self, depth):
+        self.queMove('SAVE_DEPTH', depth)
+        print("saveDepth %7.4f" % (depth))
+
+    def taperZX(self, zLoc):
+        self.queMoveF('TAPER_ZX', 1, zLoc)
+        print("taperZX %7.4f" % (zLoc))
+
+    def taperXZ(self, xLoc):
+        self.queMove('TAPER_XZ', 1, xLoc)
+        print("taperXZ %7.4f" % (xLoc))
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
@@ -605,10 +716,10 @@ class UpdatePass():
                     self.springFlag = True
             if self.springFlag:
                 print("spring")
-                nextPass(0x100 | self.passCount)
+                moveCommands.nextPass(0x100 | self.passCount)
             else:
                 print("pass %d" % (self.passCount))
-                nextPass(self.passCount)
+                moveCommands.nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
                 self.passCount += 1
             self.genPass()
@@ -618,7 +729,7 @@ class UpdatePass():
                 self.spring += 1
             if self.spring < self.sPasses:
                 self.spring += 1
-                nextPass(0x200 | self.spring)
+                moveCommands.nextPass(0x200 | self.spring)
                 print("spring %d" % (self.spring))
                 self.genPass()
             else:
@@ -629,11 +740,14 @@ class Turn(UpdatePass):
     def __init__(self, turnPanel):
         UpdatePass.__init__(self)
         self.turnPanel = turnPanel
+        global moveCommands
+        self.m = moveCommands
 
     def getTurnParameters(self):
         tu = self.turnPanel
         self.zStart = getFloatVal(tu.zStart)
         self.zEnd = getFloatVal(tu.zEnd)
+        self.zRetract = getFloatVal(tu.zRetract)
 
         self.xStart = getFloatVal(tu.xStart) / 2.0
         self.xEnd = getFloatVal(tu.xEnd) / 2.0
@@ -665,8 +779,8 @@ class Turn(UpdatePass):
         self.setupAction(self.calculateTurnPass, self.turnPass)
 
         self.turnPanel.passes.SetValue("%d" % (self.passes))
-        print ("xCut %5.3f passes %d internal %s" %
-               (self.xCut, self.passes, self.internal))
+        print("xCut %5.3f passes %d internal %s" %
+              (self.xCut, self.passes, self.internal))
 
         if self.internal:
             if not self.neg:
@@ -676,27 +790,46 @@ class Turn(UpdatePass):
                 self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
+        self.safeZ = self.zStart + self.zRetract
 
+        if True:
+            self.m.draw("turn", self.zStart, self.zEnd)
+            
         self.turnSetup()
 
         while self.updatePass():
             pass
 
-        moveX(self.xStart + self.xRetract)
+        self.m.moveX(self.xStart + self.xRetract)
         if STEPPER_DRIVE:
-            stopSpindle();
+            self.m.stopSpindle();
+        self.m.drawClose()
         stdout.flush()
 
     def turnSetup(self):
-        quePause()
+        m = self.m
+        m.setLoc(self.zEnd, self.xStart)
+        m.drawLineZ(self.zStart, REF)
+        m.drawLineX(self.xEnd, REF)
+        m.setLoc(self.safeZ, self.safeX)
+        m.quePause()
         if STEPPER_DRIVE:
-            startSpindle(getIntInfo('tuRPM'))
-            queFeedType(FEED_PITCH)
-            zSynSetup(getFloatInfo('tuZFeed'))
+            m.startSpindle(getIntInfo('tuRPM'))
+            m.queFeedType(FEED_PITCH)
+            m.zSynSetup(getFloatInfo('tuZFeed'))
         else:
-            queZSetup(getFloatInfo('tuZFeed'))
-        moveX(self.safeX)
-        moveZ(self.zStart)
+            m. queZSetup(getFloatInfo('tuZFeed'))
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+        m.text("%7.3f" % (self.xStart * 2.0), \
+               (self.safeZ, self.xStart))
+        m.text("%7.3f" % (self.zStart), \
+               (self.zStart, self.xEnd), \
+               CENTER | (BELOW, ABOVE)[self.internal])
+        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+               (self.safeZ, self.safeX))
+        m.text("%7.3f" % (self.zEnd),
+               (self.zEnd, self.safeX), CENTER)
 
     def calculateTurnPass(self, final=False):
         if final:
@@ -712,18 +845,26 @@ class Turn(UpdatePass):
                 feed = -feed
         self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
-        print ("pass %2d feed %5.3f x %5.3f diameter %5.3f" %
-               (self.passCount, feed, self.curX, self.curX * 2.0))
+        print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
+              (self.passCount, feed, self.curX, self.curX * 2.0))
 
     def turnPass(self):
-        moveX(self.curX, CMD_JOG)
-        saveDiameter(self.curX * 2.0)
+        m = self.m
+        m.moveX(self.curX, CMD_JOG)
+        m.saveDiameter(self.curX * 2.0)
         if self.turnPanel.pause.GetValue():
             print("pause")
-            quePause()
-        moveZ(self.zEnd, ZSYN)
-        moveX(self.safeX)
-        moveZ(self.zStart)
+            self.m.quePause()
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
+                   (self.safeZ, self.curX))
+        m.moveZ(self.zStart)
+        m.moveZ(self.zEnd, CMD_SYN)
+        m.moveX(self.safeX)
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
+                   (self.zEnd, self.safeX), RIGHT)
+        m.moveZ(self.safeZ)
 
     def turnAdd(self):
         if self.feed >= self.xCut:
@@ -732,8 +873,8 @@ class Turn(UpdatePass):
             self.calculateTurnPass(True)
             self.turnSetup()
             self.turnPass()
-            moveX(self.xStart + self.xRetract)
-            stopSpindle()
+            self.m.moveX(self.xStart + self.xRetract)
+            self.m.stopSpindle()
             command('CMD_RESUME')
 
 class TurnPanel(wx.Panel):
@@ -762,8 +903,7 @@ class TurnPanel(wx.Panel):
         
         self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        self.zRetract = addField(self, sizerG, "Z Retract", "tuZRetract")
 
         # x parameters
 
@@ -774,7 +914,7 @@ class TurnPanel(wx.Panel):
         self.xFeed = addField(self, sizerG, "X Feed D", "tuXFeed")
 
         self.xRetract = addField(self, sizerG, "X Retract", "tuXRetract")
-        
+
         # pass info
 
         self.passes = addField(self, sizerG, "Passes", "tuPasses")
@@ -824,7 +964,7 @@ class TurnPanel(wx.Panel):
 
     def sendData(self):
         try:
-            queClear()
+            moveCommands.queClear()
             sendClear()
 
             sendSpindleData()
@@ -860,6 +1000,8 @@ class Face(UpdatePass):
     def __init__(self, facePanel):
         UpdatePass.__init__(self)
         self.facePanel = facePanel
+        global moveCommands
+        self.m = moveCommands
 
     def getFaceParameters(self):
         fa = self.facePanel
@@ -884,36 +1026,55 @@ class Face(UpdatePass):
         self.setupAction(self.calculateFacePass, self.facePass)
 
         self.facePanel.passes.SetValue("%d" % (self.passes))
-        print ("zCut %5.3f passes %d internal %s" %
-               (self.zCut, self.passes, self.internal))
+        print("zCut %5.3f passes %d internal %s" %
+              (self.zCut, self.passes, self.internal))
 
         if self.internal:
             self.xRetract = -self.xRetract
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
+        if True:
+            self.m.draw("face", self.xStart, self.xEnd)
+            self.m.setAlign(90)
+
         self.faceSetup()
 
         while self.updatePass():
             pass
 
-        moveX(self.safeX)
-        moveZ(self.zStart + self.zRetract)
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.zStart + self.zRetract)
 
-        stopSpindle()
+        if STEPPER_DRIVE:
+            self.m.stopSpindle()
+        self.m.drawClose()
         stdout.flush()
 
     def faceSetup(self):
-        quePause()
+        m = self.m
+        m.setLoc(self.zEnd, self.xStart)
+        m.drawLineZ(self.zStart, REF)
+        m.drawLineX(self.xEnd, REF)
+        m.setLoc(self.zStart, self.safeX)
+        m.quePause()
         if STEPPER_DRIVE:
-            startSpindle(getIntInfo('faRPM'))
-            queFeedType(FEED_PITCH)
-            xSynSetup(getFloatInfo('faXFeed'))
+            m.startSpindle(getIntInfo('faRPM'))
+            m.queFeedType(FEED_PITCH)
+            m.xSynSetup(getFloatInfo('faXFeed'))
         else:
-            queXSetup(getFloatInfo('faxFeed'))
-        moveX(self.safeX)
-        moveZ(self.zStart)
-        moveX(self.xStart)
+            m.queXSetup(getFloatInfo('faxFeed'))
+        m.moveX(self.safeX)
+        m.moveZ(self.zStart)
+        m.text("%7.3f" % (self.zStart), \
+               (self.zStart, self.xEnd), (RIGHT, None)[self.internal])
+        m.text("%7.3f %6.3f" % \
+               (self.safeX * 2.0, self.actualFeed), \
+               (self.safeZ, self.safeX))
+        m.text("%7.3f" % (self.xStart * 2.0), \
+               (self.zEnd, self.xStart), CENTER)
+        m.text("%7.3f" % (self.xEnd * 2.0), \
+               (self.zEnd, self.xEnd), CENTER)
 
     def calculateFacePass(self, final=False):
         if final:
@@ -921,21 +1082,27 @@ class Face(UpdatePass):
         else:
             feed = self.passCount * self.actualFeed
         self.feed = feed
-        if self.internal:
-            feed = -feed
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
-        print ("pass %2d feed %5.3f z %5.3f" %
-               (self.passCount, feed, self.curZ))
+        print("pass %2d feed %5.3f z %5.3f" %
+              (self.passCount, feed, self.curZ))
 
     def facePass(self):
-        moveZ(self.curZ, CMD_JOG)
+        m = self.m
+        m.moveZ(self.curZ, CMD_JOG)
         if self.facePanel.pause.GetValue():
             print("pause")
-            quePause()
-        moveX(self.xEnd, ZSYN)
-        moveZ(self.safeZ)
-        moveX(self.xStart)
+            m.quePause()
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.curZ), \
+                   (self.curZ, self.safeX), (None, RIGHT)[self.internal])
+        m.moveX(self.xStart)
+        m.moveX(self.xEnd, CMD_SYN)
+        m.moveZ(self.safeZ)
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.safeZ), \
+                   (self.safeZ, self.xEnd), (RIGHT, None)[self.internal])
+        m.moveX(self.safeX)
 
     def faceAdd(self):
         if self.feed >= self.zCut:
@@ -944,9 +1111,9 @@ class Face(UpdatePass):
             self.faceSetup()
             self.calculateFacePass(True)
             self.facePass()
-            moveX(self.safeX)
-            moveZ(self.zStart + self.zRetract)
-            stopSpindle()
+            self.m.moveX(self.safeX)
+            self.m.moveZ(self.zStart + self.zRetract)
+            self.m.stopSpindle()
             command('CMD_RESUME')
 
 class FacePanel(wx.Panel):
@@ -1035,7 +1202,7 @@ class FacePanel(wx.Panel):
 
     def sendData(self):
         try:
-            queClear()
+            moveCommands.queClear()
             sendClear()
             sendSpindleData()
             sendZData()
@@ -1086,29 +1253,35 @@ class Cutoff():
 
         self.safeX = self.xStart + self.xRetract
 
+        if True:
+            self.m.draw("cutoff", self.xStart, self.zStart)
+
         self.cutoffSetup()
 
         if self.cutoffPanel.pause.GetValue():
             print("pause")
-            quePause()
-        moveX(self.xEnd, ZSYN)
-        moveX(self.safeX)
-        moveZ(self.zStart)
+            self.m.quePause()
+        self.m.moveX(self.xEnd, CMD_SYN)
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.zStart)
 
-        stopSpindle()
+        if STEPPER_DRIVE:
+            self.m.stopSpindle()
+        self.m.drawClose()
         stdout.flush()
 
     def cutoffSetup(self):
-        quePause()
+        m = self.m
+        m.quePause()
         if STEPPER_DRIVE:
-            startSpindle(getIntInfo('cuRPM'))
-            queFeedType(FEED_PITCH)
-            xSynSetup(getFloatInfo('cuXFeed'))
+            m.startSpindle(getIntInfo('cuRPM'))
+            m.queFeedType(FEED_PITCH)
+            m.xSynSetup(getFloatInfo('cuXFeed'))
         else:
-            queXSetup(getFloatInfo('cuXFeed'))
-        moveX(self.safeX)
-        moveZ(self.zCutoff)
-        moveX(self.xStart)
+            m.queXSetup(getFloatInfo('cuXFeed'))
+        m.moveX(self.safeX)
+        m.moveZ(self.zCutoff)
+        m.moveX(self.xStart)
 
 class CutoffPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -1180,7 +1353,7 @@ class CutoffPanel(wx.Panel):
 
     def sendData(self):
         try:
-            queClear()
+            moveCommands.queClear()
             sendClear()
             sendSpindleData()
             sendZData()
@@ -1208,6 +1381,8 @@ class Taper(UpdatePass):
     def __init__(self, taperPanel):
         UpdatePass.__init__(self)
         self.taperPanel = taperPanel
+        global moveCommands
+        self.m = moveCommands
         # morse #3 taper
         # taper = 0.0502
         # length = 3.190
@@ -1216,6 +1391,10 @@ class Taper(UpdatePass):
     
     def getTaperParameters(self, taperInch):
         tp = self.taperPanel
+        # taper = x / z
+        # taperInch = totalTaper / self.zLength
+        # taperX True  - move z taper x
+        # taperX False - move x taper z
         self.taperX = taperInch <= 1.0
         self.taper = taperInch
 
@@ -1232,9 +1411,8 @@ class Taper(UpdatePass):
         self.finish = abs(getFloatVal(tp.finish))
 
         totalTaper = taperInch * self.zLength
-        # taperInch = totalTaper / self.zLength
-        print ("totalTaper %5.3f taperInch %6.4f" %
-               (totalTaper, taperInch))
+        print("taperX %s totalTaper %5.3f taperInch %6.4f" %
+              (self.taperX, totalTaper, taperInch))
 
     def externalTaper(self, taperInch):
         print("externalTaper")
@@ -1267,32 +1445,38 @@ class Taper(UpdatePass):
         self.setupAction(self.calcExternalPass, self.externalPass)
 
         self.taperPanel.passes.SetValue("%d" % (self.passes))
-        print ("passes %d cutAmount %5.3f feed %6.3f" %
-               (self.passes, self.cutAmount, self.actualFeed))
+        print("passes %d cutAmount %5.3f feed %6.3f" %
+              (self.passes, self.cutAmount, self.actualFeed))
 
+        if True:
+            self.m.draw("taper", self.zStart, self.taper)
+            
         self.taperSetup()
 
         while self.updatePass():
             pass
 
-        moveZ(self.safeZ)
-        stopSpindle();
+        self.m.moveZ(self.safeZ)
+        if STEPPER_DRIVE:
+            self.m.stopSpindle()
+        self.m.drawClose()
         stdout.flush()
 
     def taperSetup(self):
-        quePause()
-        saveTaper(self.taper)
-        startSpindle(getIntInfo('tpRPM'))
-        queFeedType(FEED_PITCH)
-        zSynSetup(getFloatInfo('tpZFeed'))
-        if self.taperX:
-            xSynSetup(getFloatInfo('tpXInFeed'))
+        m = self.m
+        m.quePause()
+        m.saveTaper(self.taper)
+        m.startSpindle(getIntInfo('tpRPM'))
+        m.queFeedType(FEED_PITCH)
+        m.zSynSetup(getFloatInfo('tpZFeed'))
+        if taperX:
+            m.xSynSetup(getFloatInfo('tpXInFeed'))
         else:
             pass
-        moveX(self.safeX)
+        m.moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
-        if self.taperX:
+        if taperX:
             if final:
                 feed = self.cutAmount
             else:
@@ -1321,24 +1505,24 @@ class Taper(UpdatePass):
                 self.endX = self.xStart -taperLength
             else:
                 self.endX = self.xEnd
-        print ("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-               "%6.3f %6.3f" %
-               (self.passCount, self.startZ, self.startX, 
-                self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
+        print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+              "%6.3f %6.3f" %
+              (self.passCount, self.startZ, self.startX, 
+               self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
 
     def externalPass(self):
-        moveZ(self.startZ)
+        m = self.m
+        m.moveZ(self.startZ)
         if self.taperPanel.pause.GetValue():
             print("pause")
-            quePause()
+            m.quePause()
         if self.taperX:
-            moveX(self.startX, XSYN)
-            taperZX(self.endZ, self.taper)
+            m.moveX(self.startX, CMD_SYN)
+            m.taperZX(self.endZ)
         else:
-            moveX(self.startX)
-            taperXZ(self.endZ, self.taper)
-            pass
-        moveX(self.safeX)
+            m.moveX(self.startX)
+            m.taperXZ(self.endx)
+        m.moveX(self.safeX)
 
     def externalAdd(self):
         if self.feed >= self.cutAmount:
@@ -1347,9 +1531,9 @@ class Taper(UpdatePass):
             self.taperSetup()
             self.calcExternalPass(True)
             self.externalPass()
-            moveX(self.safeX)
-            moveZ(self.startZ)
-            stopSpindle();
+            self.m.moveX(self.safeX)
+            self.m.moveZ(self.startZ)
+            self.m.stopSpindle();
             command('CMD_RESUME')
 
     def internalTaper(self, taperInch):
@@ -1365,8 +1549,8 @@ class Taper(UpdatePass):
         self.setupAction(self.calcInternalPass, self.internalPass)
 
         self.taperPanel.passes.SetValue("%d" % (self.passes))
-        print ("passes %d cutAmount %5.3f feed %6.3f" %
-               (self.passes, self.cutAmount, self.actualFeed))
+        print("passes %d cutAmount %5.3f feed %6.3f" %
+              (self.passes, self.cutAmount, self.actualFeed))
 
         self.startZ = 0.0
         self.endZ = 0.0
@@ -1374,14 +1558,14 @@ class Taper(UpdatePass):
         self.safeZ = self.xRetract
 
         self.taperSetup()
-        moveZ(self.safeZ)
+        self.m.moveZ(self.safeZ)
 
         while self.updatePass():
             pass
 
-        moveX(self.safeX)
-        moveZ(self.safeZ)
-        stopSpindle();
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.safeZ)
+        self.m.stopSpindle();
         stdout.flush()
 
     def calcInternalPass(self, final=False):
@@ -1400,23 +1584,27 @@ class Taper(UpdatePass):
             self.endX = (self.boreRadius + self.feed - 
                          self.zLength * self.taper)
         self.endZ = -self.endZ
-        print ("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-                "%6.3f %6.3f" %
-                (self.passCount, self.feed, self.startX, self.startZ, 
-                self.endX, self.endZ,
-                2.0 * self.startX, 2.0 * self.endX))
+        print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+              "%6.3f %6.3f" % \
+              (self.passCount, self.feed, self.startX, self.startZ, 
+               self.endX, self.endZ,
+               2.0 * self.startX, 2.0 * self.endX))
 
     def internalPass(self):
-        moveX(self.startX + 0.002, CMD_JOG)
-        moveX(self.startX, CMD_JOG)
-        moveZ(self.startZ, CMD_JOG)
+        m = self.m
+        m.moveX(self.startX + 0.002, CMD_JOG)
+        m.moveX(self.startX, CMD_JOG)
+        m.moveZ(self.startZ, CMD_JOG)
         if self.taperPanel.pause.GetValue():
             print("pause")
-            quePause()
-        taperZX(self.endZ, self.taper)
-        moveX(self.boreRadius, XSYN)
-        moveX(self.safeX)
-        moveZ(self.safeZ)
+            m.quePause()
+        if self.taperX:
+            m.taperZX(self.endZ)
+        else:
+            m.taperXZ(self.endx)
+        m.moveX(self.boreRadius, CMD_SYN)
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
 
     def internalAdd(self):
         if self.feed >= self.cutAmount:
@@ -1424,12 +1612,12 @@ class Taper(UpdatePass):
             self.feed += add
             self.passCount += 1
             self.taperSetup()
-            moveZ(self.safeZ)
+            self.m.moveZ(self.safeZ)
             self.calcInternalPass()
             self.internalPass()
-            moveX(self.safeX)
-            moveZ(self.safeZ)
-            stopSpindle();
+            self.m.moveX(self.safeX)
+            self.m.moveZ(self.safeZ)
+            self.m.stopSpindle();
             command('CMD_RESUME')
             stdout.flush()
 
@@ -1666,7 +1854,7 @@ class TaperPanel(wx.Panel):
 
     def sendData(self):
         try:
-            queClear()
+            moveCommands.queClear()
             sendClear()
             sendSpindleData()
             sendZData()
@@ -1709,10 +1897,37 @@ class TaperPanel(wx.Panel):
     #     moveZ(0.010)
     #     taperZX(-0.25, 0.0251)
 
+REF   = 'REF'
+TEXT  = 'TEXT'
+
 class ScrewThread(UpdatePass):
     def __init__(self, threadPanel):
         UpdatePass.__init__(self)
         self.threadPanel = threadPanel
+        global moveCommands
+        self.m = moveCommands
+        self.d = None
+
+    def draw(self, diam, tpi):
+        tmp = "tfeed%0.3f-%0.1f" % (diam, tpi)
+        tmp = tmp.replace("." , "-")
+        tmp = re.sub("-0$", "", tmp) + ".dxf"
+        d = dxf.drawing(tmp)
+        d.add_layer(REF, color=0)
+        d.add_layer(TEXT, color=0)
+        self.d = d
+
+    def drawLine(self, p0, p1, layer=0):
+        if self.d != None:
+            self.d.add(dxf.line(p0, p1, layer=layer))
+
+    def drawClose(self):
+        try:
+            if self.d != None:
+                self.d.save()
+                self.d = None
+        except:
+            print("dxf file save error")
 
     def getThreadParameters(self):
         th = self.threadPanel
@@ -1732,6 +1947,7 @@ class ScrewThread(UpdatePass):
         
         self.xStart = getFloatVal(th.xStart) / 2.0
 
+        self.firstFeed = getFloatVal(th.firstFeed)
         self.lastFeed = getFloatVal(th.lastFeed)
         self.depth = getFloatVal(th.depth)
         
@@ -1743,28 +1959,34 @@ class ScrewThread(UpdatePass):
     def thread(self):
         self.getThreadParameters()
 
-        print ("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
-               (self.tpi, self.pitch, self.hFactor, self.lastFeed))
+        print("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
+              (self.tpi, self.pitch, self.hFactor, self.lastFeed))
         
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch) * self.hFactor
         self.tanAngle = tan(self.angle)
         actualWidth = 2 * self.depth * self.tanAngle
-        print ("depth %6.4f actualWdith %6.4f" %
-               (self.depth, actualWidth))
-        
         self.area = area = 0.5 * self.depth * actualWidth
+        print("depth %6.4f actualWdith %6.4f area %8.6f" %
+              (self.depth, actualWidth, area))
+        
+        firstWidth = 2 * self.firstFeed * self.tanAngle
+        firstArea = 0.5 * self.firstFeed * firstWidth
+        passes = int(ceil(area / firstArea))
+        print("firstFeed %6.4f firstWidth %6.4f firstArea %8.6f passes %d" % \
+              (self.firstFeed, firstWidth, firstArea, passes))
+        
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
-        print ("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % 
-               (area, lastDepth, lastArea, self.areaPass))
+        print("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % 
+              (area, lastDepth, lastArea, self.areaPass))
 
         self.passes = int(ceil(area / self.areaPass))
         self.threadPanel.passes.SetValue("%d" % (self.passes))
         self.areaPass = area / self.passes
-        print ("passes %d areaPass %8.6f" %
-               (self.passes, self.areaPass))
+        print("passes %d areaPass %8.6f" %
+              (self.passes, self.areaPass))
         
         self.setupSpringPasses(self.threadPanel)
         self.setupAction(self.calculateThread, self.threadPass)
@@ -1776,6 +1998,13 @@ class ScrewThread(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
+        if True:
+            self.draw(self.xStart * 2.0, self.tpi)
+            self.p0 = (0, 0)
+
+        if True:
+            self.m.draw("thread", self.xStart * 2.0, self.tpi)
+            
         self.threadSetup()
 
         self.curArea = 0.0
@@ -1785,20 +2014,27 @@ class ScrewThread(UpdatePass):
         while self.updatePass():
             pass
 
-        stopSpindle();
+        self.drawClose()
+        self.m.drawClose()
+        self.m.stopSpindle();
         stdout.flush()
 
     def threadSetup(self):
-        quePause()
-        startSpindle(getIntInfo('thRPM'))
+        m = m.setup()
+        m.quePause()
+        m.startSpindle(getIntInfo('thRPM'))
         feedType = FEED_TPI
-        if self.threadPanel.mm.GetValue():
+        if threadPanel.mm.GetValue():
             feedType = FEED_METRIC
-        queFeedType(feedType)
-        zSynSetup(getFloatInfo('thPitch'))
-        moveX(self.safeX)
-        moveZ(self.startZ + self.zBackInc)
-        moveZ(self.startZ)
+        m.queFeedType(feedType)
+        m.saveTaper(getFloatInfo('thXTaper'))
+        m.saveRunout(getFloatInfo('thExitRev'))
+        m.saveDepth(self.depth)
+        m.zSynSetup(getFloatInfo('thPitch'))
+        m.moveX(self.safeX)
+        m.moveZ(self.startZ + self.zBackInc)
+        m.moveZ(self.startZ)
+        zOffset = 0.0
 
     def calculateThread(self, final=False, add=False):
         if not add:
@@ -1810,25 +2046,42 @@ class ScrewThread(UpdatePass):
             self.feed = feed
         else:
             feed = self.feed
-        self.zOffset = feed * self.tanAngle
-        print ("%4d %8.6f %6.4f %6.4f %6.4f" % 
-               (self.passCount, self.curArea, feed, self.zOffset,
-                feed - self.prevFeed))
+
+        if True:
+            self.zOffset = feed * self.tanAngle
+        else:
+            offset = (feed - self.prevFeed) * self.tanAngle
+            if self.passCount & 1:
+                offset = -offset
+            self.zOffset += offset
+
+        print("%4d %8.6f %6.4f %6.4f %6.4f" % 
+              (self.passCount, self.curArea, feed, self.zOffset,
+               feed - self.prevFeed))
         self.prevFeed = feed
         if self.internal:
             feed = -feed
         self.curX = self.xStart - feed
 
+        if self.d != None:
+            p1 = (self.zOffset, feed)
+            pa = (self.zOffset - feed * self.tanAngle, 0)
+            pb = (self.zOffset + feed * self.tanAngle, 0)
+            self.drawLine(self.p0, p1)
+            self.drawLine(p1, pa)
+            self.drawLine(p1, pb)
+            self.p0 = p1
+
     def threadPass(self):
-        moveX(self.curX, CMD_JOG)
+        self.m.moveX(self.curX, CMD_JOG)
         if self.threadPanel.pause.GetValue():
             print("pause")
-            quePause()
-        moveZ(self.zEnd, ZSYN | Z_SYN_START)
-        moveX(self.safeX)
+            self.m.quePause()
+        self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
+        self.m.moveX(self.safeX)
         startZ = self.startZ - self.zOffset
-        moveZ(startZ + self.zBackInc)
-        moveZ(startZ)
+        self.m.moveZ(startZ + self.zBackInc)
+        self.m.moveZ(startZ)
 
     def threadAdd(self):
         if self.feed >= self.depth:
@@ -1837,7 +2090,7 @@ class ScrewThread(UpdatePass):
             self.threadSetup()
             self.calculateThread(add=True)
             self.threadPass()
-            stopSpindle();
+            self.m.stopSpindle();
             command('CMD_RESUME')
             stdout.flush()
 
@@ -1882,8 +2135,8 @@ class ThreadPanel(wx.Panel):
 
         self.depth = addField(self, sizerG, "Depth", "thXDepth")
 
-        self.lastFeed = addField(self, sizerG, "Last Feed", "thXLastFeed")
-        
+        self.firstFeed = addField(self, sizerG, "First Feed", "thXFirstFeed")
+
         # self.final = btn = wx.RadioButton(self, label="Final",
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
@@ -1892,6 +2145,19 @@ class ThreadPanel(wx.Panel):
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         # info['thDepth'] = btn
+
+        #
+
+        self.xTaper = addField(self, sizerG, "Taper", "thXTaper")
+
+        self.xExitRev = addField(self, sizerG, "Exit Rev", "thExitRev")
+        
+        self.lastFeed = addField(self, sizerG, "Last Feed", "thXLastFeed")
+
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
+
+        #
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
@@ -2020,7 +2286,6 @@ def setStatus(text):
     jogPanel.Refresh()
     jogPanel.Update()
 
-
 def clrStatus():
     setStatus("")
 
@@ -2067,7 +2332,7 @@ class JogShuttle():
 
     def ShuttleInput(self, data):
         global jogShuttle, buttonRepeat
-        # print data
+        # print(data)
         # stdout.flush()
         outerRing = data[1]
         if outerRing != jogShuttle.lastOuterRing:
@@ -2101,7 +2366,7 @@ class JogShuttle():
             maxSpeed = getFloatInfo('zMaxSpeed')
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
-            # print "set z"
+            # print("set z")
             # stdout.flush()
 
     def setX(self, button, val):
@@ -2110,7 +2375,7 @@ class JogShuttle():
             maxSpeed = getFloatInfo('xMaxSpeed')
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
-            # print "set x"
+            # print("set x")
             # stdout.flush()
 
     def setSpindle(self, button, val):
@@ -2119,12 +2384,12 @@ class JogShuttle():
             maxSpeed = getFloatInfo('spMaxRPM')
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.spindleSpeed[val] = maxSpeed * jogShuttle.factor[val]
-            print "set spindle"
-            stdout.flush()
+            # print("set spindle")
+            # stdout.flush()
 
     def jogZ(self, code, val):
         global jogShuttle, buttonRepeat
-        # print "jog z %d %d" % (val, jogShuttle.zCurIndex)
+        # print("jog z %d %d" % (val, jogShuttle.zCurIndex))
         # stdout.flush()
         index = abs(val)
         speed = jogShuttle.zSpeed[index]
@@ -2144,12 +2409,12 @@ class JogShuttle():
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
                 jogShuttle.zCurIndex = -1
-                # print "jogZ done"
+                # print("jogZ done")
                 # stdout.flush()
 
     def jogX(self, code, val):
         global jogShuttle, buttonRepeat
-        # print "jog x %d" % (val)
+        # print("jog x %d" % (val))
         # stdout.flush()
         index = abs(val)
         speed = jogShuttle.xSpeed[index]
@@ -2169,14 +2434,12 @@ class JogShuttle():
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
                 jogShuttle.xCurIndex = -1
-                # print "jogX done"
+                # print("jogX done")
                 # stdout.flush()
 
     def jogSpindle(self, code, val):
-        print "jog spindle %d" % (val)
-        stdout.flush()
         global jogShuttle, buttonRepeat
-        # print "jog spindle %d %d" % (val, jogShuttle.spindleCurIndex)
+        # print("jog spindle %d %d" % (val, jogShuttle.spindleCurIndex))
         # stdout.flush()
         index = abs(val)
         speed = jogShuttle.spindleSpeed[index]
@@ -2196,7 +2459,7 @@ class JogShuttle():
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
                 jogShuttle.spindleCurIndex = -1
-                # print "jogSPINDLE done"
+                # print("jogspindle done")
                 # stdout.flush()
 
 class JogPanel(wx.Panel):
@@ -2790,7 +3053,7 @@ class JogPanel(wx.Panel):
         self.xPos.SetValue(txt)
 
     def updateRPM(self, val):
-        print val
+        print(val)
         stdout.flush()
 
     def updateAll(self, val):
@@ -2846,7 +3109,7 @@ class JogPanel(wx.Panel):
 
     def OnEStop(self, e):
         global spindleDataSend, zDataSent, xDataSent
-        queClear()
+        moveCommands.queClear()
         command('CMD_CLEAR')
         spindleDataSent = False
         zDataSent = False
@@ -2854,7 +3117,7 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def OnStop(self, e):
-        queClear()
+        moveCommands.queClear()
         command('CMD_STOP')
         self.combo.SetFocus()
 
@@ -3149,17 +3412,17 @@ class GotoDialog(wx.Dialog):
         global jogPanel
         try:
             loc = float(self.pos.GetValue())
-            queClear()
+            moveCommands.queClear()
             command('CMD_PAUSE')
             command('CLEARQUE')
             if self.axis == 0:
                 sendZData()
                 saveZOffset()
-                moveZ(loc)
+                moveCommands.moveZ(loc)
             else:
                 sendXData()
                 saveXOffset()
-                moveX(loc / 2.0)
+                moveCommands.moveX(loc / 2.0)
             command('CMD_RESUME')
             self.Show(False)
             jogPanel.focus()
@@ -3245,8 +3508,8 @@ class FixXPosDialog(wx.Dialog):
         xHomeOffset -= offset
 
         info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
-        print ("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" %
-               (curX, actualX, offset, xHomeOffset))
+        print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" %
+              (curX, actualX, offset, xHomeOffset))
         stdout.flush()
 
         self.Show(False)
@@ -3340,7 +3603,7 @@ class UpdateThread(Thread):
                 try:
                     func()
                 except commTimeout as e:
-                    print "commTimeout on func"
+                    print("commTimeout on func")
                     stdout.flush()
                 except RuntimeError:
                     if done:
@@ -3365,7 +3628,7 @@ class UpdateThread(Thread):
                             except commTimeout as e:
                                 break
                 except commTimeout as e:
-                    print "commTimeout on queue"
+                    print("commTimeout on queue")
                     stdout.flush()
             i += 1
             if i >= scanMax:
@@ -3380,12 +3643,12 @@ class UpdateThread(Thread):
                             dbg.write(result + '\n')
                             dbg.flush()
                         else:
-                            print result
+                            print(result)
                             stdout.flush()
                     else:
                         break
                 except commTimeout:
-                    print "commTimeout on dbg"
+                    print("commTimeout on dbg")
                     stdout.flush()
                     break
                 except serial.SerialException:
@@ -3414,7 +3677,7 @@ class UpdateThread(Thread):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
-        global hdrFont, testFont, jogShuttle
+        global hdrFont, testFont, jogShuttle, moveCommands
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self, self.OnUpdate)
@@ -3422,6 +3685,8 @@ class MainFrame(wx.Frame):
                           wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
+
+        moveCommands = MoveCommands()
 
         self.zDialog = ZDialog(self)
         self.xDialog = XDialog(self)
@@ -3487,7 +3752,7 @@ class MainFrame(wx.Frame):
                 sendMulti()
                 sendSpindleData()
             except commTimeout:
-                print "comm timeout on setup"
+                print("comm timeout on setup")
                 setStatus("comm timeout on setup")
 
         self.procUpdate = (
@@ -3504,7 +3769,7 @@ class MainFrame(wx.Frame):
         global done, jogPanel
         done = True
         self.update.threadRun = False
-        jogPanel.btnRpt.threadRun = False
+        buttonRepeat.threadRun = False
         self.Destroy()
 
     def initUI(self):
@@ -3642,7 +3907,7 @@ class MainFrame(wx.Frame):
                      'zEncPosition', 'xEncPosition')
 
         for key in vars:
-            exec 'global ' + key
+            exec('global ' + key)
             if not key in info:
                 info[key] = InfoValue("%0.4f" % (eval(key)))
             else:
@@ -3838,7 +4103,7 @@ class ZDialog(wx.Dialog):
         self.Show(False)
 
     def OnSetup(self, e):
-        queClear()
+        moveCommands.queClear()
         sendZData(True)
 
     def OnShow(self, e):
@@ -3934,7 +4199,7 @@ class XDialog(wx.Dialog):
         setParm('X_HOME_LOC', loc)
         
     def OnSetup(self, e):
-        queClear()
+        moveCommans.queClear()
         sendXData(True)
 
     def OnShow(self, e):
@@ -4808,7 +5073,7 @@ while True:
     if tmp == 'xhomed':
         xHomed = True
     else:
-        print "invalid argument: %s" % (tmp)
+        print("invalid argument: %s" % (tmp))
         stdout.flush()
         break
     n += 1
@@ -4825,7 +5090,7 @@ class MainApp(wx.App):
 
     def FilterEvent(self, evt):
         if evt.EventType == wx.EVT_KEY_DOWN:
-            print evt
+            print(evt)
         return(-1)
 
 app = MainApp(redirect=False)
