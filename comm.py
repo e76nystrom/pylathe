@@ -52,10 +52,10 @@ def command(cmd):
     if ser is None:
         return(None);
     commLock.acquire(True)
-    ser.write(cmdStr)
+    ser.write(str.encode(cmdStr))
     rsp = ""
     while True:
-        tmp = ser.read(1)
+        tmp = str(ser.read(1))
         if (len(tmp) == 0):
             commLock.release()
             if not timeout:
@@ -104,7 +104,7 @@ def queParm(parm, val):
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = ' %x %s' % (parmIndex, valString)
-    if True: # xDbgPrint:
+    if xDbgPrint:
         print("%-15s %s" % (parm, cmd.strip()))
         stdout.flush()
     length = len(cmd)
@@ -122,7 +122,7 @@ def sendMulti():
     for parm in parmList:
         cmd += parm
     cmd += ' \r';
-    print "cmdlen %d len(cmd) %d" % (cmdLen, len(cmd))
+    print("cmdlen %d len(cmd) %d" % (cmdLen, len(cmd)))
     parmList = []
     cmdLen = cmdOverhead
     if xDbgPrint:
@@ -182,7 +182,7 @@ def setParm(parm, val):
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = '\x01%x %x %s \r' % (cmds['LOADVAL'][0], parmIndex, valString)
-    if True: # xDbgPrint:
+    if xDbgPrint:
         print("%-15s %s" % (parm, cmd.strip()))
         stdout.flush()
     if ser is None:
