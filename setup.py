@@ -15,7 +15,8 @@ def createCommands(cmdList, cLoc, fData=False):
     val = 0
     for i in range(0, len(cmdList)):
         data = cmdList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             if (len(data) != 0):
                 (regName, action, regComment) = data
                 # if  isinstance(action, basestring):
@@ -42,9 +43,8 @@ def createCommands(cmdList, cLoc, fData=False):
         cFile.close()
         # jFile.write("};\n")
         # jFile.close()
-
-    # for key in cmds:
-    #    print key, cmds[key]
+        # for key in cmds:
+        #    print(key, cmds[key])
 
 def createParameters(parmList, cLoc, fData=False):
     if fData:
@@ -61,7 +61,8 @@ def createParameters(parmList, cLoc, fData=False):
     val = 0
     for i in range(0, len(parmList)):
         data = parmList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (regName, regComment, varType) = data
             tmp = regName.split("_")
             if len(tmp) > 1:
@@ -113,7 +114,7 @@ def createParameters(parmList, cLoc, fData=False):
         # jFile.close()
 
     #for key in parms:
-    #    print key, parms[key]
+    #    print(key, parms[key])
 
 def createCtlStates(stateList, cLoc, fData=False):
     if fData:
@@ -124,7 +125,8 @@ def createCtlStates(stateList, cLoc, fData=False):
     val = 0
     for i in range(0, len(stateList)):
         data = stateList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             state = data[0]
             comment = data[1]
             if fData:
@@ -164,7 +166,8 @@ def createCtlBits(regList, cLoc, fData=False):
         # jFile.write("public class CtlBits\n{\n");
     for i in range(0, len(regList)):
         data = regList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (var, val, comment) = data
             if fData:
                 tmp =  "#define %-12s %s" % (var, val)
@@ -210,7 +213,8 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
     val = 0
     for i in range(0, len(xilinxList)):
         data = xilinxList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (regName, regComment) = data
             if fData:
                 tmp = " %s, " % (regName)
@@ -254,7 +258,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         # jFile.close()
 
     # for key in xRegs:
-    #     print "%-12s %02x" % (key, xRegs[key])
+    #     print("%-12s %02x" % (key, xRegs[key]))
 
 def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     if fData:
@@ -276,7 +280,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     lastShift = -1
     for i in range(0, len(xilinxBitList)):
         data = xilinxBitList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             if len(data) == 1:
                 xLst = []
                 regName = data[0]
