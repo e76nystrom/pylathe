@@ -520,7 +520,7 @@ if __name__ == '__main__':
     cLoc = path + '/../LatheX/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
 
-    print "creating interface files"
+    print("creating interface files")
     createCommands(cmdList, cLoc, fData)
     createParameters(parmList, cLoc, fData)
     createCtlBits(regList, cLoc, fData)
