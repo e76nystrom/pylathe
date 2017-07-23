@@ -1474,14 +1474,14 @@ class Taper(UpdatePass):
         m.startSpindle(getIntInfo('tpRPM'))
         m.queFeedType(FEED_PITCH)
         m.zSynSetup(getFloatInfo('tpZFeed'))
-        if taperX:
+        if self.taperX:
             m.xSynSetup(getFloatInfo('tpXInFeed'))
         else:
             pass
         m.moveX(self.safeX)
 
     def calcExternalPass(self, final=False):
-        if taperX:
+        if self.taperX:
             if final:
                 feed = self.cutAmount
             else:
