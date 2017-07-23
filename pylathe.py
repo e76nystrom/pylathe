@@ -1464,6 +1464,10 @@ class Taper(UpdatePass):
 
     def taperSetup(self):
         m = self.m
+        m.setLoc(self.zEnd, self.xStart)
+        m.drawLineZ(self.zStart, REF)
+        m.drawLineX(self.xEnd, REF)
+        m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         m.saveTaper(self.taper)
         m.startSpindle(getIntInfo('tpRPM'))
