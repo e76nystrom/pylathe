@@ -574,6 +574,8 @@ stateList =\
     ["SAVE_FEED_TYPE", "save feed type"],
     ["Z_FEED_SETUP", "setup z feed"],
     ["X_FEED_SETUP", "setup x feed"],
+    ["SAVE_RUNOUT", "save thread runout"],
+    ["SAVE_DEPTH", "save thread depth"],
     "};",
 
     "home control states",
@@ -604,7 +606,7 @@ if __name__ == '__main__':
     cLoc = path + '/../Lathe/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
 
-    print "creating interface files"
+    print("creating interface files")
     createCommands(cmdList, cLoc, fData)
     createParameters(parmList, cLoc, fData)
     createCtlBits(regList, cLoc, fData)
