@@ -1486,7 +1486,7 @@ class Taper(UpdatePass):
         self.m.drawClose()
         stdout.flush()
 
-    def taperSetup(self):
+    def taperSetup(self, internal=False):
         m = self.m
         m.setLoc(self.zEnd, self.xStart)
         m.drawLineZ(self.zStart, REF)
@@ -1505,7 +1505,7 @@ class Taper(UpdatePass):
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
         m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), CENTER | BELOW)
+               (self.zStart, self.xEnd), CENTER | (BELOW, ABOVE)[internal])
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd),
@@ -1608,7 +1608,7 @@ class Taper(UpdatePass):
         if True:
             self.m.draw("taper", self.zStart, self.taper)
             
-        self.taperSetup()
+        self.taperSetup(True)
         self.m.moveZ(self.safeZ)
 
         while self.updatePass():
@@ -1672,7 +1672,7 @@ class Taper(UpdatePass):
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
             self.passCount += 1
-            self.taperSetup()
+            self.taperSetup(True)
             self.m.moveZ(self.safeZ)
             self.calcInternalPass()
             self.internalPass()
