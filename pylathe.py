@@ -1617,6 +1617,7 @@ class Taper(UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         self.m.stopSpindle();
+        self.m.drawClose()
         stdout.flush()
 
     def calcInternalPass(self, final=False):
