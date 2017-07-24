@@ -425,6 +425,13 @@ class MoveCommands():
     def nextPass(self, passNum):
         self.passNum = passNum
         self.queMove('PASS_NUM', passNum)
+        if self.dbg:
+            if passNum & 0x100:
+                print("spring")
+            elif passNum & 0x200:
+                print("spring %d" % (passNum & 0xff))
+            else
+                print("pass %d" % (passNum))
 
     def quePause(self):
         self.queMove('QUE_PAUSE', 0)
@@ -727,10 +734,8 @@ class UpdatePass():
                     self.sPassCtr = 0
                     self.springFlag = True
             if self.springFlag:
-                print("spring")
                 moveCommands.nextPass(0x100 | self.passCount)
             else:
-                print("pass %d" % (self.passCount))
                 moveCommands.nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
                 self.passCount += 1
@@ -742,7 +747,6 @@ class UpdatePass():
             if self.spring < self.sPasses:
                 self.spring += 1
                 moveCommands.nextPass(0x200 | self.spring)
-                print("spring %d" % (self.spring))
                 self.genPass()
             else:
                 return(False)
