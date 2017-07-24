@@ -1503,7 +1503,7 @@ class Taper(UpdatePass):
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd),
-               (self.zEnd, self.safeX), CENTER | ABOVE)
+               (self.zEnd, self.safeX), RIGHT | BELOW)
 
     def calcExternalPass(self, final=False):
         if self.taperX:
@@ -1536,8 +1536,8 @@ class Taper(UpdatePass):
             else:
                 self.endX = self.xEnd
         print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-              "%6.3f %6.3f" %
-              (self.passCount, self.startZ, self.startX, 
+              "%6.3f %6.3f" % \
+              (self.passCount, self.startZ, self.startX, \
                self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
 
     def externalPass(self):
@@ -1549,7 +1549,7 @@ class Taper(UpdatePass):
         if m.passNum & 0x300 == 0:
             if self.taperLength < self.zLength:
                 m.text("%2d %7.3f" % (m.passNum, self.startZ * 2.0), \
-                       (self.startZ, self.safeX), ABOVE)
+                       (self.startZ, self.safeX), CENTER | ABOVE)
             else:
                 m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
                        (self.endZ, self.startX), RIGHT)
