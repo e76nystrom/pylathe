@@ -1605,6 +1605,9 @@ class Taper(UpdatePass):
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.xRetract
 
+        if True:
+            self.m.draw("taper", self.zStart, self.taper)
+            
         self.taperSetup()
         self.m.moveZ(self.safeZ)
 
@@ -1634,8 +1637,8 @@ class Taper(UpdatePass):
         self.endZ = -self.endZ
         print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
               "%6.3f %6.3f" % \
-              (self.passCount, self.feed, self.startX, self.startZ, 
-               self.endX, self.endZ,
+              (self.passCount, self.feed, self.startX, self.startZ, \
+               self.endX, self.endZ, \
                2.0 * self.startX, 2.0 * self.endX))
 
     def internalPass(self):
@@ -1646,12 +1649,22 @@ class Taper(UpdatePass):
         if self.taperPanel.pause.GetValue():
             print("pause")
             m.quePause()
+        if m.passNum & 0x300 == 0:
+            if self.taperLength < self.zLength:
+                m.text("%2d %7.3f" % (m.passNum, self.startZ), \
+                       (self.startZ, self.safeX), CENTER | ABOVE)
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                       (self.endZ, self.startX), RIGHT)
         if self.taperX:
             m.taperZX(self.endZ)
         else:
             m.taperXZ(self.endx)
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.endX * 2.0), \
+                   (self.safeZ, self.endX), LEFT)
         m.moveZ(self.safeZ)
 
     def internalAdd(self):
