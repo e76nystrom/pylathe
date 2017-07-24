@@ -1563,7 +1563,7 @@ class Taper(UpdatePass):
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.endX * 2.0), \
-                   (self.zEnd, self.safeX), LEFT)
+                   (self.safeZ, self.safeX), LEFT)
         m.moveX(self.safeX)
 
     def externalAdd(self):
