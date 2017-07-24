@@ -1589,8 +1589,8 @@ class Taper(UpdatePass):
         self.getTaperParameters(taperInch)
 
         self.boreRadius = self.xStart = self.largeDiameter / 2.0
-        largeRadius = self.smallDiameter / 2.0
-        self.cut = largeRadius - self.boreRadius
+        self.xEnd = self.smallDiameter / 2.0
+        self.cut = self.xEnd - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
         self.setupSpringPasses(self.taperPanel)
