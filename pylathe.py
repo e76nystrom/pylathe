@@ -1503,7 +1503,7 @@ class Taper(UpdatePass):
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd),
-               (self.zEnd, self.safeX), CENTER)
+               (self.zEnd, self.safeX), CENTER | ABOVE)
 
     def calcExternalPass(self, final=False):
         if self.taperX:
