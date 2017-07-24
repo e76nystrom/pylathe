@@ -308,6 +308,8 @@ class MoveCommands():
         self.hS = self.textH
         self.angle = 0.0
         self.dbg = False
+        self.tX = 0.0
+        self.tZ = 0.0
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
@@ -349,6 +351,10 @@ class MoveCommands():
     def text(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
             (x, y) = p0
+            if abs(y - self.tY) < self.textH:
+                y = self.tY - self.textH
+            self.tX = x
+            self.tY = y
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
