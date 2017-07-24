@@ -1660,6 +1660,7 @@ class Taper(UpdatePass):
             m.taperZX(self.endZ)
         else:
             m.taperXZ(self.endx)
+        m.drawLine(self.endZ, self.endX)
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
         if m.passNum & 0x300 == 0:
