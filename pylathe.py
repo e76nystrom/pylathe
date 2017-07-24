@@ -307,6 +307,7 @@ class MoveCommands():
         self.vS = self.textH / 2
         self.hS = self.textH
         self.angle = 0.0
+        self.dbg = False
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
@@ -434,52 +435,63 @@ class MoveCommands():
     def moveZ(self, zLoc, flag=CMD_MAX):
         self.queMoveF('MOVE_Z', flag, zLoc)
         self.drawLineZ(zLoc)
-        print("moveZ  %7.4f" % (zLoc))
+        if self.dbg:
+            print("moveZ  %7.4f" % (zLoc))
 
     def moveX(self, xLoc, flag=CMD_MAX):
         self.queMoveF('MOVE_X', flag, xLoc)
         self.drawLineX(xLoc)
-        print("moveX  %7.4f" % (xLoc))
+        if self.dbg:
+            print("moveX  %7.4f" % (xLoc))
 
     def saveZOffset(self):
         global zHomeOffset
         self.queMove('SAVE_Z_OFFSET', zHomeOffset)
-        print("saveZOffset  %7.4f" % (zHomeOffset))
+        if self.dbg:
+            print("saveZOffset  %7.4f" % (zHomeOffset))
 
     def saveXOffset(self):
         global xHomeOffset
         self.queMove('SAVE_X_OFFSET', xHomeOffset)
-        print("savexOffset  %7.4f" % (xHomeOffset))
+        if self.dbg:
+            print("savexOffset  %7.4f" % (xHomeOffset))
 
     def moveXZ(self, zLoc, xLoc):
         self.queMove('SAVE_Z', zLoc)
         self.queMove('MOVE_XZ', xLoc)
-        print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
+        if self.dbg:
+            print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
 
     def moveZX(self, zLoc, xLoc):
         self.queMove('SAVE_X', xLoc)
         self.queMove('MOVE_ZX', zLoc)
-        print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
+        if self.dbg:
+            print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
     def saveTaper(self, taper):
         self.queMove('SAVE_TAPER', taper)
-        print("saveTaper %7.4f" % (taper))
+        if self.dbg:
+            print("saveTaper %7.4f" % (taper))
 
     def saveRunout(self, runout):
         self.queMove('SAVE_RUNOUT', runout)
-        print("saveRunout %7.4f" % (runout))
+        if self.dbg:
+            print("saveRunout %7.4f" % (runout))
 
     def saveDepth(self, depth):
         self.queMove('SAVE_DEPTH', depth)
-        print("saveDepth %7.4f" % (depth))
+        if self.dbg:
+            print("saveDepth %7.4f" % (depth))
 
     def taperZX(self, zLoc):
         self.queMoveF('TAPER_ZX', 1, zLoc)
-        print("taperZX %7.4f" % (zLoc))
+        if self.dbg:
+            print("taperZX %7.4f" % (zLoc))
 
     def taperXZ(self, xLoc):
         self.queMove('TAPER_XZ', 1, xLoc)
-        print("taperXZ %7.4f" % (xLoc))
+        if self.dbg:
+            print("taperXZ %7.4f" % (xLoc))
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
