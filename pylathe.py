@@ -1650,12 +1650,8 @@ class Taper(UpdatePass):
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
-            if self.endZ < self.zLength:
-                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
-                       (self.startZ, self.startX), CENTER | ABOVE)
-            else:
-                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
-                       (self.endZ, self.startX), RIGHT)
+            m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                   (self.startZ, self.startX), CENTER | ABOVE)
         if self.taperX:
             m.taperZX(self.endZ)
         else:
@@ -1663,6 +1659,7 @@ class Taper(UpdatePass):
         m.drawLine(self.endZ, self.endX)
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
+        if self.endZ < self.zLength:
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.endZ), \
                    (self.endZ, self.safeX), LEFT)
