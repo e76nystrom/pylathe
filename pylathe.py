@@ -1660,9 +1660,11 @@ class Taper(UpdatePass):
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
         if self.endZ < self.zLength:
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.endZ), \
-                   (self.endZ, self.safeX), LEFT)
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.endZ), \
+                       (self.endZ, self.safeX), LEFT)
+            else:
+                pass
         m.moveZ(self.safeZ)
 
     def internalAdd(self):
