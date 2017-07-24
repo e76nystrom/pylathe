@@ -309,7 +309,7 @@ class MoveCommands():
         self.angle = 0.0
         self.dbg = False
         self.tX = 0.0
-        self.tZ = 0.0
+        self.tY = 0.0
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
