@@ -1399,7 +1399,7 @@ class Taper(UpdatePass):
         self.taper = taperInch
 
         self.zStart = getFloatVal(tp.zStart)
-        self.zLength = abs(getFloatVal(tp.zLength))
+        self.zLength = getFloatVal(tp.zLength)
         self.zEnd = self.zStart + self.zLength
         self.zFeed = abs(getFloatVal(tp.zFeed))
         self.zRetract = abs(getFloatVal(tp.zRetract))
