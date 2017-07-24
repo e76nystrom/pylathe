@@ -1627,7 +1627,6 @@ class Taper(UpdatePass):
         self.feed = feed
         self.startX = self.boreRadius + feed
         self.endZ = self.feed / self.taper
-        print("endZ %6.3f" % (self.endZ))
         if self.endZ <= self.zLength:
             self.endX = self.boreRadius
         else:
