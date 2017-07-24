@@ -1545,6 +1545,7 @@ class Taper(UpdatePass):
             m.moveX(self.startX)
             m.taperXZ(self.endX)
         m.drawLine(self.endZ, self.endX)
+        m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
     def externalAdd(self):
