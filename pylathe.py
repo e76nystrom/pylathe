@@ -1538,7 +1538,7 @@ class Taper(UpdatePass):
             self.endZ = self.zStart
             taperLength = self.feed * self.taper
             if taperLength < self.xLength:
-                self.endX = self.xStart -taperLength
+                self.endX = self.xStart - taperLength
             else:
                 self.endX = self.xEnd
         print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
@@ -1588,7 +1588,7 @@ class Taper(UpdatePass):
         print("internalTaper")
         self.getTaperParameters(taperInch)
 
-        self.boreRadius = self.largeDiameter / 2.0
+        self.boreRadius = self.xStart = self.largeDiameter / 2.0
         largeRadius = self.smallDiameter / 2.0
         self.cut = largeRadius - self.boreRadius
 
