@@ -430,7 +430,7 @@ class MoveCommands():
                 print("spring")
             elif passNum & 0x200:
                 print("spring %d" % (passNum & 0xff))
-            else
+            else:
                 print("pass %d" % (passNum))
 
     def quePause(self):
