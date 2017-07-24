@@ -342,7 +342,7 @@ class MoveCommands():
     def drawLine(self, z, x, layer=0):
         if self.d != None:
             self.d.add(dxf.line((self.lastZ, self.lastX), \
-                                (self.lastZ, self.lastX), layer=layer))
+                                (z, x), layer=layer))
             self.lastX = x
             self.lastZ = z
             
