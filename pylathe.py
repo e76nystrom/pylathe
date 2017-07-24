@@ -1515,7 +1515,7 @@ class Taper(UpdatePass):
             self.endX = self.xStart - feed
             self.taperLength = self.feed / self.taper
             if self.taperLength < self.zLength:
-                self.startZ = taperLength
+                self.startZ = self.taperLength
                 self.startX = self.xStart
             else:
                 self.startZ = self.zLength
