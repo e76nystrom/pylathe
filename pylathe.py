@@ -1513,7 +1513,7 @@ class Taper(UpdatePass):
                 feed = self.passCount * self.actualFeed
             self.feed = feed
             self.endX = self.xStart - feed
-            taperLength = self.feed / self.taper
+            self.taperLength = self.feed / self.taper
             if taperLength < self.zLength:
                 self.startZ = taperLength
                 self.startX = self.xStart
@@ -1546,6 +1546,13 @@ class Taper(UpdatePass):
         if self.taperPanel.pause.GetValue():
             print("pause")
             m.quePause()
+        if m.passNum & 0x300 == 0:
+            if self.taperLength < self.zLength:
+                m.text("%2d %7.3f" % (m.passNum, self.startZ * 2.0), \
+                       (self.startZ, self.safeX), ABOVE)
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                       (self.endZ, self.startX), RIGHT)
         if self.taperX:
             m.moveX(self.startX, CMD_SYN)
             m.taperZX(self.endZ)
