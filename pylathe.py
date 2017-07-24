@@ -1548,7 +1548,7 @@ class Taper(UpdatePass):
             m.quePause()
         if m.passNum & 0x300 == 0:
             if self.taperLength < self.zLength:
-                m.text("%2d %7.3f" % (m.passNum, self.startZ * 2.0), \
+                m.text("%2d %7.3f" % (m.passNum, self.startZ), \
                        (self.startZ, self.safeX), CENTER | ABOVE)
             else:
                 m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
