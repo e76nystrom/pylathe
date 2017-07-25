@@ -348,7 +348,7 @@ class MoveCommands():
             self.lastZ = z
 
     def saveText(self, val, pos):
-        self.rText.append = (val, pos)
+        self.rText.append((val, pos))
 
     def printText(self, fmt, align, internal):
         lastY = 0
