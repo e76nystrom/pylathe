@@ -2092,7 +2092,7 @@ class ScrewThread(UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printText("%2d %7.4f %7.4f", LEFT)
+        self.m.printText("%2d %7.4f %7.4f", LEFT, self.internal)
             
         self.drawClose()
         self.m.drawClose()
