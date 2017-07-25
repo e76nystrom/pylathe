@@ -2219,6 +2219,9 @@ class ThreadPanel(wx.Panel):
         
         self.zRetract = addField(self, sizerG, "Z Retract", "thZRetract")
 
+        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+
         self.internal = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
@@ -2258,8 +2261,8 @@ class ThreadPanel(wx.Panel):
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
-        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        sizerG.Add(emptyCell)
+        sizerG.Add(emptyCell)
 
         #
 
