@@ -351,7 +351,8 @@ class MoveCommands():
         self.rText.append((val, pos))
 
     def printText(self, fmt, align, internal):
-        lastY = 0
+        lastY = 100
+        h = self.textH + self.vs
         for (val, pos) in self.rText:
             (x, y) = pos
             if not internal:
