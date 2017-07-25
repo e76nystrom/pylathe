@@ -2096,6 +2096,15 @@ class ScrewThread(UpdatePass):
         m.moveZ(self.startZ + self.zBackInc)
         m.moveZ(self.startZ)
         zOffset = 0.0
+        m.text("%7.3f" % (self.xStart * 2.0), \
+               (self.safeZ, self.xStart))
+        m.text("%7.3f" % (self.zStart), \
+               (self.zStart, self.xEnd), \
+               CENTER | (BELOW, ABOVE)[self.internal])
+        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+               (self.safeZ, self.safeX))
+        m.text("%7.3f" % (self.zEnd),
+               (self.zEnd, self.safeX), CENTER)
 
     def calculateThread(self, final=False, add=False):
         if not add:
@@ -2138,8 +2147,14 @@ class ScrewThread(UpdatePass):
         if self.threadPanel.pause.GetValue():
             print("pause")
             self.m.quePause()
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
+                   (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
+        if m.passNum & 0x300 == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
+                   (self.zEnd, self.safeX), RIGHT)
         startZ = self.startZ - self.zOffset
         self.m.moveZ(startZ + self.zBackInc)
         self.m.moveZ(startZ)
