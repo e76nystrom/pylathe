@@ -2081,7 +2081,7 @@ class ScrewThread(UpdatePass):
         stdout.flush()
 
     def threadSetup(self):
-        m = m.setup()
+        m = self.m
         m.quePause()
         m.startSpindle(getIntInfo('thRPM'))
         feedType = FEED_TPI
