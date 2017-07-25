@@ -356,11 +356,11 @@ class MoveCommands():
         for (val, pos) in self.rText:
             (x, y) = pos
             if not internal:
-                if lastY - y < self.textH:
-                    y = lastY - self.textH
+                if lastY - y < h:
+                    y = lastY - h
             else:
-                if y - lastY < self.textH:
-                    y = lastY + self.textH
+                if y - lastY < h:
+                    y = lastY + h
             lastY = y
             self.text(fmt % val, (x, y), align)
             
