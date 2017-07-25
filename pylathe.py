@@ -2032,17 +2032,16 @@ class ScrewThread(UpdatePass):
 
         self.xRetract = abs(getFloatVal(th.xRetract))
         
-        self.hFactor = getFloatVal(th.hFactor)
         self.angle = radians(getFloatVal(th.angle))
 
     def thread(self):
         self.getThreadParameters()
 
-        print("tpi %4.1f pitch %5.3f hFactor %5.3f lastFeed %6.4f" %
-              (self.tpi, self.pitch, self.hFactor, self.lastFeed))
+        print("tpi %4.1f pitch %5.3f lastFeed %6.4f" %
+              (self.tpi, self.pitch, self.lastFeed))
         
         if self.depth == 0:
-            self.depth = (cos(self.angle) * self.pitch) * self.hFactor
+            self.depth = (cos(self.angle) * self.pitch)
         self.tanAngle = tan(self.angle)
         actualWidth = 2 * self.depth * self.tanAngle
         self.area = area = 0.5 * self.depth * actualWidth
@@ -2174,8 +2173,7 @@ class ScrewThread(UpdatePass):
             self.m.quePause()
         if m.passNum & 0x300 == 0:
             m.saveText((m.passNum, self.startZ - self.zOffset, self.zOffset, \
-                        self.curX * 2.0, self.feed), \
-                       (self.safeZ, self.curX))
+                        self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
         # if m.passNum & 0x300 == 0:
@@ -2219,15 +2217,13 @@ class ThreadPanel(wx.Panel):
 
         self.zEnd = addField(self, sizerG, "Z End", "thZEnd")
         
-        self.thread = addField(self, sizerG, "Thread", "thPitch")
-        
-        self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
-        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thTPI'] = btn
+        self.zRetract = addField(self, sizerG, "Z Retract", "thZRetract")
 
-        self.mm = btn = wx.RadioButton(self, label="mm")
-        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thMM'] = btn
+        self.internal = cb = wx.CheckBox(self, -1,
+                                         style=wx.ALIGN_LEFT)
+        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
+        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['thInternal'] = cb
 
         # x parameters
 
@@ -2250,28 +2246,28 @@ class ThreadPanel(wx.Panel):
 
         #
 
+        self.thread = addField(self, sizerG, "Thread", "thPitch")
+        
+        self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
+        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['thTPI'] = btn
+
+        self.mm = btn = wx.RadioButton(self, label="mm")
+        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        info['thMM'] = btn
+
+        self.angle = addField(self, sizerG, "Angle", "thAngle")
+
+        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
+                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+
+        #
+
         self.xTaper = addField(self, sizerG, "Taper", "thXTaper")
 
         self.xExitRev = addField(self, sizerG, "Exit Rev", "thExitRev")
         
         self.lastFeed = addField(self, sizerG, "Last Feed", "thXLastFeed")
-
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-
-        #
-
-        self.angle = addField(self, sizerG, "Angle", "thAngle")
-
-        self.hFactor = addField(self, sizerG, "H Factor", "thHFactor")
-
-        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.internal = cb = wx.CheckBox(self, -1,
-                                         style=wx.ALIGN_LEFT)
-        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thInternal'] = cb
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -2324,7 +2320,6 @@ class ThreadPanel(wx.Panel):
         pass
 
     def OnInternal(self, e):
-        self.hFactor.SetValue(("0.75", "0.65")[self.internal.GetValue()])
 
     def sendData(self):
         try:
