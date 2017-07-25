@@ -2011,7 +2011,12 @@ class ScrewThread(UpdatePass):
         self.firstFeed = getFloatVal(th.firstFeed)
         self.lastFeed = getFloatVal(th.lastFeed)
         self.depth = getFloatVal(th.depth)
-        
+
+        if self.internal:
+            self.xEnd = self.xStart + self.depth
+        else:
+            self.xEnd = self.xStart - self.depth
+
         self.xRetract = abs(getFloatVal(th.xRetract))
         
         self.hFactor = getFloatVal(th.hFactor)
