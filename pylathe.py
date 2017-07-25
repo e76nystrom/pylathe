@@ -308,8 +308,6 @@ class MoveCommands():
         self.hS = self.textH
         self.angle = 0.0
         self.dbg = False
-        self.tX = 0.0
-        self.tY = 0.0
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
@@ -320,6 +318,7 @@ class MoveCommands():
         d.add_layer(REF, color=1)
         self.angle = 0.0
         self.d = d
+        self.rText = []
 
     def setAlign(self, angle):
         self.angle = angle
@@ -347,14 +346,26 @@ class MoveCommands():
                                 (z, x), layer=layer))
             self.lastX = x
             self.lastZ = z
+
+    def saveText(self, val, pos):
+        self.rText.append = (val, pos)
+
+    def printText(self, fmt, align, internal):
+        lastY = 0
+        for (val, pos) in self.rText:
+            (x, y) = pos
+            if not internal:
+                if lastY - y < self.textH:
+                    y = lastY - self.textH
+            else:
+                if y - lastY < self.textH:
+                    y = lastY + self.textH
+            lastY = y
+            self.text(fmt % val, (x, y), align)
             
     def text(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
             (x, y) = p0
-            if abs(y - self.tY) < self.textH:
-                y = self.tY - self.textH
-            self.tX = x
-            self.tY = y
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
@@ -2081,6 +2092,8 @@ class ScrewThread(UpdatePass):
         while self.updatePass():
             pass
 
+        self.m.printText("%2d %7.4f %7.4f", LEFT)
+            
         self.drawClose()
         self.m.drawClose()
         self.m.stopSpindle();
@@ -2159,13 +2172,13 @@ class ScrewThread(UpdatePass):
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
-                   (self.safeZ, self.curX))
+            m.saveText((m.passNum, self.startZ, self.curX * 2.0), \
+                       (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
-                   (self.zEnd, self.safeX), RIGHT)
+        # if m.passNum & 0x300 == 0:
+        #     m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
+        #            (self.zEnd, self.safeX), RIGHT)
         startZ = self.startZ - self.zOffset
         self.m.moveZ(startZ + self.zBackInc)
         self.m.moveZ(startZ)
