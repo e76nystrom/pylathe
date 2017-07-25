@@ -2173,7 +2173,8 @@ class ScrewThread(UpdatePass):
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
-            m.saveText((m.passNum, self.startZ, self.curX * 2.0), \
+            m.saveText((m.passNum, self.startZ - self.zOffset, \
+                        self.curX * 2.0), \
                        (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
