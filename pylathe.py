@@ -2082,10 +2082,14 @@ class ScrewThread(UpdatePass):
 
     def threadSetup(self):
         m = self.m
+        m.setLoc(self.zEnd, self.xStart)
+        m.drawLineZ(self.zStart, REF)
+        m.drawLineX(self.xEnd, REF)
+        m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         m.startSpindle(getIntInfo('thRPM'))
         feedType = FEED_TPI
-        if threadPanel.mm.GetValue():
+        if self.threadPanel.mm.GetValue():
             feedType = FEED_METRIC
         m.queFeedType(feedType)
         m.saveTaper(getFloatInfo('thXTaper'))
