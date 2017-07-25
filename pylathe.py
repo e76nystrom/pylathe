@@ -2064,7 +2064,7 @@ class ScrewThread(UpdatePass):
             self.p0 = (0, 0)
 
         if True:
-            self.m.draw("thread", self.xStart * 2.0, self.tpi)
+            self.m.draw("threada", self.xStart * 2.0, self.tpi)
             
         self.threadSetup()
 
