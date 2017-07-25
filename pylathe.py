@@ -1998,6 +1998,7 @@ class ScrewThread(UpdatePass):
         self.zEnd = getFloatVal(th.zEnd)
         self.zAccel = 0.0
         self.zBackInc = 0.003
+        self.safeZ = self.zStart + self.zBackInc
 
         if th.tpi.GetValue():
             self.tpi = getFloatVal(th.thread)
