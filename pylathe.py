@@ -2320,6 +2320,7 @@ class ThreadPanel(wx.Panel):
         pass
 
     def OnInternal(self, e):
+        pass
 
     def sendData(self):
         try:
