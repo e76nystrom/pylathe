@@ -2153,6 +2153,7 @@ class ScrewThread(UpdatePass):
             self.p0 = p1
 
     def threadPass(self):
+        m = self.m
         self.m.moveX(self.curX, CMD_JOG)
         if self.threadPanel.pause.GetValue():
             print("pause")
