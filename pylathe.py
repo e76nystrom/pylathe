@@ -2121,11 +2121,11 @@ class ScrewThread(UpdatePass):
         m.moveZ(self.safeZ)
         zOffset = 0.0
         m.text("%7.3f" % (self.xStart * 2.0), \
-               (self.safeZ, self.xStart))
+               (self.zEnd, self.xStart), RIGHT)
         m.text("%7.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
                CENTER | (BELOW, ABOVE)[self.internal])
-        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+        m.text("%7.3f" % (self.safeX * 2.0,), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd),
                (self.zEnd, self.safeX), CENTER | (ABOVE, BELOW)[self.internal])
