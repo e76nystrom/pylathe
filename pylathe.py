@@ -2008,7 +2008,7 @@ class ScrewThread(UpdatePass):
 
         self.zStart = getFloatVal(th.zStart)
         self.zEnd = getFloatVal(th.zEnd)
-        self.zRetract = getFloatVal(th.zRetrct)
+        self.zRetract = getFloatVal(th.zRetract)
         self.zAccel = 0.0
         self.zBackInc = 0.003
         self.safeZ = self.zStart + self.zRetract
