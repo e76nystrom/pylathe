@@ -931,10 +931,10 @@ class TurnPanel(wx.Panel):
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", "tuZStart")
-
         self.zEnd = addField(self, sizerG, "Z End", "tuZEnd")
         
+        self.zStart = addField(self, sizerG, "Z Start", "tuZStart")
+
         self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
 
         self.zRetract = addField(self, sizerG, "Z Retract", "tuZRetract")
@@ -1179,9 +1179,9 @@ class FacePanel(wx.Panel):
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", "faZStart")
-
         self.zEnd = addField(self, sizerG, "Z End", "faZEnd")
+
+        self.zStart = addField(self, sizerG, "Z Start", "faZStart")
 
         self.zFeed = addField(self, sizerG, "Z Feed", "faZFeed")
 
@@ -2008,9 +2008,10 @@ class ScrewThread(UpdatePass):
 
         self.zStart = getFloatVal(th.zStart)
         self.zEnd = getFloatVal(th.zEnd)
+        self.zRetract = getFloatVal(th.zRetrct)
         self.zAccel = 0.0
         self.zBackInc = 0.003
-        self.safeZ = self.zStart + self.zBackInc
+        self.safeZ = self.zStart + self.zRetract
 
         if th.tpi.GetValue():
             self.tpi = getFloatVal(th.thread)
@@ -2116,8 +2117,7 @@ class ScrewThread(UpdatePass):
         m.saveDepth(self.depth)
         m.zSynSetup(getFloatInfo('thPitch'))
         m.moveX(self.safeX)
-        m.moveZ(self.startZ + self.zBackInc)
-        m.moveZ(self.startZ)
+        m.moveZ(self.safeZ)
         zOffset = 0.0
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.safeZ, self.xStart))
@@ -2167,21 +2167,21 @@ class ScrewThread(UpdatePass):
 
     def threadPass(self):
         m = self.m
+        startZ = self.safeZ - self.zOffset
+        self.m.moveZ(startZ + self.zBackInc)
+        self.m.moveZ(startZ)
         self.m.moveX(self.curX, CMD_JOG)
         if self.threadPanel.pause.GetValue():
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
-            m.saveText((m.passNum, self.startZ - self.zOffset, self.zOffset, \
+            m.saveText((m.passNum, startZ, self.zOffset, \
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
         # if m.passNum & 0x300 == 0:
         #     m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
         #            (self.zEnd, self.safeX), RIGHT)
-        startZ = self.startZ - self.zOffset
-        self.m.moveZ(startZ + self.zBackInc)
-        self.m.moveZ(startZ)
 
     def threadAdd(self):
         if self.feed >= self.depth:
@@ -2213,10 +2213,10 @@ class ThreadPanel(wx.Panel):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.zStart = addField(self, sizerG, "Z Start", "thZStart")
-
         self.zEnd = addField(self, sizerG, "Z End", "thZEnd")
         
+        self.zStart = addField(self, sizerG, "Z Start", "thZStart")
+
         self.zRetract = addField(self, sizerG, "Z Retract", "thZRetract")
 
         sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
