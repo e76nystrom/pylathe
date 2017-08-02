@@ -354,7 +354,7 @@ class MoveCommands():
         if not internal:
             lastY = 999
         else:
-            lasty = 0
+            lastY = 0
         h = self.textH + self.vS
         for (val, pos) in self.rText:
             (x, y) = pos
