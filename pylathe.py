@@ -308,6 +308,7 @@ class MoveCommands():
         self.hS = self.textH
         self.angle = 0.0
         self.dbg = False
+        self.rText = None
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
@@ -348,7 +349,8 @@ class MoveCommands():
             self.lastZ = z
 
     def saveText(self, val, pos):
-        self.rText.append((val, pos))
+        if self.rText != None:
+            self.rText.append((val, pos))
 
     def printText(self, fmt, align, internal):
         if not internal:
