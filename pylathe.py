@@ -829,7 +829,7 @@ class Turn(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("turn", self.zStart, self.zEnd)
             
         self.turnSetup()
@@ -1071,7 +1071,7 @@ class Face(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setAlign(90)
 
@@ -1290,7 +1290,7 @@ class Cutoff():
 
         self.safeX = self.xStart + self.xRetract
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
         self.cutoffSetup()
@@ -1487,7 +1487,7 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" %
               (self.passes, self.cutAmount, self.actualFeed))
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup()
@@ -1623,7 +1623,7 @@ class Taper(UpdatePass):
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.xRetract
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup(True)
@@ -2084,11 +2084,11 @@ class ScrewThread(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
-        if True:
+        if getInfo('cfgDraw'):
             self.draw(self.xStart * 2.0, self.tpi)
             self.p0 = (0, 0)
 
-        if True:
+        if getInfo('cfgDraw'):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
             
         self.threadSetup()
@@ -4495,6 +4495,7 @@ class ConfigDialog(wx.Dialog):
             ("bLCD", 'cfgLCD'),
             ("fcy", "cfgFcy"),
             ("bDisable Commands", 'cfgCmdDis'),
+            ("bDraw Moves", 'cfgDraw'),
         )
         if XILINX:
             self.fields += (
