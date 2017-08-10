@@ -353,6 +353,8 @@ class MoveCommands():
             self.rText.append((val, pos))
 
     def printText(self, fmt, align, internal):
+        if self.rText == None:
+            return
         if not internal:
             lastY = 999
         else:
