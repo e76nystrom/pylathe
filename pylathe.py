@@ -2423,7 +2423,7 @@ class JogShuttle():
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, self.setX), (32, self.setZ),
+        self.buttonAction = ((16, self.setZ), (32, self.setX),
                              (64, self.setSpindle),
                              (128, None), (1, None))
         self.axisAction = None
@@ -2531,7 +2531,7 @@ class JogShuttle():
         # stdout.flush()
         index = abs(val)
         speed = jogShuttle.xSpeed[index]
-        if val < 0:
+        if val > 0:
             speed = -speed
         if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or 
             (jogShuttle.xCurSpeed <= 0 and speed <= 0)):
