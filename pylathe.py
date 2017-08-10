@@ -1495,7 +1495,7 @@ class Taper(UpdatePass):
         while self.updatePass():
             pass
 
-        m.printText("%2d %7.3f", LEFT, False)
+        self.m.printText("%2d %7.3f", LEFT, False)
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
