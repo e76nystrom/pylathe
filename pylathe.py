@@ -413,6 +413,7 @@ class MoveCommands():
             moveQue.put((opString, op, val))
 
     def queClear(self):
+        self.send = not getInfo('cfgCmdDis')
         while not moveQue.empty():
             moveQue.get()
 
@@ -778,7 +779,6 @@ class Turn(UpdatePass):
         UpdatePass.__init__(self)
         self.turnPanel = turnPanel
         global moveCommands
-        self.m = moveCommands
 
     def getTurnParameters(self):
         tu = self.turnPanel
@@ -4494,6 +4494,7 @@ class ConfigDialog(wx.Dialog):
             ("bDRO", 'cfgDRO'),
             ("bLCD", 'cfgLCD'),
             ("fcy", "cfgFcy"),
+            ("bDisable Commands", 'cfgCmdDis'),
         )
         if XILINX:
             self.fields += (
