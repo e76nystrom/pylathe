@@ -783,6 +783,7 @@ class Turn(UpdatePass):
         UpdatePass.__init__(self)
         self.turnPanel = turnPanel
         global moveCommands
+        self.m = moveCommands
 
     def getTurnParameters(self):
         tu = self.turnPanel
