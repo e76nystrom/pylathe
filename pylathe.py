@@ -3525,17 +3525,18 @@ class GotoDialog(wx.Dialog):
         global jogPanel
         try:
             loc = float(self.pos.GetValue())
-            moveCommands.queClear()
+            m = moveCommands
+            m.queClear()
             command('CMD_PAUSE')
             command('CLEARQUE')
             if self.axis == 0:
                 sendZData()
-                saveZOffset()
-                moveCommands.moveZ(loc)
+                m.saveZOffset()
+                m.moveZ(loc)
             else:
                 sendXData()
-                saveXOffset()
-                moveCommands.moveX(loc / 2.0)
+                m.saveXOffset()
+                m.moveX(loc / 2.0)
             command('CMD_RESUME')
             self.Show(False)
             jogPanel.focus()
