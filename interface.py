@@ -316,6 +316,9 @@ regList =\
     ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
     ["XFIND_HOME", "(1 << 6)", "find home"],
     ["XCLEAR_HOME", "(1 << 7)", "move off of home"],
+
+    ["M_FIND_PROBE", "(1 << 8)", "find home"],
+    ["M_CLEAR_PROBE", "(1 << 9)", "move off of home"],
      
     "x direction",
     
