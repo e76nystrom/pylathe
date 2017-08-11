@@ -3314,6 +3314,10 @@ class PosMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnZero, item)
 
+        item = wx.MenuItem(self, wx.NewId(), "Probe")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnProbe, item)
+
         if self.axis == 1:
             item = wx.MenuItem(self, wx.NewId(), "Home")
             self.Append(item)
@@ -3348,6 +3352,12 @@ class PosMenu(wx.Menu):
         else:
             updateXPos(0)
         jogPanel.focus()
+
+    def OnProbe(self, e):
+        dialog = SetPosDialog(jogPanel, self.axis)
+        dialog.SetPosition(self.getPosCtl())
+        dialog.Raise()
+        dialog.Show(True)
 
     def OnHomeX(self, e):
         queParm('X_HOME_DIST', getInfo('xHomeDist'))
@@ -3428,6 +3438,66 @@ class SetPosDialog(wx.Dialog):
         self.axis = axis
         pos = (10, 10)
         title = "Set %s" % (('Z Position', 'X Diameter')[axis])
+        wx.Dialog.__init__(self, frame, -1, title, pos,
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+                          wx.NORMAL, False, u'Consolas')
+        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        tc.SetFont(posFont)
+        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+       
+    def OnShow(self, e):
+        global done, jogPanel
+        if done:
+            return
+        if self.IsShown():
+            if self.axis == 0:
+                val = jogPanel.zPos.GetValue()
+            else:
+                val = jogPanel.xPos.GetValue()
+            self.pos.SetValue(val)
+            self.pos.SetSelection(-1, -1)
+
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnOk(None)
+        e.Skip()
+    
+    def OnOk(self, e):
+        global jogPanel
+        val = self.pos.GetValue()
+        try:
+            val = float(val)
+            if self.axis == 0:
+                updateZPos(val)
+            else:
+                updateXPos(val)
+        except ValueError:
+            print("ValueError on %s" % (val))
+            stdout.flush()
+        self.Show(False)
+        jogPanel.focus()
+
+class SetProbeDialog(wx.Dialog):
+    def __init__(self, frame, axis):
+        global info
+        self.axis = axis
+        pos = (10, 10)
+        title = "Probe %s" % (('Z', 'X Diameter')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
