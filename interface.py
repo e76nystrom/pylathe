@@ -232,10 +232,15 @@ parmList = \
     ["X_ENC_INCH", "x encoder scale", "int"],
     ["X_ENC_DIR", "x encoder direction", "int"],
 
-    "x home status",
+    "x home or probe status",
 
     ["X_HOME_DONE", "x home done", "int"],
     ["X_HOME_STATUS", "x home status", "int"],
+
+    "Z home or probe status",
+
+    ["Z_HOME_DONE", "z home done", "int"],
+    ["Z_HOME_STATUS", "z home status", "int"],
 
     "configuration",
 
@@ -298,6 +303,7 @@ regList =\
     ["CMD_SYN", "(3 << 0)", "move dist synchronized to rotation"],
     ["CMD_MAX", "(4 << 0)", "rapid move"],
     ["CMD_SPEED", "(5 << 0)", "jog at speed"],
+    ["JOGSLOW", "(6 << 0)", "slow jog for home or probe"],
 
     "z move command bits",
     
@@ -311,7 +317,6 @@ regList =\
     
     "x move command bits",
     
-    ["XJOGSLOW", "(6 << 0)", "slow jog for finding home"],
     ["X_SYN_START", "(1 << 4)", "start on sync pulse"],
     ["Z_SYN_TAPER", "(1 << 5)", "taper on z"],
     ["XFIND_HOME", "(1 << 6)", "find home"],
@@ -581,6 +586,9 @@ stateList =\
     ["X_FEED_SETUP", "setup x feed"],
     ["SAVE_RUNOUT", "save thread runout"],
     ["SAVE_DEPTH", "save thread depth"],
+    ["PROBE_Z", "porbe in z direction"],
+    ["PROBE_X", "porbe in x direction"],
+    ["PROBE_WAIT", "wait for probe to complete"],
     "};",
 
     "home control states",
