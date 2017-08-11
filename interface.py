@@ -332,6 +332,7 @@ regList =\
 
     ["FIND_HOME", "(1 << 0)", ""],
     ["CLEAR_HOME", "(1 << 1)", ""],
+    ["PROBE", "(1 << 2)", ""],
     ["HOME_ACTIVE", "0", ""],
     ["HOME_SUCCESS", "1", ""],
     ["HOME_FAIL", "2", ""],
