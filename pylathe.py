@@ -3354,7 +3354,7 @@ class PosMenu(wx.Menu):
         jogPanel.focus()
 
     def OnProbe(self, e):
-        dialog = SetPosDialog(jogPanel, self.axis)
+        dialog = SetProbeDialog(jogPanel, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
