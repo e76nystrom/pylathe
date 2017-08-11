@@ -200,6 +200,7 @@ parmList = \
     # "z home offsets",
 
     ["Z_HOME_OFFSET", "z offset home to zero", "float"],
+    ["Z_PROBE_LOC", "z probe location", "int"],
 
     # "z encoder",
 
@@ -224,6 +225,7 @@ parmList = \
     # "x home offset",
 
     ["X_HOME_OFFSET", "x offset home to zero", "float"],
+    ["X_PROBE_LOC", "x probe location", "int"],
 
     # "x encoder",
 
