@@ -3443,7 +3443,7 @@ class SetPosDialog(wx.Dialog):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(panel, -1, ('Z Position', 'X Diameter')[axis])
+        txt = wx.StaticText(self, -1, ('Z Position', 'X Diameter')[axis])
         sizerV.add(txt, flag=wx.CENTER|wx.ALL)
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
