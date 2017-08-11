@@ -3437,7 +3437,7 @@ class SetPosDialog(wx.Dialog):
         global info
         self.axis = axis
         pos = (10, 10)
-        title = "Set %s" % (('Z Position', 'X Diameter')[axis])
+        title = "Probe and Set %s" % (('Z Position', 'X Diameter')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
