@@ -557,6 +557,7 @@ stateList =\
     ["M_WAIT_Z", "wait for z to complete"],
     ["M_WAIT_X", "wait for x to complete"],
     ["M_WAIT_SPINDLE", "wait for spindle start"],
+    ["M_WAIT_PROBE", "wait for probe to complete"],
     "};",
 
     "move control commands",
@@ -588,7 +589,6 @@ stateList =\
     ["SAVE_DEPTH", "save thread depth"],
     ["PROBE_Z", "porbe in z direction"],
     ["PROBE_X", "porbe in x direction"],
-    ["PROBE_WAIT", "wait for probe to complete"],
     "};",
 
     "home control states",
