@@ -522,9 +522,19 @@ class MoveCommands():
             print("taperZX %7.4f" % (zLoc))
 
     def taperXZ(self, xLoc):
-        self.queMove('TAPER_XZ', 1, xLoc)
+        self.queMoveF('TAPER_XZ', 1, xLoc)
         if self.dbg:
             print("taperXZ %7.4f" % (xLoc))
+
+    def probeZ(self, zDist):
+        self.queMove('PROBE_Z', zDist)
+        if self.dbg:
+            print("probeZ %7.4f" % (zDist))
+
+    def probeX(self, xDist):
+        self.queMove('PROBE_X', xDist)
+        if self.dbg:
+            print("probeX %7.4f" % (xDist))
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
