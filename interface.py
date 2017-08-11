@@ -201,6 +201,7 @@ parmList = \
 
     ["Z_HOME_OFFSET", "z offset home to zero", "float"],
     ["Z_PROBE_LOC", "z probe location", "int"],
+    ["Z_PROBE_SPEED", "z probe speed", "float"],
 
     # "z encoder",
 
@@ -347,6 +348,8 @@ regList =\
     ["HOME_ACTIVE", "0", ""],
     ["HOME_SUCCESS", "1", ""],
     ["HOME_FAIL", "2", ""],
+    ["PROBE_SUCCESS", "1", ""],
+    ["PROBE_FAIL", "2", ""],
 
     # ["", "", ""],
 ]
