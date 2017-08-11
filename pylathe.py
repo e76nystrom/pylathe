@@ -2445,8 +2445,8 @@ class JogShuttle():
 
     def ShuttleInput(self, data):
         global jogShuttle, buttonRepeat
-        # print(data)
-        # stdout.flush()
+        print(data)
+        stdout.flush()
         outerRing = data[1]
         if outerRing != jogShuttle.lastOuterRing:
             if jogShuttle.axisAction != None:
