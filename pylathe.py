@@ -3452,63 +3452,63 @@ class SetPosDialog(wx.Dialog):
         try:
             val = float(val)
             if self.axis == 0:
-                updateZPos(val)
+                self.updateZPos(val)
             else:
-                updateXPos(val)
+                self.updateXPos(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
         jogPanel.focus()
 
-def updateZPos(val):
-    global jogPanel, zHomeOffset, zEncOffset
-    sendZData()
-    zLoc = getParm('Z_LOC')
-    if zLoc != None:
-        zLoc /= jogPanel.zStepsInch
-        zHomeOffset = zLoc - val
-        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
-        setParm('Z_HOME_OFFSET', zHomeOffset)
-        print("zHomeOffset %0.4f" % (zHomeOffset))
-    if DRO:
-        zEncPos = getParm('Z_ENC_POS')
-        print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
-        if zEncPos != None:
-            encPos = float(zEncPos) / jogPanel.zEncInch
-            setInfo('zEncPosition', "%0.4f" % (encPos))
-            if jogPanel.zEncInvert:
-                encPos = -encPos
-            zEncOffset = encPos - val
-            setInfo('zEncOffset', "%0.4f" % (zEncOffset))
-            setParm('Z_ENC_OFFSET', zEncOffset)
-            print("zEncOffset %0.4f" % (zEncOffset))
-    stdout.flush()
+    def updateZPos(val):
+        global jogPanel, zHomeOffset, zEncOffset
+        sendZData()
+        zLoc = getParm('Z_LOC')
+        if zLoc != None:
+            zLoc /= jogPanel.zStepsInch
+            zHomeOffset = zLoc - val
+            setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
+            setParm('Z_HOME_OFFSET', zHomeOffset)
+            print("zHomeOffset %0.4f" % (zHomeOffset))
+        if DRO:
+            zEncPos = getParm('Z_ENC_POS')
+            print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
+            if zEncPos != None:
+                encPos = float(zEncPos) / jogPanel.zEncInch
+                setInfo('zEncPosition', "%0.4f" % (encPos))
+                if jogPanel.zEncInvert:
+                    encPos = -encPos
+                zEncOffset = encPos - val
+                setInfo('zEncOffset', "%0.4f" % (zEncOffset))
+                setParm('Z_ENC_OFFSET', zEncOffset)
+                print("zEncOffset %0.4f" % (zEncOffset))
+        stdout.flush()
 
-def updateXPos(val):
-    global jogPanel, xHomeOffset, xEncOffset
-    val /= 2.0
-    sendXData()
-    xLoc = getParm('X_LOC')
-    if xLoc != None:
-        xLoc /= jogPanel.xStepsInch
-        xHomeOffset = xLoc - val
-        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
-        setParm('X_HOME_OFFSET', xHomeOffset)
-        print("xHomeOffset %0.4f" % (xHomeOffset))
-    if DRO:
-        xEncPos = getParm('X_ENC_POS')
-        print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
-        if xEncPos != None:
-            encPos = float(xEncPos) / jogPanel.xEncInch
-            setInfo('xEncPosition', "%0.4f" % (encPos))
-            if jogPanel.xEncInvert:
-                encPos = -encPos
-            xEncOffset = encPos - val
-            setInfo('xEncOffset', "%0.4f" % (xEncOffset))
-            setParm('X_ENC_OFFSET', xEncOffset)
-            print("xEncOffset %0.4f" % (xEncOffset))
-    stdout.flush()
+    def updateXPos(val):
+        global jogPanel, xHomeOffset, xEncOffset
+        val /= 2.0
+        sendXData()
+        xLoc = getParm('X_LOC')
+        if xLoc != None:
+            xLoc /= jogPanel.xStepsInch
+            xHomeOffset = xLoc - val
+            setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
+            setParm('X_HOME_OFFSET', xHomeOffset)
+            print("xHomeOffset %0.4f" % (xHomeOffset))
+        if DRO:
+            xEncPos = getParm('X_ENC_POS')
+            print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
+            if xEncPos != None:
+                encPos = float(xEncPos) / jogPanel.xEncInch
+                setInfo('xEncPosition', "%0.4f" % (encPos))
+                if jogPanel.xEncInvert:
+                    encPos = -encPos
+                xEncOffset = encPos - val
+                setInfo('xEncOffset', "%0.4f" % (xEncOffset))
+                setParm('X_ENC_OFFSET', xEncOffset)
+                print("xEncOffset %0.4f" % (xEncOffset))
+        stdout.flush()
 
 class SetProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
