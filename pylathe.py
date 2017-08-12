@@ -2598,6 +2598,7 @@ class JogPanel(wx.Panel):
         self.setXPosDialog = None
         self.fixXPosDialog = None
         self.xHome = False
+        self.probeAxis = 0;
         self.zStepsInch = 0
         self.xStepsInch = 0
         self.zEncInch = 0
@@ -3215,18 +3216,34 @@ class JogPanel(wx.Panel):
             self.statusText.SetLabel(text)
 
             if self.xHome:
-                val = getParm('X_HOME_STATUS')
-                if val != None:
-                    if val & HOME_SUCCESS:
-                        self.xHome = False
-                        print("home success")
-                        xHomed = True
+                if self.probeAxis == 0:
+                    val = getParm('X_HOME_STATUS')
+                    if val != None:
+                        if val & HOME_SUCCESS:
+                            self.homeDone("home success")
+                            xHomed = True
+                        elif val & HOME_FAIL:
+                            self.homeDone("home success")
+                elif self.probeAxis == 1:
+                    val = getParm('Z_HOME_STATUS')
+                    if val & PROBE_SUCCESS:
+                        self.homeDone("z probe success")
+                    elif val & PROBE_FAILURE:
+                        self.homeDone("z probe failure")
+                elif self.probeAxis == 2:
+                    val = getParm('X_HOME_STATUS')
+                    if val & PROBE_SUCCESS:
+                        self.homeDone("x probe success")
                         stdout.flush()
-                    elif val & HOME_FAIL:
-                        self.xHome = False
-                        print("home success")
-                        stdout.flush()
+                    elif val & PROBE_FAILURE:
+                        self.homeDone("x probe failure")
 
+    def homeDone(self, status):
+        self.xHome = False
+        self.probeStatus = 0
+        print(status)
+        stdout.flush()
+        
     def updateError(self, text):
         self.statusLine.SetLabel(text)
 
@@ -3367,6 +3384,7 @@ class PosMenu(wx.Menu):
         queParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
         jogPanel.xHome = True
+        jogPanel.probeAxis = 0
         jogPanel.focus()
 
     def OnGoto(self, e):
@@ -3382,55 +3400,6 @@ class PosMenu(wx.Menu):
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
-
-def updateZPos(val):
-    global jogPanel, zHomeOffset, zEncOffset
-    sendZData()
-    zLoc = getParm('Z_LOC')
-    if zLoc != None:
-        zLoc /= jogPanel.zStepsInch
-        zHomeOffset = zLoc - val
-        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
-        setParm('Z_HOME_OFFSET', zHomeOffset)
-        print("zHomeOffset %0.4f" % (zHomeOffset))
-    if DRO:
-        zEncPos = getParm('Z_ENC_POS')
-        print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
-        if zEncPos != None:
-            encPos = float(zEncPos) / jogPanel.zEncInch
-            setInfo('zEncPosition', "%0.4f" % (encPos))
-            if jogPanel.zEncInvert:
-                encPos = -encPos
-            zEncOffset = encPos - val
-            setInfo('zEncOffset', "%0.4f" % (zEncOffset))
-            setParm('Z_ENC_OFFSET', zEncOffset)
-            print("zEncOffset %0.4f" % (zEncOffset))
-    stdout.flush()
-
-def updateXPos(val):
-    global jogPanel, xHomeOffset, xEncOffset
-    val /= 2.0
-    sendXData()
-    xLoc = getParm('X_LOC')
-    if xLoc != None:
-        xLoc /= jogPanel.xStepsInch
-        xHomeOffset = xLoc - val
-        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
-        setParm('X_HOME_OFFSET', xHomeOffset)
-        print("xHomeOffset %0.4f" % (xHomeOffset))
-    if DRO:
-        xEncPos = getParm('X_ENC_POS')
-        print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
-        if xEncPos != None:
-            encPos = float(xEncPos) / jogPanel.xEncInch
-            setInfo('xEncPosition', "%0.4f" % (encPos))
-            if jogPanel.xEncInvert:
-                encPos = -encPos
-            xEncOffset = encPos - val
-            setInfo('xEncOffset', "%0.4f" % (xEncOffset))
-            setParm('X_ENC_OFFSET', xEncOffset)
-            print("xEncOffset %0.4f" % (xEncOffset))
-    stdout.flush()
 
 class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
@@ -3492,6 +3461,55 @@ class SetPosDialog(wx.Dialog):
         self.Show(False)
         jogPanel.focus()
 
+def updateZPos(val):
+    global jogPanel, zHomeOffset, zEncOffset
+    sendZData()
+    zLoc = getParm('Z_LOC')
+    if zLoc != None:
+        zLoc /= jogPanel.zStepsInch
+        zHomeOffset = zLoc - val
+        setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
+        setParm('Z_HOME_OFFSET', zHomeOffset)
+        print("zHomeOffset %0.4f" % (zHomeOffset))
+    if DRO:
+        zEncPos = getParm('Z_ENC_POS')
+        print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
+        if zEncPos != None:
+            encPos = float(zEncPos) / jogPanel.zEncInch
+            setInfo('zEncPosition', "%0.4f" % (encPos))
+            if jogPanel.zEncInvert:
+                encPos = -encPos
+            zEncOffset = encPos - val
+            setInfo('zEncOffset', "%0.4f" % (zEncOffset))
+            setParm('Z_ENC_OFFSET', zEncOffset)
+            print("zEncOffset %0.4f" % (zEncOffset))
+    stdout.flush()
+
+def updateXPos(val):
+    global jogPanel, xHomeOffset, xEncOffset
+    val /= 2.0
+    sendXData()
+    xLoc = getParm('X_LOC')
+    if xLoc != None:
+        xLoc /= jogPanel.xStepsInch
+        xHomeOffset = xLoc - val
+        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
+        setParm('X_HOME_OFFSET', xHomeOffset)
+        print("xHomeOffset %0.4f" % (xHomeOffset))
+    if DRO:
+        xEncPos = getParm('X_ENC_POS')
+        print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
+        if xEncPos != None:
+            encPos = float(xEncPos) / jogPanel.xEncInch
+            setInfo('xEncPosition', "%0.4f" % (encPos))
+            if jogPanel.xEncInvert:
+                encPos = -encPos
+            xEncOffset = encPos - val
+            setInfo('xEncOffset', "%0.4f" % (xEncOffset))
+            setParm('X_ENC_OFFSET', xEncOffset)
+            print("xEncOffset %0.4f" % (xEncOffset))
+    stdout.flush()
+
 class SetProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
         global info
@@ -3509,8 +3527,8 @@ class SetProbeDialog(wx.Dialog):
 
         posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+                                         style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
@@ -3547,13 +3565,31 @@ class SetProbeDialog(wx.Dialog):
         try:
             val = float(val)
             if self.axis == 0:
-                updateZPos(val)
+                self.probeZ(val)
             else:
-                updateXPos(val)
+                self.probeX(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
+        jogPanel.focus()
+
+    def probeZ(self, val):
+        queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
+        queParm('Z_PROBE_LOC', self.probeLoc)
+        moveCommands.probeZ(getInfo('zProbeDist'))
+        self.Show(False)
+        jogPanel.probeAxis = 1
+        jogPanel.xHome = True
+        jogPanel.focus()
+
+    def probeX(self, val):
+        queParm('X_HOME_SPEED', getInfo('xProbeSpeed'))
+        queParm('X_PROBE_LOC', self.probeLoc)
+        moveCommands.probeX(getInfo('xProbeDist'))
+        self.Show(False)
+        jogPanel.probeAxis = 2
+        jogPanel.xHome = True
         jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
