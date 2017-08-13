@@ -3661,7 +3661,7 @@ class GotoDialog(wx.Dialog):
             self.Show(False)
             jogPanel.focus()
         except ValueError:
-            print("ValueError")
+            print("ValueError on goto")
             stdout.flush()
 
 class FixXPosDialog(wx.Dialog):
