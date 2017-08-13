@@ -3550,8 +3550,8 @@ class SetProbeDialog(wx.Dialog):
                 val = jogPanel.zPos.GetValue()
             else:
                 val = jogPanel.xPos.GetValue()
-            self.pos.SetValue(val)
-            self.pos.SetSelection(-1, -1)
+            self.probeLoc.SetValue(val)
+            self.probeLoc.SetSelection(-1, -1)
 
     def OnKeyChar(self, e):
         keyCode = e.GetKeyCode()
@@ -3576,7 +3576,7 @@ class SetProbeDialog(wx.Dialog):
 
     def probeZ(self, val):
         queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
-        queParm('Z_PROBE_LOC', self.probeLoc)
+        queParm('Z_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeZ(getInfo('zProbeDist'))
         self.Show(False)
         jogPanel.probeAxis = 1
@@ -3585,7 +3585,7 @@ class SetProbeDialog(wx.Dialog):
 
     def probeX(self, val):
         queParm('X_HOME_SPEED', getInfo('xProbeSpeed'))
-        queParm('X_PROBE_LOC', self.probeLoc)
+        queParm('X_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeX(getInfo('xProbeDist'))
         self.Show(False)
         jogPanel.probeAxis = 2
