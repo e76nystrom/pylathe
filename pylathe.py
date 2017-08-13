@@ -3228,14 +3228,14 @@ class JogPanel(wx.Panel):
                     val = getParm('Z_HOME_STATUS')
                     if val & PROBE_SUCCESS:
                         self.homeDone("z probe success")
-                    elif val & PROBE_FAILURE:
+                    elif val & PROBE_FAIL:
                         self.homeDone("z probe failure")
                 elif self.probeAxis == 2:
                     val = getParm('X_HOME_STATUS')
                     if val & PROBE_SUCCESS:
                         self.homeDone("x probe success")
                         stdout.flush()
-                    elif val & PROBE_FAILURE:
+                    elif val & PROBE_FAIL:
                         self.homeDone("x probe failure")
 
     def homeDone(self, status):
@@ -3420,7 +3420,7 @@ class SetPosDialog(wx.Dialog):
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        btn = wx.Button(self, label='Ok', size=(60,-1))
+        btn = wx.Button(sel, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
         sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
