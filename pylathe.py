@@ -3561,7 +3561,7 @@ class SetProbeDialog(wx.Dialog):
     
     def OnOk(self, e):
         global jogPanel
-        val = self.pos.GetValue()
+        val = self.probeLoc.GetValue()
         try:
             val = float(val)
             if self.axis == 0:
