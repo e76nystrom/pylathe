@@ -95,7 +95,7 @@ def queParm(parm, val):
             valString = valString.rstrip('0')
         except ValueError:
             valString = "0.0"
-            print("ValueError %s" % (val))
+            print("ValueError queParm %s" % (val))
             stdout.flush()
     else:
         try:
@@ -173,7 +173,7 @@ def setParm(parm, val):
             valString = valString.rstrip('0')
         except ValueError:
             valString = "0.0"
-            print("ValueError %s" % (val))
+            print("ValueError setParm %s" % (val))
             stdout.flush()
     else:
         try:
