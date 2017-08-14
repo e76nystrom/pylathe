@@ -202,7 +202,7 @@ def getParm(parm, dbg=False):
         return(None)
     cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
     if dbg:
-        print("%-15s %s" % (parm, cmd.strip('\x01\r')), end="", flush=True)
+        print("%-15s %s " % (parm, cmd.strip('\x01\r')), end="")
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -227,6 +227,8 @@ def getParm(parm, dbg=False):
                     retVal = 0
                 if retVal & 0x80000000:
                     retVal -= 0x100000000
+                if dbg:
+                    print("%08x" % (retVal), flush=True)
                 return(retVal)
         rsp = rsp + tmp;
     commLock.release()
