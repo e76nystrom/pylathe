@@ -3577,7 +3577,7 @@ class SetProbeDialog(wx.Dialog):
     def probeZ(self, val):
         queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
         queParm('Z_PROBE_LOC', self.probeLoc.GetValue())
-        moveCommands.probeZ(getInfo('zProbeDist'))
+        moveCommands.probeZ(getFloatInfo('zProbeDist'))
         self.Show(False)
         jogPanel.probeAxis = 1
         jogPanel.xHome = True
