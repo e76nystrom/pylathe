@@ -3237,6 +3237,7 @@ class JogPanel(wx.Panel):
                         self.homeDone("z probe failure")
                 elif self.probeAxis == 2:
                     val = getParm('X_HOME_STATUS')
+                    print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
                         self.homeDone("x probe success")
                         stdout.flush()
