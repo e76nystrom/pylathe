@@ -3575,6 +3575,7 @@ class SetProbeDialog(wx.Dialog):
         jogPanel.focus()
 
     def probeZ(self, val):
+        moveCommands.queClear()
         queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
         queParm('Z_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeZ(getFloatInfo('zProbeDist'))
@@ -3584,6 +3585,7 @@ class SetProbeDialog(wx.Dialog):
         jogPanel.focus()
 
     def probeX(self, val):
+        moveCommands.queClear()
         queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
         queParm('X_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeX(getFloatInfo('xProbeDist'))
