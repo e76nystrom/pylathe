@@ -2,6 +2,7 @@
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 #!/usr/bin/python
 ################################################################################
+from __future__ import print_function
 import wx
 import wx.lib.inspection
 from time import sleep, time
