@@ -105,7 +105,7 @@ def queParm(parm, val):
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = ' %x %s' % (parmIndex, valString)
     if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
+        print("%-15s %s" % (parm, cmd.strip()))
         stdout.flush()
     length = len(cmd)
     if cmdLen + length > 80:
