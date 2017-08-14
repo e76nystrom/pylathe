@@ -183,7 +183,7 @@ def setParm(parm, val):
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = '\x01%x %x %s \r' % (cmds['LOADVAL'][0], parmIndex, valString)
     if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip()))
+        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
         stdout.flush()
     if ser is None:
         return
@@ -206,11 +206,14 @@ def setParm(parm, val):
         rsp = rsp + tmp
     commLock.release()
 
-def getParm(parm):
+def getParm(parm, dbg=False):
     global ser, cmds, parms, commLock, timeout
     if ser is None:
         return(None)
     cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
+    if dbg:
+        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
+        stdout.flush()
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
