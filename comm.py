@@ -47,7 +47,7 @@ def command(cmd):
     if xDbgPrint:
         if cmd != lastCmd:
             lastCmd = cmd
-            print("%-15s %s" % (cmd, cmdStr.strip()))
+            print("%-15s %s" % (cmd, cmdStr.strip('\x01\r')))
             stdout.flush()
     if ser is None:
         return(None);
@@ -60,7 +60,7 @@ def command(cmd):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("timeout %s" % (cmd.strip()))
+                print("timeout %s" % (cmd.strip('\x01\r')))
                 stdout.flush()
             raise commTimeout()
             break
@@ -105,7 +105,7 @@ def queParm(parm, val):
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = ' %x %s' % (parmIndex, valString)
     if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip()))
+        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
         stdout.flush()
     length = len(cmd)
     if cmdLen + length > 80:
@@ -126,7 +126,7 @@ def sendMulti():
     parmList = []
     cmdLen = cmdOverhead
     if xDbgPrint:
-        print("%-15s %s" % ('LOADMULTI', cmd))
+        print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
         stdout.flush()
     if ser is None:
         return
