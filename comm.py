@@ -23,8 +23,7 @@ def openSerial(port, rate):
     try:
         ser = serial.Serial(port, 57600, timeout=1)
     except IOError:
-        print("unable to open port")
-        stdout.flush()
+        print("unable to open port", flush=True)
 
 class commTimeout(Exception):
     pass
@@ -47,8 +46,7 @@ def command(cmd):
     if xDbgPrint:
         if cmd != lastCmd:
             lastCmd = cmd
-            print("%-15s %s" % (cmd, cmdStr.strip('\x01\r')))
-            stdout.flush()
+            print("%-15s %s" % (cmd, cmdStr.strip('\x01\r')), flush=True)
     if ser is None:
         return(None);
     commLock.acquire(True)
@@ -60,8 +58,7 @@ def command(cmd):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("timeout %s" % (cmd.strip('\x01\r')))
-                stdout.flush()
+                print("timeout %s" % (cmd.strip('\x01\r')), flush=True)
             raise commTimeout()
             break
         if (tmp == '*'):
@@ -95,8 +92,7 @@ def queParm(parm, val):
             valString = valString.rstrip('0')
         except ValueError:
             valString = "0.0"
-            print("ValueError queParm %s %s" % (parm, val))
-            stdout.flush()
+            print("ValueError queParm %s %s" % (parm, val), flush=True)
     else:
         try:
             valString = "x%x" % (int(val))
@@ -105,8 +101,7 @@ def queParm(parm, val):
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = ' %x %s' % (parmIndex, valString)
     if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip()))
-        stdout.flush()
+        print("%-15s %s" % (parm, cmd.strip()), flush=True)
     length = len(cmd)
     if cmdLen + length > 80:
         sendMulti()
@@ -126,8 +121,7 @@ def sendMulti():
     parmList = []
     cmdLen = cmdOverhead
     if xDbgPrint:
-        print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
-        stdout.flush()
+        print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r')), flush=True)
     if ser is None:
         return
     commLock.acquire(True)
@@ -139,8 +133,7 @@ def sendMulti():
             commLock.release()
             if not timeout:
                 timeout = True
-                print("setParm timeout %s" % (parm))
-                stdout.flush()
+                print("setParm timeout %s" % (parm), flush=True)
             raise commTimeout()
             break;
         if (tmp == '*'):
@@ -173,8 +166,7 @@ def setParm(parm, val):
             valString = valString.rstrip('0')
         except ValueError:
             valString = "0.0"
-            print("ValueError setParm %s %s" % (parm, val))
-            stdout.flush()
+            print("ValueError setParm %s %s" % (parm, val), flush=True)
     else:
         try:
             valString = "x%x" % (int(val))
@@ -183,8 +175,7 @@ def setParm(parm, val):
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
     cmd = '\x01%x %x %s \r' % (cmds['LOADVAL'][0], parmIndex, valString)
     if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
-        stdout.flush()
+        print("%-15s %s" % (parm, cmd.strip('\x01\r')), flush=True)
     if ser is None:
         return
     commLock.acquire(True)
@@ -196,8 +187,7 @@ def setParm(parm, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("setParm timeout %s" % (parm))
-                stdout.flush()
+                print("setParm timeout %s" % (parm), flush=True)
             raise commTimeout()
             break;
         if (tmp == '*'):
@@ -212,8 +202,7 @@ def getParm(parm, dbg=False):
         return(None)
     cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
     if dbg:
-        print("%-15s %s" % (parm, cmd.strip('\x01\r')))
-        stdout.flush()
+        print("%-15s %s" % (parm, cmd.strip('\x01\r')), end="", flush=True)
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -223,8 +212,7 @@ def getParm(parm, dbg=False):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("getParm timeout %s" % (parm))
-                stdout.flush()
+                print("getParm timeout %s" % (parm), flush=True)
             raise commTimeout()
             break;
         if tmp == '*':
@@ -235,8 +223,7 @@ def getParm(parm, dbg=False):
                 try:
                     retVal = int(result[2], 16)
                 except:
-                    print("getParm error on %s" % (result))
-                    stdout.flush()
+                    print("getParm error on %s" % (result), flush=True)
                     retVal = 0
                 if retVal & 0x80000000:
                     retVal -= 0x100000000
@@ -259,8 +246,7 @@ def getString():
             commLock.release()
             if not timeout:
                 timeout = True
-                print("getString timeout")
-                stdout.flush()
+                print("getString timeout", flush=True)
             raise commTimeout()
             break;
         if tmp == '*':
@@ -275,13 +261,12 @@ def getString():
 def setXReg(reg, val):
     global ser, xRegs, cmds, comLock, timeout, xDbgPrint
     if not (reg in xRegs):
-        print("invalid register " + reg)
-        stdout.flush()
+        print("invalid register " + reg, flush=True)
         return
     val = int(val)
     if xDbgPrint:
-        print("%-12s %2x %8x %12d" % (reg, xRegs[reg], val & 0xffffffff, val))
-        stdout.flush()
+        print("%-12s %2x %8x %12d" % \
+              (reg, xRegs[reg], val & 0xffffffff, val), flush=True)
     if ser is None:
         return
     # cmd = '\x01%x %x %08x ' % (cmds['LOADXREG'][0], xRegs[reg], \
@@ -388,14 +373,12 @@ def sendMove(opString, op, val):
         valStr = val
         prtStr = str
     else:
-        print("sendMove val invalid type")
-        stdout.flush()
+        print("sendMove val invalid type", flush=True)
         return
     # cmd = '\x01%x x%x %s ' % (cmds['QUEMOVE'][0], op, valStr)
     cmd = '\x01%x x%x %s \r' % (cmds['QUEMOVE'][0], op, valStr)
     if xDbgPrint:
-        print("cmd %-14s %3x %s" % (opString, op, prtStr))
-        stdout.flush()
+        print("cmd %-14s %3x %s" % (opString, op, prtStr), flush=True)
     if ser is None:
         return
     commLock.acquire(True)
@@ -407,8 +390,7 @@ def sendMove(opString, op, val):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("sendMove timeout")
-                stdout.flush()
+                print("sendMove timeout", flush=True)
             raise commTimeout()
             break;
         if (tmp == '*'):
@@ -432,8 +414,7 @@ def getQueueStatus():
             commLock.release()
             if not timeout:
                 timeout = True
-                print("getQueStatus timeout")
-                stdout.flush()
+                print("getQueStatus timeout", flush=True)
             raise commTimeout()
             break;
         if (tmp == '*'):
