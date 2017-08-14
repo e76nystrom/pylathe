@@ -3584,9 +3584,9 @@ class SetProbeDialog(wx.Dialog):
         jogPanel.focus()
 
     def probeX(self, val):
-        queParm('X_HOME_SPEED', getInfo('xProbeSpeed'))
+        queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
         queParm('X_PROBE_LOC', self.probeLoc.GetValue())
-        moveCommands.probeX(getInfo('xProbeDist'))
+        moveCommands.probeX(getFloatInfo('xProbeDist'))
         self.Show(False)
         jogPanel.probeAxis = 2
         jogPanel.xHome = True
