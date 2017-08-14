@@ -3180,6 +3180,10 @@ class JogPanel(wx.Panel):
         print(val)
         stdout.flush()
 
+    def probe(self, 0):
+        self.xHome = True
+        self.probeAxis = val
+
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset, xHomed
         if len(val) == 7:
@@ -3383,8 +3387,7 @@ class PosMenu(wx.Menu):
         val = (-1, 1)[info['xHomeDir'].GetValue()]
         queParm('X_HOME_DIR', val)
         command('XHOMEAXIS')
-        jogPanel.xHome = True
-        jogPanel.probeAxis = 0
+        jogPanel.probe(0)
         jogPanel.focus()
 
     def OnGoto(self, e):
@@ -3580,8 +3583,7 @@ class SetProbeDialog(wx.Dialog):
         queParm('Z_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeZ(getFloatInfo('zProbeDist'))
         self.Show(False)
-        jogPanel.probeAxis = 1
-        jogPanel.xHome = True
+        jogPanel.probe(1)
         jogPanel.focus()
 
     def probeX(self, val):
@@ -3590,8 +3592,7 @@ class SetProbeDialog(wx.Dialog):
         queParm('X_PROBE_LOC', self.probeLoc.GetValue())
         moveCommands.probeX(getFloatInfo('xProbeDist'))
         self.Show(False)
-        jogPanel.probeAxis = 2
-        jogPanel.xHome = True
+        jogPanel.probe(2)
         jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
