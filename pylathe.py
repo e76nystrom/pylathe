@@ -3180,7 +3180,7 @@ class JogPanel(wx.Panel):
         print(val)
         stdout.flush()
 
-    def probe(self, 0):
+    def probe(self, val):
         self.xHome = True
         self.probeAxis = val
 
