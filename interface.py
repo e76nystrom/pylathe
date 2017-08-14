@@ -192,18 +192,18 @@ parmList = \
     
     "index pulse variables",
 
-    ["INDEX_PRE_SCALER", "index prescaler", "int"],
+    ["INDEX_PRE_SCALER", "index pre scaler", "int"],
     ["LAST_INDEX_PERIOD", "last index period", "int"],
     ["INDEX_PERIOD", "index period", "int"],
-    ["REV_COUNTER", "revolutin counter", "unsigned int"],
+    ["REV_COUNTER", "revolution counter", "unsigned int"],
 
-    # "z home offsets",
+    "z home offsets",
 
     ["Z_HOME_OFFSET", "z offset home to zero", "float"],
     ["Z_PROBE_LOC", "z probe location", "int"],
     ["Z_PROBE_SPEED", "z probe speed", "float"],
 
-    # "z encoder",
+    "z encoder",
 
     ["Z_ENC_POS", "z encoder location", "int"],
     ["Z_ENC_OFFSET", "z encoder to zero", "float"],
