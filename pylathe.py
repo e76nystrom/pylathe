@@ -58,6 +58,7 @@ def saveInfo(file):
 
 def readInfo(file):
     global info
+    info = {}
     try:
         f = open(file, 'r')
         for line in f:
@@ -156,14 +157,11 @@ def getInitialInfo(key):
         return(False)
 
 configFile = "config.txt"
-info = {}
 readInfo(configFile)
 
 XILINX = getInitialInfo('cfgXilinx')
 DRO = getInitialInfo('cfgDRO')
 STEPPER_DRIVE = getInitialInfo('spStepDrive')
-
-info = {}                       # clear info
 
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
