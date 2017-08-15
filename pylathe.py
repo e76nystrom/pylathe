@@ -3242,6 +3242,7 @@ class JogPanel(wx.Panel):
                     # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
                         zHomeOffset = float(z) - self.probeLoc
+                        print("zHomeOffset %7.4f" % (zHomeOffset))
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
@@ -3251,6 +3252,7 @@ class JogPanel(wx.Panel):
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
                         xHomeOffset = float(x) - self.probeLoc
+                        print("xHomeOffset %7.4f" % (xHomeOffset))
                         self.probeLoc = 0.0
                         self.homeDone("x probe success")
                         stdout.flush()
