@@ -3272,12 +3272,13 @@ class JogPanel(wx.Panel):
                     val = getParm(Z_HOME_STATUS)
                     if val & PROBE_SUCCESS:
                         zHomeOffset = zLoc - self.probeLoc
+                        setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
                         print("z %s zLoc %7.4f probeLoc %7.4f "\
                               "zHomeOffset %7.4f" % \
                               (z, zLoc, self.probeLoc, zHomeOffset))
                         if DRO:
                             zDROOffset = zDroLoc - self.probeLoc
-                            setInfo('zDROOffset', "%0.4f" % (zDROOffset))
+                            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                             setParm(Z_DRO_OFFSET, zDROOffset)
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
@@ -3287,10 +3288,10 @@ class JogPanel(wx.Panel):
                     val = getParm(X_HOME_STATUS)
                     if val & PROBE_SUCCESS:
                         xHomeOffset = xLoc - self.probeLoc
-                        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
+                        setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
                         if DRO:
                             xDROOffset = xDroPos - self.probeLoc
-                            setInfo('xDROOffset', "%0.4f" % (xDROOffset))
+                            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
                             setParm(X_DRO_OFFSET, xDROOffset)
                         print("x %s xLoc %7.4f probeLoc %7.4f "\
                               "xHomeOffset %7.4f" % \
