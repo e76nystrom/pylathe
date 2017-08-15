@@ -202,12 +202,12 @@ parmList = \
     ["Z_HOME_OFFSET", "z offset home to zero", "float"],
     ["Z_PROBE_SPEED", "z probe speed", "float"],
 
-    "z encoder",
+    "z dro",
 
-    ["Z_ENC_POS", "z encoder location", "int"],
-    ["Z_ENC_OFFSET", "z encoder to zero", "float"],
-    ["Z_ENC_INCH", "z encoder scale", "int"],
-    ["Z_ENC_DIR", "z encoder direction", "int"],
+    ["Z_DRO_POS", "z dro location", "int"],
+    ["Z_DRO_OFFSET", "z dro to zero", "float"],
+    ["Z_DRO_INCH", "z dro scale", "int"],
+    ["Z_DRO_DIR", "z dro direction", "int"],
 
     "x home parameters",
 
@@ -227,12 +227,12 @@ parmList = \
 
     ["X_HOME_OFFSET", "x offset home to zero", "float"],
 
-    # "x encoder",
+    # "x dro",
 
-    ["X_ENC_POS", "x encoder location", "int"],
-    ["X_ENC_OFFSET", "x encoder to zero", "float"],
-    ["X_ENC_INCH", "x encoder scale", "int"],
-    ["X_ENC_DIR", "x encoder direction", "int"],
+    ["X_DRO_POS", "x dro location", "int"],
+    ["X_DRO_OFFSET", "x dro to zero", "float"],
+    ["X_DRO_INCH", "x dro scale", "int"],
+    ["X_DRO_DIR", "x dro direction", "int"],
 
     "x home or probe status",
 
@@ -259,7 +259,7 @@ parmList = \
 
     "encoder counts per revolution",
 
-    ["ENC_MAX", "encoder counts per revolution", "uint16_t"],
+    ["ENC_MAX", "spindle encoder counts per revolution", "uint16_t"],
 
     "test encoder setup variables",
 
