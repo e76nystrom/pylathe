@@ -3992,7 +3992,7 @@ class MainFrame(wx.Frame):
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
                 sendXData()
-                val = getInfo(jogXPos)
+                val = getInfo('jogXPos')
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
