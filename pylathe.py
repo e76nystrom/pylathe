@@ -58,7 +58,6 @@ def saveInfo(file):
 
 def readInfo(file):
     global info
-    info = {}
     try:
         f = open(file, 'r')
         for line in f:
@@ -163,6 +162,8 @@ readInfo(configFile)
 XILINX = getInitialInfo('cfgXilinx')
 DRO = getInitialInfo('cfgDRO')
 STEPPER_DRIVE = getInitialInfo('spStepDrive')
+
+info = {}
 
 from setup import createCommands, createParameters,\
     createCtlBits, createCtlStates
