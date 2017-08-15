@@ -3468,7 +3468,7 @@ class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
         self.axis = axis
         pos = (10, 10)
-        title = "Probe %s" % (('Z', 'X')[axis])
+        title = "Position %s" % (('Z', 'X')[axis])
         wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
