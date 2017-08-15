@@ -90,17 +90,23 @@ def readInfo(file):
         print(e)
         stdout.flush()
 
-def initInfo(field, val):
+def initInfo(key, val):
     global info
-    info[field] = val
+    if key in info:
+        print("initInfo duplicate key %s" % (key))
+        stdout.flush()
+    info[key] = val
 
-def newInfo(field, val):
+def newInfo(key, val):
     global info
-    info[field] = InfoValue(val)
+    if key in info:
+        print("newInfo duplicate key %s" % (key))
+        stdout.flush()
+    info[key] = InfoValue(val)
 
-def setInfo(field, val):
+def setInfo(key, val):
     global info
-    info[field].SetValue(val)
+    info[key].SetValue(val)
 
 def getInfo(key):
     global info
