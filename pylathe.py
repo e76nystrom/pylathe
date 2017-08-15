@@ -2604,7 +2604,8 @@ class JogPanel(wx.Panel):
         self.setXPosDialog = None
         self.fixXPosDialog = None
         self.xHome = False
-        self.probeAxis = 0;
+        self.probeAxis = 0
+        self.probeLoc = 0.0
         self.zStepsInch = 0
         self.xStepsInch = 0
         self.zEncInch = 0
@@ -3186,9 +3187,11 @@ class JogPanel(wx.Panel):
         print(val)
         stdout.flush()
 
-    def probe(self, val):
+    def probe(self, axis, probeLoc=None):
         self.xHome = True
-        self.probeAxis = val
+        self.probeAxis = axis
+        if probeLoc != None:
+            self.probeLoc = probeLoc
 
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset, xHomed
@@ -3238,6 +3241,8 @@ class JogPanel(wx.Panel):
                     val = getParm('Z_HOME_STATUS')
                     # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
+                        zHomeOffset = float(z) - self.probeLoc
+                        self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
                         self.homeDone("z probe failure")
@@ -3245,6 +3250,8 @@ class JogPanel(wx.Panel):
                     val = getParm('X_HOME_STATUS')
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
+                        xHomeOffset = float(x) - self.probeLoc
+                        self.probeLoc = 0.0
                         self.homeDone("x probe success")
                         stdout.flush()
                     elif val & PROBE_FAIL:
@@ -3573,41 +3580,37 @@ class SetProbeDialog(wx.Dialog):
     
     def OnOk(self, e):
         global jogPanel
-        val = float(self.probeLoc.GetValue())
+        val = self.probeLoc.GetValue()
         try:
-            val = float(val)
+            probeLoc = float(val)
             if self.axis == 0:
-                val = "%d" % (int(val * jogPanel.zStepsInch))
-                self.probeZ(val)
+                self.probeZ(probeLoc)
             else:
-                val = "%d" % (int(val * jogPanel.xStepsInch))
-                self.probeX(val)
+                self.probeX(probeLoc)
         except ValueError:
-            print("ValueError on %s" % (val))
+            print("probe ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
         jogPanel.focus()
 
-    def probeZ(self, val):
+    def probeZ(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
         queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
-        queParm('Z_PROBE_LOC', val)
         queParm('Z_HOME_STATUS', '0');
         moveCommands.probeZ(getFloatInfo('zProbeDist'))
         self.Show(False)
-        jogPanel.probe(1)
+        jogPanel.probe(1, probeLoc)
         jogPanel.focus()
 
-    def probeX(self, val):
+    def probeX(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
         queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-        queParm('X_PROBE_LOC', val)
         queParm('X_HOME_STATUS', '0');
         moveCommands.probeX(getFloatInfo('xProbeDist'))
         self.Show(False)
-        jogPanel.probe(2)
+        jogPanel.probe(2, probeLoc)
         jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
