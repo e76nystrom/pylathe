@@ -2740,8 +2740,8 @@ class JogPanel(wx.Panel):
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                            style=wx.TE_RIGHT)
+            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
+                                            size=(120, -1), style=wx.TE_RIGHT)
             initInfo('encZPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
@@ -2754,8 +2754,8 @@ class JogPanel(wx.Panel):
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                            style=wx.TE_RIGHT)
+            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
+                                            size=(120, -1), style=wx.TE_RIGHT)
             initInfo('droXPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
