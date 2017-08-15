@@ -1,6 +1,6 @@
 #!/cygdrive/c/Python27/Python.exe
 
-cfgList = \
+configList = \
 ( \
     ('cfgCmdDis', 'config disable sending commands'),
     ('cfgDRO', 'config dro present'),
