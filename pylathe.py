@@ -240,7 +240,7 @@ def fieldList(panel, sizer, fields):
 def addFieldText(panel, sizer, label, key):
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                   border=2)
         initInfo(key + 'Text', txt)
 
@@ -253,7 +253,7 @@ def addField(panel, sizer, label, key):
     global info
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                   border=2)
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
@@ -267,7 +267,7 @@ def addField(panel, sizer, label, key):
 def addCheckBox(panel, sizer, label, key):
     global info
     txt = wx.StaticText(panel, -1, label)
-    sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+    sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
               border=2)
 
     cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
@@ -838,7 +838,7 @@ class Turn(UpdatePass):
         self.setupAction(self.calculateTurnPass, self.turnPass)
 
         self.turnPanel.passes.SetValue("%d" % (self.passes))
-        print("xCut %5.3f passes %d internal %s" %
+        print("xCut %5.3f passes %d internal %s" % \
               (self.xCut, self.passes, self.internal))
 
         if self.internal:
@@ -887,7 +887,7 @@ class Turn(UpdatePass):
                CENTER | (BELOW, ABOVE)[self.internal])
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd),
+        m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), CENTER)
 
     def calculateTurnPass(self, final=False):
@@ -1006,9 +1006,9 @@ class TurnPanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "tuRPM")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
+        self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo('tuPause', cb)
@@ -1086,7 +1086,7 @@ class Face(UpdatePass):
         self.setupAction(self.calculateFacePass, self.facePass)
 
         self.facePanel.passes.SetValue("%d" % (self.passes))
-        print("zCut %5.3f passes %d internal %s" %
+        print("zCut %5.3f passes %d internal %s" % \
               (self.zCut, self.passes, self.internal))
 
         if self.internal:
@@ -1144,7 +1144,7 @@ class Face(UpdatePass):
         self.feed = feed
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
-        print("pass %2d feed %5.3f z %5.3f" %
+        print("pass %2d feed %5.3f z %5.3f" % \
               (self.passCount, feed, self.curZ))
 
     def facePass(self):
@@ -1245,9 +1245,9 @@ class FacePanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "faRPM")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
+        self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo('fdPause', cb)
@@ -1399,9 +1399,9 @@ class CutoffPanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "cuRPM")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
+        self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo('cuPause', cb)
@@ -1477,7 +1477,7 @@ class Taper(UpdatePass):
         self.finish = abs(getFloatVal(tp.finish))
 
         totalTaper = taperInch * self.zLength
-        print("taperX %s totalTaper %5.3f taperInch %6.4f" %
+        print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
     def externalTaper(self, taperInch):
@@ -1511,7 +1511,7 @@ class Taper(UpdatePass):
         self.setupAction(self.calcExternalPass, self.externalPass)
 
         self.taperPanel.passes.SetValue("%d" % (self.passes))
-        print("passes %d cutAmount %5.3f feed %6.3f" %
+        print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
         if getInfo('cfgDraw'):
@@ -1551,7 +1551,7 @@ class Taper(UpdatePass):
                (self.zStart, self.xEnd), CENTER | (BELOW, ABOVE)[internal])
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd),
+        m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), RIGHT | BELOW)
 
     def calcExternalPass(self, final=False):
@@ -1642,7 +1642,7 @@ class Taper(UpdatePass):
         self.setupAction(self.calcInternalPass, self.internalPass)
 
         self.taperPanel.passes.SetValue("%d" % (self.passes))
-        print("passes %d cutAmount %5.3f feed %6.3f" %
+        print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
         self.startZ = 0.0
@@ -1730,19 +1730,19 @@ class Taper(UpdatePass):
 class TaperPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
-        self.taperDef = [("Custom",),
-                         ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12),
-                         ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12),
-                         ("MT3",  0.9380, 0.7780, 3.19, 0.6024/12),
-                         ("MT4",  1.2310, 1.0200, 4.06, 0.5233/12),
-                         ("BS5",  0.5388, 0.4500, 2.13, 0.5016/12),
-                         ("BS11", 1.4978, 1.2500, 5.94, 0.5010/12),
-                         ("5C",   1.4800, 1.2500, 0.61, 20.0),
-                         ("ER32", 1.2598, 0.9252, 0, 16.0),
-                         ("R8",   1.2500, 0.9400, 0.95, 16.51),
-                         ("", 0., 0., 0, 0.),
-                         ("", 0., 0., 0, 0.),
-                         ("", 0., 0., 0, 0.),
+        self.taperDef = [("Custom",), \
+                         ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
+                         ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
+                         ("MT3",  0.9380, 0.7780, 3.19, 0.6024/12), \
+                         ("MT4",  1.2310, 1.0200, 4.06, 0.5233/12), \
+                         ("BS5",  0.5388, 0.4500, 2.13, 0.5016/12), \
+                         ("BS11", 1.4978, 1.2500, 5.94, 0.5010/12), \
+                         ("5C",   1.4800, 1.2500, 0.61, 20.0), \
+                         ("ER32", 1.2598, 0.9252, 0, 16.0), \
+                         ("R8",   1.2500, 0.9400, 0.95, 16.51), \
+                         ("", 0., 0., 0, 0.), \
+                         ("", 0., 0., 0, 0.), \
+                         ("", 0., 0., 0, 0.), \
         ]
 
         self.taperList = []
@@ -1765,8 +1765,8 @@ class TaperPanel(wx.Panel):
         txt = wx.StaticText(self, -1, "Select Taper")
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
-                                            choices=self.taperList,
+        self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
+                                            choices=self.taperList, \
                                             style=wx.CB_READONLY)
         initInfo('tpTaperSel', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
@@ -1788,7 +1788,7 @@ class TaperPanel(wx.Panel):
 
         # x parameters
 
-        self.largeDiam = addFieldText(self, sizerG, "Large Diam",
+        self.largeDiam = addFieldText(self, sizerG, "Large Diam", \
                                       "tpLargeDiam")
 
         self.smallDiam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
@@ -1800,7 +1800,7 @@ class TaperPanel(wx.Panel):
         # taper parameters
 
         self.deltaBtn = btn = wx.RadioButton(self, label="Z")
-        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
+        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
         initInfo('tpDeltaBtn', btn)
@@ -1812,7 +1812,7 @@ class TaperPanel(wx.Panel):
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.angleBtn = btn = wx.RadioButton(self, label="Angle")
-        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
+        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
         initInfo('tpAngleBtn', btn)
@@ -1855,9 +1855,9 @@ class TaperPanel(wx.Panel):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2,
+        sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.internal = cb = wx.CheckBox(self, -1,
+        self.internal = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
@@ -1867,9 +1867,9 @@ class TaperPanel(wx.Panel):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
+        self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo('tpPause', cb)
@@ -2072,7 +2072,7 @@ class ScrewThread(UpdatePass):
     def thread(self):
         self.getThreadParameters()
 
-        print("tpi %4.1f pitch %5.3f lastFeed %6.4f" %
+        print("tpi %4.1f pitch %5.3f lastFeed %6.4f" % \
               (self.tpi, self.pitch, self.lastFeed))
         
         if self.depth == 0:
@@ -2081,7 +2081,7 @@ class ScrewThread(UpdatePass):
         actualWidth = 2 * self.depth * self.tanAngle
         self.safeZ += actualWidth / 2.0
         self.area = area = 0.5 * self.depth * actualWidth
-        print("depth %6.4f actualWdith %6.4f area %8.6f" %
+        print("depth %6.4f actualWdith %6.4f area %8.6f" % \
               (self.depth, actualWidth, area))
         
         firstWidth = 2 * self.firstFeed * self.tanAngle
@@ -2093,13 +2093,13 @@ class ScrewThread(UpdatePass):
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
-        print("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % 
+        print("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % \
               (area, lastDepth, lastArea, self.areaPass))
 
         self.passes = int(ceil(area / self.areaPass))
         self.threadPanel.passes.SetValue("%d" % (self.passes))
         self.areaPass = area / self.passes
-        print("passes %d areaPass %8.6f" %
+        print("passes %d areaPass %8.6f" % \
               (self.passes, self.areaPass))
         
         self.setupSpringPasses(self.threadPanel)
@@ -2161,7 +2161,7 @@ class ScrewThread(UpdatePass):
                CENTER | (BELOW, ABOVE)[self.internal])
         m.text("%7.3f" % (self.safeX * 2.0,), \
                (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd),
+        m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), CENTER | (ABOVE, BELOW)[self.internal])
 
     def calculateThread(self, final=False, add=False):
@@ -2183,8 +2183,8 @@ class ScrewThread(UpdatePass):
                 offset = -offset
             self.zOffset += offset
 
-        print("%4d %8.6f %6.4f %6.4f %6.4f" % 
-              (self.passCount, self.curArea, feed, self.zOffset,
+        print("%4d %8.6f %6.4f %6.4f %6.4f" % \
+              (self.passCount, self.curArea, feed, self.zOffset, \
                feed - self.prevFeed))
         self.prevFeed = feed
         if self.internal:
@@ -2254,10 +2254,10 @@ class ThreadPanel(wx.Panel):
 
         self.zRetract = addField(self, sizerG, "Z Retract", "thZRetract")
 
-        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
 
-        self.internal = cb = wx.CheckBox(self, -1,
+        self.internal = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
@@ -2273,7 +2273,7 @@ class ThreadPanel(wx.Panel):
 
         self.firstFeed = addField(self, sizerG, "First Feed", "thXFirstFeed")
 
-        # self.final = btn = wx.RadioButton(self, label="Final",
+        # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         # initInfo('thFinal', btn)
@@ -2342,9 +2342,9 @@ class ThreadPanel(wx.Panel):
 
         self.rpm = addField(self, sizerG, "RPM", "thRPM")
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2,
+        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1,
+        self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo('thPause', cb)
@@ -2446,8 +2446,8 @@ class JogShuttle():
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, self.setZ), (32, self.setX),
-                             (64, self.setSpindle),
+        self.buttonAction = ((16, self.setZ), (32, self.setX), \
+                             (64, self.setSpindle), \
                              (128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
@@ -2628,9 +2628,9 @@ class JogPanel(wx.Panel):
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                           wx.NORMAL, False, u'Consolas')
-        txtFont = wx.Font(16, wx.MODERN, wx.NORMAL,
+        txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
                           wx.NORMAL, False, u'Consolas')
 
         # first row
@@ -2641,7 +2641,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+        self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
         initInfo('jogZPos', tc)
         tc.SetFont(posFont)
@@ -2656,7 +2656,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+        self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
         initInfo('jogXPos', tc)
         tc.SetFont(posFont)
@@ -2671,7 +2671,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1),
+        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
                                     style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
@@ -2693,7 +2693,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                          style=wx.TE_RIGHT)
         initInfo('jogXPosDiam', tc)
         tc.SetFont(posFont)
@@ -2709,7 +2709,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1),
+        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1), \
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
@@ -2724,7 +2724,7 @@ class JogPanel(wx.Panel):
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                             style=wx.TE_RIGHT)
             initInfo('encZPos', tc)
             tc.SetFont(posFont)
@@ -2738,14 +2738,14 @@ class JogPanel(wx.Panel):
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                             style=wx.TE_RIGHT)
             initInfo('droXPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
 
         # status line
@@ -2808,7 +2808,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(emptyCell)
 
         bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.xNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
@@ -2820,7 +2820,7 @@ class JogPanel(wx.Panel):
         # second row
 
         bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.zNegButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
@@ -2832,7 +2832,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(btn, flag=sFlag, border=2)
 
         bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.zPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
@@ -2843,11 +2843,11 @@ class JogPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnXHome)
         sizerG.Add(btn, flag=sFlag, border=2)
 
-        self.step = step = ["Cont", "0.001", "0.002", "0.005",
-                            "0.010", "0.020", "0.050",
+        self.step = step = ["Cont", "0.001", "0.002", "0.005", \
+                            "0.010", "0.020", "0.050", \
                             "0.100", "0.200", "0.500", "1.000"]
 
-        self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
+        self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step, \
                                          style=wx.CB_READONLY)
         initInfo('jogInc', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
@@ -2866,7 +2866,7 @@ class JogPanel(wx.Panel):
         sizerG.Add(emptyCell)
 
         bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp,
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.xPosButton = btn
         btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
@@ -2877,7 +2877,7 @@ class JogPanel(wx.Panel):
 
         sizerH.Add(sizerG)
 
-        sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL,
+        sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
 
         # sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
@@ -3444,14 +3444,14 @@ class SetPosDialog(wx.Dialog):
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % (('Z', 'X')[axis])
-        wx.Dialog.__init__(self, frame, -1, title, pos,
+        wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                           wx.NORMAL, False, u'Consolas')
-        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
                                     style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
@@ -3552,22 +3552,49 @@ class SetProbeDialog(wx.Dialog):
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % (('Z', 'X Diameter')[axis])
-        wx.Dialog.__init__(self, frame, -1, title, pos,
+        wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                          wx.NORMAL, False, u'Consolas')
+
+        sizerG = wx.FlexGridSizer(2, 0, 0)
+
         txt = wx.StaticText(self, -1, ('Z Position', 'X Diameter')[axis])
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALIGN_CENTER_VERTICAL|wx.TOP,
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                    border=10)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
-                          wx.NORMAL, False, u'Consolas')
-        self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
-                                         style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+                                         style=wx.TE_RIGHT)
+        tc.SetFont(posFont)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        txt = wx.StaticText(self, -1, "Distance")
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+                   border=10)
+
+        self.probeDist = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+                                          style=wx.TE_RIGHT|\
+                                          wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+
+        sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
+
+        # txt = wx.StaticText(self, -1, ('Z Position', 'X Diameter')[axis])
+        # sizerV.Add(txt, flag=wx.CENTER|wx.ALIGN_CENTER_VERTICAL|wx.TOP, \
+        #            border=10)
+
+        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+        #                   wx.NORMAL, False, u'Consolas')
+        # self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+        #                                  style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        # tc.SetFont(posFont)
+        # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -3635,14 +3662,14 @@ class GotoDialog(wx.Dialog):
         self.axis = axis
         pos = (10, 10)
         title = "Go to %s" % (('Z Position', 'X Diameter')[axis])
-        wx.Dialog.__init__(self, frame, -1, title, pos,
+        wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                           wx.NORMAL, False, u'Consolas')
-        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
                                     style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
@@ -3704,30 +3731,30 @@ class GotoDialog(wx.Dialog):
 class FixXPosDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Fix X Size", pos,
+        wx.Dialog.__init__(self, frame, -1, "Fix X Size", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL,
+        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                           wx.NORMAL, False, u'Consolas')
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         txt = wx.StaticText(self, -1, "Current")
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                    border=10)
 
-        self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1),
+        self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         txt = wx.StaticText(self, -1, "Measured")
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
+        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                    border=10)
 
-        self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+        self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                            style=wx.TE_RIGHT|\
                                            wx.TE_PROCESS_ENTER)
         tc.SetFont(posFont)
@@ -3779,7 +3806,7 @@ class FixXPosDialog(wx.Dialog):
         xHomeOffset -= offset
 
         setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
-        print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" %
+        print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" % \
               (curX, actualX, offset, xHomeOffset))
         stdout.flush()
 
@@ -4027,11 +4054,11 @@ class MainFrame(wx.Frame):
                 setStatus("comm timeout on setup")
 
         self.procUpdate = (
-            self.jogPanel.updateZ,
-            self.jogPanel.updateX,
-            self.jogPanel.updateRPM,
-            self.jogPanel.updateAll,
-            self.jogPanel.updateError,
+            self.jogPanel.updateZ, \
+            self.jogPanel.updateX, \
+            self.jogPanel.updateRPM, \
+            self.jogPanel.updateAll, \
+            self.jogPanel.updateError, \
         )
 
         self.update = UpdateThread(self)
@@ -4318,7 +4345,7 @@ class MainFrame(wx.Frame):
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Z Setup", pos,
+        wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4326,22 +4353,22 @@ class ZDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", "zPitch"),
-            ("Motor Steps", "zMotorSteps"),
-            ("Micro Steps", "zMicroSteps"),
-            ("Motor Ratio", "zMotorRatio"),
-            ("Backlash", "zBacklash"),
-            ("Accel Unit/Sec2", "zAccel"),
-            ("Min Speed U/Min", "zMinSpeed"),
-            ("Max Speed U/Min", "zMaxSpeed"),
-            ("Jog Min U/Min", "zJogMin"),
-            ("Jog Max U/Min", "zJogMax"),
-            ("Probe Dist", "zProbeDist"),
-            ("Probe Speed", "zProbeSpeed"),
-            ("bInvert Dir", 'zInvDir'),
-            ("bInvert MPG", 'zInvMpg'),
-            ("DRO Inch", "zDROInch"),
-            ("bInv DRO", 'zInvDRO'),
+            ("Pitch", "zPitch"), \
+            ("Motor Steps", "zMotorSteps"), \
+            ("Micro Steps", "zMicroSteps"), \
+            ("Motor Ratio", "zMotorRatio"), \
+            ("Backlash", "zBacklash"), \
+            ("Accel Unit/Sec2", "zAccel"), \
+            ("Min Speed U/Min", "zMinSpeed"), \
+            ("Max Speed U/Min", "zMaxSpeed"), \
+            ("Jog Min U/Min", "zJogMin"), \
+            ("Jog Max U/Min", "zJogMax"), \
+            ("Probe Dist", "zProbeDist"), \
+            ("Probe Speed", "zProbeSpeed"), \
+            ("bInvert Dir", 'zInvDir'), \
+            ("bInvert MPG", 'zInvMpg'), \
+            ("DRO Inch", "zDROInch"), \
+            ("bInv DRO", 'zInvDRO'), \
         )        
         fieldList(self, sizerG, self.fields)
 
@@ -4395,7 +4422,7 @@ class ZDialog(wx.Dialog):
 class XDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
+        wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4403,31 +4430,31 @@ class XDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", "xPitch"),
-            ("Motor Steps", "xMotorSteps"),
-            ("Micro Steps", "xMicroSteps"),
-            ("Motor Ratio", "xMotorRatio"),
-            ("Backlash", "xBacklash"),
-            ("Accel Unit/Sec2", "xAccel"),
-            ("Min Speed U/Min", "xMinSpeed"),
-            ("Max Speed U/Min", "xMaxSpeed"),
-            ("Jog Min U/Min", "xJogMin"),
-            ("Jog Max U/Min", "xJogMax"),
-            ("bInvert Dir", 'xInvDir'),
-            ("bInvert MPG", 'xInvMpg'),
-            ("Probe Dist", "xProbeDist"),
-            ("Home Dist", "xHomeDist"),
-            ("Backoff Dist", "xHomeBackoffDist"),
-            ("Home Speed", "xHomeSpeed"),
-            ("bHome Dir", 'xHomeDir'),
-            ("DRO Inch", "xDROInch"),
-            ("bInv DRO", 'xInvDRO'),
+            ("Pitch", "xPitch"), \
+            ("Motor Steps", "xMotorSteps"), \
+            ("Micro Steps", "xMicroSteps"), \
+            ("Motor Ratio", "xMotorRatio"), \
+            ("Backlash", "xBacklash"), \
+            ("Accel Unit/Sec2", "xAccel"), \
+            ("Min Speed U/Min", "xMinSpeed"), \
+            ("Max Speed U/Min", "xMaxSpeed"), \
+            ("Jog Min U/Min", "xJogMin"), \
+            ("Jog Max U/Min", "xJogMax"), \
+            ("bInvert Dir", 'xInvDir'), \
+            ("bInvert MPG", 'xInvMpg'), \
+            ("Probe Dist", "xProbeDist"), \
+            ("Home Dist", "xHomeDist"), \
+            ("Backoff Dist", "xHomeBackoffDist"), \
+            ("Home Speed", "xHomeSpeed"), \
+            ("bHome Dir", 'xHomeDir'), \
+            ("DRO Inch", "xDROInch"), \
+            ("bInv DRO", 'xInvDRO'), \
         )        
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
-                ("Home Start", "xHomeStart"),
-                ("Home End", "xHomeEnd"),
+                ("Home Start", "xHomeStart"), \
+                ("Home End", "xHomeEnd"), \
                 ("Home Loc", "xHomeLoc"))
         fieldList(self, sizerG, self.fields)
 
@@ -4490,27 +4517,27 @@ class XDialog(wx.Dialog):
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos,
+        wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("bStepper Drive", 'spStepDrive'),
+            ("bStepper Drive", 'spStepDrive'), \
         )
         if STEPPER_DRIVE:
             self.fields += (
-                ("Motor Steps", "spMotorSteps"),
-                ("Micro Steps", "spMicroSteps"),
-                ("Min RPM", "spMinRPM"),
-                ("Max RPM", "spMaxRPM"),
-                ("Accel RPM/Sec2", "spAccel"),
-                ("Jog Min", "spJogMin"),
-                ("Jog Max", "spJogMax"),
-                # ("Jog Accel Time", "spJogAccelTime"),
-                ("bInvert Dir", 'spInvDir'),
-                ("bTest Index", 'spTestIndex'),
+                ("Motor Steps", "spMotorSteps"), \
+                ("Micro Steps", "spMicroSteps"), \
+                ("Min RPM", "spMinRPM"), \
+                ("Max RPM", "spMaxRPM"), \
+                ("Accel RPM/Sec2", "spAccel"), \
+                ("Jog Min", "spJogMin"), \
+                ("Jog Max", "spJogMax"), \
+                # ("Jog Accel Time", "spJogAccelTime"), \
+                ("bInvert Dir", 'spInvDir'), \
+                ("bTest Index", 'spTestIndex'), \
             )
         fieldList(self, sizerG, self.fields)
 
@@ -4590,7 +4617,7 @@ class SpindleDialog(wx.Dialog):
 class PortDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Port Setup", pos,
+        wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -4636,29 +4663,29 @@ class ConfigDialog(wx.Dialog):
     def __init__(self, frame):
         global XILINX
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Config Setup", pos,
+        wx.Dialog.__init__(self, frame, -1, "Config Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", 'cfgXilinx'),
-            ("bMPG", 'cfgMPG'),
-            ("bDRO", 'cfgDRO'),
-            ("bLCD", 'cfgLCD'),
-            ("fcy", "cfgFcy"),
-            ("bDisable Commands", 'cfgCmdDis'),
-            ("bDraw Moves", 'cfgDraw'),
+            ("bHW Control", 'cfgXilinx'), \
+            ("bMPG", 'cfgMPG'), \
+            ("bDRO", 'cfgDRO'), \
+            ("bLCD", 'cfgLCD'), \
+            ("fcy", "cfgFcy"), \
+            ("bDisable Commands", 'cfgCmdDis'), \
+            ("bDraw Moves", 'cfgDraw'), \
         )
         if XILINX:
             self.fields += (
-                ("Encoder", "cfgEncoder"),
-                ("Xilinx Freq", "cfgXFreq"),
-                ("Freq Mult", "cfgFreqMult"),
-                ("bTest Mode", 'cfgTestMode'),
-                ("Test RPM", "cfgTestRPM"),
-                ("bInvert Enc Dir", 'cfgInvEncDir'),
+                ("Encoder", "cfgEncoder"), \
+                ("Xilinx Freq", "cfgXFreq"), \
+                ("Freq Mult", "cfgFreqMult"), \
+                ("bTest Mode", 'cfgTestMode'), \
+                ("Test RPM", "cfgTestRPM"), \
+                ("bInvert Enc Dir", 'cfgInvEncDir'), \
             )
         fieldList(self, sizerG, self.fields)
 
@@ -4714,7 +4741,7 @@ def testText(dialog):
 class TestSpindleDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos,
+        wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self)
@@ -4723,7 +4750,7 @@ class TestSpindleDialog(wx.Dialog):
 class TestSyncDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Sync", pos,
+        wx.Dialog.__init__(self, frame, -1, "Test Sync", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self)
@@ -4732,7 +4759,7 @@ class TestSyncDialog(wx.Dialog):
 class TestTaperDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Taper", pos,
+        wx.Dialog.__init__(self, frame, -1, "Test Taper", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self)
@@ -4741,7 +4768,7 @@ class TestTaperDialog(wx.Dialog):
 class TestMoveDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Move", pos,
+        wx.Dialog.__init__(self, frame, -1, "Test Move", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self)
@@ -4789,7 +4816,7 @@ class SpindleTest():
         sStepsSecMin = float(minRPM * spindleStepsRev) / 60
         sStepsSecMax = float(maxRPM * spindleStepsRev) / 60
         deltaV = sStepsSecMax - sStepsSecMin
-        dbgPrt(txt,"deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f",
+        dbgPrt(txt,"deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f", \
                (deltaV, sStepsSecMin, sStepsSecMax))
         if False:
             accelStepsSec2 = deltaV / aTime
@@ -4802,19 +4829,19 @@ class SpindleTest():
         
         accelMinTime = sStepsSecMin / accelStepsSec2
         accelMaxTime = sStepsSecMax / accelStepsSec2
-        dbgPrt(txt,"accelMinTime %5.5f accelMaxTime %5.2f",
+        dbgPrt(txt,"accelMinTime %5.5f accelMaxTime %5.2f", \
                (accelMinTime, accelMaxTime))
         
         accelMinSteps = int((sStepsSecMin * accelMinTime) / 2.0 + 0.5)
         accelMaxSteps = int((sStepsSecMax * accelMaxTime) / 2.0 + 0.5)
-        dbgPrt(txt,"accelMinSteps %d accelMaxSteps %d ",
+        dbgPrt(txt,"accelMinSteps %d accelMaxSteps %d ", \
                (accelMinSteps, accelMaxSteps))
         
         accelTime = deltaV / accelStepsSec2
         accelSteps = accelMaxSteps - accelMinSteps
         accelClocks = accelTime * fcy;
         dbgPrt(txt,"accelStepsSec2 %0.1f accelTime %5.3f accelSteps %d "\
-               "accelClocks %d",
+               "accelClocks %d", \
                (accelStepsSec2, accelTime, accelSteps, accelClocks))
         
         accelRev = float(accelSteps) / spindleStepsRev
@@ -4829,7 +4856,7 @@ class SpindleTest():
         lastCount = int(cFactor * sqrt(accelMinSteps))
         lastTime = float(lastCount) / fcy
         
-        dbgPrt(txt,"accelMinSteps %d lastCount %d lastTime %0.6f",
+        dbgPrt(txt,"accelMinSteps %d lastCount %d lastTime %0.6f", \
                (accelMinSteps, lastCount, lastTime))
         
         f.write("\n")
@@ -4855,8 +4882,8 @@ class SpindleTest():
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
             f.write("step %4d count %9d %9d pre %d %5d %6d t %8.6f %8.6f "\
-                    "f %8.2f rpm %4.1f\n" %
-                    (step, count, actCount, pre, ctr, ctr * pre - lastCtr,
+                    "f %8.2f rpm %4.1f\n" % \
+                    (step, count, actCount, pre, ctr, ctr * pre - lastCtr, \
                      time, delta, freq, rpm))
             lastCount = actCount
             lastCtr = ctr * pre
@@ -4866,7 +4893,7 @@ class SpindleTest():
         
         finalCount = int(cFactor * sqrt(accelMaxSteps))
         finalCount -= int(cFactor * sqrt(accelMaxSteps - 1))
-        dbgPrt(txt,"finalCount %d lastCtr %d spindleClocksStep %d",
+        dbgPrt(txt,"finalCount %d lastCtr %d spindleClocksStep %d", \
                (finalCount, ctr, spindleClocksStep))
         
         f.write("\n***\n\n");
@@ -4880,14 +4907,14 @@ class SpindleTest():
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
             f.write("step %4d count %9d %7d %5d t %8.6f %8.6f "\
-                    "f %8.2f rpm %4.1f\n" %
+                    "f %8.2f rpm %4.1f\n" % \
                     (step, count, ctr, ctr - lastCtr, time, delta, freq, rpm))
             lastCount = count
             lastCtr = ctr
             lastTime = time
         
         lastCount = int(cFactor * sqrt(accelMinSteps))
-        f.write("\naccelMinSteps %d lastCount %d\n" % 
+        f.write("\naccelMinSteps %d lastCount %d\n" % \
                 (accelMinSteps, lastCount))
         
         f.close()
@@ -4930,7 +4957,7 @@ class SyncTest(object):
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
         dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us "\
-               "spindleClocksRev %d",
+               "spindleClocksRev %d", \
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
@@ -4963,7 +4990,7 @@ class SyncTest(object):
             if revCycle > 20:
                 revCycle = 20
             cycleDist = revCycle * pitch
-            dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f",
+            dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f", \
                    (pitch, revCycle, cycleDist))
             clocksCycle = spindleClocksRev * revCycle
             spindleStepsCycle = spindleStepsRev * revCycle
@@ -4985,12 +5012,12 @@ class SyncTest(object):
         
         cycleTime = float(clocksCycle) / fcy
         dbgPrt(txt,"clocksCycle %d cycleTime %4.2f\nspindleStepsCycle %d "\
-               "zStepsCycle %d",
+               "zStepsCycle %d", \
                (clocksCycle, cycleTime, spindleStepsCycle, zStepsCycle))
         
         zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
-        dbgPrt(txt,"zClocksStep %d remainder %d",
+        dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
         
         dx = zStepsCycle
@@ -5019,12 +5046,12 @@ class SyncTest(object):
         
         zSpeedIPM = pitch * maxRPM
         zStepsPerSec = int((zSpeedIPM * zStepsInch) / 60)
-        dbgPrt(txt,"zSpeedIPM %4.2f in/min zStepsSec %d steps/sec",
+        dbgPrt(txt,"zSpeedIPM %4.2f in/min zStepsSec %d steps/sec", \
                (zSpeedIPM, zStepsPerSec))
         
         zAccel = .5                      # acceleration in per sec^2
         zAccelTime = ((zSpeedIPM / 60.0) / zAccel) # acceleration time
-        dbgPrt(txt,"zAccel %5.3f in/sec^2 zAccelTime %8.6f sec",
+        dbgPrt(txt,"zAccel %5.3f in/sec^2 zAccelTime %8.6f sec", \
                (zAccel, zAccelTime))
         
         zAccelStepsSec2 = zAccel * zStepsInch
@@ -5042,7 +5069,7 @@ class SyncTest(object):
             zAccelTime = float(zAccelClocks) / fcy
             zAccelDist = float(zAccelSteps) / zStepsInch
             dbgPrt(txt,"zAccelTime %8.6f zAccelSteps %d zAccelClocks %d "\
-                   "zAccelDist %5.3f",
+                   "zAccelDist %5.3f", \
                    (zAccelTime, zAccelSteps, zAccelClocks, zAccelDist))
         
             initialCount = int(cFactor1 * sqrt(1))
@@ -5052,13 +5079,13 @@ class SyncTest(object):
             isrCount = finalCount + initialCount
         
             dbgPrt(txt,"initialCount %d initialTime %8.6f accelTime %8.6f "\
-                   "hwTime %8.6f",
-                   (initialCount, float(initialCount) / fcy,
+                   "hwTime %8.6f", \
+                   (initialCount, float(initialCount) / fcy, \
                     float(finalCount) / fcy, float(isrCount) / fcy))
         
             zAccelSpindleSteps = int(isrCount / spindleClocksStep)
             remainder = isrCount - zAccelSpindleSteps * spindleClocksStep
-            dbgPrt(txt,"zAccelSpindleSteps %d remainder %d",
+            dbgPrt(txt,"zAccelSpindleSteps %d remainder %d", \
                    (zAccelSpindleSteps, remainder))
         
             f.write("\n");
@@ -5075,8 +5102,8 @@ class SyncTest(object):
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
                 f.write("step %4d count %9d %9d %9d t %8.6f %8.6f "\
-                        "f %7.2f ipm %4.1f\n" %
-                        (step, count, ctr, ctr - lastCtr, time, delta,
+                        "f %7.2f ipm %4.1f\n" % \
+                        (step, count, ctr, ctr - lastCtr, time, delta, \
                          freq, ipm))
                 lastCount = count
                 lastCtr = ctr
@@ -5087,12 +5114,12 @@ class SyncTest(object):
             # countRemainder = zAccelClocks - lastCount
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
-            # dbgPrt(txt,"lastCount %d countRemainder %d div %d rem %d" % 
+            # dbgPrt(txt,"lastCount %d countRemainder %d div %d rem %d" % \
             #        (lastCount, countRemainder, div, rem))
         
             lastCount1 = int(cFactor1 * sqrt(zAccelSteps))
             lastTime1 = time = float(count) / fcy
-            dbgPrt(txt,"lastCount1 %d lastTime1 %0.6f",
+            dbgPrt(txt,"lastCount1 %d lastTime1 %0.6f", \
                    (lastCount1, lastTime1))
         
             # spindleSteps = lastCount1 / spindleClocksStep
@@ -5102,11 +5129,11 @@ class SyncTest(object):
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
             # dbgPrt(txt,"spindleSteps %d lastCount %d countRemainder %d div "\
-            #"%d rem %d",
+            #"%d rem %d", \
             #        (spindleSteps, lastCount, countRemainder, div, rem))
         
             finalCount -= int(cFactor1 * sqrt(zAccelSteps - 1))
-            dbgPrt(txt,"finalCount %d lastCtr %d zClocksStep %d",
+            dbgPrt(txt,"finalCount %d lastCtr %d zClocksStep %d", \
                    (finalCount, lastCtr, zClocksStep))
         
         f.close()
@@ -5133,7 +5160,7 @@ class TaperTest(object):
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
         dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us "\
-               "spindleClocksRev %d",
+               "spindleClocksRev %d", \
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
@@ -5157,7 +5184,7 @@ class TaperTest(object):
         if revCycle > 20:
             revCycle = 20
         cycleDist = revCycle * pitch
-        dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f",
+        dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f", \
                (pitch, revCycle, cycleDist))
         clocksCycle = spindleClocksRev * revCycle
         spindleStepsCycle = spindleStepsRev * revCycle
@@ -5165,7 +5192,7 @@ class TaperTest(object):
 
         zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
-        dbgPrt(txt,"zClocksStep %d remainder %d",
+        dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
         arg2 = float(getInfo('tpZDelta'))
@@ -5176,23 +5203,23 @@ class TaperTest(object):
         
         zCycleDist = float(zStepsCycle) / zStepsInch
         xCycleDist = (d1 / d0) * zCycleDist
-        dbgPrt(txt,"zCycleDist %5.3f xCycleDist %5.3f",
+        dbgPrt(txt,"zCycleDist %5.3f xCycleDist %5.3f", \
                (zCycleDist, xCycleDist))
         
         d0Steps = int(zCycleDist * zStepsInch)
         d1Steps = int(xCycleDist * xStepsInch)
         d0Clocks = d0Steps * zClocksStep
-        dbgPrt(txt,"d0Steps %d d1Steps %d d0Clocks %d",
+        dbgPrt(txt,"d0Steps %d d1Steps %d d0Clocks %d", \
                (d0Steps, d1Steps, d0Clocks));
         
         # d1ClocksStep = int(d0Clocks / d1Steps)
         # d1Remainder = d0Clocks - d1Steps * d1ClocksStep
-        # dbgPrt(txt,"d1ClocksStep %d d1Remainder %d",
+        # dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
         #        (d1ClocksStep, d1Remainder))
         
         d1ClocksStep = int(clocksCycle / d1Steps)
         d1Remainder = clocksCycle - d1Steps * d1ClocksStep
-        dbgPrt(txt,"d1ClocksStep %d d1Remainder %d",
+        dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
                (d1ClocksStep, d1Remainder))
         
         dx = d1Steps;
@@ -5200,7 +5227,7 @@ class TaperTest(object):
         incr1 = 2 * dy;
         incr2 = incr1 - 2 * dx;
         d = incr1 - dx;
-        dbgPrt(txt,"incr1 %d incr2 %d d %d",
+        dbgPrt(txt,"incr1 %d incr2 %d d %d", \
                (incr1, incr2, d));
         
         f.close()
@@ -5228,7 +5255,7 @@ class MoveTest(object):
         zMinSpeed = float(getInfo('zMinSpeed')) # minimum speed ipm
         zMaxSpeed = float(getInfo('zMaxSpeed')) # maximum speed ipm
         zMoveAccelTime = float(getInfo('zAccel')) # accel time seconds
-        dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f",
+        dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (zMinSpeed, zMaxSpeed, zMoveAccelTime))
         
         zMStepsSec = int((zMaxSpeed * zStepsInch) / 60.0)
@@ -5237,29 +5264,29 @@ class MoveTest(object):
         
         zMinStepsSec = int((zStepsInch * zMinSpeed) / 60.0)
         zMaxStepsSec = int((zStepsInch * zMaxSpeed) / 60.0)
-        dbgPrt(txt,"zMinStepsSec %d zMaxStepsSec %d",
+        dbgPrt(txt,"zMinStepsSec %d zMaxStepsSec %d", \
                (zMinStepsSec, zMaxStepsSec))
         
         zMDeltaV = zMaxStepsSec - zMinStepsSec
         zMAccelStepsSec2 = zMDeltaV / zMoveAccelTime
-        dbgPrt(txt,"zMDeltaV %d zMAccelStepsSec2 %6.3f",
+        dbgPrt(txt,"zMDeltaV %d zMAccelStepsSec2 %6.3f", \
                (zMDeltaV, zMAccelStepsSec2))
         
         if zMAccelStepsSec2 != 0:
             zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
             zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
-            dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d",
+            dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d", \
                    (zMAccelMinTime, zMAccelMaxTime))
         
             zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
             zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
-            dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d",
+            dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d", \
                    (zMAccelMinSteps, zMAccelMaxSteps))
         
             zMAccelTime = zMDeltaV / zMAccelStepsSec2
             zMAccelSteps = zMAccelMaxSteps - zMAccelMinSteps
             zMAccelClocks = int(zMAccelTime * fcy)
-            dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d",
+            dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d", \
                    (zMAccelTime, zMAccelSteps, zMAccelClocks))
         
             zMAccelDist = float(zMAccelSteps) / zStepsInch
@@ -5287,8 +5314,8 @@ class MoveTest(object):
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
                 f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                        "f %7.2f rpm %3.1f\n" %
-                        (step, count, ctr, abs(ctr - lastCtr), time,
+                        "f %7.2f rpm %3.1f\n" % \
+                        (step, count, ctr, abs(ctr - lastCtr), time, \
                          delta, freq, ipm))
                 lastCount = count
                 lastCtr = ctr
@@ -5298,7 +5325,7 @@ class MoveTest(object):
         
             finalCount = int(zMCFactor * (sqrt(zMAccelSteps) - 
                                           sqrt(zMAccelSteps - 1)))
-            dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d",
+            dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d", \
                    (finalCount, ctr, zMClocksStep))
         
             f.write("\n***\n\n");
@@ -5312,15 +5339,15 @@ class MoveTest(object):
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
                 f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                        "f %7.2f ipm %3.1f\n" %
-                        (step, count, ctr, abs(ctr - lastCtr), time,
+                        "f %7.2f ipm %3.1f\n" % \
+                        (step, count, ctr, abs(ctr - lastCtr), time, \
                          delta, freq, ipm))
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time
         
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
-            f.write("\nzMAccelMinSteps %d lastCount %d\n" % 
+            f.write("\nzMAccelMinSteps %d lastCount %d\n" % \
                     (zMAccelMinSteps, lastCount))
         
             f.close()
