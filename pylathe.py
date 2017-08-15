@@ -220,10 +220,11 @@ zDataSent = False
 xDataSent = False
 zHomeOffset = 0.0
 xHomeOffset = 0.0
-zDROOffset = 0.0
-xDROOffset = 0.0
-zDROPosition = 0.0
-xDROPosition = 0.0
+if DRO:
+    zDROOffset = 0.0
+    xDROOffset = 0.0
+    zDROPosition = 0.0
+    xDROPosition = 0.0
 xHomed = False
 done = False
 jogShuttle = None
