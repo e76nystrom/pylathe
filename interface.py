@@ -126,13 +126,11 @@ configList = \
     ('xAccel', 'turn '),
     ('xBacklash', 'turn '),
     ('xDROInch', 'turn '),
-    ('xDROPosition', 'x axis '),
     ('xHomeBackoffDist', 'x axis '),
     ('xHomeDir', 'x axis '),
     ('xHomeDist', 'x axis '),
     ('xHomeEnd', 'x axis '),
     ('xHomeLoc', 'x axis '),
-    ('xHomeOffset', 'x axis '),
     ('xHomeSpeed', 'x axis '),
     ('xHomeStart', 'x axis '),
     ('xInvDRO', 'x axis '),
@@ -150,12 +148,13 @@ configList = \
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
 
+    ('xSvDROPosition', 'x axis '),
+    ('xSvDROOffset', 'x axis '),
+    ('xSvHomeOffset', 'x axis '),
+
     ('zAccel', 'z axis '),
     ('zBacklash', 'z axis '),
     ('zDROInch', 'z axis '),
-    ('zDROOffset', 'z axis '),
-    ('zDROPosition', 'z axis '),
-    ('zHomeOffset', 'z axis '),
     ('zInvDRO', 'z axis '),
     ('zInvDir', 'z axis '),
     ('zInvEnc', 'z axis '),
@@ -171,6 +170,10 @@ configList = \
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
+
+    ('zSvDROOffset', 'z axis '),
+    ('zSvDROPosition', 'z axis '),
+    ('zSvHomeOffset', 'z axis '),
 )
 
 cmdList = \
