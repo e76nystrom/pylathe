@@ -4258,7 +4258,7 @@ class MainFrame(wx.Frame):
 
     def OnTurn(self, e):
         global info
-        setSetInfo('mainPanel', 'turnPanel')
+        setInfo('mainPanel', 'turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
