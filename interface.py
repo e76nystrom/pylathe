@@ -201,6 +201,7 @@ parmList = \
 
     ["Z_HOME_OFFSET", "z offset home to zero", "float"],
     ["Z_PROBE_SPEED", "z probe speed", "float"],
+    ["PROBE_INV", "invert polarity of probe", "int"],
 
     "z dro",
 
