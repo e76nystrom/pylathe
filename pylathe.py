@@ -3610,11 +3610,14 @@ class SetProbeDialog(wx.Dialog):
             return
         if self.IsShown():
             if self.axis == 0:
-                val = jogPanel.zPos.GetValue()
+                probeLoc = 0.0000
+                probeDist = getFloatInfo('zProbeDist')
             else:
-                val = jogPanel.xPos.GetValue()
+                probeLoc = jogPanel.xPos.GetValue()
+                probeDist = getFloatInfo('xProbeDist')
             self.probeLoc.SetValue(val)
             self.probeLoc.SetSelection(-1, -1)
+            self.probeDist.SetValue("%7.4f" % probeDist)
 
     def OnKeyChar(self, e):
         keyCode = e.GetKeyCode()
