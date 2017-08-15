@@ -57,7 +57,7 @@ def saveInfo(file):
     f.close()
 
 def readInfo(file):
-    global info
+    global info, config
     try:
         f = open(file, 'r')
         for line in f:
@@ -65,6 +65,9 @@ def readInfo(file):
             if len(line) == 0:
                 continue
             [key, val] = line.split('=')
+            if not key in config:
+                print("readInfo invalid config value %s", key)
+                continue
             if key in info:
                 func = info[key]
                 funcClass = func.__class__.__name__
@@ -168,6 +171,14 @@ def getInitialInfo(key):
         stdout.flush()
         return(False)
 
+from setup import createConfig, createCommands, createParameters,\
+    createCtlBits, createCtlStates
+
+from interface import configList, cmdList, parmList, stateList, regList
+
+config = {}
+createConfig(config, configList)
+
 configFile = "config.txt"
 info = {}
 readInfo(configFile)
@@ -178,17 +189,12 @@ STEPPER_DRIVE = getInitialInfo('spStepDrive')
 
 info = {}
 
-from setup import createCommands, createParameters,\
-    createCtlBits, createCtlStates
-
 from comm import SWIG
 SWIG = False
 import comm
 from comm import openSerial, commTimeout, command, getParm, setParm,\
     getString, sendMove, getQueueStatus, queParm, sendMulti
 comm.SWIG = SWIG
-
-from interface import cmdList, parmList, stateList, regList
 
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
