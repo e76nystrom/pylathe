@@ -4257,27 +4257,22 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def OnTurn(self, e):
-        global info
         setInfo('mainPanel', 'turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
-        global info
         setInfo('mainPanel', 'facePanel')
         self.showPanel()
 
     def OnCutoff(self, e):
-        global info
         setInfo('mainPanel', 'cutoffPanel')
         self.showPanel()
 
     def OnTaper(self, e):
-        global info
         setInfo('mainPanel', 'taperPanel')
         self.showPanel()
 
     def OnThread(self, e):
-        global info
         setInfo('mainPanel', 'threadPanel')
         self.showPanel()
 
