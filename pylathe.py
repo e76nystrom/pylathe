@@ -540,8 +540,8 @@ class MoveCommands():
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
     try:
-        command('CLRDBG');
-        command('CMD_CLEAR')
+        command(CLRDBG);
+        command(CMD_CLEAR)
     except commTimeout:
         setStatus('clear timeout')
     spindleDataSent = False
@@ -929,7 +929,7 @@ class Turn(UpdatePass):
             self.turnPass()
             self.m.moveX(self.xStart + self.xRetract)
             self.m.stopSpindle()
-            command('CMD_RESUME')
+            command(CMD_RESUME)
 
 class TurnPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -1042,7 +1042,7 @@ class TurnPanel(wx.Panel):
 
     def OnStart(self, e):
         global dbg, jogPanel
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         dbg = open('dbg.txt', 'w')
         jogPanel.focus()
     
@@ -1169,7 +1169,7 @@ class Face(UpdatePass):
             self.m.moveX(self.safeX)
             self.m.moveZ(self.zStart + self.zRetract)
             self.m.stopSpindle()
-            command('CMD_RESUME')
+            command(CMD_RESUME)
 
 class FacePanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -1280,7 +1280,7 @@ class FacePanel(wx.Panel):
 
     def OnStart(self, e):
         global jogPanel
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -1431,7 +1431,7 @@ class CutoffPanel(wx.Panel):
 
     def OnStart(self, e):
         global jogPanel
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         jogPanel.focus()
 
 class Taper(UpdatePass):
@@ -1620,7 +1620,7 @@ class Taper(UpdatePass):
             self.m.moveX(self.safeX)
             self.m.moveZ(self.startZ)
             self.m.stopSpindle();
-            command('CMD_RESUME')
+            command(CMD_RESUME)
 
     def internalTaper(self, taperInch):
         print("internalTaper")
@@ -1717,7 +1717,7 @@ class Taper(UpdatePass):
             self.m.moveX(self.safeX)
             self.m.moveZ(self.safeZ)
             self.m.stopSpindle();
-            command('CMD_RESUME')
+            command(CMD_RESUME)
             stdout.flush()
 
 class TaperPanel(wx.Panel):
@@ -1980,7 +1980,7 @@ class TaperPanel(wx.Panel):
 
     def OnStart(self, e):
         global jogPanel
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -2219,7 +2219,7 @@ class ScrewThread(UpdatePass):
             self.calculateThread(add=True)
             self.threadPass()
             self.m.stopSpindle();
-            command('CMD_RESUME')
+            command(CMD_RESUME)
             stdout.flush()
 
 class ThreadPanel(wx.Panel):
@@ -2377,7 +2377,7 @@ class ThreadPanel(wx.Panel):
 
     def OnStart(self, e):
         global jogPanel
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -2531,7 +2531,7 @@ class JogShuttle():
                 if index != jogShuttle.zCurIndex:
                     jogShuttle.zCurIndex = index
                     setParm('Z_JOG_SPEED', speed)
-                command('ZJSPEED')
+                command(ZJSPEED)
             except commTimeout:
                 pass
             if index == 0:
@@ -2556,7 +2556,7 @@ class JogShuttle():
                 if index != jogShuttle.xCurIndex:
                     jogShuttle.xCurIndex = index
                     setParm('X_JOG_SPEED', speed)
-                command('XJSPEED')
+                command(XJSPEED)
             except commTimeout:
                 pass
             if index == 0:
@@ -2581,7 +2581,7 @@ class JogShuttle():
                 if index != jogShuttle.spindleCurIndex:
                     jogShuttle.spindleCurIndex = index
                     setParm('SP_JOG_RPM', speed)
-                command('SPINDLE_JOG_SPEED')
+                command(SPINDLE_JOG_SPEED)
             except commTimeout:
                 pass
             if index == 0:
@@ -2977,7 +2977,7 @@ class JogPanel(wx.Panel):
         self.zDown(wx.WXK_LEFT)
 
     def OnZHome(self, e):
-        command('ZGOHOME')
+        command(ZGOHOME)
         self.combo.SetFocus()
 
     def OnZPosDown(self, e):
@@ -2998,9 +2998,9 @@ class JogPanel(wx.Panel):
                     print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        queParm('X_JOG_MAX', getInfo('xJogMax'))
-                        queParm('X_JOG_DIR', dir)
-                        command("XJMOV")
+                        queParm(X_JOG_MAX, getInfo('xJogMax'))
+                        queParm(X_JOG_DIR, dir)
+                        command(XJMOV)
                     except commTimeout as e:
                         pass
             else:
@@ -3016,9 +3016,9 @@ class JogPanel(wx.Panel):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    queParm('X_FLAG', CMD_JOG)
-                    queParm('X_MOVE_DIST', val)
-                    command('XMOVEREL')
+                    queParm(X_FLAG, CMD_JOG)
+                    queParm(X_MOVE_DIST, val)
+                    command(XMOVEREL)
                 except commTimeout as e:
                     pass
 
@@ -3046,7 +3046,7 @@ class JogPanel(wx.Panel):
         self.xDown(wx.WXK_DOWN)
 
     def OnXHome(self, e):
-        command('XGOHOME')
+        command(XGOHOME)
         self.combo.SetFocus()
 
     def OnXNegDown(self, e):
@@ -3062,8 +3062,8 @@ class JogPanel(wx.Panel):
                 val = 0.020
         except ValueError:
             val = 0.001
-        queParm('Z_MPG_INC', val * self.zStepsInch)
-        queParm('X_MPG_INC', val * self.xStepsInch)
+        queParm(Z_MPG_INC, val * self.zStepsInch)
+        queParm(X_MPG_INC, val * self.xStepsInch)
         sendMulti()
 
     def OnMouseEvent(self, evt):
@@ -3281,7 +3281,7 @@ class JogPanel(wx.Panel):
     def OnEStop(self, e):
         global moveCommands, spindleDataSend, zDataSent, xDataSent
         moveCommands.queClear()
-        command('CMD_CLEAR')
+        command(CMD_CLEAR)
         spindleDataSent = False
         zDataSent = False
         xDataSent = False
@@ -3290,15 +3290,15 @@ class JogPanel(wx.Panel):
     def OnStop(self, e):
         global moveCommands
         moveCommands.queClear()
-        command('CMD_STOP')
+        command(CMD_STOP)
         self.combo.SetFocus()
 
     def OnPause(self, e):
-        command('CMD_PAUSE')
+        command(CMD_PAUSE)
         self.combo.SetFocus()
 
     def OnResume(self, e):
-        command('CMD_RESUME')
+        command(CMD_RESUME)
         self.combo.SetFocus()
 
     def OnStartSpindle(self, e):
@@ -3307,7 +3307,7 @@ class JogPanel(wx.Panel):
             panel = mainFrame.panels[mainPanel]
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
-            command('SPINDLE_START')
+            command(SPINDLE_START)
         self.combo.SetFocus()
 
     def spindleJogCmd(self, code, val):
@@ -3409,12 +3409,12 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnHomeX(self, e):
-        queParm('X_HOME_DIST', getInfo('xHomeDist'))
-        queParm('X_HOME_BACKOFF_DIST', getInfo('xHomeBackoffDist'))
-        queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
+        queParm(X_HOME_DIST, getInfo('xHomeDist'))
+        queParm(X_HOME_BACKOFF_DIST, getInfo('xHomeBackoffDist'))
+        queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
         val = (-1, 1)[info['xHomeDir'].GetValue()]
-        queParm('X_HOME_DIR', val)
-        command('XHOMEAXIS')
+        queParm(X_HOME_DIR, val)
+        command(XHOMEAXIS)
         jogPanel.probe(0)
         jogPanel.focus()
 
@@ -3608,8 +3608,8 @@ class SetProbeDialog(wx.Dialog):
     def probeZ(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
-        queParm('Z_HOME_STATUS', '0');
+        queParm(Z_PROBE_SPEED, getInfo('zProbeSpeed'))
+        queParm(Z_HOME_STATUS, '0');
         moveCommands.probeZ(getFloatInfo('zProbeDist'))
         self.Show(False)
         jogPanel.probe(1, probeLoc)
@@ -3618,8 +3618,8 @@ class SetProbeDialog(wx.Dialog):
     def probeX(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-        queParm('X_HOME_STATUS', '0');
+        queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
+        queParm(X_HOME_STATUS, '0');
         moveCommands.probeX(getFloatInfo('xProbeDist'))
         self.Show(False)
         jogPanel.probe(2, probeLoc)
@@ -3680,8 +3680,8 @@ class GotoDialog(wx.Dialog):
             loc = float(self.pos.GetValue())
             m = moveCommands
             m.queClear()
-            command('CMD_PAUSE')
-            command('CLEARQUE')
+            command(CMD_PAUSE)
+            command(CLEARQUE)
             if self.axis == 0:
                 sendZData()
                 m.saveZOffset()
@@ -3690,7 +3690,7 @@ class GotoDialog(wx.Dialog):
                 sendXData()
                 m.saveXOffset()
                 m.moveX(loc / 2.0)
-            command('CMD_RESUME')
+            command(CMD_RESUME)
             self.Show(False)
             jogPanel.focus()
         except ValueError:
@@ -3828,7 +3828,7 @@ class UpdateThread(Thread):
         tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         try:
-            result = command('READLOC')
+            result = command(READLOC)
         except commTimeout:
             self.readAllError = True
             if done:
@@ -4565,11 +4565,11 @@ class SpindleDialog(wx.Dialog):
         if not spindleDataSent:
             sendSpindleData()
         else:
-            command('CMD_SPSETUP')
-        command('SPINDLE_START')
+            command(CMD_SPSETUP)
+        command(SPINDLE_START)
 
     def OnStop(self, e):
-        command('SPINDLE_STOP')
+        command(SPINDLE_STOP)
 
     def OnShow(self, e):
         global done, info, spindleDataSent
