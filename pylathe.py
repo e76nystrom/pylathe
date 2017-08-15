@@ -4686,6 +4686,7 @@ class ConfigDialog(wx.Dialog):
             ("bMPG", 'cfgMPG'), \
             ("bDRO", 'cfgDRO'), \
             ("bLCD", 'cfgLCD'), \
+            ("bProbe Inv", 'cfgPrbInv'), \
             ("fcy", "cfgFcy"), \
             ("bDisable Commands", 'cfgCmdDis'), \
             ("bDraw Moves", 'cfgDraw'), \
