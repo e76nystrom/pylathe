@@ -100,7 +100,11 @@ def queParm(parm, val):
             stdout.flush()
     else:
         try:
-            valString = "x%x" % (int(val))
+            val = int(val)
+            if val < 10 :
+                valString = "%d % (val)"
+            else:
+                valString = "x%x" % (val)
         except ValueError:
             valString = "0"
     # cmd = '\x01%x %x %s ' % (cmds['LOADVAL'][0], parmIndex, valString)
