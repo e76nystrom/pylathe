@@ -3647,7 +3647,7 @@ class ProbeDialog(wx.Dialog):
         moveCommands.queClear()
         queParm(Z_PROBE_SPEED, getInfo('zProbeSpeed'))
         queParm(Z_HOME_STATUS, '0');
-        moveCommands.probeZ(getFloatInfo('zProbeDist'))
+        moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
         jogPanel.probe(1, probeLoc)
         jogPanel.focus()
@@ -3657,7 +3657,7 @@ class ProbeDialog(wx.Dialog):
         moveCommands.queClear()
         queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
         queParm(X_HOME_STATUS, '0');
-        moveCommands.probeX(getFloatInfo('xProbeDist'))
+        moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
         jogPanel.probe(2, probeLoc)
         jogPanel.focus()
