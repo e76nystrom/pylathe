@@ -216,6 +216,20 @@ moveCommands = None
 
 buttonRepeat = None
 
+AL_LEFT   = 0x001
+AL_RIGHT  = 0x002
+AL_CENTER = 0x004
+ABOVE     = 0x008
+BELOW     = 0x010
+MIDDLE    = 0x020
+LEFT      = 0x040
+RIGHT     = 0x080
+CENTER    = 0x100
+
+HOME_X = -1
+AXIS_Z = 0
+AXIS_X = 1
+
 cLoc = "../Lathe/include/"
 
 fData = False
@@ -291,16 +305,6 @@ def getIntVal(tc):
         return(0)
 
 moveQue = Queue()
-
-AL_LEFT   = 0x001
-AL_RIGHT  = 0x002
-AL_CENTER = 0x004
-ABOVE     = 0x008
-BELOW     = 0x010
-MIDDLE    = 0x020
-LEFT      = 0x040
-RIGHT     = 0x080
-CENTER    = 0x100
 
 class MoveCommands():
     def __init__(self):
@@ -2895,12 +2899,12 @@ class JogPanel(wx.Panel):
         return(xPos, yPos)
     
     def OnZMenu(self, e):
-        menu = PosMenu(0)
+        menu = PosMenu(AXIS_Z)
         self.PopupMenu(menu, self.menuPos(e, self.zPos))
         menu.Destroy()
 
     def OnXMenu(self, e):
-        menu = PosMenu(1)
+        menu = PosMenu(AXIS_X)
         self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
 
@@ -3240,7 +3244,7 @@ class JogPanel(wx.Panel):
             self.statusText.SetLabel(text)
 
             if self.xHome:
-                if self.probeAxis == 0:
+                if self.probeAxis == HOME_X:
                     val = getParm(X_HOME_STATUS)
                     if val != None:
                         if val & HOME_SUCCESS:
@@ -3248,7 +3252,7 @@ class JogPanel(wx.Panel):
                             xHomed = True
                         elif val & HOME_FAIL:
                             self.homeDone("home success")
-                elif self.probeAxis == 1:
+                elif self.probeAxis == AXIS_Z:
                     val = getParm(Z_HOME_STATUS)
                     # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
@@ -3262,7 +3266,7 @@ class JogPanel(wx.Panel):
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
                         self.homeDone("z probe failure")
-                elif self.probeAxis == 2:
+                elif self.probeAxis == AXIS_X:
                     val = getParm(X_HOME_STATUS)
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
@@ -3424,7 +3428,7 @@ class PosMenu(wx.Menu):
         val = (-1, 1)[getBoolInfo('xHomeDir')]
         queParm(X_HOME_DIR, val)
         command(XHOMEAXIS)
-        jogPanel.probe(0)
+        jogPanel.probe(HOME_X)
         jogPanel.focus()
 
     def OnGoto(self, e):
@@ -3649,7 +3653,7 @@ class ProbeDialog(wx.Dialog):
         queParm(Z_HOME_STATUS, '0');
         moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
-        jogPanel.probe(1, probeLoc)
+        jogPanel.probe(AXIS_Z, probeLoc)
         jogPanel.focus()
 
     def probeX(self, probeLoc):
@@ -3659,7 +3663,7 @@ class ProbeDialog(wx.Dialog):
         queParm(X_HOME_STATUS, '0');
         moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
-        jogPanel.probe(2, probeLoc)
+        jogPanel.probe(AXIS_X, probeLoc)
         jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
