@@ -65,7 +65,7 @@ def readInfo(file):
             if len(line) == 0:
                 continue
             [key, val] = line.split('=')
-            print("%s" % key)
+            print("%s," % key)
             if key in info:
                 func = info[key]
                 funcClass = func.__class__.__name__
