@@ -763,6 +763,7 @@ class UpdatePass():
         self.springFlag = False
 
     def updatePass(self):
+        global moveCommands
         if self.passCount <= self.passes:
             self.springFlag = False
             if self.sPassInt != 0:
@@ -1016,6 +1017,7 @@ class TurnPanel(wx.Panel):
         pass
 
     def sendData(self):
+        global moveCommands
         try:
             moveCommands.queClear()
             sendClear()
@@ -1254,6 +1256,7 @@ class FacePanel(wx.Panel):
         pass
 
     def sendData(self):
+        global moveCommands
         try:
             moveCommands.queClear()
             sendClear()
@@ -1405,6 +1408,7 @@ class CutoffPanel(wx.Panel):
         pass
 
     def sendData(self):
+        global moveCommands
         try:
             moveCommands.queClear()
             sendClear()
@@ -1948,6 +1952,7 @@ class TaperPanel(wx.Panel):
         self.updateUI()
 
     def sendData(self):
+        global moveCommands
         try:
             moveCommands.queClear()
             sendClear()
@@ -3230,15 +3235,15 @@ class JogPanel(wx.Panel):
                         elif val & HOME_FAIL:
                             self.homeDone("home success")
                 elif self.probeAxis == 1:
-                    val = getParm('Z_HOME_STATUS', True)
-                    print("zval %d" % (val))
+                    val = getParm('Z_HOME_STATUS')
+                    # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
                         self.homeDone("z probe failure")
                 elif self.probeAxis == 2:
-                    val = getParm('X_HOME_STATUS', True)
-                    print("xval %d" % (val))
+                    val = getParm('X_HOME_STATUS')
+                    # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
                         self.homeDone("x probe success")
                         stdout.flush()
@@ -3255,7 +3260,7 @@ class JogPanel(wx.Panel):
         self.statusLine.SetLabel(text)
 
     def OnEStop(self, e):
-        global spindleDataSend, zDataSent, xDataSent
+        global moveCommands, spindleDataSend, zDataSent, xDataSent
         moveCommands.queClear()
         command('CMD_CLEAR')
         spindleDataSent = False
@@ -3264,6 +3269,7 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def OnStop(self, e):
+        global moveCommands
         moveCommands.queClear()
         command('CMD_STOP')
         self.combo.SetFocus()
@@ -3567,12 +3573,14 @@ class SetProbeDialog(wx.Dialog):
     
     def OnOk(self, e):
         global jogPanel
-        val = self.probeLoc.GetValue()
+        val = float(self.probeLoc.GetValue())
         try:
             val = float(val)
             if self.axis == 0:
+                val = "%d" % (int(val * jogPanel.zStepsInch))
                 self.probeZ(val)
             else:
+                val = "%d" % (int(val * jogPanel.xStepsInch))
                 self.probeX(val)
         except ValueError:
             print("ValueError on %s" % (val))
@@ -3581,9 +3589,10 @@ class SetProbeDialog(wx.Dialog):
         jogPanel.focus()
 
     def probeZ(self, val):
+        global jogPanel, moveCommands
         moveCommands.queClear()
         queParm('Z_PROBE_SPEED', getInfo('zProbeSpeed'))
-        queParm('Z_PROBE_LOC', self.probeLoc.GetValue())
+        queParm('Z_PROBE_LOC', val)
         queParm('Z_HOME_STATUS', '0');
         moveCommands.probeZ(getFloatInfo('zProbeDist'))
         self.Show(False)
@@ -3591,9 +3600,10 @@ class SetProbeDialog(wx.Dialog):
         jogPanel.focus()
 
     def probeX(self, val):
+        global jogPanel, moveCommands
         moveCommands.queClear()
         queParm('X_HOME_SPEED', getInfo('xHomeSpeed'))
-        queParm('X_PROBE_LOC', self.probeLoc.GetValue())
+        queParm('X_PROBE_LOC', val)
         queParm('X_HOME_STATUS', '0');
         moveCommands.probeX(getFloatInfo('xProbeDist'))
         self.Show(False)
@@ -3650,7 +3660,7 @@ class GotoDialog(wx.Dialog):
         e.Skip()
     
     def OnOk(self, e):
-        global jogPanel
+        global moveCommands, jogPanel
         try:
             loc = float(self.pos.GetValue())
             m = moveCommands
@@ -3919,7 +3929,7 @@ class UpdateThread(Thread):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
-        global hdrFont, testFont, jogShuttle, moveCommands
+        global moveCommands, hdrFont, testFont, jogShuttle
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self, self.OnUpdate)
@@ -4347,6 +4357,7 @@ class ZDialog(wx.Dialog):
         self.Show(False)
 
     def OnSetup(self, e):
+        global moveCommands
         moveCommands.queClear()
         sendZData(True)
 
