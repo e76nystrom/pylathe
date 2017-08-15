@@ -3,6 +3,16 @@ cmds = None
 parms = None
 xRegs = None
 
+def createConfig(configList):
+    global config
+    config = {}
+    for (name, comment) in configList:
+        config[name] = True
+        if name in globals():
+            print("createConfig %s already defined" % name)
+        else:
+            globals()[name] = name
+
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'cmdList.h', 'w')
@@ -29,7 +39,10 @@ def createCommands(cmdList, cLoc, fData=False):
                     # jFile.write("%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), val, regComment))
                 cmds[regName] = (val, action)
-                globals()[regName] = regName
+                if regName in globals():
+                    print("createCommands %s already defined" % regName)
+                else:
+                    globals()[regName] = regName
                 val += 1
         else:
             if fData:
@@ -98,7 +111,10 @@ def createParameters(parmList, cLoc, fData=False):
                 # jFile.write("%s/* 0x%02x %s */\n" % 
                 #             (tmp.ljust(32), val, regComment))
             parms[regName] = (val, varType, varName)
-            globals()[regName] = regName
+            if regName in globals():
+                print("createParameters %s already defined" % regName)
+            else:
+                globals()[regName] = regName
             val += 1
         else:
             if fData:
@@ -136,7 +152,10 @@ def createCtlStates(stateList, cLoc, fData=False):
                 cFile.write("%s/* %2d %s */\n" % 
                             (tmp.ljust(32), val, comment));
                 # jFile.write('  "%-10s %s", \n' % (state, comment));
-            globals()[state] = val
+            if state in globals():
+                print("createCtlStates %s already defined" % state)
+            else:
+                globals()[state] = val
             val += 1
         else:
             if fData:
@@ -179,7 +198,10 @@ def createCtlBits(regList, cLoc, fData=False):
                 tmp =  " public static final int %-10s = %s;" % (var, val)
                 # jFile.write("%s /* %s */\n" % 
                 #             (tmp, comment));
-            globals()[var] = eval(val)
+            if var in globals():
+                print("createctlBits %s already defined" % var)
+            else:
+                globals()[var] = eval(val)
         else:
             if fData:
                 cFile.write("\n// %s\n\n" % (data))
@@ -312,7 +334,10 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     #             (tmp, comment));
                 if (shift > maxShift):
                     maxShift = shift
-                globals()[cVar] = bit << shift
+                if cVar in globals():
+                    print("createXilinxBits %s already defined" % cVar)
+                else:
+                    globals()[cVar] = bit << shift
                 lastShift = shift
         else:
             if fData:
@@ -323,7 +348,8 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     if xFile:
                         xFile.write(" constant %s_size : integer := %d;\n" %
                                     (regName, maxShift + 1))
-                        xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
+                        xFile.write(" signal %sReg : "\
+                                    "unsigned(%s_size-1 downto 0);\n" %
                                     (regName, regName))
                     for i in range(0, len(xLst)):
                         if xFile:
@@ -343,7 +369,10 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
             else:
                 if (len(regName) > 0):
                     var = "%s_size" % (regName)
-                    globals()[var] = maxShift + 1
+                    if var in globals():
+                        print("createXilinxBits %s already defined" % var)
+                    else:
+                        globals()[var] = maxShift + 1
     if fData:
         cFile.close()
         if xFile:
