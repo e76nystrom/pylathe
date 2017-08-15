@@ -94,6 +94,10 @@ def initInfo(field, val):
     global info
     info[field] = val
 
+def newInfo(field, val):
+    global info
+    info[field] = InfoValue(val)
+
 def setInfo(field, val):
     global info
     info[field].SetValue(val)
@@ -234,7 +238,6 @@ def fieldList(panel, sizer, fields):
             addField(panel, sizer, label, index)
 
 def addFieldText(panel, sizer, label, key):
-    global info
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
@@ -256,11 +259,9 @@ def addField(panel, sizer, label, key):
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
     if key in info:
-        tmp = info[key]
-        val = tmp.GetValue()
+        val = getInfo(key)
         tc.SetValue(val)
-    else:
-        initInfo(key, tc)
+    initInfo(key, tc)
     return(tc)
 
 def addCheckBox(panel, sizer, label, key):
@@ -272,11 +273,9 @@ def addCheckBox(panel, sizer, label, key):
     cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
     sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
     if key in info:
-        tmp = info[key]
-        val = tmp.GetValue()
+        val = getInfo(key)
         cb.SetValue(val == 'True')
-    else:
-        initInfo(key, cb)
+    initInfo(key, cb)
     return(cb)
 
 def getFloatVal(tc):
@@ -555,7 +554,7 @@ def sendClear():
     xDataSent = False
 
 def xilinxTestMode():
-    global info, fcy
+    global fcy
     testMode = False
     try:
         testMode = getInfo('cfgTestMode')
@@ -589,7 +588,7 @@ def xilinxTestMode():
         setParm(ENC_ENABLE, '0')
 
 def sendSpindleData(send=False, rpm=None):
-    global info, spindleDataSent, XILINX
+    spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
             queParm(STEPPER_DRIVE, getBoolInfo('spStepDrive'))
@@ -2620,7 +2619,7 @@ class JogPanel(wx.Panel):
         self.xDROInvert = 0
 
     def initUI(self):
-        global info, emptyCell
+        global emptyCell
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -3130,7 +3129,7 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def OnKeyChar(self, evt):
-        global info, mainFrame
+        global mainFrame
         code = evt.GetKeyCode()
         if code == ord('c'):
             self.combo.SetSelection(0)
@@ -3440,7 +3439,6 @@ class PosMenu(wx.Menu):
 
 class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
-        global info
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % (('Z', 'X')[axis])
@@ -3549,7 +3547,6 @@ class SetPosDialog(wx.Dialog):
 
 class SetProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
-        global info
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % (('Z', 'X Diameter')[axis])
@@ -3633,7 +3630,6 @@ class SetProbeDialog(wx.Dialog):
 
 class GotoDialog(wx.Dialog):
     def __init__(self, frame, axis):
-        global info
         self.axis = axis
         pos = (10, 10)
         title = "Go to %s" % (('Z Position', 'X Diameter')[axis])
@@ -4182,7 +4178,7 @@ class MainFrame(wx.Frame):
         for key in vars:
             exec('global ' + key)
             if not key in info:
-                info[key] = InfoValue("%0.4f" % (eval(key)))
+               newInfo(key, "%0.4f" % (eval(key)))
             else:
                 exp = key + ' = getFloatInfo(\'' + key + '\')'
                 exec(exp)
@@ -4242,7 +4238,6 @@ class MainFrame(wx.Frame):
         self.showDialog(self.configDialog)
 
     def showPanel(self):
-        global info
         key = 'mainPanel'
         if not key in info:
             initInfo(key, InfoValue('turnPanel'))
@@ -4320,7 +4315,6 @@ class MainFrame(wx.Frame):
 
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
-        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -4378,28 +4372,26 @@ class ZDialog(wx.Dialog):
         sendZData(True)
 
     def OnShow(self, e):
-        global done, info, zDataSent
+        global done, zDataSent
         if done:
             return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
-                self.fieldInfo[index] = info[index].GetValue()
+                self.fieldInfo[index] = getInfo(index)
         else:
             for (label, index) in self.fields:
-                if self.fieldInfo[index] != info[index].GetValue():
+                if self.fieldInfo[index] != getInfo(index):
                     zDataSent = False
                     break
 
     def OnCancel(self, e):
-        global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.fieldInfo[index])
+            setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
 class XDialog(wx.Dialog):
     def __init__(self, frame):
-        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -4475,28 +4467,26 @@ class XDialog(wx.Dialog):
         sendXData(True)
 
     def OnShow(self, e):
-        global done, info, xDataSent
+        global done, xDataSent
         if done:
             return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
-                self.fieldInfo[index] = info[index].GetValue()
+                self.fieldInfo[index] = getInfo(index)
         else:
             for (label, index) in self.fields:
-                if self.fieldInfo[index] != info[index].GetValue():
+                if self.fieldInfo[index] != getInfo(index):
                     xDataSent = False
                     break
 
     def OnCancel(self, e):
-        global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.fieldInfo[index])
+            setInfo[index], self.fieldInfo[index])
         self.Show(False)
 
 class SpindleDialog(wx.Dialog):
     def __init__(self, frame):
-        global info
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -4557,9 +4547,9 @@ class SpindleDialog(wx.Dialog):
         self.sizerV.Fit(self)
 
     def OnStart(self, e):
-        global info, spindleDataSent
+        global spindleDataSent
         for (label, index) in self.fields:
-            tmp = info[index].GetValue()
+            tmp = getInfo(index)
             if self.fieldInfo[index] != tmp:
                 self.fieldInfo[index] = tmp 
                 spindleDataSent = False
@@ -4573,27 +4563,26 @@ class SpindleDialog(wx.Dialog):
         command(SPINDLE_STOP)
 
     def OnShow(self, e):
-        global done, info, spindleDataSent
+        global done, spindleDataSent
         if done:
             return
         if self.IsShown():
             self.fieldInfo = {}
             self.cancelInfo = {}
             for (label, index) in self.fields:
-                tmp = info[index].GetValue()
+                tmp = getInfo(index)
                 self.cancelInfo[index] = tmp
                 self.fieldInfo[index] = tmp
             spindleDataSent = False
         else:
             for (label, index) in self.fields:
-                if self.fieldInfo[index] != info[index].GetValue():
+                if self.fieldInfo[index] != getInfo(index):
                     spindleDataSent = False
                     break
 
     def OnCancel(self, e):
-        global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.cancelInfo[index])
+            setInfo(index, self.cancelInfo[index])
         self.Show(False)
 
 class PortDialog(wx.Dialog):
@@ -4628,23 +4617,22 @@ class PortDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global done, info
+        global done
         if done:
             return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
-                self.fieldInfo[index] = info[index].GetValue()
+                self.fieldInfo[index] = getInfo(index)
 
     def OnCancel(self, e):
-        global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.fieldInfo[index])
+            setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
 class ConfigDialog(wx.Dialog):
     def __init__(self, frame):
-        global XILINX, info
+        global XILINX
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Config Setup", pos,
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -4692,18 +4680,17 @@ class ConfigDialog(wx.Dialog):
         self.Show(False)
 
     def OnShow(self, e):
-        global done, info
+        global done
         if done:
             return
         if self.IsShown():
             self.fieldInfo = {}
             for (label, index) in self.fields:
-                self.fieldInfo[index] = info[index].GetValue()
+                self.fieldInfo[index] = getInfo(index)
 
     def OnCancel(self, e):
-        global info
         for (label, index) in self.fields:
-            info[index].SetValue(self.fieldInfo[index])
+            setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
 def testText(dialog):
@@ -4915,7 +4902,7 @@ class SyncTest(object):
         f = open('zsync.txt','w')
    
         zAxis = True
-        mainPanel = info['mainPanel'].GetValue()
+        mainPanel = getInfo('mainPanel')
         if mainPanel == 'threadPanel':
             arg1 = float(getInfo('thPitch'))
         elif mainPanel == 'turnPanel':
