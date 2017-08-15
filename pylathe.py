@@ -2281,7 +2281,7 @@ class ThreadPanel(wx.Panel):
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo'thTPI',  btn)
+        setInfo('thTPI',  btn)
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
