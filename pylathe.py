@@ -586,29 +586,29 @@ def sendSpindleData(send=False, rpm=None):
     global info, spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
-            queParm('STEPPER_DRIVE', getBoolInfo('spStepDrive'))
+            queParm(STEPPER_DRIVE, getBoolInfo('spStepDrive'))
             if STEPPER_DRIVE:
-                queParm('SP_STEPS', getInfo('spMotorSteps'))
-                queParm('SP_MICRO', getInfo('spMicroSteps'))
-                queParm('SP_MIN_RPM', getInfo('spMinRPM'))
+                queParm(SP_STEPS, getInfo('spMotorSteps'))
+                queParm(SP_MICRO, getInfo('spMicroSteps'))
+                queParm(SP_MIN_RPM, getInfo('spMinRPM'))
                 if rpm != None:
-                    queParm('SP_MAX_RPM', rpm)
+                    queParm(SP_MAX_RPM, rpm)
                 else:
-                    queParm('SP_MAX_RPM', getInfo('spMaxRPM'))
-                # queParm('SP_ACCEL_TIME', getInfo('spAccelTime'))
-                queParm('SP_ACCEL', getInfo('spAccel'))
-                queParm('SP_JOG_MIN_RPM', getInfo('spJogMin'))
-                queParm('SP_JOG_MAX_RPM', getInfo('spJogMax'))
-                # queParm('SP_JOG_ACCEL_TIME', getInfo('spAccelTime'))
-                queParm('SP_DIR_FLAG', getBoolInfo('spInvDir'))
-                queParm('SP_TEST_INDEX', getBoolInfo('spTestIndex'))
-                command('CMD_SPSETUP')
+                    queParm(SP_MAX_RPM, getInfo('spMaxRPM'))
+                # queParm(SP_ACCEL_TIME, getInfo('spAccelTime'))
+                queParm(SP_ACCEL, getInfo('spAccel'))
+                queParm(SP_JOG_MIN_RPM, getInfo('spJogMin'))
+                queParm(SP_JOG_MAX_RPM, getInfo('spJogMax'))
+                # queParm(SP_JOG_ACCEL_TIME, getInfo('spAccelTime'))
+                queParm(SP_DIR_FLAG, getBoolInfo('spInvDir'))
+                queParm(SP_TEST_INDEX, getBoolInfo('spTestIndex'))
+                command(CMD_SPSETUP)
             elif XILINX:
-                queParm('ENC_MAX', getInfo('cfgEncoder'))
-                queParm('X_FREQUENCY', getInfo('cfgXFreq'))
-                queParm('FREQ_MULT', getInfo('cfgFreqMult'))
+                queParm(ENC_MAX, getInfo('cfgEncoder'))
+                queParm(X_FREQUENCY, getInfo('cfgXFreq'))
+                queParm(FREQ_MULT, getInfo('cfgFreqMult'))
                 xilinxTestMode()
-                queParm('RPM', getInfo('cfgTestRPM'))
+                queParm(RPM, getInfo('cfgTestRPM'))
                 cfgReg = 0
                 if info['cfgInvEncDir'].GetValue():
                     cfgReg |= ENC_POL
@@ -616,7 +616,7 @@ def sendSpindleData(send=False, rpm=None):
                     cfgReg |= ZDIR_POL
                 if info['xInvDir'].GetValue():
                     cfgReg |= XDIR_POL
-                queParm('X_CFG_REG', cfgReg)
+                queParm(X_CFG_REG, cfgReg)
                 sendMulti()
             spindleDataSent = True
     except commTimeout as e:
@@ -643,25 +643,25 @@ def sendZData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            queParm('Z_MPG_INC', val * jogPanel.zStepsInch)
+            queParm(Z_MPG_INC, val * jogPanel.zStepsInch)
 
-            queParm('Z_PITCH', getInfo('zPitch'))
-            queParm('Z_RATIO', getInfo('zMotorRatio'))
-            queParm('Z_MICRO', getInfo('zMicroSteps'))
-            queParm('Z_MOTOR', getInfo('zMotorSteps'))
-            queParm('Z_ACCEL', getInfo('zAccel'))
-            queParm('Z_BACKLASH', getInfo('zBacklash'))
+            queParm(Z_PITCH, getInfo('zPitch'))
+            queParm(Z_RATIO, getInfo('zMotorRatio'))
+            queParm(Z_MICRO, getInfo('zMicroSteps'))
+            queParm(Z_MOTOR, getInfo('zMotorSteps'))
+            queParm(Z_ACCEL, getInfo('zAccel'))
+            queParm(Z_BACKLASH, getInfo('zBacklash'))
 
-            queParm('Z_MOVE_MIN', getInfo('zMinSpeed'))
-            queParm('Z_MOVE_MAX', getInfo('zMaxSpeed'))
+            queParm(Z_MOVE_MIN, getInfo('zMinSpeed'))
+            queParm(Z_MOVE_MAX, getInfo('zMaxSpeed'))
 
-            queParm('Z_JOG_MIN', getInfo('zJogMin'))
-            queParm('Z_JOG_MAX', getInfo('zJogMax'))
+            queParm(Z_JOG_MIN, getInfo('zJogMin'))
+            queParm(Z_JOG_MAX, getInfo('zJogMax'))
 
-            queParm('Z_DIR_FLAG', getBoolInfo('zInvDir'))
-            queParm('Z_MPG_FLAG', getBoolInfo('zInvMpg'))
+            queParm(Z_DIR_FLAG, getBoolInfo('zInvDir'))
+            queParm(Z_MPG_FLAG, getBoolInfo('zInvMpg'))
                 
-            command('CMD_ZSETUP')
+            command(CMD_ZSETUP)
             zDataSent = True
     except commTimeout as e:
         print("sendZData Timeout")
@@ -689,23 +689,23 @@ def sendXData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            queParm('X_MPG_INC', val * jogPanel.xStepsInch)
+            queParm(X_MPG_INC', val * jogPanel.xStepsInch)
 
-            queParm('X_PITCH', getInfo('xPitch'))
-            queParm('X_RATIO', getInfo('xMotorRatio'))
-            queParm('X_MICRO', getInfo('xMicroSteps'))
-            queParm('X_MOTOR', getInfo('xMotorSteps'))
-            queParm('X_ACCEL', getInfo('xAccel'))
-            queParm('X_BACKLASH', getInfo('xBacklash'))
+            queParm(X_PITCH, getInfo('xPitch'))
+            queParm(X_RATIO, getInfo('xMotorRatio'))
+            queParm(X_MICRO, getInfo('xMicroSteps'))
+            queParm(X_MOTOR, getInfo('xMotorSteps'))
+            queParm(X_ACCEL, getInfo('xAccel'))
+            queParm(X_BACKLASH, getInfo('xBacklash'))
 
-            queParm('X_MOVE_MIN', getInfo('xMinSpeed'))
-            queParm('X_MOVE_MAX', getInfo('xMaxSpeed'))
+            queParm(X_MOVE_MIN, getInfo('xMinSpeed'))
+            queParm(X_MOVE_MAX, getInfo('xMaxSpeed'))
 
-            queParm('X_JOG_MIN', getInfo('xJogMin'))
-            queParm('X_JOG_MAX', getInfo('xJogMax'))
+            queParm(X_JOG_MIN, getInfo('xJogMin'))
+            queParm(X_JOG_MAX, getInfo('xJogMax'))
 
-            queParm('X_DIR_FLAG', getBoolInfo('xInvDir'))
-            queParm('X_MPG_FLAG', getBoolInfo('xInvMpg'))
+            queParm(X_DIR_FLAG, getBoolInfo('xInvDir'))
+            queParm(X_MPG_FLAG, getBoolInfo('xInvMpg'))
 
             global HOME_TEST
             if HOME_TEST:
@@ -714,10 +714,10 @@ def sendXData(send=False):
                 end = str(int(getFloatInfo('xHomeEnd') * stepsInch))
                 if end > start:
                     (start, end) = (end, start)
-                queParm('X_HOME_START', start)
-                queParm('X_HOME_END', end)
+                queParm(X_HOME_START, start)
+                queParm(X_HOME_END, end)
 
-            command('CMD_XSETUP')
+            command(CMD_XSETUP)
             xDataSent = True
     except commTimeout as e:
         print("sendZData Timeout")
@@ -2918,14 +2918,14 @@ class JogPanel(wx.Panel):
                     print("zJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        queParm('Z_JOG_MAX', getInfo('zJogMax'))
-                        queParm('Z_JOG_DIR', dir)
-                        command("ZJMOV")
+                        queParm(Z_JOG_MAX, getInfo('zJogMax'))
+                        queParm(Z_JOG_DIR, dir)
+                        command(ZJMOV)
                     except commTimeout as e:
                         pass
             else:
                 try:
-                    command("ZJMOV")
+                    command(ZJMOV)
                 except commTimeout as e:
                     pass
         else:
@@ -2936,9 +2936,9 @@ class JogPanel(wx.Panel):
                 print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    queParm('Z_FLAG', CMD_JOG)
-                    queParm('Z_MOVE_DIST', val)
-                    command('ZMOVEREL')
+                    queParm(Z_FLAG, CMD_JOG)
+                    queParm(Z_MOVE_DIST, val)
+                    command(ZMOVEREL)
                 except commTimeout as e:
                     pass
 
