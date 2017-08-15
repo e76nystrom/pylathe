@@ -4239,11 +4239,11 @@ class MainFrame(wx.Frame):
         for (key, var) in vars:
             exec('global ' + var)
             if not key in info:
-               newInfo(key, "%0.4f" % (eval(key)))
+               newInfo(key, "%0.4f" % (eval(var)))
             else:
-                exp = key + ' = getFloatInfo(\'' + key + '\')'
+                exp = key + ' = getFloatInfo(\'' + var + '\')'
                 exec(exp)
-                print("%s = %s" % (key, eval(key)))
+                print("%s = %s" % (key, eval(var)))
             stdout.flush()
 
         dw, dh = wx.DisplaySize()
