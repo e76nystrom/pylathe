@@ -109,7 +109,7 @@ def getInfo(key):
         return(tmp.GetValue())
     except KeyError:
         print("getInfo KeyError %s" % (key))
-        return('')
+    return('')
 
 def getBoolInfo(key):
     global info
