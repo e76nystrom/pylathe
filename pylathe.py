@@ -3198,10 +3198,10 @@ class JogPanel(wx.Panel):
         if len(val) == 7:
             (z, x, rpm, curPass, zEncPos, xEncPos, flag) = val
             if z != '#':
-                zLoc = float(z)
+                zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
             if x != '#':
-                xLoc = float(x)
+                xLoc = float(x) / self.xStepsInch
                 val = xLoc - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (val))
                 self.xPosDiam.SetValue("%0.4f" % (abs(val * 2)))
