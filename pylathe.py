@@ -2619,6 +2619,8 @@ class JogPanel(wx.Panel):
         self.xDROInch = 0
         self.zDROInvert = 0
         self.xDROInvert = 0
+        self.zMenu = None
+        self.xMenu = None
 
     def initUI(self):
         global emptyCell
@@ -3410,7 +3412,7 @@ class PosMenu(wx.Menu):
         jogPanel.focus()
 
     def OnProbe(self, e):
-        dialog = SetProbeDialog(jogPanel, self.axis)
+        dialog = ProbeDialog(jogPanel, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
@@ -3547,7 +3549,7 @@ class SetPosDialog(wx.Dialog):
                 print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
 
-class SetProbeDialog(wx.Dialog):
+class ProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
         self.axis = axis
         pos = (10, 10)
