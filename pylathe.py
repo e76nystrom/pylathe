@@ -275,7 +275,8 @@ def addCheckBox(panel, sizer, label, key):
         tmp = info[key]
         val = tmp.GetValue()
         cb.SetValue(val == 'True')
-    info[key] = cb
+    else:
+        inifInfo(key, cb)
     return(cb)
 
 def getFloatVal(tc):
@@ -557,18 +558,18 @@ def xilinxTestMode():
     global info, fcy
     testMode = False
     try:
-        testMode = info['cfgTestMode'].GetValue()
+        testMode = getInfo('cfgTestMode')
     except KeyError as e:
         testMode = False
     if testMode:
         encoder = 0
         try:
-            encoder = int(info['cfgEncoder'].GetValue())
+            encoder = getIntInfo('cfgEncoder')
         except KeyError as e:
             encoder = 0
         rpm = 0
         try:
-            rpm = int(float(info['cfgTestRPM'].GetValue()))
+            rpm = int(getFloatInfo('cfgTestRPM'))
         except KeyError as e:
             rpm = 0
         if encoder != 0:
@@ -615,11 +616,11 @@ def sendSpindleData(send=False, rpm=None):
                 xilinxTestMode()
                 queParm(RPM, getInfo('cfgTestRPM'))
                 cfgReg = 0
-                if info['cfgInvEncDir'].GetValue():
+                if getBoolInfo('cfgInvEncDir'):
                     cfgReg |= ENC_POL
-                if info['zInvDir'].GetValue():
+                if getBoolInfo('zInvDir):
                     cfgReg |= ZDIR_POL
-                if info['xInvDir'].GetValue():
+                if getBoolInfo('xInvDir'):
                     cfgReg |= XDIR_POL
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
