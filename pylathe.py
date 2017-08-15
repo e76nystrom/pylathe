@@ -3615,7 +3615,7 @@ class SetProbeDialog(wx.Dialog):
             else:
                 probeLoc = jogPanel.xPos.GetValue()
                 probeDist = getFloatInfo('xProbeDist')
-            self.probeLoc.SetValue(val)
+            self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
             self.probeDist.SetValue("%7.4f" % probeDist)
 
