@@ -239,11 +239,11 @@ def addFieldText(panel, sizer, label, key):
         txt = wx.StaticText(panel, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
-        setInfo(key + 'Text', txt)
+        initInfo(key + 'Text', txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
-    setInfo(key, tc)
+    initInfo(key, tc)
     return(tc)
 
 def addField(panel, sizer, label, key):
@@ -259,7 +259,8 @@ def addField(panel, sizer, label, key):
         tmp = info[key]
         val = tmp.GetValue()
         tc.SetValue(val)
-    info[key] = tc
+    else:
+        initInfo(key, tc)
     return(tc)
 
 def addCheckBox(panel, sizer, label, key):
@@ -1010,7 +1011,7 @@ class TurnPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('tuPause', cb)
+        initInfo('tuPause', cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1249,7 +1250,7 @@ class FacePanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('fdPause', cb)
+        initInfo('fdPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1401,7 +1402,7 @@ class CutoffPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('cuPause', cb)
+        initInfo('cuPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1765,7 +1766,7 @@ class TaperPanel(wx.Panel):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
                                             choices=self.taperList,
                                             style=wx.CB_READONLY)
-        setInfo('tpTaperSel', combo)
+        initInfo('tpTaperSel', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -1800,7 +1801,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        setInfo('tpDeltaBtn', btn)
+        initInfo('tpDeltaBtn', btn)
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -1812,7 +1813,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        setInfo('tpAngleBtn', btn)
+        initInfo('tpAngleBtn', btn)
 
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
@@ -1858,7 +1859,7 @@ class TaperPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('tpInternal', cb)
+        initInfo('tpInternal', cb)
 
         sizerG.Add(sizerH)
 
@@ -1869,7 +1870,7 @@ class TaperPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('tpPause', cb)
+        initInfo('tpPause', cb)
 
         sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
@@ -2258,7 +2259,7 @@ class ThreadPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('thInternal', cb)
+        initInfo('thInternal', cb)
 
         # x parameters
 
@@ -2273,11 +2274,11 @@ class ThreadPanel(wx.Panel):
         # self.final = btn = wx.RadioButton(self, label="Final",
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # setInfo('thFinal', btn)
+        # initInfo('thFinal', btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # setInfo('thDepth', btn)
+        # initInfo('thDepth', btn)
 
         #
 
@@ -2285,11 +2286,11 @@ class ThreadPanel(wx.Panel):
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('thTPI',  btn)
+        initInfo('thTPI',  btn)
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('thMM', btn)
+        initInfo('thMM', btn)
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
@@ -2344,7 +2345,7 @@ class ThreadPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        setInfo('thPause', cb)
+        initInfo('thPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2640,7 +2641,7 @@ class JogPanel(wx.Panel):
 
         self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
-        setInfo('jogZPos', tc)
+        initInfo('jogZPos', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
@@ -2655,7 +2656,7 @@ class JogPanel(wx.Panel):
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
-        setInfo('jogXPos', tc)
+        initInfo('jogXPos', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
@@ -2692,7 +2693,7 @@ class JogPanel(wx.Panel):
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                          style=wx.TE_RIGHT)
-        setInfo('jogXPosDiam', tc)
+        initInfo('jogXPosDiam', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -2723,7 +2724,7 @@ class JogPanel(wx.Panel):
 
             self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
-            setInfo('encZPos', tc)
+            initInfo('encZPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2737,7 +2738,7 @@ class JogPanel(wx.Panel):
 
             self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
-            setInfo('droXPos', tc)
+            initInfo('droXPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2846,7 +2847,7 @@ class JogPanel(wx.Panel):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
                                          style=wx.CB_READONLY)
-        setInfo('jogInc', combo)
+        initInfo('jogInc', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
