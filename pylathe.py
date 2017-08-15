@@ -90,6 +90,10 @@ def readInfo(file):
         print(e)
         stdout.flush()
 
+def initInfo(field, val):
+    global info
+    info[field] = val
+
 def setInfo(field, val):
     global info
     info[field].SetValue(val)
