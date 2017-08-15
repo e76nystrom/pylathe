@@ -4229,13 +4229,13 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile)
 
-        vars = (('zSvHomeOffset', 'zHomeOffset'), \
-                ('xSvHomeOffset', 'xHomeOffset'))
+        vars = ((zSvHomeOffset, 'zHomeOffset'), \
+                (xSvHomeOffset, 'xHomeOffset'))
         if DRO:
-            vars += (('zSvDROOffset', 'zDROOffset'), \
-                     ('xSvDROOffset', 'xDROOffset'), \
-                     ('zSvDROPosition', 'zDROPostion'), \
-                     ('xSvDROPosition', 'xDROPositon'))
+            vars += ((zSvDROOffset, 'zDROOffset'), \
+                     (xSvDROOffset, 'xDROOffset'), \
+                     (zSvDROPosition, 'zDROPostion'), \
+                     (xSvDROPosition, 'xDROPositon'))
 
         for (key, var) in vars:
             exec('global ' + var)
@@ -4244,7 +4244,7 @@ class MainFrame(wx.Frame):
             else:
                 exp = var + ' = getFloatInfo(\'' + key + '\')'
                 exec(exp)
-                print("%s = %s" % (key, eval(var)))
+                print("%s = %s" % (var, eval(var)))
             stdout.flush()
 
         dw, dh = wx.DisplaySize()
