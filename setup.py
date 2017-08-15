@@ -3,8 +3,7 @@ cmds = None
 parms = None
 xRegs = None
 
-def createConfig(configList):
-    global config
+def createConfig(config, configList):
     config = {}
     for (name, comment) in configList:
         config[name] = True
