@@ -102,7 +102,7 @@ def queParm(parm, val):
         try:
             val = int(val)
             if val < 10 :
-                valString = "%d % (val)"
+                valString = "%d" % (val)
             else:
                 valString = "x%x" % (val)
         except ValueError:
