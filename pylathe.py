@@ -689,7 +689,7 @@ def sendXData(send=False):
                     val = 0.020
             except ValueError:
                 val = 0.001
-            queParm(X_MPG_INC', val * jogPanel.xStepsInch)
+            queParm(X_MPG_INC, val * jogPanel.xStepsInch)
 
             queParm(X_PITCH, getInfo('xPitch'))
             queParm(X_RATIO, getInfo('xMotorRatio'))
