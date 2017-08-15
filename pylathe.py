@@ -576,11 +576,11 @@ def xilinxTestMode():
                 preScaler += 1
                 encTimer = int(fcy / (encoder * rps * preScaler))
             print("preScaler %d encTimer %d" % (preScaler, encTimer))
-            setParm('ENC_ENABLE', '1')
-            setParm('ENC_PRE_SCALER', preScaler)
-            setParm('ENC_TIMER', encTimer)
+            setParm(ENC_ENABLE, '1')
+            setParm(ENC_PRE_SCALER, preScaler)
+            setParm(ENC_TIMER, encTimer)
     else:
-        setParm('ENC_ENABLE', '0')
+        setParm(ENC_ENABLE, '0')
 
 def sendSpindleData(send=False, rpm=None):
     global info, spindleDataSent, XILINX
@@ -755,7 +755,7 @@ class UpdatePass():
         self.genPass = genPass
 
     def initPass(self):
-        setParm('TOTAL_PASSES', self.passes)
+        setParm(TOTAL_PASSES, self.passes)
         self.passCount = 1
         self.sPassCtr = 0
         self.spring = 0
@@ -2530,7 +2530,7 @@ class JogShuttle():
             try:
                 if index != jogShuttle.zCurIndex:
                     jogShuttle.zCurIndex = index
-                    setParm('Z_JOG_SPEED', speed)
+                    setParm(Z_JOG_SPEED, speed)
                 command(ZJSPEED)
             except commTimeout:
                 pass
@@ -2555,7 +2555,7 @@ class JogShuttle():
             try:
                 if index != jogShuttle.xCurIndex:
                     jogShuttle.xCurIndex = index
-                    setParm('X_JOG_SPEED', speed)
+                    setParm(X_JOG_SPEED, speed)
                 command(XJSPEED)
             except commTimeout:
                 pass
@@ -2580,7 +2580,7 @@ class JogShuttle():
             try:
                 if index != jogShuttle.spindleCurIndex:
                     jogShuttle.spindleCurIndex = index
-                    setParm('SP_JOG_RPM', speed)
+                    setParm(SP_JOG_RPM, speed)
                 command(SPINDLE_JOG_SPEED)
             except commTimeout:
                 pass
@@ -3232,7 +3232,7 @@ class JogPanel(wx.Panel):
 
             if self.xHome:
                 if self.probeAxis == 0:
-                    val = getParm('X_HOME_STATUS')
+                    val = getParm(X_HOME_STATUS)
                     if val != None:
                         if val & HOME_SUCCESS:
                             self.homeDone("home success")
@@ -3240,7 +3240,7 @@ class JogPanel(wx.Panel):
                         elif val & HOME_FAIL:
                             self.homeDone("home success")
                 elif self.probeAxis == 1:
-                    val = getParm('Z_HOME_STATUS')
+                    val = getParm(Z_HOME_STATUS)
                     # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
                         zHomeOffset = zLoc - self.probeLoc
@@ -3254,7 +3254,7 @@ class JogPanel(wx.Panel):
                     elif val & PROBE_FAIL:
                         self.homeDone("z probe failure")
                 elif self.probeAxis == 2:
-                    val = getParm('X_HOME_STATUS')
+                    val = getParm(X_HOME_STATUS)
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
                         xHomeOffset = xLoc - self.probeLoc
@@ -3495,15 +3495,15 @@ class SetPosDialog(wx.Dialog):
     def updateZPos(val):
         global jogPanel, zHomeOffset, zDROOffset
         sendZData()
-        zLoc = getParm('Z_LOC')
+        zLoc = getParm(Z_LOC)
         if zLoc != None:
             zLoc /= jogPanel.zStepsInch
             zHomeOffset = zLoc - val
             setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
-            setParm('Z_HOME_OFFSET', zHomeOffset)
+            setParm(Z_HOME_OFFSET, zHomeOffset)
             print("zHomeOffset %0.4f" % (zHomeOffset))
         if DRO:
-            zDROPos = getParm('Z_DRO_POS')
+            zDROPos = getParm(Z_DRO_POS)
             print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
             if zDROPos != None:
                 droPos = float(zDROPos) / jogPanel.zDROInch
@@ -3512,7 +3512,7 @@ class SetPosDialog(wx.Dialog):
                     droPos = -droPos
                 zDROOffset = droPos - val
                 setInfo('zDROOffset', "%0.4f" % (zDROOffset))
-                setParm('Z_DRO_OFFSET', zDROOffset)
+                setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
 
@@ -3520,15 +3520,15 @@ class SetPosDialog(wx.Dialog):
         global jogPanel, xHomeOffset, xDROOffset
         val /= 2.0
         sendXData()
-        xLoc = getParm('X_LOC')
+        xLoc = getParm(X_LOC)
         if xLoc != None:
             xLoc /= jogPanel.xStepsInch
             xHomeOffset = xLoc - val
             setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
-            setParm('X_HOME_OFFSET', xHomeOffset)
+            setParm(X_HOME_OFFSET, xHomeOffset)
             print("xHomeOffset %0.4f" % (xHomeOffset))
         if DRO:
-            xDROPos = getParm('X_DRO_POS')
+            xDROPos = getParm(X_DRO_POS)
             print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
             if xDROPos != None:
                 droPos = float(xDROPos) / jogPanel.xDROInch
@@ -3537,7 +3537,7 @@ class SetPosDialog(wx.Dialog):
                     droPos = -droPos
                 xDROOffset = droPos - val
                 setInfo('xDROOffset', "%0.4f" % (xDROOffset))
-                setParm('X_DRO_OFFSET', xDROOffset)
+                setParm(X_DRO_OFFSET, xDROOffset)
                 print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
 
@@ -3746,7 +3746,7 @@ class FixXPosDialog(wx.Dialog):
             return
         if self.IsShown():
             try:
-                xDiameter = float(getParm('X_DIAMETER')) / jogPanel.xStepsInch
+                xDiameter = float(getParm(X_DIAMETER)) / jogPanel.xStepsInch
             except (ValueError, TypeError):
                 xDiameter = 0.0
             self.curXPos.SetValue("%0.4f" % (xDiameter));
@@ -3804,21 +3804,21 @@ class UpdateThread(Thread):
         self.start()
 
     # def zLoc(self):
-    #     val = getParm('Z_LOC')
+    #     val = getParm(Z_LOC)
     #     if val != None:
     #         result = (0, val)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     # def xLoc(self):
-    #     val = getParm('X_LOC')
+    #     val = getParm(X_LOC)
     #     if val != None:
     #         result = (1, val)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     # def rpm(self):
-    #     period = getParm('INDEX_PERIOD')
+    #     period = getParm(INDEX_PERIOD)
     #     if period != None:
-    #         preScaler = getParm('INDEX_PRE_SCALER')
+    #         preScaler = getParm(INDEX_PRE_SCALER)
     #         result = (2, period * preScaler)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
@@ -4467,7 +4467,7 @@ class XDialog(wx.Dialog):
     def OnSetHomeLoc(self, e):
         global jogPanel
         loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
-        setParm('X_HOME_LOC', loc)
+        setParm(X_HOME_LOC, loc)
         
     def OnSetup(self, e):
         moveCommans.queClear()
