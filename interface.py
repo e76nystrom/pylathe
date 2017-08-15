@@ -1,7 +1,7 @@
 #!/cygdrive/c/Python27/Python.exe
 
 cfgList = \
-(
+( \
     (cfgCmdDis, 'config disable sending commands'),
     (cfgDRO, 'config dro present'),
     (cfgDraw, 'config draw paths'),
@@ -15,7 +15,9 @@ cfgList = \
     (cfgTestRPM, 'config xilinx test rpm value'),
     (cfgXFreq, 'config xilinx frequency'),
     (cfgXilinx, 'config xilinx interface present'),
+
     (commPort, 'comm port'),
+
     (cuPause, 'cutoff pause before cutting'),
     (cuRPM, 'cutoff rpm'),
     (cuXEnd, 'cutoff x end'),
@@ -24,10 +26,10 @@ cfgList = \
     (cuXStart, 'cutoff x start'),
     (cuZCutoff, 'cutoff offset to z cutoff'),
     (cuZStart, 'cutoff z location'),
-    (encXPos, 'dro saved x position'),
-    (encZPos, 'dro saved z position'),
+
     (faAddFeed, 'face '),
     (faPasses, 'face '),
+    (faPause, 'face pause before cutting'),
     (faRPM, 'face '),
     (faSPInt, 'face '),
     (faSpring, 'face '),
@@ -39,12 +41,14 @@ cfgList = \
     (faZFeed, 'face '),
     (faZRetract, 'face '),
     (faZStart, 'face '),
-    (fdPause, ''),
+
     (jogInc, 'jog '),
     (jogXPos, 'jog '),
     (jogXPosDiam, 'jog '),
     (jogZPos, 'jog '),
+
     (mainPanel, 'name of main panle'),
+
     (spAccel, 'spindle '),
     (spAccelTime, 'spindle '),
     (spInvDir, 'spindle '),
@@ -57,6 +61,7 @@ cfgList = \
     (spMotorSteps, 'spindle '),
     (spStepDrive, 'spindle '),
     (spTestIndex, 'spindle '),
+
     (thAddFeed, 'thread '),
     (thAngle, 'thread '),
     (thExitRev, 'thread '),
@@ -79,6 +84,7 @@ cfgList = \
     (thZEnd, 'thread '),
     (thZRetract, 'thread '),
     (thZStart, 'thread '),
+
     (tpAddFeed, 'tp '),
     (tpAngle, 'tp '),
     (tpAngleBtn, 'tp '),
@@ -116,12 +122,11 @@ cfgList = \
     (tuZFeed, 'turn '),
     (tuZRetract, 'turn '),
     (tuZStart, 'turn '),
+
     (xAccel, 'turn '),
     (xBacklash, 'turn '),
     (xDROInch, 'turn '),
-    (xEncInch, 'x axis '),
-    (xEncOffset, 'x axis '),
-    (xEncPosition, 'x axis '),
+    (xDROPosition, 'x axis '),
     (xHomeBackoffDist, 'x axis '),
     (xHomeDir, 'x axis '),
     (xHomeDist, 'x axis '),
@@ -144,12 +149,12 @@ cfgList = \
     (xMotorSteps, 'x axis '),
     (xPitch, 'x axis '),
     (xProbeDist, 'x axis '),
+
     (zAccel, 'z axis '),
     (zBacklash, 'z axis '),
     (zDROInch, 'z axis '),
-    (zEncInch, 'z axis '),
-    (zEncOffset, 'z axis '),
-    (zEncPosition, 'z axis '),
+    (zDROOffset, 'z axis '),
+    (zDROPosition, 'z axis '),
     (zHomeOffset, 'z axis '),
     (zInvDRO, 'z axis '),
     (zInvDir, 'z axis '),
