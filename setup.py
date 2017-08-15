@@ -4,7 +4,6 @@ parms = None
 xRegs = None
 
 def createConfig(config, configList):
-    config = {}
     for (name, comment) in configList:
         config[name] = True
         if name in globals():
