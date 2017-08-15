@@ -3529,7 +3529,7 @@ class SetPosDialog(wx.Dialog):
         if zLoc != None:
             zLoc /= jogPanel.zStepsInch
             zHomeOffset = zLoc - val
-            setInfo('zHomeOffset', "%0.4f" % (zHomeOffset))
+            setInfo('zSvHomeOffset', "%0.4f" % (zHomeOffset))
             setParm(Z_HOME_OFFSET, zHomeOffset)
             print("zHomeOffset %0.4f" % (zHomeOffset))
         if DRO:
@@ -3537,11 +3537,11 @@ class SetPosDialog(wx.Dialog):
             print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
             if zDROPos != None:
                 droPos = float(zDROPos) / jogPanel.zDROInch
-                setInfo('zDROPosition', "%0.4f" % (droPos))
+                setInfo('zSvDROPosition', "%0.4f" % (droPos))
                 if jogPanel.zDROInvert:
                     droPos = -droPos
                 zDROOffset = droPos - val
-                setInfo('zDROOffset', "%0.4f" % (zDROOffset))
+                setInfo('zSvDROOffset', "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
@@ -3554,7 +3554,7 @@ class SetPosDialog(wx.Dialog):
         if xLoc != None:
             xLoc /= jogPanel.xStepsInch
             xHomeOffset = xLoc - val
-            setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
+            setInfo('xSvHomeOffset', "%0.4f" % (xHomeOffset))
             setParm(X_HOME_OFFSET, xHomeOffset)
             print("xHomeOffset %0.4f" % (xHomeOffset))
         if DRO:
@@ -3562,11 +3562,11 @@ class SetPosDialog(wx.Dialog):
             print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
             if xDROPos != None:
                 droPos = float(xDROPos) / jogPanel.xDROInch
-                setInfo('xDROPosition', "%0.4f" % (droPos))
+                setInfo('xSvDROPosition', "%0.4f" % (droPos))
                 if jogPanel.xDROInvert:
                     droPos = -droPos
                 xDROOffset = droPos - val
-                setInfo('xDROOffset', "%0.4f" % (xDROOffset))
+                setInfo('xSvDROOffset', "%0.4f" % (xDROOffset))
                 setParm(X_DRO_OFFSET, xDROOffset)
                 print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
@@ -4056,10 +4056,10 @@ class MainFrame(wx.Frame):
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
-                    val = int(getFloatInfo('zDROPosition') * \
+                    val = int(getFloatInfo('zSvDROPosition') * \
                               jogPanel.zStepsInch)
                     queParm(Z_DRO_POS, val)
-                    val = int(getFloatInfo('xDROPosition') * \
+                    val = int(getFloatInfo('xSvDROPosition') * \
                               jogPanel.xStepsInch)
                     queParm(X_DRO_POS, val)
                     queParm(Z_DRO_OFFSET, zDROOffset)
@@ -4228,10 +4228,10 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile)
 
-        vars = ('zHomeOffset', 'xHomeOffset')
+        vars = ('zSvHomeOffset', 'xSvHomeOffset')
         if DRO:
-            vars += ('zDROOffset', 'xDROOffset', \
-                     'zDROPosition', 'xDROPosition')
+            vars += ('zSvDROOffset', 'xSvDROOffset', \
+                     'zSvDROPosition', 'xSvDROPosition')
 
         for key in vars:
             exec('global ' + key)
