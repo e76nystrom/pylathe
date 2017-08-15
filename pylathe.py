@@ -3209,17 +3209,17 @@ class JogPanel(wx.Panel):
             self.curPass.SetValue(curPass)
 
             if DRO:
-                encPos = float(zEncPos) / self.zEncInch
+                zDroLoc = float(zEncPos) / self.zEncInch
                 if self.zEncInvert:
-                    encPos = -encPos
-                encPos -= zEncOffset
-                self.zEncPos.SetValue("%0.4f" % (encPos))
+                    zDroLoc = -zDroLoc
+                zDroLoc -= zEncOffset
+                self.zEncPos.SetValue("%0.4f" % (zDroLoc))
 
-                encPos = float(xEncPos) / self.xEncInch
+                xDroLoc = float(xEncPos) / self.xEncInch
                 if self.xEncInvert:
-                    encPos = -encPos
-                encPos -= xEncOffset
-                self.xEncPos.SetValue("%0.4f" % (encPos))
+                    xDroLoc = -xDroLoc
+                xDroLoc -= xEncOffset
+                self.xEncPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
             label = ''
@@ -3247,6 +3247,8 @@ class JogPanel(wx.Panel):
                         print("z %s zLoc %7.4f probeLoc %7.4f "\
                               "zHomeOffset %7.4f" % \
                               (z, zLoc, self.probeLoc, zHomeOffset))
+                        if DRO:
+                            zEncOffset = zDroLoc - self.probeLoc
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
@@ -3256,6 +3258,8 @@ class JogPanel(wx.Panel):
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
                         xHomeOffset = xLoc - self.probeLoc
+                        if DRO:
+                            xEncOffset = xDroPos - self.probeLoc
                         print("x %s xLoc %7.4f probeLoc %7.4f "\
                               "xHomeOffset %7.4f" % \
                               (x, xLoc, self.probeLoc, xHomeOffset))
