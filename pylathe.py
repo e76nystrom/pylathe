@@ -276,7 +276,7 @@ def addCheckBox(panel, sizer, label, key):
         val = tmp.GetValue()
         cb.SetValue(val == 'True')
     else:
-        inifInfo(key, cb)
+        initInfo(key, cb)
     return(cb)
 
 def getFloatVal(tc):
