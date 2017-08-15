@@ -150,10 +150,10 @@ zDataSent = False
 xDataSent = False
 zHomeOffset = 0.0
 xHomeOffset = 0.0
-zEncOffset = 0.0
-xEncOffset = 0.0
-zEncPosition = 0.0
-xEncPosition = 0.0
+zDROOffset = 0.0
+xDROOffset = 0.0
+zDROPosition = 0.0
+xDROPosition = 0.0
 xHomed = False
 done = False
 jogShuttle = None
@@ -633,8 +633,8 @@ def sendZData(send=False):
             motorRatio = getFloatInfo('zMotorRatio')
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.zEncInch = getIntInfo('zEncInch')
-            jogPanel.zEncInvert = getBoolInfo('zInvEnc') == 1
+            jogPanel.zDROInch = getIntInfo('zDROInch')
+            jogPanel.zDROInvert = getBoolInfo('zInvDRO') == 1
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -680,8 +680,8 @@ def sendXData(send=False):
             motorRatio = getFloatInfo('xMotorRatio')
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.xEncInch = getIntInfo('xEncInch')
-            jogPanel.xEncInvert = getBoolInfo('xInvEnc') == 1
+            jogPanel.xDROInch = getIntInfo('xDROInch')
+            jogPanel.xDROInvert = getBoolInfo('xInvDRO') == 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -2608,10 +2608,10 @@ class JogPanel(wx.Panel):
         self.probeLoc = 0.0
         self.zStepsInch = 0
         self.xStepsInch = 0
-        self.zEncInch = 0
-        self.xEncInch = 0
-        self.zEncInvert = 0
-        self.xEncInvert = 0
+        self.zDROInch = 0
+        self.xDROInch = 0
+        self.zDROInvert = 0
+        self.xDROInvert = 0
 
     def initUI(self):
         global info, emptyCell
@@ -2710,30 +2710,30 @@ class JogPanel(wx.Panel):
 
         if DRO:
             # third row
-            # z encoder position
+            # z dro position
 
             txt = wx.StaticText(self, -1, "Z")
             txt.SetFont(txtFont)
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.zEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
             info['encZPos'] = tc
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
-            # x encoder Position
+            # x dro Position
 
             txt = wx.StaticText(self, -1, "X")
             txt.SetFont(txtFont)
             sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                        wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.xEncPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
+            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
-            info['encXPos'] = tc
+            info['droXPos'] = tc
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -3194,9 +3194,9 @@ class JogPanel(wx.Panel):
             self.probeLoc = probeLoc
 
     def updateAll(self, val):
-        global zHomeOffset, xHomeOffset, zEncOffset, xEncOffset, xHomed
+        global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
         if len(val) == 7:
-            (z, x, rpm, curPass, zEncPos, xEncPos, flag) = val
+            (z, x, rpm, curPass, zDROPos, xDROPos, flag) = val
             if z != '#':
                 zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
@@ -3209,17 +3209,17 @@ class JogPanel(wx.Panel):
             self.curPass.SetValue(curPass)
 
             if DRO:
-                zDroLoc = float(zEncPos) / self.zEncInch
-                if self.zEncInvert:
+                zDroLoc = float(zDROPos) / self.zDROInch
+                if self.zDROInvert:
                     zDroLoc = -zDroLoc
-                zDroLoc -= zEncOffset
-                self.zEncPos.SetValue("%0.4f" % (zDroLoc))
+                zDroLoc -= zDROOffset
+                self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
-                xDroLoc = float(xEncPos) / self.xEncInch
-                if self.xEncInvert:
+                xDroLoc = float(xDROPos) / self.xDROInch
+                if self.xDROInvert:
                     xDroLoc = -xDroLoc
-                xDroLoc -= xEncOffset
-                self.xEncPos.SetValue("%0.4f" % (xDroLoc))
+                xDroLoc -= xDROOffset
+                self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
             label = ''
@@ -3248,7 +3248,7 @@ class JogPanel(wx.Panel):
                               "zHomeOffset %7.4f" % \
                               (z, zLoc, self.probeLoc, zHomeOffset))
                         if DRO:
-                            zEncOffset = zDroLoc - self.probeLoc
+                            zDROOffset = zDroLoc - self.probeLoc
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
@@ -3259,7 +3259,7 @@ class JogPanel(wx.Panel):
                     if val & PROBE_SUCCESS:
                         xHomeOffset = xLoc - self.probeLoc
                         if DRO:
-                            xEncOffset = xDroPos - self.probeLoc
+                            xDROOffset = xDroPos - self.probeLoc
                         print("x %s xLoc %7.4f probeLoc %7.4f "\
                               "xHomeOffset %7.4f" % \
                               (x, xLoc, self.probeLoc, xHomeOffset))
@@ -3493,7 +3493,7 @@ class SetPosDialog(wx.Dialog):
         jogPanel.focus()
 
     def updateZPos(val):
-        global jogPanel, zHomeOffset, zEncOffset
+        global jogPanel, zHomeOffset, zDROOffset
         sendZData()
         zLoc = getParm('Z_LOC')
         if zLoc != None:
@@ -3503,21 +3503,21 @@ class SetPosDialog(wx.Dialog):
             setParm('Z_HOME_OFFSET', zHomeOffset)
             print("zHomeOffset %0.4f" % (zHomeOffset))
         if DRO:
-            zEncPos = getParm('Z_ENC_POS')
-            print("zEncPos %0.4f" % (zEncPos / jogPanel.zEncInch))
-            if zEncPos != None:
-                encPos = float(zEncPos) / jogPanel.zEncInch
-                setInfo('zEncPosition', "%0.4f" % (encPos))
-                if jogPanel.zEncInvert:
-                    encPos = -encPos
-                zEncOffset = encPos - val
-                setInfo('zEncOffset', "%0.4f" % (zEncOffset))
-                setParm('Z_ENC_OFFSET', zEncOffset)
-                print("zEncOffset %0.4f" % (zEncOffset))
+            zDROPos = getParm('Z_DRO_POS')
+            print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
+            if zDROPos != None:
+                droPos = float(zDROPos) / jogPanel.zDROInch
+                setInfo('zDROPosition', "%0.4f" % (droPos))
+                if jogPanel.zDROInvert:
+                    droPos = -droPos
+                zDROOffset = droPos - val
+                setInfo('zDROOffset', "%0.4f" % (zDROOffset))
+                setParm('Z_DRO_OFFSET', zDROOffset)
+                print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
 
     def updateXPos(val):
-        global jogPanel, xHomeOffset, xEncOffset
+        global jogPanel, xHomeOffset, xDROOffset
         val /= 2.0
         sendXData()
         xLoc = getParm('X_LOC')
@@ -3528,17 +3528,17 @@ class SetPosDialog(wx.Dialog):
             setParm('X_HOME_OFFSET', xHomeOffset)
             print("xHomeOffset %0.4f" % (xHomeOffset))
         if DRO:
-            xEncPos = getParm('X_ENC_POS')
-            print("xEncPos %0.4f" % (xEncPos / jogPanel.xEncInch))
-            if xEncPos != None:
-                encPos = float(xEncPos) / jogPanel.xEncInch
-                setInfo('xEncPosition', "%0.4f" % (encPos))
-                if jogPanel.xEncInvert:
-                    encPos = -encPos
-                xEncOffset = encPos - val
-                setInfo('xEncOffset', "%0.4f" % (xEncOffset))
-                setParm('X_ENC_OFFSET', xEncOffset)
-                print("xEncOffset %0.4f" % (xEncOffset))
+            xDROPos = getParm('X_DRO_POS')
+            print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
+            if xDROPos != None:
+                droPos = float(xDROPos) / jogPanel.xDROInch
+                setInfo('xDROPosition', "%0.4f" % (droPos))
+                if jogPanel.xDROInvert:
+                    droPos = -droPos
+                xDROOffset = droPos - val
+                setInfo('xDROOffset', "%0.4f" % (xDROOffset))
+                setParm('X_DRO_OFFSET', xDROOffset)
+                print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
 
 class SetProbeDialog(wx.Dialog):
@@ -3848,9 +3848,9 @@ class UpdateThread(Thread):
         if result == None:
             return
         try:
-            (z, x, rpm, curPass, encZ, encX, flag) = \
+            (z, x, rpm, curPass, droZ, droX, flag) = \
                 result.rstrip().split(' ')[1:]
-            result = (3, z, x, rpm, curPass, encZ, encX, flag)
+            result = (3, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print("readAll ValueError %s" % (result))
@@ -3996,26 +3996,26 @@ class MainFrame(wx.Frame):
                 setParm('X_SET_LOC', val)
                 command('XSETLOC')
                 if DRO:
-                    val = int(getFloatInfo('zEncPosition') * \
+                    val = int(getFloatInfo('zDROPosition') * \
                               jogPanel.zStepsInch)
-                    queParm('Z_ENC_POS', val)
-                    val = int(getFloatInfo('xEncPosition') * \
+                    queParm('Z_DRO_POS', val)
+                    val = int(getFloatInfo('xDROPosition') * \
                               jogPanel.xStepsInch)
-                    queParm('X_ENC_POS', val)
-                    queParm('Z_ENC_OFFSET', zEncOffset)
-                    queParm('X_ENC_OFFSET', xEncOffset)
-                    queParm('Z_ENC_INCH', jogPanel.zEncInch)
-                    queParm('X_ENC_INCH', jogPanel.xEncInch)
+                    queParm('X_DRO_POS', val)
+                    queParm('Z_DRO_OFFSET', zDROOffset)
+                    queParm('X_DRO_OFFSET', xDROOffset)
+                    queParm('Z_DRO_INCH', jogPanel.zDROInch)
+                    queParm('X_DRO_INCH', jogPanel.xDROInch)
                     sendMulti()
                 val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
                 queParm('X_HOME_LOC', val)
                 queParm('Z_HOME_OFFSET', zHomeOffset)
                 queParm('X_HOME_OFFSET', xHomeOffset)
                 queParm('X_HOME_STATUS', (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
-                val = (-1, 1)[getBoolInfo('zInvEnc')]
-                queParm('Z_ENC_DIR', val)
-                val = (-1, 1)[getBoolInfo('xInvEnc')]
-                queParm('X_ENC_DIR', val)
+                val = (-1, 1)[getBoolInfo('zInvDRO')]
+                queParm('Z_DRO_DIR', val)
+                val = (-1, 1)[getBoolInfo('xInvDRO')]
+                queParm('X_DRO_DIR', val)
                 sendMulti()
                 sendSpindleData()
             except commTimeout:
@@ -4041,7 +4041,7 @@ class MainFrame(wx.Frame):
 
     def initUI(self):
         global jogPanel, info, zHomeOffset, xHomeOffset, \
-            zEncOffset, xEncOffset
+            zDROOffset, xDROOffset
         fileMenu = wx.Menu()
 
         ID_FILE_SAVE = wx.NewId()
@@ -4170,8 +4170,8 @@ class MainFrame(wx.Frame):
 
         vars = ('zHomeOffset', 'xHomeOffset')
         if DRO:
-            vars += ('zEncOffset', 'xEncOffset', \
-                     'zEncPosition', 'xEncPosition')
+            vars += ('zDROOffset', 'xDROOffset', \
+                     'zDROPosition', 'xDROPosition')
 
         for key in vars:
             exec('global ' + key)
@@ -4343,8 +4343,8 @@ class ZDialog(wx.Dialog):
             ("Probe Speed", "zProbeSpeed"),
             ("bInvert Dir", 'zInvDir'),
             ("bInvert MPG", 'zInvMpg'),
-            ("Enc Inch", "zEncInch"),
-            ("bInv Encoder", 'zInvEnc'),
+            ("DRO Inch", "zDROInch"),
+            ("bInv DRO", 'zInvDRO'),
         )        
         fieldList(self, sizerG, self.fields)
 
@@ -4425,8 +4425,8 @@ class XDialog(wx.Dialog):
             ("Backoff Dist", "xHomeBackoffDist"),
             ("Home Speed", "xHomeSpeed"),
             ("bHome Dir", 'xHomeDir'),
-            ("Enc Inch", "xEncInch"),
-            ("bInv Encoder", 'xInvEnc'),
+            ("DRO Inch", "xDROInch"),
+            ("bInv DRO", 'xInvDRO'),
         )        
         global HOME_TEST
         if HOME_TEST:
