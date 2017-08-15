@@ -3610,7 +3610,7 @@ class SetProbeDialog(wx.Dialog):
             return
         if self.IsShown():
             if self.axis == 0:
-                probeLoc = 0.0000
+                probeLoc = "0.0000"
                 probeDist = getFloatInfo('zProbeDist')
             else:
                 probeLoc = jogPanel.xPos.GetValue()
