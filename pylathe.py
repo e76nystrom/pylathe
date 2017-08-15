@@ -588,7 +588,7 @@ def xilinxTestMode():
         setParm(ENC_ENABLE, '0')
 
 def sendSpindleData(send=False, rpm=None):
-    spindleDataSent, XILINX
+    global spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
             queParm(STEPPER_DRIVE, getBoolInfo('spStepDrive'))
