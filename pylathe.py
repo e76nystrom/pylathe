@@ -618,7 +618,7 @@ def sendSpindleData(send=False, rpm=None):
                 cfgReg = 0
                 if getBoolInfo('cfgInvEncDir'):
                     cfgReg |= ENC_POL
-                if getBoolInfo('zInvDir):
+                if getBoolInfo('zInvDir'):
                     cfgReg |= ZDIR_POL
                 if getBoolInfo('xInvDir'):
                     cfgReg |= XDIR_POL
