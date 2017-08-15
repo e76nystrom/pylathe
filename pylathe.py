@@ -4482,7 +4482,7 @@ class XDialog(wx.Dialog):
 
     def OnCancel(self, e):
         for (label, index) in self.fields:
-            setInfo[index], self.fieldInfo[index])
+            setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
 class SpindleDialog(wx.Dialog):
