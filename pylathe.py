@@ -32,10 +32,6 @@ class InfoValue():
     def SetValue(self, val):
         self.value = val
 
-def setInfo(field, val):
-    global info
-    info[field].SetValue(val)
-
 def saveInfo(file):
     global info
     f = open(file, 'w')
@@ -93,6 +89,57 @@ def readInfo(file):
         print(line, "readInfo error")
         print(e)
         stdout.flush()
+
+def setInfo(field, val):
+    global info
+    info[field].SetValue(val)
+
+def getInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        return(tmp.GetValue())
+    except KeyError:
+        return('')
+
+def getBoolInfo(key):
+    global info
+    try:
+        tmp = info[key].GetValue()
+        if tmp:
+            return(1)
+        else:
+            return(0)
+    except KeyError:
+        print("getBoolInfo IndexError %s" % (key))
+        stdout.flush()
+        return('')
+
+def getFloatInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        try:
+            return(float(tmp.GetValue()))
+        except ValueError:
+            pass
+    except KeyError:
+        print("invalid key %s" % (key))
+        stdout.flush()
+    return(0.0)
+
+def getIntInfo(key):
+    global info
+    try:
+        tmp = info[key]
+        try:
+            return(int(tmp.GetValue()))
+        except ValueError as e:
+            return(0)
+    except KeyError as e:
+        print("invalid key %s" % (key))
+        stdout.flush()
+    return(0)
 
 configFile = "config.txt"
 info = {}
@@ -188,11 +235,11 @@ def addFieldText(panel, sizer, label, key):
         txt = wx.StaticText(panel, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,
                   border=2)
-        info[key + 'Text'] = txt
+        setInfo(key + 'Text', txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
-    info[key] = tc
+    setInfo(key, tc)
     return(tc)
 
 def addField(panel, sizer, label, key):
@@ -225,53 +272,6 @@ def addCheckBox(panel, sizer, label, key):
         cb.SetValue(val == 'True')
     info[key] = cb
     return(cb)
-
-def getInfo(key):
-    global info
-    try:
-        tmp = info[key]
-        return(tmp.GetValue())
-    except KeyError:
-        return('')
-
-def getBoolInfo(key):
-    global info
-    try:
-        tmp = info[key].GetValue()
-        if tmp:
-            return(1)
-        else:
-            return(0)
-    except KeyError:
-        print("getBoolInfo IndexError %s" % (key))
-        stdout.flush()
-        return('')
-
-def getFloatInfo(key):
-    global info
-    try:
-        tmp = info[key]
-        try:
-            return(float(tmp.GetValue()))
-        except ValueError:
-            pass
-    except KeyError:
-        print("invalid key %s" % (key))
-        stdout.flush()
-    return(0.0)
-
-def getIntInfo(key):
-    global info
-    try:
-        tmp = info[key]
-        try:
-            return(int(tmp.GetValue()))
-        except ValueError as e:
-            return(0)
-    except KeyError as e:
-        print("invalid key %s" % (key))
-        stdout.flush()
-    return(0)
 
 def getFloatVal(tc):
     try:
@@ -1006,7 +1006,7 @@ class TurnPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['tuPause'] = cb
+        setInfo('tuPause', cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1245,7 +1245,7 @@ class FacePanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['fdPause'] = cb
+        setInfo('fdPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1397,7 +1397,7 @@ class CutoffPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['cuPause'] = cb
+        setInfo('cuPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1761,7 +1761,7 @@ class TaperPanel(wx.Panel):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0],
                                             choices=self.taperList,
                                             style=wx.CB_READONLY)
-        info['tpTaperSel'] = combo
+        setInfo('tpTaperSel', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -1796,7 +1796,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        info['tpDeltaBtn'] = btn
+        setInfo('tpDeltaBtn', btn)
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -1808,7 +1808,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL,
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        info['tpAngleBtn'] = btn
+        setInfo('tpAngleBtn', btn)
 
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
@@ -1854,7 +1854,7 @@ class TaperPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['tpInternal'] = cb
+        setInfo('tpInternal', cb)
 
         sizerG.Add(sizerH)
 
@@ -1865,7 +1865,7 @@ class TaperPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['tpPause'] = cb
+        setInfo('tpPause', cb)
 
         sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
@@ -2254,7 +2254,7 @@ class ThreadPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thInternal'] = cb
+        setInfo('thInternal', cb)
 
         # x parameters
 
@@ -2269,11 +2269,11 @@ class ThreadPanel(wx.Panel):
         # self.final = btn = wx.RadioButton(self, label="Final",
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # info['thFinal'] = btn
+        # setInfo('thFinal', btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # info['thDepth'] = btn
+        # setInfo('thDepth', btn)
 
         #
 
@@ -2281,11 +2281,11 @@ class ThreadPanel(wx.Panel):
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thTPI'] = btn
+        setInfo'thTPI',  btn)
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thMM'] = btn
+        setInfo('thMM', btn)
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
@@ -2340,7 +2340,7 @@ class ThreadPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1,
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        info['thPause'] = cb
+        setInfo('thPause', cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2636,7 +2636,7 @@ class JogPanel(wx.Panel):
 
         self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
-        info['jogZPos'] = tc
+        setInfo('jogZPos', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
@@ -2651,7 +2651,7 @@ class JogPanel(wx.Panel):
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                      style=wx.TE_RIGHT)
-        info['jogXPos'] = tc
+        setInfo('jogXPos', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
@@ -2688,7 +2688,7 @@ class JogPanel(wx.Panel):
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                          style=wx.TE_RIGHT)
-        info['jogXPosDiam'] = tc
+        setInfo('jogXPosDiam', tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -2719,7 +2719,7 @@ class JogPanel(wx.Panel):
 
             self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
-            info['encZPos'] = tc
+            setInfo('encZPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2733,7 +2733,7 @@ class JogPanel(wx.Panel):
 
             self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),
                                             style=wx.TE_RIGHT)
-            info['droXPos'] = tc
+            setInfo('droXPos', tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2842,7 +2842,7 @@ class JogPanel(wx.Panel):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step,
                                          style=wx.CB_READONLY)
-        info['jogInc'] = combo
+        setInfo('jogInc', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
