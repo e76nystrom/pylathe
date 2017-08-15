@@ -4242,7 +4242,7 @@ class MainFrame(wx.Frame):
             if not key in info:
                newInfo(key, "%0.4f" % (eval(var)))
             else:
-                exp = var + ' = getFloatInfo(\'' + key + '\')'
+                exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
