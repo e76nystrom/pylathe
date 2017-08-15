@@ -3652,6 +3652,7 @@ class ProbeDialog(wx.Dialog):
     def probeZ(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
+        queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
         queParm(Z_PROBE_SPEED, getInfo('zProbeSpeed'))
         queParm(Z_HOME_STATUS, '0');
         moveCommands.probeZ(getFloatVal(self.probeDist))
@@ -3662,6 +3663,7 @@ class ProbeDialog(wx.Dialog):
     def probeX(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
+        queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
         queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
         queParm(X_HOME_STATUS, '0');
         moveCommands.probeX(getFloatVal(self.probeDist))
