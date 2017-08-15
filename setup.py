@@ -29,6 +29,7 @@ def createCommands(cmdList, cLoc, fData=False):
                     # jFile.write("%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), val, regComment))
                 cmds[regName] = (val, action)
+                global()[regName] = regName
                 val += 1
         else:
             if fData:
@@ -97,6 +98,7 @@ def createParameters(parmList, cLoc, fData=False):
                 # jFile.write("%s/* 0x%02x %s */\n" % 
                 #             (tmp.ljust(32), val, regComment))
             parms[regName] = (val, varType, varName)
+            global()[regName] = regName
             val += 1
         else:
             if fData:
