@@ -3198,9 +3198,11 @@ class JogPanel(wx.Panel):
         if len(val) == 7:
             (z, x, rpm, curPass, zEncPos, xEncPos, flag) = val
             if z != '#':
-                self.zPos.SetValue("%0.4f" % (float(z) - zHomeOffset))
+                zLoc = float(z)
+                self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
             if x != '#':
-                val = float(x) - xHomeOffset
+                xLoc = float(x)
+                val = xLoc - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (val))
                 self.xPosDiam.SetValue("%0.4f" % (abs(val * 2)))
             self.rpm.SetValue(rpm)
@@ -3241,9 +3243,10 @@ class JogPanel(wx.Panel):
                     val = getParm('Z_HOME_STATUS')
                     # print("zval %d" % (val))
                     if val & PROBE_SUCCESS:
-                        zHomeOffset = float(z) - self.probeLoc
-                        print("probeLoc %7.4f zHomeOffset %7.4f" % \
-                              (self.probeLoc, zHomeOffset))
+                        zHomeOffset = zLoc - self.probeLoc
+                        print("z %s zLoc %7.4f probeLoc %7.4f "\
+                              "zHomeOffset %7.4f" % \
+                              (z, zloc, self.probeLoc, zHomeOffset))
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
@@ -3252,9 +3255,10 @@ class JogPanel(wx.Panel):
                     val = getParm('X_HOME_STATUS')
                     # print("xval %d" % (val))
                     if val & PROBE_SUCCESS:
-                        xHomeOffset = float(x) - self.probeLoc
-                        print("probeLoc %7.4f xHomeOffset %7.4f" % \
-                              (self.probeLoc, xHomeOffset))
+                        xHomeOffset = xLoc - self.probeLoc
+                        print("x %s xLoc %7.4f probeLoc %7.4f "\
+                              "xHomeOffset %7.4f" % \
+                              (x, xloc, self.probeLoc, xHomeOffset))
                         self.probeLoc = 0.0
                         self.homeDone("x probe success")
                         stdout.flush()
