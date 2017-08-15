@@ -3988,7 +3988,7 @@ class MainFrame(wx.Frame):
                 queParm(CFG_LCD, getInfo('cfgLCD'))
                 command(CMD_SETUP)
                 sendZData()
-                val = getInfo(jogZPos)
+                val = getInfo('jogZPos')
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
                 sendXData()
