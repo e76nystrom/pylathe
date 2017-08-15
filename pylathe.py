@@ -66,7 +66,7 @@ def readInfo(file):
                 continue
             [key, val] = line.split('=')
             if not key in config:
-                print("readInfo invalid config value %s", key)
+                print("readInfo invalid config value %s" % key)
                 continue
             if key in info:
                 func = info[key]
