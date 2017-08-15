@@ -4228,13 +4228,16 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile)
 
-        vars = ('zSvHomeOffset', 'xSvHomeOffset')
+        vars = (('zSvHomeOffset', 'zHomeOffset'), \
+                ('xSvHomeOffset', 'xHomeOffset'))
         if DRO:
-            vars += ('zSvDROOffset', 'xSvDROOffset', \
-                     'zSvDROPosition', 'xSvDROPosition')
+            vars += (('zSvDROOffset', 'zDROOffset'), \
+                     ('xSvDROOffset', 'xDROOffset'), \
+                     ('zSvDROPosition', 'zDROPostion'), \
+                     ('xSvDROPosition', 'xDROPositon'))
 
-        for key in vars:
-            exec('global ' + key)
+        for (key, var) in vars:
+            exec('global ' + var)
             if not key in info:
                newInfo(key, "%0.4f" % (eval(key)))
             else:
