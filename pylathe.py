@@ -145,10 +145,6 @@ def getIntInfo(key):
         stdout.flush()
     return(0)
 
-configFile = "config.txt"
-info = {}
-readInfo(configFile)
-
 def getInitialInfo(key):
     global info
     try:
@@ -158,6 +154,10 @@ def getInitialInfo(key):
         print('no config for %s' % key)
         stdout.flush()
         return(False)
+
+configFile = "config.txt"
+info = {}
+readInfo(configFile)
 
 XILINX = getInitialInfo('cfgXilinx')
 DRO = getInitialInfo('cfgDRO')
