@@ -3154,7 +3154,7 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('r'):
-            mainPanel = info['mainPanel'].GetValue()
+            mainPanel = getInfo('mainPanel')
             panel = mainFrame.panels[mainPanel]
             panel.OnSend(None)
             return
@@ -3309,7 +3309,7 @@ class JogPanel(wx.Panel):
 
     def OnStartSpindle(self, e):
         if STEPPER_DRIVE:
-            mainPanel = info['mainPanel'].GetValue()
+            mainPanel = getInfo('mainPanel')
             panel = mainFrame.panels[mainPanel]
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
@@ -3418,7 +3418,7 @@ class PosMenu(wx.Menu):
         queParm(X_HOME_DIST, getInfo('xHomeDist'))
         queParm(X_HOME_BACKOFF_DIST, getInfo('xHomeBackoffDist'))
         queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
-        val = (-1, 1)[info['xHomeDir'].GetValue()]
+        val = (-1, 1)[getBoolInfo('xHomeDir')]
         queParm(X_HOME_DIR, val)
         command(XHOMEAXIS)
         jogPanel.probe(0)
@@ -3780,7 +3780,7 @@ class FixXPosDialog(wx.Dialog):
         offset = (actualX - curX) / 2.0
         xHomeOffset -= offset
 
-        info['xHomeOffset'].SetValue("%0.4f" % (xHomeOffset))
+        setInfo('xHomeOffset', "%0.4f" % (xHomeOffset))
         print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" %
               (curX, actualX, offset, xHomeOffset))
         stdout.flush()
