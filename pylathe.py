@@ -1296,6 +1296,8 @@ class FacePanel(wx.Panel):
 class Cutoff():
     def __init__(self, cutoffPanel):
         self.cutoffPanel = cutoffPanel
+        global moveCommands
+        self.m = moveCommands
 
     def getCutoffParameters(self):
         cu = self.cutoffPanel
