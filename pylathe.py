@@ -4244,8 +4244,8 @@ class MainFrame(wx.Frame):
         global info
         key = 'mainPanel'
         if not key in info:
-            info[key] = InfoValue('turnPanel')
-        mainPanel = info[key].GetValue()
+            initInfo(key, InfoValue('turnPanel'))
+        mainPanel = getInfo(key)
 
         for key in self.panels:
             panel = self.panels[key]
@@ -4258,27 +4258,27 @@ class MainFrame(wx.Frame):
 
     def OnTurn(self, e):
         global info
-        info['mainPanel'].SetValue('turnPanel')
+        setSetInfo('mainPanel', 'turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
         global info
-        info['mainPanel'].SetValue('facePanel')
+        setInfo('mainPanel', 'facePanel')
         self.showPanel()
 
     def OnCutoff(self, e):
         global info
-        info['mainPanel'].SetValue('cutoffPanel')
+        setInfo('mainPanel', 'cutoffPanel')
         self.showPanel()
 
     def OnTaper(self, e):
         global info
-        info['mainPanel'].SetValue('taperPanel')
+        setInfo('mainPanel', 'taperPanel')
         self.showPanel()
 
     def OnThread(self, e):
         global info
-        info['mainPanel'].SetValue('threadPanel')
+        setInfo('mainPanel', 'threadPanel')
         self.showPanel()
 
     def OnTestSpindle(self, e):
