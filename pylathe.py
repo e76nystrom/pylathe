@@ -122,7 +122,7 @@ def getBoolInfo(key):
     except KeyError:
         print("getBoolInfo KeyError %s" % (key))
         stdout.flush()
-        return('')
+    return(0)
 
 def getFloatInfo(key):
     global info
@@ -158,7 +158,7 @@ def getInitialInfo(key):
         tmp = info[key]
         return(tmp.GetValue() == 'True')
     except KeyError:
-        print('no config for %s' % key)
+        print("getInitialInfo KeyError %s" % (key))
         stdout.flush()
         return(False)
 
