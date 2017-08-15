@@ -157,6 +157,7 @@ def getInitialInfo(key):
         return(False)
 
 configFile = "config.txt"
+info = {}
 readInfo(configFile)
 
 XILINX = getInitialInfo('cfgXilinx')
