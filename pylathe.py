@@ -3586,7 +3586,7 @@ class SetProbeDialog(wx.Dialog):
             if self.axis == 0:
                 self.probeZ(probeLoc)
             else:
-                self.probeX(probeLoc)
+                self.probeX(probeLoc / 2.0)
         except ValueError:
             print("probe ValueError on %s" % (val))
             stdout.flush()
