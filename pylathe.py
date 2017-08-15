@@ -601,11 +601,11 @@ def xilinxTestMode():
                 preScaler += 1
                 encTimer = int(fcy / (encoder * rps * preScaler))
             print("preScaler %d encTimer %d" % (preScaler, encTimer))
-            setParm(ENC_ENABLE, '1')
-            setParm(ENC_PRE_SCALER, preScaler)
-            setParm(ENC_TIMER, encTimer)
+            queParm(ENC_ENABLE, '1')
+            queParm(ENC_PRE_SCALER, preScaler)
+            queParm(ENC_TIMER, encTimer)
     else:
-        setParm(ENC_ENABLE, '0')
+        queParm(ENC_ENABLE, '0')
 
 def sendSpindleData(send=False, rpm=None):
     global spindleDataSent, XILINX
@@ -3671,6 +3671,7 @@ class ProbeDialog(wx.Dialog):
         queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
         queParm(Z_PROBE_SPEED, getInfo('zProbeSpeed'))
         queParm(Z_HOME_STATUS, '0');
+        sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
         jogPanel.probe(AXIS_Z, probeLoc)
@@ -3682,6 +3683,7 @@ class ProbeDialog(wx.Dialog):
         queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
         queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
         queParm(X_HOME_STATUS, '0');
+        sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
         jogPanel.probe(AXIS_X, probeLoc)
