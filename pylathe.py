@@ -5191,7 +5191,7 @@ class TaperTest(object):
         spindleMicroSteps = getIntInfo(spMicroSteps)
         spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev)
+        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
 
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
