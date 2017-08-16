@@ -3,12 +3,14 @@ from sys import stdout
 from threading import Thread, Lock, Event
 import serial
 
+from setup import cmdTable, parmTable,
+
 ser = None
 timeout = False
 commLock = Lock()
 
-cmds = None
-parms = None
+# cmds = None
+# parms = None
 xRegs = None
 xDbgPrint = True
 SWIG = False
