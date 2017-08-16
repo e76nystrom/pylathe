@@ -71,7 +71,7 @@ from comm import SWIG
 SWIG = False
 import comm
 from comm import openSerial, commTimeout, command, getParm, setParm,\
-    getString, sendMove, getQueueStatus, queParm, sendMulti,
+    getString, sendMove, getQueueStatus, queParm, sendMulti
 comm.SWIG = SWIG
 
 if XILINX:
