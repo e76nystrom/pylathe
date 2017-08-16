@@ -24,7 +24,7 @@ dbg = None
 
 from info import info, InfoValue, saveInfo, readInfo, initInfo, newInfo, \
     setInfo, getInfo, getBoolInfo, getFloatInfo, getIntInfo, infoSetLabel, \
-    getInitialInfo
+    getInitialInfo, clrInfo
 
 from setup import createConfig, createCommands, createParameters, \
     createCtlBits, createCtlStates
@@ -36,6 +36,7 @@ createConfig(config, configList)
 
 configFile = "config.txt"
 
+clrInfo(len(config))
 readInfo(configFile, config)
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
@@ -44,7 +45,7 @@ XILINX = getInitialInfo(cfgXilinx)
 DRO = getInitialInfo(cfgDRO)
 STEPPER_DRIVE = getInitialInfo(spStepDrive)
 
-info = [None for i in range(len(config))]
+clrInfo(len(config))
 
 cLoc = "../Lathe/include/"
 
