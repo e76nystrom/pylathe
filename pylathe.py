@@ -5001,16 +5001,16 @@ class SyncTest(object):
 
         if zAxis:
             pitch = getFloatInfo(zPitch)
-            zMicroSteps = getFloatInfo(zMicroSteps)
-            zMotorSteps = getFloatInfo(zMotorSteps)
-            zMotorRatio = getFloatInfo(zMotorRatio)
+            microSteps = getFloatInfo(zMicroSteps)
+            motorSteps = getFloatInfo(zMotorSteps)
+            motorRatio = getFloatInfo(zMotorRatio)
         else:
             pitch = getFloatInfo(xPitch)
-            zMicroSteps = getFloatInfo(xMicroSteps)
-            zMotorSteps = getFloatInfo(xMotorSteps)
-            zMotorRatio = getFloatInfo(xMotorRatio)
+            microSteps = getFloatInfo(xMicroSteps)
+            motorSteps = getFloatInfo(xMotorSteps)
+            motorRatio = getFloatInfo(xMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
+        zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
         if arg1 >= 8:
