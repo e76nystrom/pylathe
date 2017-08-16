@@ -14,6 +14,7 @@ class InfoValue():
         self.value = val
 
 def clrInfo(size):
+    global info
     info = [None for i in range(size)]
 
 def saveInfo(file):
