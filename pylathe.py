@@ -1272,7 +1272,7 @@ class FacePanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(faPause, cb)
+        initInfo(faPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1426,7 +1426,7 @@ class CutoffPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(cuPause, cb)
+        initInfo(cuPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1894,7 +1894,7 @@ class TaperPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(tpPause, cb)
+        initInfo(tpPause, cb)
 
         sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
@@ -2369,7 +2369,7 @@ class ThreadPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(thPause, cb)
+        initInfo(thPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2667,7 +2667,7 @@ class JogPanel(wx.Panel):
 
         self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
-        initinfo(jogZPos, tc)
+        initInfo(jogZPos, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
@@ -2682,7 +2682,7 @@ class JogPanel(wx.Panel):
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
-        initinfo(jogXPos, tc)
+        initInfo(jogXPos, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
@@ -2719,7 +2719,7 @@ class JogPanel(wx.Panel):
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                          style=wx.TE_RIGHT)
-        initinfo(jogXPosDiam, tc)
+        initInfo(jogXPosDiam, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -2750,7 +2750,7 @@ class JogPanel(wx.Panel):
 
             self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
                                             size=(120, -1), style=wx.TE_RIGHT)
-            initinfo(encZPos, tc)
+            initInfo(encZPos, tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2764,7 +2764,7 @@ class JogPanel(wx.Panel):
 
             self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
                                             size=(120, -1), style=wx.TE_RIGHT)
-            initinfo(droXPos, tc)
+            initInfo(droXPos, tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2873,7 +2873,7 @@ class JogPanel(wx.Panel):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step, \
                                          style=wx.CB_READONLY)
-        initinfo(jogInc, combo)
+        initInfo(jogInc, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
