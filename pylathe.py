@@ -1933,8 +1933,8 @@ class TaperPanel(wx.Panel):
             infoSetLabel(tpLargeDiamText, "Bore Diam")
             infoSetLabel(tpSmallDiamText, "Large Diam")
         else:
-            infoSetLabel('tpLargeDiamText', "Large Diam")
-            infoSetLabel('tpSmallDiamText', "Small Diam")
+            infoSetLabel(tpLargeDiamText, "Large Diam")
+            infoSetLabel(tpSmallDiamText, "Small Diam")
         self.sizerV.Layout()
 
     def updateAngle(self):
