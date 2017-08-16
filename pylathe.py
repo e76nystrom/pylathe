@@ -32,8 +32,7 @@ from setup import createConfig, createCommands, createParameters, \
 
 from interface import configList, cmdList, parmList, stateList, regList
 
-config = {}
-createConfig(config, configList)
+(config, configTable) = createConfig(configList)
 
 configFile = "config.txt"
 
