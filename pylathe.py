@@ -89,7 +89,7 @@ def readInfo(file):
                 # print(key, val)
                 func = InfoValue(val)
                 # info[key] = func
-                info[index]
+                info[index] = func
             # stdout.flush()
         f.close()
     except Exception as e:
