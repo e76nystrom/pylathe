@@ -1790,7 +1790,7 @@ class TaperPanel(wx.Panel):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
-        initinfo(tpTaperSel, combo)
+        initInfo(tpTaperSel, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -1825,7 +1825,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        initinfo(tpDeltaBtn, btn)
+        initInfo(tpDeltaBtn, btn)
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -1837,7 +1837,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        initinfo(tpAngleBtn, btn)
+        initInfo(tpAngleBtn, btn)
 
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
@@ -1883,7 +1883,7 @@ class TaperPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(tpInternal, cb)
+        initInfo(tpInternal, cb)
 
         sizerG.Add(sizerH)
 
@@ -2283,7 +2283,7 @@ class ThreadPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(thInternal, cb)
+        initInfo(thInternal, cb)
 
         # x parameters
 
@@ -2298,11 +2298,11 @@ class ThreadPanel(wx.Panel):
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initinfo(thFinal, bth)
+        # initInfo(thFinal, bth)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initinfo(thDepth, bth)
+        # initInfo(thDepth, bth)
 
         #
 
@@ -2310,11 +2310,11 @@ class ThreadPanel(wx.Panel):
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(thTPI, btn)
+        initInfo(thTPI, btn)
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(thMM, bth)
+        initInfo(thMM, bth)
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
