@@ -1024,9 +1024,9 @@ class TurnPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", "tuAddFeed")
+        self.add = addField(self, sizerG, "", tuAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", "tuRPM")
+        self.rpm = addField(self, sizerG, "RPM", tuRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1217,32 +1217,32 @@ class FacePanel(wx.Panel):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.xStart = addField(self, sizerG, "X Start D", "faXStart")
+        self.xStart = addField(self, sizerG, "X Start D", faXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", "faXEnd")
+        self.xEnd = addField(self, sizerG, "X End D", faXEnd)
         
-        self.xFeed = addField(self, sizerG, "X Feed", "faXFeed")
+        self.xFeed = addField(self, sizerG, "X Feed", faXFeed)
         
-        self.xRetract = addField(self, sizerG, "X Retract", "faXRetract")
+        self.xRetract = addField(self, sizerG, "X Retract", faXRetract)
 
         # z parameters
 
-        self.zEnd = addField(self, sizerG, "Z End", "faZEnd")
+        self.zEnd = addField(self, sizerG, "Z End", faZEnd)
 
-        self.zStart = addField(self, sizerG, "Z Start", "faZStart")
+        self.zStart = addField(self, sizerG, "Z Start", faZStart)
 
-        self.zFeed = addField(self, sizerG, "Z Feed", "faZFeed")
+        self.zFeed = addField(self, sizerG, "Z Feed", faZFeed)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", "faZRetract")
+        self.zRetract = addField(self, sizerG, "Z Retract", faZRetract)
         
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", "faPasses")
+        self.passes = addField(self, sizerG, "Passes", faPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", "faSPInt")
+        self.sPInt = addField(self, sizerG, "SP Int", faSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", "faSpring")
+        self.spring = addField(self, sizerG, "Spring", faSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -1263,9 +1263,9 @@ class FacePanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", "faAddFeed")
+        self.add = addField(self, sizerG, "", faAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", "faRPM")
+        self.rpm = addField(self, sizerG, "RPM", faRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1387,19 +1387,19 @@ class CutoffPanel(wx.Panel):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.xStart = addField(self, sizerG, "X Start D", "cuXStart")
+        self.xStart = addField(self, sizerG, "X Start D", cuXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", "cuXEnd")
+        self.xEnd = addField(self, sizerG, "X End D", cuXEnd)
         
-        self.xFeed = addField(self, sizerG, "X Feed", "cuXFeed")
+        self.xFeed = addField(self, sizerG, "X Feed", cuXFeed)
         
-        self.xRetract = addField(self, sizerG, "X Retract", "cuXRetract")
+        self.xRetract = addField(self, sizerG, "X Retract", cuXRetract)
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", "cuZStart")
+        self.zStart = addField(self, sizerG, "Z Start", cuZStart)
 
-        self.zCutoff = addField(self, sizerG, "Z Cutoff", "cuZCutoff")
+        self.zCutoff = addField(self, sizerG, "Z Cutoff", cuZCutoff)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -1419,7 +1419,7 @@ class CutoffPanel(wx.Panel):
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
-        self.rpm = addField(self, sizerG, "RPM", "cuRPM")
+        self.rpm = addField(self, sizerG, "RPM", cuRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1800,24 +1800,24 @@ class TaperPanel(wx.Panel):
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", "tpZStart")
+        self.zStart = addField(self, sizerG, "Z Start", tpZStart)
 
-        self.zLength = addField(self, sizerG, "Z Length", "tpZLength")
+        self.zLength = addField(self, sizerG, "Z Length", tpZLength)
         
-        self.zFeed = addField(self, sizerG, "Z Feed", "tpZFeed")
+        self.zFeed = addField(self, sizerG, "Z Feed", tpZFeed)
         
-        self.zRetract = addField(self, sizerG, "Z Retract", "tpZRetract")
+        self.zRetract = addField(self, sizerG, "Z Retract", tpZRetract)
 
         # x parameters
 
         self.largeDiam = addFieldText(self, sizerG, "Large Diam", \
-                                      "tpLargeDiam")
+                                      tpLargeDiam)
 
-        self.smallDiam = addFieldText(self, sizerG, "Small Diam", "tpSmallDiam")
+        self.smallDiam = addFieldText(self, sizerG, "Small Diam", tpSmallDiam)
 
-        self.xInFeed = addField(self, sizerG, "X In Feed R", "tpXInFeed")
+        self.xInFeed = addField(self, sizerG, "X In Feed R", tpXInFeed)
 
-        self.xFeed = addField(self, sizerG, "X Pass D", "tpXFeed")
+        self.xFeed = addField(self, sizerG, "X Pass D", tpXFeed)
 
         # taper parameters
 
@@ -1827,10 +1827,10 @@ class TaperPanel(wx.Panel):
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
         initInfo(tpDeltaBtn, btn)
 
-        self.zDelta = addField(self, sizerG, "", "tpZDelta")
+        self.zDelta = addField(self, sizerG, "", tpZDelta)
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.xDelta = addField(self, sizerG, "X", "tpXDelta")
+        self.xDelta = addField(self, sizerG, "X", tpXDelta)
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.angleBtn = btn = wx.RadioButton(self, label="Angle")
@@ -1839,21 +1839,21 @@ class TaperPanel(wx.Panel):
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
         initInfo(tpAngleBtn, btn)
 
-        self.angle = addField(self, sizerG, "", "tpAngle")
+        self.angle = addField(self, sizerG, "", tpAngle)
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
         self.xRetract = addField(self, sizerG, "X Retract", "tpXRetract")
         
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", "tpPasses")
+        self.passes = addField(self, sizerG, "Passes", tpPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", "tpSPInt")
+        self.sPInt = addField(self, sizerG, "SP Int", tpSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", "tpSpring")
+        self.spring = addField(self, sizerG, "Spring", tpSpring)
 
-        self.finish = addField(self, sizerG, "Finish", "tpXFinish")
+        self.finish = addField(self, sizerG, "Finish", tpXFinish)
 
         # control buttons
 
@@ -1871,9 +1871,9 @@ class TaperPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", "tpAddFeed")
+        self.add = addField(self, sizerG, "", tpAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", "tpRPM")
+        self.rpm = addField(self, sizerG, "RPM", tpRPM)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -2270,11 +2270,11 @@ class ThreadPanel(wx.Panel):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.zEnd = addField(self, sizerG, "Z End", "thZEnd")
+        self.zEnd = addField(self, sizerG, "Z End", thZEnd)
         
-        self.zStart = addField(self, sizerG, "Z Start", "thZStart")
+        self.zStart = addField(self, sizerG, "Z Start", thZStart)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", "thZRetract")
+        self.zRetract = addField(self, sizerG, "Z Retract", thZRetract)
 
         sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -2287,13 +2287,13 @@ class ThreadPanel(wx.Panel):
 
         # x parameters
 
-        self.xStart = addField(self, sizerG, "X Start D", "thXStart")
+        self.xStart = addField(self, sizerG, "X Start D", thXStart)
 
-        self.xRetract = addField(self, sizerG, "X Retract", "thXRetract")
+        self.xRetract = addField(self, sizerG, "X Retract", thXRetract)
 
-        self.depth = addField(self, sizerG, "Depth", "thXDepth")
+        self.depth = addField(self, sizerG, "Depth", thXDepth)
 
-        self.firstFeed = addField(self, sizerG, "First Feed", "thXFirstFeed")
+        self.firstFeed = addField(self, sizerG, "First Feed", thXFirstFeed)
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
@@ -2306,7 +2306,7 @@ class ThreadPanel(wx.Panel):
 
         #
 
-        self.thread = addField(self, sizerG, "Thread", "thPitch")
+        self.thread = addField(self, sizerG, "Thread", thPitch)
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
@@ -2316,30 +2316,30 @@ class ThreadPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo(thMM, btn)
 
-        self.angle = addField(self, sizerG, "Angle", "thAngle")
+        self.angle = addField(self, sizerG, "Angle", thAngle)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         #
 
-        self.xTaper = addField(self, sizerG, "Taper", "thXTaper")
+        self.xTaper = addField(self, sizerG, "Taper", thXTaper)
 
-        self.xExitRev = addField(self, sizerG, "Exit Rev", "thExitRev")
+        self.xExitRev = addField(self, sizerG, "Exit Rev", thExitRev)
         
-        self.lastFeed = addField(self, sizerG, "Last Feed", "thXLastFeed")
+        self.lastFeed = addField(self, sizerG, "Last Feed", thXLastFeed)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", "thPasses")
+        self.passes = addField(self, sizerG, "Passes", thPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", "thSPInt")
+        self.sPInt = addField(self, sizerG, "SP Int", thSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", "thSpring")
+        self.spring = addField(self, sizerG, "Spring", thSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -2360,9 +2360,9 @@ class ThreadPanel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", "thAddFeed")
+        self.add = addField(self, sizerG, "", thAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", "thRPM")
+        self.rpm = addField(self, sizerG, "RPM", thRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
