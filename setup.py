@@ -1,12 +1,13 @@
 from sys import stdout
-cmds = None
-parms = None
-xRegs = None
+# cmds = None
+# parms = None
+# xRegs = None
 
 importList = []
 
-def createConfig(config, configList):
-    global configTable
+def createConfig(configList):
+    global config, configTable
+    config = {}
     configTable = []
     for i, (name, comment) in enumerate(configList):
         config[name] = i
@@ -16,6 +17,7 @@ def createConfig(config, configList):
             globals()[name] = i
             configTable.append(name)
             importList.append(name)
+    return(config, configTable)
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
