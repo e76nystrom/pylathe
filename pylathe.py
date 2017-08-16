@@ -71,7 +71,7 @@ def readInfo(file):
             index = config[key]
             # if key in info:
             #     func = info[key]
-            if info[index] != None
+            if info[index] != None:
                 func = info[index]
                 funcClass = func.__class__.__name__
                 # print(key, val, funcClass)
