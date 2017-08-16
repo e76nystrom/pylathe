@@ -165,6 +165,9 @@ def getIntInfo(key):
         stdout.flush()
     return(0)
 
+def infoSetLabel(key, val):
+    info[key].SetLabel(val)
+
 def getInitialInfo(key):
     global info
     try:
@@ -1927,11 +1930,11 @@ class TaperPanel(wx.Panel):
         self.xDelta.SetEditable(val)
         self.angle.SetEditable(not val)
         if self.internal.GetValue():
-            info['tpLargeDiamText'].SetLabel("Bore Diam")
-            info['tpSmallDiamText'].SetLabel("Large Diam")
+            infoSetLabel(tpLargeDiamText, "Bore Diam")
+            infoSetLabel(tpSmallDiamText, "Large Diam")
         else:
-            info['tpLargeDiamText'].SetLabel("Large Diam")
-            info['tpSmallDiamText'].SetLabel("Small Diam")
+            infoSetLabel('tpLargeDiamText', "Large Diam")
+            infoSetLabel('tpSmallDiamText', "Small Diam")
         self.sizerV.Layout()
 
     def updateAngle(self):
