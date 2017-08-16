@@ -4048,9 +4048,9 @@ class MainFrame(wx.Frame):
         openSerial(getInfo(commPort), 57600)
         global cmds, cmdTable, parms
         # comm.initGlobals(globals)
-        comm.cmds = cmds
+        # comm.cmds = cmds
         comm.cmdTable = cmdTable
-        comm.parms = parms
+        # comm.parms = parms
         comm.parmTable = parmTable
         comm.LOADMULTI = LOADMULTI
         comm.LOADVAL = LOADVAL
