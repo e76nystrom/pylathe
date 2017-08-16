@@ -243,9 +243,11 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         # j1File.write("package lathe;\n\n");
         # j1File.write("public class XilinxStr\n{\n");
         # j1File.write(" public static final String[] xilinxStr =\n {\n");
-    global xRegs
-    xRegs = {}
-    val = 0
+    # global xRegs
+    global xRegTable
+    # xRegs = {}
+    xRegTable = []
+    index = 0
     for i in range(0, len(xilinxList)):
         data = xilinxList[i]
         # if not isinstance(data, basestring):
@@ -254,19 +256,22 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
             if fData:
                 tmp = " %s, " % (regName)
                 cFile.write("%s/* 0x%02x %s */\n" % 
-                            (tmp.ljust(32), val, regComment));
+                            (tmp.ljust(32), index, regComment));
                 if xFile:
                     xFile.write(('constant %-12s : unsigned(opb-1 downto 0) ' +
                                  ':= x"%02x"; -- %s\n') %
-                                (regName, val, regComment))
+                                (regName, index, regComment))
                 # tmp = "  %s, " % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment));
+                #             (tmp.ljust(32), index, regComment));
                 # tmp = "  \"%s\", " % (regName)
                 # j1File.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment));
-            xRegs[regName] = val
-            val += 1
+                #             (tmp.ljust(32), index, regComment));
+            # xRegs[regName] = index
+            globals()[regName] = index
+            xRegTable.append(regName)
+            importList.append(regName)
+            index += 1
         else:
             if fData:
                 if (len(data) > 0):
