@@ -77,7 +77,7 @@ def command(cmdVal):
     return(rsp.strip("\n\r"))
 
 def queParm(parmIndex, val):
-    global parmTable parmList, cmdLen
+    global parmTable, parmList, cmdLen
     # cmdInfo = parms[parm]
     # parmIndex = cmdInfo[0]
     cmdInfo = parmTable[parmIndex]
