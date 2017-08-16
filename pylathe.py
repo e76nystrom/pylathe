@@ -263,7 +263,7 @@ if XILINX:
 from setup import *
 
 for i in sorted(globals()):
-    print(i)
+    print(i, eval(i))
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
