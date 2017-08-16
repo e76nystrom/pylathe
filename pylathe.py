@@ -4046,8 +4046,9 @@ class MainFrame(wx.Frame):
 
         self.jogShuttle = jogShuttle = JogShuttle()
         openSerial(getInfo(commPort), 57600)
-        global cmds, parms
+        global cmds, cmdTable, parms
         comm.cmds = cmds
+        comm.cmdTable = cmdTable
         comm.parms = parms
         if XILINX:
             comm.xRegs = xRegs
