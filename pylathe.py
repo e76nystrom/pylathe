@@ -68,8 +68,11 @@ def readInfo(file):
             if not key in config:
                 print("readInfo invalid config value %s" % key)
                 continue
-            if key in info:
-                func = info[key]
+            index = config[key]
+            # if key in info:
+            #     func = info[key]
+            if info[index] != None
+                func = info[index]
                 funcClass = func.__class__.__name__
                 # print(key, val, funcClass)
                 if funcClass == 'TextCtrl':
@@ -85,7 +88,8 @@ def readInfo(file):
             else:
                 # print(key, val)
                 func = InfoValue(val)
-                info[key] = func
+                # info[key] = func
+                info[index]
             # stdout.flush()
         f.close()
     except Exception as e:
@@ -180,7 +184,8 @@ config = {}
 createConfig(config, configList)
 
 configFile = "config.txt"
-info = {}
+# info = {}
+info = [None for i in range(len(config))]
 readInfo(configFile)
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
@@ -189,7 +194,8 @@ XILINX = getInitialInfo(cfgXilinx)
 DRO = getInitialInfo(cfgDRO)
 STEPPER_DRIVE = getInitialInfo(spStepDrive)
 
-info = {}
+# info = {}
+info = [None for i in range(len(config))]
 
 from comm import SWIG
 SWIG = False
