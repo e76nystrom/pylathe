@@ -191,11 +191,6 @@ configFile = "config.txt"
 info = [None for i in range(len(config))]
 readInfo(configFile)
 
-cmd = "from setup import "
-for var in config:
-    cmd += var + ","
-exec(cmd[:-1])
-
 from setup import cfgXilinx, cfgDRO, spStepDrive
 
 XILINX = getInitialInfo(cfgXilinx)
@@ -218,7 +213,11 @@ if XILINX:
     createXilinxReg(xilinxList, cLoc, xLoc, fData)
     createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
-from setup import *
+from setup import importList
+cmd = "from setup import "
+for var in importList:
+    cmd += var + ","
+exec(cmd[:-1])
 
 from comm import SWIG
 SWIG = False
