@@ -183,6 +183,8 @@ configFile = "config.txt"
 info = {}
 readInfo(configFile)
 
+from setup import cfgXilinx, cfgDRO, spStepDrive
+
 XILINX = getInitialInfo(cfgXilinx)
 DRO = getInitialInfo(cfgDRO)
 STEPPER_DRIVE = getInitialInfo(spStepDrive)
