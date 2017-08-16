@@ -5282,12 +5282,12 @@ class MoveTest(object):
         
         f = open('move.txt','w')
 
-        zPitch = getFloatInfo(zPitch)
+        pitch = getFloatInfo(zPitch)
         zMicroSteps = getFloatInfo(zMicroSteps)
         zMotorSteps = getFloatInfo(zMotorSteps)
         zMotorRatio = getFloatInfo(zMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
+        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
         
         zMinSpeed = getFloatInfo(zMinSpeed) # minimum speed ipm
