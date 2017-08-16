@@ -19,6 +19,9 @@ cmdOverhead = 8
 parmList = []
 cmdLen = cmdOverhead
 
+def initGlobals(pyLathe):
+    cmdTable = pyLathe('cmds')
+
 def openSerial(port, rate):
     global ser
     try:
@@ -31,7 +34,7 @@ class commTimeout(Exception):
     pass
 
 def command(cmdVal):
-    global SWIG, ser, cmds, cmdTable, commLock, timeout, xDbgPrint, \
+    global SWIG, ser, cmdTable, commLock, timeout, xDbgPrint, \
         parmList, lastCmd
     if len(parmList) > 0:
         sendMulti()
@@ -73,10 +76,12 @@ def command(cmdVal):
     commLock.release()
     return(rsp.strip("\n\r"))
 
-def queParm(parm, val):
-    global parms, parmList, cmdLen
-    cmdInfo = parms[parm]
-    parmIndex = cmdInfo[0]
+def queParm(parmIndex, val):
+    global parmTable parmList, cmdLen
+    # cmdInfo = parms[parm]
+    # parmIndex = cmdInfo[0]
+    cmdInfo = parmTable[parmIndex]
+    parm = cmdInfo[0]
     parmType = cmdInfo[1]
     valString = "0"
     if SWIG and (len(cmdInfo) == 3):
@@ -155,10 +160,12 @@ def sendMulti():
         rsp = rsp + tmp
     commLock.release()
 
-def setParm(parm, val):
-    global ser, parms, cmds, commLock, timeout, xDbgPrint
-    cmdInfo = parms[parm]
-    parmIndex = cmdInfo[0]
+def setParm(parmIndex, val):
+    global ser, parmTable, cmds, commLock, timeout, xDbgPrint
+    # cmdInfo = parms[parm]
+    # parmIndex = cmdInfo[0]
+    cmdInfo = parmTable[parmIndex]
+    parm = cmdInfo[0]
     parmType = cmdInfo[1]
     valString = "0"
     if SWIG and (len(cmdInfo) == 3):
