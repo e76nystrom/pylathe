@@ -328,7 +328,7 @@ def setXReg(reg, val):
     commLock.release()
 
 def setXRegN(reg, val):
-    global ser, xRegs, comLock, timeout, xDbgPrint
+    global ser, xRegTable, comLock, timeout, xDbgPrint
     if ser is None:
         return
     val = int(val)
@@ -337,6 +337,8 @@ def setXRegN(reg, val):
     # cmd = '\x01%x %x %08x \r' % (cmds['LOADXREG'][0], reg, \
     #                            val & 0xffffffff)
     cmd = '\x01%x %x %08x \r' % (LOADXREG, reg, val & 0xffffffff)
+    if xDbgPrint:
+        pass
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -364,6 +366,8 @@ def getXReg(reg):
     #     return(0);
     # cmd = '\x01%x %x \r' % (cmds['READXREG'][0], xRegs[reg])
     cmd = '\x01%x %x \r' % (READXREG, reg)
+    if xDbgPrint:
+        pass
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -389,11 +393,11 @@ def getXReg(reg):
 
 
 def dspXReg(reg, label=''):
-    val = getXReg(reg)
-    global xRegs, xDbgPrint
+    # val = getXReg(reg)
+    global xRegTable, xDbgPrint
     if xDbgPrint:
         print ("%-12s %2x %8x %12d %s" %
-               (reg, xRegs[reg], val & 0xffffffff, val, label))
+               (xRegTable[reg], reg, val & 0xffffffff, val, label))
     return(val)
 
 def sendMove(opString, op, val):
