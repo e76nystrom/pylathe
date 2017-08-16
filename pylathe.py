@@ -200,6 +200,21 @@ STEPPER_DRIVE = getInitialInfo(spStepDrive)
 # info = {}
 info = [None for i in range(len(config))]
 
+cLoc = "../Lathe/include/"
+
+fData = False
+createCommands(cmdList, cLoc, fData)
+createParameters(parmList, cLoc, fData)
+createCtlBits(regList, cLoc, fData)
+createCtlStates(stateList, cLoc, fData)
+if XILINX:
+    from setup import createXilinxReg, createXilinxBits
+    xLoc = '../../Xilinx/LatheCtl/'
+    createXilinxReg(xilinxList, cLoc, xLoc, fData)
+    createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+
+from setup import *
+
 from comm import SWIG
 SWIG = False
 import comm
@@ -208,7 +223,6 @@ from comm import openSerial, commTimeout, command, getParm, setParm,\
 comm.SWIG = SWIG
 
 if XILINX:
-    from setup import createXilinxReg, createXilinxBits
     from comm import setXReg, getXReg, dspXReg
     from interface import xilinxList, xilinxBitList
 
@@ -256,20 +270,6 @@ CENTER    = 0x100
 HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
-
-cLoc = "../Lathe/include/"
-
-fData = False
-createCommands(cmdList, cLoc, fData)
-createParameters(parmList, cLoc, fData)
-createCtlBits(regList, cLoc, fData)
-createCtlStates(stateList, cLoc, fData)
-if XILINX:
-    xLoc = '../../Xilinx/LatheCtl/'
-    createXilinxReg(xilinxList, cLoc, xLoc, fData)
-    createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
-
-from setup import *
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
