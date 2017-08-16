@@ -33,12 +33,11 @@ class InfoValue():
         self.value = val
 
 def saveInfo(file):
-    global info
+    global info, config
     f = open(file, 'w')
-    # keyList = info.keys()
-    # keyList.sort()
-    for key in sorted(info.keys()):
-        val = info[key]
+    for key in sorted(config.keys()):
+        index = config[key]
+        val = info[index]
         valClass = val.__class__.__name__
         # print(key, valClass)
         # stdout.flush()
@@ -187,7 +186,7 @@ config = {}
 createConfig(config, configList)
 
 configFile = "config.txt"
-# info = {}
+
 info = [None for i in range(len(config))]
 readInfo(configFile)
 
@@ -197,7 +196,6 @@ XILINX = getInitialInfo(cfgXilinx)
 DRO = getInitialInfo(cfgDRO)
 STEPPER_DRIVE = getInitialInfo(spStepDrive)
 
-# info = {}
 info = [None for i in range(len(config))]
 
 cLoc = "../Lathe/include/"
@@ -4279,11 +4277,11 @@ class MainFrame(wx.Frame):
         self.taperPanel.updateUI()
 
     def OnSave(self, e):
-        saveinfo("config.txt")
+        saveInfo("config.txt")
         
     def OnRestat(self, e):
         import os
-        saveinfo("config.txt")
+        saveInfo("config.txt")
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnExit(self, e):
