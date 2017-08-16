@@ -1033,7 +1033,7 @@ class TurnPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initinfo(tuPause, cb)
+        initInfo(tuPause, cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
