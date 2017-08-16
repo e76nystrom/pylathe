@@ -1849,7 +1849,7 @@ class TaperPanel(wx.Panel):
         self.angle = addField(self, sizerG, "", tpAngle)
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        self.xRetract = addField(self, sizerG, "X Retract", "tpXRetract")
+        self.xRetract = addField(self, sizerG, "X Retract", tpXRetract)
         
         # pass info
 
