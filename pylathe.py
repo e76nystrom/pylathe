@@ -903,10 +903,9 @@ class TurnPanel(wx.Panel):
         self.sizerV.Fit(self)
 
     def config(self):
-        fieldList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
-        tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, tuZEnd, \
-        tuZFeed, tuZRetract, tuZStart)
-
+        configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
+                      tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
+                      tuZEnd, tuZFeed, tuZRetract, tuZStart)
 
     def update(self):
         pass
