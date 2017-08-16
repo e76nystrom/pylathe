@@ -5,7 +5,7 @@ xRegs = None
 
 def createConfig(config, configList):
     for i, (name, comment) in enumerate(configList):
-        config[name] = True
+        config[name] = i
         if name in globals():
             print("createConfig %s already defined" % name)
         else:
