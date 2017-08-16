@@ -978,7 +978,7 @@ class TurnPanel(wx.Panel):
 
         # z parameters
 
-        self.zEnd = addField(self, sizerG, "Z End", "tuZEnd")
+        self.zEnd = addField(self, sizerG, "Z End", tuZEnd)
         
         self.zStart = addField(self, sizerG, "Z Start", "tuZStart")
 
