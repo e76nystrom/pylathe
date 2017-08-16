@@ -13,7 +13,7 @@ class InfoValue():
     def SetValue(self, val):
         self.value = val
 
-def clrInfo(size)
+def clrInfo(size):
     info = [None for i in range(size)]
 
 def saveInfo(file):
