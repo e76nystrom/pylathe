@@ -5215,7 +5215,7 @@ class TaperTest(object):
         xMotorSteps = getFloatInfo(xMotorSteps)
         xMotorRatio = getFloatInfo(xMotorRatio)
         xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / xPitch)
-        dbgPrt(txt,"xStepsInch %d", (xStepsInch)
+        dbgPrt(txt,"xStepsInch %d", (xStepsInch))
 
         pitch = getFloatInfo(tpZFeed)
         revCycle = int(1.0 / pitch + 0.5)
