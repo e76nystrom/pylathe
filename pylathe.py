@@ -183,9 +183,9 @@ configFile = "config.txt"
 info = {}
 readInfo(configFile)
 
-XILINX = getInitialInfo('cfgXilinx')
-DRO = getInitialInfo('cfgDRO')
-STEPPER_DRIVE = getInitialInfo('spStepDrive')
+XILINX = getInitialInfo(cfgXilinx)
+DRO = getInitialInfo(cfgDRO)
+STEPPER_DRIVE = getInitialInfo(spStepDrive)
 
 info = {}
 
@@ -443,7 +443,7 @@ class MoveCommands():
             moveQue.put((opString, op, val))
 
     def queClear(self):
-        self.send = not getInfo('cfgCmdDis')
+        self.send = not getInfo(cfgCmdDis)
         while not moveQue.empty():
             moveQue.get()
 
@@ -577,18 +577,18 @@ def xilinxTestMode():
     global fcy
     testMode = False
     try:
-        testMode = getInfo('cfgTestMode')
+        testMode = getInfo(cfgTestMode)
     except KeyError as e:
         testMode = False
     if testMode:
         encoder = 0
         try:
-            encoder = getIntInfo('cfgEncoder')
+            encoder = getIntInfo(cfgEncoder)
         except KeyError as e:
             encoder = 0
         rpm = 0
         try:
-            rpm = int(getFloatInfo('cfgTestRPM'))
+            rpm = int(getFloatInfo(cfgTestRPM))
         except KeyError as e:
             rpm = 0
         if encoder != 0:
@@ -611,35 +611,35 @@ def sendSpindleData(send=False, rpm=None):
     global spindleDataSent, XILINX
     try:
         if send or (not spindleDataSent):
-            queParm(STEPPER_DRIVE, getBoolInfo('spStepDrive'))
+            queParm(STEPPER_DRIVE, getBoolInfo(spStepDrive))
             if STEPPER_DRIVE:
-                queParm(SP_STEPS, getInfo('spMotorSteps'))
-                queParm(SP_MICRO, getInfo('spMicroSteps'))
-                queParm(SP_MIN_RPM, getInfo('spMinRPM'))
+                queParm(SP_STEPS, getInfo(spMotorSteps))
+                queParm(SP_MICRO, getInfo(spMicroSteps))
+                queParm(SP_MIN_RPM, getInfo(spMinRPM))
                 if rpm != None:
                     queParm(SP_MAX_RPM, rpm)
                 else:
-                    queParm(SP_MAX_RPM, getInfo('spMaxRPM'))
-                # queParm(SP_ACCEL_TIME, getInfo('spAccelTime'))
-                queParm(SP_ACCEL, getInfo('spAccel'))
-                queParm(SP_JOG_MIN_RPM, getInfo('spJogMin'))
-                queParm(SP_JOG_MAX_RPM, getInfo('spJogMax'))
-                # queParm(SP_JOG_ACCEL_TIME, getInfo('spAccelTime'))
-                queParm(SP_DIR_FLAG, getBoolInfo('spInvDir'))
-                queParm(SP_TEST_INDEX, getBoolInfo('spTestIndex'))
+                    queParm(SP_MAX_RPM, getInfo(spMaxRPM))
+                # queParm(SP_ACCEL_TIME, getInfo(spAccelTime))
+                queParm(SP_ACCEL, getInfo(spAccel))
+                queParm(SP_JOG_MIN_RPM, getinfo(spJogMin))
+                queParm(SP_JOG_MAX_RPM, getinfo(spJogMax))
+                # queParm(SP_JOG_ACCEL_TIME, getinfo(spAccelTime))
+                queParm(SP_DIR_FLAG, getBoolinfo(spInvDir))
+                queParm(SP_TEST_INDEX, getBoolinfo(spTestIndex))
                 command(CMD_SPSETUP)
             elif XILINX:
-                queParm(ENC_MAX, getInfo('cfgEncoder'))
-                queParm(X_FREQUENCY, getInfo('cfgXFreq'))
-                queParm(FREQ_MULT, getInfo('cfgFreqMult'))
+                queParm(ENC_MAX, getinfo(cfgEncoder))
+                queParm(X_FREQUENCY, getinfo(cfgXFreq))
+                queParm(FREQ_MULT, getinfo(cfgFreqMult))
                 xilinxTestMode()
-                queParm(RPM, getInfo('cfgTestRPM'))
+                queParm(RPM, getinfo(cfgTestRPM))
                 cfgReg = 0
-                if getBoolInfo('cfgInvEncDir'):
+                if getBoolinfo(cfgInvEncDir):
                     cfgReg |= ENC_POL
-                if getBoolInfo('zInvDir'):
+                if getBoolinfo(zInvDir):
                     cfgReg |= ZDIR_POL
-                if getBoolInfo('xInvDir'):
+                if getBoolinfo(xInvDir):
                     cfgReg |= XDIR_POL
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
@@ -652,14 +652,14 @@ def sendZData(send=False):
     global zDataSent, jogPanel
     try:
         if send or (not zDataSent):
-            pitch = getFloatInfo('zPitch')
-            motorSteps = getIntInfo('zMotorSteps')
-            microSteps = getIntInfo('zMicroSteps')
-            motorRatio = getFloatInfo('zMotorRatio')
+            pitch = getFloatinfo(zPitch)
+            motorSteps = getIntinfo(zMotorSteps)
+            microSteps = getIntinfo(zMicroSteps)
+            motorRatio = getFloatinfo(zMotorRatio)
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.zDROInch = getIntInfo('zDROInch')
-            jogPanel.zDROInvert = getBoolInfo('zInvDRO') == 1
+            jogPanel.zDROInch = getIntinfo(zDROInch)
+            jogPanel.zDROInvert = getBoolinfo(zInvDRO) == 1
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -670,21 +670,21 @@ def sendZData(send=False):
                 val = 0.001
             queParm(Z_MPG_INC, val * jogPanel.zStepsInch)
 
-            queParm(Z_PITCH, getInfo('zPitch'))
-            queParm(Z_RATIO, getInfo('zMotorRatio'))
-            queParm(Z_MICRO, getInfo('zMicroSteps'))
-            queParm(Z_MOTOR, getInfo('zMotorSteps'))
-            queParm(Z_ACCEL, getInfo('zAccel'))
-            queParm(Z_BACKLASH, getInfo('zBacklash'))
+            queParm(Z_PITCH, getinfo(zPitch))
+            queParm(Z_RATIO, getinfo(zMotorRatio))
+            queParm(Z_MICRO, getinfo(zMicroSteps))
+            queParm(Z_MOTOR, getinfo(zMotorSteps))
+            queParm(Z_ACCEL, getinfo(zAccel))
+            queParm(Z_BACKLASH, getinfo(zBacklash))
 
-            queParm(Z_MOVE_MIN, getInfo('zMinSpeed'))
-            queParm(Z_MOVE_MAX, getInfo('zMaxSpeed'))
+            queParm(Z_MOVE_MIN, getinfo(zMinSpeed))
+            queParm(Z_MOVE_MAX, getinfo(zMaxSpeed))
 
-            queParm(Z_JOG_MIN, getInfo('zJogMin'))
-            queParm(Z_JOG_MAX, getInfo('zJogMax'))
+            queParm(Z_JOG_MIN, getinfo(zJogMin))
+            queParm(Z_JOG_MAX, getinfo(zJogMax))
 
-            queParm(Z_DIR_FLAG, getBoolInfo('zInvDir'))
-            queParm(Z_MPG_FLAG, getBoolInfo('zInvMpg'))
+            queParm(Z_DIR_FLAG, getBoolinfo(zInvDir))
+            queParm(Z_MPG_FLAG, getBoolinfo(zInvMpg))
                 
             command(CMD_ZSETUP)
             zDataSent = True
@@ -699,14 +699,14 @@ def sendXData(send=False):
     global xDataSent, jogPanel
     try:
         if send or (not xDataSent):
-            pitch = getFloatInfo('xPitch')
-            motorSteps = getIntInfo('xMotorSteps')
-            microSteps = getIntInfo('xMicroSteps')
-            motorRatio = getFloatInfo('xMotorRatio')
+            pitch = getFloatinfo(xPitch)
+            motorSteps = getIntinfo(xMotorSteps)
+            microSteps = getIntinfo(xMicroSteps)
+            motorRatio = getFloatinfo(xMotorRatio)
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.xDROInch = getIntInfo('xDROInch')
-            jogPanel.xDROInvert = getBoolInfo('xInvDRO') == 1
+            jogPanel.xDROInch = getIntinfo(xDROInch)
+            jogPanel.xDROInvert = getBoolinfo(xInvDRO) == 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -716,27 +716,27 @@ def sendXData(send=False):
                 val = 0.001
             queParm(X_MPG_INC, val * jogPanel.xStepsInch)
 
-            queParm(X_PITCH, getInfo('xPitch'))
-            queParm(X_RATIO, getInfo('xMotorRatio'))
-            queParm(X_MICRO, getInfo('xMicroSteps'))
-            queParm(X_MOTOR, getInfo('xMotorSteps'))
-            queParm(X_ACCEL, getInfo('xAccel'))
-            queParm(X_BACKLASH, getInfo('xBacklash'))
+            queParm(X_PITCH, getinfo(xPitch))
+            queParm(X_RATIO, getinfo(xMotorRatio))
+            queParm(X_MICRO, getinfo(xMicroSteps))
+            queParm(X_MOTOR, getinfo(xMotorSteps))
+            queParm(X_ACCEL, getinfo(xAccel))
+            queParm(X_BACKLASH, getinfo(xBacklash))
 
-            queParm(X_MOVE_MIN, getInfo('xMinSpeed'))
-            queParm(X_MOVE_MAX, getInfo('xMaxSpeed'))
+            queParm(X_MOVE_MIN, getinfo(xMinSpeed))
+            queParm(X_MOVE_MAX, getinfo(xMaxSpeed))
 
-            queParm(X_JOG_MIN, getInfo('xJogMin'))
-            queParm(X_JOG_MAX, getInfo('xJogMax'))
+            queParm(X_JOG_MIN, getinfo(xJogMin))
+            queParm(X_JOG_MAX, getinfo(xJogMax))
 
-            queParm(X_DIR_FLAG, getBoolInfo('xInvDir'))
-            queParm(X_MPG_FLAG, getBoolInfo('xInvMpg'))
+            queParm(X_DIR_FLAG, getBoolinfo(xInvDir))
+            queParm(X_MPG_FLAG, getBoolinfo(xInvMpg))
 
             global HOME_TEST
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
-                start = str(int(getFloatInfo('xHomeStart') * stepsInch))
-                end = str(int(getFloatInfo('xHomeEnd') * stepsInch))
+                start = str(int(getFloatinfo(xHomeStart) * stepsInch))
+                end = str(int(getFloatinfo(xHomeEnd) * stepsInch))
                 if end > start:
                     (start, end) = (end, start)
                 queParm(X_HOME_START, start)
@@ -871,7 +871,7 @@ class Turn(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
             
         self.turnSetup()
@@ -893,11 +893,11 @@ class Turn(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntInfo('tuRPM'))
+            m.startSpindle(getIntinfo(tuRPM))
             m.queFeedType(FEED_PITCH)
-            m.zSynSetup(getFloatInfo('tuZFeed'))
+            m.zSynSetup(getFloatinfo(tuZFeed))
         else:
-            m. queZSetup(getFloatInfo('tuZFeed'))
+            m. queZSetup(getFloatinfo(tuZFeed))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
         m.text("%7.3f" % (self.xStart * 2.0), \
@@ -1031,7 +1031,7 @@ class TurnPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('tuPause', cb)
+        initinfo(tuPause, cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1114,7 +1114,7 @@ class Face(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setAlign(90)
 
@@ -1139,11 +1139,11 @@ class Face(UpdatePass):
         m.setLoc(self.zStart, self.safeX)
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntInfo('faRPM'))
+            m.startSpindle(getIntinfo(faRPM))
             m.queFeedType(FEED_PITCH)
-            m.xSynSetup(getFloatInfo('faXFeed'))
+            m.xSynSetup(getFloatinfo(faXFeed))
         else:
-            m.queXSetup(getFloatInfo('faxFeed'))
+            m.queXSetup(getFloatinfo(faxFeed))
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
         m.text("%7.3f" % (self.zStart), \
@@ -1270,7 +1270,7 @@ class FacePanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('faPause', cb)
+        initinfo(faPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1336,7 +1336,7 @@ class Cutoff():
 
         self.safeX = self.xStart + self.xRetract
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
         self.cutoffSetup()
@@ -1357,11 +1357,11 @@ class Cutoff():
         m = self.m
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntInfo('cuRPM'))
+            m.startSpindle(getIntinfo(cuRPM))
             m.queFeedType(FEED_PITCH)
-            m.xSynSetup(getFloatInfo('cuXFeed'))
+            m.xSynSetup(getFloatinfo(cuXFeed))
         else:
-            m.queXSetup(getFloatInfo('cuXFeed'))
+            m.queXSetup(getFloatinfo(cuXFeed))
         m.moveX(self.safeX)
         m.moveZ(self.zCutoff)
         m.moveX(self.xStart)
@@ -1424,7 +1424,7 @@ class CutoffPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('cuPause', cb)
+        initinfo(cuPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1534,7 +1534,7 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup()
@@ -1557,11 +1557,11 @@ class Taper(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         m.saveTaper(self.taper)
-        m.startSpindle(getIntInfo('tpRPM'))
+        m.startSpindle(getIntinfo(tpRPM))
         m.queFeedType(FEED_PITCH)
-        m.zSynSetup(getFloatInfo('tpZFeed'))
+        m.zSynSetup(getFloatinfo(tpZFeed))
         if self.taperX:
-            m.xSynSetup(getFloatInfo('tpXInFeed'))
+            m.xSynSetup(getFloatinfo(tpXInFeed))
         else:
             pass
         m.moveX(self.safeX)
@@ -1670,7 +1670,7 @@ class Taper(UpdatePass):
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.xRetract
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup(True)
@@ -1788,7 +1788,7 @@ class TaperPanel(wx.Panel):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
-        initInfo('tpTaperSel', combo)
+        initinfo(tpTaperSel', combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -1823,7 +1823,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        initInfo('tpDeltaBtn', btn)
+        initinfo(tpDeltaBtn', btn)
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -1835,7 +1835,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        initInfo('tpAngleBtn', btn)
+        initinfo(tpAngleBtn', btn)
 
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
@@ -1881,7 +1881,7 @@ class TaperPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('tpInternal', cb)
+        initinfo(tpInternal, cb)
 
         sizerG.Add(sizerH)
 
@@ -1892,7 +1892,7 @@ class TaperPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('tpPause', cb)
+        initinfo(tpPause, cb)
 
         sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
@@ -2132,11 +2132,11 @@ class ScrewThread(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.draw(self.xStart * 2.0, self.tpi)
             self.p0 = (0, 0)
 
-        if getInfo('cfgDraw'):
+        if getinfo(cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
             
         self.threadSetup()
@@ -2162,15 +2162,15 @@ class ScrewThread(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
-        m.startSpindle(getIntInfo('thRPM'))
+        m.startSpindle(getIntinfo(thRPM))
         feedType = FEED_TPI
         if self.threadPanel.mm.GetValue():
             feedType = FEED_METRIC
         m.queFeedType(feedType)
-        m.saveTaper(getFloatInfo('thXTaper'))
-        m.saveRunout(getFloatInfo('thExitRev'))
+        m.saveTaper(getFloatinfo(thXTaper))
+        m.saveRunout(getFloatinfo(thExitRev))
         m.saveDepth(self.depth)
-        m.zSynSetup(getFloatInfo('thPitch'))
+        m.zSynSetup(getFloatinfo(thPitch))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
         zOffset = 0.0
@@ -2281,7 +2281,7 @@ class ThreadPanel(wx.Panel):
                                          style=wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('thInternal', cb)
+        initinfo(thInternal, cb)
 
         # x parameters
 
@@ -2296,11 +2296,11 @@ class ThreadPanel(wx.Panel):
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initInfo('thFinal', btn)
+        # initinfo(thFinal', btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initInfo('thDepth', btn)
+        # initinfo(thDepth', btn)
 
         #
 
@@ -2308,11 +2308,11 @@ class ThreadPanel(wx.Panel):
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('thTPI',  btn)
+        initinfo(thTPI',  btn)
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('thMM', btn)
+        initinfo(thMM', btn)
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
@@ -2367,7 +2367,7 @@ class ThreadPanel(wx.Panel):
         self.pause = cb = wx.CheckBox(self, -1, \
                                          style=wx.ALIGN_LEFT)
         sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo('thPause', cb)
+        initinfo(thPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2519,7 +2519,7 @@ class JogShuttle():
     def setZ(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogZ
-            maxSpeed = getFloatInfo('zMaxSpeed')
+            maxSpeed = getFloatinfo(zMaxSpeed)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set z")
@@ -2528,7 +2528,7 @@ class JogShuttle():
     def setX(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogX
-            maxSpeed = getFloatInfo('xMaxSpeed')
+            maxSpeed = getFloatinfo(xMaxSpeed)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set x")
@@ -2537,7 +2537,7 @@ class JogShuttle():
     def setSpindle(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogSpindle
-            maxSpeed = getFloatInfo('spMaxRPM')
+            maxSpeed = getFloatinfo(spMaxRPM)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.spindleSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set spindle")
@@ -2665,7 +2665,7 @@ class JogPanel(wx.Panel):
 
         self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
-        initInfo('jogZPos', tc)
+        initinfo(jogZPos, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
@@ -2680,7 +2680,7 @@ class JogPanel(wx.Panel):
 
         self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                      style=wx.TE_RIGHT)
-        initInfo('jogXPos', tc)
+        initinfo(jogXPos, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
@@ -2717,7 +2717,7 @@ class JogPanel(wx.Panel):
 
         self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
                                          style=wx.TE_RIGHT)
-        initInfo('jogXPosDiam', tc)
+        initinfo(jogXPosDiam, tc)
         tc.SetFont(posFont)
         tc.SetEditable(False)
         # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
@@ -2748,7 +2748,7 @@ class JogPanel(wx.Panel):
 
             self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
                                             size=(120, -1), style=wx.TE_RIGHT)
-            initInfo('encZPos', tc)
+            initinfo(encZPos, tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2762,7 +2762,7 @@ class JogPanel(wx.Panel):
 
             self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
                                             size=(120, -1), style=wx.TE_RIGHT)
-            initInfo('droXPos', tc)
+            initinfo(droXPos, tc)
             tc.SetFont(posFont)
             tc.SetEditable(False)
             sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
@@ -2871,7 +2871,7 @@ class JogPanel(wx.Panel):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step, \
                                          style=wx.CB_READONLY)
-        initInfo('jogInc', combo)
+        initinfo(jogInc, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
@@ -2947,7 +2947,7 @@ class JogPanel(wx.Panel):
                     print("zJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        queParm(Z_JOG_MAX, getInfo('zJogMax'))
+                        queParm(Z_JOG_MAX, getinfo(zJogMax))
                         queParm(Z_JOG_DIR, dir)
                         command(ZJMOV)
                     except commTimeout as e:
@@ -3027,7 +3027,7 @@ class JogPanel(wx.Panel):
                     print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        queParm(X_JOG_MAX, getInfo('xJogMax'))
+                        queParm(X_JOG_MAX, getinfo(xJogMax))
                         queParm(X_JOG_DIR, dir)
                         command(XJMOV)
                     except commTimeout as e:
@@ -3177,7 +3177,7 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('r'):
-            mainPanel = getInfo('mainPanel')
+            mainPanel = getinfo(mainPanel)
             panel = mainFrame.panels[mainPanel]
             panel.OnSend(None)
             return
@@ -3336,7 +3336,7 @@ class JogPanel(wx.Panel):
 
     def OnStartSpindle(self, e):
         if STEPPER_DRIVE:
-            mainPanel = getInfo('mainPanel')
+            mainPanel = getinfo(mainPanel)
             panel = mainFrame.panels[mainPanel]
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
@@ -3442,10 +3442,10 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnHomeX(self, e):
-        queParm(X_HOME_DIST, getInfo('xHomeDist'))
-        queParm(X_HOME_BACKOFF_DIST, getInfo('xHomeBackoffDist'))
-        queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
-        val = (-1, 1)[getBoolInfo('xHomeDir')]
+        queParm(X_HOME_DIST, getinfo(xHomeDist))
+        queParm(X_HOME_BACKOFF_DIST, getinfo(xHomeBackoffDist))
+        queParm(X_HOME_SPEED, getinfo(xHomeSpeed))
+        val = (-1, 1)[getBoolinfo(xHomeDir)]
         queParm(X_HOME_DIR, val)
         command(XHOMEAXIS)
         jogPanel.probe(HOME_X)
@@ -3539,11 +3539,11 @@ class SetPosDialog(wx.Dialog):
             print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
             if zDROPos != None:
                 droPos = float(zDROPos) / jogPanel.zDROInch
-                setInfo('zSvDROPosition', "%0.4f" % (droPos))
+                setinfo(zSvDROPosition, "%0.4f" % (droPos))
                 if jogPanel.zDROInvert:
                     droPos = -droPos
                 zDROOffset = droPos - val
-                setInfo('zSvDROOffset', "%0.4f" % (zDROOffset))
+                setinfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
@@ -3637,10 +3637,10 @@ class ProbeDialog(wx.Dialog):
         if self.IsShown():
             if self.axis == 0:
                 probeLoc = "0.0000"
-                probeDist = getFloatInfo('zProbeDist')
+                probeDist = getFloatinfo(zProbeDist)
             else:
                 probeLoc = jogPanel.xPos.GetValue()
-                probeDist = getFloatInfo('xProbeDist')
+                probeDist = getFloatinfo(xProbeDist)
             self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
             self.probeDist.SetValue("%7.4f" % probeDist)
@@ -3669,8 +3669,8 @@ class ProbeDialog(wx.Dialog):
     def probeZ(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
-        queParm(Z_PROBE_SPEED, getInfo('zProbeSpeed'))
+        queParm(PROBE_INV, getBoolinfo(cfgPrbInv))
+        queParm(Z_PROBE_SPEED, getinfo(zProbeSpeed))
         queParm(Z_HOME_STATUS, '0');
         sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
@@ -3681,8 +3681,8 @@ class ProbeDialog(wx.Dialog):
     def probeX(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm(PROBE_INV, getBoolInfo('cfgPrbInv'))
-        queParm(X_HOME_SPEED, getInfo('xHomeSpeed'))
+        queParm(PROBE_INV, getBoolinfo(cfgPrbInv))
+        queParm(X_HOME_SPEED, getinfo(xHomeSpeed))
         queParm(X_HOME_STATUS, '0');
         sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
@@ -4033,7 +4033,7 @@ class MainFrame(wx.Frame):
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
-        openSerial(getInfo('commPort'), 57600)
+        openSerial(getinfo(commPort), 57600)
         global cmds, parms
         comm.cmds = cmds
         comm.parms = parms
@@ -4045,25 +4045,25 @@ class MainFrame(wx.Frame):
 
         if comm.ser != None:
             try:
-                queParm(CFG_XILINX, getInfo('cfgXilinx'))
-                queParm(CFG_FCY, getInfo('cfgFcy'))
-                queParm(CFG_MPG, getInfo('cfgMPG'))
-                queParm(CFG_DRO, getInfo('cfgDRO'))
-                queParm(CFG_LCD, getInfo('cfgLCD'))
+                queParm(CFG_XILINX, getinfo(cfgXilinx))
+                queParm(CFG_FCY, getinfo(cfgFcy))
+                queParm(CFG_MPG, getinfo(cfgMPG))
+                queParm(CFG_DRO, getinfo(cfgDRO))
+                queParm(CFG_LCD, getinfo(cfgLCD))
                 command(CMD_SETUP)
                 sendZData()
-                val = getInfo('jogZPos')
+                val = getinfo(jogZPos)
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
                 sendXData()
-                val = getInfo('jogXPos')
+                val = getinfo(jogXPos)
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
-                    val = int(getFloatInfo('zSvDROPosition') * \
+                    val = int(getFloatinfo(zSvDROPosition) * \
                               jogPanel.zStepsInch)
                     queParm(Z_DRO_POS, val)
-                    val = int(getFloatInfo('xSvDROPosition') * \
+                    val = int(getFloatinfo(xSvDROPosition) * \
                               jogPanel.xStepsInch)
                     queParm(X_DRO_POS, val)
                     queParm(Z_DRO_OFFSET, zDROOffset)
@@ -4071,14 +4071,14 @@ class MainFrame(wx.Frame):
                     queParm(Z_DRO_INCH, jogPanel.zDROInch)
                     queParm(X_DRO_INCH, jogPanel.xDROInch)
                     sendMulti()
-                val = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+                val = str(int(getFloatinfo(xHomeLoc) * jogPanel.xStepsInch))
                 queParm(X_HOME_LOC, val)
                 queParm(Z_HOME_OFFSET, zHomeOffset)
                 queParm(X_HOME_OFFSET, xHomeOffset)
                 queParm(X_HOME_STATUS, (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
-                val = (-1, 1)[getBoolInfo('zInvDRO')]
+                val = (-1, 1)[getBoolinfo(zInvDRO)]
                 queParm(Z_DRO_DIR, val)
-                val = (-1, 1)[getBoolInfo('xInvDRO')]
+                val = (-1, 1)[getBoolinfo(xInvDRO)]
                 queParm(X_DRO_DIR, val)
                 sendMulti()
                 sendSpindleData()
@@ -4245,7 +4245,7 @@ class MainFrame(wx.Frame):
             if not key in info:
                newInfo(key, "%0.4f" % (eval(var)))
             else:
-                exp = var + ' = getFloatInfo(' + key + ')'
+                exp = var + ' = getFloatinfo(' + key + ')'
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
@@ -4266,11 +4266,11 @@ class MainFrame(wx.Frame):
         self.taperPanel.updateUI()
 
     def OnSave(self, e):
-        saveInfo('config.txt')
+        saveinfo("config.txt")
         
     def OnRestat(self, e):
         import os
-        saveInfo('config.txt')
+        saveinfo("config.txt")
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnExit(self, e):
@@ -4305,7 +4305,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = 'mainPanel'
         if not key in info:
-            initInfo(key, InfoValue('turnPanel'))
+            initInfo(key, InfoValue(turnPanel))
         mainPanel = getInfo(key)
 
         for key in self.panels:
@@ -4318,23 +4318,23 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def OnTurn(self, e):
-        setInfo('mainPanel', 'turnPanel')
+        setinfo(mainPanel, 'turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
-        setInfo('mainPanel', 'facePanel')
+        setinfo(mainPanel, 'facePanel')
         self.showPanel()
 
     def OnCutoff(self, e):
-        setInfo('mainPanel', 'cutoffPanel')
+        setinfo(mainPanel, 'cutoffPanel')
         self.showPanel()
 
     def OnTaper(self, e):
-        setInfo('mainPanel', 'taperPanel')
+        setinfo(mainPanel, 'taperPanel')
         self.showPanel()
 
     def OnThread(self, e):
-        setInfo('mainPanel', 'threadPanel')
+        setinfo(mainPanel, 'threadPanel')
         self.showPanel()
 
     def OnTestSpindle(self, e):
@@ -4377,7 +4377,6 @@ class MainFrame(wx.Frame):
             if len(val) == 1:
                 val = val[0]
             update(val)
-
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
@@ -4389,22 +4388,22 @@ class ZDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", "zPitch"), \
-            ("Motor Steps", "zMotorSteps"), \
-            ("Micro Steps", "zMicroSteps"), \
-            ("Motor Ratio", "zMotorRatio"), \
-            ("Backlash", "zBacklash"), \
-            ("Accel Unit/Sec2", "zAccel"), \
-            ("Min Speed U/Min", "zMinSpeed"), \
-            ("Max Speed U/Min", "zMaxSpeed"), \
-            ("Jog Min U/Min", "zJogMin"), \
-            ("Jog Max U/Min", "zJogMax"), \
-            ("Probe Dist", "zProbeDist"), \
-            ("Probe Speed", "zProbeSpeed"), \
-            ("bInvert Dir", 'zInvDir'), \
-            ("bInvert MPG", 'zInvMpg'), \
-            ("DRO Inch", "zDROInch"), \
-            ("bInv DRO", 'zInvDRO'), \
+            ("Pitch", zPitch), \
+            ("Motor Steps", zMotorSteps), \
+            ("Micro Steps", zMicroSteps), \
+            ("Motor Ratio", zMotorRatio), \
+            ("Backlash", zBacklash), \
+            ("Accel Unit/Sec2", zAccel), \
+            ("Min Speed U/Min", zMinSpeed), \
+            ("Max Speed U/Min", zMaxSpeed), \
+            ("Jog Min U/Min", zJogMin), \
+            ("Jog Max U/Min", zJogMax), \
+            ("Probe Dist", zProbeDist), \
+            ("Probe Speed", zProbeSpeed), \
+            ("bInvert Dir", zInvDir), \
+            ("bInvert MPG", zInvMpg), \
+            ("DRO Inch", zDROInch), \
+            ("bInv DRO", zInvDRO), \
         )        
         fieldList(self, sizerG, self.fields)
 
@@ -4466,32 +4465,32 @@ class XDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", "xPitch"), \
-            ("Motor Steps", "xMotorSteps"), \
-            ("Micro Steps", "xMicroSteps"), \
-            ("Motor Ratio", "xMotorRatio"), \
-            ("Backlash", "xBacklash"), \
-            ("Accel Unit/Sec2", "xAccel"), \
-            ("Min Speed U/Min", "xMinSpeed"), \
-            ("Max Speed U/Min", "xMaxSpeed"), \
-            ("Jog Min U/Min", "xJogMin"), \
-            ("Jog Max U/Min", "xJogMax"), \
-            ("bInvert Dir", 'xInvDir'), \
-            ("bInvert MPG", 'xInvMpg'), \
-            ("Probe Dist", "xProbeDist"), \
-            ("Home Dist", "xHomeDist"), \
-            ("Backoff Dist", "xHomeBackoffDist"), \
-            ("Home Speed", "xHomeSpeed"), \
-            ("bHome Dir", 'xHomeDir'), \
-            ("DRO Inch", "xDROInch"), \
-            ("bInv DRO", 'xInvDRO'), \
+            ("Pitch", xPitch), \
+            ("Motor Steps", xMotorSteps), \
+            ("Micro Steps", xMicroSteps), \
+            ("Motor Ratio", xMotorRatio), \
+            ("Backlash", xBacklash), \
+            ("Accel Unit/Sec2", xAccel), \
+            ("Min Speed U/Min", xMinSpeed), \
+            ("Max Speed U/Min", xMaxSpeed), \
+            ("Jog Min U/Min", xJogMin), \
+            ("Jog Max U/Min", xJogMax), \
+            ("bInvert Dir", xInvDir), \
+            ("bInvert MPG", xInvMpg), \
+            ("Probe Dist", xProbeDist), \
+            ("Home Dist", xHomeDist), \
+            ("Backoff Dist", xHomeBackoffDist), \
+            ("Home Speed", xHomeSpeed), \
+            ("bHome Dir", xHomeDir), \
+            ("DRO Inch", xDROInch), \
+            ("bInv DRO", xInvDRO), \
         )        
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
-                ("Home Start", "xHomeStart"), \
-                ("Home End", "xHomeEnd"), \
-                ("Home Loc", "xHomeLoc"))
+                ("Home Start", xHomeStart), \
+                ("Home End", xHomeEnd), \
+                ("Home Loc", xHomeLoc))
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -4524,7 +4523,7 @@ class XDialog(wx.Dialog):
 
     def OnSetHomeLoc(self, e):
         global jogPanel
-        loc = str(int(getFloatInfo('xHomeLoc') * jogPanel.xStepsInch))
+        loc = str(int(getFloatinfo(xHomeLoc) * jogPanel.xStepsInch))
         setParm(X_HOME_LOC, loc)
         
     def OnSetup(self, e):
@@ -4564,16 +4563,16 @@ class SpindleDialog(wx.Dialog):
         )
         if STEPPER_DRIVE:
             self.fields += (
-                ("Motor Steps", "spMotorSteps"), \
-                ("Micro Steps", "spMicroSteps"), \
-                ("Min RPM", "spMinRPM"), \
-                ("Max RPM", "spMaxRPM"), \
-                ("Accel RPM/Sec2", "spAccel"), \
-                ("Jog Min", "spJogMin"), \
-                ("Jog Max", "spJogMax"), \
-                # ("Jog Accel Time", "spJogAccelTime"), \
-                ("bInvert Dir", 'spInvDir'), \
-                ("bTest Index", 'spTestIndex'), \
+                ("Motor Steps", spMotorSteps), \
+                ("Micro Steps", spMicroSteps), \
+                ("Min RPM", spMinRPM), \
+                ("Max RPM", spMaxRPM), \
+                ("Accel RPM/Sec2", spAccel), \
+                ("Jog Min", spJogMin), \
+                ("Jog Max", spJogMax), \
+                # ("Jog Accel Time", spJogAccelTime), \
+                ("bInvert Dir", spInvDir), \
+                ("bTest Index", spTestIndex), \
             )
         fieldList(self, sizerG, self.fields)
 
@@ -4660,7 +4659,7 @@ class PortDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("Comm Port", "commPort"),)
+            ("Comm Port", commPort),)
         fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -4706,23 +4705,23 @@ class ConfigDialog(wx.Dialog):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", 'cfgXilinx'), \
-            ("bMPG", 'cfgMPG'), \
-            ("bDRO", 'cfgDRO'), \
-            ("bLCD", 'cfgLCD'), \
-            ("bProbe Inv", 'cfgPrbInv'), \
-            ("fcy", "cfgFcy"), \
-            ("bDisable Commands", 'cfgCmdDis'), \
-            ("bDraw Moves", 'cfgDraw'), \
+            ("bHW Control", cfgXilinx), \
+            ("bMPG", cfgMPG), \
+            ("bDRO", cfgDRO), \
+            ("bLCD", cfgLCD), \
+            ("bProbe Inv", cfgPrbInv), \
+            ("fcy", cfgFcy), \
+            ("bDisable Commands", cfgCmdDis), \
+            ("bDraw Moves", cfgDraw), \
         )
         if XILINX:
             self.fields += (
-                ("Encoder", "cfgEncoder"), \
-                ("Xilinx Freq", "cfgXFreq"), \
-                ("Freq Mult", "cfgFreqMult"), \
-                ("bTest Mode", 'cfgTestMode'), \
-                ("Test RPM", "cfgTestRPM"), \
-                ("bInvert Enc Dir", 'cfgInvEncDir'), \
+                ("Encoder", cfgEncoder), \
+                ("Xilinx Freq", cfgXFreq), \
+                ("Freq Mult", cfgFreqMult), \
+                ("bTest Mode", cfgTestMode), \
+                ("Test RPM", cfgTestRPM), \
+                ("bInvert Enc Dir", cfgInvEncDir), \
             )
         fieldList(self, sizerG, self.fields)
 
@@ -4827,16 +4826,16 @@ class SpindleTest():
         global fcy
         txt = self.txt
         txt.SetValue("")
-        minRPM = float(getInfo('spMinRPM')) # minimum rpm
-        maxRPM = float(getInfo('spMaxRPM')) # maximum rpm
-        accel = float(getInfo('spAccel'))   # accel rpm per sec
+        minRPM = float(getinfo(spMinRPM)) # minimum rpm
+        maxRPM = float(getinfo(spMaxRPM)) # maximum rpm
+        accel = float(getinfo(spAccel))   # accel rpm per sec
         
         f = open('spindle.txt','w')
         
         dbgPrt(txt,"minRPM %d maxRPM %d", (minRPM, maxRPM))
         
-        spindleMicroSteps = int(getInfo('spMicroSteps'))
-        spindleMotorSteps = int(getInfo('spMotorSteps'))
+        spindleMicroSteps = int(getinfo(spMicroSteps))
+        spindleMotorSteps = int(getinfo(spMotorSteps))
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
         
@@ -4968,24 +4967,24 @@ class SyncTest(object):
         f = open('zsync.txt','w')
    
         zAxis = True
-        mainPanel = getInfo('mainPanel')
+        mainPanel = getinfo(mainPanel)
         if mainPanel == 'threadPanel':
-            arg1 = float(getInfo('thPitch'))
+            arg1 = float(getinfo(thPitch))
         elif mainPanel == 'turnPanel':
-            arg1 = float(getInfo('tuZFeed'))
+            arg1 = float(getinfo(tuZFeed))
         elif mainPanel == 'facePanel':
-            arg1 = float(getInfo('faXFeed'))
+            arg1 = float(getinfo(faXFeed))
             zAxis = False
         elif mainPanel == 'CutoffPanel':
-            arg1 = float(getInfo('cuXFeed'))
+            arg1 = float(getinfo(cuXFeed))
             zAxis = False
         elif mainPanel == 'taperPanel':
-            arg1 = float(getInfo('tpZFeed'))
+            arg1 = float(getinfo(tpZFeed))
 
-        maxRPM = float(getInfo('spMaxRPM')) # maximum rpm
+        maxRPM = float(getinfo(spMaxRPM)) # maximum rpm
 
-        spindleMicroSteps = int(getInfo('spMicroSteps'))
-        spindleMotorSteps = int(getInfo('spMotorSteps'))
+        spindleMicroSteps = int(getinfo(spMicroSteps))
+        spindleMotorSteps = int(getinfo(spMotorSteps))
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
         
@@ -4999,15 +4998,15 @@ class SyncTest(object):
         dbgPrt(txt, "", ())
 
         if zAxis:
-            zPitch = float(getInfo('zPitch'))
-            zMicroSteps = float(getInfo('zMicroSteps'))
-            zMotorSteps = float(getInfo('zMotorSteps'))
-            zMotorRatio = float(getInfo('zMotorRatio'))
+            zPitch = float(getinfo(zPitch))
+            zMicroSteps = float(getinfo(zMicroSteps))
+            zMotorSteps = float(getinfo(zMotorSteps))
+            zMotorRatio = float(getinfo(zMotorRatio))
         else:
-            zPitch = float(getInfo('xPitch'))
-            zMicroSteps = float(getInfo('xMicroSteps'))
-            zMotorSteps = float(getInfo('xMotorSteps'))
-            zMotorRatio = float(getInfo('xMotorRatio'))
+            zPitch = float(getinfo(xPitch))
+            zMicroSteps = float(getinfo(xMicroSteps))
+            zMotorSteps = float(getinfo(xMotorSteps))
+            zMotorRatio = float(getinfo(xMotorRatio))
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
@@ -5186,9 +5185,9 @@ class TaperTest(object):
         txt.SetValue("")
         f = open('taper.txt','w')
         
-        maxRPM = float(getInfo('spMaxRPM')) # maximum rpm
-        spindleMicroSteps = int(getInfo('spMicroSteps'))
-        spindleMotorSteps = int(getInfo('spMotorSteps'))
+        maxRPM = float(getinfo(spMaxRPM)) # maximum rpm
+        spindleMicroSteps = int(getinfo(spMicroSteps))
+        spindleMotorSteps = int(getinfo(spMotorSteps))
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
 
@@ -5201,22 +5200,22 @@ class TaperTest(object):
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
-        zPitch = float(getInfo('zPitch'))
-        zMicroSteps = float(getInfo('zMicroSteps'))
-        zMotorSteps = float(getInfo('zMotorSteps'))
-        zMotorRatio = float(getInfo('zMotorRatio'))
+        zPitch = float(getinfo(zPitch))
+        zMicroSteps = float(getinfo(zMicroSteps))
+        zMotorSteps = float(getinfo(zMotorSteps))
+        zMotorRatio = float(getinfo(zMotorRatio))
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
-        xPitch = float(getInfo('xPitch'))
-        xMicroSteps = float(getInfo('xMicroSteps'))
-        xMotorSteps = float(getInfo('xMotorSteps'))
-        xMotorRatio = float(getInfo('xMotorRatio'))
+        xPitch = float(getinfo(xPitch))
+        xMicroSteps = float(getinfo(xMicroSteps))
+        xMotorSteps = float(getinfo(xMotorSteps))
+        xMotorRatio = float(getinfo(xMotorRatio))
         xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / xPitch)
         dbgPrt(txt,"xStepsInch %d", (xStepsInch))
 
-        pitch = float(getInfo('tpZFeed'))
+        pitch = float(getinfo(tpZFeed))
         revCycle = int(1.0 / pitch + 0.5)
         if revCycle > 20:
             revCycle = 20
@@ -5232,8 +5231,8 @@ class TaperTest(object):
         dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
-        arg2 = float(getInfo('tpZDelta'))
-        arg3 = float(getInfo('tpXDelta'))
+        arg2 = float(getinfo(tpZDelta))
+        arg3 = float(getinfo(tpXDelta))
         
         d0 = arg2
         d1 = arg3
@@ -5281,17 +5280,17 @@ class MoveTest(object):
         
         f = open('move.txt','w')
 
-        zPitch = float(getInfo('zPitch'))
-        zMicroSteps = float(getInfo('zMicroSteps'))
-        zMotorSteps = float(getInfo('zMotorSteps'))
-        zMotorRatio = float(getInfo('zMotorRatio'))
+        zPitch = float(getinfo(zPitch))
+        zMicroSteps = float(getinfo(zMicroSteps))
+        zMotorSteps = float(getinfo(zMotorSteps))
+        zMotorRatio = float(getinfo(zMotorRatio))
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
         
-        zMinSpeed = float(getInfo('zMinSpeed')) # minimum speed ipm
-        zMaxSpeed = float(getInfo('zMaxSpeed')) # maximum speed ipm
-        zMoveAccelTime = float(getInfo('zAccel')) # accel time seconds
+        zMinSpeed = float(getinfo(zMinSpeed)) # minimum speed ipm
+        zMaxSpeed = float(getinfo(zMaxSpeed)) # maximum speed ipm
+        zMoveAccelTime = float(getinfo(zAccel)) # accel time seconds
         dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (zMinSpeed, zMaxSpeed, zMoveAccelTime))
         
