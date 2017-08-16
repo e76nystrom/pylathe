@@ -220,12 +220,12 @@ def setParm(parmIndex, val):
         rsp = rsp + tmp
     commLock.release()
 
-def getParm(parm, dbg=False):
-    global ser, cmds, parms, commLock, timeout
+def getParm(parmIndex, dbg=False):
+    global ser, commLock, timeout
     if ser is None:
         return(None)
     # cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
-    cmd = '\x01%x %x \r' % (READVAL, parms[parm][0])
+    cmd = '\x01%x %x \r' % (READVAL, parmIndex)
     if dbg:
         print("%-15s %s " % (parm, cmd.strip('\x01\r')), end="")
     commLock.acquire(True)
@@ -262,7 +262,7 @@ def getParm(parm, dbg=False):
     commLock.release()
 
 def getString():
-    global ser, cmds, parms, commLock, timeout
+    global ser, commLock, timeout
     if ser is None:
         return(None)
     # cmd = '\x01%x \r' % (cmds['READDBG'][0])
@@ -290,7 +290,7 @@ def getString():
     commLock.release()
 
 def setXReg(reg, val):
-    global ser, xRegs, cmds, comLock, timeout, xDbgPrint
+    global ser, xRegs, comLock, timeout, xDbgPrint
     if not (reg in xRegs):
         print("invalid register " + reg) #, flush=True)
         stdout.flush()
@@ -324,7 +324,7 @@ def setXReg(reg, val):
     commLock.release()
 
 def setXRegN(reg, val):
-    global ser, xRegs, cmds, comLock, timeout, xDbgPrint
+    global ser, xRegs, comLock, timeout, xDbgPrint
     if ser is None:
         return
     val = int(val)
@@ -352,7 +352,7 @@ def setXRegN(reg, val):
     commLock.release()
 
 def getXReg(reg):
-    global ser, xRegs, cmds, commLock, timeout
+    global ser, xRegs, commLock, timeout
     if ser is None:
         return(0)
     if not (reg in xRegs):
