@@ -4828,16 +4828,16 @@ class SpindleTest():
         global fcy
         txt = self.txt
         txt.SetValue("")
-        minRPM = float(getInfo(spMinRPM)) # minimum rpm
-        maxRPM = float(getInfo(spMaxRPM)) # maximum rpm
-        accel = float(getInfo(spAccel))   # accel rpm per sec
+        minRPM = getFloatInfo(spMinRPM) # minimum rpm
+        maxRPM = getFloatInfo(spMaxRPM) # maximum rpm
+        accel = getFloatInfo(spAccel)   # accel rpm per sec
         
         f = open('spindle.txt','w')
         
         dbgPrt(txt,"minRPM %d maxRPM %d", (minRPM, maxRPM))
         
-        spindleMicroSteps = int(getInfo(spMicroSteps))
-        spindleMotorSteps = int(getInfo(spMotorSteps))
+        spindleMicroSteps = getIntInfo(spMicroSteps)
+        spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
         
@@ -4969,26 +4969,26 @@ class SyncTest(object):
         f = open('zsync.txt','w')
    
         zAxis = True
-        mainPanel = getInfo(mainPanel)
-        if mainPanel == 'threadPanel':
-            arg1 = float(getInfo(thPitch))
-        elif mainPanel == 'turnPanel':
-            arg1 = float(getInfo(tuZFeed))
-        elif mainPanel == 'facePanel':
-            arg1 = float(getInfo(faXFeed))
+        panel = getInfo(mainPanel)
+        if panel == 'threadPanel':
+            arg1 = getFloatInfo(thPitch)
+        elif panel == 'turnPanel':
+            arg1 = getFloatInfo(tuZFeed)
+        elif panel == 'facePanel':
+            arg1 = getFloatInfo(faXFeed)
             zAxis = False
-        elif mainPanel == 'CutoffPanel':
-            arg1 = float(getInfo(cuXFeed))
+        elif panel == 'CutoffPanel':
+            arg1 = getFloatInfo(cuXFeed)
             zAxis = False
-        elif mainPanel == 'taperPanel':
-            arg1 = float(getInfo(tpZFeed))
+        elif panel == 'taperPanel':
+            arg1 = getFloatInfo(tpZFeed)
 
-        maxRPM = float(getInfo(spMaxRPM)) # maximum rpm
+        maxRPM = getFloatInfo(spMaxRPM) # maximum rpm
 
-        spindleMicroSteps = int(getInfo(spMicroSteps))
-        spindleMotorSteps = int(getInfo(spMotorSteps))
+        spindleMicroSteps = getIntInfo(spMicroSteps)
+        spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
+        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev)
         
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
@@ -5000,15 +5000,15 @@ class SyncTest(object):
         dbgPrt(txt, "", ())
 
         if zAxis:
-            zPitch = float(getInfo(zPitch))
-            zMicroSteps = float(getInfo(zMicroSteps))
-            zMotorSteps = float(getInfo(zMotorSteps))
-            zMotorRatio = float(getInfo(zMotorRatio))
+            zPitch = getFloatInfo(zPitch)
+            zMicroSteps = getFloatInfo(zMicroSteps)
+            zMotorSteps = getFloatInfo(zMotorSteps)
+            zMotorRatio = getFloatInfo(zMotorRatio)
         else:
-            zPitch = float(getInfo(xPitch))
-            zMicroSteps = float(getInfo(xMicroSteps))
-            zMotorSteps = float(getInfo(xMotorSteps))
-            zMotorRatio = float(getInfo(xMotorRatio))
+            zPitch = getFloatInfo(xPitch)
+            zMicroSteps = getFloatInfo(xMicroSteps)
+            zMotorSteps = getFloatInfo(xMotorSteps)
+            zMotorRatio = getFloatInfo(xMotorRatio)
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
@@ -5187,11 +5187,11 @@ class TaperTest(object):
         txt.SetValue("")
         f = open('taper.txt','w')
         
-        maxRPM = float(getInfo(spMaxRPM)) # maximum rpm
-        spindleMicroSteps = int(getInfo(spMicroSteps))
-        spindleMotorSteps = int(getInfo(spMotorSteps))
+        maxRPM = getFloatInfo(spMaxRPM) # maximum rpm
+        spindleMicroSteps = getIntInfo(spMicroSteps)
+        spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
+        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev)
 
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
@@ -5202,22 +5202,22 @@ class TaperTest(object):
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
-        zPitch = float(getInfo(zPitch))
-        zMicroSteps = float(getInfo(zMicroSteps))
-        zMotorSteps = float(getInfo(zMotorSteps))
-        zMotorRatio = float(getInfo(zMotorRatio))
+        zPitch = getFloatInfo(zPitch)
+        zMicroSteps = getFloatInfo(zMicroSteps)
+        zMotorSteps = getFloatInfo(zMotorSteps)
+        zMotorRatio = getFloatInfo(zMotorRatio)
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
-        xPitch = float(getInfo(xPitch))
-        xMicroSteps = float(getInfo(xMicroSteps))
-        xMotorSteps = float(getInfo(xMotorSteps))
-        xMotorRatio = float(getInfo(xMotorRatio))
+        xPitch = getFloatInfo(xPitch)
+        xMicroSteps = getFloatInfo(xMicroSteps)
+        xMotorSteps = getFloatInfo(xMotorSteps)
+        xMotorRatio = getFloatInfo(xMotorRatio)
         xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / xPitch)
-        dbgPrt(txt,"xStepsInch %d", (xStepsInch))
+        dbgPrt(txt,"xStepsInch %d", (xStepsInch)
 
-        pitch = float(getInfo(tpZFeed))
+        pitch = getFloatInfo(tpZFeed)
         revCycle = int(1.0 / pitch + 0.5)
         if revCycle > 20:
             revCycle = 20
@@ -5233,8 +5233,8 @@ class TaperTest(object):
         dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
-        arg2 = float(getInfo(tpZDelta))
-        arg3 = float(getInfo(tpXDelta))
+        arg2 = getFloatInfo(tpZDelta))
+        arg3 = getFloatInfo(tpXDelta))
         
         d0 = arg2
         d1 = arg3
@@ -5282,17 +5282,17 @@ class MoveTest(object):
         
         f = open('move.txt','w')
 
-        zPitch = float(getInfo(zPitch))
-        zMicroSteps = float(getInfo(zMicroSteps))
-        zMotorSteps = float(getInfo(zMotorSteps))
-        zMotorRatio = float(getInfo(zMotorRatio))
+        zPitch = getFloatInfo(zPitch)
+        zMicroSteps = getFloatInfo(zMicroSteps)
+        zMotorSteps = getFloatInfo(zMotorSteps)
+        zMotorRatio = getFloatInfo(zMotorRatio)
 
         zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
         
-        zMinSpeed = float(getInfo(zMinSpeed)) # minimum speed ipm
-        zMaxSpeed = float(getInfo(zMaxSpeed)) # maximum speed ipm
-        zMoveAccelTime = float(getInfo(zAccel)) # accel time seconds
+        zMinSpeed = getFloatInfo(zMinSpeed) # minimum speed ipm
+        zMaxSpeed = getFloatInfo(zMaxSpeed) # maximum speed ipm
+        zMoveAccelTime = getFloatInfo(zAccel) # accel time seconds
         dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (zMinSpeed, zMaxSpeed, zMoveAccelTime))
         
