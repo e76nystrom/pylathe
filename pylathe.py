@@ -178,7 +178,7 @@ def getInitialInfo(key):
         stdout.flush()
         return(False)
 
-from setup import createConfig, createCommands, createParameters,\
+from setup import createConfig, createCommands, createParameters, \
     createCtlBits, createCtlStates
 
 from interface import configList, cmdList, parmList, stateList, regList
@@ -190,6 +190,9 @@ configFile = "config.txt"
 # info = {}
 info = [None for i in range(len(config))]
 readInfo(configFile)
+
+for var in config:
+    from setup import var
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
 
@@ -4046,20 +4049,6 @@ class MainFrame(wx.Frame):
 
         self.jogShuttle = jogShuttle = JogShuttle()
         openSerial(getInfo(commPort), 57600)
-        # global cmds, cmdTable, parms
-        # comm.initGlobals(globals)
-        # comm.cmds = cmds
-        # comm.cmdTable = cmdTable
-        # comm.parms = parms
-        # comm.parmTable = parmTableo
-        # comm.LOADMULTI = LOADMULTI
-        # comm.LOADVAL = LOADVAL
-        # comm.READVAL = READVAL
-        # comm.READDBG = READDBG
-        # comm.LOADXREG = LOADXREG
-        # comm.READXREG = READXREG
-        # comm.QUEMOVE = QUEMOVE
-        # comm.MOVEQUESTATUS = MOVEQUESTATUS
         if XILINX:
             comm.xRegs = xRegs
 
