@@ -18,8 +18,8 @@ def createCommands(cmdList, cLoc, fData=False):
         # jFile = open(jLoc + 'Cmd.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Cmd\n{\n");
-    global cmds, cmdTable
-    cmds = {}
+    global cmdTable
+    # cmds = {}
     cmdTable = []
     index = 0
     for i in range(0, len(cmdList)):
@@ -37,7 +37,7 @@ def createCommands(cmdList, cLoc, fData=False):
                                 (tmp.ljust(32), index, regComment))
                     # jFile.write("%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment))
-                cmds[regName] = (index, action)
+                # cmds[regName] = (index, action)
                 cmdTable.append((regName, action))
                 if regName in globals():
                     print("createCommands %s already defined" % regName)
@@ -71,9 +71,10 @@ def createParameters(parmList, cLoc, fData=False):
         # jFile = open(jLoc + 'Parm.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Parm\n{\n")
-    global parms, parmVars
-    parms = {}
-    val = 0
+    global parmTable, parmVars
+    # parms = {}
+    parmTable = []
+    index = 0
     for i in range(0, len(parmList)):
         data = parmList[i]
         # if not isinstance(data, basestring):
@@ -100,23 +101,25 @@ def createParameters(parmList, cLoc, fData=False):
             if fData:
                 tmp = " %s, " % (regName)
                 cFile.write("%s/* 0x%02x %s */\n" % 
-                            (tmp.ljust(32), val, regComment))
+                            (tmp.ljust(32), index, regComment))
                 # tmp = " PARM(%s, %s), " % (varName, regAct)
                 tmp = " PARM(%s), " % (varName)
                 c1File.write("%s/* 0x%02x %s */\n" % 
-                             (tmp.ljust(32), val, regComment))
+                             (tmp.ljust(32), index, regComment))
                 tmp = " EXT %s %s;" % (varType, varName)
                 c2File.write("%s/* 0x%02x %s */\n" % 
-                             (tmp.ljust(32), val, regComment))
+                             (tmp.ljust(32), index, regComment))
                 tmp = "  %s, " % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment))
-            parms[regName] = (val, varType, varName)
+                #             (tmp.ljust(32), index, regComment))
+            # parms[regName] = (index, varType, varName)
+            parmTable.append(regName, varType, varName)
             if regName in globals():
                 print("createParameters %s already defined" % regName)
             else:
-                globals()[regName] = regName
-            val += 1
+                # globals()[regName] = regName
+                globals()[regName] = index
+            index += 1
         else:
             if fData:
                 cFile.write("\n// %s\n\n" % (data))
