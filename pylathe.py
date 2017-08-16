@@ -4319,11 +4319,11 @@ class MainFrame(wx.Frame):
         # if not key in info:
         if info[key] == None:
             initInfo(key, InfoValue('turnPanel'))
-        panel = getInfo(key)
+        showPanel = getInfo(key)
 
         for key in self.panels:
             panel = self.panels[key]
-            if key == panel:
+            if key == showPanel:
                 panel.Show()
             else:
                 panel.Hide()
