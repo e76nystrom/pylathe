@@ -6,12 +6,12 @@ import serial
 from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
     LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
-from pylathe import getInitialInfo
+# from pylathe import getInitialInfo
 
-XILINX = getInitialInfo(cfgXilinx)
+# XILINX = getInitialInfo(cfgXilinx)
 
-if XILINX:
-    from setup import xRegTable
+# if XILINX:
+#     from setup import xRegTable
 
 ser = None
 timeout = False
