@@ -4312,14 +4312,15 @@ class MainFrame(wx.Frame):
         self.showDialog(self.configDialog)
 
     def showPanel(self):
-        key = 'mainPanel'
-        if not key in info:
+        key = mainPanel
+        # if not key in info:
+        if info[key] == None:
             initInfo(key, InfoValue('turnPanel'))
-        mainPanel = getInfo(key)
+        panel = getInfo(key)
 
         for key in self.panels:
             panel = self.panels[key]
-            if key == mainPanel:
+            if key == panel:
                 panel.Show()
             else:
                 panel.Hide()
