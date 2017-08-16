@@ -10,8 +10,6 @@ ser = None
 timeout = False
 commLock = Lock()
 
-# cmds = None
-# parms = None
 xRegs = None
 xDbgPrint = True
 SWIG = False
