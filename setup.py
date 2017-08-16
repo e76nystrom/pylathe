@@ -38,7 +38,7 @@ def createCommands(cmdList, cLoc, fData=False):
                     # jFile.write("%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment))
                 cmds[regName] = (index, action)
-                cmdTable.append((action))
+                cmdTable.append((regName, action))
                 if regName in globals():
                     print("createCommands %s already defined" % regName)
                 else:
