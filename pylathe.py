@@ -275,12 +275,12 @@ def fieldList(panel, sizer, fields):
         else:
             addField(panel, sizer, label, index)
 
-def addFieldText(panel, sizer, label, key):
+def addFieldText(panel, sizer, label, key, keyText):
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                   border=2)
-        initInfo(key + 'Text', txt)
+        initInfo(keyText, txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
@@ -1817,9 +1817,10 @@ class TaperPanel(wx.Panel):
         # x parameters
 
         self.largeDiam = addFieldText(self, sizerG, "Large Diam", \
-                                      tpLargeDiam)
+                                      tpLargeDiam, tpLargDiamText)
 
-        self.smallDiam = addFieldText(self, sizerG, "Small Diam", tpSmallDiam)
+        self.smallDiam = addFieldText(self, sizerG, "Small Diam", \
+                                      tpSmallDiam, tpSmallDiamText)
 
         self.xInFeed = addField(self, sizerG, "X In Feed R", tpXInFeed)
 
