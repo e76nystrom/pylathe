@@ -980,30 +980,30 @@ class TurnPanel(wx.Panel):
 
         self.zEnd = addField(self, sizerG, "Z End", tuZEnd)
         
-        self.zStart = addField(self, sizerG, "Z Start", "tuZStart")
+        self.zStart = addField(self, sizerG, "Z Start", tuZStart)
 
-        self.zFeed = addField(self, sizerG, "Z Feed", "tuZFeed")
+        self.zFeed = addField(self, sizerG, "Z Feed", tuZFeed)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", "tuZRetract")
+        self.zRetract = addField(self, sizerG, "Z Retract", tuZRetract)
 
         # x parameters
 
-        self.xStart = addField(self, sizerG, "X Start D", "tuXStart")
+        self.xStart = addField(self, sizerG, "X Start D", tuXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", "tuXEnd")
+        self.xEnd = addField(self, sizerG, "X End D", tuXEnd)
 
-        self.xFeed = addField(self, sizerG, "X Feed D", "tuXFeed")
+        self.xFeed = addField(self, sizerG, "X Feed D", tuXFeed)
 
-        self.xRetract = addField(self, sizerG, "X Retract", "tuXRetract")
+        self.xRetract = addField(self, sizerG, "X Retract", tuXRetract)
 
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", "tuPasses")
+        self.passes = addField(self, sizerG, "Passes", tuPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", "tuSPInt")
+        self.sPInt = addField(self, sizerG, "SP Int", tuSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", "tuSpring")
+        self.spring = addField(self, sizerG, "Spring", tuSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
