@@ -627,8 +627,8 @@ def sendSpindleData(send=False, rpm=None):
                 queParm(SP_JOG_MIN_RPM, getInfo(spJogMin))
                 queParm(SP_JOG_MAX_RPM, getInfo(spJogMax))
                 # queParm(SP_JOG_ACCEL_TIME, getInfo(spAccelTime))
-                queParm(SP_DIR_FLAG, getBoolinfo(spInvDir))
-                queParm(SP_TEST_INDEX, getBoolinfo(spTestIndex))
+                queParm(SP_DIR_FLAG, getBoolInfo(spInvDir))
+                queParm(SP_TEST_INDEX, getBoolInfo(spTestIndex))
                 command(CMD_SPSETUP)
             elif XILINX:
                 queParm(ENC_MAX, getInfo(cfgEncoder))
@@ -637,11 +637,11 @@ def sendSpindleData(send=False, rpm=None):
                 xilinxTestMode()
                 queParm(RPM, getInfo(cfgTestRPM))
                 cfgReg = 0
-                if getBoolinfo(cfgInvEncDir):
+                if getBoolInfo(cfgInvEncDir):
                     cfgReg |= ENC_POL
-                if getBoolinfo(zInvDir):
+                if getBoolInfo(zInvDir):
                     cfgReg |= ZDIR_POL
-                if getBoolinfo(xInvDir):
+                if getBoolInfo(xInvDir):
                     cfgReg |= XDIR_POL
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
@@ -655,13 +655,13 @@ def sendZData(send=False):
     try:
         if send or (not zDataSent):
             pitch = getFloatInfo(zPitch)
-            motorSteps = getIntinfo(zMotorSteps)
-            microSteps = getIntinfo(zMicroSteps)
+            motorSteps = getIntInfo(zMotorSteps)
+            microSteps = getIntInfo(zMicroSteps)
             motorRatio = getFloatInfo(zMotorRatio)
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.zDROInch = getIntinfo(zDROInch)
-            jogPanel.zDROInvert = getBoolinfo(zInvDRO) == 1
+            jogPanel.zDROInch = getIntInfo(zDROInch)
+            jogPanel.zDROInvert = getBoolInfo(zInvDRO) == 1
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -685,8 +685,8 @@ def sendZData(send=False):
             queParm(Z_JOG_MIN, getInfo(zJogMin))
             queParm(Z_JOG_MAX, getInfo(zJogMax))
 
-            queParm(Z_DIR_FLAG, getBoolinfo(zInvDir))
-            queParm(Z_MPG_FLAG, getBoolinfo(zInvMpg))
+            queParm(Z_DIR_FLAG, getBoolInfo(zInvDir))
+            queParm(Z_MPG_FLAG, getBoolInfo(zInvMpg))
                 
             command(CMD_ZSETUP)
             zDataSent = True
@@ -702,13 +702,13 @@ def sendXData(send=False):
     try:
         if send or (not xDataSent):
             pitch = getFloatInfo(xPitch)
-            motorSteps = getIntinfo(xMotorSteps)
-            microSteps = getIntinfo(xMicroSteps)
+            motorSteps = getIntInfo(xMotorSteps)
+            microSteps = getIntInfo(xMicroSteps)
             motorRatio = getFloatInfo(xMotorRatio)
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
-            jogPanel.xDROInch = getIntinfo(xDROInch)
-            jogPanel.xDROInvert = getBoolinfo(xInvDRO) == 1
+            jogPanel.xDROInch = getIntInfo(xDROInch)
+            jogPanel.xDROInvert = getBoolInfo(xInvDRO) == 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -731,8 +731,8 @@ def sendXData(send=False):
             queParm(X_JOG_MIN, getInfo(xJogMin))
             queParm(X_JOG_MAX, getInfo(xJogMax))
 
-            queParm(X_DIR_FLAG, getBoolinfo(xInvDir))
-            queParm(X_MPG_FLAG, getBoolinfo(xInvMpg))
+            queParm(X_DIR_FLAG, getBoolInfo(xInvDir))
+            queParm(X_MPG_FLAG, getBoolInfo(xInvMpg))
 
             global HOME_TEST
             if HOME_TEST:
@@ -895,7 +895,7 @@ class Turn(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntinfo(tuRPM))
+            m.startSpindle(getIntInfo(tuRPM))
             m.queFeedType(FEED_PITCH)
             m.zSynSetup(getFloatInfo(tuZFeed))
         else:
@@ -1141,7 +1141,7 @@ class Face(UpdatePass):
         m.setLoc(self.zStart, self.safeX)
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntinfo(faRPM))
+            m.startSpindle(getIntInfo(faRPM))
             m.queFeedType(FEED_PITCH)
             m.xSynSetup(getFloatInfo(faXFeed))
         else:
@@ -1359,7 +1359,7 @@ class Cutoff():
         m = self.m
         m.quePause()
         if STEPPER_DRIVE:
-            m.startSpindle(getIntinfo(cuRPM))
+            m.startSpindle(getIntInfo(cuRPM))
             m.queFeedType(FEED_PITCH)
             m.xSynSetup(getFloatInfo(cuXFeed))
         else:
@@ -1559,7 +1559,7 @@ class Taper(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         m.saveTaper(self.taper)
-        m.startSpindle(getIntinfo(tpRPM))
+        m.startSpindle(getIntInfo(tpRPM))
         m.queFeedType(FEED_PITCH)
         m.zSynSetup(getFloatInfo(tpZFeed))
         if self.taperX:
@@ -2164,7 +2164,7 @@ class ScrewThread(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
-        m.startSpindle(getIntinfo(thRPM))
+        m.startSpindle(getIntInfo(thRPM))
         feedType = FEED_TPI
         if self.threadPanel.mm.GetValue():
             feedType = FEED_METRIC
@@ -3447,7 +3447,7 @@ class PosMenu(wx.Menu):
         queParm(X_HOME_DIST, getInfo(xHomeDist))
         queParm(X_HOME_BACKOFF_DIST, getInfo(xHomeBackoffDist))
         queParm(X_HOME_SPEED, getInfo(xHomeSpeed))
-        val = (-1, 1)[getBoolinfo(xHomeDir)]
+        val = (-1, 1)[getBoolInfo(xHomeDir)]
         queParm(X_HOME_DIR, val)
         command(XHOMEAXIS)
         jogPanel.probe(HOME_X)
@@ -3671,7 +3671,7 @@ class ProbeDialog(wx.Dialog):
     def probeZ(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm(PROBE_INV, getBoolinfo(cfgPrbInv))
+        queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
         queParm(Z_PROBE_SPEED, getInfo(zProbeSpeed))
         queParm(Z_HOME_STATUS, '0');
         sendMulti()
@@ -3683,7 +3683,7 @@ class ProbeDialog(wx.Dialog):
     def probeX(self, probeLoc):
         global jogPanel, moveCommands
         moveCommands.queClear()
-        queParm(PROBE_INV, getBoolinfo(cfgPrbInv))
+        queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
         queParm(X_HOME_SPEED, getInfo(xHomeSpeed))
         queParm(X_HOME_STATUS, '0');
         sendMulti()
@@ -4078,9 +4078,9 @@ class MainFrame(wx.Frame):
                 queParm(Z_HOME_OFFSET, zHomeOffset)
                 queParm(X_HOME_OFFSET, xHomeOffset)
                 queParm(X_HOME_STATUS, (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
-                val = (-1, 1)[getBoolinfo(zInvDRO)]
+                val = (-1, 1)[getBoolInfo(zInvDRO)]
                 queParm(Z_DRO_DIR, val)
-                val = (-1, 1)[getBoolinfo(xInvDRO)]
+                val = (-1, 1)[getBoolInfo(xInvDRO)]
                 queParm(X_DRO_DIR, val)
                 sendMulti()
                 sendSpindleData()
