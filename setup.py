@@ -6,12 +6,15 @@ xRegs = None
 importList = []
 
 def createConfig(config, configList):
+    global configTable
+    configTable = []
     for i, (name, comment) in enumerate(configList):
         config[name] = i
         if name in globals():
             print("createConfig %s already defined" % name)
         else:
             globals()[name] = i
+            configTable.append(name)
             importList.append(name)
 
 def createCommands(cmdList, cLoc, fData=False):
