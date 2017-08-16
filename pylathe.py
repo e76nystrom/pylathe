@@ -5211,10 +5211,10 @@ class TaperTest(object):
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
         pitch = getFloatInfo(xPitch)
-        xMicroSteps = getFloatInfo(xMicroSteps)
-        xMotorSteps = getFloatInfo(xMotorSteps)
-        xMotorRatio = getFloatInfo(xMotorRatio)
-        xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / pitch)
+        microSteps = getFloatInfo(xMicroSteps)
+        motorSteps = getFloatInfo(xMotorSteps)
+        motorRatio = getFloatInfo(xMotorRatio)
+        xStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt,"xStepsInch %d", (xStepsInch))
 
         pitch = getFloatInfo(tpZFeed)
