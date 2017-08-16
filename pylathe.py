@@ -5233,8 +5233,8 @@ class TaperTest(object):
         dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
-        arg2 = getFloatInfo(tpZDelta))
-        arg3 = getFloatInfo(tpXDelta))
+        arg2 = getFloatInfo(tpZDelta)
+        arg3 = getFloatInfo(tpXDelta)
         
         d0 = arg2
         d1 = arg3
