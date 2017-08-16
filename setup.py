@@ -10,7 +10,6 @@ def createConfig(config, configList):
             print("createConfig %s already defined" % name)
         else:
             globals()[name] = name
-            print("%s" % name)
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
