@@ -3,6 +3,8 @@ cmds = None
 parms = None
 xRegs = None
 
+importList = []
+
 def createConfig(config, configList):
     for i, (name, comment) in enumerate(configList):
         config[name] = i
@@ -10,6 +12,7 @@ def createConfig(config, configList):
             print("createConfig %s already defined" % name)
         else:
             globals()[name] = i
+            importList.append(name)
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
@@ -44,6 +47,7 @@ def createCommands(cmdList, cLoc, fData=False):
                 else:
                     # globals()[regName] = regName
                     globals()[regName] = index
+                    importList.append(regName)
                 index += 1
         else:
             if fData:
@@ -119,6 +123,7 @@ def createParameters(parmList, cLoc, fData=False):
             else:
                 # globals()[regName] = regName
                 globals()[regName] = index
+                importList.append(regName)
             index += 1
         else:
             if fData:
@@ -160,6 +165,7 @@ def createCtlStates(stateList, cLoc, fData=False):
                 print("createCtlStates %s already defined" % state)
             else:
                 globals()[state] = val
+                importList.append(state)
             val += 1
         else:
             if fData:
@@ -206,6 +212,7 @@ def createCtlBits(regList, cLoc, fData=False):
                 print("createctlBits %s already defined" % var)
             else:
                 globals()[var] = eval(val)
+                importList.append(var)
         else:
             if fData:
                 cFile.write("\n// %s\n\n" % (data))
@@ -342,6 +349,7 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     print("createXilinxBits %s already defined" % cVar)
                 else:
                     globals()[cVar] = bit << shift
+                    importList.append(cVar)
                 lastShift = shift
         else:
             if fData:
@@ -377,6 +385,7 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                         print("createXilinxBits %s already defined" % var)
                     else:
                         globals()[var] = maxShift + 1
+                        importList.append(var)
     if fData:
         cFile.close()
         if xFile:
