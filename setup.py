@@ -4,12 +4,12 @@ parms = None
 xRegs = None
 
 def createConfig(config, configList):
-    for (name, comment) in configList:
+    for i, (name, comment) in enumerate(configList):
         config[name] = True
         if name in globals():
             print("createConfig %s already defined" % name)
         else:
-            globals()[name] = name
+            globals()[name] = i
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
