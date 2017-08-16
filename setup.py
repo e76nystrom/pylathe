@@ -18,9 +18,10 @@ def createCommands(cmdList, cLoc, fData=False):
         # jFile = open(jLoc + 'Cmd.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Cmd\n{\n");
-    global cmds
+    global cmds, cmdTable
     cmds = {}
-    val = 0
+    cmdTable = []
+    index = 0
     for i in range(0, len(cmdList)):
         data = cmdList[i]
         # if not isinstance(data, basestring):
@@ -33,15 +34,17 @@ def createCommands(cmdList, cLoc, fData=False):
                 if fData:
                     tmp = " %s, " % (regName)
                     cFile.write("%s/* 0x%02x %s */\n" % 
-                                (tmp.ljust(32), val, regComment))
+                                (tmp.ljust(32), index, regComment))
                     # jFile.write("%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), val, regComment))
-                cmds[regName] = (val, action)
+                    #             (tmp.ljust(32), index, regComment))
+                cmds[regName] = (index, action)
+                cmdTable.append((action))
                 if regName in globals():
                     print("createCommands %s already defined" % regName)
                 else:
-                    globals()[regName] = regName
-                val += 1
+                    # globals()[regName] = regName
+                    globals()[regName] = index
+                index += 1
         else:
             if fData:
                 if (len(data) > 0):
