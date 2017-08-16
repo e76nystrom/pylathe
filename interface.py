@@ -11,7 +11,7 @@ configList = \
     ('cfgInvEncDir', 'config xilinx invert encoder direction'),
     ('cfgLCD', 'config enable lcd'),
     ('cfgMPG', 'config enable manual pulse generator'),
-    ('cfgPrbInf', 'config invert probe signal'),
+    ('cfgPrbInv', 'config invert probe signal'),
     ('cfgTestMode', 'conifg test mode'),
     ('cfgTestRPM', 'config xilinx test rpm value'),
     ('cfgXFreq', 'config xilinx frequency'),
