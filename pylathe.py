@@ -4567,7 +4567,7 @@ class SpindleDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("bStepper Drive", 'spStepDrive'), \
+            ("bStepper Drive", spStepDrive), \
         )
         if STEPPER_DRIVE:
             self.fields += (
