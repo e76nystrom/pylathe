@@ -30,11 +30,13 @@ def openSerial(port, rate):
 class commTimeout(Exception):
     pass
 
-def command(cmd):
-    global SWIG, ser, cmds, commLock, timeout, xDbgPrint, parmList, lastCmd
+def command(cmdVal):
+    global SWIG, ser, cmds, cmdTable, commLock, timeout, xDbgPrint, \
+        parmList, lastCmd
     if len(parmList) > 0:
         sendMulti()
-    (cmdVal, action) = cmds[cmd]
+    # (cmdVal, action) = cmds[cmd]
+    (cmd, action) = cmdTable[cmdVal]
     if SWIG and (action != None):
         global importLathe
         if importLathe:
