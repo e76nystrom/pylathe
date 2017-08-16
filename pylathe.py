@@ -194,8 +194,7 @@ readInfo(configFile)
 cmd = "from setup import "
 for var in config:
     cmd += var + ","
-cmd.strip(',')
-exec(cmd)
+exec(cmd[:-1])
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
 
