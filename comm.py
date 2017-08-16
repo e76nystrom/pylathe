@@ -3,14 +3,20 @@ from sys import stdout
 from threading import Thread, Lock, Event
 import serial
 
-from setup import cmdTable, parmTable, LOADMULTI, LOADVAL, READVAL, \
-    READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
+from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
+    LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
+
+from pylathe import getInitialInfo
+
+XILINX = getInitialInfo(cfgXilinx)
+
+if XILINX:
+    from setup import xRegTable
 
 ser = None
 timeout = False
 commLock = Lock()
 
-xRegs = None
 xDbgPrint = True
 SWIG = False
 importLathe = True
@@ -350,14 +356,14 @@ def setXRegN(reg, val):
     commLock.release()
 
 def getXReg(reg):
-    global ser, xRegs, commLock, timeout
+    global ser, xRegTable, commLock, timeout
     if ser is None:
         return(0)
-    if not (reg in xRegs):
-        print("invalid register " + reg)
-        return(0);
+    # if not (reg in xRegs):
+    #     print("invalid register " + reg)
+    #     return(0);
     # cmd = '\x01%x %x \r' % (cmds['READXREG'][0], xRegs[reg])
-    cmd = '\x01%x %x \r' % (READXREG, xRegs[reg])
+    cmd = '\x01%x %x \r' % (READXREG, reg)
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
