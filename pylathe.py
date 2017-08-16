@@ -5296,7 +5296,7 @@ class MoveTest(object):
         dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (minSpeed, maxSpeed, zMoveAccelTime))
         
-        zMStepsSec = int((zMaxSpeed * zStepsInch) / 60.0)
+        zMStepsSec = int((maxSpeed * zStepsInch) / 60.0)
         zMClocksStep = int(fcy / zMStepsSec)
         dbgPrt(txt,"zMStepsSec %d zMClocksStep %d", (zMStepsSec, zMClocksStep))
         
