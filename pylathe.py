@@ -1788,7 +1788,7 @@ class TaperPanel(wx.Panel):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
-        initinfo(tpTaperSel', combo)
+        initinfo(tpTaperSel, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -1823,7 +1823,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        initinfo(tpDeltaBtn', btn)
+        initinfo(tpDeltaBtn, btn)
 
         self.zDelta = addField(self, sizerG, "", "tpZDelta")
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -1835,7 +1835,7 @@ class TaperPanel(wx.Panel):
         sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
                    border=2)
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        initinfo(tpAngleBtn', btn)
+        initinfo(tpAngleBtn, btn)
 
         self.angle = addField(self, sizerG, "", "tpAngle")
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
