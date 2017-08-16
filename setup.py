@@ -113,7 +113,7 @@ def createParameters(parmList, cLoc, fData=False):
                 # jFile.write("%s/* 0x%02x %s */\n" % 
                 #             (tmp.ljust(32), index, regComment))
             # parms[regName] = (index, varType, varName)
-            parmTable.append(regName, varType, varName)
+            parmTable.append((regName, varType, varName))
             if regName in globals():
                 print("createParameters %s already defined" % regName)
             else:
