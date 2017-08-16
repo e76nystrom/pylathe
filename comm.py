@@ -6,13 +6,6 @@ import serial
 from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
     LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
-from configInfo import getInitialInfo
-
-XILINX = getInitialInfo(cfgXilinx)
-
-if XILINX:
-    from setup import xRegTable
-
 ser = None
 timeout = False
 commLock = Lock()
@@ -25,6 +18,9 @@ lastCmd = ''
 cmdOverhead = 8
 parmList = []
 cmdLen = cmdOverhead
+
+def enableXilinx():
+    from setup import xRegTable
 
 def openSerial(port, rate):
     global ser
