@@ -4166,7 +4166,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = mainPanel
         # if not key in info:
-        if info[key] == None:
+        if configInfo.info[key] == None:
             initInfo(key, InfoValue('turnPanel'))
         showPanel = getInfo(key)
 
