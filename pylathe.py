@@ -192,7 +192,8 @@ info = [None for i in range(len(config))]
 readInfo(configFile)
 
 for var in config:
-    from setup import var
+    cmd = "from setup import " + var
+    exec(cmd)
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
 
