@@ -151,7 +151,7 @@ def addField(panel, sizer, label, key):
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
-    if key in config.info:
+    if key in configInfo.info:
         val = getInfo(key)
         tc.SetValue(val)
     initInfo(key, tc)
@@ -165,7 +165,7 @@ def addCheckBox(panel, sizer, label, key):
 
     cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
     sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-    if key in info:
+    if key in configInfo.info:
         val = getInfo(key)
         cb.SetValue(val == 'True')
     initInfo(key, cb)
