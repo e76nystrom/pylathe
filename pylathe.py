@@ -36,7 +36,6 @@ createConfig(config, configList)
 
 configFile = "config.txt"
 
-info = [None for i in range(len(config))]
 readInfo(configFile, config)
 
 from setup import cfgXilinx, cfgDRO, spStepDrive
