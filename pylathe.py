@@ -903,7 +903,8 @@ class TurnPanel(wx.Panel):
         self.sizerV.Fit(self)
 
     def config(self):
-        ('tuAddFeed',    ('tuPasses', 'turn '),
+        ('tuAddFeed',
+         ('tuPasses', 'turn '),
     ('tuPause', 'turn '),
     ('tuRPM', 'turn '),
     ('tuSPInt', 'turn '),
