@@ -5000,17 +5000,17 @@ class SyncTest(object):
         dbgPrt(txt, "", ())
 
         if zAxis:
-            zPitch = getFloatInfo(zPitch)
+            pitch = getFloatInfo(zPitch)
             zMicroSteps = getFloatInfo(zMicroSteps)
             zMotorSteps = getFloatInfo(zMotorSteps)
             zMotorRatio = getFloatInfo(zMotorRatio)
         else:
-            zPitch = getFloatInfo(xPitch)
+            pitch = getFloatInfo(xPitch)
             zMicroSteps = getFloatInfo(xMicroSteps)
             zMotorSteps = getFloatInfo(xMotorSteps)
             zMotorRatio = getFloatInfo(xMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
+        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
         if arg1 >= 8:
@@ -5202,19 +5202,19 @@ class TaperTest(object):
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
-        zPitch = getFloatInfo(zPitch)
+        pitch = getFloatInfo(zPitch)
         zMicroSteps = getFloatInfo(zMicroSteps)
         zMotorSteps = getFloatInfo(zMotorSteps)
         zMotorRatio = getFloatInfo(zMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / zPitch)
+        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
-        xPitch = getFloatInfo(xPitch)
+        pitch = getFloatInfo(xPitch)
         xMicroSteps = getFloatInfo(xMicroSteps)
         xMotorSteps = getFloatInfo(xMotorSteps)
         xMotorRatio = getFloatInfo(xMotorRatio)
-        xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / xPitch)
+        xStepsInch = ((xMicroSteps * xMotorSteps * xMotorRatio) / pitch)
         dbgPrt(txt,"xStepsInch %d", (xStepsInch))
 
         pitch = getFloatInfo(tpZFeed)
