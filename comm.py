@@ -3,7 +3,8 @@ from sys import stdout
 from threading import Thread, Lock, Event
 import serial
 
-from setup import cmdTable, parmTable
+from setup import cmdTable, parmTable, LOADMULTI, LOADVAL, READVAL, \
+    READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
 ser = None
 timeout = False
@@ -20,9 +21,6 @@ lastCmd = ''
 cmdOverhead = 8
 parmList = []
 cmdLen = cmdOverhead
-
-def initGlobals(pyLathe):
-    cmdTable = pyLathe('cmds')
 
 def openSerial(port, rate):
     global ser
