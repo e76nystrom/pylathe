@@ -13,6 +13,9 @@ class InfoValue():
     def SetValue(self, val):
         self.value = val
 
+def clrInfo(size)
+    info = [None for i in range(size)]
+
 def saveInfo(file):
     global info, config
     f = open(file, 'w')
@@ -38,7 +41,6 @@ def saveInfo(file):
 
 def readInfo(file, config):
     global info
-    info = [None for i in range(len(config))]
     try:
         f = open(file, 'r')
         for line in f:
