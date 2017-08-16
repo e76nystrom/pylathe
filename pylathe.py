@@ -22,7 +22,8 @@ if windows:
 HOME_TEST = False
 dbg = None
 
-from info import info, InfoValue, saveInfo, readInfo, initInfo, newInfo, \
+import configInfo
+from configInfo import InfoValue, saveInfo, readInfo, initInfo, newInfo, \
     setInfo, getInfo, getBoolInfo, getFloatInfo, getIntInfo, infoSetLabel, \
     getInitialInfo, clrInfo
 
@@ -4102,7 +4103,7 @@ class MainFrame(wx.Frame):
 
         for (key, var) in vars:
             exec('global ' + var)
-            if not key in info:
+            if not key in configInfo.info:
                newInfo(key, "%0.4f" % (eval(var)))
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
