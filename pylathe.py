@@ -5203,11 +5203,11 @@ class TaperTest(object):
         dbgPrt(txt, "", ())
 
         pitch = getFloatInfo(zPitch)
-        zMicroSteps = getFloatInfo(zMicroSteps)
-        zMotorSteps = getFloatInfo(zMotorSteps)
-        zMotorRatio = getFloatInfo(zMotorRatio)
+        microSteps = getFloatInfo(zMicroSteps)
+        motorSteps = getFloatInfo(zMotorSteps)
+        motorRatio = getFloatInfo(zMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
+        zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
 
         pitch = getFloatInfo(xPitch)
@@ -5283,18 +5283,18 @@ class MoveTest(object):
         f = open('move.txt','w')
 
         pitch = getFloatInfo(zPitch)
-        zMicroSteps = getFloatInfo(zMicroSteps)
-        zMotorSteps = getFloatInfo(zMotorSteps)
-        zMotorRatio = getFloatInfo(zMotorRatio)
+        microSteps = getFloatInfo(zMicroSteps)
+        motorSteps = getFloatInfo(zMotorSteps)
+        motorRatio = getFloatInfo(zMotorRatio)
 
-        zStepsInch = ((zMicroSteps * zMotorSteps * zMotorRatio) / pitch)
+        zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
         
-        zMinSpeed = getFloatInfo(zMinSpeed) # minimum speed ipm
-        zMaxSpeed = getFloatInfo(zMaxSpeed) # maximum speed ipm
+        minSpeed = getFloatInfo(zMinSpeed) # minimum speed ipm
+        maxSpeed = getFloatInfo(zMaxSpeed) # maximum speed ipm
         zMoveAccelTime = getFloatInfo(zAccel) # accel time seconds
         dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
-               (zMinSpeed, zMaxSpeed, zMoveAccelTime))
+               (minSpeed, maxSpeed, zMoveAccelTime))
         
         zMStepsSec = int((zMaxSpeed * zStepsInch) / 60.0)
         zMClocksStep = int(fcy / zMStepsSec)
