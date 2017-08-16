@@ -151,7 +151,7 @@ def addField(panel, sizer, label, key):
 
     tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
     sizer.Add(tc, flag=wx.ALL, border=2)
-    if key in info:
+    if key in config.info:
         val = getInfo(key)
         tc.SetValue(val)
     initInfo(key, tc)
