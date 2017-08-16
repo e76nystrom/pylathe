@@ -654,10 +654,10 @@ def sendZData(send=False):
     global zDataSent, jogPanel
     try:
         if send or (not zDataSent):
-            pitch = getFloatinfo(zPitch)
+            pitch = getFloatInfo(zPitch)
             motorSteps = getIntinfo(zMotorSteps)
             microSteps = getIntinfo(zMicroSteps)
-            motorRatio = getFloatinfo(zMotorRatio)
+            motorRatio = getFloatInfo(zMotorRatio)
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.zDROInch = getIntinfo(zDROInch)
@@ -701,10 +701,10 @@ def sendXData(send=False):
     global xDataSent, jogPanel
     try:
         if send or (not xDataSent):
-            pitch = getFloatinfo(xPitch)
+            pitch = getFloatInfo(xPitch)
             motorSteps = getIntinfo(xMotorSteps)
             microSteps = getIntinfo(xMicroSteps)
-            motorRatio = getFloatinfo(xMotorRatio)
+            motorRatio = getFloatInfo(xMotorRatio)
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.xDROInch = getIntinfo(xDROInch)
@@ -737,8 +737,8 @@ def sendXData(send=False):
             global HOME_TEST
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
-                start = str(int(getFloatinfo(xHomeStart) * stepsInch))
-                end = str(int(getFloatinfo(xHomeEnd) * stepsInch))
+                start = str(int(getFloatInfo(xHomeStart) * stepsInch))
+                end = str(int(getFloatInfo(xHomeEnd) * stepsInch))
                 if end > start:
                     (start, end) = (end, start)
                 queParm(X_HOME_START, start)
@@ -897,9 +897,9 @@ class Turn(UpdatePass):
         if STEPPER_DRIVE:
             m.startSpindle(getIntinfo(tuRPM))
             m.queFeedType(FEED_PITCH)
-            m.zSynSetup(getFloatinfo(tuZFeed))
+            m.zSynSetup(getFloatInfo(tuZFeed))
         else:
-            m. queZSetup(getFloatinfo(tuZFeed))
+            m. queZSetup(getFloatInfo(tuZFeed))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
         m.text("%7.3f" % (self.xStart * 2.0), \
@@ -1143,9 +1143,9 @@ class Face(UpdatePass):
         if STEPPER_DRIVE:
             m.startSpindle(getIntinfo(faRPM))
             m.queFeedType(FEED_PITCH)
-            m.xSynSetup(getFloatinfo(faXFeed))
+            m.xSynSetup(getFloatInfo(faXFeed))
         else:
-            m.queXSetup(getFloatinfo(faxFeed))
+            m.queXSetup(getFloatInfo(faxFeed))
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
         m.text("%7.3f" % (self.zStart), \
@@ -1361,9 +1361,9 @@ class Cutoff():
         if STEPPER_DRIVE:
             m.startSpindle(getIntinfo(cuRPM))
             m.queFeedType(FEED_PITCH)
-            m.xSynSetup(getFloatinfo(cuXFeed))
+            m.xSynSetup(getFloatInfo(cuXFeed))
         else:
-            m.queXSetup(getFloatinfo(cuXFeed))
+            m.queXSetup(getFloatInfo(cuXFeed))
         m.moveX(self.safeX)
         m.moveZ(self.zCutoff)
         m.moveX(self.xStart)
@@ -1561,9 +1561,9 @@ class Taper(UpdatePass):
         m.saveTaper(self.taper)
         m.startSpindle(getIntinfo(tpRPM))
         m.queFeedType(FEED_PITCH)
-        m.zSynSetup(getFloatinfo(tpZFeed))
+        m.zSynSetup(getFloatInfo(tpZFeed))
         if self.taperX:
-            m.xSynSetup(getFloatinfo(tpXInFeed))
+            m.xSynSetup(getFloatInfo(tpXInFeed))
         else:
             pass
         m.moveX(self.safeX)
@@ -2169,10 +2169,10 @@ class ScrewThread(UpdatePass):
         if self.threadPanel.mm.GetValue():
             feedType = FEED_METRIC
         m.queFeedType(feedType)
-        m.saveTaper(getFloatinfo(thXTaper))
-        m.saveRunout(getFloatinfo(thExitRev))
+        m.saveTaper(getFloatInfo(thXTaper))
+        m.saveRunout(getFloatInfo(thExitRev))
         m.saveDepth(self.depth)
-        m.zSynSetup(getFloatinfo(thPitch))
+        m.zSynSetup(getFloatInfo(thPitch))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
         zOffset = 0.0
@@ -2521,7 +2521,7 @@ class JogShuttle():
     def setZ(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogZ
-            maxSpeed = getFloatinfo(zMaxSpeed)
+            maxSpeed = getFloatInfo(zMaxSpeed)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set z")
@@ -2530,7 +2530,7 @@ class JogShuttle():
     def setX(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogX
-            maxSpeed = getFloatinfo(xMaxSpeed)
+            maxSpeed = getFloatInfo(xMaxSpeed)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set x")
@@ -2539,7 +2539,7 @@ class JogShuttle():
     def setSpindle(self, button, val):
         if button & val:
             jogShuttle.axisAction = jogShuttle.jogSpindle
-            maxSpeed = getFloatinfo(spMaxRPM)
+            maxSpeed = getFloatInfo(spMaxRPM)
             for val in range(len(jogShuttle.factor)):
                 jogShuttle.spindleSpeed[val] = maxSpeed * jogShuttle.factor[val]
             # print("set spindle")
@@ -3639,10 +3639,10 @@ class ProbeDialog(wx.Dialog):
         if self.IsShown():
             if self.axis == 0:
                 probeLoc = "0.0000"
-                probeDist = getFloatinfo(zProbeDist)
+                probeDist = getFloatInfo(zProbeDist)
             else:
                 probeLoc = jogPanel.xPos.GetValue()
-                probeDist = getFloatinfo(xProbeDist)
+                probeDist = getFloatInfo(xProbeDist)
             self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
             self.probeDist.SetValue("%7.4f" % probeDist)
@@ -4062,10 +4062,10 @@ class MainFrame(wx.Frame):
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
-                    val = int(getFloatinfo(zSvDROPosition) * \
+                    val = int(getFloatInfo(zSvDROPosition) * \
                               jogPanel.zStepsInch)
                     queParm(Z_DRO_POS, val)
-                    val = int(getFloatinfo(xSvDROPosition) * \
+                    val = int(getFloatInfo(xSvDROPosition) * \
                               jogPanel.xStepsInch)
                     queParm(X_DRO_POS, val)
                     queParm(Z_DRO_OFFSET, zDROOffset)
@@ -4073,7 +4073,7 @@ class MainFrame(wx.Frame):
                     queParm(Z_DRO_INCH, jogPanel.zDROInch)
                     queParm(X_DRO_INCH, jogPanel.xDROInch)
                     sendMulti()
-                val = str(int(getFloatinfo(xHomeLoc) * jogPanel.xStepsInch))
+                val = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
                 queParm(X_HOME_LOC, val)
                 queParm(Z_HOME_OFFSET, zHomeOffset)
                 queParm(X_HOME_OFFSET, xHomeOffset)
@@ -4247,7 +4247,7 @@ class MainFrame(wx.Frame):
             if not key in info:
                newInfo(key, "%0.4f" % (eval(var)))
             else:
-                exp = var + ' = getFloatinfo(' + key + ')'
+                exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
@@ -4525,7 +4525,7 @@ class XDialog(wx.Dialog):
 
     def OnSetHomeLoc(self, e):
         global jogPanel
-        loc = str(int(getFloatinfo(xHomeLoc) * jogPanel.xStepsInch))
+        loc = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
         setParm(X_HOME_LOC, loc)
         
     def OnSetup(self, e):
