@@ -2298,11 +2298,11 @@ class ThreadPanel(wx.Panel):
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initInfo(thFinal, bth)
+        # initInfo(thFinal, btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # initInfo(thDepth, bth)
+        # initInfo(thDepth, btn)
 
         #
 
@@ -2314,7 +2314,7 @@ class ThreadPanel(wx.Panel):
 
         self.mm = btn = wx.RadioButton(self, label="mm")
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(thMM, bth)
+        initInfo(thMM, btn)
 
         self.angle = addField(self, sizerG, "Angle", "thAngle")
 
