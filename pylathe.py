@@ -3541,11 +3541,11 @@ class SetPosDialog(wx.Dialog):
             print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
             if zDROPos != None:
                 droPos = float(zDROPos) / jogPanel.zDROInch
-                setinfo(zSvDROPosition, "%0.4f" % (droPos))
+                setInfo(zSvDROPosition, "%0.4f" % (droPos))
                 if jogPanel.zDROInvert:
                     droPos = -droPos
                 zDROOffset = droPos - val
-                setinfo(zSvDROOffset, "%0.4f" % (zDROOffset))
+                setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
@@ -4320,23 +4320,23 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def OnTurn(self, e):
-        setinfo(mainPanel, 'turnPanel')
+        setInfo(mainPanel, 'turnPanel')
         self.showPanel()
 
     def OnFace(self, e):
-        setinfo(mainPanel, 'facePanel')
+        setInfo(mainPanel, 'facePanel')
         self.showPanel()
 
     def OnCutoff(self, e):
-        setinfo(mainPanel, 'cutoffPanel')
+        setInfo(mainPanel, 'cutoffPanel')
         self.showPanel()
 
     def OnTaper(self, e):
-        setinfo(mainPanel, 'taperPanel')
+        setInfo(mainPanel, 'taperPanel')
         self.showPanel()
 
     def OnThread(self, e):
-        setinfo(mainPanel, 'threadPanel')
+        setInfo(mainPanel, 'threadPanel')
         self.showPanel()
 
     def OnTestSpindle(self, e):
