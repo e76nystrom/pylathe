@@ -903,7 +903,7 @@ class TurnPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def configList(self):
+    def getConfigList(self):
         if self.configList == None:
             self.configList = []
             for i, (name) in enumerate(configTable):
@@ -1154,7 +1154,7 @@ class FacePanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def configList(self):
+    def getConfigList(self):
         if self.configList == None:
             self.configList = []
             for i, (name) in enumerate(configTable):
@@ -1317,7 +1317,7 @@ class CutoffPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def configList(self):
+    def getConfigList(self):
         if self.configList == None:
             self.configList = []
             for i, (name) in enumerate(configTable):
@@ -1802,7 +1802,7 @@ class TaperPanel(wx.Panel):
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
-    def configList(self):
+    def getConfigList(self):
         if self.configList == None:
             self.configList = []
             for i, (name) in enumerate(configTable):
@@ -2279,7 +2279,7 @@ class ThreadPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def configList(self):
+    def getConfigList(self):
         if self.configList == None:
             self.configList = []
             for i, (name) in enumerate(configTable):
@@ -4205,7 +4205,7 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            saveList(path, configTable, self.panels[panel].configList())
+            saveList(path, configTable, self.panels[panel].getConfigList())
 
     def OnLoadPanel(self, e):
         panel = getInfo(mainPanel)
@@ -4216,7 +4216,7 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            readInfo(path, config, self.panels[panel].configList())
+            readInfo(path, config, self.panels[panel].getConfigList())
 
     def OnExit(self, e):
         self.Close(True)
