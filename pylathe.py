@@ -839,20 +839,20 @@ class TurnPanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.turn = Turn(self)
-        formatList = ((tuAddFeed, 'f'), \
-                      (tuPasses, 'd'), \
-                      (tuPause, None), \
-                      (tuRPM, 'd'), \
-                      (tuSPInt, 'd'), \
-                      (tuSpring, 'd'), \
-                      (tuXEnd, 'f'), \
-                      (tuXFeed, 'f'), \
-                      (tuXRetract, 'f'), \
-                      (tuXStart, 'f'),\
-                      (tuZEnd, 'f'), \
-                      (tuZFeed, 'f'), \
-                      (tuZRetract, 'f'), \
-                      (tuZStart, 'f'))
+        self.formatList = ((tuAddFeed, 'f'), \
+                           (tuPasses, 'd'), \
+                           (tuPause, None), \
+                           (tuRPM, 'd'), \
+                           (tuSPInt, 'd'), \
+                           (tuSpring, 'd'), \
+                           (tuXEnd, 'f'), \
+                           (tuXFeed, 'f'), \
+                           (tuXRetract, 'f'), \
+                           (tuXStart, 'f'),\
+                           (tuZEnd, 'f'), \
+                           (tuZFeed, 'f'), \
+                           (tuZRetract, 'f'), \
+                           (tuZStart, 'f'))
 
     def InitUI(self):
         global hdrFont
