@@ -903,7 +903,7 @@ class TurnPanel(wx.Panel):
         self.sizerV.Fit(self)
 
     def configList(self):
-        configlist = []
+        configList = []
         for i, (name) in enumerate(configTable):
             if name.startswith('tu'):
                 configList.append(i)
