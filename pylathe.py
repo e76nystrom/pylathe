@@ -156,14 +156,14 @@ def formatData(panel, formatList):
                 ctl.SetValue(val)
             except ValueError:
                 success = False
-                ctl.setValue('')
+                ctl.SetValue('')
         elif fieldType == 'd':
             try:
                 val = int(strVal)
                 ctl.SetValue("%d" % (val))
             except ValueError:
                 success = False
-                ctl.setValue('')
+                ctl.SetValue('')
     return(success)
 
 def fieldList(panel, sizer, fields):
@@ -2007,17 +2007,19 @@ class TaperPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatData(self, self.formatList)
-        if xHomed:
-            clrStatus()
-            self.sendData()
-            taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-            if self.internal.GetValue():
-                self.taper.internalTaper(taper)
+        if formatData(self, self.formatList):
+            if xHomed:
+                clrStatus()
+                self.sendData()
+                taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
+                if self.internal.GetValue():
+                    self.taper.internalTaper(taper)
+                else:
+                    self.taper.externalTaper(taper)
             else:
-                self.taper.externalTaper(taper)
+                notHomed()
         else:
-            notHomed()
+            pass
         jogPanel.focus()
 
     def OnStart(self, e):
