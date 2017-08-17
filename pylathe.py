@@ -1750,7 +1750,7 @@ class TaperPanel(wx.Panel):
         self.taper = Taper(self)
         self.m = moveCommands
         self.formatList = ((tpAddFeed, 'f'), \
-                           (tpAngle, 'f'), \
+                           (tpAngle, 'fs'), \
                            (tpAngleBtn, None), \
                            (tpDeltaBtn, None), \
                            (tpInternal, None), \
@@ -2273,8 +2273,8 @@ class ThreadPanel(wx.Panel):
         self.configList = None
         self.screwThread = ScrewThread(self)
         self.formatList =  ((thAddFeed, 'f'), \
-                            (thAngle, 'f'), \
-                            (thExitRev, 'f'), \
+                            (thAngle, 'fs'), \
+                            (thExitRev, 'fs'), \
                             (thHFactor, 'f'), \
                             (thInternal, None), \
                             (thMM, None), \
@@ -2482,20 +2482,6 @@ class ButtonRepeat(Thread):
                     self.action(self.code, self.val)
                 sleep(timeout)
                 timeout = .05
-
-def setStatus(text):
-    global done, jogPanel
-    if done:
-        return
-    jogPanel.statusLine.SetLabel(text)
-    jogPanel.Refresh()
-    jogPanel.Update()
-
-def clrStatus():
-    setStatus("")
-
-def notHomed():
-    setStatus("X Not Homed")
 
 class JogShuttle():
     def __init__(self):
@@ -3421,6 +3407,20 @@ class JogPanel(wx.Panel):
         except commTimeout as e:
             pass
         self.combo.SetFocus()
+
+def setStatus(text):
+    global done, jogPanel
+    if done:
+        return
+    jogPanel.statusLine.SetLabel(text)
+    jogPanel.Refresh()
+    jogPanel.Update()
+
+def clrStatus():
+    setStatus("")
+
+def notHomed():
+    setStatus("X Not Homed")
 
 def jogPanelPos(ctl):
         global jogPanel, mainFrame
