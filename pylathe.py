@@ -4163,11 +4163,20 @@ class MainFrame(wx.Frame):
         dlg = wx.FileDialog(self, "Save " + p + " Config", self.dirName,
                             p + ".txt", "", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
+            self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
             saveList(path, configTable, self.panels[panel].configList())
 
     def OnLoadPanel(self, e):
-        pass
+        panel = getInfo(mainPanel)
+        p = panel.replace('Panel', '')
+        p = p[:1].upper() + p[1:].lower()
+        dlg = wx.FileDialog(self, "Load " + p + " Config", self.dirName,
+                            p + ".txt", "", wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.dirName = dlg.GetDirectory()
+            path = dlg.GetPath()
+            saveList(path, configTable, self.panels[panel].configList())
 
     def OnExit(self, e):
         self.Close(True)
