@@ -133,8 +133,6 @@ def formatData(panel, formatList):
         if fieldType.startswith('f'):
             try:
                 val = float(strVal)
-            except ValueError:
-                pass
 
             strip = False
             if fieldType.endswith('s'):
@@ -155,6 +153,8 @@ def formatData(panel, formatList):
                 else:
                     val = val.rstrip('0')
             ctl.SetValue(val)
+            except ValueError:
+                pass
         elif fieldType == 'd':
             try:
                 val = int(strVal)
