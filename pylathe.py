@@ -4216,7 +4216,7 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            saveList(path, configTable, self.panels[panel].configList())
+            readInfo(path, config, self.panels[panel].configList())
 
     def OnExit(self, e):
         self.Close(True)
