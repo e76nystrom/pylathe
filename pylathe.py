@@ -906,6 +906,7 @@ class TurnPanel(wx.Panel):
         configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
                       tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
                       tuZEnd, tuZFeed, tuZRetract, tuZStart)
+        return(configList)
 
     def update(self):
         pass
