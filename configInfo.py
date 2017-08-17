@@ -54,7 +54,7 @@ def writeConfig(f, name, val):
     elif valClass == 'StaticText':
         pass
 
-def readInfo(file, config):
+def readInfo(file, config, configList=None):
     global info
     try:
         f = open(file, 'r')
@@ -65,10 +65,12 @@ def readInfo(file, config):
             [key, val] = line.split('=')
             if not key in config:
                 print("readInfo invalid config value %s" % key)
+                stdout.flush()
                 continue
             index = config[key]
-            # if key in info:
-            #     func = info[key]
+            if configList != None:
+                if not index in configList:
+                    continue
             if info[index] != None:
                 func = info[index]
                 funcClass = func.__class__.__name__
@@ -84,9 +86,7 @@ def readInfo(file, config):
                 elif funcClass == 'ComboBox':
                     func.SetValue(val)
             else:
-                # print(key, val)
                 func = InfoValue(val)
-                # info[key] = func
                 info[index] = func
             # stdout.flush()
         f.close()
