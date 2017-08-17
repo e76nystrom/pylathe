@@ -902,7 +902,7 @@ class TurnPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def config(self):
+    def configList(self):
         configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
                       tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
                       tuZEnd, tuZFeed, tuZRetract, tuZStart)
@@ -4163,7 +4163,7 @@ class MainFrame(wx.Frame):
                             p + ".txt", "", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            print(path)
+            saveList(path, configTable, self.panels[panel].configList())
 
     def OnLoadPanel(self, e):
         pass
