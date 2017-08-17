@@ -1319,14 +1319,14 @@ class CutoffPanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.cutoff = Cutoff(self)
-        self.formatList =  (('cuPause', ''), \
-                            ('cuRPM', 'd'), \
-                            ('cuXEnd', 'f'), \
-                            ('cuXFeed', 'f'), \
-                            ('cuXRetract', 'f'), \
-                            ('cuXStart', 'f'), \
-                            ('cuZCutoff', 'f'), \
-                            ('cuZStart', 'f'))
+        self.formatList = ((cuPause, None), \
+                           (cuRPM, 'd'), \
+                           (cuXEnd, 'f'), \
+                           (cuXFeed, 'f'), \
+                           (cuXRetract, 'f'), \
+                           (cuXStart, 'f'), \
+                           (cuZCutoff, 'f'), \
+                           (cuZStart, 'f'))
 
     def InitUI(self):
         global hdrFont, emptyCell
