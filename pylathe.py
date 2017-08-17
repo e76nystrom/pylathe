@@ -150,7 +150,10 @@ def formatData(panel, formatList):
             format = "%%0.%df" % digits
             val = format % (val)
             if strip:
-                val = val.rstrip(".0")
+                if re.match("\.0*$", val):
+                    val = re.sub("\.0*$", "", val)
+                else:
+                    val = val.rstrip('0')
             ctl.SetValue(val)
         elif fieldType == 'd':
             try:
@@ -2265,7 +2268,7 @@ class ThreadPanel(wx.Panel):
                             (thMM, None), \
                             (thPasses, 'd'), \
                             (thPause, None), \
-                            (thPitch, 'f1'), \
+                            (thPitch, 'fs'), \
                             (thRPM, 'd'), \
                             (thSPInt, 'n'), \
                             (thSpring, 'n'), \
