@@ -1748,7 +1748,7 @@ class TaperPanel(wx.Panel):
                            (tpRPM, 'd'), \
                            (tpSPInt, 'd'), \
                            (tpSmallDiam, 'f'), \
-                           (tpSmallDiamText, 'f'), \
+                           (tpSmallDiamText, None), \
                            (tpSpring, 'd'), \
                            (tpTaperSel, None), \
                            (tpXDelta, 'f'), \
