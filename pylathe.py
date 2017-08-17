@@ -131,9 +131,6 @@ def formatData(panel, formatList):
         ctl = configInfo.info[index]
         strVal = ctl.GetValue()
         if fieldType.startswith('f'):
-            try:
-                val = float(strVal)
-
             strip = False
             if fieldType.endswith('s'):
                 fieldType = fieldType[:-1]
@@ -146,21 +143,24 @@ def formatData(panel, formatList):
                 except ValueError:
                     pass
             format = "%%0.%df" % digits
-            val = format % (val)
-            if strip:
-                if re.search("\.0*$", val):
-                    val = re.sub("\.0*$", "", val)
-                else:
-                    val = val.rstrip('0')
-            ctl.SetValue(val)
+
+            try:
+                val = float(strVal)
+                val = format % (val)
+                if strip:
+                    if re.search("\.0*$", val):
+                        val = re.sub("\.0*$", "", val)
+                    else:
+                        val = val.rstrip('0')
+                ctl.SetValue(val)
             except ValueError:
-                pass
+                ctl.setValue('')
         elif fieldType == 'd':
             try:
                 val = int(strVal)
                 ctl.SetValue("%d" % (val))
             except ValueError:
-                pass
+                ctl.setValue('')
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
