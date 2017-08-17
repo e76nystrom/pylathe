@@ -2265,7 +2265,7 @@ class ThreadPanel(wx.Panel):
                             (thMM, None), \
                             (thPasses, 'd'), \
                             (thPause, None), \
-                            (thPitch, 'fs'), \
+                            (thPitch, 'f1'), \
                             (thRPM, 'd'), \
                             (thSPInt, 'n'), \
                             (thSpring, 'n'), \
