@@ -89,11 +89,11 @@ def readInfo(file, config, configList=None):
                 func = InfoValue(val)
                 info[index] = func
             # stdout.flush()
-        f.close()
     except Exception as e:
         print(line, "readInfo error")
         print(e)
         stdout.flush()
+    f.close()
 
 def initInfo(key, val):
     global info
