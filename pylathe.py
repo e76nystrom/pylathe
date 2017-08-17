@@ -150,8 +150,8 @@ def formatData(panel, formatList):
             format = "%%0.%df" % digits
             val = format % (val)
             if strip:
-                if re.match("\.0*$", val):
-                    val = re.sub("\.0*$", "", val)
+                if re.match(r"\.0*$", val):
+                    val = re.sub(r"\.0*$", "", val)
                 else:
                     val = val.rstrip('0')
             ctl.SetValue(val)
