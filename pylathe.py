@@ -940,7 +940,6 @@ class TurnPanel(wx.Panel):
 
     def update(self):
         formatData(self, self.formatList)
-        pass
 
     def sendData(self):
         global moveCommands
@@ -1104,6 +1103,20 @@ class FacePanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.face = Face(self)
+        self.formatList = ((faAddFeed, 'f'), \
+                           (faPasses, 'f'), \
+                           (faPause, None), \
+                           (faRPM, 'd'), \
+                           (faSPInt, 'd'), \
+                           (faSpring, 'd'), \
+                           (faXEnd, 'f'), \
+                           (faXFeed, 'f'), \
+                           (faXRetract, 'f'), \
+                           (faXStart, 'f'), \
+                           (faZEnd, 'f'), \
+                           (faZFeed, 'f'), \
+                           (faZRetract, 'f'), \
+                           (faZStart, 'f'))
 
     def InitUI(self):
         global hdrFont, emptyCell
@@ -1189,7 +1202,7 @@ class FacePanel(wx.Panel):
         return(self.configList)
 
     def update(self):
-        pass
+        formatData(self, self.formatList)
 
     def sendData(self):
         global moveCommands
@@ -1206,6 +1219,7 @@ class FacePanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
+        formatData(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
@@ -1283,6 +1297,14 @@ class CutoffPanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.cutoff = Cutoff(self)
+        self.formatList =  (('cuPause', ''), \
+                            ('cuRPM', 'd'), \
+                            ('cuXEnd', 'f'), \
+                            ('cuXFeed', 'f'), \
+                            ('cuXRetract', 'f'), \
+                            ('cuXStart', 'f'), \
+                            ('cuZCutoff', 'f'), \
+                            ('cuZStart', 'f'))
 
     def InitUI(self):
         global hdrFont, emptyCell
@@ -1352,7 +1374,7 @@ class CutoffPanel(wx.Panel):
         return(self.configList)
 
     def update(self):
-        pass
+        formatData(self, self.formatList)
 
     def sendData(self):
         global moveCommands
@@ -1368,6 +1390,7 @@ class CutoffPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
+        formatData(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
@@ -1684,13 +1707,38 @@ class TaperPanel(wx.Panel):
                          ("", 0., 0., 0, 0.), \
                          ("", 0., 0., 0, 0.), \
         ]
-
         self.taperList = []
         for t in self.taperDef:
             self.taperList.append(t[0])
         self.InitUI()
         self.configList = None
         self.taper = Taper(self)
+        self.m = moveCommands
+        self.formatList = ((tpAddFeed, 'f'), \
+                           (tpAngle, 'f'), \
+                           (tpAngleBtn, None), \
+                           (tpDeltaBtn, None), \
+                           (tpInternal, None), \
+                           (tpLargeDiam, 'f'), \
+                           (tpLargeDiamText, None), \
+                           (tpPasses, 'd'), \
+                           (tpPause, None), \
+                           (tpRPM, 'd'), \
+                           (tpSPInt, 'd'), \
+                           (tpSmallDiam, 'f'), \
+                           (tpSmallDiamText, 'f'), \
+                           (tpSpring, 'd'), \
+                           (tpTaperSel, None), \
+                           (tpXDelta, 'f'), \
+                           (tpXFeed, 'f'), \
+                           (tpXFinish, 'f'), \
+                           (tpXInFeed, 'f'), \
+                           (tpXRetract, 'f'), \
+                           (tpZDelta, 'f'), \
+                           (tpZFeed, 'f'), \
+                           (tpZLength, 'f'), \
+                           (tpZRetract, 'f'), \
+                           (tpZStart, 'f'))
 
     def InitUI(self):
         global hdrFont, info
@@ -1840,6 +1888,7 @@ class TaperPanel(wx.Panel):
         self.updateUI()
         self.updateDelta()
         self.updateAngle()
+        formatData(self, self.formatList)
 
     def updateUI(self):
         global info
@@ -1923,6 +1972,7 @@ class TaperPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
+        formatData(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
@@ -2185,6 +2235,28 @@ class ThreadPanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.screwThread = ScrewThread(self)
+        self.formatList =  ((thAddFeed, 'f'), \
+                            (thAngle, 'f'), \
+                            (thExitRev, 'f'), \
+                            (thHFactor, 'f'), \
+                            (thInternal, None), \
+                            (thMM, None), \
+                            (thPasses, 'd'), \
+                            (thPause, None), \
+                            (thPitch, 'f'), \
+                            (thRPM, 'd'), \
+                            (thSPInt, 'n'), \
+                            (thSpring, 'n'), \
+                            (thTPI, 'f'), \
+                            (thXDepth, 'f'), \
+                            (thXFirstFeed, 'f'), \
+                            (thXLastFeed, 'f'), \
+                            (thXRetract, 'f'), \
+                            (thXStart, 'f'), \
+                            (thXTaper, 'f'), \
+                            (thZEnd, 'f'), \
+                            (thZRetract, 'f'), \
+                            (thZStart, 'f'))
 
     def InitUI(self):
         global hdrFont, info, emptyCell
@@ -2314,7 +2386,7 @@ class ThreadPanel(wx.Panel):
         return(self.configList)
 
     def update(self):
-        pass
+        formatData(self, self.formatList)
 
     def OnInternal(self, e):
         pass
@@ -2331,6 +2403,7 @@ class ThreadPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
+        formatData(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
