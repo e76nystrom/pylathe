@@ -130,10 +130,10 @@ def formatData(panel, formatList):
             continue
         ctl = configInfo.info[index]
         strVal = ctl.GetValue()
-        if type == 'f':
+        if fieldType == 'f':
             val = float(strVal)
             ctl.SetValue("%0.4f" % (val))
-        elif type == 'd':
+        elif fieldType == 'd':
             val = int(strVal)
             ctl.SetValue("%d" % (val))
 
