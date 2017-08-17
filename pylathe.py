@@ -474,7 +474,7 @@ def sendClear():
         command(CLRDBG);
         command(CMD_CLEAR)
     except commTimeout:
-        setStatus('clear timeout')
+        jogPanel.setStatus('clear timeout')
     spindleDataSent = False
     zDataSent = False
     xDataSent = False
@@ -988,13 +988,13 @@ class TurnPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                clrStatus()
+                jogPanel.clrStatus()
                 self.sendData()
                 self.turn.turn()
             else:
-                notHomed()
+                jogPanel.notHomed()
         else:
-            pass
+            jogPanel.fieldError()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1252,13 +1252,13 @@ class FacePanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                clrStatus()
+                jogPanel.clrStatus()
                 self.sendData()
                 self.face.face()
             else:
-                notHomed()
+                jogPanel.notHomed()
         else:
-            pass
+            jogPanel.fieldError()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1425,13 +1425,13 @@ class CutoffPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                clrStatus()
+                jogPanel.clrStatus()
                 self.sendData()
                 self.cutoff.cutoff()
             else:
-                notHomed()
+                jogPanel.notHomed()
         else:
-            pass
+            jogPanel.fieldError()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2009,7 +2009,7 @@ class TaperPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                clrStatus()
+                jogPanel.clrStatus()
                 self.sendData()
                 taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
                 if self.internal.GetValue():
@@ -2017,9 +2017,9 @@ class TaperPanel(wx.Panel):
                 else:
                     self.taper.externalTaper(taper)
             else:
-                notHomed()
+                jogPanel.notHomed()
         else:
-            pass
+            jogPanel.fieldError()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2442,13 +2442,13 @@ class ThreadPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                clrStatus()
+                jogPanel.clrStatus()
                 self.sendData()
                 self.screwThread.thread()
             else:
-                notHomed()
+                jogPanel.notHomed()
         else:
-            pass
+            jogPanel.fieldError()
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -3408,19 +3408,22 @@ class JogPanel(wx.Panel):
             pass
         self.combo.SetFocus()
 
-def setStatus(text):
-    global done, jogPanel
-    if done:
-        return
-    jogPanel.statusLine.SetLabel(text)
-    jogPanel.Refresh()
-    jogPanel.Update()
+    def setStatus(self, text):
+        global done, jogPanel
+        if done:
+            return
+        self.statusLine.SetLabel(text)
+        self.Refresh()
+        self.Update()
 
-def clrStatus():
-    setStatus("")
+    def clrStatus(self):
+        self.setStatus("")
 
-def notHomed():
-    setStatus("X Not Homed")
+    def notHomed(self):
+        self.setStatus("X Not Homed")
+
+    def fieldError(self):
+        self.setStatus("Entry Field Error")
 
 def jogPanelPos(ctl):
         global jogPanel, mainFrame
@@ -4132,7 +4135,7 @@ class MainFrame(wx.Frame):
                 sendSpindleData()
             except commTimeout:
                 print("comm timeout on setup")
-                setStatus("comm timeout on setup")
+                jogPanel.setStatus("comm timeout on setup")
 
         self.procUpdate = (
             self.jogPanel.updateZ, \
