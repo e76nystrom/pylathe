@@ -907,9 +907,9 @@ class TurnPanel(wx.Panel):
         for i, (name) in enumerate(configTable):
             if name.startswith('tu'):
                 configList.append(i)
-        configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
-                      tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
-                      tuZEnd, tuZFeed, tuZRetract, tuZStart)
+        # configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
+        #               tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
+        #               tuZEnd, tuZFeed, tuZRetract, tuZStart)
         return(configList)
 
     def update(self):
