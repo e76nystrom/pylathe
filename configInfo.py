@@ -17,28 +17,42 @@ def clrInfo(size):
     global info
     info = [None for i in range(size)]
 
-def saveInfo(file, config):
+def saveList(file, configTable, varList):
     global info
     f = open(file, 'w')
-    for key in sorted(config.keys()):
-        index = config[key]
+    for index in varList:
+        name = configTable[index]
         val = info[index]
-        valClass = val.__class__.__name__
-        # print(key, valClass)
-        # stdout.flush()
-        if valClass == 'TextCtrl':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'RadioButton':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'CheckBox':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'ComboBox':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'InfoValue':
-            f.write("%s=%s\n" % (key, val.GetValue()))
-        elif valClass == 'StaticText':
-            pass
+        writeConfig(f, name, val)
     f.close()
+
+def saveInfo(file, configTable):
+    global info
+    f = open(file, 'w')
+    # for key in sorted(config.keys()):
+    #     index = config[key]
+    #     val = info[index]
+    for index, (val) in enumerate(info):
+        name = configTable[index]
+        writeConfig(f, name, val)
+    f.close()
+
+def writeConfig(f, name, val):
+    valClass = val.__class__.__name__
+    # print(name, valClass)
+    # stdout.flush()
+    if valClass == 'TextCtrl':
+        f.write("%s=%s\n" % (name, val.GetValue()))
+    elif valClass == 'RadioButton':
+        f.write("%s=%s\n" % (name, val.GetValue()))
+    elif valClass == 'CheckBox':
+        f.write("%s=%s\n" % (name, val.GetValue()))
+    elif valClass == 'ComboBox':
+        f.write("%s=%s\n" % (name, val.GetValue()))
+    elif valClass == 'InfoValue':
+        f.write("%s=%s\n" % (name, val.GetValue()))
+    elif valClass == 'StaticText':
+        pass
 
 def readInfo(file, config):
     global info
