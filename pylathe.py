@@ -4212,7 +4212,7 @@ class MainFrame(wx.Frame):
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
         dlg = wx.FileDialog(self, "Load " + p + " Config", self.dirName,
-                            p + ".txt", "", wx.FD_SAVE)
+                            p + ".txt", "", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
