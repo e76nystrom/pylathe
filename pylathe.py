@@ -3984,11 +3984,11 @@ class MainFrame(wx.Frame):
         menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
         self.Bind(wx.EVT_MENU, self.OnRestat, menu)
 
-        ID_FILE_SAVE_PANEL = wx_NewID()
+        ID_FILE_SAVE_PANEL = wx.NewID()
         menu = fileMenu.Append(ID_FILE_SAVE_PANEL, 'Save Panel')
         self.Bind(wx.EVT_MENU, self.OnSavePanel, menu)
 
-        ID_FILE_LOAD_PANEL = wx_NewID()
+        ID_FILE_LOAD_PANEL = wx.NewID()
         menu = fileMenu.Append(ID_FILE_LOAD_PANEL, 'Load Panel')
         self.Bind(wx.EVT_MENU, self.OnLoadPanel, menu)
 
