@@ -939,6 +939,7 @@ class TurnPanel(wx.Panel):
         return(self.configList)
 
     def update(self):
+        formatData(self, self.formatList)
         pass
 
     def sendData(self):
@@ -957,7 +958,7 @@ class TurnPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatDate(self, self.formatList)
+        formatData(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
