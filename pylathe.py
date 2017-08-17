@@ -4156,8 +4156,11 @@ class MainFrame(wx.Frame):
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnSavePanel(self, e):
-        dlg = wx.FileDialog(self, "Choose a file", self.dirName,
-                            "", "", wx.FD_SAVE)
+        panel = getInfo(mainPanel)
+        p = panel.replace('Panel', '')
+        p = p[:1].upper() + p[1:].lower()
+        dlg = wx.FileDialog(self, "Save " + p + " Config", self.dirName,
+                            p + ".txt", "", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             print(path)
