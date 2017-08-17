@@ -124,6 +124,19 @@ HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
 
+def formatData(panel, formatList):
+    for (index, fieldType) in formatList:
+        if fieldType == None:
+            continue
+        ctl = configInfo.info[index]
+        strVal = ctl.GetValue()
+        if type == 'f':
+            val = float(strVal)
+            ctl.SetValue("%0.4f" % (val))
+        elif type == 'd':
+            val = int(strVal)
+            ctl.SetValue("%d" % (val))
+
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
         if label.startswith('b'):
@@ -826,6 +839,20 @@ class TurnPanel(wx.Panel):
         self.InitUI()
         self.configList = None
         self.turn = Turn(self)
+        formatList = ((tuAddFeed, 'f'), \
+                      (tuPasses, 'd'), \
+                      (tuPause, None), \
+                      (tuRPM, 'd'), \
+                      (tuSPInt, 'd'), \
+                      (tuSpring, 'd'), \
+                      (tuXEnd, 'f'), \
+                      (tuXFeed, 'f'), \
+                      (tuXRetract, 'f'), \
+                      (tuXStart, 'f'),\
+                      (tuZEnd, 'f'), \
+                      (tuZFeed, 'f'), \
+                      (tuZRetract, 'f'), \
+                      (tuZStart, 'f'))
 
     def InitUI(self):
         global hdrFont
@@ -909,9 +936,6 @@ class TurnPanel(wx.Panel):
             for i, (name) in enumerate(configTable):
                 if name.startswith('tu'):
                     self.configList.append(i)
-        # configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
-        #               tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
-        #               tuZEnd, tuZFeed, tuZRetract, tuZStart)
         return(self.configList)
 
     def update(self):
@@ -933,6 +957,7 @@ class TurnPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
+        formatDate(self, self.formatList)
         if xHomed:
             clrStatus()
             self.sendData()
