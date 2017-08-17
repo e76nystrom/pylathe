@@ -3972,22 +3972,34 @@ class MainFrame(wx.Frame):
     def initUI(self):
         global jogPanel, info, zHomeOffset, xHomeOffset, \
             zDROOffset, xDROOffset
+
+        # file menu
         fileMenu = wx.Menu()
 
         ID_FILE_SAVE = wx.NewId()
         menu = fileMenu.Append(ID_FILE_SAVE, 'Save')
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
 
-        ID_FILE_EXIT = wx.NewId()
-        menu = fileMenu.Append(ID_FILE_EXIT, 'Save and Restart')
+        ID_FILE_SAVE_RESTART = wx.NewId()
+        menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
         self.Bind(wx.EVT_MENU, self.OnRestat, menu)
+
+        ID_FILE_SAVE_PANEL = wx_NewId()
+        menu = fileMenu.Append(ID_FILE_SAVE_PANEL, 'Save Panel')
+        self.Bind(wx.EVT_MENU, self.OnSavePanel, menu)
+
+        ID_FILE_LOAD_PANEL = wx_NewId()
+        menu = fileMenu.Append(ID_FILE_LOAD_PANEL, 'Load Panel')
+        self.Bind(wx.EVT_MENU, self.OnLoadPanel, menu)
 
         ID_FILE_EXIT = wx.NewId()
         menu = fileMenu.Append(ID_FILE_EXIT, 'Exit')
         self.Bind(wx.EVT_MENU, self.OnExit, menu)
 
-        ID_Z_SETUP = wx.NewId()
+        # setup menu
         setupMenu = wx.Menu()
+
+        ID_Z_SETUP = wx.NewId()
         menu = setupMenu.Append(ID_Z_SETUP, 'Z')
         self.Bind(wx.EVT_MENU, self.OnZSetup, menu)
 
@@ -4007,6 +4019,7 @@ class MainFrame(wx.Frame):
         menu = setupMenu.Append(ID_PORT_SETUP, 'Config')
         self.Bind(wx.EVT_MENU, self.OnConfigSetup, menu)
 
+        # operation menu
         operationMenu = wx.Menu()
 
         ID_TURN = wx.NewId()
@@ -4030,6 +4043,7 @@ class MainFrame(wx.Frame):
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
 
+        # test menu
         testMenu = wx.Menu()
 
         ID_TEST_SPINDLE = wx.NewId()
@@ -4138,6 +4152,12 @@ class MainFrame(wx.Frame):
         import os
         saveInfo(configFile, configTable)
         os.execl(sys.executable, sys.executable, *sys.argv)
+
+    def OnSavePanel(self, e):
+        pass
+
+    def OnLoadPanel(self, e):
+        pass
 
     def OnExit(self, e):
         self.Close(True)
