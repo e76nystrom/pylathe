@@ -7,6 +7,7 @@ import wx
 import wx.lib.inspection
 from time import sleep, time
 import sys
+import os
 from sys import stdout
 import serial
 from threading import Thread, Lock, Event
@@ -3899,6 +3900,8 @@ class MainFrame(wx.Frame):
         self.testTaperDialog = None
         self.testMoveDialog = None
 
+        self.dirName = os.getcwd()
+
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
@@ -4149,12 +4152,15 @@ class MainFrame(wx.Frame):
         saveInfo(configFile, configTable)
         
     def OnRestat(self, e):
-        import os
         saveInfo(configFile, configTable)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnSavePanel(self, e):
-        pass
+        dlg = wx.FileDialog(self, "Choose a file", self.dirname,
+                            "", "", wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            print(path)
 
     def OnLoadPanel(self, e):
         pass
