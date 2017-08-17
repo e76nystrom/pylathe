@@ -4132,11 +4132,11 @@ class MainFrame(wx.Frame):
         self.taperPanel.updateUI()
 
     def OnSave(self, e):
-        saveInfo(configFile, config)
+        saveInfo(configFile, configTable)
         
     def OnRestat(self, e):
         import os
-        saveInfo(configFile, config)
+        saveInfo(configFile, configTable)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnExit(self, e):
