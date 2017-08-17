@@ -125,6 +125,7 @@ AXIS_Z = 0
 AXIS_X = 1
 
 def formatData(panel, formatList):
+    success = True
     for (index, fieldType) in formatList:
         if fieldType == None:
             continue
@@ -154,13 +155,16 @@ def formatData(panel, formatList):
                         val = val.rstrip('0')
                 ctl.SetValue(val)
             except ValueError:
+                success = False
                 ctl.setValue('')
         elif fieldType == 'd':
             try:
                 val = int(strVal)
                 ctl.SetValue("%d" % (val))
             except ValueError:
+                success = False
                 ctl.setValue('')
+    return(success)
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
@@ -982,13 +986,15 @@ class TurnPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatData(self, self.formatList)
-        if xHomed:
-            clrStatus()
-            self.sendData()
-            self.turn.turn()
+        if formatData(self, self.formatList):
+            if xHomed:
+                clrStatus()
+                self.sendData()
+                self.turn.turn()
+            else:
+                notHomed()
         else:
-            notHomed()
+            pass
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1244,13 +1250,15 @@ class FacePanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatData(self, self.formatList)
-        if xHomed:
-            clrStatus()
-            self.sendData()
-            self.face.face()
+        if formatData(self, self.formatList):
+            if xHomed:
+                clrStatus()
+                self.sendData()
+                self.face.face()
+            else:
+                notHomed()
         else:
-            notHomed()
+            pass
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1415,13 +1423,15 @@ class CutoffPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatData(self, self.formatList)
-        if xHomed:
-            clrStatus()
-            self.sendData()
-            self.cutoff.cutoff()
+        if formatData(self, self.formatList):
+            if xHomed:
+                clrStatus()
+                self.sendData()
+                self.cutoff.cutoff()
+            else:
+                notHomed()
         else:
-            notHomed()
+            pass
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2428,13 +2438,15 @@ class ThreadPanel(wx.Panel):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        formatData(self, self.formatList)
-        if xHomed:
-            clrStatus()
-            self.sendData()
-            self.screwThread.thread()
+        if formatData(self, self.formatList):
+            if xHomed:
+                clrStatus()
+                self.sendData()
+                self.screwThread.thread()
+            else:
+                notHomed()
         else:
-            notHomed()
+            pass
         jogPanel.focus()
 
     def OnStart(self, e):
