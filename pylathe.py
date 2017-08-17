@@ -824,6 +824,7 @@ class TurnPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
+        self.configList = None
         self.turn = Turn(self)
 
     def InitUI(self):
@@ -903,14 +904,15 @@ class TurnPanel(wx.Panel):
         self.sizerV.Fit(self)
 
     def configList(self):
-        configList = []
-        for i, (name) in enumerate(configTable):
-            if name.startswith('tu'):
-                configList.append(i)
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(configTable):
+                if name.startswith('tu'):
+                    self.configList.append(i)
         # configList = (tuAddFeed, tuPasses, tuPause, tuRPM, tuSPInt, \
         #               tuSpring, tuXEnd, tuXFeed, tuXRetract, tuXStart, \
         #               tuZEnd, tuZFeed, tuZRetract, tuZStart)
-        return(configList)
+        return(self.configList)
 
     def update(self):
         pass
@@ -1074,6 +1076,7 @@ class FacePanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
+        self.configList = None
         self.face = Face(self)
 
     def InitUI(self):
@@ -1150,6 +1153,14 @@ class FacePanel(wx.Panel):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
+
+    def configList(self):
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(configTable):
+                if name.startswith('fa'):
+                    self.configList.append(i)
+        return(self.configList)
 
     def update(self):
         pass
@@ -1244,6 +1255,7 @@ class CutoffPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
+        self.configList = None
         self.cutoff = Cutoff(self)
 
     def InitUI(self):
@@ -1304,6 +1316,14 @@ class CutoffPanel(wx.Panel):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
+
+    def configList(self):
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(configTable):
+                if name.startswith('cu'):
+                    self.configList.append(i)
+        return(self.configList)
 
     def update(self):
         pass
@@ -1643,6 +1663,7 @@ class TaperPanel(wx.Panel):
         for t in self.taperDef:
             self.taperList.append(t[0])
         self.InitUI()
+        self.configList = None
         self.taper = Taper(self)
 
     def InitUI(self):
@@ -1780,6 +1801,14 @@ class TaperPanel(wx.Panel):
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
+
+    def configList(self):
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(configTable):
+                if name.startswith('ta'):
+                    self.configList.append(i)
+        return(self.configList)
 
     def update(self):
         self.updateUI()
@@ -2128,6 +2157,7 @@ class ThreadPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
+        self.configList = None
         self.screwThread = ScrewThread(self)
 
     def InitUI(self):
@@ -2249,6 +2279,14 @@ class ThreadPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
+    def configList(self):
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(configTable):
+                if name.startswith('th'):
+                    self.configList.append(i)
+        return(self.configList)
+
     def update(self):
         pass
 
@@ -2261,8 +2299,6 @@ class ThreadPanel(wx.Panel):
             sendSpindleData()
             sendZData()
             sendXData()
-
-
         except commTimeout as e:
             print("timeout error")
             stdout.flush()
