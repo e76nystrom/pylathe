@@ -130,12 +130,34 @@ def formatData(panel, formatList):
             continue
         ctl = configInfo.info[index]
         strVal = ctl.GetValue()
-        if fieldType == 'f':
-            val = float(strVal)
-            ctl.SetValue("%0.4f" % (val))
+        if fieldType.startswith('f'):
+            try:
+                val = float(strVal)
+            except ValueError:
+                pass
+
+            strip = False
+            if fieldType.endswith('s'):
+                fieldType = fieldType[:-1]
+                strip = True
+
+            digits = 4
+            if len(fieldType) > 1:
+                try:
+                    digits = int(fieldType[1])
+                except ValueError:
+                    pass
+            format = "%%0.%df" % digits
+            val = format % (val)
+            if strip:
+                val = val.rstrip(".0")
+            ctl.SetValue(val)
         elif fieldType == 'd':
-            val = int(strVal)
-            ctl.SetValue("%d" % (val))
+            try:
+                val = int(strVal)
+                ctl.SetValue("%d" % (val))
+            except ValueError:
+                pass
 
 def fieldList(panel, sizer, fields):
     for (label, index) in fields:
@@ -2243,11 +2265,11 @@ class ThreadPanel(wx.Panel):
                             (thMM, None), \
                             (thPasses, 'd'), \
                             (thPause, None), \
-                            (thPitch, 'f'), \
+                            (thPitch, 'fs'), \
                             (thRPM, 'd'), \
                             (thSPInt, 'n'), \
                             (thSpring, 'n'), \
-                            (thTPI, 'f'), \
+                            (thTPI, None), \
                             (thXDepth, 'f'), \
                             (thXFirstFeed, 'f'), \
                             (thXLastFeed, 'f'), \
