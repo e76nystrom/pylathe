@@ -156,7 +156,7 @@ def createEnums(enumList, cLoc, fData=False):
         # jFile.write("public class CtlStates\n{\n");
     val = 0
     for i in range(len(enumList)):
-        data = stateList[i]
+        data = enumList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
             state = data[0]
