@@ -3,6 +3,7 @@
 configList = \
 ( \
     ('cfgCmdDis', 'config disable sending commands'),
+    ('cfgDbgSave', 'config save debug info'),
     ('cfgDRO', 'config dro present'),
     ('cfgDraw', 'config draw paths'),
     ('cfgEncoder', 'config xilinx encoder counts per revolution'),
@@ -774,6 +775,7 @@ stateList =\
     ["SAVE_DEPTH", "save thread depth"],
     ["PROBE_Z", "porbe in z direction"],
     ["PROBE_X", "porbe in x direction"],
+    ["OP_DONE", "operation done"],
     "};",
 
     "home control states",
