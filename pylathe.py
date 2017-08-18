@@ -4022,6 +4022,7 @@ class UpdateThread(Thread):
         for i, (val) in enumerate(dbgTbl):
             if val == None:
                 print("dbgTbl action for %s missing" % (dMessageList[i]))
+                stdout.flush()
         i = 0
         op = None
         scanMax = len(self.parmList)
