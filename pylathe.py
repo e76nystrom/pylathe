@@ -647,7 +647,8 @@ def sendXData(send=False):
                 stepsInch = jogPanel.xStepsInch
                 start = str(int(getFloatInfo(xHomeStart) * stepsInch))
                 end = str(int(getFloatInfo(xHomeEnd) * stepsInch))
-                (start, end) = (end, start) if end > start
+                if end > start:
+                    (start, end) = (end, start)
                 queParm(X_HOME_START, start)
                 queParm(X_HOME_END, end)
 
