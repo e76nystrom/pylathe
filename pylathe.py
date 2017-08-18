@@ -4083,6 +4083,9 @@ class UpdateThread(Thread):
                                     output = action(val)
                                     dbg.write(output + "\n")
                                     dbg.flush()
+                                    if cmd == D_DONE:
+                                        dbg.close()
+                                        dbg = None
                                 except IndexError:
                                     print("index error %s" % result)
                                     stdout.flush()
@@ -4111,10 +4114,6 @@ class UpdateThread(Thread):
         return("pass %x" % (val))
 
     def dbgDone(self, val):
-        global dbg
-        if dbg != None:
-            dbg.close()
-        dbg = None
         return("done")
 
     def dbgTest(self, val):
