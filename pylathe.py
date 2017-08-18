@@ -4103,7 +4103,7 @@ class UpdateThread(Thread):
         dbg = None
 
     def dbgTest(self, val):
-        
+        return("test %d" % (val))
 
     def dbgXMov(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
@@ -4126,7 +4126,7 @@ class UpdateThread(Thread):
         return("x_st %s" % (tmp))
 
     def dbgXBSteps(self, val):
-        return("xbst %d" % val)
+        return("xbst %d" % (val))
 
     def dbgXDro(self, val):
         xDroLoc = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
@@ -4142,6 +4142,44 @@ class UpdateThread(Thread):
 
     def dbgXdn(self, val):
         return("xdn  %2x" % (val))
+
+    def dbgZMov(self, val):
+        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        return("zmov %7.4f" % (tmp))
+
+    def dbgZLoc(self, val):
+        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        return("zloc %7.4f" % (tmp))
+
+    def dbgZDst(self, val):
+        tmp = float(val) / jogPanel.zStepsInch
+        return("zdst %7.4f" % (tmp))
+
+    def dbgZStp(self, val):
+        tmp = float(val) / jogPanel.zStepsInch
+        return("zstp %7.4f" % (tmp))
+
+    def dbgZState(self, val):
+        tmp = xStateList[val]
+        return("z_st %s" % (tmp))
+
+    def dbgZBSteps(self, val):
+        return("zbst %d" % (val))
+
+    def dbgZDro(self, val):
+        xDroLoc = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
+                  zDROOffset
+        return("zdro %7.4f" % (tmp))
+
+    def dbgZExp(self, val):
+        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        return("zexp %7.4f" % (tmp))
+
+    def dbgZwt(self, val):
+        return("zwt  %2x" % (val))
+
+    def dbgZdn(self, val):
+        return("zdn  %2x" % (val))
 
     def abort(self):
         self.run = False
