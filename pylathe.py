@@ -4071,6 +4071,7 @@ class UpdateThread(Thread):
                             dbg.flush()
                             (cmd, val) = result.split(' ')[:2]
                             try:
+                                cmd = int(val, 16)
                                 val = int(val, 16)
                                 try:
                                     action = dbgTbl[cmd]
