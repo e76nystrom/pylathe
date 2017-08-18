@@ -386,11 +386,11 @@ class MoveCommands():
         self.queMove(PASS_NUM, passNum)
         if self.dbg:
             if passNum & 0x100:
-                print("spring")
+                print("spring\n")
             elif passNum & 0x200:
                 print("spring %d" % (passNum & 0xff))
             else:
-                print("pass %d" % (passNum))
+                print("pass %d]" % (passNum))
 
     def quePause(self):
         self.queMove(QUE_PAUSE, 0)
@@ -616,7 +616,7 @@ def sendXData(send=False):
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.xDROInch = getIntInfo(xDROInch)
-            jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO)] else 1
+            jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -815,7 +815,7 @@ class Turn(UpdatePass):
                (self.safeZ, self.xStart))
         m.text("%7.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | ABOVE if self.internal else BELOW
+               CENTER | ABOVE if self.internal else BELOW)
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
@@ -1086,7 +1086,7 @@ class Face(UpdatePass):
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
         m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), None if self.internal else RIGHT
+               (self.zStart, self.xEnd), None if self.internal else RIGHT)
         m.text("%7.3f %6.3f" % \
                (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
@@ -1114,13 +1114,13 @@ class Face(UpdatePass):
             m.quePause()
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.curZ), \
-                   (self.curZ, self.safeX), RIGHT if self.internal else None
+                   (self.curZ, self.safeX), RIGHT if self.internal else None)
         m.moveX(self.xStart)
         m.moveX(self.xEnd, CMD_SYN)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.safeZ), \
-                   (self.safeZ, self.xEnd), None if self.internal else RIGHT
+                   (self.safeZ, self.xEnd), None if self.internal else RIGHT)
         m.moveX(self.safeX)
 
     def faceAdd(self):
@@ -1559,7 +1559,7 @@ class Taper(UpdatePass):
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
         m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), CENTER | ABOVE if internal else BELOW
+               (self.zStart, self.xEnd), CENTER | ABOVE if internal else BELOW)
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
@@ -2212,12 +2212,12 @@ class ScrewThread(UpdatePass):
                (self.zEnd, self.xStart), RIGHT)
         m.text("%7.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | ABOVE if self.internal else BELOW
+               CENTER | ABOVE if self.internal else BELOW)
         m.text("%7.3f" % (self.safeX * 2.0,), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), \
-               CENTER | BELOW if self.internal else ABOVE
+               CENTER | BELOW if self.internal else ABOVE)
 
     def calculateThread(self, final=False, add=False):
         if not add:
@@ -4098,14 +4098,18 @@ class UpdateThread(Thread):
         stdout.flush()
 
     def dbgPass(self, val):
-        tmp = val >> 8
-        if tmp == 0:
-            return("pass %x" % (val))
-        elif tmp == 1:
-            return("spring")
-        elif tmp == 2:
-            return("spring %d" % (val & 0xff))
-
+        # tmp = val >> 8
+        # if tmp == 0:
+        #     return("pass %d\n")
+        # elif tmp == 1:
+        #     return("spring\n")
+        # elif tmp == 2:
+        #     return("spring %d\n" % (val & 0xff))
+        return(tmp = val >> 8; \
+              "pass %d\n" % (val) if tmp == 0 else \
+              "spring\n" if tmp == 1 else \
+              "spring %d\n" % (val & 0xff))
+    
     def dbgDone(self, val):
         return("done")
 
