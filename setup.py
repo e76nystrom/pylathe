@@ -183,11 +183,11 @@ def createCtlStates(stateList, cLoc, fData=False):
                 enum = tmp[1].replace('_', "") + "List"
                 globals()[enum] = []
                 importList.append(enum)
+                val = 0
                 if fData:
                     cFile.write("enum %s\n" % (var.upper()))
                     # tmp =  " public static final String[] %s = \n" % (var])
                     # jFile.write(tmp)
-                    val = 0
             elif data.startswith("{") or data.startswith("}"):
                 if fData:
                     cFile.write("%s\n" % (data))
