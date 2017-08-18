@@ -30,7 +30,7 @@ def createCommands(cmdList, cLoc, fData=False):
     # cmds = {}
     cmdTable = []
     index = 0
-    for i in range(0, len(cmdList)):
+    for i in range(len(cmdList)):
         data = cmdList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -84,7 +84,7 @@ def createParameters(parmList, cLoc, fData=False):
     # parms = {}
     parmTable = []
     index = 0
-    for i in range(0, len(parmList)):
+    for i in range(len(parmList)):
         data = parmList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -148,14 +148,14 @@ def createParameters(parmList, cLoc, fData=False):
     #for key in parms:
     #    print(key, parms[key])
 
-def createCtlStates(stateList, cLoc, fData=False):
+def createEnums(enumList, cLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'ctlstates.h', 'w')
         # jFile = open(jLoc + 'CtlStates.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlStates\n{\n");
     val = 0
-    for i in range(0, len(stateList)):
+    for i in range(len(enumList)):
         data = stateList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -207,7 +207,7 @@ def createCtlBits(regList, cLoc, fData=False):
         # jFile = open(jLoc + 'CtlBits.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlBits\n{\n");
-    for i in range(0, len(regList)):
+    for i in range(len(regList)):
         data = regList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -260,7 +260,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
     # xRegs = {}
     xRegTable = []
     index = 0
-    for i in range(0, len(xilinxList)):
+    for i in range(len(xilinxList)):
         data = xilinxList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -330,7 +330,7 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     regName = ""
     bitStr = []
     lastShift = -1
-    for i in range(0, len(xilinxBitList)):
+    for i in range(len(xilinxBitList)):
         data = xilinxBitList[i]
         # if not isinstance(data, basestring):
         if not isinstance(data, str):
@@ -380,13 +380,13 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                         xFile.write(" signal %sReg : "\
                                     "unsigned(%s_size-1 downto 0);\n" %
                                     (regName, regName))
-                    for i in range(0, len(xLst)):
+                    for i in range(len(xLst)):
                         if xFile:
                             xFile.write(xLst[i])
                     # if (len(bitStr) != 0):
                     #     jFile.write(("\n public static final " +
                     #                 "String[] %sBits =\n {\n") % (regName))
-                    #     for i in range(0, len(bitStr)):
+                    #     for i in range(len(bitStr)):
                     #         jFile.write(bitStr[i])
                     #     jFile.write(" };\n");
                     #     bitStr = []
