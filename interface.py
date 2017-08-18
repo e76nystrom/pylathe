@@ -797,22 +797,31 @@ enumList =\
     "{",
     ("D_PASS", "pass done"),
     ("D_DONE", "all operations done"),
+    ("D_TEST", "test message"),
 
     ("D_XMOV", "x move location"),
     ("D_XLOC", "x location"),
     ("D_XDST", "x distance"),
-    ("D_XST", "x state"),
+    ("D_XSTP", "x steps"),
+    ("D_XST",  "x state"),
     ("D_XBSTP", "x backlash steps"),
     ("D_XDRO", "x dro location"),
     ("D_XEXP", "x expected location"),
+    ("D_XWT", "x wait"),
+    ("D_XDN",  "x done"),
 
     ("D_ZMOV", "z move location"),
     ("D_ZLOC", "z location"),
     ("D_ZDST", "z distance"),
-    ("D_ZST", "z state"),
+    ("D_ZSTP", "z steps"),
+    ("D_ZST",  "z state"),
     ("D_ZBSTP", "z backlash steps"),
     ("D_ZDRO", "z dro location"),
     ("D_ZEXP", "z expected location"),
+    ("D_ZWT", "z wait"),
+    ("D_ZDN",  "z done"),
+
+    ("D_HST", "home state"),
     "};",
 )
     
