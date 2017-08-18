@@ -4137,10 +4137,10 @@ class UpdateThread(Thread):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
         return("xexp %7.4f" % (tmp))
 
-    def dbgXwait(self, val):
+    def dbgXWait(self, val):
         return("xwt  %2x" % (val))
 
-    def dbgXdone(self, val):
+    def dbgXDone(self, val):
         return("xdn  %2x" % (val))
 
     def dbgZMov(self, val):
@@ -4175,10 +4175,10 @@ class UpdateThread(Thread):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
         return("zexp %7.4f" % (tmp))
 
-    def dbgZwait(self, val):
+    def dbgZWait(self, val):
         return("zwt  %2x" % (val))
 
-    def dbgZdone(self, val):
+    def dbgZDone(self, val):
         return("zdn  %2x" % (val))
 
     def abort(self):
