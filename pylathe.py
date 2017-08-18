@@ -4111,7 +4111,8 @@ class UpdateThread(Thread):
         pass
 
     def dbgDone(self, val):
-        dbg.close()
+        if dbg != None:
+            dbg.close()
         dbg = None
 
     def dbgTest(self, val):
