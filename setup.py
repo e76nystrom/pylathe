@@ -410,5 +410,5 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
             xFile.write("package body CtlBits is\n\n")
             xFile.write("end CtlBits;\n")
             xFile.close()
-        # jFile.write("};\n")
-        # jFile.close()
+            # jFile.write("};\n")
+            # jFile.close()
