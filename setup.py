@@ -182,10 +182,7 @@ def createCtlStates(stateList, cLoc, fData=False):
                         stdout.flush()
                     var = tmp[1]
                     cFile.write("enum %s\n" % (var.upper()))
-                    enum = var.replace('_', "") + "List"
-                    globals()[enum] = []
-                    importLisgt.append(enum)
-                    # tmp =  " public static final String[] %s = \n" % (tmp[1])
+                    # tmp =  " public static final String[] %s = \n" % (var])
                     # jFile.write(tmp)
                     val = 0
                 elif data.startswith("{") or data.startswith("}"):
@@ -197,6 +194,13 @@ def createCtlStates(stateList, cLoc, fData=False):
             else:
                 if data.startswith("enum"):
                     val = 0
+                    tmp = data.split()
+                    if len(tmp) != 2:
+                        print("enum failure")
+                        stdout.flush()
+                    enum = tmp[1].replace('_', "") + "List"
+                    globals()[enum] = []
+                    importLisgt.append(enum)
     if fData:
         cFile.close()
         # jFile.write("};\n")
