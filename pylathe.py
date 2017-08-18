@@ -4108,12 +4108,14 @@ class UpdateThread(Thread):
         stdout.flush()
 
     def dbgPass(self, val):
-        pass
-
+        return("pass %x" % (val))
+;
     def dbgDone(self, val):
+        global dbg
         if dbg != None:
             dbg.close()
         dbg = None
+        return("done")
 
     def dbgTest(self, val):
         return("test %d" % (val))
