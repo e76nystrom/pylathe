@@ -4074,11 +4074,15 @@ class UpdateThread(Thread):
                                 val = int(val, 16)
                                 try:
                                     action = dbgTbl[cmd]
-                                    result = action(val)
-                                    dbg.write(result + "\n")
+                                    output = action(val)
+                                    dbg.write(output + "\n")
                                     dbg.flush()
                                 except IndexError:
-                                    pass
+                                    print("index error %s" % result)
+                                    stdout.flush()
+                                except TypeError:
+                                    print("type error %s" % result)
+                                    stdout.flush()
                             except ValueError:
                                 pass
                         else:
