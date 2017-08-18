@@ -4111,7 +4111,7 @@ class UpdateThread(Thread):
         stdout.flush()
 
     def dbgPass(self, val):
-        tmp = pass >> 8
+        tmp = val >> 8
         if tmp == 0:
             return("pass %x" % (val))
         elif tmp == 1:
