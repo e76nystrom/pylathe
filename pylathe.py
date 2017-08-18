@@ -545,9 +545,12 @@ def sendSpindleData(send=False, rpm=None):
                 xilinxTestMode()
                 queParm(RPM, getInfo(cfgTestRPM))
                 cfgReg = 0
-                cfgReg |= ENC_POL if getBoolInfo(cfgInvEncDir)
-                cfgReg |= ZDIR_POL if getBoolInfo(zInvDir)
-                cfgReg |= XDIR_POL if getBoolInfo(xInvDir)
+                if getBoolInfo(cfgInvEncDir):
+                    cfgReg |= ENC_POL
+                if getBoolInfo(zInvDir):
+                    cfgReg |= ZDIR_POL
+                if getBoolInfo(xInvDir):
+                     cfgReg |= XDIR_POL
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
             spindleDataSent = True
