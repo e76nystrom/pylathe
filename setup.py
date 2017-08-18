@@ -195,7 +195,7 @@ def createEnums(enumList, cLoc, fData=False):
                     cFile.write("%s\n" % (data))
                     if data.startswith("}"):
                         cFile.write("\n#ifdef ENUM_%s\n\n" % (var.upper()))
-                        cFile.write("char *%s = \n{\n" % (enum))
+                        cFile.write("char *%s[] = \n{\n" % (enum))
                         for s in stringList:
                             cFile.write(" \"%s\",\n" % (s))
                         cFile.write("};\n\n#endif\n")
