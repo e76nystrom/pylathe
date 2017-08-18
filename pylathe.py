@@ -2199,7 +2199,7 @@ class ScrewThread(UpdatePass):
 
     def calculateThread(self, final=False, add=False):
         if not add:
-           if final:
+            if final:
                 self.curArea = self.area
             else:
                 self.curArea += self.areaPass
