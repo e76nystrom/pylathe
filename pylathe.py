@@ -399,13 +399,13 @@ class MoveCommands():
         self.queMove(SAVE_DIAMETER, val)
 
     def moveZ(self, zLoc, flag=CMD_MAX):
-        self.queMoveF('MOVE_Z, flag, zLoc)
+        self.queMoveF(MOVE_Z, flag, zLoc)
         self.drawLineZ(zLoc)
         if self.dbg:
             print("moveZ  %7.4f" % (zLoc))
 
     def moveX(self, xLoc, flag=CMD_MAX):
-        self.queMoveF('MOVE_X, flag, xLoc)
+        self.queMoveF(MOVE_X, flag, xLoc)
         self.drawLineX(xLoc)
         if self.dbg:
             print("moveX  %7.4f" % (xLoc))
@@ -450,12 +450,12 @@ class MoveCommands():
             print("saveDepth %7.4f" % (depth))
 
     def taperZX(self, zLoc):
-        self.queMoveF('TAPER_ZX, 1, zLoc)
+        self.queMoveF(TAPER_ZX, 1, zLoc)
         if self.dbg:
             print("taperZX %7.4f" % (zLoc))
 
     def taperXZ(self, xLoc):
-        self.queMoveF('TAPER_XZ, 1, xLoc)
+        self.queMoveF(TAPER_XZ, 1, xLoc)
         if self.dbg:
             print("taperXZ %7.4f" % (xLoc))
 
