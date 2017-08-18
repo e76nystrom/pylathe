@@ -4019,6 +4019,9 @@ class UpdateThread(Thread):
         dbgTbl = [None for i in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
             dbgTbl[index] = action
+        for i, (val) in enumerate(dbgTbl):
+            if val == None:
+                print("dbgTbl action for %s missing" % (dMessageList[i]))
         i = 0
         op = None
         scanMax = len(self.parmList)
