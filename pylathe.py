@@ -4105,11 +4105,12 @@ class UpdateThread(Thread):
         #     return("spring\n")
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
-        return(tmp = val >> 8; \
+        result = tmp = val >> 8; \
               "pass %d\n" % (val) if tmp == 0 else \
               "spring\n" if tmp == 1 else \
-              "spring %d\n" % (val & 0xff))
-    
+              "spring %d\n" % (val & 0xff)
+        return(result)
+
     def dbgDone(self, val):
         return("done")
 
