@@ -4068,14 +4068,15 @@ class UpdateThread(Thread):
                     if result:
                         if dbg != None:
                             dbg.write(result + '\n')
-                            dbg.flush()
                             (cmd, val) = result.split(' ')[:2]
                             try:
                                 cmd = int(cmd, 16)
                                 val = int(val, 16)
                                 try:
                                     action = dbgTbl[cmd]
-                                    action(val)
+                                    result = action(val)
+                                    dbg.write(result + "\n")
+                                    dbg.flush()
                                 except IndexError:
                                     pass
                             except ValueError:
