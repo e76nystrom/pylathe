@@ -789,9 +789,9 @@ class Turn(UpdatePass):
             pass
 
         self.m.moveX(self.xStart + self.xRetract)
-        self.m.done()
         if STEPPER_DRIVE:
             self.m.stopSpindle();
+        self.m.done()
         self.m.drawClose()
         stdout.flush()
 
@@ -1065,6 +1065,7 @@ class Face(UpdatePass):
 
         if STEPPER_DRIVE:
             self.m.stopSpindle()
+        self.m.done()
         self.m.drawClose()
         stdout.flush()
 
@@ -1315,6 +1316,7 @@ class Cutoff():
 
         if STEPPER_DRIVE:
             self.m.stopSpindle()
+        self.m.done()
         self.m.drawClose()
         stdout.flush()
 
@@ -1533,6 +1535,7 @@ class Taper(UpdatePass):
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
+        self.m.done()
         self.m.drawClose()
         stdout.flush()
 
@@ -1669,6 +1672,7 @@ class Taper(UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         self.m.stopSpindle();
+        self.m.done()
         self.m.drawClose()
         stdout.flush()
 
@@ -2181,6 +2185,7 @@ class ScrewThread(UpdatePass):
         self.drawClose()
         self.m.drawClose()
         self.m.stopSpindle();
+        self.m.done()
         stdout.flush()
 
     def threadSetup(self):
