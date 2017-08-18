@@ -1093,7 +1093,7 @@ class Face(UpdatePass):
                (self.zEnd, self.xEnd), CENTER)
 
     def calculateFacePass(self, final=False):
-        feed = self.cutAmount if final self.passCount * self.actualFeed
+        feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
@@ -1561,7 +1561,7 @@ class Taper(UpdatePass):
 
     def calcExternalPass(self, final=False):
         if self.taperX:
-            feed = self.cutAmount if final self.passCount * self.actualFeed
+            feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
             self.endX = self.xStart - feed
             self.taperLength = self.feed / self.taper
@@ -2199,8 +2199,10 @@ class ScrewThread(UpdatePass):
 
     def calculateThread(self, final=False, add=False):
         if not add:
-            (self.curArea = self.area) if final \
-                           self.curArea += self.areaPass
+           if final:
+                self.curArea = self.area
+            else:
+                self.curArea += self.areaPass
             feed = sqrt(self.curArea / self.tanAngle)
             self.feed = feed
         else:
@@ -3229,14 +3231,12 @@ class JogPanel(wx.Panel):
 
     def updateZ(self, val):
         txt = "%7.3f" % (float(val) / self.zStepsInch) \
-              if self.zStepsInch != 0.0 else \
-                 txt = '0.000'
+              if self.zStepsInch != 0.0 else '0.000'
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
         txt = "%7.3f" % (float(val) / self.xStepsInch) \
-              if self.xStepsInch != 0.0 else \
-                 txt = '0.000'
+              if self.xStepsInch != 0.0 else '0.000'
         self.xPos.SetValue(txt)
 
     def updateRPM(self, val):
