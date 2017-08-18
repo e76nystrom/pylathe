@@ -4111,7 +4111,13 @@ class UpdateThread(Thread):
         stdout.flush()
 
     def dbgPass(self, val):
-        return("pass %x" % (val))
+        tmp = pass >> 8
+        if tmp == 0:
+            return("pass %x" % (val))
+        elif tmp == 1:
+            return("spring")
+        elif tmp == 2:
+            return("spring %d" % (val & 0xff))
 
     def dbgDone(self, val):
         return("done")
@@ -4286,9 +4292,9 @@ class MainFrame(wx.Frame):
                 queParm(Z_HOME_OFFSET, zHomeOffset)
                 queParm(X_HOME_OFFSET, xHomeOffset)
                 queParm(X_HOME_STATUS, (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
-                val = (-1, 1)[getBoolInfo(zInvDRO)]
+                val = -1 if getBoolInfo(zInvDRO) else 1
                 queParm(Z_DRO_DIR, val)
-                val = (-1, 1)[getBoolInfo(xInvDRO)]
+                val = -1 if getBoolInfo(xInvDRO) else 1
                 queParm(X_DRO_DIR, val)
                 sendMulti()
                 sendSpindleData()
