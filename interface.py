@@ -715,7 +715,7 @@ stateList =\
 [\
     "z control states",
 
-    "enum zStates",
+    "enum z_States",
     "{",
     ["ZIDLE", "idle"],
     ["ZWAITBKLS", "wait for backlash move complete"],
