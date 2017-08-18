@@ -822,10 +822,7 @@ class Turn(UpdatePass):
                (self.zEnd, self.safeX), CENTER)
 
     def calculateTurnPass(self, final=False):
-        if final:
-            feed = self.cutAmount
-        else:
-            feed = self.passCount * self.actualFeed
+        feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         if self.internal:
             if self.neg:
@@ -1096,10 +1093,7 @@ class Face(UpdatePass):
                (self.zEnd, self.xEnd), CENTER)
 
     def calculateFacePass(self, final=False):
-        if final:
-            feed = self.cutAmount
-        else:
-            feed = self.passCount * self.actualFeed
+        feed = self.cutAmount if final self.passCount * self.actualFeed
         self.feed = feed
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
@@ -1567,10 +1561,7 @@ class Taper(UpdatePass):
 
     def calcExternalPass(self, final=False):
         if self.taperX:
-            if final:
-                feed = self.cutAmount
-            else:
-                feed = self.passCount * self.actualFeed
+            feed = self.cutAmount if final self.passCount * self.actualFeed
             self.feed = feed
             self.endX = self.xStart - feed
             self.taperLength = self.feed / self.taper
@@ -1591,10 +1582,8 @@ class Taper(UpdatePass):
             self.startX = self.xStart
             self.endZ = self.zStart
             taperLength = self.feed * self.taper
-            if taperLength < self.xLength:
-                self.endX = self.xStart - taperLength
-            else:
-                self.endX = self.xEnd
+            self.endX = self.xStart - taperLength \
+                        if taperLength < self.xLength else self.xEnd
         print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
               "%6.3f %6.3f" % \
               (self.passCount, self.startZ, self.startX, \
@@ -1678,10 +1667,7 @@ class Taper(UpdatePass):
         stdout.flush()
 
     def calcInternalPass(self, final=False):
-        if final:
-            feed = self.cutAmount
-        else:
-            feed = self.passCount * self.actualFeed
+        feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         self.startX = self.boreRadius + feed
         self.endZ = self.feed / self.taper
@@ -1709,10 +1695,7 @@ class Taper(UpdatePass):
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
                    (self.safeZ, self.startX), LEFT)
-        if self.taperX:
-            m.taperZX(self.endZ)
-        else:
-            m.taperXZ(self.endx)
+        m.taperZX(self.endZ) if self.taperX else m.taperXZ(self.endx)
         m.drawLine(self.endZ, self.endX)
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
@@ -2026,10 +2009,9 @@ class TaperPanel(wx.Panel):
                 jogPanel.clrStatus()
                 self.sendData()
                 taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-                if self.internal.GetValue():
-                    self.taper.internalTaper(taper)
-                else:
-                    self.taper.externalTaper(taper)
+                self.taper.internalTaper(taper) \
+                    if self.internal.GetValue() else \
+                       self.taper.externalTaper(taper)
             else:
                 jogPanel.notHomed()
         else:
@@ -2045,9 +2027,7 @@ class TaperPanel(wx.Panel):
     
     def OnAdd(self, e):
         global jogPanel
-        if self.internal.GetValue():
-            self.taper.internalAdd()
-        else:
+        self.taper.internalAdd() if self.internal.GetValue() else \
             self.taper.externalAdd()
         jogPanel.focus()
 
@@ -2113,10 +2093,8 @@ class ScrewThread(UpdatePass):
         self.lastFeed = getFloatVal(th.lastFeed)
         self.depth = getFloatVal(th.depth)
 
-        if self.internal:
-            self.xEnd = self.xStart + self.depth
-        else:
-            self.xEnd = self.xStart - self.depth
+        self.xEnd = self.xStart + self.depth if self.internal else \
+                    self.xStart - self.depth
 
         self.xRetract = abs(getFloatVal(th.xRetract))
         
@@ -2221,10 +2199,9 @@ class ScrewThread(UpdatePass):
 
     def calculateThread(self, final=False, add=False):
         if not add:
-            if final:
-                self.curArea = self.area
-            else:
-                self.curArea += self.areaPass
+            (self.curArea = self.area) if final \
+                           self.curArea += self.areaPass
+                
             feed = sqrt(self.curArea / self.tanAngle)
             self.feed = feed
         else:
