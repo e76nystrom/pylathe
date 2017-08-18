@@ -29,9 +29,9 @@ from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
     infoSetLabel, getInitialInfo, clrInfo
 
 from setup import createConfig, createCommands, createParameters, \
-    createCtlBits, createCtlStates
+    createCtlBits, createEnums
 
-from interface import configList, cmdList, parmList, stateList, regList
+from interface import configList, cmdList, parmList, enumList, regList
 
 (config, configTable) = createConfig(configList)
 
@@ -54,7 +54,7 @@ fData = False
 createCommands(cmdList, cLoc, fData)
 createParameters(parmList, cLoc, fData)
 createCtlBits(regList, cLoc, fData)
-createCtlStates(stateList, cLoc, fData)
+createEnums(enumList, cLoc, fData)
 if XILINX:
     from setup import createXilinxReg, createXilinxBits
     xLoc = '../../Xilinx/LatheCtl/'
@@ -569,7 +569,7 @@ def sendZData(send=False):
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.zDROInch = getIntInfo(zDROInch)
-            jogPanel.zDROInvert = getBoolInfo(zInvDRO) == 1
+            jogPanel.zDROInvert = (1, -1)[getBoolInfo(zInvDRO)]
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -616,7 +616,7 @@ def sendXData(send=False):
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.xDROInch = getIntInfo(xDROInch)
-            jogPanel.xDROInvert = getBoolInfo(xInvDRO) == 1
+            jogPanel.xDROInvert = (1, -1)[getBoolInfo(xInvDRO)]
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -2691,8 +2691,8 @@ class JogPanel(wx.Panel):
         self.xStepsInch = 0
         self.zDROInch = 0
         self.xDROInch = 0
-        self.zDROInvert = 0
-        self.xDROInvert = 0
+        self.zDROInvert = 1
+        self.xDROInvert = 1
         self.zMenu = None
         self.xMenu = None
 
@@ -3284,24 +3284,19 @@ class JogPanel(wx.Panel):
                 zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
             if x != '#':
-                xLoc = float(x) / self.xStepsInch
-                val = xLoc - xHomeOffset
-                self.xPos.SetValue("%0.4f" % (val))
-                self.xPosDiam.SetValue("%0.4f" % (abs(val * 2)))
+                xLoc = float(x) / self.xStepsInch - xHomeOffset
+                self.xPos.SetValue("%0.4f" % (xLoc))
+                self.xPosDiam.SetValue("%0.4f" % (abs(xLoc * 2)))
             self.rpm.SetValue(rpm)
             self.curPass.SetValue(curPass)
 
             if DRO:
-                zDroLoc = float(zDROPos) / self.zDROInch
-                if self.zDROInvert:
-                    zDroLoc = -zDroLoc
-                zDroLoc -= zDROOffset
+                zDroLoc = float(self.zDroInvert * zDROPos) / self.zDROInch - \
+                          zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
-                xDroLoc = float(xDROPos) / self.xDROInch
-                if self.xDROInvert:
-                    xDroLoc = -xDroLoc
-                xDroLoc -= xDROOffset
+                xDroLoc = float(self.xDroInvert * xDROPos) / self.xDROInch - \
+                          xDROOffset
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
@@ -3993,6 +3988,20 @@ class UpdateThread(Thread):
 
     def run(self):
         global dbg
+        dbgTbl = {\
+                  'pass': self.dbgPass, \
+                  'done': self.dbgDone, \
+                  'xloc': self.dbgXLoc, \
+                  'xdst': self.dbgXDst, \
+                  'x_st': self.dbgXState, \
+                  'xbsteps': self.dbgXBSteps, \
+                  'xdro': self.dbgXDro, \
+                  'zloc': self.dbgZLoc, \
+                  'zdst': self.dbgZDst, \
+                  'z_st': self.dbgZState, \
+                  'zbsteps': self.dbgZBSteps, \
+                  'zdro': self.dbgZDro, \
+                  }
         i = 0
         op = None
         scanMax = len(self.parmList)
@@ -4045,9 +4054,12 @@ class UpdateThread(Thread):
                             dbg.write(result + '\n')
                             dbg.flush()
                             (cmd, val) = result.split(' ')[:2]
+                            try:
+                                action = dbgTbl[cmd]
+                                action(val)
+                            except KeyError:
+                                pass
                             if cmd == done:
-                                dbg.close()
-                                dbg = None
                         else:
                             print(result)
                             stdout.flush()
@@ -4063,6 +4075,29 @@ class UpdateThread(Thread):
                     break
         print("done")
         stdout.flush()
+
+    def dbgPass(self, val):
+        pass
+
+    def dbgDone(self, val):
+        dbg.close()
+        dbg = None
+
+    def dbgXLoc(self, val):
+        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+
+    def dbgXDst(self, val):
+        tmp = float(val) / jogPanel.xStepsInch
+
+    def dbgXState(self, val):
+        tmp = xStateList[val]
+
+    def dbgXBSteps(self, val):
+        pass
+
+    def dbgXDro(self, val):
+        xDroLoc = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
+                  xDROOffset
 
     def abort(self):
         self.run = False
