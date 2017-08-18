@@ -545,12 +545,9 @@ def sendSpindleData(send=False, rpm=None):
                 xilinxTestMode()
                 queParm(RPM, getInfo(cfgTestRPM))
                 cfgReg = 0
-                if getBoolInfo(cfgInvEncDir):
-                    cfgReg |= ENC_POL
-                if getBoolInfo(zInvDir):
-                    cfgReg |= ZDIR_POL
-                if getBoolInfo(xInvDir):
-                    cfgReg |= XDIR_POL
+                cfgReg |= ENC_POL if getBoolInfo(cfgInvEncDir)
+                cfgReg |= ZDIR_POL if getBoolInfo(zInvDir)
+                cfgReg |= XDIR_POL if getBoolInfo(xInvDir)
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
             spindleDataSent = True
@@ -574,8 +571,7 @@ def sendZData(send=False):
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
-                if val > 0.020:
-                    val = 0.020
+                val = 0.020 if val > 0.020
             except ValueError:
                 val = 0.001
             queParm(Z_MPG_INC, val * jogPanel.zStepsInch)
@@ -620,8 +616,7 @@ def sendXData(send=False):
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
-                if val > 0.020:
-                    val = 0.020
+                val = 0.020 if val > 0.020
             except ValueError:
                 val = 0.001
             queParm(X_MPG_INC, val * jogPanel.xStepsInch)
@@ -647,8 +642,7 @@ def sendXData(send=False):
                 stepsInch = jogPanel.xStepsInch
                 start = str(int(getFloatInfo(xHomeStart) * stepsInch))
                 end = str(int(getFloatInfo(xHomeEnd) * stepsInch))
-                if end > start:
-                    (start, end) = (end, start)
+                (start, end) = (end, start) if end > start
                 queParm(X_HOME_START, start)
                 queParm(X_HOME_END, end)
 
