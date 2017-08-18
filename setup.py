@@ -170,8 +170,9 @@ def createCtlStates(stateList, cLoc, fData=False):
                 print("createCtlStates %s already defined" % state)
             else:
                 globals()[state] = val
-                eval("%s.append('%s')" % (enum, state))
-                importList.append(state)
+                if !fData:
+                    eval("%s.append('%s')" % (enum, state))
+                    importList.append(state)
             val += 1
         else:
             if fData:
