@@ -3988,20 +3988,36 @@ class UpdateThread(Thread):
 
     def run(self):
         global dbg
-        dbgTbl = {\
-                  'pass': self.dbgPass, \
-                  'done': self.dbgDone, \
-                  'xloc': self.dbgXLoc, \
-                  'xdst': self.dbgXDst, \
-                  'x_st': self.dbgXState, \
-                  'xbsteps': self.dbgXBSteps, \
-                  'xdro': self.dbgXDro, \
-                  'zloc': self.dbgZLoc, \
-                  'zdst': self.dbgZDst, \
-                  'z_st': self.dbgZState, \
-                  'zbsteps': self.dbgZBSteps, \
-                  'zdro': self.dbgZDro, \
-                  }
+        dbgSetup = (\
+                    (D_PASS, self.dbgPass), \
+                    (D_DONE, self.dbgDone), \
+                    (D_TEST, self.dbgTest), \
+
+                    (D_XMOV, self.dbgXMov), \
+                    (D_XLOC, self.dbgXLoc), \
+                    (D_XDST, self.dbgXDst), \
+                    (D_XSTP, self.dbgXStp),
+                    (D_XST, self.dbgXState), \
+                    (D_XBSTP, self.dbgXBSteps), \
+                    (D_XDRO, self.dbgXDro), \
+                    (D_XEXP, self.dbgXExp), \
+                    (D_XWT, self.dbgXDWait), \
+                    (D_XDN, self.dbgXDone), \
+
+                    (D_XMOV, self.dbgXMov), \
+                    (D_XLOC, self.dbgXLoc), \
+                    (D_XDST, self.dbgXDst), \
+                    (D_XSTP, self.dbgXStp),
+                    (D_XST, self.dbgXState), \
+                    (D_XBSTP, self.dbgXBSteps), \
+                    (D_XDRO, self.dbgXDro), \
+                    (D_XEXP, self.dbgXExp), \
+                    (D_XWT, self.dbgXDWait), \
+                    (D_XDN, self.dbgXDone), \
+        )
+        dbgTbl = [None for i in range(len(dbgSetup))]
+        for (index, action) in dbgSetup:
+            dbgTbl[index] = action
         i = 0
         op = None
         scanMax = len(self.parmList)
@@ -4055,11 +4071,14 @@ class UpdateThread(Thread):
                             dbg.flush()
                             (cmd, val) = result.split(' ')[:2]
                             try:
-                                action = dbgTbl[cmd]
-                                action(val)
-                            except KeyError:
+                                val = int(val, 16)
+                                try:
+                                    action = dbgTbl[cmd]
+                                    action(val)
+                                except IndexError:
+                                    pass
+                            except ValueError:
                                 pass
-                            if cmd == done:
                         else:
                             print(result)
                             stdout.flush()
@@ -4083,21 +4102,46 @@ class UpdateThread(Thread):
         dbg.close()
         dbg = None
 
+    def dbgTest(self, val):
+        
+
+    def dbgXMov(self, val):
+        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        return("xmov %7.4f" % (tmp))
+
     def dbgXLoc(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        return("xloc %7.4f" % (tmp))
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
+        return("xdst %7.4f" % (tmp))
+
+    def dbgXStp(self, val):
+        tmp = float(val) / jogPanel.xStepsInch
+        return("xstp %7.4f" % (tmp))
 
     def dbgXState(self, val):
         tmp = xStateList[val]
+        return("x_st %s" % (tmp))
 
     def dbgXBSteps(self, val):
-        pass
+        return("xbst %d" % val)
 
     def dbgXDro(self, val):
         xDroLoc = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
                   xDROOffset
+        return("xdro %7.4f" % (tmp))
+
+    def dbgXExp(self, val):
+        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        return("xexp %7.4f" % (tmp))
+
+    def dbgXwt(self, val):
+        return("xwt  %2x" % (val))
+
+    def dbgXdn(self, val):
+        return("xdn  %2x" % (val))
 
     def abort(self):
         self.run = False
