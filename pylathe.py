@@ -4014,6 +4014,7 @@ class UpdateThread(Thread):
                     (D_XEXP, self.dbgXExp), \
                     (D_XWT, self.dbgXWait), \
                     (D_XDN, self.dbgXDone), \
+                    (D_ZDN, self.dbgHome), \
         )
         dbgTbl = [None for i in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
@@ -4186,6 +4187,9 @@ class UpdateThread(Thread):
 
     def dbgZDone(self, val):
         return("zdn  %2x" % (val))
+
+    def dbgHome(self, val):
+        return("hsta %s" % (hStatesList[val]))
 
     def abort(self):
         self.run = False
