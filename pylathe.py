@@ -4073,7 +4073,7 @@ class UpdateThread(Thread):
                     result = getString()
                     if result:
                         if dbg != None:
-                            dbg.write(result + '\n')
+                            # dbg.write(result + '\n')
                             (cmd, val) = result.split(' ')[:2]
                             try:
                                 cmd = int(cmd, 16)
@@ -4090,7 +4090,7 @@ class UpdateThread(Thread):
                                     print("type error %s" % result)
                                     stdout.flush()
                             except ValueError:
-                                pass
+                                print("value error cmd %s val %s" % (cmd, val))
                         else:
                             print(result)
                             stdout.flush()
@@ -4109,7 +4109,7 @@ class UpdateThread(Thread):
 
     def dbgPass(self, val):
         return("pass %x" % (val))
-;
+
     def dbgDone(self, val):
         global dbg
         if dbg != None:
