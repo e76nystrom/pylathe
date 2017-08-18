@@ -468,6 +468,9 @@ class MoveCommands():
         if self.dbg:
             print("probeX %7.4f" % (xDist))
 
+    def done(self):
+        self.queMove('OP_DONE', 0)
+
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
     try:
@@ -786,6 +789,7 @@ class Turn(UpdatePass):
             pass
 
         self.m.moveX(self.xStart + self.xRetract)
+        self.m.done()
         if STEPPER_DRIVE:
             self.m.stopSpindle();
         self.m.drawClose()
