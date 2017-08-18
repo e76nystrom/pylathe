@@ -338,14 +338,15 @@ class MoveCommands():
             except:
                 print("dxf file save error")
 
-    def queMove(self, opString, val):
+    def queMove(self, op, val):
         if self.send:
-            op = eval(opString)
+            opString = mCommandsList[op]
             moveQue.put((opString, op, val))
 
-    def queMoveF(self, opString, flag, val):
+    def queMoveF(self, op, flag, val):
         if self.send:
-            op = eval(opString) | (flag << 8)
+            opString = mCommandsList[op]
+            op |= (flag << 8)
             moveQue.put((opString, op, val))
 
     def queClear(self):
@@ -354,35 +355,35 @@ class MoveCommands():
             moveQue.get()
 
     def queZSetup(self, feed):
-        self.queMove('Z_FEED_SETUP', feed)
+        self.queMove(Z_FEED_SETUP, feed)
         self.saveZOffset();
         self.saveXOffset();
 
     def queXSetup(self, feed):
-        self.queMove('X_FEED_SETUP', feed)
+        self.queMove(X_FEED_SETUP, feed)
         self.saveZOffset();
         self.saveXOffset();
 
     def startSpindle(self, rpm):
-        self.queMove('START_SPINDLE', rpm)
+        self.queMove(START_SPINDLE, rpm)
         self.saveZOffset();
         self.saveXOffset();
 
     def stopSpindle(self):
-        self.queMove('STOP_SPINDLE', 0)
+        self.queMove(STOP_SPINDLE, 0)
 
     def queFeedType(self, feedType):
-        self.queMove('SAVE_FEED_TYPE', feedType)
+        self.queMove(SAVE_FEED_TYPE, feedType)
 
     def zSynSetup(self, feed):
-        self.queMove('Z_SYN_SETUP', feed)
+        self.queMove(Z_SYN_SETUP, feed)
 
     def xSynSetup(self, feed):
-        self.queMove('X_SYN_SETUP', feed)
+        self.queMove(X_SYN_SETUP, feed)
 
     def nextPass(self, passNum):
         self.passNum = passNum
-        self.queMove('PASS_NUM', passNum)
+        self.queMove(PASS_NUM, passNum)
         if self.dbg:
             if passNum & 0x100:
                 print("spring")
@@ -392,84 +393,84 @@ class MoveCommands():
                 print("pass %d" % (passNum))
 
     def quePause(self):
-        self.queMove('QUE_PAUSE', 0)
+        self.queMove(QUE_PAUSE, 0)
 
     def saveDiameter(self, val):
-        self.queMove('SAVE_DIAMETER', val)
+        self.queMove(SAVE_DIAMETER, val)
 
     def moveZ(self, zLoc, flag=CMD_MAX):
-        self.queMoveF('MOVE_Z', flag, zLoc)
+        self.queMoveF('MOVE_Z, flag, zLoc)
         self.drawLineZ(zLoc)
         if self.dbg:
             print("moveZ  %7.4f" % (zLoc))
 
     def moveX(self, xLoc, flag=CMD_MAX):
-        self.queMoveF('MOVE_X', flag, xLoc)
+        self.queMoveF('MOVE_X, flag, xLoc)
         self.drawLineX(xLoc)
         if self.dbg:
             print("moveX  %7.4f" % (xLoc))
 
     def saveZOffset(self):
         global zHomeOffset
-        self.queMove('SAVE_Z_OFFSET', zHomeOffset)
+        self.queMove(SAVE_Z_OFFSET, zHomeOffset)
         if self.dbg:
             print("saveZOffset  %7.4f" % (zHomeOffset))
 
     def saveXOffset(self):
         global xHomeOffset
-        self.queMove('SAVE_X_OFFSET', xHomeOffset)
+        self.queMove(SAVE_X_OFFSET, xHomeOffset)
         if self.dbg:
             print("savexOffset  %7.4f" % (xHomeOffset))
 
     def moveXZ(self, zLoc, xLoc):
-        self.queMove('SAVE_Z', zLoc)
-        self.queMove('MOVE_XZ', xLoc)
+        self.queMove(SAVE_Z, zLoc)
+        self.queMove(MOVE_XZ, xLoc)
         if self.dbg:
             print("moveZX %7.4f %7.4f" % (zLoc, xLoc))
 
     def moveZX(self, zLoc, xLoc):
-        self.queMove('SAVE_X', xLoc)
-        self.queMove('MOVE_ZX', zLoc)
+        self.queMove(SAVE_X, xLoc)
+        self.queMove(MOVE_ZX, zLoc)
         if self.dbg:
             print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
     def saveTaper(self, taper):
-        self.queMove('SAVE_TAPER', taper)
+        self.queMove(SAVE_TAPER, taper)
         if self.dbg:
             print("saveTaper %7.4f" % (taper))
 
     def saveRunout(self, runout):
-        self.queMove('SAVE_RUNOUT', runout)
+        self.queMove(SAVE_RUNOUT, runout)
         if self.dbg:
             print("saveRunout %7.4f" % (runout))
 
     def saveDepth(self, depth):
-        self.queMove('SAVE_DEPTH', depth)
+        self.queMove(SAVE_DEPTH, depth)
         if self.dbg:
             print("saveDepth %7.4f" % (depth))
 
     def taperZX(self, zLoc):
-        self.queMoveF('TAPER_ZX', 1, zLoc)
+        self.queMoveF('TAPER_ZX, 1, zLoc)
         if self.dbg:
             print("taperZX %7.4f" % (zLoc))
 
     def taperXZ(self, xLoc):
-        self.queMoveF('TAPER_XZ', 1, xLoc)
+        self.queMoveF('TAPER_XZ, 1, xLoc)
         if self.dbg:
             print("taperXZ %7.4f" % (xLoc))
 
     def probeZ(self, zDist):
-        self.queMove('PROBE_Z', zDist)
+        self.queMove(PROBE_Z, zDist)
         if self.dbg:
             print("probeZ %7.4f" % (zDist))
 
     def probeX(self, xDist):
-        self.queMove('PROBE_X', xDist)
+        self.queMove(PROBE_X, xDist)
         if self.dbg:
             print("probeX %7.4f" % (xDist))
 
     def done(self):
-        self.queMove('OP_DONE', 0)
+        self.queMove(OP_DONE, 0)
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
