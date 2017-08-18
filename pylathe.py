@@ -4134,7 +4134,7 @@ class UpdateThread(Thread):
 
     def dbgXState(self, val):
         tmp = xStatesList[val]
-        return("x_st %s" % (tmp))
+        return("x_st %s" % (tmp + "\n" if val == XIDLE else ""))
 
     def dbgXBSteps(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -4173,7 +4173,7 @@ class UpdateThread(Thread):
 
     def dbgZState(self, val):
         tmp = xStatesList[val]
-        return("z_st %s" % (tmp))
+        return("z_st %s" % (tmp + "\n" if val == XIDLE else ""))
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
