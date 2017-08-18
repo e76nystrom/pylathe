@@ -170,13 +170,21 @@ def createCtlStates(stateList, cLoc, fData=False):
                 print("createCtlStates %s already defined" % state)
             else:
                 globals()[state] = val
+                eval("%s.append('%s')" % (enum, state))
                 importList.append(state)
             val += 1
         else:
             if fData:
                 if data.startswith("enum"):
                     tmp = data.split()
-                    cFile.write("%s %s\n" % (tmp[0], tmp[1].upper()))
+                    if len(tmp) != 2:
+                        print("enum failure")
+                        stdout.flush()
+                    var = tmp[1]
+                    cFile.write("enum %s\n" % (var.upper()))
+                    enum = var + "List"
+                    globals(enum) = []
+                    importLisgt.append(enum)
                     # tmp =  " public static final String[] %s = \n" % (tmp[1])
                     # jFile.write(tmp)
                     val = 0
