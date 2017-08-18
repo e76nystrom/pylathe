@@ -638,7 +638,7 @@ xilinxBitList = \
 (\
     "z control register",
 
-    ("zCtl"),
+    ("zCtl",),
     ("zReset",      1, 0, "reset flag"),
     ("zStart",      1, 1, "start z"),
     ("zSrc_Syn",    1, 2, "run z synchronized"),
@@ -652,7 +652,7 @@ xilinxBitList = \
 
     "x control register",
 
-    ("xCtl"),
+    ("xCtl",),
     ("xReset",      1, 0, "x reset"),
     ("xStart",      1, 1, "start x"),
     ("xSrc_Syn",    1, 2, "run x synchronized"),
@@ -665,21 +665,21 @@ xilinxBitList = \
 
     "taper control register",
 
-    ("tCtl"),
+    ("tCtl",),
     ("tEna",     1, 0, "taper enable"),
     ("tZ",       1, 1, "one for taper z"),
     ("tX",       0, 1, "zero for taper x"),
 
     "position control register",
 
-    ("pCtl"),
+    ("pCtl",),
     ("pReset",    1, 0, "reset position"),
     ("pLimit",    1, 1, "set flag on limit reached"),
     ("pZero",     1, 2, "set flag on zero reached"),
 
     "configuration register",
 
-    ("cCtl"),
+    ("cCtl",),
     ("zStep_Pol",  1, 0, "z step pulse polarity"),
     ("zDir_Pol",   1, 1, "z direction polarity"),
     ("xStep_Pol",  1, 2, "x step pulse polarity"),
@@ -689,7 +689,7 @@ xilinxBitList = \
 
     "debug control register",
 
-    ("dCtl"),
+    ("dCtl",),
     ("Dbg_Ena",    1, 0, "enable debugging"),
     ("Dbg_Sel",    1, 1, "select dbg encoder"),
     ("Dbg_Dir",    1, 2, "debug direction"),
@@ -700,7 +700,7 @@ xilinxBitList = \
 
  "status register",
 
-    ("stat"),
+    ("stat",),
     ("s_Z_Done_Int", 1, 0, "z done interrrupt"),
     ("s_X_Done_Int", 1, 1, "x done interrupt"),
     ("s_Dbg_Done",   1, 2, "debug done"),
@@ -793,7 +793,7 @@ enumList =\
 
     "debug message types",
     
-    "enum d_message",
+    "enum d_Message",
     "{",
     ("D_PASS", "pass done"),
     ("D_DONE", "all operations done"),
