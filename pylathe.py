@@ -574,7 +574,8 @@ def sendZData(send=False):
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
-                val = 0.020 if val > 0.020
+                if val > 0.020:
+                    val = 0.020
             except ValueError:
                 val = 0.001
             queParm(Z_MPG_INC, val * jogPanel.zStepsInch)
@@ -619,7 +620,8 @@ def sendXData(send=False):
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
-                val = 0.020 if val > 0.020
+                if val > 0.020:
+                    val = 0.020
             except ValueError:
                 val = 0.001
             queParm(X_MPG_INC, val * jogPanel.xStepsInch)
