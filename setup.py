@@ -170,38 +170,32 @@ def createCtlStates(stateList, cLoc, fData=False):
                 print("createCtlStates %s already defined" % state)
             else:
                 globals()[state] = val
-                if !fData:
-                    eval("%s.append('%s')" % (enum, state))
-                    importList.append(state)
+                eval("%s.append('%s')" % (enum, state))
+                importList.append(state)
             val += 1
         else:
-            if fData:
-                if data.startswith("enum"):
-                    tmp = data.split()
-                    if len(tmp) != 2:
-                        print("enum failure")
-                        stdout.flush()
-                    var = tmp[1]
+            if data.startswith("enum"):
+                tmp = data.split()
+                if len(tmp) != 2:
+                    print("enum failure")
+                    stdout.flush()
+                var = tmp[1]
+                enum = tmp[1].replace('_', "") + "List"
+                globals()[enum] = []
+                importLisgt.append(enum)
+                if fData:
                     cFile.write("enum %s\n" % (var.upper()))
                     # tmp =  " public static final String[] %s = \n" % (var])
                     # jFile.write(tmp)
                     val = 0
-                elif data.startswith("{") or data.startswith("}"):
+            elif data.startswith("{") or data.startswith("}"):
+                if fData:
                     cFile.write("%s\n" % (data))
                     # jFile.write(" %s\n" % (data))
-                else:
+            else:
+                if fData:
                     cFile.write("\n// %s\n\n" % (data))
                     # jFile.write("\n // %s\n\n" % (data))
-            else:
-                if data.startswith("enum"):
-                    val = 0
-                    tmp = data.split()
-                    if len(tmp) != 2:
-                        print("enum failure")
-                        stdout.flush()
-                    enum = tmp[1].replace('_', "") + "List"
-                    globals()[enum] = []
-                    importLisgt.append(enum)
     if fData:
         cFile.close()
         # jFile.write("};\n")
