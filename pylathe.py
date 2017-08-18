@@ -4129,18 +4129,19 @@ class UpdateThread(Thread):
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
-        return("xdst %7.4f" % (tmp))
+        return("xdst %7.4f %6d" % (tmp, val))
 
     def dbgXStp(self, val):
         tmp = float(val) / jogPanel.xStepsInch
-        return("xstp %7.4f" % (tmp))
+        return("xstp %7.4f %6d" % (tmp, val))
 
     def dbgXState(self, val):
         tmp = xStatesList[val]
         return("x_st %s" % (tmp))
 
     def dbgXBSteps(self, val):
-        return("xbst %d" % (val))
+        tmp = float(val) / jogPanel.xStepsInch
+        return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
         xDroLoc = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
@@ -4167,18 +4168,19 @@ class UpdateThread(Thread):
 
     def dbgZDst(self, val):
         tmp = float(val) / jogPanel.zStepsInch
-        return("zdst %7.4f" % (tmp))
+        return("zdst %7.4f %6d" % (tmp, val))
 
     def dbgZStp(self, val):
         tmp = float(val) / jogPanel.zStepsInch
-        return("zstp %7.4f" % (tmp))
+        return("zstp %7.4f %6d" % (tmp, val))
 
     def dbgZState(self, val):
         tmp = xStatesList[val]
         return("z_st %s" % (tmp))
 
     def dbgZBSteps(self, val):
-        return("zbst %d" % (val))
+        tmp = float(val) / jogPanel.zStepsInch
+        return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
         xDroLoc = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
