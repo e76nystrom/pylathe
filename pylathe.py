@@ -4004,17 +4004,18 @@ class UpdateThread(Thread):
                     (D_XWT, self.dbgXWait), \
                     (D_XDN, self.dbgXDone), \
 
-                    (D_XMOV, self.dbgXMov), \
-                    (D_XLOC, self.dbgXLoc), \
-                    (D_XDST, self.dbgXDst), \
-                    (D_XSTP, self.dbgXStp),
-                    (D_XST, self.dbgXState), \
-                    (D_XBSTP, self.dbgXBSteps), \
-                    (D_XDRO, self.dbgXDro), \
-                    (D_XEXP, self.dbgXExp), \
-                    (D_XWT, self.dbgXWait), \
-                    (D_XDN, self.dbgXDone), \
-                    (D_ZDN, self.dbgHome), \
+                    (D_ZMOV, self.dbgZMov), \
+                    (D_ZLOC, self.dbgZLoc), \
+                    (D_ZDST, self.dbgZDst), \
+                    (D_ZSTP, self.dbgZStp),
+                    (D_ZST, self.dbgZState), \
+                    (D_ZBSTP, self.dbgZBSteps), \
+                    (D_ZDRO, self.dbgZDro), \
+                    (D_ZEXP, self.dbgZExp), \
+                    (D_ZWT, self.dbgZWait), \
+                    (D_ZDN, self.dbgZDone), \
+
+                    (D_HST, self.dbgHome), \
         )
         dbgTbl = [None for i in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
