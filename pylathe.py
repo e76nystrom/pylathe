@@ -4124,7 +4124,7 @@ class UpdateThread(Thread):
         return("xstp %7.4f" % (tmp))
 
     def dbgXState(self, val):
-        tmp = xStateList[val]
+        tmp = xStatesList[val]
         return("x_st %s" % (tmp))
 
     def dbgXBSteps(self, val):
@@ -4162,7 +4162,7 @@ class UpdateThread(Thread):
         return("zstp %7.4f" % (tmp))
 
     def dbgZState(self, val):
-        tmp = xStateList[val]
+        tmp = xStatesList[val]
         return("z_st %s" % (tmp))
 
     def dbgZBSteps(self, val):
