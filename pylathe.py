@@ -569,7 +569,7 @@ def sendZData(send=False):
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.zDROInch = getIntInfo(zDROInch)
-            jogPanel.zDROInvert = (1, -1)[getBoolInfo(zInvDRO)]
+            jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
             stdout.flush()
             val = jogPanel.combo.GetValue()
             try:
@@ -616,7 +616,7 @@ def sendXData(send=False):
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             jogPanel.xDROInch = getIntInfo(xDROInch)
-            jogPanel.xDROInvert = (1, -1)[getBoolInfo(xInvDRO)]
+            jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO)] else 1
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -815,7 +815,7 @@ class Turn(UpdatePass):
                (self.safeZ, self.xStart))
         m.text("%7.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | (BELOW, ABOVE)[self.internal])
+               CENTER | ABOVE if self.internal else BELOW
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
@@ -1086,7 +1086,7 @@ class Face(UpdatePass):
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
         m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), (RIGHT, None)[self.internal])
+               (self.zStart, self.xEnd), None if self.internal else RIGHT
         m.text("%7.3f %6.3f" % \
                (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
@@ -1114,13 +1114,13 @@ class Face(UpdatePass):
             m.quePause()
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.curZ), \
-                   (self.curZ, self.safeX), (None, RIGHT)[self.internal])
+                   (self.curZ, self.safeX), RIGHT if self.internal else None
         m.moveX(self.xStart)
         m.moveX(self.xEnd, CMD_SYN)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.safeZ), \
-                   (self.safeZ, self.xEnd), (RIGHT, None)[self.internal])
+                   (self.safeZ, self.xEnd), None if self.internal else RIGHT
         m.moveX(self.safeX)
 
     def faceAdd(self):
@@ -1559,7 +1559,7 @@ class Taper(UpdatePass):
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
         m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), CENTER | (BELOW, ABOVE)[internal])
+               (self.zStart, self.xEnd), CENTER | ABOVE if internal else BELOW
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
@@ -2212,11 +2212,12 @@ class ScrewThread(UpdatePass):
                (self.zEnd, self.xStart), RIGHT)
         m.text("%7.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | (BELOW, ABOVE)[self.internal])
+               CENTER | ABOVE if self.internal else BELOW
         m.text("%7.3f" % (self.safeX * 2.0,), \
                (self.safeZ, self.safeX))
         m.text("%7.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), CENTER | (ABOVE, BELOW)[self.internal])
+               (self.zEnd, self.safeX), \
+               CENTER | BELOW if self.internal else ABOVE
 
     def calculateThread(self, final=False, add=False):
         if not add:
@@ -3466,7 +3467,7 @@ class PosMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnProbe, item)
 
-        if self.axis == 1:
+        if self.axis == AXIS_X:
             item = wx.MenuItem(self, wx.NewId(), "Home")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnHomeX, item)
@@ -3475,16 +3476,13 @@ class PosMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnGoto, item)
 
-        if self.axis == 1:
+        if self.axis == AXIS_X:
             item = wx.MenuItem(self, wx.NewId(), "Fix X")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def getPosCtl(self):
-        if self.axis == 0:
-            ctl = jogPanel.zPos
-        else:
-            ctl = jogPanel.xPos
+        ctl = jogPanel.zPos if self.axis == AXIS_Z else jogPanel.xPos
         return(jogPanelPos(ctl))
 
     def OnSet(self, e):
@@ -3495,10 +3493,7 @@ class PosMenu(wx.Menu):
 
     def OnZero(self, e):
         global jogPanel
-        if self.axis == 0:
-            updateZPos(0)
-        else:
-            updateXPos(0)
+        updateZPos(0) if self.axis == AXIS_Z else updateXPos(0)
         jogPanel.focus()
 
     def OnProbe(self, e):
@@ -3511,8 +3506,7 @@ class PosMenu(wx.Menu):
         queParm(X_HOME_DIST, getInfo(xHomeDist))
         queParm(X_HOME_BACKOFF_DIST, getInfo(xHomeBackoffDist))
         queParm(X_HOME_SPEED, getInfo(xHomeSpeed))
-        val = (-1, 1)[getBoolInfo(xHomeDir)]
-        queParm(X_HOME_DIR, val)
+        queParm(X_HOME_DIR, 1 if getBoolInfo(xHomeDir) else -1)
         command(XHOMEAXIS)
         jogPanel.probe(HOME_X)
         jogPanel.focus()
@@ -3535,7 +3529,7 @@ class SetPosDialog(wx.Dialog):
     def __init__(self, frame, axis):
         self.axis = axis
         pos = (10, 10)
-        title = "Position %s" % (('Z', 'X')[axis])
+        title = "Position %s" % ('Z' if axis == AXIS_Z else 'X')
         wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -3562,10 +3556,8 @@ class SetPosDialog(wx.Dialog):
         if done:
             return
         if self.IsShown():
-            if self.axis == 0:
-                val = jogPanel.zPos.GetValue()
-            else:
-                val = jogPanel.xPos.GetValue()
+            val = jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
+               jogPanel.xPos.GetValue()
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
@@ -3580,10 +3572,8 @@ class SetPosDialog(wx.Dialog):
         val = self.pos.GetValue()
         try:
             val = float(val)
-            if self.axis == 0:
-                self.updateZPos(val)
-            else:
-                self.updateXPos(val)
+            self.updateZPos(val) if self.axis == AXIS_Z else \
+               self.updateXPOS(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
@@ -3643,7 +3633,7 @@ class ProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
         self.axis = axis
         pos = (10, 10)
-        title = "Probe %s" % (('Z', 'X Diameter')[axis])
+        title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
         wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -3654,7 +3644,8 @@ class ProbeDialog(wx.Dialog):
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        txt = wx.StaticText(self, -1, ('Z Position', 'X Diameter')[axis])
+        txt = wx.StaticText(self, -1, \
+                            'Z Position' if axis == AXIS_Z else 'X Diameter')
         sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
                    border=10)
 
@@ -3701,7 +3692,7 @@ class ProbeDialog(wx.Dialog):
         if done:
             return
         if self.IsShown():
-            if self.axis == 0:
+            if self.axis == AXIS_Z:
                 probeLoc = "0.0000"
                 probeDist = getFloatInfo(zProbeDist)
             else:
@@ -3722,10 +3713,8 @@ class ProbeDialog(wx.Dialog):
         val = self.probeLoc.GetValue()
         try:
             probeLoc = float(val)
-            if self.axis == 0:
-                self.probeZ(probeLoc)
-            else:
-                self.probeX(probeLoc / 2.0)
+            self.probeZ(probeLoc) if self.axis == AXIS_Z else \
+               self.probeX(probeLoc / 2.0)
         except ValueError:
             print("probe ValueError on %s" % (val))
             stdout.flush()
@@ -3760,7 +3749,7 @@ class GotoDialog(wx.Dialog):
     def __init__(self, frame, axis):
         self.axis = axis
         pos = (10, 10)
-        title = "Go to %s" % (('Z Position', 'X Diameter')[axis])
+        title = "Go to %s" % ('Z Position' if AXIS == AXIS_Z else 'X Diameter')
         wx.Dialog.__init__(self, frame, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -3787,10 +3776,8 @@ class GotoDialog(wx.Dialog):
         if done:
             return
         if self.IsShown():
-            if self.axis == 0:
-                val = jogPanel.zPos.GetValue()
-            else:
-                val = jogPanel.xPos.GetValue()
+            val = jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
+               jogPanel.xPos.GetValue()
             try:
                 val = float(val)
             except ValueError:
@@ -3812,7 +3799,7 @@ class GotoDialog(wx.Dialog):
             m.queClear()
             command(CMD_PAUSE)
             command(CLEARQUE)
-            if self.axis == 0:
+            if self.axis == AXIS_Z:
                 sendZData()
                 m.saveZOffset()
                 m.moveZ(loc)
@@ -4291,7 +4278,7 @@ class MainFrame(wx.Frame):
                 queParm(X_HOME_LOC, val)
                 queParm(Z_HOME_OFFSET, zHomeOffset)
                 queParm(X_HOME_OFFSET, xHomeOffset)
-                queParm(X_HOME_STATUS, (HOME_ACTIVE, HOME_SUCCESS)[xHomed])
+                queParm(X_HOME_STATUS, HOME_SUCCESS if xHomed else HOME_ACTIVE)
                 val = -1 if getBoolInfo(zInvDRO) else 1
                 queParm(Z_DRO_DIR, val)
                 val = -1 if getBoolInfo(xInvDRO) else 1
