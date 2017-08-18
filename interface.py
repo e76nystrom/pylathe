@@ -726,7 +726,7 @@ stateList =\
     
     "x control states",
     
-    "enum xStates",
+    "enum x_States",
     "{",
     ["XIDLE", "idle"],
     ["XWAITBKLS", "wait for backlash move complete"],
@@ -737,7 +737,7 @@ stateList =\
     
     "move control states",
     
-    "enum mStates",
+    "enum m_States",
     "{",
     ["M_IDLE", "idle state"],
     ["M_WAIT_Z", "wait for z to complete"],
@@ -748,7 +748,7 @@ stateList =\
 
     "move control commands",
     
-    "enum mCommands",
+    "enum m_Commands",
     "{",
     ["MOVE_Z", "move z"],
     ["MOVE_X", "move x"],
@@ -780,7 +780,7 @@ stateList =\
 
     "home control states",
     
-    "enum hStates",
+    "enum h_States",
     "{",
     ["H_IDLE", "idle state"],
     ["H_CHECK_ONHOME", ""],
