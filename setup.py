@@ -194,11 +194,11 @@ def createEnums(enumList, cLoc, fData=False):
                 if fData:
                     cFile.write("%s\n" % (data))
                     if data.startswith("{"):
-                        cfile.write("\n#ifdefine ENUM_%s\n\n" % (var.upper))
-                        cfile.write(" char *%s = \n {\n" % (enum))
+                        cFile.write("\n#ifdefine ENUM_%s\n\n" % (var.upper))
+                        cFile.write(" char *%s = \n {\n" % (enum))
                         for s in stringList:
-                            cfile.write("  \"%s\"\n" % (s))
-                        cfile.write(" };\n#endif\n\n")
+                            cFile.write("  \"%s\"\n" % (s))
+                        cFile.write(" };\n#endif\n\n")
                     # jFile.write(" %s\n" % (data))
             else:
                 if fData:
