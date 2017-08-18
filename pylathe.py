@@ -2201,7 +2201,6 @@ class ScrewThread(UpdatePass):
         if not add:
             (self.curArea = self.area) if final \
                            self.curArea += self.areaPass
-                
             feed = sqrt(self.curArea / self.tanAngle)
             self.feed = feed
         else:
@@ -3196,9 +3195,7 @@ class JogPanel(wx.Panel):
             if val == 0:
                 combo.SetSelection(1)
             else:
-                if val >= len(self.step) - 1:
-                    combo.SetSelection(1)
-                else:
+                combo.SetSelection(1) if val >= len(self.step) - 1 else \
                     combo.SetSelection(val + 1)
             return
         elif code == ord('I'):
@@ -3231,17 +3228,15 @@ class JogPanel(wx.Panel):
         evt.Skip()
 
     def updateZ(self, val):
-        if self.zStepsInch != 0.0:
-            txt = "%7.3f" % (float(val) / self.zStepsInch)
-        else:
-            txt = '0.000'
+        txt = "%7.3f" % (float(val) / self.zStepsInch) \
+              if self.zStepsInch != 0.0 else \
+                 txt = '0.000'
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
-        if self.xStepsInch != 0.0:
-            txt = "%7.3f" % (float(val) / self.xStepsInch)
-        else:
-            txt = '0.000'
+        txt = "%7.3f" % (float(val) / self.xStepsInch) \
+              if self.xStepsInch != 0.0 else \
+                 txt = '0.000'
         self.xPos.SetValue(txt)
 
     def updateRPM(self, val):
@@ -4530,10 +4525,7 @@ class MainFrame(wx.Frame):
 
         for key in self.panels:
             panel = self.panels[key]
-            if key == showPanel:
-                panel.Show()
-            else:
-                panel.Hide()
+            panel.Show() if key == showPanel else panel.Hide()
         self.Layout()
         self.Fit()
 
