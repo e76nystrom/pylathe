@@ -711,7 +711,7 @@ xilinxBitList = \
     ""
 ]
     
-stateList =\
+enumList =\
 [\
     "z control states",
 
@@ -789,6 +789,26 @@ stateList =\
     ["H_WAIT_BACKOFF", ""],
     ["H_WAIT_SLOWFIND", ""],
     # ["H_", ""],
+    "};",
+
+    "debug message types",
+    
+    "enum d_message",
+    "{",
+    ["D_PASS", "pass done"],
+    ["D_DONE", "all operations done"],
+    ["D_XLOC", "x location"],
+    ["D_XDST", "x distance"],
+    ["D_XST", "x state"],
+    ["D_XBSTP", "x backlash steps"],
+    ["D_XDRO", "x dro location"],
+    ["D_XEXP", "x expected location"],
+    ["D_ZLOC", "z location"],
+    ["D_ZDST", "z distance"],
+    ["D_ZST", "z state"],
+    ["D_ZBSTP", "z backlash steps"],
+    ["D_ZDRO", "z dro location"],
+    ["D_ZEXP", "z expected location"],
     "};",
 ]
     
