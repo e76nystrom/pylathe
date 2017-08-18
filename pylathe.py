@@ -4044,7 +4044,7 @@ class UpdateThread(Thread):
                         if dbg != None:
                             dbg.write(result + '\n')
                             dbg.flush()
-                            (cmd, val) = result.split(' ')
+                            (cmd, val) = result.split(' ')[:2]
                             if cmd == done:
                                 dbg.close()
                                 dbg = None
