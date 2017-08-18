@@ -1000,7 +1000,8 @@ class TurnPanel(wx.Panel):
     def OnStart(self, e):
         global dbg, jogPanel
         command(CMD_RESUME)
-        dbg = open('dbg.txt', 'w')
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -1264,6 +1265,8 @@ class FacePanel(wx.Panel):
     def OnStart(self, e):
         global jogPanel
         command(CMD_RESUME)
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -1437,6 +1440,8 @@ class CutoffPanel(wx.Panel):
     def OnStart(self, e):
         global jogPanel
         command(CMD_RESUME)
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
         jogPanel.focus()
 
 class Taper(UpdatePass):
@@ -2025,6 +2030,8 @@ class TaperPanel(wx.Panel):
     def OnStart(self, e):
         global jogPanel
         command(CMD_RESUME)
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -2454,6 +2461,8 @@ class ThreadPanel(wx.Panel):
     def OnStart(self, e):
         global jogPanel
         command(CMD_RESUME)
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
         jogPanel.focus()
     
     def OnAdd(self, e):
@@ -4800,6 +4809,7 @@ class ConfigDialog(wx.Dialog):
             ("fcy", cfgFcy), \
             ("bDisable Commands", cfgCmdDis), \
             ("bDraw Moves", cfgDraw), \
+            ("bSave Debug", cfgDbgSave), \
         )
         if XILINX:
             self.fields += (
