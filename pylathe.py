@@ -3992,7 +3992,7 @@ class UpdateThread(Thread):
         i = 0
         op = None
         scanMax = len(self.parmList)
-        baseTime = time()
+        baseTime = None
         while True:
             sleep(0.1)
             if not self.threadRun:
@@ -4047,7 +4047,8 @@ class UpdateThread(Thread):
                 if rLen > 0:
                     print("%2d (%s)" % (rLen, result))
                 index = 2
-                t = "%7.3f " % (time() - baseTime)
+                t = ("%7.3f " % (time() - baseTime)) if baseTime != None else \
+                                                                    " 0.000 "
                 while rLen >= index:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
@@ -4064,9 +4065,14 @@ class UpdateThread(Thread):
                             else:
                                 dbg.write(t + output + "\n")
                                 dbg.flush()
-                                if cmd == D_DONE:
-                                    dbg.close()
-                                    dbg = None
+                            if cmd == D_DONE:
+                                if val == 0:
+                                    baseTime = time()
+                                if val == 1:
+                                    baseTime = None
+                                    if dbg != None:
+                                        dbg.close()
+                                        dbg = None
                         except IndexError:
                             print("index error %s" % result)
                             stdout.flush()
