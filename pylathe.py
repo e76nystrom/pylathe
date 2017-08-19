@@ -3918,6 +3918,8 @@ class UpdateThread(Thread):
         comm.xDbgPrint = False
         try:
             result = command(READLOC)
+            if result == None:
+                return
         except CommTimeout:
             self.readAllError = True
             if done:
@@ -3934,8 +3936,6 @@ class UpdateThread(Thread):
         if self.readAllError:
             self.readAllError = False
             wx.PostEvent(self.notifyWindow, UpdateEvent((4, "")))
-        if result == None:
-            return
         try:
             (z, x, rpm, curPass, droZ, droX, flag) = \
                 result.rstrip().split(' ')[1:]
