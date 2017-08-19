@@ -4033,7 +4033,7 @@ class UpdateThread(Thread):
                     result = getString()
                     tmp = result.split()
                     rLen = len(tmp)
-                    print("%2d (%s)" % (rLen, result)
+                    print("%2d (%s)" % (rLen, result))
                     index = 2
                     while rLen >= index:
                         (cmd, val) = tmp[index-2:index]
