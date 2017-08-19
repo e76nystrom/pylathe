@@ -4042,8 +4042,8 @@ class UpdateThread(Thread):
                     break
                 tmp = result.split()
                 rLen = len(tmp)
-                if rLen > 0:
-                    print("%2d (%s)" % (rLen, result))
+                # if rLen > 0:
+                #     print("%2d (%s)" % (rLen, result))
                 index = 2
                 t = ("%7.3f " % (time() - baseTime)) if baseTime != None else \
                     " 0.000 "
@@ -4053,6 +4053,14 @@ class UpdateThread(Thread):
                     try:
                         cmd = int(cmd, 16)
                         val = int(val, 16)
+                            if cmd == D_DONE:
+                                if val == 0:
+                                    baseTime = time()
+                                if val == 1:
+                                    baseTime = None
+                                    if dbg != None:
+                                        dbg.close()
+                                        dbg = None
                         try:
                             action = dbgTbl[cmd]
                             output = action(val)
@@ -4063,14 +4071,6 @@ class UpdateThread(Thread):
                             else:
                                 dbg.write(t + output + "\n")
                                 dbg.flush()
-                            if cmd == D_DONE:
-                                if val == 0:
-                                    baseTime = time()
-                                if val == 1:
-                                    baseTime = None
-                                    if dbg != None:
-                                        dbg.close()
-                                        dbg = None
                         except IndexError:
                             print("index error %s" % result)
                             stdout.flush()
