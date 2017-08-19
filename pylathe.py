@@ -4086,6 +4086,7 @@ class UpdateThread(Thread):
                             stdout.flush()
                     except ValueError:
                         print("value error cmd %s val %s" % (cmd, val))
+                        stdout.flush()
             except CommTimeout:
                 print("getString CommTimeout")
                 stdout.flush()
