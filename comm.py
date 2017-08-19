@@ -266,7 +266,7 @@ def getString(cmd, parm=None):
     if ser is None:
         return(None)
     # cmd = '\x01%x \r' % (cmds['READDBG'][0])
-    arg = "" if parm == None: else " %x" % parm
+    arg = "" if parm == None else " %x" % parm
     cmd = '\x01%x%s \r' % (cmd, arg)
     cmdLen = len(cmd) - 1
     commLock.acquire(True)
