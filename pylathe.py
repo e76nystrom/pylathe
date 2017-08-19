@@ -784,7 +784,6 @@ class Turn(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
             
-        self.m.done(0)
         self.turnSetup()
 
         while self.updatePass():
@@ -804,6 +803,7 @@ class Turn(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
+        self.m.done(0)
         if STEPPER_DRIVE:
             m.startSpindle(getIntInfo(tuRPM))
             m.queFeedType(FEED_PITCH)
@@ -1054,7 +1054,6 @@ class Face(UpdatePass):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setAlign(90)
 
-        self.m.done(0)
         self.faceSetup()
 
         while self.updatePass():
@@ -1076,6 +1075,7 @@ class Face(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.zStart, self.safeX)
         m.quePause()
+        self.m.done(0)
         if STEPPER_DRIVE:
             m.startSpindle(getIntInfo(faRPM))
             m.queFeedType(FEED_PITCH)
@@ -1302,7 +1302,6 @@ class Cutoff():
         if getInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
-        self.m.done(0)
         self.cutoffSetup()
 
         if self.cutoffPanel.pause.GetValue():
@@ -1321,6 +1320,7 @@ class Cutoff():
     def cutoffSetup(self):
         m = self.m
         m.quePause()
+        self.m.done(0)
         if STEPPER_DRIVE:
             m.startSpindle(getIntInfo(cuRPM))
             m.queFeedType(FEED_PITCH)
@@ -1524,7 +1524,6 @@ class Taper(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
-        self.m.done(0)
         self.taperSetup()
 
         while self.updatePass():
@@ -1545,6 +1544,7 @@ class Taper(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
+        self.m.done(0)
         m.saveTaper(self.taper)
         m.startSpindle(getIntInfo(tpRPM))
         m.queFeedType(FEED_PITCH)
@@ -1657,7 +1657,6 @@ class Taper(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
-        self.m.done(0)
         self.taperSetup(True)
         self.m.moveZ(self.safeZ)
 
@@ -2161,7 +2160,6 @@ class ScrewThread(UpdatePass):
         self.prevFeed = 0.0
         print("pass     area  xfeed  zfeed  delta")
 
-        self.m.done(0)
         while self.updatePass():
             pass
 
@@ -2180,6 +2178,7 @@ class ScrewThread(UpdatePass):
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
+        self.m.done(0)
         m.startSpindle(getIntInfo(thRPM))
         feedType = FEED_TPI
         if self.threadPanel.mm.GetValue():
