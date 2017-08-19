@@ -408,7 +408,7 @@ def sendMove(opString, op, val):
         prtStr = "%7x" % (val)
     elif isinstance(val, str):
         valStr = val
-        prtStr = str
+        prtStr = val
     else:
         print("sendMove val invalid type") #, flush=True)
         stdout.flush()
