@@ -261,12 +261,14 @@ def getParm(parmIndex, dbg=False):
         rsp = rsp + tmp;
     commLock.release()
 
-def getString():
+def getString(cmd, parm=None):
     global ser, commLock, timeout
     if ser is None:
         return(None)
     # cmd = '\x01%x \r' % (cmds['READDBG'][0])
-    cmd = '\x01%x \r' % (READDBG)
+    arg = "" if parm == None: else " %x" % parm
+    cmd = '\x01%x%s \r' % (cmd, arg)
+    cmdLen = len(cmd) - 1
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -285,7 +287,7 @@ def getString():
             timeout = False
             if len(rsp) <= 3:
                 return ""
-            return(rsp[4:])
+            return(rsp[cmdLen:])
         rsp = rsp + tmp;
     commLock.release()
 
