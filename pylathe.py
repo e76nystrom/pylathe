@@ -4030,7 +4030,7 @@ class UpdateThread(Thread):
                 if not self.threadRun:
                     break
                 try:
-                    result = getString()
+                    result = getString(10)
                     tmp = result.split()
                     rLen = len(tmp)
                     if rLen > 0:
