@@ -293,7 +293,7 @@ class MoveCommands():
             lastY = 0
         h = self.textH + self.vS
         for (val, pos) in self.rText:
-            (x, y) = pos[:2]
+            (x, y) = pos
             if not internal:
                 if lastY - y < h:
                     y = lastY - h
@@ -1615,8 +1615,8 @@ class Taper(UpdatePass):
         m.drawLine(self.endZ, self.endX)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
-            m.saveText((m.passNum, self.endX * 2.0), \
-                       (self.safeZ, self.endX, self.endX / 2.0))
+            m.saveText((m.passNum, self.endX * 2.0, self.endX), \
+                       (self.safeZ, self.endX))
         m.moveX(self.safeX)
 
     def externalAdd(self):
