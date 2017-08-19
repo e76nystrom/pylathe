@@ -4082,7 +4082,6 @@ class UpdateThread(Thread):
             except CommTimeout:
                 print("getString CommTimeout")
                 stdout.flush()
-                break
             except serial.SerialException:
                 print("getString SerialException")
                 stdout.flush()
