@@ -1529,7 +1529,7 @@ class Taper(UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printText("%2d %7.3f", LEFT, False)
+        self.m.printText("%2d %7.4f %7.4f", LEFT, False)
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
@@ -1615,10 +1615,8 @@ class Taper(UpdatePass):
         m.drawLine(self.endZ, self.endX)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
-            # m.text("%2d %7.3f" % (m.passNum, self.endX * 2.0), \
-            #        (self.safeZ, self.endX), LEFT)
             m.saveText((m.passNum, self.endX * 2.0), \
-                       (self.safeZ, self.endX))
+                       (self.safeZ, self.endX, self.endX / 2.0))
         m.moveX(self.safeX)
 
     def externalAdd(self):
