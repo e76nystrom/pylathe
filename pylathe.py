@@ -435,9 +435,10 @@ class MoveCommands():
             print("moveXZ %7.4f %7.4f" % (zLoc, xLoc))
 
     def saveTaper(self, taper):
+        taper = "%0.6f" % (taper)
         self.queMove(SAVE_TAPER, taper)
         if self.dbg:
-            print("saveTaper %7.4f" % (taper))
+            print("saveTaper %s" % (taper))
 
     def saveRunout(self, runout):
         self.queMove(SAVE_RUNOUT, runout)
