@@ -3997,15 +3997,24 @@ class UpdateThread(Thread):
                 except CommTimeout:
                     print("CommTimeout on func")
                     stdout.flush()
+                except serial.SerialException:
+                    print("func SerialException")
+                    stdout.flush()
+                    break
                 except RuntimeError:
                     if done:
                         break
+            i += 1
+            if i >= scanMax:
+                i = 0
 
             if not moveQue.empty() or (op != None):
                 if not self.threadRun:
                     break
                 try:
                     num = getQueueStatus()
+                    if not self.threadRun:
+                        break
                     while num > 0:
                         num -= 1
                         if op == None:
@@ -4013,64 +4022,59 @@ class UpdateThread(Thread):
                                 (opString, op, val) = moveQue.get(False)
                             except Empty:
                                 break
-                        try:
-                            sendMove(opString, op, val)
-                            op = None
-                        except CommTimeout:
-                            print("CommTimeout on sendMove")
-                            stdout.flush()
-                            break
+                        sendMove(opString, op, val)
+                        op = None
                 except CommTimeout:
-                    print("CommTimeout on getQueueStatus")
+                    print("CommTimeout on queue")
                     stdout.flush()
-            i += 1
-            if i >= scanMax:
-                i = 0
-            for count in range(10):
+                except serial.SerialException:
+                    print("SerialException on queue")
+                    stdout.flush()
+                    break
+            try:
+                result = getString(READDBG, 10)
                 if not self.threadRun:
                     break
-                try:
-                    result = getString(READDBG, 10)
-                    tmp = result.split()
-                    rLen = len(tmp)
-                    if rLen > 0:
-                        print("%2d (%s)" % (rLen, result))
-                    index = 2
-                    while rLen >= index:
-                        (cmd, val) = tmp[index-2:index]
-                        index += 2
+                tmp = result.split()
+                rLen = len(tmp)
+                if rLen > 0:
+                    print("%2d (%s)" % (rLen, result))
+                index = 2
+                while rLen >= index:
+                    (cmd, val) = tmp[index-2:index]
+                    index += 2
+                    try:
+                        cmd = int(cmd, 16)
+                        val = int(val, 16)
                         try:
-                            cmd = int(cmd, 16)
-                            val = int(val, 16)
-                            try:
-                                action = dbgTbl[cmd]
-                                output = action(val)
-                                if dbg == None:
-                                    print(output)
-                                    stdout.flush()
-                                else:
-                                    dbg.write(output + "\n")
-                                    dbg.flush()
-                                    if cmd == D_DONE:
-                                        dbg.close()
-                                        dbg = None
-                            except IndexError:
-                                print("index error %s" % result)
+                            action = dbgTbl[cmd]
+                            output = action(val)
+                            if dbg == None:
+                                print(output)
                                 stdout.flush()
-                            except TypeError:
-                                print("type error %s" % result)
-                                stdout.flush()
-                        except ValueError:
-                            print("value error cmd %s val %s" % (cmd, val))
-                except CommTimeout:
-                    print("CommTimeout on dbg")
-                    stdout.flush()
-                    break
-                except serial.SerialException:
-                    print("getString SerialException")
-                    stdout.flush()
-                    break
-        print("done")
+                            else:
+                                dbg.write(output + "\n")
+                                dbg.flush()
+                                if cmd == D_DONE:
+                                    dbg.close()
+                                    dbg = None
+                        except IndexError:
+                            print("index error %s" % result)
+                            stdout.flush()
+                        except TypeError:
+                            print("type error %s" % result)
+                            stdout.flush()
+                    except ValueError:
+                        print("value error cmd %s val %s" % (cmd, val))
+            except CommTimeout:
+                print("getString CommTimeout")
+                stdout.flush()
+                break
+            except serial.SerialException:
+                print("getString SerialException")
+                stdout.flush()
+                break
+        print("UpdateThread done")
         stdout.flush()
 
     def dbgPass(self, val):
