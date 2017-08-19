@@ -3995,6 +3995,9 @@ class UpdateThread(Thread):
             sleep(0.1)
             if not self.threadRun:
                 break
+
+            # read update variables
+
             if i < len(self.parmList):
                 func = self.parmList[i]
                 try:
@@ -4012,6 +4015,8 @@ class UpdateThread(Thread):
             i += 1
             if i >= scanMax:
                 i = 0
+
+            # process move queue
 
             if not moveQue.empty() or (op != None):
                 if not self.threadRun:
@@ -4036,6 +4041,9 @@ class UpdateThread(Thread):
                     print("SerialException on queue")
                     stdout.flush()
                     break
+
+            # get debug data
+
             try:
                 result = getString(READDBG, 10)
                 if not self.threadRun:
@@ -4047,12 +4055,21 @@ class UpdateThread(Thread):
                 index = 2
                 t = ("%7.3f " % (time() - baseTime)) if baseTime != None else \
                     " 0.000 "
-                while rLen >= index:
+                while index <= rLen:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
                     try:
                         cmd = int(cmd, 16)
                         val = int(val, 16)
+                        try:
+                            action = dbgTbl[cmd]
+                            output = action(val)                        
+                            if dbg == None:
+                                print(t + output)
+                                stdout.flush()
+                            else:
+                                dbg.write(t + output + "\n")
+                                dbg.flush()
                             if cmd == D_DONE:
                                 if val == 0:
                                     baseTime = time()
@@ -4060,17 +4077,7 @@ class UpdateThread(Thread):
                                     baseTime = None
                                     if dbg != None:
                                         dbg.close()
-                                        dbg = None
-                        try:
-                            action = dbgTbl[cmd]
-                            output = action(val)
-                            
-                            if dbg == None:
-                                print(t + output)
-                                stdout.flush()
-                            else:
-                                dbg.write(t + output + "\n")
-                                dbg.flush()
+                                    dbg = None
                         except IndexError:
                             print("index error %s" % result)
                             stdout.flush()
