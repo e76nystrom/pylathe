@@ -239,7 +239,7 @@ class MoveCommands():
         self.vS = self.textH / 2
         self.hS = self.textH
         self.angle = 0.0
-        self.dbg = False
+        self.dbg = True
         self.rText = None
 
     def draw(self, type, diam, parm):
