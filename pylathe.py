@@ -4053,8 +4053,8 @@ class UpdateThread(Thread):
                 # if rLen > 0:
                 #     print("%2d (%s)" % (rLen, result))
                 index = 2
-                t = ("%7.3f " % (time() - baseTime)) if baseTime != None else \
-                    "  0.000 "
+                t = ("%8.3f " % (time() - baseTime)) if baseTime != None else \
+                    "   0.000 "
                 while index <= rLen:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
@@ -4141,9 +4141,9 @@ class UpdateThread(Thread):
         return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
-        xDroLoc = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
-                  xDROOffset
-        return("xdro %7.4f" % (tmp))
+        tmp = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
+              xDROOffset
+        return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXExp(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
@@ -4180,8 +4180,8 @@ class UpdateThread(Thread):
         return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
-        xDroLoc = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
-                  zDROOffset
+        tmp = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
+              zDROOffset
         return("zdro %7.4f" % (tmp))
 
     def dbgZExp(self, val):
