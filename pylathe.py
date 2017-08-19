@@ -70,7 +70,7 @@ exec(cmd[:-1])
 from comm import SWIG
 SWIG = False
 import comm
-from comm import openSerial, commTimeout, command, getParm, setParm,\
+from comm import openSerial, CommTimeout, command, getParm, setParm,\
     getString, sendMove, getQueueStatus, queParm, sendMulti
 comm.SWIG = SWIG
 
@@ -217,13 +217,13 @@ def addCheckBox(panel, sizer, label, key):
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
-    except ValueError as e:
+    except ValueError:
         return(0.0)
 
 def getIntVal(tc):
     try:
         return(int(tc.GetValue()))
-    except ValueError as e:
+    except ValueError:
         return(0)
 
 moveQue = Queue()
@@ -477,7 +477,7 @@ def sendClear():
     try:
         command(CLRDBG);
         command(CMD_CLEAR)
-    except commTimeout:
+    except CommTimeout:
         jogPanel.setStatus('clear timeout')
     spindleDataSent = False
     zDataSent = False
@@ -488,18 +488,18 @@ def xilinxTestMode():
     testMode = False
     try:
         testMode = getInfo(cfgTestMode)
-    except KeyError as e:
+    except KeyError:
         testMode = False
     if testMode:
         encoder = 0
         try:
             encoder = getIntInfo(cfgEncoder)
-        except KeyError as e:
+        except KeyError:
             encoder = 0
         rpm = 0
         try:
             rpm = int(getFloatInfo(cfgTestRPM))
-        except KeyError as e:
+        except KeyError:
             rpm = 0
         if encoder != 0:
             preScaler = 1
@@ -554,7 +554,7 @@ def sendSpindleData(send=False, rpm=None):
                 queParm(X_CFG_REG, cfgReg)
                 sendMulti()
             spindleDataSent = True
-    except commTimeout as e:
+    except CommTimeout:
         print("sendSpindleData Timeout")
         stdout.flush()
 
@@ -598,7 +598,7 @@ def sendZData(send=False):
                 
             command(CMD_ZSETUP)
             zDataSent = True
-    except commTimeout as e:
+    except CommTimeout:
         print("sendZData Timeout")
         stdout.flush()
     except:
@@ -654,7 +654,7 @@ def sendXData(send=False):
 
             command(CMD_XSETUP)
             xDataSent = True
-    except commTimeout as e:
+    except CommTimeout:
         print("sendZData Timeout")
         stdout.flush()
 
@@ -982,7 +982,7 @@ class TurnPanel(wx.Panel):
             sendZData()
             sendXData()
 
-        except commTimeout as e:
+        except CommTimeout:
             print("timeout error")
             stdout.flush()
 
@@ -1245,7 +1245,7 @@ class FacePanel(wx.Panel):
             sendZData()
             sendXData()
 
-        except commTimeout as e:
+        except CommTimeout:
             print("timeout error")
             stdout.flush()
 
@@ -1421,7 +1421,7 @@ class CutoffPanel(wx.Panel):
             sendSpindleData()
             sendZData()
             sendXData()
-        except commTimeout as e:
+        except CommTimeout:
             print("timeout error")
             stdout.flush()
 
@@ -1943,7 +1943,7 @@ class TaperPanel(wx.Panel):
                 deltaX = tan(radians(angle))
                 self.zDelta.ChangeValue("1.000")
                 self.xDelta.ChangeValue("%0.5f" % (deltaX))
-            except ValueError as e:
+            except ValueError:
                 pass
 
     def updateDelta(self):
@@ -1998,7 +1998,7 @@ class TaperPanel(wx.Panel):
             sendZData()
             sendXData()
 
-        except commTimeout as e:
+        except CommTimeout:
             print("timeout error")
             stdout.flush()
 
@@ -2430,7 +2430,7 @@ class ThreadPanel(wx.Panel):
             sendSpindleData()
             sendZData()
             sendXData()
-        except commTimeout as e:
+        except CommTimeout:
             print("timeout error")
             stdout.flush()
 
@@ -2592,7 +2592,7 @@ class JogShuttle():
                     jogShuttle.zCurIndex = index
                     setParm(Z_JOG_SPEED, speed)
                 command(ZJSPEED)
-            except commTimeout:
+            except CommTimeout:
                 pass
             if index == 0:
                 buttonRepeat.action = None
@@ -2617,7 +2617,7 @@ class JogShuttle():
                     jogShuttle.xCurIndex = index
                     setParm(X_JOG_SPEED, speed)
                 command(XJSPEED)
-            except commTimeout:
+            except CommTimeout:
                 pass
             if index == 0:
                 buttonRepeat.action = None
@@ -2642,7 +2642,7 @@ class JogShuttle():
                     jogShuttle.spindleCurIndex = index
                     setParm(SP_JOG_RPM, speed)
                 command(SPINDLE_JOG_SPEED)
-            except commTimeout:
+            except CommTimeout:
                 pass
             if index == 0:
                 buttonRepeat.action = None
@@ -2983,12 +2983,12 @@ class JogPanel(wx.Panel):
                         queParm(Z_JOG_MAX, getInfo(zJogMax))
                         queParm(Z_JOG_DIR, dir)
                         command(ZJMOV)
-                    except commTimeout as e:
+                    except CommTimeout:
                         pass
             else:
                 try:
                     command(ZJMOV)
-                except commTimeout as e:
+                except CommTimeout:
                     pass
         else:
             if self.jogCode == None:
@@ -3001,7 +3001,7 @@ class JogPanel(wx.Panel):
                     queParm(Z_FLAG, CMD_JOG)
                     queParm(Z_MOVE_DIST, val)
                     command(ZMOVEREL)
-                except commTimeout as e:
+                except CommTimeout:
                     pass
 
     def jogDone(self, cmd):
@@ -3012,7 +3012,7 @@ class JogPanel(wx.Panel):
             stdout.flush()
             try:
                 command(cmd)
-            except commTimeout as e:
+            except CommTimeout:
                 pass
 
     def zDown(self, code):
@@ -3063,12 +3063,12 @@ class JogPanel(wx.Panel):
                         queParm(X_JOG_MAX, getInfo(xJogMax))
                         queParm(X_JOG_DIR, dir)
                         command(XJMOV)
-                    except commTimeout as e:
+                    except CommTimeout:
                         pass
             else:
                 try:
                     command("XJMOV")
-                except commTimeout as e:
+                except CommTimeout:
                     pass
         else:
             if self.jogCode == None:
@@ -3081,7 +3081,7 @@ class JogPanel(wx.Panel):
                     queParm(X_FLAG, CMD_JOG)
                     queParm(X_MOVE_DIST, val)
                     command(XMOVEREL)
-                except commTimeout as e:
+                except CommTimeout:
                     pass
 
     def xDown(self, code):
@@ -3374,7 +3374,7 @@ class JogPanel(wx.Panel):
                 self.repeat = 0
         try:
             command("SPINDLE_JOG")
-        except commTimeout as e:
+        except CommTimeout:
             pass
         self.combo.SetFocus()
 
@@ -3391,7 +3391,7 @@ class JogPanel(wx.Panel):
         self.btnRpt.action = None
         try:
             command("SPINDLE_STOP")
-        except commTimeout as e:
+        except CommTimeout:
             pass
         self.combo.SetFocus()
 
@@ -3918,7 +3918,7 @@ class UpdateThread(Thread):
         comm.xDbgPrint = False
         try:
             result = command(READLOC)
-        except commTimeout:
+        except CommTimeout:
             self.readAllError = True
             if done:
                 return
@@ -3994,72 +3994,72 @@ class UpdateThread(Thread):
                 func = self.parmList[i]
                 try:
                     func()
-                except commTimeout as e:
-                    print("commTimeout on func")
+                except CommTimeout:
+                    print("CommTimeout on func")
                     stdout.flush()
                 except RuntimeError:
                     if done:
                         break
 
             if not moveQue.empty() or (op != None):
+                if not self.threadRun:
+                    break
                 try:
-                    if not self.threadRun:
-                        break
                     num = getQueueStatus()
-                    if num != None:
-                        while num > 0:
-                            num -= 1
-                            if op == None:
-                                try:
-                                    (opString, op, val) = moveQue.get(False)
-                                except Empty as e:
-                                    break
+                    while num > 0:
+                        num -= 1
+                        if op == None:
                             try:
-                                sendMove(opString, op, val)
-                                op = None
-                            except commTimeout as e:
+                                (opString, op, val) = moveQue.get(False)
+                            except Empty:
                                 break
-                except commTimeout as e:
-                    print("commTimeout on queue")
+                        try:
+                            sendMove(opString, op, val)
+                            op = None
+                        except CommTimeout:
+                            print("CommTimeout on sendMove")
+                            stdout.flush()
+                            break
+                except CommTimeout:
+                    print("CommTimeout on getQueueStatus")
                     stdout.flush()
             i += 1
             if i >= scanMax:
                 i = 0
-            for count in range(0, 10):
+            for count in range(10):
+                if not self.threadRun:
+                    break
                 try:
-                    if not self.threadRun:
-                        break
                     result = getString()
-                    if result:
-                        if dbg != None:
-                            # dbg.write(result + '\n')
-                            (cmd, val) = result.split(' ')[:2]
-                            try:
-                                cmd = int(cmd, 16)
-                                val = int(val, 16)
-                                try:
-                                    action = dbgTbl[cmd]
-                                    output = action(val)
-                                    dbg.write(output + "\n")
-                                    dbg.flush()
-                                    if cmd == D_DONE:
-                                        dbg.close()
-                                        dbg = None
-                                except IndexError:
-                                    print("index error %s" % result)
-                                    stdout.flush()
-                                except TypeError:
-                                    print("type error %s" % result)
-                                    stdout.flush()
-                            except ValueError:
-                                print("value error cmd %s val %s" % (cmd, val))
-                        else:
-                            print(result)
-                            stdout.flush()
-                    else:
+                    tmp = result.split()
+                    if len(tmp) < 2:
                         break
-                except commTimeout:
-                    print("commTimeout on dbg")
+                    (cmd, val) = result.split(' ')[:2]
+                    try:
+                        cmd = int(cmd, 16)
+                        val = int(val, 16)
+                        try:
+                            action = dbgTbl[cmd]
+                            output = action(val)
+                            if dbg == None:
+                                print(result)
+                                stdout.flush()
+                            else:
+                                dbg.write(output + "\n")
+                                dbg.flush()
+                                if cmd == D_DONE:
+                                    dbg.close()
+                                    dbg = None
+                        except IndexError:
+                            print("index error %s" % result)
+                            stdout.flush()
+                        except TypeError:
+                            print("type error %s" % result)
+                            stdout.flush()
+                    except ValueError:
+                        print("value error cmd %s val %s" % (cmd, val))
+                except CommTimeout:
+                    print("CommTimeout on dbg")
                     stdout.flush()
                     break
                 except serial.SerialException:
@@ -4261,7 +4261,7 @@ class MainFrame(wx.Frame):
                 queParm(X_DRO_DIR, val)
                 sendMulti()
                 sendSpindleData()
-            except commTimeout:
+            except CommTimeout:
                 print("comm timeout on setup")
                 jogPanel.setStatus("comm timeout on setup")
 
