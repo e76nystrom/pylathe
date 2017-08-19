@@ -4048,7 +4048,7 @@ class UpdateThread(Thread):
                     print("%2d (%s)" % (rLen, result))
                 index = 2
                 t = ("%7.3f " % (time() - baseTime)) if baseTime != None else \
-                                                                    " 0.000 "
+                    " 0.000 "
                 while rLen >= index:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
