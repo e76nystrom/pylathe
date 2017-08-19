@@ -4032,32 +4032,35 @@ class UpdateThread(Thread):
                 try:
                     result = getString()
                     tmp = result.split()
-                    while len(tmp) > 2:
-                    (cmd, val) = tmp[:2]
-                    tmp = tmp[2:]
-                    try:
-                        cmd = int(cmd, 16)
-                        val = int(val, 16)
+                    rLen = len(tmp)
+                    print("%2d (%s)" % (rLen, result)
+                    index = 2
+                    while rLen >= index:
+                        (cmd, val) = tmp[index-2:index]
+                        index += 2
                         try:
-                            action = dbgTbl[cmd]
-                            output = action(val)
-                            if dbg == None:
-                                print(output)
+                            cmd = int(cmd, 16)
+                            val = int(val, 16)
+                            try:
+                                action = dbgTbl[cmd]
+                                output = action(val)
+                                if dbg == None:
+                                    print(output)
+                                    stdout.flush()
+                                else:
+                                    dbg.write(output + "\n")
+                                    dbg.flush()
+                                    if cmd == D_DONE:
+                                        dbg.close()
+                                        dbg = None
+                            except IndexError:
+                                print("index error %s" % result)
                                 stdout.flush()
-                            else:
-                                dbg.write(output + "\n")
-                                dbg.flush()
-                                if cmd == D_DONE:
-                                    dbg.close()
-                                    dbg = None
-                        except IndexError:
-                            print("index error %s" % result)
-                            stdout.flush()
-                        except TypeError:
-                            print("type error %s" % result)
-                            stdout.flush()
-                    except ValueError:
-                        print("value error cmd %s val %s" % (cmd, val))
+                            except TypeError:
+                                print("type error %s" % result)
+                                stdout.flush()
+                        except ValueError:
+                            print("value error cmd %s val %s" % (cmd, val))
                 except CommTimeout:
                     print("CommTimeout on dbg")
                     stdout.flush()
