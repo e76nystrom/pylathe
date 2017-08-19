@@ -4032,9 +4032,9 @@ class UpdateThread(Thread):
                 try:
                     result = getString()
                     tmp = result.split()
-                    if len(tmp) < 2:
-                        break
-                    (cmd, val) = result.split(' ')[:2]
+                    while len(tmp) > 2:
+                    (cmd, val) = tmp[:2]
+                    tmp = tmp[2:]
                     try:
                         cmd = int(cmd, 16)
                         val = int(val, 16)
