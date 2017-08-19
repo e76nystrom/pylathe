@@ -415,7 +415,7 @@ def sendMove(opString, op, val):
         return
     # cmd = '\x01%x x%x %s \r' % (cmds['QUEMOVE'][0], op, valStr)
     if '.' in valStr:
-        valStr.rstrip('0')
+        valStr = valStr.rstrip('0')
     cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
     if xDbgPrint:
         print("cmd %-14s %3x %s" % (opString, op, prtStr)) #, flush=True)
