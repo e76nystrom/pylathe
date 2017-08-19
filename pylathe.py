@@ -4118,7 +4118,7 @@ class UpdateThread(Thread):
 
     def dbgXMov(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
-        return("xmov %7.4f" % (tmp))
+        return("xmov %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXLoc(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
