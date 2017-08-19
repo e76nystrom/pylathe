@@ -30,7 +30,7 @@ def openSerial(port, rate):
         print("unable to open port") #, flush=True)
         stdout.flush()
 
-class commTimeout(Exception):
+class CommTimeout(Exception):
     pass
 
 def command(cmdVal):
@@ -67,7 +67,7 @@ def command(cmdVal):
                 timeout = True
                 print("timeout %s" % (cmd.strip('\x01\r'))) #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break
         if (tmp == '*'):
             timeout = False
@@ -153,7 +153,7 @@ def sendMulti():
                 timeout = True
                 print("setParm timeout %s" % (parm)) #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if (tmp == '*'):
             timeout = False
@@ -212,7 +212,7 @@ def setParm(parmIndex, val):
                 timeout = True
                 print("setParm timeout %s" % (parm)) #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if (tmp == '*'):
             timeout = False
@@ -239,7 +239,7 @@ def getParm(parmIndex, dbg=False):
                 timeout = True
                 print("getParm timeout %s" % (parm)) #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if tmp == '*':
             timeout = False
@@ -278,7 +278,7 @@ def getString():
                 timeout = True
                 print("getString timeout") #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if tmp == '*':
             commLock.release()
@@ -315,7 +315,7 @@ def setXReg(reg, val):
             if not timeout:
                 timeout = True
                 print("timeout")
-            raise commTimeout
+            raise CommTimeout
             break;
         if (tmp == '*'):
             timeout = False
@@ -345,7 +345,7 @@ def setXRegN(reg, val):
             if not timeout:
                 timeout = True
                 print("timeout")
-            raise commTimeout
+            raise CommTimeout
             break;
         if (tmp == '*'):
             timeout = False
@@ -374,7 +374,7 @@ def getXReg(reg):
             if not timeout:
                 timeout = True
                 print("timeout")
-            raise commTimeout
+            raise CommTimeout
             break;
         if (tmp == '*'):
             timeout = False
@@ -429,7 +429,7 @@ def sendMove(opString, op, val):
                 timeout = True
                 print("sendMove timeout") #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if (tmp == '*'):
             timeout = False
@@ -454,7 +454,7 @@ def getQueueStatus():
                 timeout = True
                 print("getQueStatus timeout") #, flush=True)
                 stdout.flush()
-            raise commTimeout()
+            raise CommTimeout()
             break;
         if (tmp == '*'):
             timeout = False
