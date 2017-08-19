@@ -163,15 +163,15 @@ def createEnums(enumList, cLoc, fData=False):
             comment = data[1]
             if fData:
                 tmp =  " %s, " % (state)
-                cFile.write("%s/* %2d %s */\n" % 
-                            (tmp.ljust(32), val, comment));
+                cFile.write("%s/* %2d x%02x %s */\n" % \
+                            (tmp.ljust(32), val, val, comment));
                 # jFile.write('  "%-10s %s", \n' % (state, comment));
             if state in globals():
                 print("createCtlStates %s already defined" % state)
             else:
                 globals()[state] = val
                 eval("%s.append('%s')" % (enum, state))
-                stringList.append(state)
+                stringList.append((state, comment))
                 importList.append(state)
             val += 1
         else:
@@ -196,8 +196,10 @@ def createEnums(enumList, cLoc, fData=False):
                     if data.startswith("}"):
                         cFile.write("\n#ifdef ENUM_%s\n\n" % (var.upper()))
                         cFile.write("char *%s[] = \n{\n" % (enum))
-                        for s in stringList:
-                            cFile.write(" \"%s\",\n" % (s))
+                        for index, (s, comment) in enumerate(stringList):
+                            tmp =  " \"%s\", " % (s)
+                            cFile.write("%s/* %2d x%02x %s */\n" % \
+                                        (tmp.ljust(32), index, index, comment))
                         cFile.write("};\n\n#endif\n")
                     # jFile.write(" %s\n" % (data))
             else:
