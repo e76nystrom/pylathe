@@ -293,7 +293,7 @@ class MoveCommands():
             lastY = 0
         h = self.textH + self.vS
         for (val, pos) in self.rText:
-            (x, y) = pos
+            (x, y) = pos[:2]
             if not internal:
                 if lastY - y < h:
                     y = lastY - h
