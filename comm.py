@@ -61,7 +61,7 @@ def command(cmdVal):
     rsp = ""
     while True:
         tmp = str(ser.read(1))
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
@@ -69,7 +69,7 @@ def command(cmdVal):
                 stdout.flush()
             raise CommTimeout()
             break
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp;
@@ -147,7 +147,7 @@ def sendMulti():
     rsp = "";
     while True:
         tmp = ser.read(1)
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
@@ -155,7 +155,7 @@ def sendMulti():
                 stdout.flush()
             raise CommTimeout()
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp
@@ -206,7 +206,7 @@ def setParm(parmIndex, val):
     rsp = "";
     while True:
         tmp = ser.read(1)
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
@@ -214,7 +214,7 @@ def setParm(parmIndex, val):
                 stdout.flush()
             raise CommTimeout()
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp
@@ -319,7 +319,7 @@ def setXReg(reg, val):
                 print("timeout")
             raise CommTimeout
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp;
@@ -349,7 +349,7 @@ def setXRegN(reg, val):
                 print("timeout")
             raise CommTimeout
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp;
@@ -371,17 +371,17 @@ def getXReg(reg):
     rsp = "";
     while True:
         tmp = ser.read(1)
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
                 print("timeout")
             raise CommTimeout
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             result = rsp.split()
-            if (len(result) == 3):
+            if len(result) == 3:
                 val = int(result[2], 16)
                 if val & 0x80000000:
                     val = -((val ^ 0xffffffff) + 1)
@@ -425,7 +425,7 @@ def sendMove(opString, op, val):
     rsp = "";
     while True:
         tmp = ser.read(1)
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
@@ -433,7 +433,7 @@ def sendMove(opString, op, val):
                 stdout.flush()
             raise CommTimeout()
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             break
         rsp = rsp + tmp
@@ -450,7 +450,7 @@ def getQueueStatus():
     rsp = "";
     while True:
         tmp = ser.read(1)
-        if (len(tmp) == 0):
+        if len(tmp) == 0:
             commLock.release()
             if not timeout:
                 timeout = True
@@ -458,10 +458,10 @@ def getQueueStatus():
                 stdout.flush()
             raise CommTimeout()
             break;
-        if (tmp == '*'):
+        if tmp == '*':
             timeout = False
             result = rsp.split()
-            if (len(result) == 2):
+            if len(result) == 2:
                 commLock.release()
                 retVal = int(result[1], 16)
                 if retVal & 0x80000000:
