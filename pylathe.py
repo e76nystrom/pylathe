@@ -469,8 +469,8 @@ class MoveCommands():
         if self.dbg:
             print("probeX %7.4f" % (xDist))
 
-    def done(self):
-        self.queMove(OP_DONE, 0)
+    def done(self, parm):
+        self.queMove(OP_DONE, parm)
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
@@ -784,6 +784,7 @@ class Turn(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
             
+        self.m.done(0)
         self.turnSetup()
 
         while self.updatePass():
@@ -792,7 +793,7 @@ class Turn(UpdatePass):
         self.m.moveX(self.xStart + self.xRetract)
         if STEPPER_DRIVE:
             self.m.stopSpindle();
-        self.m.done()
+        self.m.done(1)
         self.m.drawClose()
         stdout.flush()
 
@@ -1053,6 +1054,7 @@ class Face(UpdatePass):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setAlign(90)
 
+        self.m.done(0)
         self.faceSetup()
 
         while self.updatePass():
@@ -1063,7 +1065,7 @@ class Face(UpdatePass):
 
         if STEPPER_DRIVE:
             self.m.stopSpindle()
-        self.m.done()
+        self.m.done(1)
         self.m.drawClose()
         stdout.flush()
 
@@ -1300,6 +1302,7 @@ class Cutoff():
         if getInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
+        self.m.done(0)
         self.cutoffSetup()
 
         if self.cutoffPanel.pause.GetValue():
@@ -1311,7 +1314,7 @@ class Cutoff():
 
         if STEPPER_DRIVE:
             self.m.stopSpindle()
-        self.m.done()
+        self.m.done(1)
         self.m.drawClose()
         stdout.flush()
 
@@ -1521,6 +1524,7 @@ class Taper(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
+        self.m.done(0)
         self.taperSetup()
 
         while self.updatePass():
@@ -1530,7 +1534,7 @@ class Taper(UpdatePass):
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
-        self.m.done()
+        self.m.done(1)
         self.m.drawClose()
         stdout.flush()
 
@@ -1653,6 +1657,7 @@ class Taper(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
+        self.m.done(0)
         self.taperSetup(True)
         self.m.moveZ(self.safeZ)
 
@@ -1662,7 +1667,7 @@ class Taper(UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         self.m.stopSpindle();
-        self.m.done()
+        self.m.done(1)
         self.m.drawClose()
         stdout.flush()
 
@@ -2156,6 +2161,7 @@ class ScrewThread(UpdatePass):
         self.prevFeed = 0.0
         print("pass     area  xfeed  zfeed  delta")
 
+        self.m.done(0)
         while self.updatePass():
             pass
 
@@ -2164,7 +2170,7 @@ class ScrewThread(UpdatePass):
         self.drawClose()
         self.m.drawClose()
         self.m.stopSpindle();
-        self.m.done()
+        self.m.done(1)
         stdout.flush()
 
     def threadSetup(self):
