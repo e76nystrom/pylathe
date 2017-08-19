@@ -1265,7 +1265,7 @@ class FacePanel(wx.Panel):
         jogPanel.focus()
 
     def OnStart(self, e):
-        global jogPanel
+        global dbg, jogPanel
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
@@ -1442,7 +1442,7 @@ class CutoffPanel(wx.Panel):
         jogPanel.focus()
 
     def OnStart(self, e):
-        global jogPanel
+        global dbg, jogPanel
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
@@ -2021,7 +2021,7 @@ class TaperPanel(wx.Panel):
         jogPanel.focus()
 
     def OnStart(self, e):
-        global jogPanel
+        global dbg, jogPanel
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
@@ -2451,7 +2451,7 @@ class ThreadPanel(wx.Panel):
         jogPanel.focus()
 
     def OnStart(self, e):
-        global jogPanel
+        global dbg, jogPanel
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
