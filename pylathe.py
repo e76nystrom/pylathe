@@ -3894,6 +3894,8 @@ class UpdateThread(Thread):
         self.notifyWindow = notifyWindow
         self.threadRun = True
         self.parmList = (self.readAll, )
+        self.zDro = None
+        self.xDro = None
         self.start()
 
     # def zLoc(self):
@@ -4122,7 +4124,12 @@ class UpdateThread(Thread):
 
     def dbgXLoc(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
-        return("xloc %7.4f %7.4f" % (tmp, tmp * 2.0))
+        if self.xDro != None:
+            diff = " %0.4f" % (self.xDro - tmp)
+            self.xDro = None
+        else:
+            diff = ""
+        return("xloc %7.4f %7.4f%s" % (tmp, tmp * 2.0, diff))
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -4143,6 +4150,7 @@ class UpdateThread(Thread):
     def dbgXDro(self, val):
         tmp = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
               xDROOffset
+        self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXExp(self, val):
@@ -4161,7 +4169,12 @@ class UpdateThread(Thread):
 
     def dbgZLoc(self, val):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
-        return("zloc %7.4f" % (tmp))
+        if self.zDro != None:
+            diff = " %0.4f" % (self.zDro - tmp)
+            self.zDro = None
+        else:
+            diff = ""
+        return("zloc %7.4f%s" % (tmp, diff))
 
     def dbgZDst(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -4172,7 +4185,7 @@ class UpdateThread(Thread):
         return("zstp %7.4f %6d" % (tmp, val))
 
     def dbgZState(self, val):
-        tmp = xStatesList[val]
+        tmp = zStatesList[val]
         return("z_st %s" % (tmp + ("\n" if val == XIDLE else "")))
 
     def dbgZBSteps(self, val):
@@ -4182,6 +4195,7 @@ class UpdateThread(Thread):
     def dbgZDro(self, val):
         tmp = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
               zDROOffset
+        self.zDro = val
         return("zdro %7.4f" % (tmp))
 
     def dbgZExp(self, val):
