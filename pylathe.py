@@ -4042,7 +4042,7 @@ class UpdateThread(Thread):
                             action = dbgTbl[cmd]
                             output = action(val)
                             if dbg == None:
-                                print(result)
+                                print(output)
                                 stdout.flush()
                             else:
                                 dbg.write(output + "\n")
