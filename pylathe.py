@@ -487,12 +487,14 @@ class MoveCommands():
         if self.dbg:
             print("saveDepth %7.4f" % (depth))
 
-    def taperZX(self, zLoc):
+    def taperZX(self, zLoc, xLoc):
+        self.queMove(SAVE_X, xLoc)
         self.queMoveF(TAPER_ZX, 1, zLoc)
         if self.dbg:
             print("taperZX %7.4f" % (zLoc))
 
-    def taperXZ(self, xLoc):
+    def taperXZ(self, xLoc, zLoc):
+        self.queMove(SAVE_Z, zLoc)
         self.queMoveF(TAPER_XZ, 1, xLoc)
         if self.dbg:
             print("taperXZ %7.4f" % (xLoc))
@@ -1652,13 +1654,13 @@ class Taper(UpdatePass):
                     m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
                            (self.endZ, self.startX), RIGHT)
             m.moveX(self.startX, CMD_SYN)
-            m.taperZX(self.endZ)
+            m.taperZX(self.endZ, self.endX)
         else:
             if m.passNum & 0x300 == 0:
                 m.saveZText((m.passNum, self.startZ), \
                             (self.startZ, self.safeX))
             m.moveX(self.startX)
-            m.taperXZ(self.endX)
+            m.taperXZ(self.endX, self.endZ)
         m.drawLine(self.endZ, self.endX)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
