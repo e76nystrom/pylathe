@@ -348,12 +348,12 @@ class MoveCommands():
                 if align & ABOVE:
                     vOffset = self.vS
                 elif align & BELOW:
-                    vOffset = -self.textH - self.vS
+                    vOffset = -(self.textH + self.vS)
                 elif align & MIDDLE:
-                    vOffset = -self.textH / 2
+                    vOffset = -(self.textH / 2)
 
             if self.textAngle != 0.0:
-                (vOffset, hOffset) = (hOffset, vOffset)
+                (vOffset, hOffset) = (hOffset, -vOffset)
             self.d.add(dxf.text(text, (x + hOffset, y + vOffset), \
                                 height=self.textH, rotation=self.textAngle, \
                                 layer=layer, style=self.style))
