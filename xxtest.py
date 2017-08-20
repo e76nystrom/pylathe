@@ -2,12 +2,12 @@
 
 h = -0.005
 xInc = -0.0025
-xLast = 10
+lastX = 10
 for i in range(20):
     x = i * xInc
-    diff = x - xLast
-    print("x %7.4f xLast %7.4f diff %7.4f" % (x, xLast, diff))
+    diff = x - lastX
+    print("x %7.4f lastX %7.4f diff %7.4f" % (x, lastX, diff))
     if diff > h:
-        x = xLast + h
+        x = lastX + h
         print("x %7.4f" % (x))
-    xLast = x
+    lastX = x
