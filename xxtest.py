@@ -5,5 +5,6 @@ xInc = -0.025
 xLast = 10
 for i in range(20):
     x = i * xInc
-    print("x %7.4f xLast %7.4f" % (x, xLast))
+    dif = x - xLast
+    print("x %7.4f xLast %7.4f diff %7.4f" % (x, xLast, diff))
     xLast = x
