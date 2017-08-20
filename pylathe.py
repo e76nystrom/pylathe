@@ -17,8 +17,8 @@ from Queue import Queue, Empty
 from platform import system
 from dxfwrite import DXFEngine as dxf
 import re
-windows = system() == 'Windows'
-if windows:
+WINDOWS = system() == 'Windows'
+if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
 
 HOME_TEST = False
@@ -359,9 +359,14 @@ class MoveCommands():
             try:
                 if self.d != None:
                     self.d.save()
-                    # subprocess.call(["sed", "-i", "-e", \
-                    #                  "'s/arial/consolas/g'", \
-                    #                  self.fileName])
+                    fileName = self.fileName
+                    if WINDOWS:
+                        fileName = fileName.replace("\\", "/")
+                        fileName = fileName.replace("C:", "/cygdrive/c")
+                    subprocess.call(["sed", "-i", "-e", \
+                                     "'s/arial/consolas/g'", \
+                                     fileName])
+                    self.fileName = None
                     self.d = None
             except:
                 print("dxf file save error")
@@ -2525,7 +2530,7 @@ class ButtonRepeat(Thread):
 class JogShuttle():
     def __init__(self):
         allHids = None
-        if windows:
+        if WINDOWS:
             allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
