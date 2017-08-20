@@ -2480,6 +2480,7 @@ class ThreadPanel(wx.Panel):
 
     def sendData(self):
         try:
+            moveCommands.queClear()
             sendClear()
             sendSpindleData()
             sendZData()
