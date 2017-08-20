@@ -320,7 +320,7 @@ class MoveCommands():
             (x, y) = pos
             if not internal:
                 print("x %7.4f lastX %7.4f diff %7.4f %s" % \
-                      (x, lastX, abs(x - lastX)), fmt % val)
+                      (x, lastX, abs(x - lastX), fmt % val))
                 if abs(x - lastX) < h:
                     x = lastX - h
             else:
