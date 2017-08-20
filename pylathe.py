@@ -303,8 +303,8 @@ class MoveCommands():
             self.text(fmt % val, (x, y), align)
             
     def saveZText(self, val, pos):
-        if self.ZText != None:
-            self.ZText.append((val, pos))
+        if self.zText != None:
+            self.zText.append((val, pos))
 
     def printZText(self, fmt, align, internal):
         if self.zText == None:
