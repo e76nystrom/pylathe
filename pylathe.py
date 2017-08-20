@@ -248,7 +248,7 @@ class MoveCommands():
         tmp = tmp.replace("." , "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
         d = dxf.drawing(tmp)
-        d.style('font', "Consolas")
+        self.style = dxf.style('font', "Consolas.ttf")
         d.add_layer(TEXT, color=0)
         d.add_layer(REF, color=1)
         self.textAngle = 0.0
@@ -350,7 +350,7 @@ class MoveCommands():
                 (vOffset, hOffset) = (hOffset, vOffset)
             self.d.add(dxf.text(text, (x + hOffset, y + vOffset), \
                                 height=self.textH, rotation=self.textAngle, \
-                                layer=layer))
+                                layer=layer, style=self.style))
     def drawClose(self):
         if self.d != None:
             try:
