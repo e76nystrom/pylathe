@@ -1507,7 +1507,8 @@ class Taper(UpdatePass):
             finish = self.finish / 2
         else:
             zCut = self.zLength # z feed from length
-            xCut = (self.xStart - self.xEnd) / taperInch # z feed from x
+            self.xLength = self.xStart - self.xEnd
+            xCut = self.xLength / taperInch # z feed from x
             self.cut = min(zCut, xCut) # choose minimum
 
             self.startZ = 0.0
