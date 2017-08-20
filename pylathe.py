@@ -248,7 +248,7 @@ class MoveCommands():
         tmp = tmp.replace("." , "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
         d = dxf.drawing(tmp)
-        self.style = dxf.style('font', "Consolas.ttf")
+        self.style = dxf.style("CONSOLAS", font="Consolas.ttf")
         d.add_layer(TEXT, color=0)
         d.add_layer(REF, color=1)
         self.textAngle = 0.0
