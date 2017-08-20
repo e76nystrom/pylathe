@@ -320,9 +320,9 @@ class MoveCommands():
                     x = lastX - h
             else:
                 pass
-            lastX = x
-            print("x %7.4f y %7.4f %s" % (x, y, fmt % val))
+            print("lastX %7.4f x %7.4f y %7.4f %s" % (x, y, fmt % val))
             self.text(fmt % val, (x, y), align)
+            lastX = x
         self.textAngle = 0.0
             
     def text(self, text, p0, align=None, layer='TEXT'):
