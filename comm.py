@@ -102,7 +102,7 @@ def queParm(parmIndex, val):
             valString = valString.rstrip('0')
         except ValueError:
             valString = "0.0"
-            print("ValueError queParm %s %s" % (parm, val)) #, flush=True)
+            print("ValueError float queParm %s %s" % (parm, val)) #, flush=True)
             stdout.flush()
     else:
         try:
@@ -113,6 +113,8 @@ def queParm(parmIndex, val):
                 valString = "x%x" % (val)
         except ValueError:
             valString = "0"
+            print("ValueError int queParm %s %s" % (parm, val)) #, flush=True)
+            stdout.flush()
     cmd = ' %x %s' % (parmIndex, valString)
     if xDbgPrint:
         print("%-15s %s" % (parm, cmd.strip())) #, flush=True)
