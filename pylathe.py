@@ -1578,10 +1578,7 @@ class Taper(UpdatePass):
                 self.startX = self.endX + self.taper * self.zLength
             self.startZ = -self.startZ
         else:
-            if final:
-                feed = self.cutAmount
-            else:
-                feed = self.passCount * self.actualFeed
+            feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
             self.startZ = self.zStart - feed
             self.startX = self.xStart
@@ -1627,8 +1624,11 @@ class Taper(UpdatePass):
             self.taperSetup()
             self.calcExternalPass(True)
             self.externalPass()
-            self.m.moveX(self.safeX)
-            self.m.moveZ(self.startZ)
+            if self.taperX:
+                self.m.moveX(self.safeX)
+                self.m.moveZ(self.startZ)
+            else:
+                pass
             self.m.stopSpindle();
             command(CMD_RESUME)
 
