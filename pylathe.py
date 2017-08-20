@@ -322,8 +322,8 @@ class MoveCommands():
             if not internal:
                 print("x %7.4f lastX %7.4f diff %7.4f %s" % \
                       (x, lastX, x - lastX, fmt % val))
-                if x - lastX < h:
-                    x = lastX - h
+                # if x - lastX < h:
+                #     x = lastX - h
             else:
                 pass
             # print("lastX %7.4f x %7.4f y %7.4f %s" % (lastX, x, y, fmt % val))
