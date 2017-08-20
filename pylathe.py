@@ -338,9 +338,9 @@ class MoveCommands():
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
-                textW = len(text) * self.textH * .75
+                textW = len(text) * self.textH * 0.9
                 if align & RIGHT:
-                    hOffset = -textW
+                    hOffset = -(textW + self.hs)
                 elif align & CENTER:
                     hOffset = -textW / 2
                 elif align & LEFT:
