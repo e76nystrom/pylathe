@@ -238,9 +238,10 @@ class MoveCommands():
         self.textH = 0.005
         self.vS = self.textH / 2
         self.hS = self.textH
-        self.angle = 0.0
+        self.textAngle = 0.0
         self.dbg = False
-        self.rText = None
+        self.xText = None
+        self.zText = None
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
@@ -249,12 +250,13 @@ class MoveCommands():
         d = dxf.drawing(tmp)
         d.add_layer(TEXT, color=0)
         d.add_layer(REF, color=1)
-        self.angle = 0.0
+        self.textAngle = 0.0
         self.d = d
-        self.rText = []
+        self.xText = []
+        self.zText = []
 
-    def setAlign(self, angle):
-        self.angle = angle
+    def setTextAngle(self, textAngle):
+        self.textAngle = textAngle
 
     def setLoc(self, z, x):
         if self.d != None:
@@ -280,19 +282,16 @@ class MoveCommands():
             self.lastX = x
             self.lastZ = z
 
-    def saveText(self, val, pos):
-        if self.rText != None:
-            self.rText.append((val, pos))
+    def saveXText(self, val, pos):
+        if self.xText != None:
+            self.xText.append((val, pos))
 
-    def printText(self, fmt, align, internal):
-        if self.rText == None:
+    def printXText(self, fmt, align, internal):
+        if self.xText == None:
             return
-        if not internal:
-            lastY = 999
-        else:
-            lastY = 0
+        lastY = 999 if not internal else 0
         h = self.textH + self.vS
-        for (val, pos) in self.rText:
+        for (val, pos) in self.xText:
             (x, y) = pos
             if not internal:
                 if lastY - y < h:
@@ -302,6 +301,27 @@ class MoveCommands():
                     y = lastY + h
             lastY = y
             self.text(fmt % val, (x, y), align)
+            
+    def saveZText(self, val, pos):
+        if self.ZText != None:
+            self.ZText.append((val, pos))
+
+    def printZText(self, fmt, align, internal):
+        if self.zText == None:
+            return
+        self.textAngle = 90.0
+        lastX = 0
+        h = self.textH + self.vS
+        for (val, pos) in self.zText:
+            (x, y) = pos
+            if not internal:
+                if abs(x - lastX) < h:
+                    x = lastX - h
+            else:
+                pass
+            lastX = x
+            self.text(fmt % val, (x, y), align)
+        self.textAngle = 0.0
             
     def text(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
@@ -324,10 +344,10 @@ class MoveCommands():
                 elif align & MIDDLE:
                     vOffset = -self.textH / 2
 
-            if self.angle != 0.0:
+            if self.textAngle != 0.0:
                 (vOffset, hOffset) = (hOffset, vOffset)
             self.d.add(dxf.text(text, (x + hOffset, y + vOffset), \
-                                height=self.textH, rotation=self.angle, \
+                                height=self.textH, rotation=self.textAngle, \
                                 layer=layer))
     def drawClose(self):
         if self.d != None:
@@ -1053,7 +1073,7 @@ class Face(UpdatePass):
 
         if getInfo(cfgDraw):
             self.m.draw("face", self.xStart, self.xEnd)
-            self.m.setAlign(90)
+            self.m.setTextAngle(90)
 
         self.faceSetup()
 
@@ -1535,7 +1555,8 @@ class Taper(UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printText("%2d %7.4f %7.4f", LEFT, False)
+        self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
+        self.m.printZText("%2d %7.4f", LEFT, False)
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
@@ -1558,7 +1579,7 @@ class Taper(UpdatePass):
         if self.taperX:
             m.xSynSetup(getFloatInfo(tpXInFeed))
         else:
-            pass
+            m.zSynSetup(getFloatInfo(tpZInFeed))
         m.moveX(self.safeX)
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
@@ -1613,12 +1634,15 @@ class Taper(UpdatePass):
             m.moveX(self.startX, CMD_SYN)
             m.taperZX(self.endZ)
         else:
+            if m.passNum & 0x300 == 0:
+                m.saveZText((m.passNum, self.startZ), \
+                            (self.startZ, self.safeX))
             m.moveX(self.startX)
             m.taperXZ(self.endX)
         m.drawLine(self.endZ, self.endX)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
-            m.saveText((m.passNum, self.endX * 2.0, self.endX), \
+            m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
                        (self.safeZ, self.endX))
         m.moveX(self.safeX)
 
@@ -2252,7 +2276,7 @@ class ScrewThread(UpdatePass):
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
-            m.saveText((m.passNum, startZ, self.zOffset, \
+            m.saveXText((m.passNum, startZ, self.zOffset, \
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
