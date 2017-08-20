@@ -1496,9 +1496,9 @@ class Taper(UpdatePass):
         self.xEnd = self.smallDiameter / 2.0
 
         if self.taperX:
-            zCut = self.zLength * taperInch
-            xCut = self.xStart - self.xEnd
-            self.cut = min(zCut, xCut)
+            zCut = self.zLength * taperInch # x feed from z length
+            xCut = self.xStart - self.xEnd  # x feed from start - end
+            self.cut = min(zCut, xCut)      # choose minimum
 
             self.startZ = 0.0
             self.endZ = self.startZ
@@ -1506,8 +1506,12 @@ class Taper(UpdatePass):
             feed = self.xFeed
             finish = self.finish / 2
         else:
-            self.cut = self.zLength
-            self.xLength = self.xStart - self.xEnd
+            zCut = self.zLength # z feed from length
+            xCut = (self.xStart - self.xEnd) / taperInch # z feed from x
+            self.cut = min(zCut, xCut) # choose minimum
+
+            self.startZ = 0.0
+            self.endZ = self.startZ
             feed = self.zFeed
             finish = self.finish
 
