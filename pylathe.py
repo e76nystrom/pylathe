@@ -1595,11 +1595,10 @@ class Taper(UpdatePass):
             m.saveTaper(1.0 / self.taper)
         m.startSpindle(getIntInfo(tpRPM))
         m.queFeedType(FEED_PITCH)
+
         m.zSynSetup(getFloatInfo(tpZFeed))
-        if self.taperX:
-            m.xSynSetup(getFloatInfo(tpXInFeed))
-        else:
-            m.zSynSetup(getFloatInfo(tpZFeed))
+        m.xSynSetup(getFloatInfo(tpXInFeed))
+
         m.moveX(self.safeX)
         m.text("%0.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
