@@ -321,7 +321,7 @@ class MoveCommands():
             else:
                 pass
             lastX = x
-            print("x %7.4f y %7.4f %s", (x, y, fmt % val))
+            print("x %7.4f y %7.4f %s" % (x, y, fmt % val))
             self.text(fmt % val, (x, y), align)
         self.textAngle = 0.0
             
