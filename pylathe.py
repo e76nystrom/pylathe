@@ -248,6 +248,7 @@ class MoveCommands():
         tmp = tmp.replace("." , "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
         d = dxf.drawing(tmp)
+        d.style('font', "Consolas")
         d.add_layer(TEXT, color=0)
         d.add_layer(REF, color=1)
         self.textAngle = 0.0
@@ -320,6 +321,7 @@ class MoveCommands():
             else:
                 pass
             lastX = x
+            print("x %7.4f y %7.4f %s", (x, y, fmt % val))
             self.text(fmt % val, (x, y), align)
         self.textAngle = 0.0
             
