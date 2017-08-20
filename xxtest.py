@@ -9,5 +9,5 @@ for i in range(20):
     print("x %7.4f xLast %7.4f diff %7.4f" % (x, xLast, diff))
     if diff < h:
         x = xLast - h
-        print("x")
+        print("x %7.4f" % (x))
     xLast = x
