@@ -316,6 +316,7 @@ class MoveCommands():
         self.textAngle = 90.0
         lastX = 0
         h = self.textH + self.vS
+        print("h %7.4f" % (h))
         for (val, pos) in self.zText:
             (x, y) = pos
             if not internal:
