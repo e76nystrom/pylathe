@@ -1589,7 +1589,10 @@ class Taper(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         self.m.done(0)
-        m.saveTaper(self.taper)
+        if self.taperX:
+            m.saveTaper(self.taper)
+        else:
+            m.saveTaper(1.0 / self.taper)
         m.startSpindle(getIntInfo(tpRPM))
         m.queFeedType(FEED_PITCH)
         m.zSynSetup(getFloatInfo(tpZFeed))
@@ -1600,7 +1603,7 @@ class Taper(UpdatePass):
         m.moveX(self.safeX)
         m.text("%0.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if internal else BELOW)
+               CENTER | (ABOVE if internal else BELOW))
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
