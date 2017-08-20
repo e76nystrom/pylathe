@@ -1,6 +1,6 @@
 #!/cygdrive/c/Python27/Python.exe
 
-h = 0.005
+h = -0.005
 xInc = -0.0025
 xLast = 10
 for i in range(20):
