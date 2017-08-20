@@ -5,7 +5,7 @@ xInc = -0.0025
 xLast = 10
 for i in range(20):
     x = i * xInc
-    diff = abs(x - xLast)
+    diff = x - xLast
     print("x %7.4f xLast %7.4f diff %7.4f" % (x, xLast, diff))
     if diff < h:
         x = xLast - h
