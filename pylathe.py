@@ -321,13 +321,12 @@ class MoveCommands():
             (x, y) = pos
             if not internal:
                 diff = x - lastX
-                print("x %7.4f lastX %7.4f diff %7.4f %s" % \
-                      (x, lastX, diff, fmt % val))
+                # print("x %7.4f lastX %7.4f diff %7.4f %s" % \
+                #       (x, lastX, diff, fmt % val))
                 if diff > h:
                     x = lastX + h
             else:
                 pass
-            # print("lastX %7.4f x %7.4f y %7.4f %s" % (lastX, x, y, fmt % val))
             self.text(fmt % val, (x, y), align)
             lastX = x
         self.textAngle = 0.0
