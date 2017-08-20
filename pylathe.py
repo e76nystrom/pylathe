@@ -249,7 +249,7 @@ class MoveCommands():
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
         tmp = tmp.replace("." , "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
-        self.fileName = os.join(os.getcwd(), tmp)
+        self.fileName = os.path.join(os.getcwd(), tmp)
         d = dxf.drawing(self.fileName)
         self.style = dxf.style("CONSOLAS", font="Consolas.ttf")
         d.add_layer(TEXT, color=0)
