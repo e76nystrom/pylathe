@@ -1602,14 +1602,14 @@ class Taper(UpdatePass):
         if self.taperPanel.pause.GetValue():
             print("pause")
             m.quePause()
-        if m.passNum & 0x300 == 0:
-            if self.taperLength < self.zLength:
-                m.text("%2d %7.3f" % (m.passNum, self.startZ), \
-                       (self.startZ, self.safeX), CENTER | ABOVE)
-            else:
-                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
-                       (self.endZ, self.startX), RIGHT)
         if self.taperX:
+            if m.passNum & 0x300 == 0:
+                if self.taperLength < self.zLength:
+                    m.text("%2d %7.3f" % (m.passNum, self.startZ), \
+                           (self.startZ, self.safeX), CENTER | ABOVE)
+                else:
+                    m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                           (self.endZ, self.startX), RIGHT)
             m.moveX(self.startX, CMD_SYN)
             m.taperZX(self.endZ)
         else:
