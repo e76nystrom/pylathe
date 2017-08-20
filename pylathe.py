@@ -320,7 +320,7 @@ class MoveCommands():
         for (val, pos) in self.zText:
             (x, y) = pos
             if not internal:
-                diff = x - xLast
+                diff = x - lastX
                 print("x %7.4f lastX %7.4f diff %7.4f %s" % \
                       (x, lastX, diff, fmt % val))
                 if diff > h:
