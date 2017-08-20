@@ -314,16 +314,16 @@ class MoveCommands():
         if self.zText == None:
             return
         self.textAngle = 90.0
-        lastX = 999
+        lastX = -999
         h = self.textH + self.vS
         print("h %7.4f" % (h))
         for (val, pos) in self.zText:
             (x, y) = pos
             if not internal:
-                print("x %7.4f lastX %7.4f diff %7.4f %s" % \
-                      (x, lastX, abs(x) - abs(lastX), fmt % val))
-                if x - lastX < h:
-                    x = lastX - h
+                # print("x %7.4f lastX %7.4f diff %7.4f %s" % \
+                #       (x, lastX, abs(x) - abs(lastX), fmt % val))
+                # if x - lastX < h:
+                #     x = lastX - h
             else:
                 pass
             # print("lastX %7.4f x %7.4f y %7.4f %s" % (lastX, x, y, fmt % val))
