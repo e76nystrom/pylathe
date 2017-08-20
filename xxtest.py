@@ -8,6 +8,6 @@ for i in range(20):
     diff = x - xLast
     print("x %7.4f xLast %7.4f diff %7.4f" % (x, xLast, diff))
     if diff < h:
-        x = xLast - h
+        x = xLast + h
         print("x %7.4f" % (x))
     xLast = x
