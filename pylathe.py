@@ -8,6 +8,7 @@ import wx.lib.inspection
 from time import sleep, time
 import sys
 import os
+import subprocess
 from sys import stdout
 import serial
 from threading import Thread, Lock, Event
@@ -242,12 +243,14 @@ class MoveCommands():
         self.dbg = False
         self.xText = None
         self.zText = None
+        self.fileName = None
 
     def draw(self, type, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (type, diam, parm)
         tmp = tmp.replace("." , "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
-        d = dxf.drawing(tmp)
+        self.fileName = os.join(os.getcwd(), tmp)
+        d = dxf.drawing(self.fileName)
         self.style = dxf.style("CONSOLAS", font="Consolas.ttf")
         d.add_layer(TEXT, color=0)
         d.add_layer(REF, color=1)
@@ -356,6 +359,9 @@ class MoveCommands():
             try:
                 if self.d != None:
                     self.d.save()
+                    # subprocess.call(["sed", "-i", "-e", \
+                    #                  "'s/arial/consolas/g'", \
+                    #                  self.fileName])
                     self.d = None
             except:
                 print("dxf file save error")
