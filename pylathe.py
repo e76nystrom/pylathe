@@ -1579,7 +1579,7 @@ class Taper(UpdatePass):
         if self.taperX:
             m.xSynSetup(getFloatInfo(tpXInFeed))
         else:
-            m.zSynSetup(getFloatInfo(tpZInFeed))
+            m.zSynSetup(getFloatInfo(tpZFeed))
         m.moveX(self.safeX)
         m.text("%7.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), LEFT | ABOVE)
