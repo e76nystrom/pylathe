@@ -1526,8 +1526,38 @@ class Taper(UpdatePass):
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
+    def taperSetup(self):
+        m = self.m
+        m.setLoc(self.zEnd, self.xStart)
+        m.drawLineZ(self.zStart, REF)
+        m.drawLineX(self.xEnd, REF)
+        m.setLoc(self.safeZ, self.safeX)
+        m.quePause()
+        self.m.done(0)
+        if self.taperX:
+            m.saveTaper(self.taper)
+        else:
+            m.saveTaper(1.0 / self.taper)
+        m.startSpindle(getIntInfo(tpRPM))
+        m.queFeedType(FEED_PITCH)
+
+        m.zSynSetup(getFloatInfo(tpZFeed))
+        m.xSynSetup(getFloatInfo(tpXInFeed))
+
+        m.moveX(self.safeX)
+        m.text("%0.3f" % (self.zStart), \
+               (self.zStart, self.xEnd), \
+               CENTER | (ABOVE if self.internal else BELOW))
+        m.text("%0.3f" % (self.xStart * 2.0), \
+               (self.zEnd, self.xStart), RIGHT | MIDDLE)
+        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+               (self.safeZ, self.safeX))
+        m.text("%7.3f" % (self.zEnd), \
+               (self.zEnd, self.safeX), RIGHT | BELOW)
+
     def externalTaper(self, taperInch):
         print("externalTaper")
+        self.internal = False
         self.getTaperParameters(taperInch)
 
         self.xStart = self.largeDiameter / 2.0
@@ -1581,35 +1611,6 @@ class Taper(UpdatePass):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
-
-    def taperSetup(self, internal=False):
-        m = self.m
-        m.setLoc(self.zEnd, self.xStart)
-        m.drawLineZ(self.zStart, REF)
-        m.drawLineX(self.xEnd, REF)
-        m.setLoc(self.safeZ, self.safeX)
-        m.quePause()
-        self.m.done(0)
-        if self.taperX:
-            m.saveTaper(self.taper)
-        else:
-            m.saveTaper(1.0 / self.taper)
-        m.startSpindle(getIntInfo(tpRPM))
-        m.queFeedType(FEED_PITCH)
-
-        m.zSynSetup(getFloatInfo(tpZFeed))
-        m.xSynSetup(getFloatInfo(tpXInFeed))
-
-        m.moveX(self.safeX)
-        m.text("%0.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if internal else BELOW))
-        m.text("%0.3f" % (self.xStart * 2.0), \
-               (self.zEnd, self.xStart), RIGHT | MIDDLE)
-        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
-               (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), RIGHT | BELOW)
 
     def calcExternalPass(self, final=False):
         if self.taperX:
@@ -1684,6 +1685,7 @@ class Taper(UpdatePass):
 
     def internalTaper(self, taperInch):
         print("internalTaper")
+        self.internal = True
         self.getTaperParameters(taperInch)
 
         self.boreRadius = self.xStart = self.largeDiameter / 2.0
@@ -1706,12 +1708,14 @@ class Taper(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
-        self.taperSetup(True)
+        self.taperSetup()
         self.m.moveZ(self.safeZ)
 
         while self.updatePass():
             pass
 
+        self.m.printXText("%2d %7.4f %7.4f", LEFT, True)
+        self.m.printZText("%2d %7.4f", RIGHT|MIDDLE, True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         self.m.stopSpindle();
@@ -1746,8 +1750,12 @@ class Taper(UpdatePass):
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
-                   (self.safeZ, self.startX), LEFT)
+            if self.taperX:
+                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                       (self.safeZ, self.startX), LEFT)
+            else:
+                m.saveZText((m.passNum, self.startZ), \
+                            (self.startZ, self.safeX))
         m.taperZX(self.endZ, self.endX) if self.taperX else \
             m.taperXZ(self.endX, self.endZ)
         m.drawLine(self.endZ, self.endX)
@@ -1768,7 +1776,7 @@ class Taper(UpdatePass):
             add = getFloatVal(self.taperPanel.add) / 2
             self.feed += add
             self.passCount += 1
-            self.taperSetup(True)
+            self.taperSetup()
             self.m.moveZ(self.safeZ)
             self.calcInternalPass()
             self.internalPass()
