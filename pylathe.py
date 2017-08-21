@@ -1748,7 +1748,8 @@ class Taper(UpdatePass):
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
                    (self.safeZ, self.startX), LEFT)
-        m.taperZX(self.endZ) if self.taperX else m.taperXZ(self.endx)
+        m.taperZX(self.endZ, self.endX) if self.taperX else \
+            m.taperXZ(self.endX, self.endZ)
         m.drawLine(self.endZ, self.endX)
         m.moveX(self.boreRadius, CMD_SYN)
         m.moveX(self.safeX)
