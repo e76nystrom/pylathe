@@ -333,6 +333,7 @@ parmList = \
     
     ("TOTAL_PASSES", "total passes", "int16_t"),
     ("CURRENT_PASS", "current passes", "int16_t"),
+    ("MV_STATUS", "movement status", "int16_t"),
     
     "z axis move values",
     
@@ -532,6 +533,13 @@ regList =\
     ("PROBE_SUCCESS", "1", ""),
     ("PROBE_FAIL", "2", ""),
 
+    "movement status",
+
+    ("MV_PAUSE", "(1 << 0)", "movement paused"),
+    ("MV_ACTIVE", "(1 << 1)", "movement active"),
+    ("MV_DONE", "(1 << 2)", "movement done"),
+    # ("", "", ""),
+ 
     # ("", "", ""),
 )
 xilinxList = \
