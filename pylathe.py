@@ -1550,8 +1550,8 @@ class Taper(UpdatePass):
                (self.zEnd, self.xStart), RIGHT | MIDDLE)
         m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), RIGHT | BELOW)
+        m.text("%0.3f" % (self.zEnd), \
+               (self.zEnd, self.safeX), RIGHT | MIDDLE)
 
     def externalTaper(self, taperInch):
         print("externalTaper")
