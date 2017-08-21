@@ -1518,6 +1518,7 @@ class Taper(UpdatePass):
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
         self.finish = abs(getFloatVal(tp.finish))
+        self.pause = self.taperPanel.pause.GetValue()
 
         totalTaper = taperInch * self.zLength
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
@@ -1643,7 +1644,7 @@ class Taper(UpdatePass):
     def externalPass(self):
         m = self.m
         m.moveZ(self.startZ)
-        if self.taperPanel.pause.GetValue():
+        if self.pause:
             print("pause")
             m.quePause()
         if self.taperX:
@@ -1743,34 +1744,9 @@ class Taper(UpdatePass):
 
     def internalPass(self):
         m = self.m
-        # m.moveX(self.startX + 0.002, CMD_JOG)
-        # m.moveX(self.startX, CMD_JOG)
-        # m.moveZ(self.startZ, CMD_JOG)
-        # if self.taperPanel.pause.GetValue():
-        #     print("pause")
-        #     m.quePause()
-        # if m.passNum & 0x300 == 0:
-        #     if self.taperX:
-        #         m.text("%2d %7.3f" % (m.passNum, self.startZ), \
-        #                (self.safeZ, self.startX), LEFT)
-        #     else:
-        #         m.saveZText((m.passNum, self.endZ), \
-        #                     (self.endZ, self.safeX))
-        # m.taperZX(self.endZ, self.endX) if self.taperX else \
-        #     m.taperXZ(self.endX, self.endZ)
-        # m.drawLine(self.endZ, self.endX)
-        # m.moveX(self.boreRadius, CMD_SYN)
-        # m.moveX(self.safeX)
-        # if self.endZ < self.zLength:
-        #     if m.passNum & 0x300 == 0:
-        #         m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
-        #                     (self.safeZ, self.startX))
-        #     else:
-        #         pass
-        # m.moveZ(self.safeZ)
         m.moveZ(self.endZ, CMD_JOG)
         m.moveX(self.endX, CMD_SYN)
-        if self.taperPanel.pause.GetValue():
+        if self.pause
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
@@ -1779,13 +1755,12 @@ class Taper(UpdatePass):
         m.taperZX(self.startZ, self.startX) if self.taperX else \
             m.taperXZ(self.startX, self.startZ)
         m.drawLine(self.startZ, self.startX)
-        m.moveZ(self.safeZ, CMD_JOG)
-        m.moveX(self.safeX)
         if self.endZ < self.zLength:
             if m.passNum & 0x300 == 0:
                 m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
                             (self.safeZ, self.startX))
-        m.moveZ(self.safeZ)
+        m.moveZ(self.safeZ, CMD_JOG)
+        m.moveX(self.safeX)
 
     def internalAdd(self):
         if self.feed >= self.cutAmount:
