@@ -1760,7 +1760,7 @@ class Taper(UpdatePass):
             if m.passNum & 0x300 == 0:
                 m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
                             (self.safeZ, self.startX))
-        m.moveZ(self.safeZ, CMD_JOG)
+        m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
     def internalAdd(self):
