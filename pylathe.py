@@ -2220,7 +2220,7 @@ class ScrewThread(UpdatePass):
 
     def threadSetup(self, add=False):
         m = self.m
-        if not self.add:
+        if not add:
             m.setLoc(self.zEnd, self.xStart)
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
@@ -2228,9 +2228,7 @@ class ScrewThread(UpdatePass):
         m.quePause()
         self.m.done(0)
         m.startSpindle(getIntInfo(thRPM))
-        feedType = FEED_TPI
-        if self.threadPanel.mm.GetValue():
-            feedType = FEED_METRIC
+        feedType = FEED_TPI if self.threadPanel.tpi.GetValue() else FEED_METRIC
         m.queFeedType(feedType)
         m.saveTaper(getFloatInfo(thXTaper))
         m.saveRunout(getFloatInfo(thExitRev))
@@ -2238,7 +2236,7 @@ class ScrewThread(UpdatePass):
         m.zSynSetup(getFloatInfo(thPitch))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        if not self.add:
+        if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
                    (self.zEnd, self.xStart), RIGHT)
             m.text("%0.3f" % (self.zStart), \
