@@ -1744,6 +1744,7 @@ class Taper(UpdatePass):
 
     def internalPass(self):
         m = self.m
+        m.moveZ(self.endZ - 0.002)
         m.moveZ(self.endZ, CMD_JOG)
         m.moveX(self.endX, CMD_SYN)
         if self.pause:
