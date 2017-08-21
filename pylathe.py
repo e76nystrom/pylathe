@@ -1571,9 +1571,9 @@ class Taper(UpdatePass):
             xCut = self.xStart - self.xEnd  # x feed from start - end
             self.cut = min(zCut, xCut)      # choose minimum
 
-            self.startZ = 0.0
-            self.endZ = self.startZ
-            self.endX = 0.0
+            # self.startZ = self.zStart
+            # self.endZ = self.zStart - self.zEnd
+            # self.endX = 0.0
             feed = self.xFeed
             finish = self.finish / 2
         else:
@@ -1582,12 +1582,12 @@ class Taper(UpdatePass):
             xCut = self.xLength / taperInch # z feed from x
             self.cut = min(zCut, xCut) # choose minimum
 
-            self.startZ = 0.0
-            self.endZ = self.startZ
+            # self.startZ = self.zStart
+            # self.endZ = self.zStart - self.zEnd
             feed = self.zFeed
             finish = self.finish
 
-        self.safeZ = self.startZ + self.zRetract
+        self.safeZ = self.zStart + self.zRetract
         self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
@@ -1622,12 +1622,11 @@ class Taper(UpdatePass):
             self.endX = self.xStart - feed
             self.taperLength = self.feed / self.taper
             if self.taperLength < self.zLength:
-                self.startZ = self.taperLength
+                self.startZ = self.zStart - self.taperLength
                 self.startX = self.xStart
             else:
-                self.startZ = self.zLength
+                self.startZ = self.zStart - self.zLength
                 self.startX = self.endX + self.taper * self.zLength
-            self.startZ = -self.startZ
         else:
             feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
@@ -1704,10 +1703,10 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
-        self.startZ = 0.0
-        self.endZ = 0.0
+        self.startZ = self.zStart
+        self.endZ = self.zStart = self.zLength
         self.safeX = self.boreRadius - self.xRetract
-        self.safeZ = self.xRetract
+        self.safeZ = self.zStart + self.zRetract
 
         if getInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
@@ -1746,8 +1745,8 @@ class Taper(UpdatePass):
 
     def internalPass(self):
         m = self.m
-        m.moveZ(self.endZ - self.backInc)
-        m.moveZ(self.endZ, CMD_JOG)
+        m.moveZ(self.endZ - self.backInc) # past the start point
+        m.moveZ(self.endZ, CMD_JOG) # back to start to remove backlash
         m.moveX(self.endX, CMD_SYN)
         if self.pause:
             print("pause")
