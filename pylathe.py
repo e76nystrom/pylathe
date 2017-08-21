@@ -1771,12 +1771,8 @@ class Taper(UpdatePass):
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
-            if self.taperX:
-                m.text("%2d %7.3f" % (m.passNum, self.startZ), \
-                       (self.safeZ, self.startX), LEFT)
-            else:
-                m.saveZText((m.passNum, self.endZ), \
-                            (self.endZ, self.safeX))
+            m.saveZText((m.passNum, self.endZ), \
+                        (self.endZ, self.safeX))
         m.taperZX(self.startZ, self.startX) if self.taperX else \
             m.taperXZ(self.startX, self.startZ)
         m.drawLine(self.startZ, self.startX)
@@ -1786,8 +1782,6 @@ class Taper(UpdatePass):
             if m.passNum & 0x300 == 0:
                 m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
                             (self.safeZ, self.startX))
-            else:
-                pass
         m.moveZ(self.safeZ)
 
     def internalAdd(self):
