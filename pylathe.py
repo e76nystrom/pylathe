@@ -310,7 +310,7 @@ class MoveCommands():
         if self.zText != None:
             self.zText.append((val, pos))
 
-    def printZText(self, fmt, align, internal):
+    def printZText(self, fmt, align):
         if self.zText == None:
             return
         self.textAngle = 90.0
@@ -1602,7 +1602,7 @@ class Taper(UpdatePass):
             pass
 
         self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
-        self.m.printZText("%2d %7.4f", LEFT|MIDDLE, False)
+        self.m.printZText("%2d %7.4f", LEFT|MIDDLE)
         self.m.moveZ(self.safeZ)
         if STEPPER_DRIVE:
             self.m.stopSpindle()
@@ -1712,7 +1712,7 @@ class Taper(UpdatePass):
             pass
 
         self.m.printXText("%2d %7.4f %7.4f", LEFT, True)
-        self.m.printZText("%2d %7.4f", RIGHT|MIDDLE, True)
+        self.m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         self.m.stopSpindle();
@@ -1771,7 +1771,7 @@ class Taper(UpdatePass):
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
-            m.saveZText((m.passNum, self.endZ), \
+            m.saveZText((m.passNum, self.endZ, self.endX, self.endX * 2.0), \
                         (self.endZ, self.safeX))
         m.taperZX(self.startZ, self.startX) if self.taperX else \
             m.taperXZ(self.startX, self.startZ)
