@@ -1726,10 +1726,10 @@ class Taper(UpdatePass):
         self.feed = feed
         self.endX = self.boreRadius + feed
         self.startZ = self.zStart - self.feed / self.taper
-        if self.startZ > self.endZ:
+        if self.startZ > self.zEnd:
             self.startX = self.boreRadius
         else:
-            self.startZ = self.endZ
+            self.startZ = self.zEnd
             self.startX = (self.boreRadius + self.feed - \
                            self.zLength * self.taper)
         print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
