@@ -316,7 +316,7 @@ class MoveCommands():
         self.textAngle = 90.0
         lastX = 10
         h = -(self.textH + self.vS)
-        print("h %7.4f" % (h))
+        # print("h %7.4f" % (h))
         for (val, pos) in self.zText:
             (x, y) = pos
             diff = x - lastX
@@ -1748,11 +1748,11 @@ class Taper(UpdatePass):
             m.quePause()
         if m.passNum & 0x300 == 0:
             if self.taperX:
-                m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
+                m.text("%2d %7.3f" % (m.passNum, self.startZ), \
                        (self.safeZ, self.startX), LEFT)
             else:
                 m.saveZText((m.passNum, self.startZ), \
-                            (self.startZ, self.safeX))
+                            (self.endZ, self.safeX))
         m.taperZX(self.endZ, self.endX) if self.taperX else \
             m.taperXZ(self.endX, self.endZ)
         m.drawLine(self.endZ, self.endX)
@@ -1760,8 +1760,8 @@ class Taper(UpdatePass):
         m.moveX(self.safeX)
         if self.endZ < self.zLength:
             if m.passNum & 0x300 == 0:
-                m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
-                            (self.safeZ, self.endX))
+                m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
+                            (self.safeZ, self.startX))
                 # m.text("%2d %7.3f" % (m.passNum, self.endZ), \
                 #        (self.endZ, self.safeX), CENTER | BELOW)
             else:
