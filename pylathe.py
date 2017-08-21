@@ -1571,9 +1571,6 @@ class Taper(UpdatePass):
             xCut = self.xStart - self.xEnd  # x feed from start - end
             self.cut = min(zCut, xCut)      # choose minimum
 
-            # self.startZ = self.zStart
-            # self.endZ = self.zStart - self.zEnd
-            # self.endX = 0.0
             feed = self.xFeed
             finish = self.finish / 2
         else:
@@ -1582,8 +1579,6 @@ class Taper(UpdatePass):
             xCut = self.xLength / taperInch # z feed from x
             self.cut = min(zCut, xCut) # choose minimum
 
-            # self.startZ = self.zStart
-            # self.endZ = self.zStart - self.zEnd
             feed = self.zFeed
             finish = self.finish
 
@@ -1703,8 +1698,9 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
-        self.startZ = self.zStart
-        self.endZ = self.zStart = self.zLength
+        # self.startZ = self.zStart
+        # self.endZ = self.zStart - self.zLength
+
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
@@ -1728,15 +1724,14 @@ class Taper(UpdatePass):
     def calcInternalPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
-        self.startX = self.boreRadius + feed
-        self.endZ = self.feed / self.taper
-        if self.endZ <= self.zLength:
-            self.endX = self.boreRadius
+        self.endX = self.boreRadius + feed
+        self.startZ = self.zStart - self.feed / self.taper
+        if self.startZ > self.endZ:
+            self.startX = self.boreRadius
         else:
-            self.endZ = self.zLength
-            self.endX = (self.boreRadius + self.feed - 
-                         self.zLength * self.taper)
-        self.endZ = -self.endZ
+            self.startZ = self.endZ
+            self.startX = (self.boreRadius + self.feed - \
+                           self.zLength * self.taper)
         print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
               "%6.3f %6.3f" % \
               (self.passCount, self.feed, self.startX, self.startZ, \
@@ -1745,22 +1740,21 @@ class Taper(UpdatePass):
 
     def internalPass(self):
         m = self.m
-        m.moveZ(self.endZ - self.backInc) # past the start point
-        m.moveZ(self.endZ, CMD_JOG) # back to start to remove backlash
-        m.moveX(self.endX, CMD_SYN)
+        m.moveZ(self.startZ - self.backInc) # past the start point
+        m.moveZ(self.startZ, CMD_JOG) # back to start to remove backlash
+        m.moveX(self.startX, CMD_SYN)
         if self.pause:
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
-            m.saveZText((m.passNum, self.endZ, self.endX, self.endX * 2.0), \
-                        (self.endZ, self.safeX))
-        m.taperZX(self.startZ, self.startX) if self.taperX else \
-            m.taperXZ(self.startX, self.startZ)
-        m.drawLine(self.startZ, self.startX)
-        if self.endZ < self.zLength:
-            if m.passNum & 0x300 == 0:
-                m.saveXText((m.passNum, self.startX * 2.0, self.startX), \
-                            (self.safeZ, self.startX))
+            m.saveZText((m.passNum, self.startZ, self.startX, \
+                         self.startX * 2.0), (self.startZ, self.safeX))
+        m.taperZX(self.endZ, self.endX) if self.taperX else \
+            m.taperXZ(self.endX, self.endZ)
+        m.drawLine(self.endZ, self.endX)
+        if m.passNum & 0x300 == 0:
+            m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
+                        (self.safeZ, self.endX))
         m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
