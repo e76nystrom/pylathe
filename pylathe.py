@@ -2301,7 +2301,7 @@ class ScrewThread(UpdatePass):
 
     def threadAdd(self):
         try:
-            curPass = getparm(CURRENT_PASS)
+            curPass = getParm(CURRENT_PASS)
             if curPass >= self.passes:
                 add = getFloatVal(self.threadPanel.add)
                 self.feed += add
