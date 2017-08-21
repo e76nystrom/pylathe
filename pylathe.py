@@ -1554,7 +1554,7 @@ class Taper(UpdatePass):
         m.text("%0.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), RIGHT | MIDDLE)
         m.text("%0.3f Feed %0.3f" % (self.safeX * 2.0, self.actualFeed), \
-               (self.safeZ, self.safeX, ABOVE if self.internal else BELOW))
+               (self.safeZ, self.safeX), ABOVE if self.internal else BELOW)
         m.text("%0.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), RIGHT | MIDDLE)
 
