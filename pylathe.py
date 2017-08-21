@@ -1545,13 +1545,13 @@ class Taper(UpdatePass):
         m.moveZ(self.safeZ)
         m.text("%0.3f" % (self.zStart), \
                (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if self.internal else BELOW))
+               RIGHT | (ABOVE if self.internal else BELOW))
         m.text("%0.3f" % (self.safeZ), \
                (self.safeZ, self.xEnd), \
-               CENTER | (ABOVE if self.internal else BELOW))
+               RIGHT | (ABOVE if self.internal else BELOW))
         m.text("%0.3f" % (self.xStart * 2.0), \
                (self.zEnd, self.xStart), RIGHT | MIDDLE)
-        m.text("%7.3f feed %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+        m.text("%0.3f Feed %0.3f" % (self.safeX * 2.0, self.actualFeed), \
                (self.safeZ, self.safeX))
         m.text("%0.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), RIGHT | MIDDLE)
