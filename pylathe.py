@@ -1504,6 +1504,7 @@ class Taper(UpdatePass):
         # taperX False - move x taper z
         self.taperX = taperInch <= 1.0
         self.taper = taperInch
+        self.backInc = 0.002
 
         self.zStart = getFloatVal(tp.zStart)
         self.zLength = getFloatVal(tp.zLength)
@@ -1643,7 +1644,8 @@ class Taper(UpdatePass):
 
     def externalPass(self):
         m = self.m
-        m.moveZ(self.startZ)
+        m.moveZ(self.startZ - self.backInc) # move past start
+        m.moveZ(self.startZ, CMD_JOG) # move to takeout backlash
         if self.pause:
             print("pause")
             m.quePause()
@@ -1744,7 +1746,7 @@ class Taper(UpdatePass):
 
     def internalPass(self):
         m = self.m
-        m.moveZ(self.endZ - 0.002)
+        m.moveZ(self.endZ - self.backInc)
         m.moveZ(self.endZ, CMD_JOG)
         m.moveX(self.endX, CMD_SYN)
         if self.pause:
