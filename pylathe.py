@@ -1698,8 +1698,7 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
-        # self.startZ = self.zStart
-        # self.endZ = self.zStart - self.zLength
+        self.endZ = self.zStart
 
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.zStart + self.zRetract
