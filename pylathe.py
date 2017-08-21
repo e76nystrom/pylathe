@@ -2218,12 +2218,13 @@ class ScrewThread(UpdatePass):
         self.m.done(1)
         stdout.flush()
 
-    def threadSetup(self):
+    def threadSetup(self, add=False):
         m = self.m
-        m.setLoc(self.zEnd, self.xStart)
-        m.drawLineZ(self.zStart, REF)
-        m.drawLineX(self.xEnd, REF)
-        m.setLoc(self.safeZ, self.safeX)
+        if not self.add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         self.m.done(0)
         m.startSpindle(getIntInfo(thRPM))
@@ -2237,17 +2238,17 @@ class ScrewThread(UpdatePass):
         m.zSynSetup(getFloatInfo(thPitch))
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        zOffset = 0.0
-        m.text("%7.3f" % (self.xStart * 2.0), \
-               (self.zEnd, self.xStart), RIGHT)
-        m.text("%0.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if self.internal else BELOW))
-        m.text("%7.3f" % (self.safeX * 2.0,), \
-               (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), \
-               CENTER | (BELOW if self.internal else ABOVE))
+        if not self.add:
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.zEnd, self.xStart), RIGHT)
+            m.text("%0.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%7.3f" % (self.safeX * 2.0,), \
+                   (self.safeZ, self.safeX))
+            m.text("%7.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), \
+                   CENTER | (BELOW if self.internal else ABOVE))
 
     def calculateThread(self, final=False, add=False):
         if not add:
@@ -2299,20 +2300,23 @@ class ScrewThread(UpdatePass):
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
-        # if m.passNum & 0x300 == 0:
-        #     m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
-        #            (self.zEnd, self.safeX), RIGHT)
 
     def threadAdd(self):
-        if self.feed >= self.depth:
-            add = getFloatVal(self.threadPanel.add)
-            self.feed += add
-            self.threadSetup()
-            self.calculateThread(add=True)
-            self.threadPass()
-            self.m.stopSpindle();
-            command(CMD_RESUME)
-            stdout.flush()
+        try:
+            curPass = getparm(CURRENT_PASS)
+            if curPass >= self.passes:
+                add = getFloatVal(self.threadPanel.add)
+                self.feed += add
+                self.threadSetup(True)
+                self.calculateThread(add=True)
+                self.threadPass()
+                self.m.stopSpindle();
+                command(CMD_RESUME)
+            else:
+                jogPanel.setStatus("Cannot Add")
+        except CommTimeout:
+            pass
+        stdout.flush()
 
 class ThreadPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
@@ -2477,23 +2481,23 @@ class ThreadPanel(wx.Panel):
         pass
 
     def sendData(self):
-        try:
-            moveCommands.queClear()
-            sendClear()
-            sendSpindleData()
-            sendZData()
-            sendXData()
-        except CommTimeout:
-            print("timeout error")
-            stdout.flush()
+        moveCommands.queClear()
+        sendClear()
+        sendSpindleData()
+        sendZData()
+        sendXData()
 
     def OnSend(self, e):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
                 jogPanel.clrStatus()
-                self.sendData()
-                self.screwThread.thread()
+                try:
+                    self.sendData()
+                    self.screwThread.thread()
+                except CommTimeout:
+                    print("timeout error")
+                    stdout.flush()
             else:
                 jogPanel.notHomed()
         else:
