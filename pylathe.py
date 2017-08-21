@@ -1751,7 +1751,7 @@ class Taper(UpdatePass):
                 m.text("%2d %7.3f" % (m.passNum, self.startZ), \
                        (self.safeZ, self.startX), LEFT)
             else:
-                m.saveZText((m.passNum, self.startZ), \
+                m.saveZText((m.passNum, self.endZ), \
                             (self.endZ, self.safeX))
         m.taperZX(self.endZ, self.endX) if self.taperX else \
             m.taperXZ(self.endX, self.endZ)
