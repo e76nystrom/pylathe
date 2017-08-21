@@ -1746,7 +1746,7 @@ class Taper(UpdatePass):
         m = self.m
         m.moveZ(self.endZ, CMD_JOG)
         m.moveX(self.endX, CMD_SYN)
-        if self.pause
+        if self.pause:
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
