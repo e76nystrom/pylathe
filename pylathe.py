@@ -2209,7 +2209,7 @@ class ScrewThread(UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printXText("%2d z %6.4f zofs %6.4f d %6.4f feed %6.4f", \
+        self.m.printXText("%2d Z %6.4f Zofs %6.4f D %6.4f F %6.4f", \
                           LEFT, self.internal)
             
         self.drawClose()
