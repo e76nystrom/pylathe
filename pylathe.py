@@ -3554,7 +3554,7 @@ class SetPosDialog(wx.Dialog):
         self.Show(False)
         jogPanel.focus()
 
-    def updateZPos(val):
+    def updateZPos(self, val):
         global jogPanel, zHomeOffset, zDROOffset
         sendZData()
         zLoc = getParm(Z_LOC)
@@ -3578,7 +3578,7 @@ class SetPosDialog(wx.Dialog):
                 print("zDROOffset %0.4f" % (zDROOffset))
         stdout.flush()
 
-    def updateXPos(val):
+    def updateXPos(self, val):
         global jogPanel, xHomeOffset, xDROOffset
         val /= 2.0
         sendXData()
