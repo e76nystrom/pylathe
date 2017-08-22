@@ -2516,7 +2516,7 @@ class ThreadPanel(wx.Panel):
         global dbg, jogPanel
         if not self.active:
             jogPanel.setStatus(STR_NOT_SENT)
-        elif jogPanel.mvStatus & MV_PAUSE:
+        elif (jogPanel.mvStatus & MV_PAUSE) == 0:
             jogPanel.setStatus(STR_NOT_PAUSED)
         else:
             jogPanel.setStatus(STR_CLR)
