@@ -31,9 +31,8 @@ def createStrings(strList):
             print("createConfig %s already defined" % name)
         else:
             globals()[name] = i
-            configTable.append(value)
+            strTable.append(value)
             importList.append(name)
-    return(config, configTable)
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
