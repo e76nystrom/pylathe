@@ -3517,7 +3517,7 @@ class SetPosDialog(wx.Dialog):
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        btn = wx.Button(sel, label='Ok', size=(60,-1))
+        btn = wx.Button(self, label='Ok', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnOk)
         sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
