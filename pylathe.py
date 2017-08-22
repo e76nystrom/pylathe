@@ -133,7 +133,7 @@ class FormRoutines():
     def __init__(self):
         pass
 
-    def formatData(formatList):
+    def formatData(self,formatList):
         success = True
         for (index, fieldType) in formatList:
             if fieldType == None:
