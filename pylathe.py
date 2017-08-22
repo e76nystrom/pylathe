@@ -133,7 +133,7 @@ class FormRoutines():
     def __init__(self):
         pass
 
-    def formatData(self, formatList):
+    def formatData(formatList):
         success = True
         for (index, fieldType) in formatList:
             if fieldType == None:
@@ -1012,7 +1012,7 @@ class TurnPanel(wx.Panel, FormRoutines):
         return(self.configList)
 
     def update(self):
-        self.formatData(self, self.formatList)
+        self.formatData(self.formatList)
 
     def sendData(self):
         global moveCommands
@@ -1029,7 +1029,7 @@ class TurnPanel(wx.Panel, FormRoutines):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        if self.formatData(self, self.formatList):
+        if self.formatData(self.formatList):
             if xHomed:
                 jogPanel.setStatus(STR_CLR)
                 self.sendData()
@@ -1276,7 +1276,7 @@ class FacePanel(wx.Panel, FormRoutines):
         return(self.configList)
 
     def update(self):
-        self.formatData(self, self.formatList)
+        self.formatData(self.formatList)
 
     def sendData(self):
         global moveCommands
@@ -1292,7 +1292,7 @@ class FacePanel(wx.Panel, FormRoutines):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        if self.formatData(self, self.formatList):
+        if self.formatData(self.formatList):
             if xHomed:
                 jogPanel.setStatus(STR_CLR)
                 self.sendData()
@@ -1453,7 +1453,7 @@ class CutoffPanel(wx.Panel, FormRoutines):
         return(self.configList)
 
     def update(self):
-        self.formatData(self, self.formatList)
+        self.formatData(self.formatList)
 
     def sendData(self):
         global moveCommands
@@ -1468,7 +1468,7 @@ class CutoffPanel(wx.Panel, FormRoutines):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        if self.formatData(self, self.formatList):
+        if self.formatData(self.formatList):
             if xHomed:
                 jogPanel.setStatus(STR_CLR)
                 self.sendData()
@@ -1972,7 +1972,7 @@ class TaperPanel(wx.Panel, FormRoutines):
         self.updateUI()
         self.updateDelta()
         self.updateAngle()
-        self.formatData(self, self.formatList)
+        self.formatData(self.formatList)
 
     def updateUI(self):
         global info
@@ -2055,7 +2055,7 @@ class TaperPanel(wx.Panel, FormRoutines):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        if self.formatData(self, self.formatList):
+        if self.formatData(self.formatList):
             if xHomed:
                 jogPanel.setStatus(STR_CLR)
                 self.sendData()
@@ -2485,7 +2485,7 @@ class ThreadPanel(wx.Panel, FormRoutines):
         return(self.configList)
 
     def update(self):
-        self.formatData(self, self.formatList)
+        self.formatData(self.formatList)
 
     def OnInternal(self, e):
         pass
@@ -2499,7 +2499,7 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
     def OnSend(self, e):
         global xHomed, jogPanel
-        if self.formatData(self, self.formatList):
+        if self.formatData(self.formatList):
             if not xHomed:
                 jogPanel.setStatus(STR_NOT_HOMED)
             elif self.active or jogPanel.mvStatus & (MV_ACTIVE | MV_PAUSE):
