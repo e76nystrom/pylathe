@@ -2836,7 +2836,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Resume', self.OnResume)
 
         if STEPPER_DRIVE:
-            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle, None)
+            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle, (-1, -1))
         else:
             sizerG.Add(emptyCell)
 
