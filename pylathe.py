@@ -2309,6 +2309,7 @@ class ScrewThread(UpdatePass):
                 self.calculateThread(add=True)
                 self.threadPass()
                 self.m.stopSpindle();
+                self.m.done(1)
                 command(CMD_RESUME)
             else:
                 jogPanel.setStatus("Cannot Add")
@@ -4199,7 +4200,10 @@ class UpdateThread(Thread):
         return(result)
 
     def dbgDone(self, val):
-        return("done")
+         if val == 0:
+             return("strt")
+         elif val == 1:
+             return("done")
 
     def dbgTest(self, val):
         return("test %d" % (val))
