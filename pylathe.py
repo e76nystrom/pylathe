@@ -4735,7 +4735,7 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.moveTest.test()
         self.testMoveDialog.Show()
 
-class ZDialog(wx.Dialog):
+class ZDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
@@ -4812,7 +4812,7 @@ class ZDialog(wx.Dialog):
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
-class XDialog(wx.Dialog):
+class XDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
@@ -4907,7 +4907,7 @@ class XDialog(wx.Dialog):
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
-class SpindleDialog(wx.Dialog):
+class SpindleDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
@@ -5007,7 +5007,7 @@ class SpindleDialog(wx.Dialog):
             setInfo(index, self.cancelInfo[index])
         self.Show(False)
 
-class PortDialog(wx.Dialog):
+class PortDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
@@ -5052,7 +5052,7 @@ class PortDialog(wx.Dialog):
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
-class ConfigDialog(wx.Dialog):
+class ConfigDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
         global XILINX
         pos = (10, 10)
