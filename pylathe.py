@@ -3438,8 +3438,8 @@ class JogPanel(wx.Panel):
         self.combo.SetFocus()
 
     def getPanel(self):
-        mainPanel = getInfo(mainPanel)
-        return(mainFrame.panels[mainPanel])
+        panel = getInfo(mainPanel)
+        return(mainFrame.panels[panel])
 
     def clrActive(self):
         panel = self.getPanel()
