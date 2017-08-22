@@ -983,15 +983,15 @@ class TurnPanel(wx.Panel, FormRoutines):
         # btn.Bind(wx.EVT_BUTTON, self.OnSend)
         # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Start', self.OnStart)
+        # btn = wx.Button(self, label='Start', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        # sizerG.Add(wx.StaticText(self, -1), border=2)
-
-        btn = wx.Button(self, label='Add', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Add', self.OnAdd)
+        # btn = wx.Button(self, label='Add', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", tuAddFeed)
 
@@ -1244,30 +1244,32 @@ class FacePanel(wx.Panel, FormRoutines):
 
         # buttons
 
-        btn = wx.Button(self, label='Send', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Send', self.OnSend)
+        # btn = wx.Button(self, label='Send', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Start', self.OnStart)
+        # btn = wx.Button(self, label='Start', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        # sizerG.Add(wx.StaticText(self, -1), border=2)
-
-        btn = wx.Button(self, label='Add', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Add', self.OnAdd)
+        # btn = wx.Button(self, label='Add', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", faAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", faRPM)
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(faPause, cb)
+        self.pause = self.addCheckBox(sizerG, "Pause", faPause)
+        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.pause = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(faPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1426,25 +1428,28 @@ class CutoffPanel(wx.Panel, FormRoutines):
         
         # buttons
 
-        btn = wx.Button(self, label='Send', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Send', self.OnSend)
+        # btn = wx.Button(self, label='Send', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Start', self.OnStart)
+        # btn = wx.Button(self, label='Start', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         self.rpm = self.addField(sizerG, "RPM", cuRPM)
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(cuPause, cb)
+        self.pause = self.addCheckBox(sizerG, "Pause", cuPause)
+        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.pause = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(cuPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1916,19 +1921,20 @@ class TaperPanel(wx.Panel, FormRoutines):
 
         # control buttons
 
-        btn = wx.Button(self, label='Send', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Send', self.OnSend)
+        # btn = wx.Button(self, label='Send', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Start', self.OnStart)
+        # btn = wx.Button(self, label='Start', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        # sizerG.Add(wx.StaticText(self, -1), border=2)
-
-        btn = wx.Button(self, label='Add', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Add', self.OnAdd)
+        # btn = wx.Button(self, label='Add', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", tpAddFeed)
 
@@ -1948,12 +1954,13 @@ class TaperPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(tpPause, cb)
+        self.pause = self.addCheckBox(sizerG, "Pause", tpPause)
+        # sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.pause = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(tpPause, cb)
 
         sizerG.Add(sizerH)
         # sizerG.Add(wx.StaticText(self, -1), border=2)
@@ -2445,30 +2452,32 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         # buttons
 
-        btn = wx.Button(self, label='Send', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Send', self.OnSend)
+        # btn = wx.Button(self, label='Send', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Start', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Start', self.OnStart)
+        # btn = wx.Button(self, label='Start', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        # sizerG.Add(wx.StaticText(self, -1), border=2)
-
-        btn = wx.Button(self, label='Add', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Add', self.OnAdd)
+        # btn = wx.Button(self, label='Add', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", thAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", thRPM)
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(thPause, cb)
+        self.pause = self.addCheckBox(sizerG, "Pause", thPause)
+        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.pause = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(thPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2739,7 +2748,7 @@ class JogShuttle():
                 # print("jogspindle done")
                 # stdout.flush()
 
-class JogPanel(wx.Panel):
+class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, parent, *args, **kwargs):
         global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
@@ -2905,13 +2914,15 @@ class JogPanel(wx.Panel):
 
         sizerG = wx.GridSizer(3, 0, 0)
 
-        btn = wx.Button(self, label='E Stop')
-        btn.Bind(wx.EVT_BUTTON, self.OnEStop)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'E Stop', self.OnEStop)
+        # btn = wx.Button(self, label='E Stop')
+        # btn.Bind(wx.EVT_BUTTON, self.OnEStop)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Pause')
-        btn.Bind(wx.EVT_BUTTON, self.OnPause)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Pause', self.OnPause)
+        # btn = wx.Button(self, label='Pause')
+        # btn.Bind(wx.EVT_BUTTON, self.OnPause)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         if STEPPER_DRIVE:
             btn = wx.Button(self, label='Jog Spindle')
@@ -2921,25 +2932,29 @@ class JogPanel(wx.Panel):
         else:
             sizerG.Add(emptyCell)
 
-        btn = wx.Button(self, label='Done')
-        btn.Bind(wx.EVT_BUTTON, self.OnDone)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Done', self.OnDone)
+        # btn = wx.Button(self, label='Done')
+        # btn.Bind(wx.EVT_BUTTON, self.OnDone)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
-        btn = wx.Button(self, label='Stop')
-        btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Stop', self.OnStop)
+        # btn = wx.Button(self, label='Stop')
+        # btn.Bind(wx.EVT_BUTTON, self.OnStop)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Resume')
-        btn.Bind(wx.EVT_BUTTON, self.OnResume)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Resume', self.OnResume)
+        # btn = wx.Button(self, label='Resume')
+        # btn.Bind(wx.EVT_BUTTON, self.OnResume)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         if STEPPER_DRIVE:
-            btn = wx.Button(self, label='Start Spindle')
-            btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
-            sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle)
+            # btn = wx.Button(self, label='Start Spindle')
+            # btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
+            # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         else:
             sizerG.Add(emptyCell)
 
