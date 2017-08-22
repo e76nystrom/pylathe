@@ -185,10 +185,13 @@ strList = \
 (\
  ("STR_OP_NOT_ACTIVE", "Operation Not Active"),
  ("STR_OP_IN_PROGRESS", "Operation In Progress"),
+ ("STR_NOT_PAUSED", "Not Paused"),
+ ("STR_NOT_SENT", "Data Not Sent"),
  ("STR_NO_ADD", "Cannot Add"),
  ("STR_NOT_HOMED", "X Not Homed"),
  ("STR_FIELD_ERROR", "Entry Field Error"),
  ("STR_READALL_ERROR", "ReadAll Error"),
+ ("STR_TIMEOUT_ERROR", "Timeout Error"),
  ("STR_CLR", ""),
 )
 
