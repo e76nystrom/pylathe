@@ -2529,7 +2529,7 @@ class ThreadPanel(wx.Panel):
         global jogPanel
         if not self.active:
             jogPanel.setStatus(STR_OP_NOT_ACTIVE)
-        elif: jogPanel.mvStatus & MV_ACTIVE:
+        elif jogPanel.mvStatus & MV_ACTIVE:
             jogPanel.setStatus(STR_OP_IN_PROGRESS)
         else:
             self.screwThread.threadAdd()
