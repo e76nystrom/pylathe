@@ -3280,8 +3280,8 @@ class JogPanel(wx.Panel):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('r'):
-            mainPanel = getInfo(mainPanel)
-            panel = mainFrame.panels[mainPanel]
+            panel = getInfo(mainPanel)
+            panel = mainFrame.panels[panel]
             panel.OnSend(None)
             return
         elif code == ord('s'):
