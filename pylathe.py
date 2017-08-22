@@ -229,7 +229,8 @@ class FormRoutines():
         sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
 class ActionRoutines():
-    def __init__(self):
+    def __init__(self, control):
+        self.control = control
         self.active = False
         self.Bind(wx.EVT_SHOW, self.OnShow)
 
@@ -289,7 +290,7 @@ class ActionRoutines():
             jogPanel.setStatus(STR_CLR)
             try:
                 curPass = getParm(CURRENT_PASS)
-                if curPass >= self.passes:
+                if curPass >= self.control.passes:
                     if callable(self.addAction):
                         self.addAction()
                 else:
@@ -299,6 +300,7 @@ class ActionRoutines():
             except AttributeErrror:
                 pass
         jogPanel.focus()
+
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
@@ -987,10 +989,10 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self)
+        self.turn = Turn(self)
+        ActionRoutines.__init__(self, self.turn)
         self.InitUI()
         self.configList = None
-        self.turn = Turn(self)
         self.formatList = ((tuAddFeed, 'f'), \
                            (tuPasses, 'd'), \
                            (tuPause, None), \
@@ -1228,10 +1230,10 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self)
+        self.face = Face(self)
+        ActionRoutines.__init__(self, self.face)
         self.InitUI()
         self.configList = None
-        self.face = Face(self)
         self.formatList = ((faAddFeed, 'f'), \
                            (faPasses, 'f'), \
                            (faPause, None), \
@@ -1404,10 +1406,10 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self)
+        self.cutoff = Cutoff(self)
+        ActionRoutines.__init__(self, self.cutoff)
         self.InitUI()
         self.configList = None
-        self.cutoff = Cutoff(self)
         self.formatList = ((cuPause, None), \
                            (cuRPM, 'd'), \
                            (cuXEnd, 'f'), \
@@ -1791,7 +1793,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self)
+        self.taper = Taper(self)
+        ActionRoutines.__init__(self, self.taper)
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -1811,7 +1814,6 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             self.taperList.append(t[0])
         self.InitUI()
         self.configList = None
-        self.taper = Taper(self)
         self.m = moveCommands
         self.formatList = ((tpAddFeed, 'f'), \
                            (tpAngle, 'fs'), \
@@ -2291,10 +2293,10 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        self.screwThread = ScrewThread(self)
         ActionRoutines.__init__(self)
         self.InitUI()
         self.configList = None
-        self.screwThread = ScrewThread(self)
         self.formatList =  ((thAddFeed, 'f'), \
                             (thAngle, 'fs'), \
                             (thExitRev, 'fs'), \
