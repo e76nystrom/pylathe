@@ -270,7 +270,6 @@ class ActionRoutines():
 
     def OnAdd(start,e):
 
-
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
