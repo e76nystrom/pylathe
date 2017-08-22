@@ -8,6 +8,8 @@ class Test():
     def t1(self):
         pass
 
+a = Test()
+
 h = -0.005
 xInc = -0.0025
 lastX = 10
