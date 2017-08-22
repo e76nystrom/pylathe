@@ -2496,17 +2496,19 @@ class ThreadPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
-            if xHomed and not self.active:
-                self.active = True
+            if not xHomed:
+                jogPanel.notHomed()
+            elif self.active:
+                jogPanel.setStatus("Currently Active")
+            else:
                 jogPanel.clrStatus()
+                self.active = True
                 try:
                     self.sendData()
                     self.screwThread.thread()
                 except CommTimeout:
                     print("timeout error")
                     stdout.flush()
-            else:
-                jogPanel.notHomed()
         else:
             jogPanel.fieldError()
         jogPanel.focus()
