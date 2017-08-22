@@ -3547,7 +3547,7 @@ class SetPosDialog(wx.Dialog):
         try:
             val = float(val)
             self.updateZPos(val) if self.axis == AXIS_Z else \
-               self.updateXPOS(val)
+               self.updateXPos(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
