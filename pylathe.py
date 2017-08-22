@@ -2810,13 +2810,15 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # control buttons and jog
 
+        btnSize = (-1, -1)
+
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerG = wx.GridSizer(3, 0, 0)
 
-        self.addButton(sizerG, 'E Stop', self.OnEStop)
+        self.addButton(sizerG, 'E Stop', self.OnEStop, btnSize)
 
-        self.addButton(sizerG, 'Pause', self.OnPause)
+        self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
 
         if STEPPER_DRIVE:
             btn = wx.Button(self, label='Jog Spindle')
@@ -2826,17 +2828,18 @@ class JogPanel(wx.Panel, FormRoutines):
         else:
             sizerG.Add(emptyCell)
 
-        self.addButton(sizerG, 'Done', self.OnDone)
+        self.addButton(sizerG, 'Done', self.OnDone, btnSize)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
-        self.addButton(sizerG, 'Stop', self.OnStop)
+        self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
 
-        self.addButton(sizerG, 'Resume', self.OnResume)
+        self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
 
         if STEPPER_DRIVE:
-            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle, (-1, -1))
+            self.addButton(sizerG, 'Start Spindle', \
+                           self.OnStartSpindle, btnSize)
         else:
             sizerG.Add(emptyCell)
 
