@@ -224,7 +224,7 @@ class FormRoutines():
         return(cb)
 
     def addButton(self, sizer, label, action):
-        btn = wx.Button(self, label=label, size=(60,-1))
+        btn = wx.Button(self, label=label) #, size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, action)
         sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
