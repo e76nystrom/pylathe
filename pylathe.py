@@ -1942,19 +1942,20 @@ class TaperPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.internal = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
-        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(tpInternal, cb)
+        self.pause = self.addCheckBox(sizerH, "Internal", tpInternal)
+        # sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.internal = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
+        # sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(tpInternal, cb)
 
         sizerG.Add(sizerH)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.pause = self.addCheckBox(sizerG, "Pause", tpPause)
+        self.pause = self.addCheckBox(sizerH, "Pause", tpPause)
         # sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2, \
         #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         # self.pause = cb = wx.CheckBox(self, -1, \
@@ -2382,14 +2383,14 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
-        sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-
-        self.internal = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(thInternal, cb)
+        self.pause = self.addCheckBox(sizerG, "Internal", thInternal)
+        # sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.internal = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
+        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(thInternal, cb)
 
         # x parameters
 
@@ -2409,8 +2410,6 @@ class ThreadPanel(wx.Panel, FormRoutines):
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         # initInfo(thDepth, btn)
-
-        #
 
         self.thread = self.addField(sizerG, "Thread", thPitch)
         
