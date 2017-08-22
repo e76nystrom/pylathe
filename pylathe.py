@@ -1028,7 +1028,7 @@ class TurnPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                jogPanel.clrStatus()
+                jogPanel.setStatus(STR_CLR)
                 self.sendData()
                 self.turn.turn()
             else:
@@ -1292,7 +1292,7 @@ class FacePanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                jogPanel.clrStatus()
+                jogPanel.setStatus(STR_CLR)
                 self.sendData()
                 self.face.face()
             else:
@@ -1469,7 +1469,7 @@ class CutoffPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                jogPanel.clrStatus()
+                jogPanel.setStatus(STR_CLR)
                 self.sendData()
                 self.cutoff.cutoff()
             else:
@@ -2057,7 +2057,7 @@ class TaperPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if xHomed:
-                jogPanel.clrStatus()
+                jogPanel.setStatus(STR_CLR)
                 self.sendData()
                 taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
                 self.taper.internalTaper(taper) \
@@ -2505,7 +2505,7 @@ class ThreadPanel(wx.Panel):
             elif jogPanel.mvStatus & MV_ACTIVE:
                 jogPanel.setStatus(STR_OP_IN_PROGRESS)
             else:
-                jogPanel.clrStatus()
+                jogPanel.setStatus(STR_CLR)
                 self.active = True
                 try:
                     self.sendData()
@@ -3329,6 +3329,12 @@ class JogPanel(wx.Panel):
         if probeLoc != None:
             self.probeLoc = probeLoc
 
+    def homeDone(self, status):
+        self.xHome = False
+        self.probeStatus = 0
+        print(status)
+        stdout.flush()
+        
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
         if len(val) == 7:
@@ -3406,14 +3412,8 @@ class JogPanel(wx.Panel):
                     elif val & PROBE_FAIL:
                         self.homeDone("x probe failure")
 
-    def homeDone(self, status):
-        self.xHome = False
-        self.probeStatus = 0
-        print(status)
-        stdout.flush()
-        
     def updateError(self, text):
-        self.statusLine.SetLabel(text)
+        self.setStatus(text)
 
     def OnEStop(self, e):
         global moveCommands, spindleDataSend, zDataSent, xDataSent
@@ -3442,7 +3442,7 @@ class JogPanel(wx.Panel):
 
     def OnDone(self, e):
         self.clrActive()
-        self.clrStatus()
+        self.setStatus(STR_CLR)
         self.combo.SetFocus()
 
     def getPanel(self):
@@ -3501,9 +3501,6 @@ class JogPanel(wx.Panel):
             self.statusLine.SetLabel(text)
         self.Refresh()
         self.Update()
-
-    def clrStatus(self):
-        self.setStatus("")
 
 def jogPanelPos(ctl):
         global jogPanel, mainFrame
@@ -3990,20 +3987,20 @@ class UpdateThread(Thread):
     # def zLoc(self):
     #     val = getParm(Z_LOC)
     #     if val != None:
-    #         result = (0, val)
+    #         result = (EV_ZLOC, val)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     # def xLoc(self):
     #     val = getParm(X_LOC)
     #     if val != None:
-    #         result = (1, val)
+    #         result = (EV_XLOC, val)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     # def rpm(self):
     #     period = getParm(INDEX_PERIOD)
     #     if period != None:
     #         preScaler = getParm(INDEX_PRE_SCALER)
-    #         result = (2, period * preScaler)
+    #         result = (EV_RPM, period * preScaler)
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
@@ -4015,26 +4012,31 @@ class UpdateThread(Thread):
             result = command(READLOC)
             if result == None:
                 return
+
         except CommTimeout:
-            self.readAllError = True
             if done:
                 return
-            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "readAll error")))
+            self.readAllError = True
+            wx.PostEvent(self.notifyWindow, \
+                         UpdateEvent((EV_ERROR, STR_READALL_ERROR)))
             print("readAll error")
             stdout.flush()
             return
+    
         except serial.SerialException:
             print("readAll SerialException")
             stdout.flush()
             return
+
         comm.xDbgPrint = True
         if self.readAllError:
             self.readAllError = False
-            wx.PostEvent(self.notifyWindow, UpdateEvent((4, "")))
+            wx.PostEvent(self.notifyWindow,
+                         UpdateEvent((EV_ERROR, STR_CLR)))
         try:
             (z, x, rpm, curPass, droZ, droX, flag) = \
                 result.rstrip().split(' ')[1:]
-            result = (3, z, x, rpm, curPass, droZ, droX, flag)
+            result = (EV_READALL, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print("readAll ValueError %s" % (result))
@@ -4399,13 +4401,17 @@ class MainFrame(wx.Frame):
                 print("comm timeout on setup")
                 jogPanel.setStatus("comm timeout on setup")
 
-        self.procUpdate = (
-            self.jogPanel.updateZ, \
-            self.jogPanel.updateX, \
-            self.jogPanel.updateRPM, \
-            self.jogPanel.updateAll, \
-            self.jogPanel.updateError, \
-        )
+        eventTable = (\
+                      (EV_ZLOC, self.jogPanel.updateZ), \
+                      (EV_XLOC, self.jogPanel.updateX), \
+                      (EV_RPM, self.jogPanel.updateRPM), \
+                      (EV_READ_ALL, self.jogPanel.updateAll), \
+                      (EV_ERROR, self.jogPanel.updateError), \
+                      )
+                       
+        self.procUpdate = [None for i in range(EV_MAX)]
+        for (event, action) in eventTable:
+            self.procUpdate[event] = action
 
         self.update = UpdateThread(self)
 
@@ -4416,6 +4422,16 @@ class MainFrame(wx.Frame):
         buttonRepeat.threadRun = False
         self.Destroy()
 
+    def OnUpdate(self, e):
+        index = e.data[0]
+        if index < len(self.procUpdate):
+            update = self.procUpdate[index]
+            if update != None:
+                val = e.data[1:]
+                if len(val) == 1:
+                    val = val[0]
+                update(val)
+            
     def initUI(self):
         global jogPanel, info, zHomeOffset, xHomeOffset, \
             zDROOffset, xDROOffset
@@ -4715,14 +4731,6 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.moveTest.test()
         self.testMoveDialog.Show()
 
-    def OnUpdate(self, e):
-        index = e.data[0]
-        if index < len(self.procUpdate):
-            update = self.procUpdate[index]
-            val = e.data[1:]
-            if len(val) == 1:
-                val = val[0]
-            update(val)
 class ZDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
