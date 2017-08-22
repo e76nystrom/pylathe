@@ -2498,7 +2498,7 @@ class ThreadPanel(wx.Panel):
         if formatData(self, self.formatList):
             if not xHomed:
                 jogPanel.setStatus(STR_NOT_HOMED)
-            elif jogPanel.mvStatus & MV_ACTIVE:
+            elif self.active or jogPanel.mvStatus & (MV_ACTIVE | MV_PAUSE):
                 jogPanel.setStatus(STR_OP_IN_PROGRESS)
             else:
                 jogPanel.setStatus(STR_CLR)
@@ -2529,7 +2529,7 @@ class ThreadPanel(wx.Panel):
         global jogPanel
         if not self.active:
             jogPanel.setStatus(STR_OP_NOT_ACTIVE)
-        elif jogPanel.mvStatus & MV_ACTIVE:
+        elif jogPanel.mvStatus & (MV_ACTIVE | MV_PAUSE):
             jogPanel.setStatus(STR_OP_IN_PROGRESS)
         else:
             jogPanel.setStatus(STR_CLR)
