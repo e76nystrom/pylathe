@@ -973,10 +973,11 @@ class Turn(UpdatePass):
             self.m.stopSpindle()
             command(CMD_RESUME)
 
-class TurnPanel(wx.Panel, FormRoutines):
+class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        ActionRoutines.__init__(self)
         self.InitUI()
         self.configList = None
         self.turn = Turn(self)
@@ -1042,31 +1043,16 @@ class TurnPanel(wx.Panel, FormRoutines):
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
-        # btn = wx.Button(self, label='Send', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Start', self.OnStart)
-        # btn = wx.Button(self, label='Start', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Add', self.OnAdd)
-        # btn = wx.Button(self, label='Add', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", tuAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", tuRPM)
 
         self.pause = self.addCheckBox(sizerG, "Pause", tuPause)
-        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.pause = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(tuPause, cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1093,34 +1079,20 @@ class TurnPanel(wx.Panel, FormRoutines):
             sendSpindleData()
             sendZData()
             sendXData()
-
         except CommTimeout:
             commTimeout()
 
-    def OnSend(self, e):
-        global xHomed, jogPanel
-        if self.formatData(self.formatList):
-            if xHomed:
-                jogPanel.setStatus(STR_CLR)
-                self.sendData()
-                self.turn.turn()
-            else:
-                jogPanel.setStatus(STR_NOT_HOMED)
-        else:
-            jogPanel.setStatus(STR_FIELD_ERROR)
-        jogPanel.focus()
+    def sendAction(self):
+        self.sendData()
+        self.turn.turn()
 
-    def OnStart(self, e):
-        global dbg, jogPanel
+    def startAction(self):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
     
-    def OnAdd(self, e):
-        global jogPanel
+    def addAction(self):
         self.turn.turnAdd()
-        jogPanel.focus()
 
 class Face(UpdatePass):
     def __init__(self, facePanel):
@@ -1241,10 +1213,11 @@ class Face(UpdatePass):
             self.m.stopSpindle()
             command(CMD_RESUME)
 
-class FacePanel(wx.Panel, FormRoutines):
+class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        ActionRoutines.__init__(self)
         self.InitUI()
         self.configList = None
         self.face = Face(self)
@@ -1309,31 +1282,16 @@ class FacePanel(wx.Panel, FormRoutines):
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
-        # btn = wx.Button(self, label='Send', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Start', self.OnStart)
-        # btn = wx.Button(self, label='Start', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Add', self.OnAdd)
-        # btn = wx.Button(self, label='Add', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", faAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", faRPM)
 
         self.pause = self.addCheckBox(sizerG, "Pause", faPause)
-        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.pause = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(faPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1363,30 +1321,18 @@ class FacePanel(wx.Panel, FormRoutines):
         except CommTimeout:
             commTimeout()
 
-    def OnSend(self, e):
-        global xHomed, jogPanel
-        if self.formatData(self.formatList):
-            if xHomed:
-                jogPanel.setStatus(STR_CLR)
-                self.sendData()
-                self.face.face()
-            else:
-                jogPanel.setStatus(STR_NOT_HOMED)
-        else:
-            jogPanel.setStatus(STR_FIELD_ERROR)
-        jogPanel.focus()
+    def sendAction(self):
+        jogPanel.setStatus(STR_CLR)
+        self.sendData()
+        self.face.face()
 
-    def OnStart(self, e):
-        global dbg, jogPanel
+    def startAction(self):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
     
-    def OnAdd(self, e):
-        global jogPanel
+    def addAction(self):
         self.face.faceAdd()
-        jogPanel.focus()
 
 class Cutoff():
     def __init__(self, cutoffPanel):
@@ -1443,10 +1389,11 @@ class Cutoff():
         m.moveZ(self.zCutoff)
         m.moveX(self.xStart)
 
-class CutoffPanel(wx.Panel, FormRoutines):
+class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        ActionRoutines.__init__(self)
         self.InitUI()
         self.configList = None
         self.cutoff = Cutoff(self)
@@ -1494,14 +1441,8 @@ class CutoffPanel(wx.Panel, FormRoutines):
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
-        # btn = wx.Button(self, label='Send', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Start', self.OnStart)
-        # btn = wx.Button(self, label='Start', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -1509,12 +1450,6 @@ class CutoffPanel(wx.Panel, FormRoutines):
         self.rpm = self.addField(sizerG, "RPM", cuRPM)
 
         self.pause = self.addCheckBox(sizerG, "Pause", cuPause)
-        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.pause = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(cuPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1543,25 +1478,14 @@ class CutoffPanel(wx.Panel, FormRoutines):
         except CommTimeout:
             commTimeout()
 
-    def OnSend(self, e):
-        global xHomed, jogPanel
-        if self.formatData(self.formatList):
-            if xHomed:
-                jogPanel.setStatus(STR_CLR)
-                self.sendData()
-                self.cutoff.cutoff()
-            else:
-                jogPanel.setStatus(STR_NOT_HOMED)
-        else:
-            jogPanel.setStatus(STR_FIELD_ERROR)
-        jogPanel.focus()
+    def sendAction(self):
+        self.sendData()
+        self.cutoff.cutoff()
 
-    def OnStart(self, e):
-        global dbg, jogPanel
+    def startAction(self):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
 
 class Taper(UpdatePass):
     def __init__(self, taperPanel):
@@ -1851,10 +1775,11 @@ class Taper(UpdatePass):
             command(CMD_RESUME)
             stdout.flush()
 
-class TaperPanel(wx.Panel, FormRoutines):
+class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        ActionRoutines.__init__(self)
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -1988,19 +1913,10 @@ class TaperPanel(wx.Panel, FormRoutines):
         # control buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
-        # btn = wx.Button(self, label='Send', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Start', self.OnStart)
-        # btn = wx.Button(self, label='Start', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Add', self.OnAdd)
-        # btn = wx.Button(self, label='Add', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", tpAddFeed)
 
@@ -2009,32 +1925,14 @@ class TaperPanel(wx.Panel, FormRoutines):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         self.internal = self.addCheckBox(sizerH, "Internal", tpInternal)
-        # sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.internal = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # self.Bind(wx.EVT_CHECKBOX, self.OnInternal, cb)
-        # sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(tpInternal, cb)
 
         sizerG.Add(sizerH)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         self.pause = self.addCheckBox(sizerH, "Pause", tpPause)
-        # sizerH.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.pause = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(tpPause, cb)
 
         sizerG.Add(sizerH)
-        # sizerG.Add(wx.StaticText(self, -1), border=2)
-
-        # btn = wx.Button(self, label='Debug', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnDebug)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2130,38 +2028,23 @@ class TaperPanel(wx.Panel, FormRoutines):
             sendSpindleData()
             sendZData()
             sendXData()
-
         except CommTimeout:
             commTimeout()
 
-    def OnSend(self, e):
-        global xHomed, jogPanel
-        if self.formatData(self.formatList):
-            if xHomed:
-                jogPanel.setStatus(STR_CLR)
-                self.sendData()
-                taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-                self.taper.internalTaper(taper) \
-                    if self.internal.GetValue() else \
-                       self.taper.externalTaper(taper)
-            else:
-                jogPanel.setStatus(STR_NOT_HOMED)
-        else:
-            jogPanel.setStatus(STR_FIELD_ERROR)
-        jogPanel.focus()
+    def sendAction(self):
+        self.sendData()
+        taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
+        self.taper.internalTaper(taper) if self.internal.GetValue() else \
+            self.taper.externalTaper(taper)
 
-    def OnStart(self, e):
-        global dbg, jogPanel
+    def startAction(self):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
     
-    def OnAdd(self, e):
-        global jogPanel
+    def addAction(self):
         self.taper.internalAdd() if self.internal.GetValue() else \
             self.taper.externalAdd()
-        jogPanel.focus()
 
     # def OnDebug(self, e):
     #     self.sendData()
@@ -2399,10 +2282,11 @@ class ScrewThread(UpdatePass):
             commTimeout()
         stdout.flush()
 
-class ThreadPanel(wx.Panel, FormRoutines):
+class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        ActionRoutines.__init__(self)
         self.InitUI()
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.configList = None
@@ -2519,31 +2403,16 @@ class ThreadPanel(wx.Panel, FormRoutines):
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
-        # btn = wx.Button(self, label='Send', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Start', self.OnStart)
-        # btn = wx.Button(self, label='Start', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnStart)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Add', self.OnAdd)
-        # btn = wx.Button(self, label='Add', size=(60,-1))
-        # btn.Bind(wx.EVT_BUTTON, self.OnAdd)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.add = self.addField(sizerG, "", thAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", thRPM)
 
         self.pause = self.addCheckBox(sizerG, "Pause", thPause)
-        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        # self.pause = cb = wx.CheckBox(self, -1, \
-        #                                  style=wx.ALIGN_LEFT)
-        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        # initInfo(thPause, cb)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2579,48 +2448,17 @@ class ThreadPanel(wx.Panel, FormRoutines):
         sendZData()
         sendXData()
 
-    def OnSend(self, e):
-        global xHomed, jogPanel
-        if self.formatData(self.formatList):
-            if not xHomed:
-                jogPanel.setStatus(STR_NOT_HOMED)
-            elif self.active or jogPanel.mvStatus & (MV_ACTIVE | MV_PAUSE):
-                jogPanel.setStatus(STR_OP_IN_PROGRESS)
-            else:
-                jogPanel.setStatus(STR_CLR)
-                self.active = True
-                try:
-                    self.sendData()
-                    self.screwThread.thread()
-                except CommTimeout:
-                    commTimeout()
-        else:
-            jogPanel.setStatus(STR_FIELD_ERROR)
-        jogPanel.focus()
+    def sendAction(self):
+        self.sendData()
+        self.screwThread.thread()
 
-    def OnStart(self, e):
-        global dbg, jogPanel
-        if not self.active:
-            jogPanel.setStatus(STR_NOT_SENT)
-        elif (jogPanel.mvStatus & MV_PAUSE) == 0:
-            jogPanel.setStatus(STR_NOT_PAUSED)
-        else:
-            jogPanel.setStatus(STR_CLR)
-            command(CMD_RESUME)
-            if getBoolInfo(cfgDbgSave):
-                dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
+    def startAction(self):
+        command(CMD_RESUME)
+        if getBoolInfo(cfgDbgSave):
+            dbg = open('dbg.txt', 'w')
     
-    def OnAdd(self, e):
-        global jogPanel
-        if not self.active:
-            jogPanel.setStatus(STR_OP_NOT_ACTIVE)
-        elif jogPanel.mvStatus & (MV_ACTIVE | MV_PAUSE):
-            jogPanel.setStatus(STR_OP_IN_PROGRESS)
-        else:
-            jogPanel.setStatus(STR_CLR)
-            self.screwThread.threadAdd()
-        jogPanel.focus()
+    def addAction(self):
+        self.screwThread.threadAdd()
 
 class ButtonRepeat(Thread):
     def __init__(self):
@@ -2982,14 +2820,8 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerG = wx.GridSizer(3, 0, 0)
 
         self.addButton(sizerG, 'E Stop', self.OnEStop)
-        # btn = wx.Button(self, label='E Stop')
-        # btn.Bind(wx.EVT_BUTTON, self.OnEStop)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Pause', self.OnPause)
-        # btn = wx.Button(self, label='Pause')
-        # btn.Bind(wx.EVT_BUTTON, self.OnPause)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         if STEPPER_DRIVE:
             btn = wx.Button(self, label='Jog Spindle')
@@ -3000,28 +2832,16 @@ class JogPanel(wx.Panel, FormRoutines):
             sizerG.Add(emptyCell)
 
         self.addButton(sizerG, 'Done', self.OnDone)
-        # btn = wx.Button(self, label='Done')
-        # btn.Bind(wx.EVT_BUTTON, self.OnDone)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         self.addButton(sizerG, 'Stop', self.OnStop)
-        # btn = wx.Button(self, label='Stop')
-        # btn.Bind(wx.EVT_BUTTON, self.OnStop)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         self.addButton(sizerG, 'Resume', self.OnResume)
-        # btn = wx.Button(self, label='Resume')
-        # btn.Bind(wx.EVT_BUTTON, self.OnResume)
-        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         if STEPPER_DRIVE:
             self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle)
-            # btn = wx.Button(self, label='Start Spindle')
-            # btn.Bind(wx.EVT_BUTTON, self.OnStartSpindle)
-            # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         else:
             sizerG.Add(emptyCell)
 
