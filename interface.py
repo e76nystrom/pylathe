@@ -527,9 +527,15 @@ regList =\
     ("CLEAR_HOME", "(1 << 1)", ""),
     ("PROBE_SET", "(1 << 2)", ""),
     ("PROBE_CLR", "(1 << 3)", ""),
+ 
+    "home status",
+ 
     ("HOME_ACTIVE", "0", ""),
     ("HOME_SUCCESS", "1", ""),
     ("HOME_FAIL", "2", ""),
+
+    "probe status",
+
     ("PROBE_SUCCESS", "1", ""),
     ("PROBE_FAIL", "2", ""),
 
