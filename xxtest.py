@@ -1,5 +1,13 @@
 #!/cygdrive/c/Python27/Python.exe
 
+class Test():
+    def __init__(self):
+        print(hasattr(self, t1))
+        print(callable(self, t1))
+
+    def t1(self):
+        pass
+
 h = -0.005
 xInc = -0.0025
 lastX = 10
