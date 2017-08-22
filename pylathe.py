@@ -129,6 +129,10 @@ AXIS_X = 1
 def commTimeout():
     jogPanel.setStatus(STR_TIMEOUT_ERROR)
 
+class FormRoutines():
+    def __init__(self):
+        pass
+
 def formatData(panel, formatList):
     success = True
     for (index, fieldType) in formatList:
