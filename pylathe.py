@@ -279,7 +279,7 @@ class ActionRoutines():
                 pass
         jogPanel.focus()
 
-    def OnAdd(start,e):
+    def OnAdd(self, e):
         global jogPanel
         if not self.active:
             jogPanel.setStatus(STR_OP_NOT_ACTIVE)
