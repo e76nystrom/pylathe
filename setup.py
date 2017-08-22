@@ -7,6 +7,8 @@ importList = []
 
 def createConfig(configList):
     global config, configTable
+    importList.append("config")
+    importList.append("configTable")
     config = {}
     configTable = []
     for i, (name, comment) in enumerate(configList):
@@ -19,6 +21,20 @@ def createConfig(configList):
             importList.append(name)
     return(config, configTable)
 
+def createStrings(strList):
+    global strTable
+    importList.append("strTable")
+    strTable = []
+    for i, (name, value) in enumerate(configList):
+        config[name] = i
+        if name in globals():
+            print("createConfig %s already defined" % name)
+        else:
+            globals()[name] = i
+            configTable.append(value)
+            importList.append(name)
+    return(config, configTable)
+
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'cmdList.h', 'w')
@@ -27,6 +43,7 @@ def createCommands(cmdList, cLoc, fData=False):
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Cmd\n{\n");
     global cmdTable
+    importList.append("cmdTable")
     # cmds = {}
     cmdTable = []
     index = 0
@@ -80,9 +97,10 @@ def createParameters(parmList, cLoc, fData=False):
         # jFile = open(jLoc + 'Parm.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Parm\n{\n")
-    global parmTable, parmVars
+    global parmTable
     # parms = {}
     parmTable = []
+    importList.append("parmTable")
     index = 0
     for i in range(len(parmList)):
         data = parmList[i]
@@ -267,6 +285,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         # j1File.write(" public static final String[] xilinxStr =\n {\n");
     # global xRegs
     global xRegTable
+    importList.append("xRegTable")
     # xRegs = {}
     xRegTable = []
     index = 0
