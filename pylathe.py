@@ -223,8 +223,8 @@ class FormRoutines():
         initInfo(key, cb)
         return(cb)
 
-    def addButton(self, sizer, label, action):
-        btn = wx.Button(self, label=label) #, size=(60,-1))
+    def addButton(self, sizer, label, action, size=(60, -1)):
+        btn = wx.Button(self, label=label, size=size)
         btn.Bind(wx.EVT_BUTTON, action)
         sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2836,7 +2836,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Resume', self.OnResume)
 
         if STEPPER_DRIVE:
-            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle)
+            self.addButton(sizerG, 'Start Spindle', self.OnStartSpindle, None)
         else:
             sizerG.Add(emptyCell)
 
