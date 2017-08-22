@@ -1942,7 +1942,7 @@ class TaperPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.pause = self.addCheckBox(sizerH, "Internal", tpInternal)
+        self.internal = self.addCheckBox(sizerH, "Internal", tpInternal)
         # sizerH.Add(wx.StaticText(self, -1, "Internal"), border=2, \
         #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         # self.internal = cb = wx.CheckBox(self, -1, \
@@ -2383,7 +2383,7 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
-        self.pause = self.addCheckBox(sizerG, "Internal", thInternal)
+        self.internal = self.addCheckBox(sizerG, "Internal", thInternal)
         # sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
         #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         # self.internal = cb = wx.CheckBox(self, -1, \
