@@ -8,7 +8,7 @@ class Test():
     def t1(self):
         pass
 
-    a = Test()
+a = Test()
 
 h = -0.005
 xInc = -0.0025
