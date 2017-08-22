@@ -3,7 +3,7 @@
 class Test():
     def __init__(self):
         print(hasattr(self, "t1"))
-        print(callable(self, self.t1))
+        print(callable(self, "t1"))
 
     def t1(self):
         pass
