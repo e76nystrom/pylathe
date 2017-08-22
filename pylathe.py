@@ -126,6 +126,9 @@ HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
 
+def commTimeout():
+    jogPanel.setStatus(STR_TIMEOUT_ERROR)
+
 def formatData(panel, formatList):
     success = True
     for (index, fieldType) in formatList:
@@ -515,7 +518,7 @@ def sendClear():
         command(CLRDBG);
         command(CMD_CLEAR)
     except CommTimeout:
-        jogPanel.setStatus('clear timeout')
+        commTimeout()
     spindleDataSent = False
     zDataSent = False
     xDataSent = False
@@ -592,8 +595,7 @@ def sendSpindleData(send=False, rpm=None):
                 sendMulti()
             spindleDataSent = True
     except CommTimeout:
-        print("sendSpindleData Timeout")
-        stdout.flush()
+        commTimeout()
 
 def sendZData(send=False):
     global zDataSent, jogPanel
@@ -636,8 +638,7 @@ def sendZData(send=False):
             command(CMD_ZSETUP)
             zDataSent = True
     except CommTimeout:
-        print("sendZData Timeout")
-        stdout.flush()
+        commTimeout()
     except:
         print("setZData exception")
         stdout.flush()
@@ -692,8 +693,7 @@ def sendXData(send=False):
             command(CMD_XSETUP)
             xDataSent = True
     except CommTimeout:
-        print("sendZData Timeout")
-        stdout.flush()
+        commTimeout()
 
 class UpdatePass():
     def __init__(self):
@@ -1021,8 +1021,7 @@ class TurnPanel(wx.Panel):
             sendXData()
 
         except CommTimeout:
-            print("timeout error")
-            stdout.flush()
+            commTimeout()
 
     def OnSend(self, e):
         global xHomed, jogPanel
@@ -1285,8 +1284,7 @@ class FacePanel(wx.Panel):
             sendXData()
 
         except CommTimeout:
-            print("timeout error")
-            stdout.flush()
+            commTimeout()
 
     def OnSend(self, e):
         global xHomed, jogPanel
@@ -1462,8 +1460,7 @@ class CutoffPanel(wx.Panel):
             sendZData()
             sendXData()
         except CommTimeout:
-            print("timeout error")
-            stdout.flush()
+            commTimeout()
 
     def OnSend(self, e):
         global xHomed, jogPanel
@@ -2050,8 +2047,7 @@ class TaperPanel(wx.Panel):
             sendXData()
 
         except CommTimeout:
-            print("timeout error")
-            stdout.flush()
+            commTimeout()
 
     def OnSend(self, e):
         global xHomed, jogPanel
@@ -2315,7 +2311,7 @@ class ScrewThread(UpdatePass):
             else:
                 jogPanel.setStatus(STR_NO_ADD)
         except CommTimeout:
-            pass
+            commTimeout()
         stdout.flush()
 
 class ThreadPanel(wx.Panel):
@@ -2511,19 +2507,23 @@ class ThreadPanel(wx.Panel):
                     self.sendData()
                     self.screwThread.thread()
                 except CommTimeout:
-                    print("timeout error")
-                    stdout.flush()
+                    commTimeout()
         else:
             jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
         global dbg, jogPanel
-        if self.active:
+        if not self.active:
+            jogPanel.setStatus(STR_NOT_SENT)
+        elif jogPanel.mvStatus & MV_PAUSE:
+            jogPanel.setStatus(STR_NOT_PAUSED)
+        else:
+            jogPanel.setStatus(STR_CLR)
             command(CMD_RESUME)
             if getBoolInfo(cfgDbgSave):
                 dbg = open('dbg.txt', 'w')
-            jogPanel.focus()
+        jogPanel.focus()
     
     def OnAdd(self, e):
         global jogPanel
@@ -2532,6 +2532,7 @@ class ThreadPanel(wx.Panel):
         elif jogPanel.mvStatus & MV_ACTIVE:
             jogPanel.setStatus(STR_OP_IN_PROGRESS)
         else:
+            jogPanel.setStatus(STR_CLR)
             self.screwThread.threadAdd()
         jogPanel.focus()
 
@@ -2669,7 +2670,7 @@ class JogShuttle():
                     setParm(Z_JOG_SPEED, speed)
                 command(ZJSPEED)
             except CommTimeout:
-                pass
+                commTimeout()
             if index == 0:
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
@@ -2694,7 +2695,7 @@ class JogShuttle():
                     setParm(X_JOG_SPEED, speed)
                 command(XJSPEED)
             except CommTimeout:
-                pass
+                commTimeout()
             if index == 0:
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
@@ -2719,7 +2720,7 @@ class JogShuttle():
                     setParm(SP_JOG_RPM, speed)
                 command(SPINDLE_JOG_SPEED)
             except CommTimeout:
-                pass
+                commTimeout()
             if index == 0:
                 buttonRepeat.action = None
                 buttonRepeat.event.clear()
@@ -3064,12 +3065,12 @@ class JogPanel(wx.Panel):
                         queParm(Z_JOG_DIR, dir)
                         command(ZJMOV)
                     except CommTimeout:
-                        pass
+                        commTimeout()
             else:
                 try:
                     command(ZJMOV)
                 except CommTimeout:
-                    pass
+                    commTimeout()
         else:
             if self.jogCode == None:
                 self.jogCode = code
@@ -3082,7 +3083,7 @@ class JogPanel(wx.Panel):
                     queParm(Z_MOVE_DIST, val)
                     command(ZMOVEREL)
                 except CommTimeout:
-                    pass
+                    commTimeout()
 
     def jogDone(self, cmd):
         self.jogCode = None
@@ -3093,7 +3094,7 @@ class JogPanel(wx.Panel):
             try:
                 command(cmd)
             except CommTimeout:
-                pass
+                commTimeout()
 
     def zDown(self, code):
         val = self.getInc()
@@ -3144,12 +3145,12 @@ class JogPanel(wx.Panel):
                         queParm(X_JOG_DIR, dir)
                         command(XJMOV)
                     except CommTimeout:
-                        pass
+                        commTimeout()
             else:
                 try:
                     command("XJMOV")
                 except CommTimeout:
-                    pass
+                    commTimeout()
         else:
             if self.jogCode == None:
                 self.jogCode = code
@@ -3162,7 +3163,7 @@ class JogPanel(wx.Panel):
                     queParm(X_MOVE_DIST, val)
                     command(XMOVEREL)
                 except CommTimeout:
-                    pass
+                    commTimeout()
 
     def xDown(self, code):
         val = self.getInc()
@@ -3471,7 +3472,7 @@ class JogPanel(wx.Panel):
         try:
             command("SPINDLE_JOG")
         except CommTimeout:
-            pass
+            commTimeout()
         self.combo.SetFocus()
 
     def OnJogSpindle(self, e):
@@ -3488,7 +3489,7 @@ class JogPanel(wx.Panel):
         try:
             command("SPINDLE_STOP")
         except CommTimeout:
-            pass
+            commTimeout()
         self.combo.SetFocus()
 
     def setStatus(self, text):
@@ -4398,8 +4399,7 @@ class MainFrame(wx.Frame):
                 sendMulti()
                 sendSpindleData()
             except CommTimeout:
-                print("comm timeout on setup")
-                jogPanel.setStatus("comm timeout on setup")
+                commTimeout()
 
         eventTable = (\
                       (EV_ZLOC, self.jogPanel.updateZ), \
