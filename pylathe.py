@@ -175,53 +175,58 @@ class FormRoutines():
                     ctl.SetValue('')
         return(success)
 
-def fieldList(self, sizer, fields):
-    for (label, index) in fields:
-        if label.startswith('b'):
-            addCheckBox(self, sizer, label[1:], index)
-        else:
-            addField(self, sizer, label, index)
+    def fieldList(self, sizer, fields):
+        for (label, index) in fields:
+            if label.startswith('b'):
+                self.addCheckBox(sizer, label[1:], index)
+            else:
+                self.addField(sizer, label, index)
 
-def addFieldText(panel, sizer, label, key, keyText):
-    if len(label) != 0:
-        txt = wx.StaticText(panel, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                  border=2)
-        initInfo(keyText, txt)
+    def addFieldText(self, sizer, label, key, keyText):
+        if len(label) != 0:
+            txt = wx.StaticText(self, -1, label)
+            sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                      wx.ALIGN_CENTER_VERTICAL, border=2)
+            initInfo(keyText, txt)
 
-    tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
-    sizer.Add(tc, flag=wx.ALL, border=2)
-    initInfo(key, tc)
-    return(tc)
+        tc = wx.TextCtrl(self, -1, "", size=(60, -1))
+        sizer.Add(tc, flag=wx.ALL, border=2)
+        initInfo(key, tc)
+        return(tc)
 
-def addField(panel, sizer, label, key):
-    global info
-    if len(label) != 0:
-        txt = wx.StaticText(panel, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                  border=2)
+    def addField(self, sizer, label, key):
+        global info
+        if len(label) != 0:
+            txt = wx.StaticText(self, -1, label)
+            sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                      wx.ALIGN_CENTER_VERTICAL, border=2)
 
-    tc = wx.TextCtrl(panel, -1, "", size=(60, -1))
-    sizer.Add(tc, flag=wx.ALL, border=2)
-    if key in configInfo.info:
-        val = getInfo(key)
-        tc.SetValue(val)
-    initInfo(key, tc)
-    return(tc)
+        tc = wx.TextCtrl(self, -1, "", size=(60, -1))
+        sizer.Add(tc, flag=wx.ALL, border=2)
+        if key in configInfo.info:
+            val = getInfo(key)
+            tc.SetValue(val)
+        initInfo(key, tc)
+        return(tc)
 
-def addCheckBox(panel, sizer, label, key):
-    global info
-    txt = wx.StaticText(panel, -1, label)
-    sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-              border=2)
+    def addCheckBox(self, sizer, label, key):
+        global info
+        txt = wx.StaticText(self, -1, label)
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                  wx.ALIGN_CENTER_VERTICAL, border=2)
 
-    cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
-    sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-    if key in configInfo.info:
-        val = getInfo(key)
-        cb.SetValue(val == 'True')
-    initInfo(key, cb)
-    return(cb)
+        cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
+        sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+        if key in configInfo.info:
+            val = getInfo(key)
+            cb.SetValue(val == 'True')
+        initInfo(key, cb)
+        return(cb)
+
+    def addButton(self, sizer, label, action):
+        btn = wx.Button(self, label=label, size=(60,-1))
+        btn.Bind(wx.EVT_BUTTON, action)
+        sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
 def getFloatVal(tc):
     try:
@@ -941,41 +946,42 @@ class TurnPanel(wx.Panel, FormRoutines):
 
         # z parameters
 
-        self.zEnd = addField(self, sizerG, "Z End", tuZEnd)
+        self.zEnd = self.addField(sizerG, "Z End", tuZEnd)
         
-        self.zStart = addField(self, sizerG, "Z Start", tuZStart)
+        self.zStart = self.addField(sizerG, "Z Start", tuZStart)
 
-        self.zFeed = addField(self, sizerG, "Z Feed", tuZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", tuZFeed)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", tuZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", tuZRetract)
 
         # x parameters
 
-        self.xStart = addField(self, sizerG, "X Start D", tuXStart)
+        self.xStart = self.addField(sizerG, "X Start D", tuXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", tuXEnd)
+        self.xEnd = self.addField(sizerG, "X End D", tuXEnd)
 
-        self.xFeed = addField(self, sizerG, "X Feed D", tuXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed D", tuXFeed)
 
-        self.xRetract = addField(self, sizerG, "X Retract", tuXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", tuXRetract)
 
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", tuPasses)
+        self.passes = self.addField(sizerG, "Passes", tuPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", tuSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", tuSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", tuSpring)
+        self.spring = self.addField(sizerG, "Spring", tuSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         # buttons
 
-        btn = wx.Button(self, label='Send', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSend)
-        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        self.addButton(sizerG, 'Send', self.OnSend)
+        # btn = wx.Button(self, label='Send', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSend)
+        # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
         btn = wx.Button(self, label='Start', size=(60,-1))
         btn.Bind(wx.EVT_BUTTON, self.OnStart)
@@ -987,16 +993,17 @@ class TurnPanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", tuAddFeed)
+        self.add = self.addField(sizerG, "", tuAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", tuRPM)
+        self.rpm = self.addField(sizerG, "RPM", tuRPM)
 
-        sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
-                   flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
-        self.pause = cb = wx.CheckBox(self, -1, \
-                                         style=wx.ALIGN_LEFT)
-        sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(tuPause, cb)
+        self.pause = self.addCheckBox(sizerG, "Pause", tuPause)
+        # sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
+        #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
+        # self.pause = cb = wx.CheckBox(self, -1, \
+        #                                  style=wx.ALIGN_LEFT)
+        # sizerG.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(tuPause, cb)
         
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1205,32 +1212,32 @@ class FacePanel(wx.Panel, FormRoutines):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.xStart = addField(self, sizerG, "X Start D", faXStart)
+        self.xStart = self.addField(sizerG, "X Start D", faXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", faXEnd)
+        self.xEnd = self.addField(sizerG, "X End D", faXEnd)
         
-        self.xFeed = addField(self, sizerG, "X Feed", faXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed", faXFeed)
         
-        self.xRetract = addField(self, sizerG, "X Retract", faXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", faXRetract)
 
         # z parameters
 
-        self.zEnd = addField(self, sizerG, "Z End", faZEnd)
+        self.zEnd = self.addField(sizerG, "Z End", faZEnd)
 
-        self.zStart = addField(self, sizerG, "Z Start", faZStart)
+        self.zStart = self.addField(sizerG, "Z Start", faZStart)
 
-        self.zFeed = addField(self, sizerG, "Z Feed", faZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", faZFeed)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", faZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", faZRetract)
         
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", faPasses)
+        self.passes = self.addField(sizerG, "Passes", faPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", faSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", faSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", faSpring)
+        self.spring = self.addField(sizerG, "Spring", faSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -1251,9 +1258,9 @@ class FacePanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", faAddFeed)
+        self.add = self.addField(sizerG, "", faAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", faRPM)
+        self.rpm = self.addField(sizerG, "RPM", faRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1398,19 +1405,19 @@ class CutoffPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.xStart = addField(self, sizerG, "X Start D", cuXStart)
+        self.xStart = self.addField(sizerG, "X Start D", cuXStart)
 
-        self.xEnd = addField(self, sizerG, "X End D", cuXEnd)
+        self.xEnd = self.addField(sizerG, "X End D", cuXEnd)
         
-        self.xFeed = addField(self, sizerG, "X Feed", cuXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed", cuXFeed)
         
-        self.xRetract = addField(self, sizerG, "X Retract", cuXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cuXRetract)
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", cuZStart)
+        self.zStart = self.addField(sizerG, "Z Start", cuZStart)
 
-        self.zCutoff = addField(self, sizerG, "Z Cutoff", cuZCutoff)
+        self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -1430,7 +1437,7 @@ class CutoffPanel(wx.Panel, FormRoutines):
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
-        self.rpm = addField(self, sizerG, "RPM", cuRPM)
+        self.rpm = self.addField(sizerG, "RPM", cuRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -1851,25 +1858,25 @@ class TaperPanel(wx.Panel, FormRoutines):
 
         # z parameters
 
-        self.zStart = addField(self, sizerG, "Z Start", tpZStart)
+        self.zStart = self.addField(sizerG, "Z Start", tpZStart)
 
-        self.zLength = addField(self, sizerG, "Z Length", tpZLength)
+        self.zLength = self.addField(sizerG, "Z Length", tpZLength)
         
-        self.zFeed = addField(self, sizerG, "Z Feed", tpZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", tpZFeed)
         
-        self.zRetract = addField(self, sizerG, "Z Retract", tpZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", tpZRetract)
 
         # x parameters
 
-        self.largeDiam = addFieldText(self, sizerG, "Large Diam", \
-                                      tpLargeDiam, tpLargeDiamText)
+        self.largeDiam = self.addFieldText(sizerG, "Large Diam", \
+                                           tpLargeDiam, tpLargeDiamText)
 
-        self.smallDiam = addFieldText(self, sizerG, "Small Diam", \
-                                      tpSmallDiam, tpSmallDiamText)
+        self.smallDiam = self.addFieldText(sizerG, "Small Diam", \
+                                           tpSmallDiam, tpSmallDiamText)
 
-        self.xInFeed = addField(self, sizerG, "X In Feed R", tpXInFeed)
+        self.xInFeed = self.addField(sizerG, "X In Feed R", tpXInFeed)
 
-        self.xFeed = addField(self, sizerG, "X Pass D", tpXFeed)
+        self.xFeed = self.addField(sizerG, "X Pass D", tpXFeed)
 
         # taper parameters
 
@@ -1879,10 +1886,10 @@ class TaperPanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
         initInfo(tpDeltaBtn, btn)
 
-        self.zDelta = addField(self, sizerG, "", tpZDelta)
+        self.zDelta = self.addField(sizerG, "", tpZDelta)
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.xDelta = addField(self, sizerG, "X", tpXDelta)
+        self.xDelta = self.addField(sizerG, "X", tpXDelta)
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.angleBtn = btn = wx.RadioButton(self, label="Angle")
@@ -1891,21 +1898,21 @@ class TaperPanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
         initInfo(tpAngleBtn, btn)
 
-        self.angle = addField(self, sizerG, "", tpAngle)
+        self.angle = self.addField(sizerG, "", tpAngle)
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        self.xRetract = addField(self, sizerG, "X Retract", tpXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", tpXRetract)
         
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", tpPasses)
+        self.passes = self.addField(sizerG, "Passes", tpPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", tpSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", tpSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", tpSpring)
+        self.spring = self.addField(sizerG, "Spring", tpSpring)
 
-        self.finish = addField(self, sizerG, "Finish", tpXFinish)
+        self.finish = self.addField(sizerG, "Finish", tpXFinish)
 
         # control buttons
 
@@ -1923,9 +1930,9 @@ class TaperPanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", tpAddFeed)
+        self.add = self.addField(sizerG, "", tpAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", tpRPM)
+        self.rpm = self.addField(sizerG, "RPM", tpRPM)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -2362,11 +2369,11 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.GridSizer(8, 0, 0)
 
-        self.zEnd = addField(self, sizerG, "Z End", thZEnd)
+        self.zEnd = self.addField(sizerG, "Z End", thZEnd)
         
-        self.zStart = addField(self, sizerG, "Z Start", thZStart)
+        self.zStart = self.addField(sizerG, "Z Start", thZStart)
 
-        self.zRetract = addField(self, sizerG, "Z Retract", thZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
         sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
@@ -2379,13 +2386,13 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         # x parameters
 
-        self.xStart = addField(self, sizerG, "X Start D", thXStart)
+        self.xStart = self.addField(sizerG, "X Start D", thXStart)
 
-        self.xRetract = addField(self, sizerG, "X Retract", thXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", thXRetract)
 
-        self.depth = addField(self, sizerG, "Depth", thXDepth)
+        self.depth = self.addField(sizerG, "Depth", thXDepth)
 
-        self.firstFeed = addField(self, sizerG, "First Feed", thXFirstFeed)
+        self.firstFeed = self.addField(sizerG, "First Feed", thXFirstFeed)
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
@@ -2398,7 +2405,7 @@ class ThreadPanel(wx.Panel, FormRoutines):
 
         #
 
-        self.thread = addField(self, sizerG, "Thread", thPitch)
+        self.thread = self.addField(sizerG, "Thread", thPitch)
         
         self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
@@ -2408,30 +2415,30 @@ class ThreadPanel(wx.Panel, FormRoutines):
         sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo(thMM, btn)
 
-        self.angle = addField(self, sizerG, "Angle", thAngle)
+        self.angle = self.addField(sizerG, "Angle", thAngle)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         #
 
-        self.xTaper = addField(self, sizerG, "Taper", thXTaper)
+        self.xTaper = self.addField(sizerG, "Taper", thXTaper)
 
-        self.xExitRev = addField(self, sizerG, "Exit Rev", thExitRev)
+        self.xExitRev = self.addField(sizerG, "Exit Rev", thExitRev)
         
-        self.lastFeed = addField(self, sizerG, "Last Feed", thXLastFeed)
+        self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
         # pass info
 
-        self.passes = addField(self, sizerG, "Passes", thPasses)
+        self.passes = self.addField(sizerG, "Passes", thPasses)
         self.passes.SetEditable(False)
 
-        self.sPInt = addField(self, sizerG, "SP Int", thSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", thSPInt)
 
-        self.spring = addField(self, sizerG, "Spring", thSpring)
+        self.spring = self.addField(sizerG, "Spring", thSpring)
 
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
@@ -2452,9 +2459,9 @@ class ThreadPanel(wx.Panel, FormRoutines):
         btn.Bind(wx.EVT_BUTTON, self.OnAdd)
         sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.add = addField(self, sizerG, "", thAddFeed)
+        self.add = self.addField(sizerG, "", thAddFeed)
 
-        self.rpm = addField(self, sizerG, "RPM", thRPM)
+        self.rpm = self.addField(sizerG, "RPM", thRPM)
 
         sizerG.Add(wx.StaticText(self, -1, "Pause"), border=2, \
                    flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
