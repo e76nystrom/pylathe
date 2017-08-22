@@ -175,12 +175,12 @@ class FormRoutines():
                     ctl.SetValue('')
         return(success)
 
-def fieldList(panel, sizer, fields):
+def fieldList(self, sizer, fields):
     for (label, index) in fields:
         if label.startswith('b'):
-            addCheckBox(panel, sizer, label[1:], index)
+            addCheckBox(self, sizer, label[1:], index)
         else:
-            addField(panel, sizer, label, index)
+            addField(self, sizer, label, index)
 
 def addFieldText(panel, sizer, label, key, keyText):
     if len(label) != 0:
@@ -4763,7 +4763,7 @@ class ZDialog(wx.Dialog):
             ("DRO Inch", zDROInch), \
             ("bInv DRO", zInvDRO), \
         )        
-        fieldList(self, sizerG, self.fields)
+        self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -4849,7 +4849,7 @@ class XDialog(wx.Dialog):
                 ("Home Start", xHomeStart), \
                 ("Home End", xHomeEnd), \
                 ("Home Loc", xHomeLoc))
-        fieldList(self, sizerG, self.fields)
+        self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -4932,7 +4932,7 @@ class SpindleDialog(wx.Dialog):
                 ("bInvert Dir", spInvDir), \
                 ("bTest Index", spTestIndex), \
             )
-        fieldList(self, sizerG, self.fields)
+        self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -5018,7 +5018,7 @@ class PortDialog(wx.Dialog):
 
         self.fields = (
             ("Comm Port", commPort),)
-        fieldList(self, sizerG, self.fields)
+        self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
@@ -5082,7 +5082,7 @@ class ConfigDialog(wx.Dialog):
                 ("Test RPM", cfgTestRPM), \
                 ("bInvert Enc Dir", cfgInvEncDir), \
             )
-        fieldList(self, sizerG, self.fields)
+        self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
