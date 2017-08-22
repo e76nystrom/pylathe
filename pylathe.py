@@ -2294,7 +2294,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
         self.screwThread = ScrewThread(self)
-        ActionRoutines.__init__(self)
+        ActionRoutines.__init__(self, self.screwThread)
         self.InitUI()
         self.configList = None
         self.formatList =  ((thAddFeed, 'f'), \
