@@ -188,6 +188,8 @@ strList = \
  ("STR_NO_ADD", "Cannot Add"),
  ("STR_NOT_HOMED", "X Not Homed"),
  ("STR_FIELD_ERROR", "Entry Field Error"),
+ ("STR_READALL_ERROR", "ReadAll Error"),
+ ("STR_CLR", ""),
 )
 
 cmdList = \
@@ -847,6 +849,19 @@ enumList =\
     ("D_ZDN",  "z done"),
 
     ("D_HST", "home state"),
+    "};",
+
+    "pylathe update events",
+    
+    "enum ev_Events",
+    "{",
+     ("EV_ZLOC", "z location"),
+     ("EV_XLOC", "x location"),
+     ("EV_RPM", "rpm"),
+     ("EV_READ_ALL", "all values"),
+     ("EV_ERROR", "event error"),
+     ("EV_MAX", "maximum event"),
+    # ("EV_", ""),
     "};",
 )
     
