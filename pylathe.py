@@ -29,10 +29,10 @@ from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
     newInfo, setInfo, getInfo, getBoolInfo, getFloatInfo, getIntInfo, \
     infoSetLabel, getInitialInfo, clrInfo
 
-from setup import createConfig, createCommands, createParameters, \
-    createCtlBits, createEnums
+from setup import createConfig, createStrings, createCommands, \
+    createParameters, createCtlBits, createEnums
 
-from interface import configList, cmdList, parmList, enumList, regList
+from interface import configList, strList, cmdList, parmList, enumList, regList
 
 (config, configTable) = createConfig(configList)
 
@@ -53,6 +53,7 @@ cLoc = "../Lathe/include/"
 
 fData = False
 createCommands(cmdList, cLoc, fData)
+createStrings(strList)
 createParameters(parmList, cLoc, fData)
 createCtlBits(regList, cLoc, fData)
 createEnums(enumList, cLoc, fData)
@@ -1031,9 +1032,9 @@ class TurnPanel(wx.Panel):
                 self.sendData()
                 self.turn.turn()
             else:
-                jogPanel.notHomed()
+                jogPanel.setStatus(STR_NOT_HOMED)
         else:
-            jogPanel.fieldError()
+            jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1295,9 +1296,9 @@ class FacePanel(wx.Panel):
                 self.sendData()
                 self.face.face()
             else:
-                jogPanel.notHomed()
+                jogPanel.setStatus(STR_NOT_HOMED)
         else:
-            jogPanel.fieldError()
+            jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -1472,9 +1473,9 @@ class CutoffPanel(wx.Panel):
                 self.sendData()
                 self.cutoff.cutoff()
             else:
-                jogPanel.notHomed()
+                jogPanel.setStatus(STR_NOT_HOMED)
         else:
-            jogPanel.fieldError()
+            jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2063,9 +2064,9 @@ class TaperPanel(wx.Panel):
                     if self.internal.GetValue() else \
                        self.taper.externalTaper(taper)
             else:
-                jogPanel.notHomed()
+                jogPanel.setStatus(STR_NOT_HOMED)
         else:
-            jogPanel.fieldError()
+            jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2312,7 +2313,7 @@ class ScrewThread(UpdatePass):
                 self.m.done(1)
                 command(CMD_RESUME)
             else:
-                jogPanel.setStatus("Cannot Add")
+                jogPanel.setStatus(STR_NO_ADD)
         except CommTimeout:
             pass
         stdout.flush()
@@ -2500,9 +2501,9 @@ class ThreadPanel(wx.Panel):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
             if not xHomed:
-                jogPanel.notHomed()
-            elif self.active:
-                jogPanel.setStatus("Currently Active")
+                jogPanel.setStatus(STR_NOT_HOMED)
+            elif jogPanel.mvStatus & MV_ACTIVE:
+                jogPanel.setStatus(STR_OP_IN_PROGRESS)
             else:
                 jogPanel.clrStatus()
                 self.active = True
@@ -2513,7 +2514,7 @@ class ThreadPanel(wx.Panel):
                     print("timeout error")
                     stdout.flush()
         else:
-            jogPanel.fieldError()
+            jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
 
     def OnStart(self, e):
@@ -2526,9 +2527,13 @@ class ThreadPanel(wx.Panel):
     
     def OnAdd(self, e):
         global jogPanel
-        if self.active:
+        if not self.active:
+            jogPanel.setStatus(STR_OP_NOT_ACTIVE)
+        elif: jogPanel.mvStatus & MV_ACTIVE:
+            jogPanel.setStatus(STR_OP_IN_PROGRESS)
+        else:
             self.screwThread.threadAdd()
-            jogPanel.focus()
+        jogPanel.focus()
 
 class ButtonRepeat(Thread):
     def __init__(self):
@@ -3490,18 +3495,15 @@ class JogPanel(wx.Panel):
         global done, jogPanel
         if done:
             return
-        self.statusLine.SetLabel(text)
+        if isinstance(text, int):
+            self.statusLine.SetLabel(strTable[text])
+        elif isinstance(text, str):
+            self.statusLine.SetLabel(text)
         self.Refresh()
         self.Update()
 
     def clrStatus(self):
         self.setStatus("")
-
-    def notHomed(self):
-        self.setStatus("X Not Homed")
-
-    def fieldError(self):
-        self.setStatus("Entry Field Error")
 
 def jogPanelPos(ctl):
         global jogPanel, mainFrame
