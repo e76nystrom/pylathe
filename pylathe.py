@@ -4036,7 +4036,7 @@ class UpdateThread(Thread):
         try:
             (z, x, rpm, curPass, droZ, droX, flag) = \
                 result.rstrip().split(' ')[1:]
-            result = (EV_READALL, z, x, rpm, curPass, droZ, droX, flag)
+            result = (EV_READ_ALL, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print("readAll ValueError %s" % (result))
