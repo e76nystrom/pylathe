@@ -2320,7 +2320,9 @@ class ThreadPanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         self.InitUI()
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.configList = None
+        self.active = False
         self.screwThread = ScrewThread(self)
         self.formatList =  ((thAddFeed, 'f'), \
                             (thAngle, 'fs'), \
@@ -2464,6 +2466,12 @@ class ThreadPanel(wx.Panel):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
+    def OnShow(self, e):
+        if not self.IsShown():
+            self.active = False
+            print("OnShow clear active")
+            stdout.flush()
+
     def getConfigList(self):
         if self.configList == None:
             self.configList = []
@@ -2488,7 +2496,8 @@ class ThreadPanel(wx.Panel):
     def OnSend(self, e):
         global xHomed, jogPanel
         if formatData(self, self.formatList):
-            if xHomed:
+            if xHomed and not self.active:
+                self.active = True
                 jogPanel.clrStatus()
                 try:
                     self.sendData()
@@ -2504,15 +2513,17 @@ class ThreadPanel(wx.Panel):
 
     def OnStart(self, e):
         global dbg, jogPanel
-        command(CMD_RESUME)
-        if getBoolInfo(cfgDbgSave):
-            dbg = open('dbg.txt', 'w')
-        jogPanel.focus()
+        if self.active:
+            command(CMD_RESUME)
+            if getBoolInfo(cfgDbgSave):
+                dbg = open('dbg.txt', 'w')
+            jogPanel.focus()
     
     def OnAdd(self, e):
         global jogPanel
-        self.screwThread.threadAdd()
-        jogPanel.focus()
+        if self.active:
+            self.screwThread.threadAdd()
+            jogPanel.focus()
 
 class ButtonRepeat(Thread):
     def __init__(self):
@@ -2729,6 +2740,7 @@ class JogPanel(wx.Panel):
         self.xDROInvert = 1
         self.zMenu = None
         self.xMenu = None
+        self.mvStatus = 0
 
     def initUI(self):
         global emptyCell
@@ -2887,7 +2899,10 @@ class JogPanel(wx.Panel):
         else:
             sizerG.Add(emptyCell)
 
-        sizerG.Add(emptyCell)
+        btn = wx.Button(self, label='Done')
+        btn.Bind(wx.EVT_BUTTON, self.OnDone)
+        sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+
         sizerG.Add(emptyCell)
         sizerG.Add(emptyCell)
 
@@ -3307,7 +3322,7 @@ class JogPanel(wx.Panel):
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
         if len(val) == 7:
-            (z, x, rpm, curPass, zDROPos, xDROPos, flag) = val
+            (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
             if z != '#':
                 zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
@@ -3328,12 +3343,14 @@ class JogPanel(wx.Panel):
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
-            label = ''
             if xHomed:
                 text = 'H'
-            flag = int(flag)
-            if flag & 1:
+            mvStatus = int(mvStatus)
+            self.mvStatus = mvStatus
+            if mvStatus & MV_PAUSE:
                 text  = text + 'P'
+            if mvStatus & MV_ACTIVE:
+                text = text + 'A';
             self.statusText.SetLabel(text)
 
             if self.xHome:
@@ -3395,12 +3412,14 @@ class JogPanel(wx.Panel):
         spindleDataSent = False
         zDataSent = False
         xDataSent = False
+        self.clrActive()
         self.combo.SetFocus()
 
     def OnStop(self, e):
         global moveCommands
         moveCommands.queClear()
         command(CMD_STOP)
+        self.clrActive()
         self.combo.SetFocus()
 
     def OnPause(self, e):
@@ -3411,10 +3430,21 @@ class JogPanel(wx.Panel):
         command(CMD_RESUME)
         self.combo.SetFocus()
 
+    def OnDone(self, e):
+        self.clrActive()
+        self.combo.SetFocus()
+
+    def getPanel(self):
+        mainPanel = getInfo(mainPanel)
+        return(mainFrame.panels[mainPanel])
+
+    def clrActive(self):
+        panel = self.getPanel()
+        panel.active = False
+
     def OnStartSpindle(self, e):
         if STEPPER_DRIVE:
-            mainPanel = getInfo(mainPanel)
-            panel = mainFrame.panels[mainPanel]
+            panel = self.getPanel()
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
             command(SPINDLE_START)
