@@ -188,6 +188,7 @@ strList = \
  ("STR_NOT_PAUSED", "Not Paused"),
  ("STR_NOT_SENT", "Data Not Sent"),
  ("STR_NO_ADD", "Cannot Add"),
+ ("STR_PASS_ERROR", "Passcount Incorrect"),
  ("STR_NOT_HOMED", "X Not Homed"),
  ("STR_FIELD_ERROR", "Entry Field Error"),
  ("STR_READALL_ERROR", "ReadAll Error"),
