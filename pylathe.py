@@ -230,10 +230,16 @@ class FormRoutines():
 
 class ActionRoutines():
     def __init__(self):
-        self.sendAction = None
-        self.startAction = None
-        self.addAction = None
         self.active = False
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+
+    def OnShow(self, e):
+        if done:
+            return
+        if not self.IsShown():
+            self.active = False
+            print("OnShow clear active")
+            stdout.flush()
 
     def OnSend(self, e):
         global xHomed, jogPanel
@@ -255,7 +261,6 @@ class ActionRoutines():
         else:
             jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
-        pass
 
     def OnStart(self, e):
         global dbg, jogPanel
@@ -2288,9 +2293,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         FormRoutines.__init__(self)
         ActionRoutines.__init__(self)
         self.InitUI()
-        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.configList = None
-        self.active = False
         self.screwThread = ScrewThread(self)
         self.formatList =  ((thAddFeed, 'f'), \
                             (thAngle, 'fs'), \
@@ -2418,14 +2421,6 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
-
-    def OnShow(self, e):
-        if done:
-            return
-        if not self.IsShown():
-            self.active = False
-            print("OnShow clear active")
-            stdout.flush()
 
     def getConfigList(self):
         if self.configList == None:
