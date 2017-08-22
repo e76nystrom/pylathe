@@ -25,7 +25,7 @@ def createStrings(strList):
     global strTable
     importList.append("strTable")
     strTable = []
-    for i, (name, value) in enumerate(configList):
+    for i, (name, value) in enumerate(strList):
         config[name] = i
         if name in globals():
             print("createConfig %s already defined" % name)
