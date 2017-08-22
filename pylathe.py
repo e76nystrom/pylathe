@@ -2467,6 +2467,8 @@ class ThreadPanel(wx.Panel):
         self.sizerV.Fit(self)
 
     def OnShow(self, e):
+        if done:
+            return
         if not self.IsShown():
             self.active = False
             print("OnShow clear active")
