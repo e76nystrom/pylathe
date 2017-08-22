@@ -3467,7 +3467,8 @@ class PosMenu(wx.Menu):
 
     def OnZero(self, e):
         global jogPanel
-        updateZPos(0) if self.axis == AXIS_Z else updateXPos(0)
+        updateZPos(0) if self.axis == AXIS_Z else \
+            updateXPos(0)
         jogPanel.focus()
 
     def OnProbe(self, e):
@@ -3546,8 +3547,8 @@ class SetPosDialog(wx.Dialog):
         val = self.pos.GetValue()
         try:
             val = float(val)
-            self.updateZPos(val) if self.axis == AXIS_Z else \
-               self.updateXPos(val)
+            updateZPos(val) if self.axis == AXIS_Z else \
+                updateXPos(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
