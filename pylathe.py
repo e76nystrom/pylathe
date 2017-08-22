@@ -288,8 +288,12 @@ class ActionRoutines():
         else:
             jogPanel.setStatus(STR_CLR)
             try:
-                if callable(self.addAction):
-                    self.addAction()
+                curPass = getParm(CURRENT_PASS)
+                if curPass >= self.passes:
+                    if callable(self.addAction):
+                        self.addAction()
+                else:
+                    jogPanel.setStatus(STR_PASS_ERROR)
             except CommTimeout:
                 commTimeout()
             except AttributeErrror:
@@ -976,6 +980,7 @@ class Turn(UpdatePass):
             self.turnPass()
             self.m.moveX(self.xStart + self.xRetract)
             self.m.stopSpindle()
+            self.m.done(1)
             command(CMD_RESUME)
 
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
@@ -1216,6 +1221,7 @@ class Face(UpdatePass):
             self.m.moveX(self.safeX)
             self.m.moveZ(self.zStart + self.zRetract)
             self.m.stopSpindle()
+            self.m.done(1)
             command(CMD_RESUME)
 
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
@@ -1687,6 +1693,7 @@ class Taper(UpdatePass):
             else:
                 pass
             self.m.stopSpindle();
+            self.m.done(1)
             command(CMD_RESUME)
 
     def internalTaper(self, taperInch):
@@ -1777,8 +1784,8 @@ class Taper(UpdatePass):
             self.m.moveX(self.safeX)
             self.m.moveZ(self.safeZ)
             self.m.stopSpindle();
+            self.m.done(1)
             command(CMD_RESUME)
-            stdout.flush()
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
@@ -2270,22 +2277,15 @@ class ScrewThread(UpdatePass):
         self.m.moveX(self.safeX)
 
     def threadAdd(self):
-        try:
-            curPass = getParm(CURRENT_PASS)
-            if curPass >= self.passes:
-                add = getFloatVal(self.threadPanel.add)
-                self.feed += add
-                self.threadSetup(True)
-                self.calculateThread(add=True)
-                self.threadPass()
-                self.m.stopSpindle();
-                self.m.done(1)
-                command(CMD_RESUME)
-            else:
-                jogPanel.setStatus(STR_NO_ADD)
-        except CommTimeout:
-            commTimeout()
-        stdout.flush()
+        add = getFloatVal(self.threadPanel.add)
+        self.feed += add
+        self.threadSetup(True)
+        self.calculateThread(add=True)
+        self.threadPass()
+        self.m.stopSpindle();
+        self.m.done(1)
+        command(CMD_RESUME)
+        jogPanel.setStatus(STR_NO_ADD)
 
 class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
@@ -3555,54 +3555,54 @@ class SetPosDialog(wx.Dialog):
         self.Show(False)
         jogPanel.focus()
 
-    def updateZPos(self, val):
-        global jogPanel, zHomeOffset, zDROOffset
-        sendZData()
-        zLoc = getParm(Z_LOC)
-        if zLoc != None:
-            zLoc /= jogPanel.zStepsInch
-            zHomeOffset = zLoc - val
-            setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
-            setParm(Z_HOME_OFFSET, zHomeOffset)
-            print("zHomeOffset %0.4f" % (zHomeOffset))
-        if DRO:
-            zDROPos = getParm(Z_DRO_POS)
-            print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
-            if zDROPos != None:
-                droPos = float(zDROPos) / jogPanel.zDROInch
-                setInfo(zSvDROPosition, "%0.4f" % (droPos))
-                if jogPanel.zDROInvert:
-                    droPos = -droPos
-                zDROOffset = droPos - val
-                setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
-                setParm(Z_DRO_OFFSET, zDROOffset)
-                print("zDROOffset %0.4f" % (zDROOffset))
-        stdout.flush()
+def updateZPos(val):
+    global jogPanel, zHomeOffset, zDROOffset
+    sendZData()
+    zLoc = getParm(Z_LOC)
+    if zLoc != None:
+        zLoc /= jogPanel.zStepsInch
+        zHomeOffset = zLoc - val
+        setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
+        setParm(Z_HOME_OFFSET, zHomeOffset)
+        print("zHomeOffset %0.4f" % (zHomeOffset))
+    if DRO:
+        zDROPos = getParm(Z_DRO_POS)
+        print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
+        if zDROPos != None:
+            droPos = float(zDROPos) / jogPanel.zDROInch
+            setInfo(zSvDROPosition, "%0.4f" % (droPos))
+            if jogPanel.zDROInvert:
+                droPos = -droPos
+            zDROOffset = droPos - val
+            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
+            setParm(Z_DRO_OFFSET, zDROOffset)
+            print("zDROOffset %0.4f" % (zDROOffset))
+    stdout.flush()
 
-    def updateXPos(self, val):
-        global jogPanel, xHomeOffset, xDROOffset
-        val /= 2.0
-        sendXData()
-        xLoc = getParm(X_LOC)
-        if xLoc != None:
-            xLoc /= jogPanel.xStepsInch
-            xHomeOffset = xLoc - val
-            setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
-            setParm(X_HOME_OFFSET, xHomeOffset)
-            print("xHomeOffset %0.4f" % (xHomeOffset))
-        if DRO:
-            xDROPos = getParm(X_DRO_POS)
-            print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
-            if xDROPos != None:
-                droPos = float(xDROPos) / jogPanel.xDROInch
-                setInfo(xSvDROPosition, "%0.4f" % (droPos))
-                if jogPanel.xDROInvert:
-                    droPos = -droPos
-                xDROOffset = droPos - val
-                setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
-                setParm(X_DRO_OFFSET, xDROOffset)
-                print("xDROOffset %0.4f" % (xDROOffset))
-        stdout.flush()
+def updateXPos(val):
+    global jogPanel, xHomeOffset, xDROOffset
+    val /= 2.0
+    sendXData()
+    xLoc = getParm(X_LOC)
+    if xLoc != None:
+        xLoc /= jogPanel.xStepsInch
+        xHomeOffset = xLoc - val
+        setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
+        setParm(X_HOME_OFFSET, xHomeOffset)
+        print("xHomeOffset %0.4f" % (xHomeOffset))
+    if DRO:
+        xDROPos = getParm(X_DRO_POS)
+        print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
+        if xDROPos != None:
+            droPos = float(xDROPos) / jogPanel.xDROInch
+            setInfo(xSvDROPosition, "%0.4f" % (droPos))
+            if jogPanel.xDROInvert:
+                droPos = -droPos
+            xDROOffset = droPos - val
+            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
+            setParm(X_DRO_OFFSET, xDROOffset)
+            print("xDROOffset %0.4f" % (xDROOffset))
+    stdout.flush()
 
 class ProbeDialog(wx.Dialog):
     def __init__(self, frame, axis):
