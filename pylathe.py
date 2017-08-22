@@ -3434,6 +3434,7 @@ class JogPanel(wx.Panel):
 
     def OnDone(self, e):
         self.clrActive()
+        self.clrStatus()
         self.combo.SetFocus()
 
     def getPanel(self):
