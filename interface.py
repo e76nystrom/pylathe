@@ -181,6 +181,15 @@ configList = \
     ('zSvHomeOffset', 'z axis '),
 )
 
+strList = \
+(\
+ ("STR_OP_NOT_ACTIVE", "Operation Not Active"),
+ ("STR_OP_IN_PROGRESS", "Operation In Progress"),
+ ("STR_NO_ADD", "Cannot Add"),
+ ("STR_NOT_HOMED", "X Not Homed"),
+ ("STR_FIELD_ERROR", "Entry Field Error"),
+)
+
 cmdList = \
 (\
     "z motion commands",
@@ -549,6 +558,7 @@ regList =\
  
     # ("", "", ""),
 )
+
 xilinxList = \
 ( \
     "skip register zero",
