@@ -133,11 +133,16 @@ class FormRoutines():
     def __init__(self):
         pass
 
-    def formatData(self,formatList):
+    def formatData(self, formatList):
         success = True
         for (index, fieldType) in formatList:
             if fieldType == None:
                 continue
+            success = success and format(index, fieldType)
+        return(self.success)
+
+    def format(self, index, fieldType):
+        success = True
             ctl = configInfo.info[index]
             strVal = ctl.GetValue()
             if fieldType.startswith('f'):
@@ -176,7 +181,7 @@ class FormRoutines():
         return(success)
 
     def fieldList(self, sizer, fields):
-        for (label, index) in fields:
+        for (label, index, fmt) in fields:
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
             else:
@@ -223,10 +228,18 @@ class FormRoutines():
         initInfo(key, cb)
         return(cb)
 
-    def addButton(self, sizer, label, action, size=(60, -1)):
+    def addButton(self, sizer, label, action, size=(60, -1), border=2):
         btn = wx.Button(self, label=label, size=size)
         btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=border)
+
+    def addDialogButton(self, sizer, id, action=None):
+        btn = wx.Button(self, id)
+        if id == wx.ID_OK:
+            btn.SetDefault()
+        else:
+            btn.Bind(wx.EVT_BUTTON, action)
+        sizer.Add(btn, 0, wx.ALL, 5)
 
 class ActionRoutines():
     def __init__(self, control):
@@ -4657,41 +4670,45 @@ class ZDialog(wx.Dialog, FormRoutines):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", zPitch), \
-            ("Motor Steps", zMotorSteps), \
-            ("Micro Steps", zMicroSteps), \
-            ("Motor Ratio", zMotorRatio), \
-            ("Backlash", zBacklash), \
-            ("Accel Unit/Sec2", zAccel), \
-            ("Min Speed U/Min", zMinSpeed), \
-            ("Max Speed U/Min", zMaxSpeed), \
-            ("Jog Min U/Min", zJogMin), \
-            ("Jog Max U/Min", zJogMax), \
-            ("Probe Dist", zProbeDist), \
-            ("Probe Speed", zProbeSpeed), \
-            ("bInvert Dir", zInvDir), \
-            ("bInvert MPG", zInvMpg), \
-            ("DRO Inch", zDROInch), \
-            ("bInv DRO", zInvDRO), \
+            ("Pitch", zPitch, 'f'), \
+            ("Motor Steps", zMotorSteps, 'd'), \
+            ("Micro Steps", zMicroSteps, 'd'), \
+            ("Motor Ratio", zMotorRatio, 'fs'), \
+            ("Backlash", zBacklash, 'f'), \
+            ("Accel Unit/Sec2", zAccel, 'f'), \
+            ("Min Speed U/Min", zMinSpeed, 'f'), \
+            ("Max Speed U/Min", zMaxSpeed, 'f'), \
+            ("Jog Min U/Min", zJogMin, 'f'), \
+            ("Jog Max U/Min", zJogMax, 'f'), \
+            ("Probe Dist", zProbeDist, 'f'), \
+            ("Probe Speed", zProbeSpeed, 'f'), \
+            ("bInvert Dir", zInvDir, None), \
+            ("bInvert MPG", zInvMpg, None), \
+            ("DRO Inch", zDROInch, None), \
+            ("bInv DRO", zInvDRO, None), \
         )        
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
-        btn = wx.Button(self, label='Setup Z', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSetup)
-        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+        self.addBUtton(sizerV, 'Setup Z', self.OnSetup, border=5)
+        # btn = wx.Button(self, label='Setup Z', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSetup)
+        # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_OK)
+        # btn = wx.Button(self, wx.ID_OK)
+        # btn.SetDefault()
+        # sizerH.Add(btn, 0, wx.ALL, 5)
+
+        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        # btn = wx.Button(self, wx.ID_CANCEL)
+        # btn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -4766,24 +4783,29 @@ class XDialog(wx.Dialog, FormRoutines):
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         if HOME_TEST:
-            btn = wx.Button(self, label='Set Home Loc')#, size=(60,-1))
-            btn.Bind(wx.EVT_BUTTON, self.OnSetHomeLoc)
-            sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+            self.addBUtton(sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
+            # btn = wx.Button(self, label='Set Home Loc')#, size=(60,-1))
+            # btn.Bind(wx.EVT_BUTTON, self.OnSetHomeLoc)
+            # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
-        btn = wx.Button(self, label='Setup X', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnSetup)
-        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+        self.addBUtton(sizerV, 'Setup X', self.OnSetup, border=5)
+        # btn = wx.Button(self, label='Setup X', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnSetup)
+        # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_OK)
+        # btn = wx.Button(self, wx.ID_OK)
+        # btn.SetDefault()
+        # sizerH.Add(btn, 0, wx.ALL, 5)
+
+        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        # btn = wx.Button(self, wx.ID_CANCEL)
+        # btn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
