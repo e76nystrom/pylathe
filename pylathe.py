@@ -3107,6 +3107,8 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.event.set()
 
     def OnZUp(self, e):
+        print("OnZUp")
+        stdout.flush()
         val = self.getInc()
         if val == "Cont":
             self.btnRpt.event.clear()
