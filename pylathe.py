@@ -2942,16 +2942,16 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # second row
 
-        self.zNegButton = \
-            self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
-                                 self.OnZUp, flag=sFlag)
-        # bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        # self.zNegButton = btn
-        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
-        # btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        # sizerG.Add(btn, flag=sFlag, border=2)
+        # self.zNegButton = \
+        #     self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
+        #                          self.OnZUp, flag=sFlag)
+        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.zNegButton = btn
+        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
+        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        sizerG.Add(btn, flag=sFlag, border=2)
 
         self.addButton(sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
@@ -3111,7 +3111,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if val == "Cont":
             self.btnRpt.event.clear()
             self.btnRpt.action = None
-            self.jogDone("ZSTOP")
+            self.jogDone(ZSTOP)
         self.jogCode = None
         self.combo.SetFocus()
 
@@ -3182,7 +3182,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if val == "Cont":
             self.btnRpt.event.clear()
             self.btnRpt.action = None
-            self.jogDone("XSTOP")
+            self.jogDone(XSTOP)
         self.jogCode = None
         self.combo.SetFocus()
 
@@ -3252,19 +3252,19 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnKeyUp(self, evt):
         code = evt.GetKeyCode()
         if code == wx.WXK_LEFT:
-            self.jogDone("ZSTOP")
+            self.jogDone(ZSTOP)
             return
         elif code == wx.WXK_RIGHT:
-            self.jogDone("ZSTOP")
+            self.jogDone(ZSTOP)
             return
         elif code == wx.WXK_UP:
-            self.jogDone("XSTOP")
+            self.jogDone(XSTOP)
             return
         elif code == wx.WXK_DOWN:
-            self.jogDone("XSTOP")
+            self.jogDone(XSTOP)
             return
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
-            command("SPINDLE_STOP")
+            command(SPINDLE_STOP)
             return
         # print("key up %x" % (code))
         # stdout.flush()
