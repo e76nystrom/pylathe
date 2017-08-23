@@ -234,7 +234,7 @@ class FormRoutines():
 
     def addDialogButton(self, sizer, id, action=None):
         btn = wx.Button(self, id)
-        if id == wx.ID_OK:
+        if action == None:
             btn.SetDefault()
         else:
             btn.Bind(wx.EVT_BUTTON, action)
@@ -313,6 +313,47 @@ class ActionRoutines():
                 pass
         jogPanel.focus()
 
+class DialogActions():
+    def __init__(self, control):
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+
+    def OnSetup(self, e):
+        global moveCommands
+        if self.formatData(self.fields):
+            moveCommands.queClear()
+            try:
+                if callabale(self.setupAction):
+                    self.setupAction()
+            except AttributeError:
+                pass
+            
+    def OnShow(self, e):
+        global done
+        if done:
+            return
+        changed = False
+        if self.IsShown():
+            self.changed = not self.formatData(self.fields)
+            self.fieldInfo = {}
+            for (label, index, fmt) in self.fields:
+                self.fieldInfo[index] = getInfo(index)
+        else:
+                    for (label, index, fmt) in self.fields:
+                        if self.fieldInfo[index] != getInfo(index):
+                            self.sendData = True
+                            break
+        if changed:
+            try:
+                if callable(self.showAction):
+                    self.showAction(changed)
+            except AttributeError:
+                pass
+
+    def OnCancel(self, e):
+        for (label, index, fmt) in self.fields:
+            setInfo(index, self.fieldInfo[index])
+        self.Show(False)
+    
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
@@ -3532,9 +3573,10 @@ class SetPosDialog(wx.Dialog):
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
+        self.addDialogButton(sizerH, wx.ID_OK, self.onOk)
+        # btn = wx.Button(self, label='Ok', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        # sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -4660,13 +4702,13 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.moveTest.test()
         self.testMoveDialog.Show()
 
-class ZDialog(wx.Dialog, FormRoutines):
+class ZDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         FormRoutines.__init__(self)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
+        DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
@@ -4717,37 +4759,40 @@ class ZDialog(wx.Dialog, FormRoutines):
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnSetup(self, e):
-        global moveCommands
-        moveCommands.queClear()
-        sendZData(True)
+    def setupAction(self):
+            sendZData(True)
 
-    def OnShow(self, e):
-        global done, zDataSent
-        if done:
-            return
-        if self.IsShown():
-            self.fieldInfo = {}
-            for (label, index, fmt) in self.fields:
-                self.fieldInfo[index] = getInfo(index)
-        else:
-            for (label, index, fmt) in self.fields:
-                if self.fieldInfo[index] != getInfo(index):
-                    zDataSent = False
-                    break
+    def showAction(self, changed):
+        global zDataSent
+        if changed:
+            zDataSent = False
+    
+    # def OnShow(self, e):
+    #     global done, zDataSent
+    #     if done:
+    #         return
+    #     if self.IsShown():
+    #         self.fieldInfo = {}
+    #         for (label, index, fmt) in self.fields:
+    #             self.fieldInfo[index] = getInfo(index)
+    #     else:
+    #         for (label, index, fmt) in self.fields:
+    #             if self.fieldInfo[index] != getInfo(index):
+    #                 zDataSent = False
+    #                 break
 
-    def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
-            setInfo(index, self.fieldInfo[index])
-        self.Show(False)
+    # def OnCancel(self, e):
+    #     for (label, index, fmt) in self.fields:
+    #         setInfo(index, self.fieldInfo[index])
+    #     self.Show(False)
 
-class XDialog(wx.Dialog, FormRoutines):
+class XDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         FormRoutines.__init__(self)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
+        DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
@@ -4820,37 +4865,41 @@ class XDialog(wx.Dialog, FormRoutines):
         loc = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
         setParm(X_HOME_LOC, loc)
         
-    def OnSetup(self, e):
-        moveCommans.queClear()
-        sendXData(True)
+    def setupAction(self):
+            sendXData(True)
 
-    def OnShow(self, e):
-        global done, xDataSent
-        if done:
-            return
-        if self.IsShown():
-            self.fieldInfo = {}
-            for (label, index, fmt) in self.fields:
-                self.fieldInfo[index] = getInfo(index)
-        else:
-            for (label, index, fmt) in self.fields:
-                if self.fieldInfo[index] != getInfo(index):
-                    xDataSent = False
-                    break
+    def showAction(self, changed):
+        global xDataSent
+        if changed:
+            xDataSent = False
+    
+    # def OnShow(self, e):
+    #     global done, xDataSent
+    #     if done:
+    #         return
+    #     if self.IsShown():
+    #         self.fieldInfo = {}
+    #         for (label, index, fmt) in self.fields:
+    #             self.fieldInfo[index] = getInfo(index)
+    #     else:
+    #         for (label, index, fmt) in self.fields:
+    #             if self.fieldInfo[index] != getInfo(index):
+    #                 xDataSent = False
+    #                 break
 
-    def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
-            setInfo(index, self.fieldInfo[index])
-        self.Show(False)
+    # def OnCancel(self, e):
+    #     for (label, index, fmt) in self.fields:
+    #         setInfo(index, self.fieldInfo[index])
+    #     self.Show(False)
 
-class SpindleDialog(wx.Dialog, FormRoutines):
+class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         FormRoutines.__init__(self)
+        DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
@@ -4911,6 +4960,7 @@ class SpindleDialog(wx.Dialog, FormRoutines):
 
     def OnStart(self, e):
         global spindleDataSent
+        if formatData(self.fields):
         for (label, index, fmt) in self.fields:
             tmp = getInfo(index)
             if self.fieldInfo[index] != tmp:
@@ -4925,37 +4975,42 @@ class SpindleDialog(wx.Dialog, FormRoutines):
     def OnStop(self, e):
         command(SPINDLE_STOP)
 
-    def OnShow(self, e):
-        global done, spindleDataSent
-        if done:
-            return
-        if self.IsShown():
-            self.fieldInfo = {}
-            self.cancelInfo = {}
-            for (label, index, fmt) in self.fields:
-                tmp = getInfo(index)
-                self.cancelInfo[index] = tmp
-                self.fieldInfo[index] = tmp
+    def showAction(self, changed):
+        global spindleDataSent
+        if changed:
             spindleDataSent = False
-        else:
-            for (label, index, fmt) in self.fields:
-                if self.fieldInfo[index] != getInfo(index):
-                    spindleDataSent = False
-                    break
+    
+    # def OnShow(self, e):
+    #     global done, spindleDataSent
+    #     if done:
+    #         return
+    #     if self.IsShown():
+    #         self.fieldInfo = {}
+    #         self.cancelInfo = {}
+    #         for (label, index, fmt) in self.fields:
+    #             tmp = getInfo(index)
+    #             self.cancelInfo[index] = tmp
+    #             self.fieldInfo[index] = tmp
+    #         spindleDataSent = False
+    #     else:
+    #         for (label, index, fmt) in self.fields:
+    #             if self.fieldInfo[index] != getInfo(index):
+    #                 spindleDataSent = False
+    #                 break
 
-    def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
-            setInfo(index, self.cancelInfo[index])
-        self.Show(False)
+    # def OnCancel(self, e):
+    #     for (label, index, fmt) in self.fields:
+    #         setInfo(index, self.cancelInfo[index])
+    #     self.Show(False)
 
-class PortDialog(wx.Dialog, FormRoutines):
+class PortDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         FormRoutines.__init__(self)
+        DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
@@ -4983,29 +5038,29 @@ class PortDialog(wx.Dialog, FormRoutines):
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        global done
-        if done:
-            return
-        if self.IsShown():
-            self.fieldInfo = {}
-            for (label, index, fmt) in self.fields:
-                self.fieldInfo[index] = getInfo(index)
+    # def OnShow(self, e):
+    #     global done
+    #     if done:
+    #         return
+    #     if self.IsShown():
+    #         self.fieldInfo = {}
+    #         for (label, index, fmt) in self.fields:
+    #             self.fieldInfo[index] = getInfo(index)
 
-    def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
-            setInfo(index, self.fieldInfo[index])
-        self.Show(False)
+    # def OnCancel(self, e):
+    #     for (label, index, fmt) in self.fields:
+    #         setInfo(index, self.fieldInfo[index])
+    #     self.Show(False)
 
-class ConfigDialog(wx.Dialog, FormRoutines):
+class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         global XILINX
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Config Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         FormRoutines.__init__(self)
+        DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        self.Bind(wx.EVT_SHOW, self.OnShow)
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
@@ -5051,19 +5106,19 @@ class ConfigDialog(wx.Dialog, FormRoutines):
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        global done
-        if done:
-            return
-        if self.IsShown():
-            self.fieldInfo = {}
-            for (label, index, fmt) in self.fields:
-                self.fieldInfo[index] = getInfo(index)
+    # def OnShow(self, e):
+    #     global done
+    #     if done:
+    #         return
+    #     if self.IsShown():
+    #         self.fieldInfo = {}
+    #         for (label, index, fmt) in self.fields:
+    #             self.fieldInfo[index] = getInfo(index)
 
-    def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
-            setInfo(index, self.fieldInfo[index])
-        self.Show(False)
+    # def OnCancel(self, e):
+    #     for (label, index, fmt) in self.fields:
+    #         setInfo(index, self.fieldInfo[index])
+    #     self.Show(False)
 
 def testText(dialog):
     global testFont
