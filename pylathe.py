@@ -89,9 +89,7 @@ print(sys.version)
 print(wx.version())
 stdout.flush()
 
-hdrFont = None
 testFont = None
-emptyCell = (0, 0)
 f = None
 mainFrame = None
 jogPanel = None
@@ -131,7 +129,9 @@ def commTimeout():
 
 class FormRoutines():
     def __init__(self):
-        pass
+        self.emptyCell = (0, 0)
+        self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                               wx.NORMAL, False, u'Consolas')
 
     def formatData(self, formatList):
         success = True
@@ -213,13 +213,15 @@ class FormRoutines():
         initInfo(key, tc)
         return(tc)
 
-    def addCheckBox(self, sizer, label, key):
+    def addCheckBox(self, sizer, label, key, action=None):
         global info
         txt = wx.StaticText(self, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
 
         cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
+        if action != None:
+            self.Bind(wx.EVT_CHECKBOX, action, cb)
         sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
         if key in configInfo.info:
             val = getInfo(key)
@@ -227,10 +229,29 @@ class FormRoutines():
         initInfo(key, cb)
         return(cb)
 
-    def addButton(self, sizer, label, action, size=(60, -1), border=2):
-        btn = wx.Button(self, label=label, size=size)
+    def addButton(self, sizer, label, action, size=(60, -1), border=2, \
+                  style=0, flag=wx.CENTER|wx.ALL):
+        btn = wx.Button(self, label=label, style=style, size=size)
         btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, flag=wx.CENTER|wx.ALL, border=border)
+        sizer.Add(btn, flag=flag, border=border)
+        return(btn)
+
+    def addControlButton(self, sizer, label, downAction, upAction, \
+                         flag=wx.CENTER|wx.ALL):
+        btn = wx.Button(self, label=label, style=style, size=size)
+        btn.Bind(wx.EVT_LEFT_DOWN, downAction)
+        btn.Bind(wx.EVT_LEFT_UP, upAction)
+        sizerG.Add(btn, flag=flag, border=2)
+        return(btn)
+
+    def addBitmapButton(self, bitmap, downAction, upAction, flag=0):
+        bmp = wx.Bitmap(bitmap, wx.BITMAP_TYPE_ANY)
+        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        btn.Bind(wx.EVT_LEFT_DOWN, downAction)
+        btn.Bind(wx.EVT_LEFT_UP, upAction)
+        sizer.Add(btn, flag=flag, border=2)
+        return(btn)
 
     def addDialogButton(self, sizer, id, action=None):
         btn = wx.Button(self, id)
@@ -239,7 +260,8 @@ class FormRoutines():
         else:
             btn.Bind(wx.EVT_BUTTON, action)
         sizer.Add(btn, 0, wx.ALL, 5)
-
+        return(btn)
+    
 class ActionRoutines():
     def __init__(self, control):
         self.control = control
@@ -1061,12 +1083,10 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (tuZStart, 'f'))
 
     def InitUI(self):
-        global hdrFont
-
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Turn")
-        txt.SetFont(hdrFont)
+        txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1101,8 +1121,8 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", tuSpring)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # buttons
 
@@ -1302,11 +1322,10 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
                            (faZStart, 'f'))
 
     def InitUI(self):
-        global hdrFont, emptyCell
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Face")
-        txt.SetFont(hdrFont)
+        txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1341,8 +1360,8 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", faSpring)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # buttons
 
@@ -1472,11 +1491,10 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (cuZStart, 'f'))
 
     def InitUI(self):
-        global hdrFont, emptyCell
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Cutoff")
-        txt.SetFont(hdrFont)
+        txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -1498,10 +1516,10 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
         
         # buttons
 
@@ -1509,8 +1527,8 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButton(sizerG, 'Start', self.OnStart)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         self.rpm = self.addField(sizerG, "RPM", cuRPM)
 
@@ -1894,11 +1912,10 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (tpZStart, 'f'))
 
     def InitUI(self):
-        global hdrFont, info
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Taper")
-        txt.SetFont(hdrFont)
+        txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2373,11 +2390,10 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                             (thZStart, 'f'))
 
     def InitUI(self):
-        global hdrFont, info, emptyCell
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Thread")
-        txt.SetFont(hdrFont)
+        txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2391,7 +2407,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
-        self.internal = self.addCheckBox(sizerG, "Internal", thInternal)
+        self.internal = self.addCheckBox(sizerG, "Internal", thInternal, \
+                                         action=self.OnInternal)
         # sizerG.Add(wx.StaticText(self, -1, "Internal"), border=2, \
         #            flag=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL)
         # self.internal = cb = wx.CheckBox(self, -1, \
@@ -2431,8 +2448,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.angle = self.addField(sizerG, "Angle", thAngle)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         #
 
@@ -2442,8 +2459,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         
         self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # pass info
 
@@ -2454,8 +2471,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", thSpring)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # buttons
 
@@ -2787,7 +2804,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # second row
         # blank space
 
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
         self.statusText = txt = wx.StaticText(self, -1, "")
         txt.SetFont(txtFont)
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
@@ -2875,17 +2892,19 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
 
         if STEPPER_DRIVE:
-            btn = wx.Button(self, label='Jog Spindle')
-            btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
-            btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
-            sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+            self.addControlButton(sizerG, 'Jog Spindle', self.OnJogSpindle, \
+                                  self.OnJogUp)
+            # btn = wx.Button(self, label='Jog Spindle')
+            # btn.Bind(wx.EVT_LEFT_DOWN, self.OnJogSpindle)
+            # btn.Bind(wx.EVT_LEFT_UP, self.OnJogUp)
+            # sizerG.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         else:
-            sizerG.Add(emptyCell)
+            sizerG.Add(self.emptyCell)
 
         self.addButton(sizerG, 'Done', self.OnDone, btnSize)
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
 
@@ -2895,7 +2914,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addButton(sizerG, 'Start Spindle', \
                            self.OnStartSpindle, btnSize)
         else:
-            sizerG.Add(emptyCell)
+            sizerG.Add(self.emptyCell)
 
         sizerH.Add(sizerG)
 
@@ -2904,45 +2923,56 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # first row
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
-        bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.xNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
+        self.xNegButton = \
+            self.addBitmapButton("north.gif", self.OnXNegDown, self.OnXUp, \
+                                 flag=sFlag|wx.EXPAND)
+        # bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
+        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        # self.xNegButton = btn
+        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnXNegDown)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
+        # sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
 
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # second row
 
-        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        self.zNegButton = \
+            self.addBitmapButton("west.gif", self.OnZNegDown, self.OnZUp, \
+                                 flag=sFlag)
+        # bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
+        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        # self.zNegButton = btn
+        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        # sizerG.Add(btn, flag=sFlag, border=2)
 
-        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
-        btn.Bind(wx.EVT_BUTTON, self.OnZHome)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        addButton(sizerG, 'S', onZSafe, style=wx.BU_EXACTFIT, flag=sFlag)
+        # btn = wx.Button(self, label='S', style=wx.BU_EXACTFIT)
+        # btn.Bind(wx.EVT_BUTTON, self.OnZSafe)
+        # sizerG.Add(btn, flag=sFlag, border=2)
 
-        bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        self.zPosButton = \
+            self.addBitmapButton("west.gif", self.OnZPosDown, self.OnZUp, \
+                                 flag=sFlag)
+        # bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
+        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        # self.zPosButton = btn
+        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnZPosDown)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        # sizerG.Add(btn, flag=sFlag, border=2)
 
-        btn = wx.Button(self, label='H', style=wx.BU_EXACTFIT)
-        btn.Bind(wx.EVT_BUTTON, self.OnXHome)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        addButton(sizerG, 'S', onXSafe, style=wx.BU_EXACTFIT, flag=sFlag)
+        # btn = wx.Button(self, label='S', style=wx.BU_EXACTFIT)
+        # btn.Bind(wx.EVT_BUTTON, self.OnXSafe)
+        # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.step = step = ["Cont", "0.001", "0.002", "0.005", \
                             "0.010", "0.020", "0.050", \
@@ -2962,19 +2992,22 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # third row
 
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
-        bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.xPosButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
-        sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
+        self.xPosButton = \
+            self.addBitmapButton("north.gif", self.OnXPosDown, self.OnXUp, \
+                                 flag=sFlag|wx.EXPAND)
+        # bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
+        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        # self.xPosButton = btn
+        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnXPosDown)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnXUp)
+        # sizerG.Add(btn, flag=sFlag|wx.EXPAND, border=2)
 
-        sizerG.Add(emptyCell)
+        sizerG.Add(self.emptyCell)
 
         sizerH.Add(sizerG)
 
@@ -3084,8 +3117,10 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zNegButton.SetFocus()
         self.zDown(wx.WXK_LEFT)
 
-    def OnZHome(self, e):
-        command(ZGOHOME)
+    def OnZSafe(self, e):
+        self.combo.SetFocus()
+
+    def OnZPark(self, e):
         self.combo.SetFocus()
 
     def OnZPosDown(self, e):
@@ -3153,8 +3188,10 @@ class JogPanel(wx.Panel, FormRoutines):
         self.xPosButton.SetFocus()
         self.xDown(wx.WXK_DOWN)
 
-    def OnXHome(self, e):
-        command(XGOHOME)
+    def OnXSafe(self, e):
+        self.combo.SetFocus()
+
+    def OnXPark(self, e):
         self.combo.SetFocus()
 
     def OnXNegDown(self, e):
@@ -4271,12 +4308,10 @@ class UpdateThread(Thread):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
-        global moveCommands, hdrFont, testFont, jogShuttle
+        global moveCommands, testFont, jogShuttle
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self, self.OnUpdate)
-        hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, 
-                          wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
                           wx.NORMAL, False, u'Consolas')
 
