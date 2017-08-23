@@ -2960,7 +2960,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.zPosButton = \
-            self.addBitmapButton(sizerG, "west.gif", self.OnZPosDown, \
+            self.addBitmapButton(sizerG, "east.gif", self.OnZPosDown, \
                                  self.OnZUp, flag=sFlag)
         # bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
         # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
