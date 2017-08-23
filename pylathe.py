@@ -140,42 +140,41 @@ class FormRoutines():
                 (index, fieldType) = fmt
             else:
                 (name, index, fieldType) = fmt
+            ctl = configInfo.info[index]
+            strVal = ctl.GetValue()
+            if fieldType.startswith('f'):
+                strip = False
+                if fieldType.endswith('s'):
+                    fieldType = fieldType[:-1]
+                    strip = True
 
-        ctl = configInfo.info[index]
-        strVal = ctl.GetValue()
-        if fieldType.startswith('f'):
-            strip = False
-            if fieldType.endswith('s'):
-                fieldType = fieldType[:-1]
-                strip = True
+                digits = 4
+                if len(fieldType) > 1:
+                    try:
+                        digits = int(fieldType[1])
+                    except ValueError:
+                        pass
+                format = "%%0.%df" % digits
 
-            digits = 4
-            if len(fieldType) > 1:
                 try:
-                    digits = int(fieldType[1])
+                    val = float(strVal)
+                    val = format % (val)
+                    if strip:
+                        if re.search("\.0*$", val):
+                            val = re.sub("\.0*$", "", val)
+                        else:
+                            val = val.rstrip('0')
+                    ctl.SetValue(val)
                 except ValueError:
-                    pass
-            format = "%%0.%df" % digits
-
-            try:
-                val = float(strVal)
-                val = format % (val)
-                if strip:
-                    if re.search("\.0*$", val):
-                        val = re.sub("\.0*$", "", val)
-                    else:
-                        val = val.rstrip('0')
-                ctl.SetValue(val)
-            except ValueError:
-                success = False
-                ctl.SetValue('')
-        elif fieldType == 'd':
-            try:
-                val = int(strVal)
-                ctl.SetValue("%d" % (val))
-            except ValueError:
-                success = False
-                ctl.SetValue('')
+                    success = False
+                    ctl.SetValue('')
+            elif fieldType == 'd':
+                try:
+                    val = int(strVal)
+                    ctl.SetValue("%d" % (val))
+                except ValueError:
+                    success = False
+                    ctl.SetValue('')
         return(success)
 
     def fieldList(self, sizer, fields):
@@ -1971,7 +1970,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                 if name.startswith('ta'):
                     self.configList.append(i)
         return(self.configList)
-
+
     def update(self):
         self.updateUI()
         self.updateDelta()
@@ -3667,9 +3666,10 @@ class ProbeDialog(wx.Dialog):
         # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
+        self.addBUtton(sizerV, 'Ok', self.OnOk, border=10)
+        # btn = wx.Button(self, label='Ok', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        # sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -3751,9 +3751,10 @@ class GotoDialog(wx.Dialog):
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        btn = wx.Button(self, label='Ok', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnOk)
-        sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
+        self.addBUtton(sizerV, 'Ok', self.OnOk, border=10)
+        # btn = wx.Button(self, label='Ok', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnOk)
+        # sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -3837,9 +3838,10 @@ class FixXPosDialog(wx.Dialog):
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        btn = wx.Button(self, label='Fix', size=(60,-1))
-        btn.Bind(wx.EVT_BUTTON, self.OnFix)
-        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
+        self.addBUtton(sizerV, 'Fix', self.OnSetup, border=5)
+        # btn = wx.Button(self, label='Fix', size=(60,-1))
+        # btn.Bind(wx.EVT_BUTTON, self.OnFix)
+        # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
@@ -4695,7 +4697,6 @@ class ZDialog(wx.Dialog, FormRoutines):
         # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
         self.addDialogButton(sizerH, wx.ID_OK)
@@ -4725,16 +4726,16 @@ class ZDialog(wx.Dialog, FormRoutines):
             return
         if self.IsShown():
             self.fieldInfo = {}
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = getInfo(index)
         else:
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 if self.fieldInfo[index] != getInfo(index):
                     zDataSent = False
                     break
 
     def OnCancel(self, e):
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
@@ -4827,16 +4828,16 @@ class XDialog(wx.Dialog, FormRoutines):
             return
         if self.IsShown():
             self.fieldInfo = {}
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = getInfo(index)
         else:
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 if self.fieldInfo[index] != getInfo(index):
                     xDataSent = False
                     break
 
     def OnCancel(self, e):
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
@@ -4875,13 +4876,15 @@ class SpindleDialog(wx.Dialog, FormRoutines):
         if STEPPER_DRIVE:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-            btn = wx.Button(self, label='Start', size=(60,-1))
-            btn.Bind(wx.EVT_BUTTON, self.OnStart)
-            sizerH.Add(btn, 0, wx.ALL, 5)
+            self.addBUtton(sizerH, 'Start', self.OnStart, border=5)
+            # btn = wx.Button(self, label='Start', size=(60,-1))
+            # btn.Bind(wx.EVT_BUTTON, self.OnStart)
+            # sizerH.Add(btn, 0, wx.ALL, 5)
 
-            btn = wx.Button(self, label='Stop', size=(60,-1))
-            btn.Bind(wx.EVT_BUTTON, self.OnStop)
-            sizerH.Add(btn, 0, wx.ALL, 5)
+            self.addBUtton(sizerH, 'Stop', self.OnStop, border=5)
+            # btn = wx.Button(self, label='Stop', size=(60,-1))
+            # btn.Bind(wx.EVT_BUTTON, self.OnStop)
+            # sizerH.Add(btn, 0, wx.ALL, 5)
 
             sizerV.Add(sizerH, 0, wx.CENTER)
 
@@ -4889,13 +4892,15 @@ class SpindleDialog(wx.Dialog, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_OK)
+        # btn = wx.Button(self, wx.ID_OK)
+        # btn.SetDefault()
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        # btn = wx.Button(self, wx.ID_CANCEL)
+        # btn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -4904,7 +4909,7 @@ class SpindleDialog(wx.Dialog, FormRoutines):
 
     def OnStart(self, e):
         global spindleDataSent
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             tmp = getInfo(index)
             if self.fieldInfo[index] != tmp:
                 self.fieldInfo[index] = tmp 
@@ -4925,19 +4930,19 @@ class SpindleDialog(wx.Dialog, FormRoutines):
         if self.IsShown():
             self.fieldInfo = {}
             self.cancelInfo = {}
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 tmp = getInfo(index)
                 self.cancelInfo[index] = tmp
                 self.fieldInfo[index] = tmp
             spindleDataSent = False
         else:
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 if self.fieldInfo[index] != getInfo(index):
                     spindleDataSent = False
                     break
 
     def OnCancel(self, e):
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             setInfo(index, self.cancelInfo[index])
         self.Show(False)
 
@@ -4958,15 +4963,17 @@ class PortDialog(wx.Dialog, FormRoutines):
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
         sizerH.Add((0, 0), 0, wx.EXPAND)
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_OK)
+        # btn = wx.Button(self, wx.ID_OK)
+        # btn.SetDefault()
+        # sizerH.Add(btn, 0, wx.ALL, 5)
+
+        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        # btn = wx.Button(self, wx.ID_CANCEL)
+        # btn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -4980,11 +4987,11 @@ class PortDialog(wx.Dialog, FormRoutines):
             return
         if self.IsShown():
             self.fieldInfo = {}
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = getInfo(index)
 
     def OnCancel(self, e):
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
@@ -5024,15 +5031,17 @@ class ConfigDialog(wx.Dialog, FormRoutines):
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
         sizerH.Add((0, 0), 0, wx.EXPAND)
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        sizerH.Add(btn, 0, wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        sizerH.Add(btn, 0, wx.ALL, 5)
+        self.addDialogButton(sizerH, wx.ID_OK)
+        # btn = wx.Button(self, wx.ID_OK)
+        # btn.SetDefault()
+        # sizerH.Add(btn, 0, wx.ALL, 5)
+
+        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        # btn = wx.Button(self, wx.ID_CANCEL)
+        # btn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        # sizerH.Add(btn, 0, wx.ALL, 5)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -5046,11 +5055,11 @@ class ConfigDialog(wx.Dialog, FormRoutines):
             return
         if self.IsShown():
             self.fieldInfo = {}
-            for (label, index) in self.fields:
+            for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = getInfo(index)
 
     def OnCancel(self, e):
-        for (label, index) in self.fields:
+        for (label, index, fmt) in self.fields:
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
