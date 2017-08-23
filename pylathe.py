@@ -238,7 +238,7 @@ class FormRoutines():
 
     def addControlButton(self, sizer, label, downAction, upAction, \
                          flag=wx.CENTER|wx.ALL):
-        btn = wx.Button(self, label=label, style=style, size=size)
+        btn = wx.Button(self, label=label)
         btn.Bind(wx.EVT_LEFT_DOWN, downAction)
         btn.Bind(wx.EVT_LEFT_UP, upAction)
         sizerG.Add(btn, flag=flag, border=2)
