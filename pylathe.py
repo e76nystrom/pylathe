@@ -135,49 +135,47 @@ class FormRoutines():
 
     def formatData(self, formatList):
         success = True
-        for (index, fieldType) in formatList:
-            if fieldType == None:
-                continue
-            success = success and format(index, fieldType)
-        return(self.success)
+        for fmt in formatList:
+            if len(fmt) == 2:
+                (index, fieldType) = fmt
+            else:
+                (name, index, fieldType) = fmt
 
-    def format(self, index, fieldType):
-        success = True
-            ctl = configInfo.info[index]
-            strVal = ctl.GetValue()
-            if fieldType.startswith('f'):
-                strip = False
-                if fieldType.endswith('s'):
-                    fieldType = fieldType[:-1]
-                    strip = True
+        ctl = configInfo.info[index]
+        strVal = ctl.GetValue()
+        if fieldType.startswith('f'):
+            strip = False
+            if fieldType.endswith('s'):
+                fieldType = fieldType[:-1]
+                strip = True
 
-                digits = 4
-                if len(fieldType) > 1:
-                    try:
-                        digits = int(fieldType[1])
-                    except ValueError:
-                        pass
-                format = "%%0.%df" % digits
-
+            digits = 4
+            if len(fieldType) > 1:
                 try:
-                    val = float(strVal)
-                    val = format % (val)
-                    if strip:
-                        if re.search("\.0*$", val):
-                            val = re.sub("\.0*$", "", val)
-                        else:
-                            val = val.rstrip('0')
-                    ctl.SetValue(val)
+                    digits = int(fieldType[1])
                 except ValueError:
-                    success = False
-                    ctl.SetValue('')
-            elif fieldType == 'd':
-                try:
-                    val = int(strVal)
-                    ctl.SetValue("%d" % (val))
-                except ValueError:
-                    success = False
-                    ctl.SetValue('')
+                    pass
+            format = "%%0.%df" % digits
+
+            try:
+                val = float(strVal)
+                val = format % (val)
+                if strip:
+                    if re.search("\.0*$", val):
+                        val = re.sub("\.0*$", "", val)
+                    else:
+                        val = val.rstrip('0')
+                ctl.SetValue(val)
+            except ValueError:
+                success = False
+                ctl.SetValue('')
+        elif fieldType == 'd':
+            try:
+                val = int(strVal)
+                ctl.SetValue("%d" % (val))
+            except ValueError:
+                success = False
+                ctl.SetValue('')
         return(success)
 
     def fieldList(self, sizer, fields):
@@ -4752,32 +4750,33 @@ class XDialog(wx.Dialog, FormRoutines):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("Pitch", xPitch), \
-            ("Motor Steps", xMotorSteps), \
-            ("Micro Steps", xMicroSteps), \
-            ("Motor Ratio", xMotorRatio), \
-            ("Backlash", xBacklash), \
-            ("Accel Unit/Sec2", xAccel), \
-            ("Min Speed U/Min", xMinSpeed), \
-            ("Max Speed U/Min", xMaxSpeed), \
-            ("Jog Min U/Min", xJogMin), \
-            ("Jog Max U/Min", xJogMax), \
-            ("bInvert Dir", xInvDir), \
-            ("bInvert MPG", xInvMpg), \
-            ("Probe Dist", xProbeDist), \
-            ("Home Dist", xHomeDist), \
-            ("Backoff Dist", xHomeBackoffDist), \
-            ("Home Speed", xHomeSpeed), \
-            ("bHome Dir", xHomeDir), \
-            ("DRO Inch", xDROInch), \
-            ("bInv DRO", xInvDRO), \
+            ("Pitch", xPitch, 'f'), \
+            ("Motor Steps", xMotorSteps, 'd'), \
+            ("Micro Steps", xMicroSteps, 'd'), \
+            ("Motor Ratio", xMotorRatio, 'fs'), \
+            ("Backlash", xBacklash, 'f'), \
+            ("Accel Unit/Sec2", xAccel, 'f'), \
+            ("Min Speed U/Min", xMinSpeed, 'f'), \
+            ("Max Speed U/Min", xMaxSpeed, 'f'), \
+            ("Jog Min U/Min", xJogMin, 'f'), \
+            ("Jog Max U/Min", xJogMax, 'f'), \
+            ("bInvert Dir", xInvDir, 'f'), \
+            ("bInvert MPG", xInvMpg, None), \
+            ("Probe Dist", xProbeDist, 'f'), \
+            ("Home Dist", xHomeDist, 'f'), \
+            ("Backoff Dist", xHomeBackoffDist, 'f'), \
+            ("Home Speed", xHomeSpeed, 'f'), \
+            ("bHome Dir", xHomeDir, None), \
+            ("DRO Inch", xDROInch, None), \
+            ("bInv DRO", xInvDRO, None), \
         )        
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
-                ("Home Start", xHomeStart), \
-                ("Home End", xHomeEnd), \
-                ("Home Loc", xHomeLoc))
+                ("Home Start", xHomeStart, 'f'), \
+                ("Home End", xHomeEnd, 'f'), \
+                ("Home Loc", xHomeLoc, 'f'), \
+            )
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -4852,20 +4851,20 @@ class SpindleDialog(wx.Dialog, FormRoutines):
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
-            ("bStepper Drive", spStepDrive), \
+            ("bStepper Drive", spStepDrive, None), \
         )
         if STEPPER_DRIVE:
             self.fields += (
-                ("Motor Steps", spMotorSteps), \
-                ("Micro Steps", spMicroSteps), \
-                ("Min RPM", spMinRPM), \
-                ("Max RPM", spMaxRPM), \
-                ("Accel RPM/Sec2", spAccel), \
-                ("Jog Min", spJogMin), \
-                ("Jog Max", spJogMax), \
-                # ("Jog Accel Time", spJogAccelTime), \
-                ("bInvert Dir", spInvDir), \
-                ("bTest Index", spTestIndex), \
+                ("Motor Steps", spMotorSteps, 'd'), \
+                ("Micro Steps", spMicroSteps, 'd'), \
+                ("Min RPM", spMinRPM, 'd'), \
+                ("Max RPM", spMaxRPM, 'd'), \
+                ("Accel RPM/Sec2", spAccel, 'f'), \
+                ("Jog Min", spJogMin, 'd'), \
+                ("Jog Max", spJogMax, 'd'), \
+                # ("Jog Accel Time", spJogAccelTime, 'f'), \
+                ("bInvert Dir", spInvDir, None), \
+                ("bTest Index", spTestIndex, None), \
             )
         self.fieldList(sizerG, self.fields)
 
@@ -4953,7 +4952,8 @@ class PortDialog(wx.Dialog, FormRoutines):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("Comm Port", commPort),)
+            ("Comm Port", commPort, None), \
+        )
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -5000,24 +5000,24 @@ class ConfigDialog(wx.Dialog, FormRoutines):
         sizerG = wx.GridSizer(2, 0, 0)
 
         self.fields = (
-            ("bHW Control", cfgXilinx), \
-            ("bMPG", cfgMPG), \
-            ("bDRO", cfgDRO), \
-            ("bLCD", cfgLCD), \
-            ("bProbe Inv", cfgPrbInv), \
-            ("fcy", cfgFcy), \
-            ("bDisable Commands", cfgCmdDis), \
-            ("bDraw Moves", cfgDraw), \
-            ("bSave Debug", cfgDbgSave), \
+            ("bHW Control", cfgXilinx, None), \
+            ("bMPG", cfgMPG, None), \
+            ("bDRO", cfgDRO, None), \
+            ("bLCD", cfgLCD, None), \
+            ("bProbe Inv", cfgPrbInv, None), \
+            ("fcy", cfgFcy, 'd'), \
+            ("bDisable Commands", cfgCmdDis, None), \
+            ("bDraw Moves", cfgDraw, None), \
+            ("bSave Debug", cfgDbgSave, None), \
         )
         if XILINX:
             self.fields += (
-                ("Encoder", cfgEncoder), \
-                ("Xilinx Freq", cfgXFreq), \
-                ("Freq Mult", cfgFreqMult), \
-                ("bTest Mode", cfgTestMode), \
-                ("Test RPM", cfgTestRPM), \
-                ("bInvert Enc Dir", cfgInvEncDir), \
+                ("Encoder", cfgEncoder, 'd'), \
+                ("Xilinx Freq", cfgXFreq, 'd'), \
+                ("Freq Mult", cfgFreqMult, 'd'), \
+                ("bTest Mode", cfgTestMode, None), \
+                ("Test RPM", cfgTestRPM, 'd'), \
+                ("bInvert Enc Dir", cfgInvEncDir, None), \
             )
         self.fieldList(sizerG, self.fields)
 
