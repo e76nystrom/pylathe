@@ -4827,7 +4827,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Micro Steps", spMicroSteps, 'd'), \
                 ("Min RPM", spMinRPM, 'd'), \
                 ("Max RPM", spMaxRPM, 'd'), \
-                ("Accel RPM/Sec2", spAccel, 'f'), \
+                ("Accel RPM/Sec2", spAccel, 'fs'), \
                 ("Jog Min", spJogMin, 'd'), \
                 ("Jog Max", spJogMax, 'd'), \
                 # ("Jog Accel Time", spJogAccelTime, 'f'), \
