@@ -4729,7 +4729,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Probe Speed", zProbeSpeed, 'f'), \
             ("bInvert Dir", zInvDir, None), \
             ("bInvert MPG", zInvMpg, None), \
-            ("DRO Inch", zDROInch, None), \
+            ("DRO Inch", zDROInch, 'd'), \
             ("bInv DRO", zInvDRO, None), \
         )        
         self.fieldList(sizerG, self.fields)
@@ -4809,14 +4809,14 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Max Speed U/Min", xMaxSpeed, 'f'), \
             ("Jog Min U/Min", xJogMin, 'f'), \
             ("Jog Max U/Min", xJogMax, 'f'), \
-            ("bInvert Dir", xInvDir, 'f'), \
+            ("bInvert Dir", xInvDir, None), \
             ("bInvert MPG", xInvMpg, None), \
             ("Probe Dist", xProbeDist, 'f'), \
             ("Home Dist", xHomeDist, 'f'), \
             ("Backoff Dist", xHomeBackoffDist, 'f'), \
             ("Home Speed", xHomeSpeed, 'f'), \
             ("bHome Dir", xHomeDir, None), \
-            ("DRO Inch", xDROInch, None), \
+            ("DRO Inch", xDROInch, 'd'), \
             ("bInv DRO", xInvDRO, None), \
         )        
         global HOME_TEST
