@@ -4694,13 +4694,13 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Micro Steps", zMicroSteps, 'd'), \
             ("Motor Ratio", zMotorRatio, 'fs'), \
             ("Backlash", zBacklash, 'f'), \
-            ("Accel Unit/Sec2", zAccel, 'f'), \
-            ("Min Speed U/Min", zMinSpeed, 'f'), \
-            ("Max Speed U/Min", zMaxSpeed, 'f'), \
-            ("Jog Min U/Min", zJogMin, 'f'), \
-            ("Jog Max U/Min", zJogMax, 'f'), \
+            ("Accel Unit/Sec2", zAccel, 'fs'), \
+            ("Min Speed U/Min", zMinSpeed, 'fs'), \
+            ("Max Speed U/Min", zMaxSpeed, 'fs'), \
+            ("Jog Min U/Min", zJogMin, 'fs'), \
+            ("Jog Max U/Min", zJogMax, 'fs'), \
             ("Probe Dist", zProbeDist, 'f'), \
-            ("Probe Speed", zProbeSpeed, 'f'), \
+            ("Probe Speed", zProbeSpeed, 'fs'), \
             ("bInvert Dir", zInvDir, None), \
             ("bInvert MPG", zInvMpg, None), \
             ("DRO Inch", zDROInch, 'd'), \
@@ -4750,17 +4750,17 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Micro Steps", xMicroSteps, 'd'), \
             ("Motor Ratio", xMotorRatio, 'fs'), \
             ("Backlash", xBacklash, 'f'), \
-            ("Accel Unit/Sec2", xAccel, 'f'), \
-            ("Min Speed U/Min", xMinSpeed, 'f'), \
-            ("Max Speed U/Min", xMaxSpeed, 'f'), \
-            ("Jog Min U/Min", xJogMin, 'f'), \
-            ("Jog Max U/Min", xJogMax, 'f'), \
+            ("Accel Unit/Sec2", xAccel, 'fs'), \
+            ("Min Speed U/Min", xMinSpeed, 'fs'), \
+            ("Max Speed U/Min", xMaxSpeed, 'fs'), \
+            ("Jog Min U/Min", xJogMin, 'fs'), \
+            ("Jog Max U/Min", xJogMax, 'fs'), \
             ("bInvert Dir", xInvDir, None), \
             ("bInvert MPG", xInvMpg, None), \
             ("Probe Dist", xProbeDist, 'f'), \
             ("Home Dist", xHomeDist, 'f'), \
+            ("Home/Probe Speed", xHomeSpeed, 'fs'), \
             ("Backoff Dist", xHomeBackoffDist, 'f'), \
-            ("Home Speed", xHomeSpeed, 'f'), \
             ("bHome Dir", xHomeDir, None), \
             ("DRO Inch", xDROInch, 'd'), \
             ("bInv DRO", xInvDRO, None), \
