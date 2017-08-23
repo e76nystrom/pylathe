@@ -314,7 +314,7 @@ class ActionRoutines():
         jogPanel.focus()
 
 class DialogActions():
-    def __init__(self, control):
+    def __init__(self):
         self.Bind(wx.EVT_SHOW, self.OnShow)
 
     def OnSetup(self, e):
