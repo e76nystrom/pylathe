@@ -2942,16 +2942,16 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # second row
 
-        # self.zNegButton = \
-        #     self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
-        #                          self.OnZUp, flag=sFlag)
-        bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.zNegButton = btn
-        btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
-        btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
-        sizerG.Add(btn, flag=sFlag, border=2)
+        self.zNegButton = \
+            self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
+                                 self.OnZUp, flag=sFlag)
+        # bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
+        # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
+        #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        # self.zNegButton = btn
+        # btn.Bind(wx.EVT_LEFT_DOWN, self.OnZNegDown)
+        # btn.Bind(wx.EVT_LEFT_UP, self.OnZUp)
+        # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.addButton(sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
