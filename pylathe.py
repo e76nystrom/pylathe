@@ -2881,7 +2881,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # control buttons and jog
 
-        btnSize = (-1, -1)
+        btnSize = wx.DefaultSize
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -2954,7 +2954,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.addButton(sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
-                       flag=sFlag)
+                       size=btnSize, flag=sFlag)
         # btn = wx.Button(self, label='S', style=wx.BU_EXACTFIT)
         # btn.Bind(wx.EVT_BUTTON, self.OnZSafe)
         # sizerG.Add(btn, flag=sFlag, border=2)
@@ -2971,7 +2971,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.addButton(sizerG, 'S', self.OnXSafe, style=wx.BU_EXACTFIT, \
-                       flag=sFlag)
+                       size=btnSize, flag=sFlag)
         # btn = wx.Button(self, label='S', style=wx.BU_EXACTFIT)
         # btn.Bind(wx.EVT_BUTTON, self.OnXSafe)
         # sizerG.Add(btn, flag=sFlag, border=2)
