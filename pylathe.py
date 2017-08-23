@@ -319,13 +319,14 @@ class DialogActions():
 
     def OnSetup(self, e):
         global moveCommands
-        if self.formatData(self.fields):
-            moveCommands.queClear()
-            try:
-                if callabale(self.setupAction):
-                    self.setupAction()
-            except AttributeError:
-                pass
+        if not self.formatData(self.fields):
+            return
+        moveCommands.queClear()
+        try:
+            if callabale(self.setupAction):
+                self.setupAction()
+        except AttributeError:
+            pass
             
     def OnShow(self, e):
         global done
@@ -4960,7 +4961,8 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnStart(self, e):
         global spindleDataSent
-        if formatData(self.fields):
+        if not formatData(self.fields):
+            return
         for (label, index, fmt) in self.fields:
             tmp = getInfo(index)
             if self.fieldInfo[index] != tmp:
