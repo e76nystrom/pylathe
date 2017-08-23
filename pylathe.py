@@ -244,7 +244,7 @@ class FormRoutines():
         sizer.Add(btn, flag=flag, border=2)
         return(btn)
 
-    def addBitmapButton(self, bitmap, downAction, upAction, flag=0):
+    def addBitmapButton(self, sizer, bitmap, downAction, upAction, flag=0):
         bmp = wx.Bitmap(bitmap, wx.BITMAP_TYPE_ANY)
         btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
                               size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
@@ -2928,8 +2928,8 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerG.Add(self.emptyCell)
 
         self.xNegButton = \
-            self.addBitmapButton("north.gif", self.OnXNegDown, self.OnXUp, \
-                                 flag=sFlag|wx.EXPAND)
+            self.addBitmapButton(sizerG, "north.gif", self.OnXNegDown, \
+                                 self.OnXUp, flag=sFlag|wx.EXPAND)
         # bmp = wx.Bitmap("north.gif", wx.BITMAP_TYPE_ANY)
         # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
         #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
@@ -2943,8 +2943,8 @@ class JogPanel(wx.Panel, FormRoutines):
         # second row
 
         self.zNegButton = \
-            self.addBitmapButton("west.gif", self.OnZNegDown, self.OnZUp, \
-                                 flag=sFlag)
+            self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
+                                 self.OnZUp, flag=sFlag)
         # bmp = wx.Bitmap("west.gif", wx.BITMAP_TYPE_ANY)
         # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
         #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
@@ -2959,8 +2959,8 @@ class JogPanel(wx.Panel, FormRoutines):
         # sizerG.Add(btn, flag=sFlag, border=2)
 
         self.zPosButton = \
-            self.addBitmapButton("west.gif", self.OnZPosDown, self.OnZUp, \
-                                 flag=sFlag)
+            self.addBitmapButton(sizerG, "west.gif", self.OnZPosDown, \
+                                 self.OnZUp, flag=sFlag)
         # bmp = wx.Bitmap("east.gif", wx.BITMAP_TYPE_ANY)
         # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
         #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
@@ -2997,8 +2997,8 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerG.Add(self.emptyCell)
 
         self.xPosButton = \
-            self.addBitmapButton("north.gif", self.OnXPosDown, self.OnXUp, \
-                                 flag=sFlag|wx.EXPAND)
+            self.addBitmapButton(sizerG, "north.gif", self.OnXPosDown,
+                                 self.OnXUp, flag=sFlag|wx.EXPAND)
         # bmp = wx.Bitmap("south.gif", wx.BITMAP_TYPE_ANY)
         # btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
         #                       size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
