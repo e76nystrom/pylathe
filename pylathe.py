@@ -267,7 +267,15 @@ class ActionRoutines():
         self.control = control
         self.active = False
         self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.safeX = None
+        self.safeZ = None
 
+    def getSafeLoc(self):
+        self.getParameters()
+        self.safeX = self.xStart + self.xRetract
+        self.safeZ = self.zStart + self.zRetract
+        return(self.safeZ, self.safeX)
+        
     def OnShow(self, e):
         if done:
             return
@@ -3123,7 +3131,11 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def OnZSafe(self, e):
         panel = getPanel()
-
+        (z, x) = panel.getSafeLoc()
+        queParm(Z_MOVE_POS, z)
+        queParm(Z_HOME_OFFSET, zHomeOffset)
+        queParm(Z_FLAG, CMD_MAX)
+        command(ZMOVEABS)
         self.combo.SetFocus()
 
     def OnZPark(self, e):
