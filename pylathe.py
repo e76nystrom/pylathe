@@ -3666,7 +3666,7 @@ class ProbeDialog(wx.Dialog):
         # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        self.addBUtton(sizerV, 'Ok', self.OnOk, border=10)
+        self.addButton(sizerV, 'Ok', self.OnOk, border=10)
         # btn = wx.Button(self, label='Ok', size=(60,-1))
         # btn.Bind(wx.EVT_BUTTON, self.OnOk)
         # sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
@@ -3751,7 +3751,7 @@ class GotoDialog(wx.Dialog):
         tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        self.addBUtton(sizerV, 'Ok', self.OnOk, border=10)
+        self.addButton(sizerV, 'Ok', self.OnOk, border=10)
         # btn = wx.Button(self, label='Ok', size=(60,-1))
         # btn.Bind(wx.EVT_BUTTON, self.OnOk)
         # sizerV.Add(btn, 0, wx.BOTTOM|wx.CENTER, 10)
@@ -3838,7 +3838,7 @@ class FixXPosDialog(wx.Dialog):
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        self.addBUtton(sizerV, 'Fix', self.OnSetup, border=5)
+        self.addButton(sizerV, 'Fix', self.OnSetup, border=5)
         # btn = wx.Button(self, label='Fix', size=(60,-1))
         # btn.Bind(wx.EVT_BUTTON, self.OnFix)
         # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
@@ -4691,7 +4691,7 @@ class ZDialog(wx.Dialog, FormRoutines):
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
-        self.addBUtton(sizerV, 'Setup Z', self.OnSetup, border=5)
+        self.addButton(sizerV, 'Setup Z', self.OnSetup, border=5)
         # btn = wx.Button(self, label='Setup Z', size=(60,-1))
         # btn.Bind(wx.EVT_BUTTON, self.OnSetup)
         # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
@@ -4783,12 +4783,12 @@ class XDialog(wx.Dialog, FormRoutines):
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         if HOME_TEST:
-            self.addBUtton(sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
+            self.addButton(sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
             # btn = wx.Button(self, label='Set Home Loc')#, size=(60,-1))
             # btn.Bind(wx.EVT_BUTTON, self.OnSetHomeLoc)
             # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
 
-        self.addBUtton(sizerV, 'Setup X', self.OnSetup, border=5)
+        self.addButton(sizerV, 'Setup X', self.OnSetup, border=5)
         # btn = wx.Button(self, label='Setup X', size=(60,-1))
         # btn.Bind(wx.EVT_BUTTON, self.OnSetup)
         # sizerV.Add(btn, 0, wx.ALL|wx.CENTER, 5)
@@ -4876,12 +4876,12 @@ class SpindleDialog(wx.Dialog, FormRoutines):
         if STEPPER_DRIVE:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-            self.addBUtton(sizerH, 'Start', self.OnStart, border=5)
+            self.addButton(sizerH, 'Start', self.OnStart, border=5)
             # btn = wx.Button(self, label='Start', size=(60,-1))
             # btn.Bind(wx.EVT_BUTTON, self.OnStart)
             # sizerH.Add(btn, 0, wx.ALL, 5)
 
-            self.addBUtton(sizerH, 'Stop', self.OnStop, border=5)
+            self.addButton(sizerH, 'Stop', self.OnStop, border=5)
             # btn = wx.Button(self, label='Stop', size=(60,-1))
             # btn.Bind(wx.EVT_BUTTON, self.OnStop)
             # sizerH.Add(btn, 0, wx.ALL, 5)
