@@ -140,6 +140,8 @@ class FormRoutines():
                 (index, fieldType) = fmt
             else:
                 (name, index, fieldType) = fmt
+            if fieldType == None:
+                continue
             ctl = configInfo.info[index]
             strVal = ctl.GetValue()
             if fieldType.startswith('f'):
