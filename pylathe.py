@@ -271,9 +271,10 @@ class ActionRoutines():
         self.safeZ = None
 
     def getSafeLoc(self):
-        self.control.getParameters()
-        self.safeX = self.xStart + self.xRetract
-        self.safeZ = self.zStart + self.zRetract
+        control = self.control
+        control.getParameters()
+        self.safeX = control.xStart + control.xRetract
+        self.safeZ = control.zStart + control.zRetract
         return(self.safeZ, self.safeX)
         
     def OnShow(self, e):
