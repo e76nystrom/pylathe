@@ -4864,7 +4864,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnStart(self, e):
         global spindleDataSent
-        if not formatData(self.fields):
+        if not self.formatData(self.fields):
             return
         for (label, index, fmt) in self.fields:
             tmp = getInfo(index)
