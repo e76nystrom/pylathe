@@ -3130,7 +3130,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zDown(wx.WXK_LEFT)
 
     def OnZSafe(self, e):
-        panel = getPanel()
+        panel = self.getPanel()
         (z, x) = panel.getSafeLoc()
         queParm(Z_MOVE_POS, z)
         queParm(Z_HOME_OFFSET, zHomeOffset)
