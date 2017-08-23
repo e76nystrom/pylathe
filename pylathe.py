@@ -241,7 +241,7 @@ class FormRoutines():
         btn = wx.Button(self, label=label)
         btn.Bind(wx.EVT_LEFT_DOWN, downAction)
         btn.Bind(wx.EVT_LEFT_UP, upAction)
-        sizerG.Add(btn, flag=flag, border=2)
+        sizer.Add(btn, flag=flag, border=2)
         return(btn)
 
     def addBitmapButton(self, bitmap, downAction, upAction, flag=0):
