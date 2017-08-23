@@ -921,12 +921,12 @@ class UpdatePass():
 class Turn(UpdatePass):
     def __init__(self, turnPanel):
         UpdatePass.__init__(self)
-        self.turnPanel = turnPanel
+        self.panel = turnPanel
         global moveCommands
         self.m = moveCommands
 
-    def getTurnParameters(self):
-        tu = self.turnPanel
+    def getParameters(self):
+        tu = self.panel
         self.zStart = getFloatVal(tu.zStart)
         self.zEnd = getFloatVal(tu.zEnd)
         self.zRetract = getFloatVal(tu.zRetract)
@@ -936,8 +936,8 @@ class Turn(UpdatePass):
         self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
-    def turn(self):
-        self.getTurnParameters()
+    def runOperation(self):
+        self.getParameters()
 
         if self.xStart < 0:
             if self.xEnd <= 0:
@@ -957,10 +957,10 @@ class Turn(UpdatePass):
         self.xCut = abs(self.xCut)
 
         self.calcFeed(self.xFeed, self.xCut)
-        self.setupSpringPasses(self.turnPanel)
-        self.setupAction(self.calculateTurnPass, self.turnPass)
+        self.setupSpringPasses(self.panel)
+        self.setupAction(self.calculatePass, self.runPass)
 
-        self.turnPanel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes))
         print("xCut %5.3f passes %d internal %s" % \
               (self.xCut, self.passes, self.internal))
 
@@ -977,7 +977,7 @@ class Turn(UpdatePass):
         if getInfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
             
-        self.turnSetup()
+        self.setup()
 
         while self.updatePass():
             pass
@@ -989,7 +989,7 @@ class Turn(UpdatePass):
         self.m.drawClose()
         stdout.flush()
 
-    def turnSetup(self):
+    def setup(self):
         m = self.m
         m.setLoc(self.zEnd, self.xStart)
         m.drawLineZ(self.zStart, REF)
@@ -1015,7 +1015,7 @@ class Turn(UpdatePass):
         m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), CENTER)
 
-    def calculateTurnPass(self, final=False):
+    def calculatePass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         if self.internal:
@@ -1029,11 +1029,11 @@ class Turn(UpdatePass):
         print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
               (self.passCount, feed, self.curX, self.curX * 2.0))
 
-    def turnPass(self):
+    def runPass(self):
         m = self.m
         m.moveX(self.curX, CMD_JOG)
         m.saveDiameter(self.curX * 2.0)
-        if self.turnPanel.pause.GetValue():
+        if self.panel.pause.GetValue():
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
@@ -1047,13 +1047,13 @@ class Turn(UpdatePass):
                    (self.zEnd, self.safeX), RIGHT)
         m.moveZ(self.safeZ)
 
-    def turnAdd(self):
+    def addPass(self):
         if self.feed >= self.xCut:
-            add = getFloatVal(self.turnPanel.add)
+            add = getFloatVal(self.panel.add)
             self.cutAmount += add
-            self.calculateTurnPass(True)
-            self.turnSetup()
-            self.turnPass()
+            self.calculatePass(True)
+            self.Setup()
+            self.runPass()
             self.m.moveX(self.xStart + self.xRetract)
             self.m.stopSpindle()
             self.m.done(1)
@@ -1168,7 +1168,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.turn.turn()
+        self.turn.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -1176,7 +1176,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
     
     def addAction(self):
-        self.turn.turnAdd()
+        self.turn.addPass()
 
 class Face(UpdatePass):
     def __init__(self, facePanel):
@@ -3122,6 +3122,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zDown(wx.WXK_LEFT)
 
     def OnZSafe(self, e):
+        panel = getPanel()
+
         self.combo.SetFocus()
 
     def OnZPark(self, e):
