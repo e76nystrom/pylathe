@@ -271,7 +271,7 @@ class ActionRoutines():
         self.safeZ = None
 
     def getSafeLoc(self):
-        self.getParameters()
+        self.control.getParameters()
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
         return(self.safeZ, self.safeX)
@@ -1071,8 +1071,8 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.turn = Turn(self)
-        ActionRoutines.__init__(self, self.turn)
+        self.control = Turn(self)
+        ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
         self.formatList = ((tuAddFeed, 'f'), \
@@ -1176,7 +1176,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.turn.runOperation()
+        self.control.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -1184,7 +1184,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
     
     def addAction(self):
-        self.turn.addPass()
+        self.control.addPass()
 
 class Face(UpdatePass):
     def __init__(self, facePanel):
@@ -3131,7 +3131,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def OnZSafe(self, e):
         panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
+        (z, x) = control.getSafeLoc()
         queParm(Z_MOVE_POS, z)
         queParm(Z_HOME_OFFSET, zHomeOffset)
         queParm(Z_FLAG, CMD_MAX)
