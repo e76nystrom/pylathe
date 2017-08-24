@@ -1315,8 +1315,8 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.face = Face(self)
-        ActionRoutines.__init__(self, self.face)
+        self.control = Face(self)
+        ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
         self.formatList = ((faAddFeed, 'f'), \
@@ -1421,7 +1421,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         jogPanel.setStatus(STR_CLR)
         self.sendData()
-        self.face.face()
+        self.control.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -1429,16 +1429,16 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
     
     def addAction(self):
-        self.face.faceAdd()
+        self.control.addPass()
 
 class Cutoff():
     def __init__(self, cutoffPanel):
-        self.cutoffPanel = cutoffPanel
+        self.panel = cutoffPanel
         global moveCommands
         self.m = moveCommands
 
-    def getCutoffParameters(self):
-        cu = self.cutoffPanel
+    def getParameters(self):
+        cu = self.panel
         self.xStart = getFloatVal(cu.xStart) / 2.0
         self.xEnd = getFloatVal(cu.xEnd) / 2.0
         self.xFeed = abs(getFloatVal(cu.xFeed))
@@ -1449,8 +1449,8 @@ class Cutoff():
         self.zStart = getFloatVal(cu.zStart)
         self.zCutoff = getFloatVal(cu.zCutoff)
 
-    def cutoff(self):
-        self.getCutoffParameters()
+    def runOperation(self):
+        self.getParameters()
 
         self.safeX = self.xStart + self.xRetract
 
@@ -1459,7 +1459,7 @@ class Cutoff():
 
         self.cutoffSetup()
 
-        if self.cutoffPanel.pause.GetValue():
+        if self.panel.pause.GetValue():
             print("pause")
             self.m.quePause()
         self.m.moveX(self.xEnd, CMD_SYN)
@@ -1472,7 +1472,7 @@ class Cutoff():
         self.m.drawClose()
         stdout.flush()
 
-    def cutoffSetup(self):
+    def setup(self):
         m = self.m
         m.quePause()
         self.m.done(0)
@@ -1490,8 +1490,8 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.cutoff = Cutoff(self)
-        ActionRoutines.__init__(self, self.cutoff)
+        self.control = Cutoff(self)
+        ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
         self.formatList = ((cuPause, None), \
@@ -1576,7 +1576,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.cutoff.cutoff()
+        self.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -1586,7 +1586,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 class Taper(UpdatePass):
     def __init__(self, taperPanel):
         UpdatePass.__init__(self)
-        self.taperPanel = taperPanel
+        self.panel = taperPanel
         global moveCommands
         self.m = moveCommands
         # morse #3 taper
@@ -1595,8 +1595,8 @@ class Taper(UpdatePass):
         # largeEnd = .938
         # smallEnd = .778
     
-    def getTaperParameters(self, taperInch):
-        tp = self.taperPanel
+    def getParameters(self, taperInch):
+        tp = self.panel
         # taper = x / z
         # taperInch = totalTaper / self.zLength
         # taperX True  - move z taper x
@@ -1624,7 +1624,7 @@ class Taper(UpdatePass):
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
-    def taperSetup(self):
+    def setup(self):
         m = self.m
         m.setLoc(self.zEnd, self.xStart)
         m.drawLineZ(self.zStart, REF)
@@ -1876,7 +1876,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.taper = Taper(self)
+        self.control = Taper(self)
         ActionRoutines.__init__(self, self.taper)
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
@@ -2130,8 +2130,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         self.sendData()
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-        self.taper.internalTaper(taper) if self.internal.GetValue() else \
-            self.taper.externalTaper(taper)
+        self.control.internalTaper(taper) if self.internal.GetValue() else \
+            self.control.externalTaper(taper)
 
     def startAction(self):
         command(CMD_RESUME)
@@ -2139,8 +2139,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
     
     def addAction(self):
-        self.taper.internalAdd() if self.internal.GetValue() else \
-            self.taper.externalAdd()
+        self.control.internalAdd() if self.internal.GetValue() else \
+            self.control.externalAdd()
 
     # def OnDebug(self, e):
     #     self.sendData()
@@ -2154,7 +2154,7 @@ TEXT  = 'TEXT'
 class ScrewThread(UpdatePass):
     def __init__(self, threadPanel):
         UpdatePass.__init__(self)
-        self.threadPanel = threadPanel
+        self.panel = threadPanel
         global moveCommands
         self.m = moveCommands
         self.d = None
@@ -2180,8 +2180,8 @@ class ScrewThread(UpdatePass):
         except:
             print("dxf file save error")
 
-    def getThreadParameters(self):
-        th = self.threadPanel
+    def getParameters(self):
+        th = self.panel
         self.internal = th.internal.GetValue()
 
         self.zStart = getFloatVal(th.zStart)
@@ -2212,7 +2212,7 @@ class ScrewThread(UpdatePass):
         self.angle = radians(getFloatVal(th.angle))
 
     def thread(self):
-        self.getThreadParameters()
+        self.getParameters()
 
         print("tpi %4.1f pitch %5.3f lastFeed %6.4f" % \
               (self.tpi, self.pitch, self.lastFeed))
@@ -2245,7 +2245,7 @@ class ScrewThread(UpdatePass):
               (self.passes, self.areaPass))
         
         self.setupSpringPasses(self.threadPanel)
-        self.setupAction(self.calculateThread, self.threadPass)
+        self.setupAction(self.calculatePass, self.runPass)
         self.initPass()
 
         if self.internal:
@@ -2279,7 +2279,7 @@ class ScrewThread(UpdatePass):
         self.m.done(1)
         stdout.flush()
 
-    def threadSetup(self, add=False):
+    def setup(self, add=False):
         m = self.m
         if not add:
             m.setLoc(self.zEnd, self.xStart)
@@ -2309,7 +2309,7 @@ class ScrewThread(UpdatePass):
                    (self.zEnd, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
 
-    def calculateThread(self, final=False, add=False):
+    def calculatePass(self, final=False, add=False):
         if not add:
             if final:
                 self.curArea = self.area
@@ -2345,7 +2345,7 @@ class ScrewThread(UpdatePass):
             self.drawLine(p1, pb)
             self.p0 = p1
 
-    def threadPass(self):
+    def runPass(self):
         m = self.m
         startZ = self.safeZ - self.zOffset
         self.m.moveZ(startZ + self.zBackInc)
@@ -2360,12 +2360,12 @@ class ScrewThread(UpdatePass):
         self.m.moveZ(self.zEnd, CMD_SYN | Z_SYN_START)
         self.m.moveX(self.safeX)
 
-    def threadAdd(self):
+    def addPass(self):
         add = getFloatVal(self.threadPanel.add)
         self.feed += add
-        self.threadSetup(True)
-        self.calculateThread(add=True)
-        self.threadPass()
+        self.setup(True)
+        self.calculatePass(add=True)
+        self.runPass()
         self.m.stopSpindle();
         self.m.done(1)
         command(CMD_RESUME)
@@ -2375,8 +2375,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.screwThread = ScrewThread(self)
-        ActionRoutines.__init__(self, self.screwThread)
+        self.control = ScrewThread(self)
+        ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
         self.formatList =  ((thAddFeed, 'f'), \
@@ -2529,7 +2529,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.screwThread.thread()
+        self.control.thread()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -2537,7 +2537,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
     
     def addAction(self):
-        self.screwThread.threadAdd()
+        self.control.threadAdd()
 
 class ButtonRepeat(Thread):
     def __init__(self):
