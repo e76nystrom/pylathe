@@ -1501,7 +1501,9 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (cuXRetract, 'f'), \
                            (cuXStart, 'f'), \
                            (cuZCutoff, 'f'), \
-                           (cuZStart, 'f'))
+                           (cuZStart, 'f'), \
+                           (cuZRetract, 'f'), \
+        )
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -1527,9 +1529,10 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zStart = self.addField(sizerG, "Z Start", cuZStart)
 
+        self.zRetract = self.addField(sizerG, "Z Retract", cuZRetract)
+
         self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
-        sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
