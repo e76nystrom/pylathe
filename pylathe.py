@@ -2732,6 +2732,7 @@ class JogPanel(wx.Panel, FormRoutines):
         global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
+        self.panelLock = Lock()
         self.jogCode = None
         self.repeat = 0
         # self.lastTime = 0
@@ -3056,6 +3057,18 @@ class JogPanel(wx.Panel, FormRoutines):
         # stdout.flush()
         return(val)
 
+    def OnZSafe(self, e):
+        panel = self.getPanel()
+        (z, x) = panel.getSafeLoc()
+        queParm(Z_MOVE_POS, z)
+        queParm(Z_HOME_OFFSET, zHomeOffset)
+        queParm(Z_FLAG, CMD_MAX)
+        command(ZMOVEABS)
+        self.combo.SetFocus()
+
+    def OnZPark(self, e):
+        self.combo.SetFocus()
+
     def zJogCmd(self, code, val):
         self.repeat += 1
         sendZData()
@@ -3116,6 +3129,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.event.set()
 
     def OnZUp(self, e):
+        self.panelLock.acquire(True)
         print("OnZUp")
         stdout.flush()
         val = self.getInc()
@@ -3125,26 +3139,19 @@ class JogPanel(wx.Panel, FormRoutines):
             self.jogDone(ZSTOP)
         self.jogCode = None
         self.combo.SetFocus()
+        self.panelLock.release()
 
     def OnZNegDown(self, e):
+        self.panelLock.acquire(True)
         self.zNegButton.SetFocus()
         self.zDown(wx.WXK_LEFT)
-
-    def OnZSafe(self, e):
-        panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
-        queParm(Z_MOVE_POS, z)
-        queParm(Z_HOME_OFFSET, zHomeOffset)
-        queParm(Z_FLAG, CMD_MAX)
-        command(ZMOVEABS)
-        self.combo.SetFocus()
-
-    def OnZPark(self, e):
-        self.combo.SetFocus()
+        self.panelLock.release()
 
     def OnZPosDown(self, e):
+        self.panelLock.acquire(True)
         self.zPosButton.SetFocus()
         self.zDown(wx.WXK_RIGHT)
+        self.panelLock.release()
 
     def xJogCmd(self, code, val):
         self.repeat += 1
@@ -3359,6 +3366,7 @@ class JogPanel(wx.Panel, FormRoutines):
         
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
+        self.panelLock.acquire(True)
         if len(val) == 7:
             (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
             if z != '#':
@@ -3433,6 +3441,7 @@ class JogPanel(wx.Panel, FormRoutines):
                         stdout.flush()
                     elif val & PROBE_FAIL:
                         self.homeDone("x probe failure")
+        self.panelLock.release()
 
     def updateError(self, text):
         self.setStatus(text)
