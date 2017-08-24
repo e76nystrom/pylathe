@@ -1981,23 +1981,29 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # taper parameters
 
-        self.deltaBtn = btn = wx.RadioButton(self, label="Z")
-        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
-                   border=2)
-        btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
-        initInfo(tpDeltaBtn, btn)
+        self.deltaBtn = self.addRadioButton(sizerG, "Delta Z", tpDeltaBtn, \
+                                            style=wx.RB_GROUP, \
+                                            action=self.OnDelta)
+        # self.deltaBtn = btn = wx.RadioButton(self, label="Z")
+        # sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
+        #            border=2)
+        # btn.Bind(wx.EVT_RADIOBUTTON, self.OnDelta)
+        # initInfo(tpDeltaBtn, btn)
 
         self.zDelta = self.addField(sizerG, "", tpZDelta)
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.xDelta = self.addField(sizerG, "X", tpXDelta)
+        self.xDelta = self.addField(sizerG, "Delta X", tpXDelta)
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.angleBtn = btn = wx.RadioButton(self, label="Angle")
-        sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
-                   border=2)
-        btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
-        initInfo(tpAngleBtn, btn)
+        self.deltaBtn = self.addRadioButton(sizerG, "Angle", tpAngleBtn, \
+                                            style=wx.RB_GROUP, \
+                                            action=self.OnAngle)
+        # self.angleBtn = btn = wx.RadioButton(self, label="Angle")
+        # sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
+        #            border=2)
+        # btn.Bind(wx.EVT_RADIOBUTTON, self.OnAngle)
+        # initInfo(tpAngleBtn, btn)
 
         self.angle = self.addField(sizerG, "", tpAngle)
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
