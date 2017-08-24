@@ -3037,6 +3037,10 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnXPark(self, e):
+        queParm(X_MOVE_POS, getFloatInfo(xParkLoc)
+        queParm(X_HOME_OFFSET, zHomeOffset)
+        queParm(X_FLAG, CMD_MAX)
+        command(XMOVEABS)
         self.combo.SetFocus()
 
     def zJogCmd(self, code, val):
@@ -4774,6 +4778,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Max Speed U/Min", xMaxSpeed, 'fs'), \
             ("Jog Min U/Min", xJogMin, 'fs'), \
             ("Jog Max U/Min", xJogMax, 'fs'), \
+            ("Park Loc", xParkLoc, 'f'), \
             ("bInvert Dir", xInvDir, None), \
             ("bInvert MPG", xInvMpg, None), \
             ("Probe Dist", xProbeDist, 'f'), \
