@@ -4746,6 +4746,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Max Speed U/Min", zMaxSpeed, 'fs'), \
             ("Jog Min U/Min", zJogMin, 'fs'), \
             ("Jog Max U/Min", zJogMax, 'fs'), \
+            ("Park Loc", zParkLoc, 'f'), \
             ("Probe Dist", zProbeDist, 'f'), \
             ("Probe Speed", zProbeSpeed, 'fs'), \
             ("bInvert Dir", zInvDir, None), \
