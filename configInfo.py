@@ -73,24 +73,28 @@ def readInfo(file, config, configList=None):
             if configList != None:
                 if not index in configList:
                     continue
-            infoData[index] = val
             if info[index] != None:
                 func = info[index]
                 funcClass = func.__class__.__name__
                 # print(key, val, funcClass)
                 if funcClass == 'TextCtrl':
                     func.SetValue(val)
+                    infoData[index] = val
                 elif funcClass == 'RadioButton':
-                    if val == 'True':
-                        func.SetValue(True)
+                    val = val == 'True':
+                    func.SetValue(val)
+                    infoData[index] = val
                 elif funcClass == 'CheckBox':
-                    if val == 'True':
-                        func.SetValue(True)
+                    val = val == 'True':
+                    func.SetValue(val)
+                    infoData[index] = val
                 elif funcClass == 'ComboBox':
                     func.SetValue(val)
+                    infoData[index] = val
             else:
                 func = InfoValue(val)
                 info[index] = func
+                infoData[index] = val
             # stdout.flush()
     except Exception as e:
         print(line, "readInfo error")
@@ -144,10 +148,11 @@ def getBoolInfo(key):
     try:
         # tmp = info[key].GetValue()
         # if tmp:
-        if infoData[key] == 'True':
-            return(1)
+        val = infoData[key]
+        if isinstance(val, bool):
+            return(1 if val else 0)
         else:
-            return(0)
+            return(1 if val == 'True' eslse return(0)
     except KeyError:
         print("getBoolInfo KeyError %s" % (key))
     stdout.flush()
