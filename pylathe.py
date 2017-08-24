@@ -4300,7 +4300,7 @@ class UpdateThread(Thread):
         return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
-        tmp = float(jogPanel.zDroInvert * zDROPos) / jogPanel.zDROInch - \
+        tmp = float(jogPanel.zDROInvert * zDROPos) / jogPanel.zDROInch - \
               zDROOffset
         self.zDro = val
         return("zdro %7.4f" % (tmp))
