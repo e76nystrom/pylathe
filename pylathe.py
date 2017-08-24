@@ -1535,7 +1535,6 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
         
         # buttons
 
