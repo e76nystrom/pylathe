@@ -3097,7 +3097,7 @@ class JogPanel(wx.Panel, FormRoutines):
                         dir = -1
                     print("zJogCmd %d" % (dir))
                     try:
-                        queParm(Z_JOG_MAX, getInfoData(zJogMax)
+                        queParm(Z_JOG_MAX, getInfoData(zJogMax))
                         queParm(Z_JOG_DIR, dir)
                         command(ZJMOV)
                     except CommTimeout:
