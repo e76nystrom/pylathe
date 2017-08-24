@@ -144,7 +144,7 @@ def getBoolInfo(key):
     try:
         # tmp = info[key].GetValue()
         # if tmp:
-        if infoData[key}:
+        if infoData[key]:
             return(1)
         else:
             return(0)
