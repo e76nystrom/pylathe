@@ -264,6 +264,11 @@ class FormRoutines():
             btn.Bind(wx.EVT_BUTTON, action)
         sizer.Add(btn, 0, wx.ALL, 5)
         return(btn)
+
+    def addRadioButton(self, sizer, label, key, style=0):
+        btn = wx.RadioButton(self, label=label, style=style)
+        sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        initInfo(key, btn)
     
 class ActionRoutines():
     def __init__(self, control):
@@ -1172,7 +1177,6 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         try:
             moveCommands.queClear()
             sendClear()
-
             sendSpindleData()
             sendZData()
             sendXData()
@@ -2454,13 +2458,15 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.thread = self.addField(sizerG, "Thread", thPitch)
         
-        self.tpi = btn = wx.RadioButton(self, label="TPI", style = wx.RB_GROUP)
-        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(thTPI, btn)
+        self.tpi = addRadioButton(sizerG, "TPI", thTPI, style=wx.RB_GROUP)
+        # self.tpi = btn = wx.RadioButton(self, label="TPI", style=wx.RB_GROUP)
+        # sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(thTPI, btn)
 
-        self.mm = btn = wx.RadioButton(self, label="mm")
-        sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        initInfo(thMM, btn)
+        self.tpi = addRadioButton(sizerG, "mm", thMM)
+        # self.mm = btn = wx.RadioButton(self, label="mm")
+        # sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+        # initInfo(thMM, btn)
 
         self.angle = self.addField(sizerG, "Angle", thAngle)
 
