@@ -26,8 +26,8 @@ dbg = None
 
 import configInfo
 from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
-    newInfo, setInfo, getInfo, getBoolInfo, getFloatInfo, getIntInfo, \
-    infoSetLabel, getInitialInfo, clrInfo
+    newInfo, setInfo, setInfoData, getInfo, getInfoData, getBoolInfo, \
+    getFloatInfo, getIntInfo, infoSetLabel, getInitialInfo, clrInfo
 
 from setup import createConfig, createStrings, createCommands, \
     createParameters, createCtlBits, createEnums
