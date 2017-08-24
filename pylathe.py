@@ -2979,7 +2979,7 @@ class JogPanel(wx.Panel, FormRoutines):
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
         self.addButton(sizerG, 'P', self.OnXPark, style=wx.BU_EXACTFIT, \
-                       size=btnSize, flag=sFlag)
+                       size=btnSize, flag=sFlag|wx.ALIGN_CENTER_HORIZONTAL)
 
         sizerH.Add(sizerG)
 
