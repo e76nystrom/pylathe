@@ -859,6 +859,9 @@ enumList =\
     ("D_ZDN",  "z done"),
 
     ("D_HST", "home state"),
+
+    ("D_MSTA", "move state"),
+    ("D_MCMD", "move command"),
     "};",
 
     "pylathe update events",
