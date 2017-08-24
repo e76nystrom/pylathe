@@ -382,7 +382,7 @@ class DialogActions():
             for (label, index, fmt) in self.fields:
                 val = getInfo(index)
                 if self.fieldInfo[index] != val:
-                    setInfoData(key, val)
+                    setInfoData(index, val)
                     self.sendData = True
         if changed:
             try:
@@ -2969,10 +2969,11 @@ class JogPanel(wx.Panel, FormRoutines):
         # third row
 
         sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
 
         self.addButton(sizerG, 'P', self.OnZPark, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
+
+        sizerG.Add(self.emptyCell)
 
         self.xPosButton = \
             self.addBitmapButton(sizerG, "south.gif", self.OnXPosDown,
