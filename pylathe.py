@@ -4103,6 +4103,8 @@ class UpdateThread(Thread):
             if not self.threadRun:
                 break
 
+            print("1")
+            stdout.flush()
             # read update variables
 
             if i < len(self.parmList):
@@ -4123,6 +4125,8 @@ class UpdateThread(Thread):
             if i >= scanMax:
                 i = 0
 
+            print("2")
+            stdout.flush()
             # process move queue
 
             if not moveQue.empty() or (op != None):
@@ -4149,6 +4153,8 @@ class UpdateThread(Thread):
                     stdout.flush()
                     break
 
+            print("3")
+            stdout.flush()
             # get debug data
 
             try:
@@ -4201,6 +4207,8 @@ class UpdateThread(Thread):
                 print("getString SerialException")
                 stdout.flush()
                 break
+            print("4")
+            stdout.flush()
         print("UpdateThread done")
         stdout.flush()
 
