@@ -152,7 +152,7 @@ def getBoolInfo(key):
         if isinstance(val, bool):
             return(1 if val else 0)
         else:
-            return(1 if val == 'True' else return(0)
+            return(1 if val == 'True' else 0)
     except KeyError:
         print("getBoolInfo KeyError %s" % (key))
     stdout.flush()
