@@ -2905,7 +2905,8 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Done', self.OnDone, btnSize)
 
-        sizerG.Add(self.emptyCell)
+        self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
+
         sizerG.Add(self.emptyCell)
 
         self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
@@ -3438,6 +3439,10 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnDone(self, e):
         self.clrActive()
         self.setStatus(STR_CLR)
+        self.combo.SetFocus()
+
+    def OnMeasure(self, e):
+        command(CMD_MEASURE)
         self.combo.SetFocus()
 
     def getPanel(self):
