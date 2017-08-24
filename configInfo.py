@@ -144,14 +144,12 @@ def getBoolInfo(key):
     try:
         # tmp = info[key].GetValue()
         # if tmp:
-        if bool(infoData[key]):
+        if infoData[key] == 'True':
             return(1)
         else:
             return(0)
     except KeyError:
         print("getBoolInfo KeyError %s" % (key))
-    except ValueError:
-        print("getBoolInfo ValueError %s" % (key))
     stdout.flush()
     return(0)
 
