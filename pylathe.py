@@ -3359,10 +3359,12 @@ class JogPanel(wx.Panel, FormRoutines):
                 text = 'H'
             mvStatus = int(mvStatus)
             self.mvStatus = mvStatus
+            if mvStatus & MV_MEASURE:
+                text += 'M'
             if mvStatus & MV_PAUSE:
-                text  = text + 'P'
+                text  += 'P'
             if mvStatus & MV_ACTIVE:
-                text = text + 'A';
+                text += 'A';
             self.statusText.SetLabel(text)
 
             if self.xHome:
@@ -3379,13 +3381,14 @@ class JogPanel(wx.Panel, FormRoutines):
                     if val & PROBE_SUCCESS:
                         zHomeOffset = zLoc - self.probeLoc
                         setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
-                        print("z %s zLoc %7.4f probeLoc %7.4f "\
-                              "zHomeOffset %7.4f" % \
-                              (z, zLoc, self.probeLoc, zHomeOffset))
                         if DRO:
                             zDROOffset = zDroLoc - self.probeLoc
                             setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                             setParm(Z_DRO_OFFSET, zDROOffset)
+                        print("z %s zLoc %7.4f probeLoc %7.4f "\
+                              "zHomeOffset %7.4f" % \
+                              (z, zLoc, self.probeLoc, zHomeOffset))
+                        stdout.flush()
                         self.probeLoc = 0.0
                         self.homeDone("z probe success")
                     elif val & PROBE_FAIL:
@@ -3401,10 +3404,10 @@ class JogPanel(wx.Panel, FormRoutines):
                             setParm(X_DRO_OFFSET, xDROOffset)
                         print("x %s xLoc %7.4f probeLoc %7.4f "\
                               "xHomeOffset %7.4f" % \
+                        stdout.flush()
                               (x, xLoc, self.probeLoc, xHomeOffset))
                         self.probeLoc = 0.0
                         self.homeDone("x probe success")
-                        stdout.flush()
                     elif val & PROBE_FAIL:
                         self.homeDone("x probe failure")
 
