@@ -564,6 +564,7 @@ regList =\
     ("MV_ACTIVE", "(1 << 1)", "movement active"),
     ("MV_HOME_ACTIVE", "(1 << 2)", "home active"),
     ("MV_XHOME", "(1 << 3)", "X home success"),
+    ("MV_MEASURE", "(1 << 4)", "pause for measurement"),
     # ("", "()", ""),
  
     # ("", "", ""),
