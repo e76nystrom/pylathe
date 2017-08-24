@@ -236,6 +236,7 @@ cmdList = \
     ("CMD_PAUSE", "pauseCmd", "pause current operation"),
     ("CMD_RESUME", "resumeCmd", "resume current operation"),
     ("CMD_STOP", "stopCmd", "stop current operation"),
+    ("CMD_MEASURE", "measureCmd", "stop at end of current pass"),
     
     "setup operations",
     
