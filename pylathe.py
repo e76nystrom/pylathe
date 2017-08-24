@@ -301,7 +301,7 @@ class ActionRoutines():
                         self.sendAction()
                 except CommTimeout:
                     commTimeout()
-                except AttributeErrror:
+                except AttributeError:
                     pass
         else:
             jogPanel.setStatus(STR_FIELD_ERROR)
@@ -320,7 +320,7 @@ class ActionRoutines():
                     self.startAction()
             except CommTimeout:
                 commTimeout()
-            except AttributeErrror:
+            except AttributeError:
                 pass
         jogPanel.focus()
 
@@ -341,7 +341,7 @@ class ActionRoutines():
                     jogPanel.setStatus(STR_PASS_ERROR)
             except CommTimeout:
                 commTimeout()
-            except AttributeErrror:
+            except AttributeError:
                 pass
         jogPanel.focus()
 
@@ -3182,7 +3182,7 @@ class JogPanel(wx.Panel, FormRoutines):
                         commTimeout()
             else:
                 try:
-                    command("XJMOV")
+                    command(XJMOV)
                 except CommTimeout:
                     commTimeout()
         else:
@@ -3500,7 +3500,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.jogCode = code
                 self.repeat = 0
         try:
-            command("SPINDLE_JOG")
+            command(SPINDLE_JOG)
         except CommTimeout:
             commTimeout()
         self.combo.SetFocus()
@@ -3517,7 +3517,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt.event.clear()
         self.btnRpt.action = None
         try:
-            command("SPINDLE_STOP")
+            command(SPINDLE_STOP)
         except CommTimeout:
             commTimeout()
         self.combo.SetFocus()
