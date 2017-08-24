@@ -128,10 +128,11 @@ def commTimeout():
     jogPanel.setStatus(STR_TIMEOUT_ERROR)
 
 class FormRoutines():
-    def __init__(self):
+    def __init__(self, panel=True):
         self.emptyCell = (0, 0)
-        self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                               wx.NORMAL, False, u'Consolas')
+        if panel:
+            self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                                   wx.NORMAL, False, u'Consolas')
 
     def formatData(self, formatList):
         success = True
@@ -2728,7 +2729,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, parent, *args, **kwargs):
         global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
-        FormRoutines.__init__(self)
+        FormRoutines.__init__(self, False)
         self.jogCode = None
         self.repeat = 0
         # self.lastTime = 0
@@ -3862,8 +3863,9 @@ class GotoDialog(wx.Dialog):
             print("ValueError on goto")
             stdout.flush()
 
-class FixXPosDialog(wx.Dialog):
+class FixXPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, frame):
+        FormRoutines.__init__(self, False)
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Fix X Size", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -4718,7 +4720,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        FormRoutines.__init__(self)
+        FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
@@ -4774,7 +4776,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        FormRoutines.__init__(self)
+        FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
@@ -4850,7 +4852,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        FormRoutines.__init__(self)
+        FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(2, 0, 0)
@@ -4927,7 +4929,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        FormRoutines.__init__(self)
+        FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.GridSizer(2, 0, 0)
@@ -4956,8 +4958,8 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         global XILINX
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Config Setup", pos, \
-                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
-        FormRoutines.__init__(self)
+                           wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.GridSizer(2, 0, 0)
