@@ -3025,20 +3025,24 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnZPark(self, e):
+        queParm(Z_MOVE_POS, getFloatInfo(zParkLoc))
+        queParm(Z_HOME_OFFSET, zHomeOffset)
+        queParm(Z_FLAG, CMD_MAX)
+        command(ZMOVEABS)
         self.combo.SetFocus()
 
     def OnXSafe(self, e):
         panel = self.getPanel()
         (z, x) = panel.getSafeLoc()
         queParm(X_MOVE_POS, x)
-        queParm(X_HOME_OFFSET, zHomeOffset)
+        queParm(X_HOME_OFFSET, xHomeOffset)
         queParm(X_FLAG, CMD_MAX)
         command(XMOVEABS)
         self.combo.SetFocus()
 
     def OnXPark(self, e):
-        queParm(X_MOVE_POS, getFloatInfo(xParkLoc)
-        queParm(X_HOME_OFFSET, zHomeOffset)
+        queParm(X_MOVE_POS, getFloatInfo(xParkLoc))
+        queParm(X_HOME_OFFSET, xHomeOffset)
         queParm(X_FLAG, CMD_MAX)
         command(XMOVEABS)
         self.combo.SetFocus()
