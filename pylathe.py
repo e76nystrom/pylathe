@@ -2458,12 +2458,12 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.thread = self.addField(sizerG, "Thread", thPitch)
         
-        self.tpi = addRadioButton(sizerG, "TPI", thTPI, style=wx.RB_GROUP)
+        self.tpi = self.addRadioButton(sizerG, "TPI", thTPI, style=wx.RB_GROUP)
         # self.tpi = btn = wx.RadioButton(self, label="TPI", style=wx.RB_GROUP)
         # sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         # initInfo(thTPI, btn)
 
-        self.tpi = addRadioButton(sizerG, "mm", thMM)
+        self.tpi = self.addRadioButton(sizerG, "mm", thMM)
         # self.mm = btn = wx.RadioButton(self, label="mm")
         # sizerG.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         # initInfo(thMM, btn)
