@@ -3101,6 +3101,8 @@ class JogPanel(wx.Panel, FormRoutines):
                         stdout.flush()
                         queParm(Z_JOG_MAX, getInfo(zJogMax))
                         queParm(Z_JOG_DIR, dir)
+                        print("I", end="")
+                        stdout.flush()
                         command(ZJMOV)
                         print("H", end="")
                         stdout.flush()
