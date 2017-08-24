@@ -3899,7 +3899,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        self.addButton(sizerV, 'Fix', self.OnSetup, border=5)
+        self.addButton(sizerV, 'Fix', self.OnFix, border=5)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
