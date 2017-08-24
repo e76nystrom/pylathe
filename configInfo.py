@@ -127,7 +127,7 @@ def getInfo(key):
         return(info[key].GetValue())
     except KeyError:
         print("getInfo KeyError %s" % (key))
-        stdout.flush()
+    stdout.flush()
     return('')
 
 def getInfoData(key):
@@ -136,7 +136,7 @@ def getInfoData(key):
         return(infoData[key])
     except KeyError:
         print("getInfo KeyError %s" % (key))
-        stdout.flush()
+    stdout.flush()
     return('')
 
 def getBoolInfo(key):
@@ -144,13 +144,15 @@ def getBoolInfo(key):
     try:
         # tmp = info[key].GetValue()
         # if tmp:
-        if infoData[key]:
+        if bool(infoData[key]):
             return(1)
         else:
             return(0)
     except KeyError:
         print("getBoolInfo KeyError %s" % (key))
-        stdout.flush()
+    except ValueError:
+        print("getBoolInfo ValueError %s" % (key))
+    stdout.flush()
     return(0)
 
 def getFloatInfo(key):
@@ -162,10 +164,9 @@ def getFloatInfo(key):
             return(float(val))
         except ValueError:
             print("getFloatInfo ValueError %s" % val)
-            stdout.flush()
     except KeyError:
         print("getFloatInfo KeyError %s" % (key))
-        stdout.flush()
+    stdout.flush()
     return(0.0)
 
 def getIntInfo(key):
