@@ -3141,6 +3141,8 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.event.set()
 
     def OnZUp(self, e):
+        print("C", end="")
+        stdout.flush()
         self.panelLock.acquire(True)
         print("OnZUp")
         stdout.flush()
@@ -3152,12 +3154,18 @@ class JogPanel(wx.Panel, FormRoutines):
         self.jogCode = None
         self.combo.SetFocus()
         self.panelLock.release()
+        print("D", end="")
+        stdout.flush()
 
     def OnZNegDown(self, e):
+        print("A", end="")
+        stdout.flush()
         self.panelLock.acquire(True)
         self.zNegButton.SetFocus()
         self.zDown(wx.WXK_LEFT)
         self.panelLock.release()
+        print("B", end="")
+        stdout.flush()
 
     def OnZPosDown(self, e):
         self.panelLock.acquire(True)
