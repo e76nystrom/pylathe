@@ -120,6 +120,7 @@ def getInfo(key):
         return(tmp.GetValue())
     except KeyError:
         print("getInfo KeyError %s" % (key))
+        stdout.flush()
     return('')
 
 def getBoolInfo(key):
