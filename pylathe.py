@@ -1877,7 +1877,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
         self.control = Taper(self)
-        ActionRoutines.__init__(self, self.taper)
+        ActionRoutines.__init__(self, self.control)
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
