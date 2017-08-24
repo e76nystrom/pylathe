@@ -3069,6 +3069,18 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnZPark(self, e):
         self.combo.SetFocus()
 
+    def OnXSafe(self, e):
+        panel = self.getPanel()
+        (z, x) = panel.getSafeLoc()
+        queParm(X_MOVE_POS, x)
+        queParm(X_HOME_OFFSET, zHomeOffset)
+        queParm(X_FLAG, CMD_MAX)
+        command(XMOVEABS)
+        self.combo.SetFocus()
+
+    def OnXPark(self, e):
+        self.combo.SetFocus()
+
     def zJogCmd(self, code, val):
         self.repeat += 1
         sendZData()
@@ -3213,12 +3225,6 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnXPosDown(self, e):
         self.xPosButton.SetFocus()
         self.xDown(wx.WXK_DOWN)
-
-    def OnXSafe(self, e):
-        self.combo.SetFocus()
-
-    def OnXPark(self, e):
-        self.combo.SetFocus()
 
     def OnXNegDown(self, e):
         self.xNegButton.SetFocus()
