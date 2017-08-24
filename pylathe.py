@@ -1065,7 +1065,7 @@ class Turn(UpdatePass):
             add = getFloatVal(self.panel.add)
             self.cutAmount += add
             self.calculatePass(True)
-            self.Setup()
+            self.setup()
             self.runPass()
             self.m.moveX(self.xStart + self.xRetract)
             self.m.stopSpindle()
@@ -1194,12 +1194,12 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 class Face(UpdatePass):
     def __init__(self, facePanel):
         UpdatePass.__init__(self)
-        self.facePanel = facePanel
+        self.panel = facePanel
         global moveCommands
         self.m = moveCommands
 
-    def getFaceParameters(self):
-        fa = self.facePanel
+    def getParameters(self):
+        fa = self.panel
         self.xStart = getFloatVal(fa.xStart) / 2.0
         self.xEnd = getFloatVal(fa.xEnd) / 2.0
         self.xFeed = abs(getFloatVal(fa.xFeed))
@@ -1210,17 +1210,17 @@ class Face(UpdatePass):
         self.zFeed = getFloatVal(fa.zFeed)
         self.zRetract = abs(getFloatVal(fa.zRetract))
 
-    def face(self):
-        self.getFaceParameters()
+    def runOperation(self):
+        self.getParameters()
 
         self.internal = self.xStart < self.xEnd
         self.zCut = abs(self.zStart - self.zEnd)
 
         self.calcFeed(self.zFeed, self.zCut)
-        self.setupSpringPasses(self.facePanel)
-        self.setupAction(self.calculateFacePass, self.facePass)
+        self.setupSpringPasses(self.panel)
+        self.setupAction(self.calculatePass, self.runPass)
 
-        self.facePanel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes))
         print("zCut %5.3f passes %d internal %s" % \
               (self.zCut, self.passes, self.internal))
 
@@ -1233,7 +1233,7 @@ class Face(UpdatePass):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setTextAngle(90)
 
-        self.faceSetup()
+        self.setup()
 
         while self.updatePass():
             pass
@@ -1247,7 +1247,7 @@ class Face(UpdatePass):
         self.m.drawClose()
         stdout.flush()
 
-    def faceSetup(self):
+    def setup(self):
         m = self.m
         m.setLoc(self.zEnd, self.xStart)
         m.drawLineZ(self.zStart, REF)
@@ -1273,7 +1273,7 @@ class Face(UpdatePass):
         m.text("%7.3f" % (self.xEnd * 2.0), \
                (self.zEnd, self.xEnd), CENTER)
 
-    def calculateFacePass(self, final=False):
+    def calculatePass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         self.curZ = self.zStart - feed
@@ -1281,10 +1281,10 @@ class Face(UpdatePass):
         print("pass %2d feed %5.3f z %5.3f" % \
               (self.passCount, feed, self.curZ))
 
-    def facePass(self):
+    def runPass(self):
         m = self.m
         m.moveZ(self.curZ, CMD_JOG)
-        if self.facePanel.pause.GetValue():
+        if self.panel.pause.GetValue():
             print("pause")
             m.quePause()
         if m.passNum & 0x300 == 0:
@@ -1298,13 +1298,13 @@ class Face(UpdatePass):
                    (self.safeZ, self.xEnd), None if self.internal else RIGHT)
         m.moveX(self.safeX)
 
-    def faceAdd(self):
+    def addPass(self):
         if self.feed >= self.zCut:
-            add = getFloatVal(self.facePanel.add)
+            add = getFloatVal(self.panel.add)
             self.cutAmount += add
-            self.faceSetup()
-            self.calculateFacePass(True)
-            self.facePass()
+            self.setup()
+            self.calculatePass(True)
+            self.runPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.zStart + self.zRetract)
             self.m.stopSpindle()
