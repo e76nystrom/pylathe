@@ -80,6 +80,8 @@ def queParm(parmIndex, val):
     global parmTable, parmList, cmdLen
     # cmdInfo = parms[parm]
     # parmIndex = cmdInfo[0]
+    print("q", end="")
+    stdout.flush()
     cmdInfo = parmTable[parmIndex]
     parm = cmdInfo[0]
     parmType = cmdInfo[1]
