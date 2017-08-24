@@ -179,7 +179,7 @@ class FormRoutines():
                     success = False
                     strVal = ''
                     ctl.SetValue('')
-            setInfoData(key, strVal)
+            setInfoData(index, strVal)
         return(success)
 
     def fieldList(self, sizer, fields):
