@@ -1998,7 +1998,6 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.angleBtn = self.addRadioButton(sizerG, "Angle", tpAngleBtn, \
-                                            style=wx.RB_GROUP, \
                                             action=self.OnAngle)
         # self.angleBtn = btn = wx.RadioButton(self, label="Angle")
         # sizerG.Add(btn, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, \
