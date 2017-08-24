@@ -294,7 +294,7 @@ def getString(command, parm=None):
     commLock.release()
 
 def setXReg(reg, val):
-    global ser, xRegs, comLock, timeout, xDbgPrint
+    global ser, xRegs, commLock, timeout, xDbgPrint
     if not (reg in xRegs):
         print("invalid register " + reg) #, flush=True)
         stdout.flush()
@@ -328,7 +328,7 @@ def setXReg(reg, val):
     commLock.release()
 
 def setXRegN(reg, val):
-    global ser, xRegTable, comLock, timeout, xDbgPrint
+    global ser, xRegTable, commLock, timeout, xDbgPrint
     if ser is None:
         return
     val = int(val)
