@@ -1,7 +1,8 @@
 from __future__ import print_function
 from sys import stdout
 
-# info = []
+info = []
+infoData = []
 
 class InfoValue():
     def __init__(self, val):
@@ -16,6 +17,7 @@ class InfoValue():
 def clrInfo(size):
     global info
     info = [None for i in range(size)]
+    infoData = [None for i in range(size)]
 
 def saveList(file, configTable, varList):
     global info
@@ -71,6 +73,7 @@ def readInfo(file, config, configList=None):
             if configList != None:
                 if not index in configList:
                     continue
+            infoData[index] = val
             if info[index] != None:
                 func = info[index]
                 funcClass = func.__class__.__name__
@@ -112,12 +115,25 @@ def newInfo(key, val):
 def setInfo(key, val):
     global info
     info[key].SetValue(val)
+    infoData[key] = val
+
+def setInfoData(key, val):
+    global infoData
+    infoData[key] = val
 
 def getInfo(key):
     global info
     try:
-        tmp = info[key]
-        return(tmp.GetValue())
+        return(info[key].GetValue())
+    except KeyError:
+        print("getInfo KeyError %s" % (key))
+        stdout.flush()
+    return('')
+
+def getInfoData(key):
+    global infoData
+    try:
+        return(infoData[key])
     except KeyError:
         print("getInfo KeyError %s" % (key))
         stdout.flush()
@@ -126,8 +142,9 @@ def getInfo(key):
 def getBoolInfo(key):
     global info
     try:
-        tmp = info[key].GetValue()
-        if tmp:
+        # tmp = info[key].GetValue()
+        # if tmp:
+        if infoData[key}:
             return(1)
         else:
             return(0)
@@ -139,7 +156,8 @@ def getBoolInfo(key):
 def getFloatInfo(key):
     global info
     try:
-        val = info[key].GetValue()
+        # val = info[key].GetValue()
+        val = infoData[key]
         try:
             return(float(val))
         except ValueError:
@@ -153,7 +171,8 @@ def getFloatInfo(key):
 def getIntInfo(key):
     global info
     try:
-        val = info[key].GetValue()
+        # val = info[key].GetValue()
+        val = infoData[key]
         try:
             return(int(val))
         except ValueError as e:
