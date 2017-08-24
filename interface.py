@@ -810,8 +810,8 @@ enumList =\
     ("X_FEED_SETUP", "setup x feed"),
     ("SAVE_RUNOUT", "save thread runout"),
     ("SAVE_DEPTH", "save thread depth"),
-    ("PROBE_Z", "porbe in z direction"),
-    ("PROBE_X", "porbe in x direction"),
+    ("PROBE_Z", "probe in z direction"),
+    ("PROBE_X", "probe in x direction"),
     ("OP_DONE", "operation done"),
     "};",
 
