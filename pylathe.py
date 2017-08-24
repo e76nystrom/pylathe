@@ -271,6 +271,7 @@ class FormRoutines():
             btn.Bind(wx.EVT_RADIOBUTTON, action)
         sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo(key, btn)
+        return(btn)
     
 class ActionRoutines():
     def __init__(self, control):
@@ -2057,7 +2058,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                 if name.startswith('ta'):
                     self.configList.append(i)
         return(self.configList)
-
+
     def update(self):
         self.updateUI()
         self.updateDelta()
