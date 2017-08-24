@@ -3381,11 +3381,11 @@ class JogPanel(wx.Panel, FormRoutines):
             self.curPass.SetValue(curPass)
 
             if DRO:
-                zDroLoc = float(self.zDroInvert * zDROPos) / self.zDROInch - \
+                zDroLoc = float(self.zDROInvert * zDROPos) / self.zDROInch - \
                           zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
-                xDroLoc = float(self.xDroInvert * xDROPos) / self.xDROInch - \
+                xDroLoc = float(self.xDROInvert * xDROPos) / self.xDROInch - \
                           xDROOffset
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
