@@ -3444,7 +3444,9 @@ class JogPanel(wx.Panel, FormRoutines):
         self.panelLock.release()
 
     def updateError(self, text):
+        self.panelLock.acquire(True)
         self.setStatus(text)
+        self.panelLock.release()
 
     def OnEStop(self, e):
         global moveCommands, spindleDataSend, zDataSent, xDataSent
