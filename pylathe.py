@@ -4058,6 +4058,9 @@ class UpdateThread(Thread):
                     (D_ZDN, self.dbgZDone), \
 
                     (D_HST, self.dbgHome), \
+
+                    (D_MSTA, self.dbgMoveState), \
+                    (D_MCMD, self.dbgMoveCmd), \
         )
         dbgTbl = [None for i in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
@@ -4292,6 +4295,12 @@ class UpdateThread(Thread):
     def dbgHome(self, val):
         return("hsta %s" % (hStatesList[val]))
 
+    def dbgMoveState(self, val):
+        return("msta %s" % (mStatesList[val]))
+
+    def dbgMoveCmd(self, val):
+        return("mcmd %s" % (mCommandsList[val]))
+        
     def abort(self):
         self.run = False
 
