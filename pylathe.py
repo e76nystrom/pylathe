@@ -3082,6 +3082,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def zJogCmd(self, code, val):
+        print("E", end="")
+        stdout.flush()
         self.repeat += 1
         sendZData()
         if val == 'Cont':
@@ -3118,6 +3120,8 @@ class JogPanel(wx.Panel, FormRoutines):
                     command(ZMOVEREL)
                 except CommTimeout:
                     commTimeout()
+        print("F", end="")
+        stdout.flush()
 
     def jogDone(self, cmd):
         self.jogCode = None
