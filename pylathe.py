@@ -4099,7 +4099,7 @@ class UpdateThread(Thread):
         scanMax = len(self.parmList)
         baseTime = None
         while True:
-            print("1", end="")
+            print("0", end="")
             stdout.flush()
             sleep(0.1)
             if not self.threadRun:
