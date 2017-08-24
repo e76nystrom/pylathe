@@ -151,7 +151,7 @@ configList = \
     ('xMinSpeed', 'x axis '),
     ('xMotorRatio', 'x axis '),
     ('xMotorSteps', 'x axis '),
-    ('xPark', 'x axis '),
+    ('xParkLoc', 'x axis '),
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
 
@@ -174,7 +174,7 @@ configList = \
     ('zMinSpeed', 'z axis '),
     ('zMotorRatio', 'z axis '),
     ('zMotorSteps', 'z axis '),
-    ('zPark', 'z axis '),
+    ('zParkLoc', 'z axis '),
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
