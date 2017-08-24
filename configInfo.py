@@ -15,7 +15,7 @@ class InfoValue():
         self.value = val
 
 def clrInfo(size):
-    global info
+    global info, infoData
     info = [None for i in range(size)]
     infoData = [None for i in range(size)]
 
