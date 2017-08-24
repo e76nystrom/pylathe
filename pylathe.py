@@ -169,6 +169,7 @@ class FormRoutines():
                     ctl.SetValue(val)
                 except ValueError:
                     success = False
+                    strVal = ''
                     ctl.SetValue('')
             elif fieldType == 'd':
                 try:
@@ -176,7 +177,9 @@ class FormRoutines():
                     ctl.SetValue("%d" % (val))
                 except ValueError:
                     success = False
+                    strVal = ''
                     ctl.SetValue('')
+            setInfoData(key, strVal)
         return(success)
 
     def fieldList(self, sizer, fields):
@@ -368,10 +371,11 @@ class DialogActions():
             for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = getInfo(index)
         else:
-                    for (label, index, fmt) in self.fields:
-                        if self.fieldInfo[index] != getInfo(index):
-                            self.sendData = True
-                            break
+            for (label, index, fmt) in self.fields:
+                val = getInfo(index)
+                if self.fieldInfo[index] != val:
+                    setInfoData(key, val)
+                    self.sendData = True
         if changed:
             try:
                 if callable(self.showAction):
@@ -552,7 +556,7 @@ class MoveCommands():
             moveQue.put((opString, op, val))
 
     def queClear(self):
-        self.send = not getInfo(cfgCmdDis)
+        self.send = not getBoolInfo(cfgCmdDis)
         while not moveQue.empty():
             moveQue.get()
 
@@ -692,7 +696,7 @@ def xilinxTestMode():
     global fcy
     testMode = False
     try:
-        testMode = getInfo(cfgTestMode)
+        testMode = getBoolInfo(cfgTestMode)
     except KeyError:
         testMode = False
     if testMode:
@@ -728,27 +732,27 @@ def sendSpindleData(send=False, rpm=None):
         if send or (not spindleDataSent):
             queParm(STEPPER_DRIVE, getBoolInfo(spStepDrive))
             if STEPPER_DRIVE:
-                queParm(SP_STEPS, getInfo(spMotorSteps))
-                queParm(SP_MICRO, getInfo(spMicroSteps))
-                queParm(SP_MIN_RPM, getInfo(spMinRPM))
+                queParm(SP_STEPS, getInfoData(spMotorSteps))
+                queParm(SP_MICRO, getInfoData(spMicroSteps))
+                queParm(SP_MIN_RPM, getInfoData(spMinRPM))
                 if rpm != None:
                     queParm(SP_MAX_RPM, rpm)
                 else:
-                    queParm(SP_MAX_RPM, getInfo(spMaxRPM))
-                # queParm(SP_ACCEL_TIME, getInfo(spAccelTime))
-                queParm(SP_ACCEL, getInfo(spAccel))
-                queParm(SP_JOG_MIN_RPM, getInfo(spJogMin))
-                queParm(SP_JOG_MAX_RPM, getInfo(spJogMax))
-                # queParm(SP_JOG_ACCEL_TIME, getInfo(spAccelTime))
+                    queParm(SP_MAX_RPM, getInfoData(spMaxRPM))
+                # queParm(SP_ACCEL_TIME, getInfoData(spAccelTime))
+                queParm(SP_ACCEL, getInfoData(spAccel))
+                queParm(SP_JOG_MIN_RPM, getInfoData(spJogMin))
+                queParm(SP_JOG_MAX_RPM, getInfoData(spJogMax))
+                # queParm(SP_JOG_ACCEL_TIME, getInfoData(spAccelTime))
                 queParm(SP_DIR_FLAG, getBoolInfo(spInvDir))
                 queParm(SP_TEST_INDEX, getBoolInfo(spTestIndex))
                 command(CMD_SPSETUP)
             elif XILINX:
-                queParm(ENC_MAX, getInfo(cfgEncoder))
-                queParm(X_FREQUENCY, getInfo(cfgXFreq))
-                queParm(FREQ_MULT, getInfo(cfgFreqMult))
+                queParm(ENC_MAX, getInfoData(cfgEncoder))
+                queParm(X_FREQUENCY, getInfoData(cfgXFreq))
+                queParm(FREQ_MULT, getInfoData(cfgFreqMult))
                 xilinxTestMode()
-                queParm(RPM, getInfo(cfgTestRPM))
+                queParm(RPM, getInfoData(cfgTestRPM))
                 cfgReg = 0
                 if getBoolInfo(cfgInvEncDir):
                     cfgReg |= ENC_POL
@@ -784,18 +788,18 @@ def sendZData(send=False):
                 val = 0.001
             queParm(Z_MPG_INC, val * jogPanel.zStepsInch)
 
-            queParm(Z_PITCH, getInfo(zPitch))
-            queParm(Z_RATIO, getInfo(zMotorRatio))
-            queParm(Z_MICRO, getInfo(zMicroSteps))
-            queParm(Z_MOTOR, getInfo(zMotorSteps))
-            queParm(Z_ACCEL, getInfo(zAccel))
-            queParm(Z_BACKLASH, getInfo(zBacklash))
+            queParm(Z_PITCH, getInfoData(zPitch))
+            queParm(Z_RATIO, getInfoData(zMotorRatio))
+            queParm(Z_MICRO, getInfoData(zMicroSteps))
+            queParm(Z_MOTOR, getInfoData(zMotorSteps))
+            queParm(Z_ACCEL, getInfoData(zAccel))
+            queParm(Z_BACKLASH, getInfoData(zBacklash))
 
-            queParm(Z_MOVE_MIN, getInfo(zMinSpeed))
-            queParm(Z_MOVE_MAX, getInfo(zMaxSpeed))
+            queParm(Z_MOVE_MIN, getInfoData(zMinSpeed))
+            queParm(Z_MOVE_MAX, getInfoData(zMaxSpeed))
 
-            queParm(Z_JOG_MIN, getInfo(zJogMin))
-            queParm(Z_JOG_MAX, getInfo(zJogMax))
+            queParm(Z_JOG_MIN, getInfoData(zJogMin))
+            queParm(Z_JOG_MAX, getInfoData(zJogMax))
 
             queParm(Z_DIR_FLAG, getBoolInfo(zInvDir))
             queParm(Z_MPG_FLAG, getBoolInfo(zInvMpg))
@@ -829,18 +833,18 @@ def sendXData(send=False):
                 val = 0.001
             queParm(X_MPG_INC, val * jogPanel.xStepsInch)
 
-            queParm(X_PITCH, getInfo(xPitch))
-            queParm(X_RATIO, getInfo(xMotorRatio))
-            queParm(X_MICRO, getInfo(xMicroSteps))
-            queParm(X_MOTOR, getInfo(xMotorSteps))
-            queParm(X_ACCEL, getInfo(xAccel))
-            queParm(X_BACKLASH, getInfo(xBacklash))
+            queParm(X_PITCH, getInfoData(xPitch))
+            queParm(X_RATIO, getInfoData(xMotorRatio))
+            queParm(X_MICRO, getInfoData(xMicroSteps))
+            queParm(X_MOTOR, getInfoData(xMotorSteps))
+            queParm(X_ACCEL, getInfoData(xAccel))
+            queParm(X_BACKLASH, getInfoData(xBacklash))
 
-            queParm(X_MOVE_MIN, getInfo(xMinSpeed))
-            queParm(X_MOVE_MAX, getInfo(xMaxSpeed))
+            queParm(X_MOVE_MIN, getInfoData(xMinSpeed))
+            queParm(X_MOVE_MAX, getInfoData(xMaxSpeed))
 
-            queParm(X_JOG_MIN, getInfo(xJogMin))
-            queParm(X_JOG_MAX, getInfo(xJogMax))
+            queParm(X_JOG_MIN, getInfoData(xJogMin))
+            queParm(X_JOG_MAX, getInfoData(xJogMax))
 
             queParm(X_DIR_FLAG, getBoolInfo(xInvDir))
             queParm(X_MPG_FLAG, getBoolInfo(xInvMpg))
@@ -983,7 +987,7 @@ class Turn(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
             
         self.setup()
@@ -1225,7 +1229,7 @@ class Face(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setTextAngle(90)
 
@@ -1450,7 +1454,7 @@ class Cutoff():
 
         self.safeX = self.xStart + self.xRetract
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
         self.cutoffSetup()
@@ -1688,7 +1692,7 @@ class Taper(UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup()
@@ -1799,7 +1803,7 @@ class Taper(UpdatePass):
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
             
         self.taperSetup()
@@ -2250,11 +2254,11 @@ class ScrewThread(UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.draw(self.xStart * 2.0, self.tpi)
             self.p0 = (0, 0)
 
-        if getInfo(cfgDraw):
+        if getBoolInfo(cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
             
         self.threadSetup()
@@ -2732,7 +2736,6 @@ class JogPanel(wx.Panel, FormRoutines):
         global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self)
-        self.panelLock = Lock()
         self.jogCode = None
         self.repeat = 0
         # self.lastTime = 0
@@ -2753,7 +2756,6 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
-        self.zJogMax = None
 
     def initUI(self):
         global emptyCell
@@ -3083,11 +3085,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def zJogCmd(self, code, val):
-        print("E", end="")
-        stdout.flush()
         self.repeat += 1
         sendZData()
-        
         if val == 'Cont':
             if self.jogCode != code: # new jog code
                 if self.jogCode == None: # jogging stopped
@@ -3097,20 +3096,10 @@ class JogPanel(wx.Panel, FormRoutines):
                     if code == wx.WXK_LEFT:
                         dir = -1
                     print("zJogCmd %d" % (dir))
-                    stdout.flush()
                     try:
-                        print("G", end="")
-                        stdout.flush()
-                        if self.zJogMax == None:
-                            self.zJogMax = getInfo(zJogMax)
-                        print("g", end="")
-                        queParm(Z_JOG_MAX, self.zJogMax)
+                        queParm(Z_JOG_MAX, getInfoData(zJogMax)
                         queParm(Z_JOG_DIR, dir)
-                        print("I", end="")
-                        stdout.flush()
                         command(ZJMOV)
-                        print("H", end="")
-                        stdout.flush()
                     except CommTimeout:
                         commTimeout()
             else:
@@ -3131,8 +3120,6 @@ class JogPanel(wx.Panel, FormRoutines):
                     command(ZMOVEREL)
                 except CommTimeout:
                     commTimeout()
-        print("F", end="")
-        stdout.flush()
 
     def jogDone(self, cmd):
         self.jogCode = None
@@ -3156,9 +3143,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.event.set()
 
     def OnZUp(self, e):
-        print("C", end="")
-        stdout.flush()
-        self.panelLock.acquire(True)
         print("OnZUp")
         stdout.flush()
         val = self.getInc()
@@ -3168,25 +3152,14 @@ class JogPanel(wx.Panel, FormRoutines):
             self.jogDone(ZSTOP)
         self.jogCode = None
         self.combo.SetFocus()
-        self.panelLock.release()
-        print("D", end="")
-        stdout.flush()
 
     def OnZNegDown(self, e):
-        print("A", end="")
-        stdout.flush()
-        self.panelLock.acquire(True)
         self.zNegButton.SetFocus()
         self.zDown(wx.WXK_LEFT)
-        self.panelLock.release()
-        print("B", end="")
-        stdout.flush()
 
     def OnZPosDown(self, e):
-        self.panelLock.acquire(True)
         self.zPosButton.SetFocus()
         self.zDown(wx.WXK_RIGHT)
-        self.panelLock.release()
 
     def xJogCmd(self, code, val):
         self.repeat += 1
@@ -3202,7 +3175,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     print("xJogCmd %d" % (dir))
                     stdout.flush()
                     try:
-                        queParm(X_JOG_MAX, getInfo(xJogMax))
+                        queParm(X_JOG_MAX, getInfoData(xJogMax))
                         queParm(X_JOG_DIR, dir)
                         command(XJMOV)
                     except CommTimeout:
@@ -3346,7 +3319,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     combo.SetSelection(val - 1)
             return
         elif code == ord('r'):
-            panel = getInfo(mainPanel)
+            panel = getInfoData(mainPanel)
             panel = mainFrame.panels[panel]
             panel.OnSend(None)
             return
@@ -3395,7 +3368,6 @@ class JogPanel(wx.Panel, FormRoutines):
         
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
-        self.panelLock.acquire(True)
         if len(val) == 7:
             (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
             if z != '#':
@@ -3470,12 +3442,9 @@ class JogPanel(wx.Panel, FormRoutines):
                         stdout.flush()
                     elif val & PROBE_FAIL:
                         self.homeDone("x probe failure")
-        self.panelLock.release()
 
     def updateError(self, text):
-        self.panelLock.acquire(True)
         self.setStatus(text)
-        self.panelLock.release()
 
     def OnEStop(self, e):
         global moveCommands, spindleDataSend, zDataSent, xDataSent
@@ -3508,7 +3477,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def getPanel(self):
-        panel = getInfo(mainPanel)
+        panel = getInfoData(mainPanel)
         return(mainFrame.panels[panel])
 
     def clrActive(self):
@@ -3628,9 +3597,9 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnHomeX(self, e):
-        queParm(X_HOME_DIST, getInfo(xHomeDist))
-        queParm(X_HOME_BACKOFF_DIST, getInfo(xHomeBackoffDist))
-        queParm(X_HOME_SPEED, getInfo(xHomeSpeed))
+        queParm(X_HOME_DIST, getInfoData(xHomeDist))
+        queParm(X_HOME_BACKOFF_DIST, getInfoData(xHomeBackoffDist))
+        queParm(X_HOME_SPEED, getInfoData(xHomeSpeed))
         queParm(X_HOME_DIR, 1 if getBoolInfo(xHomeDir) else -1)
         command(XHOMEAXIS)
         jogPanel.probe(HOME_X)
@@ -3834,7 +3803,7 @@ class ProbeDialog(wx.Dialog):
         global jogPanel, moveCommands
         moveCommands.queClear()
         queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
-        queParm(Z_PROBE_SPEED, getInfo(zProbeSpeed))
+        queParm(Z_PROBE_SPEED, getInfoData(zProbeSpeed))
         queParm(Z_HOME_STATUS, '0');
         sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
@@ -3846,7 +3815,7 @@ class ProbeDialog(wx.Dialog):
         global jogPanel, moveCommands
         moveCommands.queClear()
         queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
-        queParm(X_HOME_SPEED, getInfo(xHomeSpeed))
+        queParm(X_HOME_SPEED, getInfoData(xHomeSpeed))
         queParm(X_HOME_STATUS, '0');
         sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
@@ -4128,14 +4097,11 @@ class UpdateThread(Thread):
         scanMax = len(self.parmList)
         baseTime = None
         while True:
-            print("0", end="")
             stdout.flush()
             sleep(0.1)
             if not self.threadRun:
                 break
 
-            print("1", end="")
-            stdout.flush()
             # read update variables
 
             if i < len(self.parmList):
@@ -4156,8 +4122,6 @@ class UpdateThread(Thread):
             if i >= scanMax:
                 i = 0
 
-            print("2", end="")
-            stdout.flush()
             # process move queue
 
             if not moveQue.empty() or (op != None):
@@ -4184,8 +4148,6 @@ class UpdateThread(Thread):
                     stdout.flush()
                     break
 
-            print("3", end="")
-            stdout.flush()
             # get debug data
 
             try:
@@ -4238,8 +4200,6 @@ class UpdateThread(Thread):
                 print("getString SerialException")
                 stdout.flush()
                 break
-            print("4", end="")
-            stdout.flush()
         print("UpdateThread done")
         stdout.flush()
 
@@ -4402,7 +4362,7 @@ class MainFrame(wx.Frame):
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
-        openSerial(getInfo(commPort), 57600)
+        openSerial(getInfoData(commPort), 57600)
         if XILINX:
             comm.xRegs = xRegs
 
@@ -4411,18 +4371,18 @@ class MainFrame(wx.Frame):
 
         if comm.ser != None:
             try:
-                queParm(CFG_XILINX, getInfo(cfgXilinx))
-                queParm(CFG_FCY, getInfo(cfgFcy))
-                queParm(CFG_MPG, getInfo(cfgMPG))
-                queParm(CFG_DRO, getInfo(cfgDRO))
-                queParm(CFG_LCD, getInfo(cfgLCD))
+                queParm(CFG_XILINX, getBoolInfo(cfgXilinx))
+                queParm(CFG_FCY, getInfoData(cfgFcy))
+                queParm(CFG_MPG, getBoolInfo(cfgMPG))
+                queParm(CFG_DRO, getBoolInfo(cfgDRO))
+                queParm(CFG_LCD, getBoolInfo(cfgLCD))
                 command(CMD_SETUP)
                 sendZData()
-                val = getInfo(jogZPos)
+                val = getInfoData(jogZPos)
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
                 sendXData()
-                val = getInfo(jogXPos)
+                val = getInfoData(jogXPos)
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
@@ -4666,7 +4626,7 @@ class MainFrame(wx.Frame):
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnSavePanel(self, e):
-        panel = getInfo(mainPanel)
+        panel = getInfoData(mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
         dlg = wx.FileDialog(self, "Save " + p + " Config", self.dirName,
@@ -4677,7 +4637,7 @@ class MainFrame(wx.Frame):
             saveList(path, configTable, self.panels[panel].getConfigList())
 
     def OnLoadPanel(self, e):
-        panel = getInfo(mainPanel)
+        panel = getInfoData(mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
         dlg = wx.FileDialog(self, "Load " + p + " Config", self.dirName,
@@ -4721,7 +4681,7 @@ class MainFrame(wx.Frame):
         # if not key in info:
         if configInfo.info[key] == None:
             initInfo(key, InfoValue('turnPanel'))
-        showPanel = getInfo(key)
+        showPanel = getInfoData(key)
 
         for key in self.panels:
             panel = self.panels[key]
@@ -4971,7 +4931,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if not self.formatData(self.fields):
             return
         for (label, index, fmt) in self.fields:
-            tmp = getInfo(index)
+            tmp = getInfoData(index)
             if self.fieldInfo[index] != tmp:
                 self.fieldInfo[index] = tmp 
                 spindleDataSent = False
@@ -5275,7 +5235,7 @@ class SyncTest(object):
         f = open('zsync.txt','w')
    
         zAxis = True
-        panel = getInfo(mainPanel)
+        panel = getInfoData(mainPanel)
         if panel == 'threadPanel':
             arg1 = getFloatInfo(thPitch)
         elif panel == 'turnPanel':
