@@ -2753,6 +2753,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
+        self.zJogMax = None
 
     def initUI(self):
         global emptyCell
@@ -3086,6 +3087,7 @@ class JogPanel(wx.Panel, FormRoutines):
         stdout.flush()
         self.repeat += 1
         sendZData()
+        
         if val == 'Cont':
             if self.jogCode != code: # new jog code
                 if self.jogCode == None: # jogging stopped
@@ -3099,9 +3101,10 @@ class JogPanel(wx.Panel, FormRoutines):
                     try:
                         print("G", end="")
                         stdout.flush()
-                        tmp = getInfo(zJogMax)
+                        if self.zJogMax == None:
+                            self.zJogMax = getInfo(zJogMax)
                         print("g", end="")
-                        queParm(Z_JOG_MAX, tmp)
+                        queParm(Z_JOG_MAX, self.zJogMax)
                         queParm(Z_JOG_DIR, dir)
                         print("I", end="")
                         stdout.flush()
