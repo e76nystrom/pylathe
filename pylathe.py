@@ -1447,6 +1447,7 @@ class Cutoff():
             self.xRetract = -self.xRetract
 
         self.zStart = getFloatVal(cu.zStart)
+        self.zRetract = getFloatVal(cu.zRetract)
         self.zCutoff = getFloatVal(cu.zCutoff)
 
     def runOperation(self):
