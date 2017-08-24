@@ -27,6 +27,7 @@ configList = \
     ('cuXRetract', 'cutoff x retract'),
     ('cuXStart', 'cutoff x start'),
     ('cuZCutoff', 'cutoff offset to z cutoff'),
+    ('cuZRetract', 'cutoff offset to z retract'),
     ('cuZStart', 'cutoff z location'),
 
     ('faAddFeed', 'face '),
