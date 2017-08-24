@@ -272,7 +272,7 @@ class FormRoutines():
         sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo(key, btn)
         return(btn)
-    
+
 class ActionRoutines():
     def __init__(self, control):
         self.control = control
@@ -287,7 +287,7 @@ class ActionRoutines():
         self.safeX = control.xStart + control.xRetract
         self.safeZ = control.zStart + control.zRetract
         return(self.safeZ, self.safeX)
-        
+
     def OnShow(self, e):
         if done:
             return
@@ -367,7 +367,7 @@ class DialogActions():
                 self.setupAction()
         except AttributeError:
             pass
-            
+
     def OnShow(self, e):
         global done
         if done:
@@ -395,7 +395,7 @@ class DialogActions():
         for (label, index, fmt) in self.fields:
             setInfo(index, self.fieldInfo[index])
         self.Show(False)
-    
+
 def getFloatVal(tc):
     try:
         return(float(tc.GetValue()))
@@ -486,7 +486,7 @@ class MoveCommands():
                     y = lastY + h
             lastY = y
             self.text(fmt % val, (x, y), align)
-            
+
     def saveZText(self, val, pos):
         if self.zText != None:
             self.zText.append((val, pos))
@@ -508,7 +508,7 @@ class MoveCommands():
             self.text(fmt % val, (x, y), align)
             lastX = x
         self.textAngle = 0.0
-            
+
     def text(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
             (x, y) = p0
@@ -811,7 +811,7 @@ def sendZData(send=False):
 
             queParm(Z_DIR_FLAG, getBoolInfo(zInvDir))
             queParm(Z_MPG_FLAG, getBoolInfo(zInvMpg))
-                
+
             command(CMD_ZSETUP)
             zDataSent = True
     except CommTimeout:
@@ -890,7 +890,7 @@ class UpdatePass():
         if finish != 0:
             self.passes += 1
         self.initPass()
-        
+
     def setupFeed(self, actualFeed, cutAmount):
         self.actualFeed = actualFeed
         self.cutAmount = cutAmount
@@ -997,7 +997,7 @@ class Turn(UpdatePass):
 
         if getBoolInfo(cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
-            
+
         self.setup()
 
         while self.updatePass():
@@ -1116,7 +1116,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         # z parameters
 
         self.zEnd = self.addField(sizerG, "Z End", tuZEnd)
-        
+
         self.zStart = self.addField(sizerG, "Z Start", tuZStart)
 
         self.zFeed = self.addField(sizerG, "Z Feed", tuZFeed)
@@ -1158,7 +1158,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.rpm = self.addField(sizerG, "RPM", tuRPM)
 
         self.pause = self.addCheckBox(sizerG, "Pause", tuPause)
-        
+
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
@@ -1194,7 +1194,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-    
+
     def addAction(self):
         self.control.addPass()
 
@@ -1356,9 +1356,9 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         self.xStart = self.addField(sizerG, "X Start D", faXStart)
 
         self.xEnd = self.addField(sizerG, "X End D", faXEnd)
-        
+
         self.xFeed = self.addField(sizerG, "X Feed", faXFeed)
-        
+
         self.xRetract = self.addField(sizerG, "X Retract", faXRetract)
 
         # z parameters
@@ -1370,7 +1370,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zFeed = self.addField(sizerG, "Z Feed", faZFeed)
 
         self.zRetract = self.addField(sizerG, "Z Retract", faZRetract)
-        
+
         # pass info
 
         self.passes = self.addField(sizerG, "Passes", faPasses)
@@ -1434,7 +1434,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-    
+
     def addAction(self):
         self.control.addPass()
 
@@ -1528,9 +1528,9 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.xStart = self.addField(sizerG, "X Start D", cuXStart)
 
         self.xEnd = self.addField(sizerG, "X End D", cuXEnd)
-        
+
         self.xFeed = self.addField(sizerG, "X Feed", cuXFeed)
-        
+
         self.xRetract = self.addField(sizerG, "X Retract", cuXRetract)
 
         # z parameters
@@ -1543,7 +1543,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
-        
+
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
@@ -1604,7 +1604,7 @@ class Taper(UpdatePass):
         # length = 3.190
         # largeEnd = .938
         # smallEnd = .778
-    
+
     def getParameters(self, taperInch):
         tp = self.panel
         # taper = x / z
@@ -1704,7 +1704,7 @@ class Taper(UpdatePass):
 
         if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
-            
+
         self.taperSetup()
 
         while self.updatePass():
@@ -1815,7 +1815,7 @@ class Taper(UpdatePass):
 
         if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
-            
+
         self.taperSetup()
 
         while self.updatePass():
@@ -1955,7 +1955,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
- 
+
         sizerG = wx.GridSizer(8, 0, 0)
 
         # z parameters
@@ -1963,9 +1963,9 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zStart = self.addField(sizerG, "Z Start", tpZStart)
 
         self.zLength = self.addField(sizerG, "Z Length", tpZLength)
-        
+
         self.zFeed = self.addField(sizerG, "Z Feed", tpZFeed)
-        
+
         self.zRetract = self.addField(sizerG, "Z Retract", tpZRetract)
 
         # x parameters
@@ -1999,7 +1999,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
         self.xRetract = self.addField(sizerG, "X Retract", tpXRetract)
-        
+
         # pass info
 
         self.passes = self.addField(sizerG, "Passes", tpPasses)
@@ -2142,7 +2142,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-    
+
     def addAction(self):
         self.control.internalAdd() if self.internal.GetValue() else \
             self.control.externalAdd()
@@ -2202,7 +2202,7 @@ class ScrewThread(UpdatePass):
         else:
             self.pitch = getFloatVal(th.thread) / 25.4
             self.tpi = 1.0 / self.pitch
-        
+
         self.xStart = getFloatVal(th.xStart) / 2.0
 
         self.firstFeed = getFloatVal(th.firstFeed)
@@ -2213,7 +2213,7 @@ class ScrewThread(UpdatePass):
                     self.xStart - self.depth
 
         self.xRetract = abs(getFloatVal(th.xRetract))
-        
+
         self.angle = radians(getFloatVal(th.angle))
 
     def thread(self):
@@ -2221,7 +2221,7 @@ class ScrewThread(UpdatePass):
 
         print("tpi %4.1f pitch %5.3f lastFeed %6.4f" % \
               (self.tpi, self.pitch, self.lastFeed))
-        
+
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch)
         self.tanAngle = tan(self.angle)
@@ -2230,13 +2230,13 @@ class ScrewThread(UpdatePass):
         self.area = area = 0.5 * self.depth * actualWidth
         print("depth %6.4f actualWdith %6.4f area %8.6f" % \
               (self.depth, actualWidth, area))
-        
+
         firstWidth = 2 * self.firstFeed * self.tanAngle
         firstArea = 0.5 * self.firstFeed * firstWidth
         passes = int(ceil(area / firstArea))
         print("firstFeed %6.4f firstWidth %6.4f firstArea %8.6f passes %d" % \
               (self.firstFeed, firstWidth, firstArea, passes))
-        
+
         lastDepth = self.depth - self.lastFeed
         lastArea = (lastDepth * lastDepth) * self.tanAngle
         self.areaPass = area - lastArea
@@ -2248,14 +2248,14 @@ class ScrewThread(UpdatePass):
         self.areaPass = area / self.passes
         print("passes %d areaPass %8.6f" % \
               (self.passes, self.areaPass))
-        
+
         self.setupSpringPasses(self.threadPanel)
         self.setupAction(self.calculatePass, self.runPass)
         self.initPass()
 
         if self.internal:
             self.xRetract = -self.xRetract
-        
+
         self.safeX = self.xStart + self.xRetract
         self.startZ = self.zStart + self.zAccel
 
@@ -2265,7 +2265,7 @@ class ScrewThread(UpdatePass):
 
         if getBoolInfo(cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
-            
+
         self.threadSetup()
 
         self.curArea = 0.0
@@ -2277,7 +2277,7 @@ class ScrewThread(UpdatePass):
 
         self.m.printXText("%2d Z %6.4f Zofs %6.4f D %6.4f F %6.4f", \
                           LEFT, self.internal)
-            
+
         self.drawClose()
         self.m.drawClose()
         self.m.stopSpindle();
@@ -2420,7 +2420,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         sizerG = wx.GridSizer(8, 0, 0)
 
         self.zEnd = self.addField(sizerG, "Z End", thZEnd)
-        
+
         self.zStart = self.addField(sizerG, "Z Start", thZStart)
 
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
@@ -2447,7 +2447,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         # initInfo(thDepth, btn)
 
         self.thread = self.addField(sizerG, "Thread", thPitch)
-        
+
         self.tpi = self.addRadioButton(sizerG, "TPI", thTPI, style=wx.RB_GROUP)
 
         self.mm = self.addRadioButton(sizerG, "mm", thMM)
@@ -2462,7 +2462,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.xTaper = self.addField(sizerG, "Taper", thXTaper)
 
         self.xExitRev = self.addField(sizerG, "Exit Rev", thExitRev)
-        
+
         self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
 
         sizerG.Add(self.emptyCell)
@@ -2528,7 +2528,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         command(CMD_RESUME)
         if getBoolInfo(cfgDbgSave):
             dbg = open('dbg.txt', 'w')
-    
+
     def addAction(self):
         self.control.threadAdd()
 
@@ -2657,7 +2657,7 @@ class JogShuttle():
         speed = jogShuttle.zSpeed[index]
         if val < 0:
             speed = -speed
-        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or 
+        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or
             (jogShuttle.zCurSpeed <= 0 and speed <= 0)):
             jogShuttle.zCurSpeed = speed
             try:
@@ -2682,7 +2682,7 @@ class JogShuttle():
         speed = jogShuttle.xSpeed[index]
         if val > 0:
             speed = -speed
-        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or 
+        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or
             (jogShuttle.xCurSpeed <= 0 and speed <= 0)):
             jogShuttle.xCurSpeed = speed
             try:
@@ -2707,7 +2707,7 @@ class JogShuttle():
         speed = jogShuttle.spindleSpeed[index]
         if val < 0:
             speed = -speed
-        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or 
+        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or
             (jogShuttle.spindleCurSpeed <= 0 and speed <= 0)):
             jogShuttle.spindleCurSpeed = speed
             try:
@@ -2995,7 +2995,7 @@ class JogPanel(wx.Panel, FormRoutines):
         xPos += x
         yPos += y
         return(xPos, yPos)
-    
+
     def OnZMenu(self, e):
         menu = PosMenu(AXIS_Z)
         self.PopupMenu(menu, self.menuPos(e, self.zPos))
@@ -3237,7 +3237,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # print("key down %x" % (code))
         # stdout.flush()
         evt.Skip()
-    
+
     def OnKeyUp(self, evt):
         code = evt.GetKeyCode()
         if code == wx.WXK_LEFT:
@@ -3328,7 +3328,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.probeStatus = 0
         print(status)
         stdout.flush()
-        
+
     def updateAll(self, val):
         global zHomeOffset, xHomeOffset, zDROOffset, xDROOffset, xHomed
         if len(val) == 7:
@@ -3605,7 +3605,7 @@ class SetPosDialog(wx.Dialog):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
-       
+
     def OnShow(self, e):
         global done, jogPanel
         if done:
@@ -3621,7 +3621,7 @@ class SetPosDialog(wx.Dialog):
         if keyCode == wx.WXK_RETURN:
             self.OnOk(None)
         e.Skip()
-    
+
     def OnOk(self, e):
         global jogPanel
         val = self.pos.GetValue()
@@ -3748,7 +3748,7 @@ class ProbeDialog(wx.Dialog):
         if keyCode == wx.WXK_RETURN:
             self.OnOk(None)
         e.Skip()
-    
+
     def OnOk(self, e):
         global jogPanel
         val = self.probeLoc.GetValue()
@@ -3829,7 +3829,7 @@ class GotoDialog(wx.Dialog):
         if keyCode == wx.WXK_RETURN:
             self.OnOk(None)
         e.Skip()
-    
+
     def OnOk(self, e):
         global moveCommands, jogPanel
         try:
@@ -3912,7 +3912,7 @@ class FixXPosDialog(wx.Dialog):
         if keyCode == wx.WXK_RETURN:
             self.OnFix(None)
         e.Skip()
-    
+
     def OnFix(self, e):
         global xHomeOffset
         try:
@@ -3997,7 +3997,7 @@ class UpdateThread(Thread):
             print("readAll error")
             stdout.flush()
             return
-    
+
         except serial.SerialException:
             print("readAll SerialException")
             stdout.flush()
@@ -4132,7 +4132,7 @@ class UpdateThread(Thread):
                         val = int(val, 16)
                         try:
                             action = dbgTbl[cmd]
-                            output = action(val)                        
+                            output = action(val)
                             if dbg == None:
                                 print(t + output)
                                 stdout.flush()
@@ -4304,7 +4304,7 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self, self.OnUpdate)
-        testFont = wx.Font(10, wx.MODERN, wx.NORMAL, 
+        testFont = wx.Font(10, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
 
         moveCommands = MoveCommands()
@@ -4381,7 +4381,7 @@ class MainFrame(wx.Frame):
                       (EV_READ_ALL, self.jogPanel.updateAll), \
                       (EV_ERROR, self.jogPanel.updateError), \
                       )
-                       
+
         self.procUpdate = [None for i in range(EV_MAX)]
         for (event, action) in eventTable:
             self.procUpdate[event] = action
@@ -4404,7 +4404,7 @@ class MainFrame(wx.Frame):
                 if len(val) == 1:
                     val = val[0]
                 update(val)
-            
+
     def initUI(self):
         global jogPanel, info, zHomeOffset, xHomeOffset, \
             zDROOffset, xDROOffset
@@ -4583,7 +4583,7 @@ class MainFrame(wx.Frame):
 
     def OnSave(self, e):
         saveInfo(configFile, configTable)
-        
+
     def OnRestat(self, e):
         saveInfo(configFile, configTable)
         os.execl(sys.executable, sys.executable, *sys.argv)
@@ -4732,7 +4732,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bInvert MPG", zInvMpg, None), \
             ("DRO Inch", zDROInch, 'd'), \
             ("bInv DRO", zInvDRO, None), \
-        )        
+        )
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -4759,7 +4759,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         global zDataSent
         if changed:
             zDataSent = False
-    
+
 class XDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame):
         pos = (10, 10)
@@ -4792,7 +4792,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHome Dir", xHomeDir, None), \
             ("DRO Inch", xDROInch, 'd'), \
             ("bInv DRO", xInvDRO, None), \
-        )        
+        )
         global HOME_TEST
         if HOME_TEST:
             self.fields += (
@@ -4827,7 +4827,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         global jogPanel
         loc = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
         setParm(X_HOME_LOC, loc)
-        
+
     def setupAction(self):
             sendXData(True)
 
@@ -4897,7 +4897,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         for (label, index, fmt) in self.fields:
             tmp = getInfoData(index)
             if self.fieldInfo[index] != tmp:
-                self.fieldInfo[index] = tmp 
+                self.fieldInfo[index] = tmp
                 spindleDataSent = False
         if not spindleDataSent:
             sendSpindleData()
@@ -5014,7 +5014,7 @@ class TestSpindleDialog(wx.Dialog):
 
         txt = testText(self)
         self.spindleTest = SpindleTest(txt)
-        
+
 class TestSyncDialog(wx.Dialog):
     def __init__(self, frame):
         pos = (10, 10)
@@ -5061,26 +5061,26 @@ class SpindleTest():
         minRPM = getFloatInfo(spMinRPM) # minimum rpm
         maxRPM = getFloatInfo(spMaxRPM) # maximum rpm
         accel = getFloatInfo(spAccel)   # accel rpm per sec
-        
+
         f = open('spindle.txt','w')
-        
+
         dbgPrt(txt,"minRPM %d maxRPM %d", (minRPM, maxRPM))
-        
+
         spindleMicroSteps = getIntInfo(spMicroSteps)
         spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
-        
+
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
         dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us " +
-               "spindleClocksRev %d", 
+               "spindleClocksRev %d",
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
-        
+
         # accelStepsSec2 = (accel * spindleStepsRev) / 60
-        
+
         sStepsSecMin = float(minRPM * spindleStepsRev) / 60
         sStepsSecMax = float(maxRPM * spindleStepsRev) / 60
         deltaV = sStepsSecMax - sStepsSecMin
@@ -5094,41 +5094,41 @@ class SpindleTest():
             aTime = deltaV / accelStepsSec2
 
         dbgPrt(txt,"accel %0.1f rpm per sec", (accel))
-        
+
         accelMinTime = sStepsSecMin / accelStepsSec2
         accelMaxTime = sStepsSecMax / accelStepsSec2
         dbgPrt(txt,"accelMinTime %5.5f accelMaxTime %5.2f", \
                (accelMinTime, accelMaxTime))
-        
+
         accelMinSteps = int((sStepsSecMin * accelMinTime) / 2.0 + 0.5)
         accelMaxSteps = int((sStepsSecMax * accelMaxTime) / 2.0 + 0.5)
         dbgPrt(txt,"accelMinSteps %d accelMaxSteps %d ", \
                (accelMinSteps, accelMaxSteps))
-        
+
         accelTime = deltaV / accelStepsSec2
         accelSteps = accelMaxSteps - accelMinSteps
         accelClocks = accelTime * fcy;
         dbgPrt(txt,"accelStepsSec2 %0.1f accelTime %5.3f accelSteps %d "\
                "accelClocks %d", \
                (accelStepsSec2, accelTime, accelSteps, accelClocks))
-        
+
         accelRev = float(accelSteps) / spindleStepsRev
         dbgPrt(txt,"accelRev %5.3f", (accelRev))
-        
+
         cFactorA = (fcy * sqrt(2)) / sqrt(accelStepsSec2)
         cFactorB = spindleClocksStep / (sqrt(accelMaxSteps) -
                                         sqrt(accelMaxSteps - 1))
         dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
         cFactor = cFactorB
-        
+
         lastCount = int(cFactor * sqrt(accelMinSteps))
         lastTime = float(lastCount) / fcy
-        
+
         dbgPrt(txt,"accelMinSteps %d lastCount %d lastTime %0.6f", \
                (accelMinSteps, lastCount, lastTime))
-        
+
         f.write("\n")
-        
+
         lastCtr = 0
         step = accelMinSteps
         while step < accelMaxSteps:
@@ -5156,16 +5156,16 @@ class SpindleTest():
             lastCount = actCount
             lastCtr = ctr * pre
             lastTime = time
-        
+
         f.write("\n")
-        
+
         finalCount = int(cFactor * sqrt(accelMaxSteps))
         finalCount -= int(cFactor * sqrt(accelMaxSteps - 1))
         dbgPrt(txt,"finalCount %d lastCtr %d spindleClocksStep %d", \
                (finalCount, ctr, spindleClocksStep))
-        
+
         f.write("\n***\n\n");
-        
+
         while step > accelMinSteps:
             step -= 1
             count = int(cFactor * sqrt(step))
@@ -5180,13 +5180,13 @@ class SpindleTest():
             lastCount = count
             lastCtr = ctr
             lastTime = time
-        
+
         lastCount = int(cFactor * sqrt(accelMinSteps))
         f.write("\naccelMinSteps %d lastCount %d\n" % \
                 (accelMinSteps, lastCount))
-        
+
         f.close()
-    
+
 class SyncTest(object):
     def __init__(self, txt):
         self.txt = txt
@@ -5197,7 +5197,7 @@ class SyncTest(object):
         txt.SetValue("")
         print("")
         f = open('zsync.txt','w')
-   
+
         zAxis = True
         panel = getInfoData(mainPanel)
         if panel == 'threadPanel':
@@ -5219,7 +5219,7 @@ class SyncTest(object):
         spindleMotorSteps = getIntInfo(spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
-        
+
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
@@ -5252,7 +5252,7 @@ class SyncTest(object):
             pitch = arg1;
             if pitch < .3:
                 inchPitch = True
-        
+
         if inchPitch:
             revCycle = int(1.0 / pitch + 0.5)
             if revCycle > 20:
@@ -5273,28 +5273,28 @@ class SyncTest(object):
             revolutions = 127
             inches = (pitch * revolutions) / 25.4
             dbgPrt(txt,"pitch %4.2f mm inches %5.3f", (pitch, inches))
-        
+
             clocksCycle = spindleClocksRev * revolutions
             spindleStepsCycle = spindleStepsRev * revolutions
             zStepsCycle = zStepsInch * inches
-        
+
         cycleTime = float(clocksCycle) / fcy
         dbgPrt(txt,"clocksCycle %d cycleTime %4.2f\nspindleStepsCycle %d "\
                "zStepsCycle %d", \
                (clocksCycle, cycleTime, spindleStepsCycle, zStepsCycle))
-        
+
         zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
         dbgPrt(txt,"zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
-        
+
         dx = zStepsCycle
         dy = zRemainder
         incr1 = 2 * dy
         incr2 = incr1 - 2 * dx
         d = incr1 - dx
         dbgPrt(txt,"incr1 %d incr2 %d d %d", (incr1, incr2, d))
-        
+
         sum = d
         x = 0
         y = 0
@@ -5309,22 +5309,22 @@ class SyncTest(object):
                 sum += incr2
                 clocks += 1
         dbgPrt(txt,"clocks %d x %d y %d", (clocks, x, y))
-        
+
         dbgPrt(txt,"", ())
-        
+
         zSpeedIPM = pitch * maxRPM
         zStepsPerSec = int((zSpeedIPM * zStepsInch) / 60)
         dbgPrt(txt,"zSpeedIPM %4.2f in/min zStepsSec %d steps/sec", \
                (zSpeedIPM, zStepsPerSec))
-        
+
         zAccel = .5                      # acceleration in per sec^2
         zAccelTime = ((zSpeedIPM / 60.0) / zAccel) # acceleration time
         dbgPrt(txt,"zAccel %5.3f in/sec^2 zAccelTime %8.6f sec", \
                (zAccel, zAccelTime))
-        
+
         zAccelStepsSec2 = zAccel * zStepsInch
         dbgPrt(txt,"zAccelStepsSec2 %3.0f steps/sec^2", (zAccelStepsSec2))
-        
+
         zAccelSteps = int((zAccelTime * zStepsPerSec) / 2.0)
         if zAccelSteps != 0:
             cFactorA = (fcy * sqrt(2)) / sqrt(zAccelStepsSec2)
@@ -5332,32 +5332,32 @@ class SyncTest(object):
                                       sqrt(zAccelSteps - 1))
             dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
             cFactor1 = cFactorB
-        
+
             zAccelClocks = int(cFactor1 * sqrt(zAccelSteps))
             zAccelTime = float(zAccelClocks) / fcy
             zAccelDist = float(zAccelSteps) / zStepsInch
             dbgPrt(txt,"zAccelTime %8.6f zAccelSteps %d zAccelClocks %d "\
                    "zAccelDist %5.3f", \
                    (zAccelTime, zAccelSteps, zAccelClocks, zAccelDist))
-        
+
             initialCount = int(cFactor1 * sqrt(1))
             initialCount -= int(cFactor1 * sqrt(0))
             finalCount = int(cFactor1 * sqrt(zAccelSteps))
-        
+
             isrCount = finalCount + initialCount
-        
+
             dbgPrt(txt,"initialCount %d initialTime %8.6f accelTime %8.6f "\
                    "hwTime %8.6f", \
                    (initialCount, float(initialCount) / fcy, \
                     float(finalCount) / fcy, float(isrCount) / fcy))
-        
+
             zAccelSpindleSteps = int(isrCount / spindleClocksStep)
             remainder = isrCount - zAccelSpindleSteps * spindleClocksStep
             dbgPrt(txt,"zAccelSpindleSteps %d remainder %d", \
                    (zAccelSpindleSteps, remainder))
-        
+
             f.write("\n");
-        
+
             lastCount = 0
             lastTime = 0
             lastCtr = 0
@@ -5376,34 +5376,34 @@ class SyncTest(object):
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time
-        
+
             f.write("\n");
-        
+
             # countRemainder = zAccelClocks - lastCount
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
             # dbgPrt(txt,"lastCount %d countRemainder %d div %d rem %d" % \
             #        (lastCount, countRemainder, div, rem))
-        
+
             lastCount1 = int(cFactor1 * sqrt(zAccelSteps))
             lastTime1 = time = float(count) / fcy
             dbgPrt(txt,"lastCount1 %d lastTime1 %0.6f", \
                    (lastCount1, lastTime1))
-        
+
             # spindleSteps = lastCount1 / spindleClocksStep
             # spindleCount = spindleSteps * spindleClocksStep
             # countRemainder = lastCount1 - (spindleSteps * spindleClocksStep)
-        
+
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
             # dbgPrt(txt,"spindleSteps %d lastCount %d countRemainder %d div "\
             #"%d rem %d", \
             #        (spindleSteps, lastCount, countRemainder, div, rem))
-        
+
             finalCount -= int(cFactor1 * sqrt(zAccelSteps - 1))
             dbgPrt(txt,"finalCount %d lastCtr %d zClocksStep %d", \
                    (finalCount, lastCtr, zClocksStep))
-        
+
         f.close()
 
 class TaperTest(object):
@@ -5416,7 +5416,7 @@ class TaperTest(object):
         txt = self.txt
         txt.SetValue("")
         f = open('taper.txt','w')
-        
+
         maxRPM = getFloatInfo(spMaxRPM) # maximum rpm
         spindleMicroSteps = getIntInfo(spMicroSteps)
         spindleMotorSteps = getIntInfo(spMotorSteps)
@@ -5465,31 +5465,31 @@ class TaperTest(object):
 
         arg2 = getFloatInfo(tpZDelta)
         arg3 = getFloatInfo(tpXDelta)
-        
+
         d0 = arg2
         d1 = arg3
-        
+
         zCycleDist = float(zStepsCycle) / zStepsInch
         xCycleDist = (d1 / d0) * zCycleDist
         dbgPrt(txt,"zCycleDist %5.3f xCycleDist %5.3f", \
                (zCycleDist, xCycleDist))
-        
+
         d0Steps = int(zCycleDist * zStepsInch)
         d1Steps = int(xCycleDist * xStepsInch)
         d0Clocks = d0Steps * zClocksStep
         dbgPrt(txt,"d0Steps %d d1Steps %d d0Clocks %d", \
                (d0Steps, d1Steps, d0Clocks));
-        
+
         # d1ClocksStep = int(d0Clocks / d1Steps)
         # d1Remainder = d0Clocks - d1Steps * d1ClocksStep
         # dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
         #        (d1ClocksStep, d1Remainder))
-        
+
         d1ClocksStep = int(clocksCycle / d1Steps)
         d1Remainder = clocksCycle - d1Steps * d1ClocksStep
         dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
                (d1ClocksStep, d1Remainder))
-        
+
         dx = d1Steps;
         dy = d1Remainder;
         incr1 = 2 * dy;
@@ -5497,7 +5497,7 @@ class TaperTest(object):
         d = incr1 - dx;
         dbgPrt(txt,"incr1 %d incr2 %d d %d", \
                (incr1, incr2, d));
-        
+
         f.close()
 
 class MoveTest(object):
@@ -5509,7 +5509,7 @@ class MoveTest(object):
         global fcy
         txt = self.txt
         txt.SetValue("")
-        
+
         f = open('move.txt','w')
 
         pitch = getFloatInfo(zPitch)
@@ -5519,58 +5519,58 @@ class MoveTest(object):
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt,"zStepsInch %d", (zStepsInch))
-        
+
         minSpeed = getFloatInfo(zMinSpeed) # minimum speed ipm
         maxSpeed = getFloatInfo(zMaxSpeed) # maximum speed ipm
         zMoveAccelTime = getFloatInfo(zAccel) # accel time seconds
         dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (minSpeed, maxSpeed, zMoveAccelTime))
-        
+
         zMStepsSec = int((maxSpeed * zStepsInch) / 60.0)
         zMClocksStep = int(fcy / zMStepsSec)
         dbgPrt(txt,"zMStepsSec %d zMClocksStep %d", (zMStepsSec, zMClocksStep))
-        
+
         zMinStepsSec = int((zStepsInch * minSpeed) / 60.0)
         zMaxStepsSec = int((zStepsInch * maxSpeed) / 60.0)
         dbgPrt(txt,"zMinStepsSec %d zMaxStepsSec %d", \
                (zMinStepsSec, zMaxStepsSec))
-        
+
         zMDeltaV = zMaxStepsSec - zMinStepsSec
         zMAccelStepsSec2 = zMDeltaV / zMoveAccelTime
         dbgPrt(txt,"zMDeltaV %d zMAccelStepsSec2 %6.3f", \
                (zMDeltaV, zMAccelStepsSec2))
-        
+
         if zMAccelStepsSec2 != 0:
             zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
             zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
             dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d", \
                    (zMAccelMinTime, zMAccelMaxTime))
-        
+
             zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
             zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
             dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d", \
                    (zMAccelMinSteps, zMAccelMaxSteps))
-        
+
             zMAccelTime = zMDeltaV / zMAccelStepsSec2
             zMAccelSteps = zMAccelMaxSteps - zMAccelMinSteps
             zMAccelClocks = int(zMAccelTime * fcy)
             dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d", \
                    (zMAccelTime, zMAccelSteps, zMAccelClocks))
-        
+
             zMAccelDist = float(zMAccelSteps) / zStepsInch
             dbgPrt(txt,"zMAccelDist %5.3f", (zMAccelDist))
-        
+
             cFactorA = (fcy * sqrt(2)) / sqrt(zMAccelStepsSec2)
             cFactorB = zMClocksStep / (sqrt(zMAccelSteps) -
                                        sqrt(zMAccelSteps - 1))
             dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
             zMCFactor = cFactorB
-        
+
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
             lastTime = float(lastCount) / fcy
-        
+
             f.write("\n")
-        
+
             lastCtr = 0
             step = zMAccelMinSteps
             while step < zMAccelMaxSteps:
@@ -5588,16 +5588,16 @@ class MoveTest(object):
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time
-        
+
             f.write("\n")
-        
-            finalCount = int(zMCFactor * (sqrt(zMAccelSteps) - 
+
+            finalCount = int(zMCFactor * (sqrt(zMAccelSteps) -
                                           sqrt(zMAccelSteps - 1)))
             dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d", \
                    (finalCount, ctr, zMClocksStep))
-        
+
             f.write("\n***\n\n");
-        
+
             while step > zMAccelMinSteps:
                 step -= 1
                 count = int(zMCFactor * sqrt(step))
@@ -5613,11 +5613,11 @@ class MoveTest(object):
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time
-        
+
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
             f.write("\nzMAccelMinSteps %d lastCount %d\n" % \
                     (zMAccelMinSteps, lastCount))
-        
+
             f.close()
 
 n = 1
