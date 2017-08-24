@@ -81,11 +81,11 @@ def readInfo(file, config, configList=None):
                     func.SetValue(val)
                     infoData[index] = val
                 elif funcClass == 'RadioButton':
-                    val = val == 'True':
+                    val = val == 'True'
                     func.SetValue(val)
                     infoData[index] = val
                 elif funcClass == 'CheckBox':
-                    val = val == 'True':
+                    val = val == 'True'
                     func.SetValue(val)
                     infoData[index] = val
                 elif funcClass == 'ComboBox':
