@@ -781,6 +781,8 @@ enumList =\
     ("M_WAIT_SPINDLE", "wait for spindle start"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
+    ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),
+    ("M_WAIT_SAFE_Z", "wait for move to safe z to complete"),
     "};",
 
     "move control commands",
