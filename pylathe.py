@@ -3995,7 +3995,7 @@ class UpdateThread(Thread):
         tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         try:
-            result = command(READLOC)
+            result = command(READALL)
             if result == None:
                 return
 
