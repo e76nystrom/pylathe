@@ -282,6 +282,9 @@ class FormRoutines():
             b0 = border
             b1 = border
 
+        b0 = 10
+        b1 = 10
+
         if label != None:
             txt = wx.StaticText(self, -1, label)
             if textFont != None:
