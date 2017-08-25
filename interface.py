@@ -30,6 +30,9 @@ configList = \
     ('cuZRetract', 'cutoff offset to z retract'),
     ('cuZStart', 'cutoff z location'),
 
+    ('droXPos', 'dro x position '),
+    ('droZPos', 'dro z position '),
+
     ('faAddFeed', 'face '),
     ('faPasses', 'face '),
     ('faPause', 'face pause before cutting'),
