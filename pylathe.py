@@ -2881,7 +2881,8 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.statusText = txt = wx.StaticText(self, -1, "aaa", (60, -1))
+        self.statusText = txt = wx.StaticText(self, -1, "aaa", \
+                                              style=wx.ST_NO_AUTORESIZE)
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
