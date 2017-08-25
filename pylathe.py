@@ -3594,7 +3594,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
 
-    def getPos(ctl):
+    def getPos(self, ctl):
         global mainFrame
         (xPos, yPos) = mainFrame.GetPosition()
         (x, y) = self.GetPosition()
