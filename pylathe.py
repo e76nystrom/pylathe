@@ -275,7 +275,7 @@ class FormRoutines():
         if border == None:
             b0 = 10
             b1 = 10
-        elif if isinstance(border, tuple) or isinstance(border, list):
+        elif isinstance(border, tuple) or isinstance(border, list):
             b0 = border[0]
             b1 = border[1] if len(border) >= 2 else b0
         else:
