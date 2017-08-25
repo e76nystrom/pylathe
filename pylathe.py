@@ -2809,7 +2809,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # z position
 
         self.zPos = \
-            self.addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+            self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False, index=jogZPos)
         # txt = wx.StaticText(self, -1, "Z")
@@ -2828,7 +2828,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # x Position
 
         self.xPos = \
-            self.addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+            self.addDialogField(sizerG, "X", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False, index=jogXPos)
         # txt = wx.StaticText(self, -1, "X")
@@ -2847,7 +2847,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # rpm
 
         self.rpm = \
-            self.addDialogField(self, sizerG, "RPM", "0", txtFont, \
+            self.addDialogField(sizerG, "RPM", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
                                 edit=False)
         # txt = wx.StaticText(self, -1, "RPM")
@@ -2873,7 +2873,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # x diameter
 
         self.xPosDiam = \
-            self.addDialogField(self, sizerG, "X D", "0.0000", txtFont, \
+            self.addDialogField(sizerG, "X D", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False)
         # txt = wx.StaticText(self, -1, "X D")
@@ -2892,7 +2892,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # pass
 
         self.rpm = \
-            self.addDialogField(self, sizerG, "Pass", "0", txtFont, \
+            self.addDialogField(sizerG, "Pass", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
                                 edit=False)
         # txt = wx.StaticText(self, -1, "Pass")
@@ -2911,7 +2911,7 @@ class JogPanel(wx.Panel, FormRoutines):
             # z dro position
 
             self.zDROPos = \
-                self.addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+                self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=droZPos)
             # txt = wx.StaticText(self, -1, "Z")
@@ -2929,7 +2929,7 @@ class JogPanel(wx.Panel, FormRoutines):
             # x dro Position
 
             self.xDROPos = \
-                self.addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+                self.addDialogField(sizerG, "X", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=droXPos)
             # txt = wx.StaticText(self, -1, "X")
