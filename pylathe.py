@@ -2848,7 +2848,7 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(120, -1), \
+        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
