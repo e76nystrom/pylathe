@@ -3642,7 +3642,7 @@ class PosMenu(wx.Menu):
         return(self.jogPanel.getPos(ctl))
 
     def OnSet(self, e):
-        dialog = SetPosDialog(self.jogPanel)
+        dialog = SetPosDialog(self.jogPanel, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
