@@ -282,9 +282,6 @@ class FormRoutines():
             b0 = border
             b1 = border
 
-        b0 = 10
-        b1 = 10
-
         if label != None:
             txt = wx.StaticText(self, -1, label)
             if textFont != None:
@@ -2834,7 +2831,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.xPos = \
             self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (120, -1), border=(10, 10), \
                                 edit=False, index=jogXPos)
         # txt = wx.StaticText(self, -1, "X")
         # txt.SetFont(txtFont)
