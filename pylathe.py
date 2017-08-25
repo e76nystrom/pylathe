@@ -2830,10 +2830,9 @@ class JogPanel(wx.Panel, FormRoutines):
                                 edit=False)
 
         # second row
-        # blank space
 
         (self.passSize, self.passText) = \
-            self.addDialogField(sizerG, "Size", "0", txtFont, \
+            self.addDialogField(sizerG, "Size", "0.000", txtFont, \
                                 posFont, (120, -1), border=(10,2),
                                 edit=False, text=True)
         # sizerG.Add(self.emptyCell)
@@ -2881,13 +2880,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.statusText = txt = wx.StaticText(self, -1, "aaa", size=(80, -1), \
+        self.statusText = txt = wx.StaticText(self, -1, "", size=(80, -1), \
                                               style=wx.ST_NO_AUTORESIZE)
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        self.statusLine = txt = wx.StaticText(self, -1, "a")
+        self.statusLine = txt = wx.StaticText(self, -1, "")
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
