@@ -3941,9 +3941,9 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         # tc.SetFont(posFont)
         # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        self.curXPos = \
+        self.actualXPos = \
             self.addDialogField(sizerG, 'Measured', "0.000", jogPanel.txtFont, \
-                jogPanel.posFont, (120, -1), self.onKeyChar)
+                jogPanel.posFont, (120, -1), self.OnKeyChar)
         # txt = wx.StaticText(self, -1, "Measured")
         # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
         #            border=10)
