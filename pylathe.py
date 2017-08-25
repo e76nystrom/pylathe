@@ -288,7 +288,7 @@ class FormRoutines():
                 txt.SetFont(textFont)
             sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=b0)
-            print("label %s border %d", (label, border))
+            print("label %s border %d" % (label, border))
             stdout.flush()
 
         tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
