@@ -200,7 +200,6 @@ class FormRoutines():
         return(tc)
 
     def addField(self, sizer, label, key):
-        global info
         if len(label) != 0:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
@@ -215,7 +214,6 @@ class FormRoutines():
         return(tc)
 
     def addCheckBox(self, sizer, label, key, action=None):
-        global info
         txt = wx.StaticText(self, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
@@ -270,6 +268,23 @@ class FormRoutines():
         sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
         initInfo(key, btn)
         return(btn)
+
+    def addDialogField(self, sizer, label, tcDefault="", textFont=None, \
+                       tcFont=None, size=wx.DefaultSize, action=None):
+        txt = wx.StaticText(self, -1, label)
+        sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+                   border=10)
+        if textFont != None:
+            txt.SetFont(textFont)
+
+        tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
+                         style=wx.TE_RIGHT)
+        if tcFont != None:
+            tc.SetFont(tcFont)
+        if action != None:
+            tc.Bind(wx.EVT_CHAR, action)
+        sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        return(tc)
 
 class ActionRoutines():
     def __init__(self, control):
@@ -3721,6 +3736,7 @@ def updateXPos(val):
 
 class ProbeDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
+        self.jogPanel = jogPanel
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
@@ -3729,31 +3745,36 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-        #                   wx.NORMAL, False, u'Consolas')
-        posFont = jogPanel.posFont
-
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        txt = wx.StaticText(self, -1, \
-                            'Z Position' if axis == AXIS_Z else 'X Diameter')
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                   border=10)
+        self.probeLoc = \
+            self.addDialogField(sizerG, \
+                                'Z Position' if axis == AXIS_Z else \
+                                'X Diameter', "0.000", jogPanel.txtFont, \
+                                jogPanel.posFont, (120, -1))
+        # txt = wx.StaticText(self, -1, \
+        #                     'Z Position' if axis == AXIS_Z else 'X Diameter')
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=10)
+        # self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+        #                                  style=wx.TE_RIGHT)
+        # tc.SetFont(jogPanel.posFont)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
-                                         style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        self.probeDist = \
+            self.addDialogField(sizerG, 'Distance', "0.000", \
+                                jogPanel.txtFont, jogPanel.posFont, (120, -1), \
+                                self.OnKeyChar)
+        # txt = wx.StaticText(self, -1, "Distance")
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=10)
 
-        txt = wx.StaticText(self, -1, "Distance")
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                   border=10)
+        # self.probeDist = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+        #                                   style=wx.TE_RIGHT|\
+        #                                   wx.TE_PROCESS_ENTER)
+        # tc.SetFont(jogPanel.posFont)
+        # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
 
-        self.probeDist = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                          style=wx.TE_RIGHT|\
-                                          wx.TE_PROCESS_ENTER)
-        tc.SetFont(posFont)
-        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
@@ -3765,7 +3786,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.Show(False)
 
     def OnShow(self, e):
-        global done, jogPanel
+        global done
         if done:
             return
         if self.IsShown():
@@ -3773,7 +3794,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
                 probeLoc = "0.0000"
                 probeDist = getFloatInfo(zProbeDist)
             else:
-                probeLoc = jogPanel.xPos.GetValue()
+                probeLoc = self.jogPanel.xPos.GetValue()
                 probeDist = getFloatInfo(xProbeDist)
             self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
@@ -3786,7 +3807,6 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         e.Skip()
 
     def OnOk(self, e):
-        global jogPanel
         val = self.probeLoc.GetValue()
         try:
             probeLoc = float(val)
@@ -3796,10 +3816,10 @@ class ProbeDialog(wx.Dialog, FormRoutines):
             print("probe ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        jogPanel.focus()
+        self.jogPanel.focus()
 
     def probeZ(self, probeLoc):
-        global jogPanel, moveCommands
+        global moveCommands
         moveCommands.queClear()
         queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
         queParm(Z_PROBE_SPEED, getInfoData(zProbeSpeed))
@@ -3807,11 +3827,11 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
-        jogPanel.probe(AXIS_Z, probeLoc)
-        jogPanel.focus()
+        self.jogPanel.probe(AXIS_Z, probeLoc)
+        self.jogPanel.focus()
 
     def probeX(self, probeLoc):
-        global jogPanel, moveCommands
+        global moveCommands
         moveCommands.queClear()
         queParm(PROBE_INV, getBoolInfo(cfgPrbInv))
         queParm(X_HOME_SPEED, getInfoData(xHomeSpeed))
@@ -3819,8 +3839,8 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
-        jogPanel.probe(AXIS_X, probeLoc)
-        jogPanel.focus()
+        self.jogPanel.probe(AXIS_X, probeLoc)
+        self.jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
     def __init__(self, frame, axis):
