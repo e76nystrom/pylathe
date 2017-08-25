@@ -3844,7 +3844,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.jogPanel.probe(AXIS_X, probeLoc)
         self.jogPanel.focus()
 
-class GotoDialog(wx.Dialog):
+class GotoDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
         self.axis = axis
         pos = (10, 10)
