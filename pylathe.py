@@ -3695,9 +3695,9 @@ class SetPosDialog(wx.Dialog):
         # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
         #                   wx.NORMAL, False, u'Consolas')
 
-        self.pos = addDialogField(sizerV, tcDefault="0.000", \
-                                  tcFont=jogPanel.posFont, size=(120,-1), \
-                                  action=self.OnKeyChar)
+        self.pos = \
+            self.addDialogField(sizerV, tcDefault="0.000", \
+                tcFont=jogPanel.posFont, size=(120,-1), action=self.OnKeyChar)
         # self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
         #                             style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         # tc.SetFont(posFont)
@@ -3754,9 +3754,8 @@ class ProbeDialog(wx.Dialog, FormRoutines):
 
         self.probeLoc = \
             self.addDialogField(sizerG, \
-                                'Z Position' if axis == AXIS_Z else \
-                                'X Diameter', "0.000", jogPanel.txtFont, \
-                                jogPanel.posFont, (120, -1))
+                'Z Position' if axis == AXIS_Z else 'X Diameter', \
+                "0.000", jogPanel.txtFont, jogPanel.posFont, (120, -1))
         # txt = wx.StaticText(self, -1, \
         #                     'Z Position' if axis == AXIS_Z else 'X Diameter')
         # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
@@ -3768,13 +3767,12 @@ class ProbeDialog(wx.Dialog, FormRoutines):
 
         self.probeDist = \
             self.addDialogField(sizerG, 'Distance', "0.000", \
-                                jogPanel.txtFont, jogPanel.posFont, (120, -1), \
-                                self.OnKeyChar)
+                jogPanel.txtFont, jogPanel.posFont, (120, -1), self.OnKeyChar)
         # txt = wx.StaticText(self, -1, "Distance")
-        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
         #            border=10)
 
-        # self.probeDist = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+        # self.probeDist = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1),\
         #                                   style=wx.TE_RIGHT|\
         #                                   wx.TE_PROCESS_ENTER)
         # tc.SetFont(jogPanel.posFont)
@@ -3859,9 +3857,9 @@ class GotoDialog(wx.Dialog):
         # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
         #                   wx.NORMAL, False, u'Consolas')
 
-        self.pos = addDialogField(sizerV, tcDefault="0.000", \
-                                  tcFont=jogPanel.posFont, size=(120,-1), \
-                                  action=self.OnKeyChar)
+        self.pos = \
+            self.addDialogField(sizerV, tcDefault="0.000", \
+                tcFont=jogPanel.posFont, size=(120,-1), action=self.OnKeyChar)
         # self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
         #                             style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         # tc.SetFont(posFont)
@@ -3935,7 +3933,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             self.addDialogField(sizerG, 'Current', "0.000", jogPanel.txtFont, \
                                 jogPanel.posFont, (120, -1))
         # txt = wx.StaticText(self, -1, "Current")
-        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
         #            border=10)
 
         # self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
@@ -3945,9 +3943,9 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         self.curXPos = \
             self.addDialogField(sizerG, 'Measured', "0.000", jogPanel.txtFont, \
-                                jogPanel.posFont, (120, -1), self.onKeyChar)
+                jogPanel.posFont, (120, -1), self.onKeyChar)
         # txt = wx.StaticText(self, -1, "Measured")
-        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
         #            border=10)
 
         # self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", \
