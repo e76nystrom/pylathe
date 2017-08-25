@@ -2770,10 +2770,10 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
-        txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
+        self.posFont = posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                                         wx.NORMAL, False, u'Consolas')
+        self.txtFont = txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
+                                         wx.NORMAL, False, u'Consolas')
 
         # first row
         # z position
