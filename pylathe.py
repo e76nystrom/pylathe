@@ -2812,17 +2812,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False, index=jogZPos)
-        # txt = wx.StaticText(self, -1, "Z")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-        # self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-        #                              style=wx.TE_RIGHT)
-        # initInfo(jogZPos, tc)
-        # tc.SetFont(posFont)
-        # tc.SetEditable(False)
-        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
         # x Position
@@ -2831,17 +2820,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addDialogField(sizerG, "X", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False, index=jogXPos)
-        # txt = wx.StaticText(self, -1, "X")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-        # self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-        #                              style=wx.TE_RIGHT)
-        # initInfo(jogXPos, tc)
-        # tc.SetFont(posFont)
-        # tc.SetEditable(False)
-        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # rpm
@@ -2850,16 +2828,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addDialogField(sizerG, "RPM", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
                                 edit=False)
-        # txt = wx.StaticText(self, -1, "RPM")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-        # self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
-        #                             style=wx.TE_RIGHT)
-        # tc.SetFont(posFont)
-        # tc.SetEditable(False)
-        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         # second row
         # blank space
@@ -2876,17 +2844,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addDialogField(sizerG, "X D", "0.0000", txtFont, \
                                 posFont, (120, -1), border=(10, 2), \
                                 edit=False)
-        # txt = wx.StaticText(self, -1, "X D")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-        # self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-        #                                  style=wx.TE_RIGHT)
-        # initInfo(jogXPosDiam, tc)
-        # tc.SetFont(posFont)
-        # tc.SetEditable(False)
-        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # pass
@@ -2895,16 +2852,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addDialogField(sizerG, "Pass", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
                                 edit=False)
-        # txt = wx.StaticText(self, -1, "Pass")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-        # self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
-        #                                 style=wx.TE_RIGHT)
-        # tc.SetFont(posFont)
-        # tc.SetEditable(False)
-        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         if DRO:
             # third row
@@ -2914,17 +2861,6 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=droZPos)
-            # txt = wx.StaticText(self, -1, "Z")
-            # txt.SetFont(txtFont)
-            # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-            #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-            # self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
-            #                                 size=(120, -1), style=wx.TE_RIGHT)
-            # initInfo(encZPos, tc)
-            # tc.SetFont(posFont)
-            # tc.SetEditable(False)
-            # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
             # x dro Position
 
@@ -2932,17 +2868,6 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.addDialogField(sizerG, "X", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=droXPos)
-            # txt = wx.StaticText(self, -1, "X")
-            # txt.SetFont(txtFont)
-            # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-            #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
-            # self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
-            #                                 size=(120, -1), style=wx.TE_RIGHT)
-            # initInfo(droXPos, tc)
-            # tc.SetFont(posFont)
-            # tc.SetEditable(False)
-            # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
