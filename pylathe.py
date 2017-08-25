@@ -3704,7 +3704,7 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
         # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        self.addDialogButton(sizerH, wx.ID_OK, self.onOk, border=10)
+        self.addDialogButton(sizerV, wx.ID_OK, self.onOk, border=10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
