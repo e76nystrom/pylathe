@@ -3715,8 +3715,8 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         if done:
             return
         if self.IsShown():
-            val = self.jogpanel.zPos.GetValue() if self.axis == AXIS_Z else \
-               self.jogpanel.xPos.GetValue()
+            val = self.jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
+               self.jogPanel.xPos.GetValue()
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
