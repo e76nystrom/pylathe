@@ -3737,7 +3737,7 @@ class SetPosDialog(wx.Dialog, FormRoutines):
             print("ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        self.jogpanel.focus()
+        self.jogPanel.focus()
 
 class ProbeDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
