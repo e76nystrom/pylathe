@@ -3594,16 +3594,16 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("xDROOffset %0.4f" % (xDROOffset))
         stdout.flush()
 
-        def getPos(ctl):
-            global mainFrame
-            (xPos, yPos) = mainFrame.GetPosition()
-            (x, y) = self.GetPosition()
-            xPos += x
-            yPos += y
-            (x, y) = ctl.GetPosition()
-            xPos += x
-            yPos += y
-            return(xPos, yPos)
+    def getPos(ctl):
+        global mainFrame
+        (xPos, yPos) = mainFrame.GetPosition()
+        (x, y) = self.GetPosition()
+        xPos += x
+        yPos += y
+        (x, y) = ctl.GetPosition()
+        xPos += x
+        yPos += y
+        return(xPos, yPos)
 
 class PosMenu(wx.Menu):
     def __init__(self, jogPanel, axis):
