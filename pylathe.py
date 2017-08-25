@@ -3681,7 +3681,7 @@ class PosMenu(wx.Menu):
         dialog.Raise()
         dialog.Show(True)
 
-class SetPosDialog(wx.Dialog):
+class SetPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
         self.jogPanel = jogPanel
         self.axis = axis
