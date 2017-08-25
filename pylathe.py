@@ -882,6 +882,7 @@ class UpdatePass():
         self.cutAmount = 0.0
         self.calcPass = None
         self.genPass = None
+        self.passDiam = []
 
     def calcFeed(self, feed, cutAmount, finish=0):
         self.cutAmount = cutAmount
@@ -890,6 +891,7 @@ class UpdatePass():
         self.actualFeed = cutToFinish / self.passes
         if finish != 0:
             self.passes += 1
+        self.passDiam = [None for i in range(self.passes + 1)]
         self.initPass()
 
     def setupFeed(self, actualFeed, cutAmount):
@@ -1047,6 +1049,7 @@ class Turn(UpdatePass):
             if not self.neg:
                 feed = -feed
         self.curX = self.xStart + feed
+        self.passDiam[self.passCount] = self.curX
         self.safeX = self.curX + self.xRetract
         print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
               (self.passCount, feed, self.curX, self.curX * 2.0))
