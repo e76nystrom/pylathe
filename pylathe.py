@@ -3719,7 +3719,7 @@ def updateXPos(val):
             print("xDROOffset %0.4f" % (xDROOffset))
     stdout.flush()
 
-class ProbeDialog(wx.Dialog, FormRoutine):
+class ProbeDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
         self.axis = axis
         pos = (10, 10)
