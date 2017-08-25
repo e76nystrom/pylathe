@@ -270,11 +270,22 @@ class FormRoutines():
         return(btn)
 
     def addDialogField(self, sizer, label=None, tcDefault="", textFont=None, \
-                       tcFont=None, size=wx.DefaultSize, action=None):
+                       tcFont=None, size=wx.DefaultSize, action=None, \
+                       border=None, index=None, edit=True):
+        if border == None:
+            b0 = 10
+            b1 = 10
+        elif if isinstance(border, tuple) or isinstance(border, list):
+            b0 = border[0]
+            b1 = border[1] if len(border) >= 2 else b0
+        else:
+            b0 = border
+            b1 = border
+
         if label != None:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|\
-                      wx.ALIGN_CENTER_VERTICAL, border=10)
+                      wx.ALIGN_CENTER_VERTICAL, border=b0)
             if textFont != None:
                 txt.SetFont(textFont)
 
@@ -284,7 +295,11 @@ class FormRoutines():
             tc.SetFont(tcFont)
         if action != None:
             tc.Bind(wx.EVT_CHAR, action)
-        sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        if not edit:
+            tc.SetEditable(False)
+        if index != None:
+            initInfo(index, tc)
+        sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
         return(tc)
 
 class ActionRoutines():
@@ -2786,54 +2801,65 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.FlexGridSizer(6, 0, 0)
 
-        self.posFont = posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                                         wx.NORMAL, False, u'Consolas')
         self.txtFont = txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
                                          wx.NORMAL, False, u'Consolas')
-
+        self.posFont = posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                                         wx.NORMAL, False, u'Consolas')
         # first row
         # z position
 
-        txt = wx.StaticText(self, -1, "Z")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        self.zPos = \
+            self.addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+                                posFont, (120, -1), border=(10, 2), \
+                                edit=False, index=jogZPos)
+        # txt = wx.StaticText(self, -1, "Z")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                     style=wx.TE_RIGHT)
-        initInfo(jogZPos, tc)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        tc.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        # self.zPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+        #                              style=wx.TE_RIGHT)
+        # initInfo(jogZPos, tc)
+        # tc.SetFont(posFont)
+        # tc.SetEditable(False)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
         # x Position
 
-        txt = wx.StaticText(self, -1, "X")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        self.xPos = \
+            self.addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+                                posFont, (120, -1), border=(10, 2), \
+                                edit=False, index=jogXPos)
+        # txt = wx.StaticText(self, -1, "X")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                     style=wx.TE_RIGHT)
-        initInfo(jogXPos, tc)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        # self.xPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+        #                              style=wx.TE_RIGHT)
+        # initInfo(jogXPos, tc)
+        # tc.SetFont(posFont)
+        # tc.SetEditable(False)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # rpm
 
-        txt = wx.StaticText(self, -1, "RPM")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        self.rpm = \
+            self.addDialogField(self, sizerG, "RPM", "0", txtFont, \
+                                posFont, (80, -1), border=(10, 2), \
+                                edit=False)
+        # txt = wx.StaticText(self, -1, "RPM")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
-                                    style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        # self.rpm = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
+        #                             style=wx.TE_RIGHT)
+        # tc.SetFont(posFont)
+        # tc.SetEditable(False)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         # second row
         # blank space
@@ -2846,62 +2872,77 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # x diameter
 
-        txt = wx.StaticText(self, -1, "X D")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        self.xPosDiam = \
+            self.addDialogField(self, sizerG, "X D", "0.0000", txtFont, \
+                                posFont, (120, -1), border=(10, 2), \
+                                edit=False)
+        # txt = wx.StaticText(self, -1, "X D")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                         style=wx.TE_RIGHT)
-        initInfo(jogXPosDiam, tc)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        # tc.Bind(wx.EVT_LEFT_DOWN, self.OnSetXPos)
-        tc.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        # self.xPosDiam = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
+        #                                  style=wx.TE_RIGHT)
+        # initInfo(jogXPosDiam, tc)
+        # tc.SetFont(posFont)
+        # tc.SetEditable(False)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # pass
 
-        txt = wx.StaticText(self, -1, "Pass")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        self.rpm = \
+            self.addDialogField(self, sizerG, "Pass", "0", txtFont, \
+                                posFont, (80, -1), border=(10, 2), \
+                                edit=False)
+        # txt = wx.StaticText(self, -1, "Pass")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
-                                        style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        tc.SetEditable(False)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+        # self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(80, -1), \
+        #                                 style=wx.TE_RIGHT)
+        # tc.SetFont(posFont)
+        # tc.SetEditable(False)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         if DRO:
             # third row
             # z dro position
 
-            txt = wx.StaticText(self, -1, "Z")
-            txt.SetFont(txtFont)
-            sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                       wx.ALIGN_CENTER_VERTICAL, border=10)
+            self.zDROPos = \
+                self.addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+                                    posFont, (120, -1), border=(10, 2), \
+                                    edit=False, index=droZPos)
+            # txt = wx.StaticText(self, -1, "Z")
+            # txt.SetFont(txtFont)
+            # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+            #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
-                                            size=(120, -1), style=wx.TE_RIGHT)
-            initInfo(encZPos, tc)
-            tc.SetFont(posFont)
-            tc.SetEditable(False)
-            sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+            # self.zDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
+            #                                 size=(120, -1), style=wx.TE_RIGHT)
+            # initInfo(encZPos, tc)
+            # tc.SetFont(posFont)
+            # tc.SetEditable(False)
+            # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
             # x dro Position
 
-            txt = wx.StaticText(self, -1, "X")
-            txt.SetFont(txtFont)
-            sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
-                       wx.ALIGN_CENTER_VERTICAL, border=10)
+            self.xDROPos = \
+                self.addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+                                    posFont, (120, -1), border=(10, 2), \
+                                    edit=False, index=droXPos)
+            # txt = wx.StaticText(self, -1, "X")
+            # txt.SetFont(txtFont)
+            # sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
+            #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
-            self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
-                                            size=(120, -1), style=wx.TE_RIGHT)
-            initInfo(droXPos, tc)
-            tc.SetFont(posFont)
-            tc.SetEditable(False)
-            sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
+            # self.xDROPos = tc = wx.TextCtrl(self, -1, "0.0000", \
+            #                                 size=(120, -1), style=wx.TE_RIGHT)
+            # initInfo(droXPos, tc)
+            # tc.SetFont(posFont)
+            # tc.SetEditable(False)
+            # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
