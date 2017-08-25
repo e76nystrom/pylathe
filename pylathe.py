@@ -2753,7 +2753,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
-        self.curPass = 0
+        self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
 
@@ -3355,12 +3355,12 @@ class JogPanel(wx.Panel, FormRoutines):
             passNum = val & 0xff
             passType = val >> 8
             if passType == 0:
-                self.passNum = passNum
+                self.lastPass = passNum
                 curPass = str(passNum)
             elif passType == 1:
                 curPass = str(passNum) + "S"
             else:
-                curPass = "%dS%d" % (self.passNum, val)
+                curPass = "%dS%d" % (self.lastNum, val)
             self.curPass.SetValue(curPass)
 
             if DRO:
