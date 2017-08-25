@@ -276,8 +276,8 @@ class FormRoutines():
             b0 = 10
             b1 = 10
         elif isinstance(border, tuple) or isinstance(border, list):
-            b0 = int(border[0])
-            b1 = int(border[1]) if len(border) >= 2 else b0
+            b0 = border[0]
+            b1 = border[1] if len(border) >= 2 else b0
         else:
             b0 = border
             b1 = border
@@ -288,8 +288,6 @@ class FormRoutines():
                 txt.SetFont(textFont)
             sizer.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=b0)
-            print("label %s border %d" % (label, b0))
-            stdout.flush()
 
         tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
                          style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
