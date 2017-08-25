@@ -2891,7 +2891,7 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        sizerV.add(sizerH)
+        sizerV.Add(sizerH)
 
         # control buttons and jog
 
