@@ -3545,65 +3545,65 @@ class JogPanel(wx.Panel, FormRoutines):
         self.Refresh()
         self.Update()
 
-def updateZPos(val):
-    global jogPanel, zHomeOffset, zDROOffset
-    sendZData()
-    zLoc = getParm(Z_LOC)
-    if zLoc != None:
-        zLoc /= jogPanel.zStepsInch
-        zHomeOffset = zLoc - val
-        setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
-        setParm(Z_HOME_OFFSET, zHomeOffset)
-        print("zHomeOffset %0.4f" % (zHomeOffset))
-    if DRO:
-        zDROPos = getParm(Z_DRO_POS)
-        print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
-        if zDROPos != None:
-            droPos = float(zDROPos) / jogPanel.zDROInch
-            setInfo(zSvDROPosition, "%0.4f" % (droPos))
-            if jogPanel.zDROInvert:
-                droPos = -droPos
-            zDROOffset = droPos - val
-            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
-            setParm(Z_DRO_OFFSET, zDROOffset)
-            print("zDROOffset %0.4f" % (zDROOffset))
-    stdout.flush()
+    def updateZPos(val):
+        global zHomeOffset, zDROOffset
+        sendZData()
+        zLoc = getParm(Z_LOC)
+        if zLoc != None:
+            zLoc /= self.zStepsInch
+            zHomeOffset = zLoc - val
+            setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
+            setParm(Z_HOME_OFFSET, zHomeOffset)
+            print("zHomeOffset %0.4f" % (zHomeOffset))
+        if DRO:
+            zDROPos = getParm(Z_DRO_POS)
+            print("zDROPos %0.4f" % (zDROPos / self.zDROInch))
+            if zDROPos != None:
+                droPos = float(zDROPos) / self.zDROInch
+                setInfo(zSvDROPosition, "%0.4f" % (droPos))
+                if self.zDROInvert:
+                    droPos = -droPos
+                zDROOffset = droPos - val
+                setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
+                setParm(Z_DRO_OFFSET, zDROOffset)
+                print("zDROOffset %0.4f" % (zDROOffset))
+        stdout.flush()
 
-def updateXPos(val):
-    global jogPanel, xHomeOffset, xDROOffset
-    val /= 2.0
-    sendXData()
-    xLoc = getParm(X_LOC)
-    if xLoc != None:
-        xLoc /= jogPanel.xStepsInch
-        xHomeOffset = xLoc - val
-        setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
-        setParm(X_HOME_OFFSET, xHomeOffset)
-        print("xHomeOffset %0.4f" % (xHomeOffset))
-    if DRO:
-        xDROPos = getParm(X_DRO_POS)
-        print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
-        if xDROPos != None:
-            droPos = float(xDROPos) / jogPanel.xDROInch
-            setInfo(xSvDROPosition, "%0.4f" % (droPos))
-            if jogPanel.xDROInvert:
-                droPos = -droPos
-            xDROOffset = droPos - val
-            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
-            setParm(X_DRO_OFFSET, xDROOffset)
-            print("xDROOffset %0.4f" % (xDROOffset))
-    stdout.flush()
+    def updateXPos(val):
+        global xHomeOffset, xDROOffset
+        val /= 2.0
+        sendXData()
+        xLoc = getParm(X_LOC)
+        if xLoc != None:
+            xLoc /= self.xStepsInch
+            xHomeOffset = xLoc - val
+            setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
+            setParm(X_HOME_OFFSET, xHomeOffset)
+            print("xHomeOffset %0.4f" % (xHomeOffset))
+        if DRO:
+            xDROPos = getParm(X_DRO_POS)
+            print("xDROPos %0.4f" % (xDROPos / self.xDROInch))
+            if xDROPos != None:
+                droPos = float(xDROPos) / self.xDROInch
+                setInfo(xSvDROPosition, "%0.4f" % (droPos))
+                if self.xDROInvert:
+                    droPos = -droPos
+                xDROOffset = droPos - val
+                setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
+                setParm(X_DRO_OFFSET, xDROOffset)
+                print("xDROOffset %0.4f" % (xDROOffset))
+        stdout.flush()
 
-def jogPanelPos(ctl):
-        global jogPanel, mainFrame
-        (xPos, yPos) = mainFrame.GetPosition()
-        (x, y) = jogPanel.GetPosition()
-        xPos += x
-        yPos += y
-        (x, y) = ctl.GetPosition()
-        xPos += x
-        yPos += y
-        return(xPos, yPos)
+        def getPos(ctl):
+            global mainFrame
+            (xPos, yPos) = mainFrame.GetPosition()
+            (x, y) = self.GetPosition()
+            xPos += x
+            yPos += y
+            (x, y) = ctl.GetPosition()
+            xPos += x
+            yPos += y
+            return(xPos, yPos)
 
 class PosMenu(wx.Menu):
     def __init__(self, jogPanel, axis):
@@ -3639,7 +3639,7 @@ class PosMenu(wx.Menu):
     def getPosCtl(self):
         ctl = self.jogPanel.zPos if self.axis == AXIS_Z else \
               self.jogPanel.xPos
-        return(jogPanelPos(ctl))
+        return(self.jogPanel.getPos(ctl))
 
     def OnSet(self, e):
         dialog = SetPosDialog(self.jogPanel)
@@ -3648,8 +3648,8 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnZero(self, e):
-        updateZPos(0) if self.axis == AXIS_Z else \
-            updateXPos(0)
+        self.jogPanel.updateZPos(0) if self.axis == AXIS_Z else \
+            self.jogPanel.updateXPos(0)
         self.jogPanel.focus()
 
     def OnProbe(self, e):
@@ -3731,8 +3731,8 @@ class SetPosDialog(wx.Dialog):
         val = self.pos.GetValue()
         try:
             val = float(val)
-            updateZPos(val) if self.axis == AXIS_Z else \
-                updateXPos(val)
+            self.jogPanel.updateZPos(val) if self.axis == AXIS_Z else \
+                self.jogPanel.updateXPos(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
