@@ -3774,8 +3774,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         #                                   wx.TE_PROCESS_ENTER)
         # tc.SetFont(jogPanel.posFont)
         # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
-
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
