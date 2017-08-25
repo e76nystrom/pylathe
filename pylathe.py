@@ -2754,7 +2754,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.xMenu = None
         self.mvStatus = 0
         self.currentPanel = None
-        self.currentControl = Not
+        self.currentControl = None
 
     def initUI(self):
         global emptyCell
