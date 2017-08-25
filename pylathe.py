@@ -130,9 +130,6 @@ def commTimeout():
 class FormRoutines():
     def __init__(self, panel=True):
         self.emptyCell = (0, 0)
-        if panel:
-            self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                                   wx.NORMAL, False, u'Consolas')
 
     def formatData(self, formatList):
         success = True
@@ -1085,8 +1082,9 @@ class Turn(UpdatePass):
             command(CMD_RESUME)
 
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
         FormRoutines.__init__(self)
         self.control = Turn(self)
         ActionRoutines.__init__(self, self.control)
@@ -1323,8 +1321,9 @@ class Face(UpdatePass):
             command(CMD_RESUME)
 
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
         FormRoutines.__init__(self)
         self.control = Face(self)
         ActionRoutines.__init__(self, self.control)
@@ -1499,8 +1498,9 @@ class Cutoff():
         m.moveX(self.xStart)
 
 class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
         FormRoutines.__init__(self)
         self.control = Cutoff(self)
         ActionRoutines.__init__(self, self.control)
@@ -1887,8 +1887,9 @@ class Taper(UpdatePass):
             command(CMD_RESUME)
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
         FormRoutines.__init__(self)
         self.control = Taper(self)
         ActionRoutines.__init__(self, self.control)
@@ -2381,8 +2382,9 @@ class ScrewThread(UpdatePass):
         jogPanel.setStatus(STR_NO_ADD)
 
 class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
         FormRoutines.__init__(self)
         self.control = ScrewThread(self)
         ActionRoutines.__init__(self, self.control)
@@ -2846,7 +2848,7 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerG.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT| \
                    wx.ALIGN_CENTER_VERTICAL, border=10)
 
-        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(40, -1), \
+        self.curPass = tc = wx.TextCtrl(self, -1, "0", size=(120, -1), \
                                         style=wx.TE_RIGHT)
         tc.SetFont(posFont)
         tc.SetEditable(False)
@@ -4342,6 +4344,8 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         evtUpdate(self, self.OnUpdate)
+        self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+                               wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
 
@@ -4552,28 +4556,28 @@ class MainFrame(wx.Frame):
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.panels = {}
-        self.turnPanel = panel = TurnPanel(self)
+        self.turnPanel = panel = TurnPanel(self, self.hdrFont)
         self.panels['turnPanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        self.facePanel = panel = FacePanel(self)
+        self.facePanel = panel = FacePanel(self, self.hdrFont)
         self.panels['facePanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        self.cutoffPanel = panel = CutoffPanel(self)
+        self.cutoffPanel = panel = CutoffPanel(self, self.hdrFont)
         self.panels['cutoffPanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        self.taperPanel = panel = TaperPanel(self)
+        self.taperPanel = panel = TaperPanel(self, self.hdrFont)
         self.panels['taperPanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
         if STEPPER_DRIVE:
-            self.threadPanel = panel = ThreadPanel(self)
+            self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
