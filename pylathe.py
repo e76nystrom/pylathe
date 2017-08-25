@@ -269,16 +269,17 @@ class FormRoutines():
         initInfo(key, btn)
         return(btn)
 
-    def addDialogField(self, sizer, label, tcDefault="", textFont=None, \
+    def addDialogField(self, sizer, label=None, tcDefault="", textFont=None, \
                        tcFont=None, size=wx.DefaultSize, action=None):
-        txt = wx.StaticText(self, -1, label)
-        sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                   border=10)
-        if textFont != None:
-            txt.SetFont(textFont)
+        if label != None:
+            txt = wx.StaticText(self, -1, label)
+            sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|\
+                      wx.ALIGN_CENTER_VERTICAL, border=10)
+            if textFont != None:
+                txt.SetFont(textFont)
 
         tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
-                         style=wx.TE_RIGHT)
+                         style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
         if tcFont != None:
             tc.SetFont(tcFont)
         if action != None:
@@ -3544,6 +3545,55 @@ class JogPanel(wx.Panel, FormRoutines):
         self.Refresh()
         self.Update()
 
+def updateZPos(val):
+    global jogPanel, zHomeOffset, zDROOffset
+    sendZData()
+    zLoc = getParm(Z_LOC)
+    if zLoc != None:
+        zLoc /= jogPanel.zStepsInch
+        zHomeOffset = zLoc - val
+        setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
+        setParm(Z_HOME_OFFSET, zHomeOffset)
+        print("zHomeOffset %0.4f" % (zHomeOffset))
+    if DRO:
+        zDROPos = getParm(Z_DRO_POS)
+        print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
+        if zDROPos != None:
+            droPos = float(zDROPos) / jogPanel.zDROInch
+            setInfo(zSvDROPosition, "%0.4f" % (droPos))
+            if jogPanel.zDROInvert:
+                droPos = -droPos
+            zDROOffset = droPos - val
+            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
+            setParm(Z_DRO_OFFSET, zDROOffset)
+            print("zDROOffset %0.4f" % (zDROOffset))
+    stdout.flush()
+
+def updateXPos(val):
+    global jogPanel, xHomeOffset, xDROOffset
+    val /= 2.0
+    sendXData()
+    xLoc = getParm(X_LOC)
+    if xLoc != None:
+        xLoc /= jogPanel.xStepsInch
+        xHomeOffset = xLoc - val
+        setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
+        setParm(X_HOME_OFFSET, xHomeOffset)
+        print("xHomeOffset %0.4f" % (xHomeOffset))
+    if DRO:
+        xDROPos = getParm(X_DRO_POS)
+        print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
+        if xDROPos != None:
+            droPos = float(xDROPos) / jogPanel.xDROInch
+            setInfo(xSvDROPosition, "%0.4f" % (droPos))
+            if jogPanel.xDROInvert:
+                droPos = -droPos
+            xDROOffset = droPos - val
+            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
+            setParm(X_DRO_OFFSET, xDROOffset)
+            print("xDROOffset %0.4f" % (xDROOffset))
+    stdout.flush()
+
 def jogPanelPos(ctl):
         global jogPanel, mainFrame
         (xPos, yPos) = mainFrame.GetPosition()
@@ -3642,13 +3692,17 @@ class SetPosDialog(wx.Dialog):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
-        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
-                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
-        tc.SetFont(posFont)
-        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+        #                   wx.NORMAL, False, u'Consolas')
+
+        self.pos = addDialogField(sizerV, tcDefault="0.000", \
+                                  tcFont=jogPanel.posFont, size=(120,-1), \
+                                  action=self.OnKeyChar)
+        # self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+        #                             style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        # tc.SetFont(posFont)
+        # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         self.addDialogButton(sizerH, wx.ID_OK, self.onOk, border=10)
 
@@ -3661,8 +3715,8 @@ class SetPosDialog(wx.Dialog):
         if done:
             return
         if self.IsShown():
-            val = jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
-               jogPanel.xPos.GetValue()
+            val = self.jogpanel.zPos.GetValue() if self.axis == AXIS_Z else \
+               self.jogpanel.xPos.GetValue()
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
@@ -3683,56 +3737,7 @@ class SetPosDialog(wx.Dialog):
             print("ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        jogPanel.focus()
-
-def updateZPos(val):
-    global jogPanel, zHomeOffset, zDROOffset
-    sendZData()
-    zLoc = getParm(Z_LOC)
-    if zLoc != None:
-        zLoc /= jogPanel.zStepsInch
-        zHomeOffset = zLoc - val
-        setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
-        setParm(Z_HOME_OFFSET, zHomeOffset)
-        print("zHomeOffset %0.4f" % (zHomeOffset))
-    if DRO:
-        zDROPos = getParm(Z_DRO_POS)
-        print("zDROPos %0.4f" % (zDROPos / jogPanel.zDROInch))
-        if zDROPos != None:
-            droPos = float(zDROPos) / jogPanel.zDROInch
-            setInfo(zSvDROPosition, "%0.4f" % (droPos))
-            if jogPanel.zDROInvert:
-                droPos = -droPos
-            zDROOffset = droPos - val
-            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
-            setParm(Z_DRO_OFFSET, zDROOffset)
-            print("zDROOffset %0.4f" % (zDROOffset))
-    stdout.flush()
-
-def updateXPos(val):
-    global jogPanel, xHomeOffset, xDROOffset
-    val /= 2.0
-    sendXData()
-    xLoc = getParm(X_LOC)
-    if xLoc != None:
-        xLoc /= jogPanel.xStepsInch
-        xHomeOffset = xLoc - val
-        setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
-        setParm(X_HOME_OFFSET, xHomeOffset)
-        print("xHomeOffset %0.4f" % (xHomeOffset))
-    if DRO:
-        xDROPos = getParm(X_DRO_POS)
-        print("xDROPos %0.4f" % (xDROPos / jogPanel.xDROInch))
-        if xDROPos != None:
-            droPos = float(xDROPos) / jogPanel.xDROInch
-            setInfo(xSvDROPosition, "%0.4f" % (droPos))
-            if jogPanel.xDROInvert:
-                droPos = -droPos
-            xDROOffset = droPos - val
-            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
-            setParm(X_DRO_OFFSET, xDROOffset)
-            print("xDROOffset %0.4f" % (xDROOffset))
-    stdout.flush()
+        self.jogpanel.focus()
 
 class ProbeDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
@@ -3754,7 +3759,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
                                 jogPanel.posFont, (120, -1))
         # txt = wx.StaticText(self, -1, \
         #                     'Z Position' if axis == AXIS_Z else 'X Diameter')
-        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL,\
         #            border=10)
         # self.probeLoc = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
         #                                  style=wx.TE_RIGHT)
@@ -3842,22 +3847,26 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.jogPanel.focus()
 
 class GotoDialog(wx.Dialog):
-    def __init__(self, frame, axis):
+    def __init__(self, jogPanel, axis):
         self.axis = axis
         pos = (10, 10)
         title = "Go to %s" % ('Z Position' if AXIS == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, frame, -1, title, pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
-        self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
-                                    style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
-        tc.SetFont(posFont)
-        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
-        sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+        #                   wx.NORMAL, False, u'Consolas')
+
+        self.pos = addDialogField(sizerV, tcDefault="0.000", \
+                                  tcFont=jogPanel.posFont, size=(120,-1), \
+                                  action=self.OnKeyChar)
+        # self.pos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+        #                             style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+        # tc.SetFont(posFont)
+        # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        # sizerV.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         self.addButton(sizerV, 'Ok', self.OnOk, border=10)
 
@@ -3909,38 +3918,44 @@ class GotoDialog(wx.Dialog):
             stdout.flush()
 
 class FixXPosDialog(wx.Dialog, FormRoutines):
-    def __init__(self, frame):
+    def __init__(self, jogPanel):
         FormRoutines.__init__(self, False)
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Fix X Size", pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, "Fix X Size", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
+        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+        #                   wx.NORMAL, False, u'Consolas')
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        txt = wx.StaticText(self, -1, "Current")
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                   border=10)
+        self.curXPos = \
+            self.addDialogField(sizerG, 'Current', "0.000", jogPanel.txtFont, \
+                                jogPanel.posFont, (120, -1))
+        # txt = wx.StaticText(self, -1, "Current")
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=10)
 
-        self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
-                                        style=wx.TE_RIGHT)
-        tc.SetFont(posFont)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        # self.curXPos = tc = wx.TextCtrl(self, -1, "0.000", size=(120, -1), \
+        #                                 style=wx.TE_RIGHT)
+        # tc.SetFont(posFont)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
-        txt = wx.StaticText(self, -1, "Measured")
-        sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-                   border=10)
+        self.curXPos = \
+            self.addDialogField(sizerG, 'Measured', "0.000", jogPanel.txtFont, \
+                                jogPanel.posFont, (120, -1), self.onKeyChar)
+        # txt = wx.StaticText(self, -1, "Measured")
+        # sizerG.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=10)
 
-        self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", size=(120, -1), \
-                                           style=wx.TE_RIGHT|\
-                                           wx.TE_PROCESS_ENTER)
-        tc.SetFont(posFont)
-        tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
-        sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
+        # self.actualXPos = tc = wx.TextCtrl(self, -1, "0.0000", \
+        #                                    size=(120, -1), style=wx.TE_RIGHT|\
+        #                                    wx.TE_PROCESS_ENTER)
+        # tc.SetFont(posFont)
+        # tc.Bind(wx.EVT_CHAR, self.OnKeyChar)
+        # sizerG.Add(tc, flag=wx.CENTER|wx.ALL, border=10)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
