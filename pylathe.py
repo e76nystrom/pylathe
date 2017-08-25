@@ -3719,19 +3719,19 @@ def updateXPos(val):
             print("xDROOffset %0.4f" % (xDROOffset))
     stdout.flush()
 
-class ProbeDialog(wx.Dialog):
-    def __init__(self, frame, axis):
+class ProbeDialog(wx.Dialog, FormRoutine):
+    def __init__(self, jogPanel, axis):
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, frame, -1, title, pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
         #                   wx.NORMAL, False, u'Consolas')
-        posFont = frame.posFont
+        posFont = jogPanel.posFont
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
