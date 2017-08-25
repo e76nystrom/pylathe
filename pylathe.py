@@ -252,13 +252,13 @@ class FormRoutines():
         sizer.Add(btn, flag=flag, border=2)
         return(btn)
 
-    def addDialogButton(self, sizer, id, action=None):
+    def addDialogButton(self, sizer, id, action=None, border=5):
         btn = wx.Button(self, id)
         if action == None:
             btn.SetDefault()
         else:
             btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, 0, wx.ALL, 5)
+        sizer.Add(btn, 0, wx.ALL, border=border)
         return(btn)
 
     def addRadioButton(self, sizer, label, key, style=0, action=None):
