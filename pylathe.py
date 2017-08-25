@@ -2753,6 +2753,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
+        self.curPass = 0
         self.currentPanel = None
         self.currentControl = None
 
@@ -3349,6 +3350,17 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xPos.SetValue("%0.4f" % (xLoc))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLoc * 2)))
             self.rpm.SetValue(rpm)
+
+            val = int(curPass)
+            passNum = val & 0xff
+            passType = val >> 8
+            if passType == 0:
+                self.passNum = val
+                curPass = str(val)
+            elif passType == 1:
+                curPass = str(val) + "S"
+            else:
+                curPass = "%dS%d" % (self.passNum, val)
             self.curPass.SetValue(curPass)
 
             if DRO:
@@ -3461,8 +3473,7 @@ class JogPanel(wx.Panel, FormRoutines):
         return(mainFrame.panels[panel])
 
     def clrActive(self):
-        panel = self.getPanel()
-        panel.active = False
+        self.currentPanel.active = False
 
     def OnStartSpindle(self, e):
         if STEPPER_DRIVE:
