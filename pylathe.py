@@ -2832,12 +2832,16 @@ class JogPanel(wx.Panel, FormRoutines):
         # second row
         # blank space
 
-        sizerG.Add(self.emptyCell)
+        (self.passSize, self.passText) = \
+            self.addDialogField(sizerG, "Size", "0", txtFont, \
+                                posFont, (120, -1), border=(10,2),
+                                edit=False, text=True)
+        # sizerG.Add(self.emptyCell)
         
-        self.statusText = txt = wx.StaticText(self, -1, "")
-        txt.SetFont(txtFont)
-        sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=10)
+        # self.statusText = txt = wx.StaticText(self, -1, "")
+        # txt.SetFont(txtFont)
+        # sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
+        #            wx.ALIGN_CENTER_VERTICAL, border=10)
 
         # x diameter
 
@@ -2875,10 +2879,19 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # status line
 
-        self.statusLine = txt = wx.StaticText(self, -1, "")
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.statusText = txt = wx.StaticText(self, -1, "aaa", (60, -1))
         txt.SetFont(txtFont)
-        sizerV.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        self.statusLine = txt = wx.StaticText(self, -1, "a")
+        txt.SetFont(txtFont)
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
+                   wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        sizerV.add(sizerH)
 
         # control buttons and jog
 
