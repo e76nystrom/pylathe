@@ -3362,7 +3362,7 @@ class JogPanel(wx.Panel, FormRoutines):
             elif passType == 1:
                 curPass = str(passNum) + "S"
             else:
-                curPass = "%dS%d" % (self.lastPass, val)
+                curPass = "%dS%d" % (self.lastPass, passNum)
             self.curPass.SetValue(curPass)
 
             if DRO:
