@@ -292,7 +292,10 @@ class ActionRoutines():
     def OnShow(self, e):
         if done:
             return
-        if not self.IsShown():
+        if self.IsShown():
+            jogPanel.currentPanel = self
+            jogPanel.currentControl = self.control
+        else:
             self.active = False
 
     def OnSend(self, e):
@@ -2750,6 +2753,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
+        self.currentPanel = None
+        self.currentControl = Not
 
     def initUI(self):
         global emptyCell
@@ -3358,6 +3363,8 @@ class JogPanel(wx.Panel, FormRoutines):
             text = ''
             if xHomed:
                 text = 'H'
+            if self.currentPanel.active:
+                text += '*'
             mvStatus = int(mvStatus)
             self.mvStatus = mvStatus
             if mvStatus & MV_MEASURE:
