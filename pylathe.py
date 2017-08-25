@@ -2891,7 +2891,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # pass
 
-        self.rpm = \
+        self.curPass = \
             self.addDialogField(sizerG, "Pass", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
                                 edit=False)
