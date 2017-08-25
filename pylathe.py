@@ -2907,7 +2907,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
 
         if STEPPER_DRIVE:
-            self.addControlButton(sizerG, 'Jog Spindle', self.OnJogSpindle, \
+            self.addControlButton(sizerG, 'Jog Spindle +', self.OnJogSpindle, \
                                   self.OnJogUp)
         else:
             sizerG.Add(self.emptyCell)
@@ -2916,7 +2916,11 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
 
-        sizerG.Add(self.emptyCell)
+        if STEPPER_DRIVE:
+            self.addControlButton(sizerG, 'Jog Spindle -', self.OnJogSpindle, \
+                                  self.OnJogUp)
+        else:
+            sizerG.Add(self.emptyCell)
 
         self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
 
