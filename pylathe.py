@@ -258,7 +258,7 @@ class FormRoutines():
             btn.SetDefault()
         else:
             btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, 0, wx.ALL, border=border)
+        sizer.Add(btn, 0, wx.ALL|wx.CENTER, border=border)
         return(btn)
 
     def addRadioButton(self, sizer, label, key, style=0, action=None):
