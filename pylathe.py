@@ -3445,8 +3445,8 @@ class JogPanel(wx.Panel, FormRoutines):
                             setParm(X_DRO_OFFSET, xDROOffset)
                         print("x %s xLoc %7.4f probeLoc %7.4f "\
                               "xHomeOffset %7.4f" % \
-                        stdout.flush()
                               (x, xLoc, self.probeLoc, xHomeOffset))
+                        stdout.flush()
                         self.probeLoc = 0.0
                         self.homeDone("x probe success")
                     elif val & PROBE_FAIL:
