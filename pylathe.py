@@ -284,10 +284,12 @@ class FormRoutines():
 
         if label != None:
             txt = wx.StaticText(self, -1, label)
-            sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|\
-                      wx.ALIGN_CENTER_VERTICAL, border=b0)
             if textFont != None:
                 txt.SetFont(textFont)
+            sizer.Add(txt, flag=wx.LEFT|wx.ALIGN_RIGHT|\
+                      wx.ALIGN_CENTER_VERTICAL, border=b0)
+            print("label %s border %d", (label, border))
+            stdout.flush()
 
         tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
                          style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
