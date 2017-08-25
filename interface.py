@@ -269,7 +269,7 @@ cmdList = \
     
     "location and debug info",
     
-    ("READLOC", "", "read location"),
+    ("READALL", "", "read all status info"),
     ("READDBG", "", "read debug message"),
     ("CLRDBG", "", "clear debug message buffer"),
 
