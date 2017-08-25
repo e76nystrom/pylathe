@@ -271,7 +271,7 @@ class FormRoutines():
 
     def addDialogField(self, sizer, label=None, tcDefault="", textFont=None, \
                        tcFont=None, size=wx.DefaultSize, action=None, \
-                       border=None, index=None, edit=True):
+                       border=None, index=None, edit=True, text=False):
         if border == None:
             b0 = 10
             b1 = 10
@@ -300,7 +300,7 @@ class FormRoutines():
         if index != None:
             initInfo(index, tc)
         sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
-        return(tc)
+        return(tc if not text else (tc, txt))
 
 class ActionRoutines():
     def __init__(self, control):
@@ -2833,6 +2833,7 @@ class JogPanel(wx.Panel, FormRoutines):
         # blank space
 
         sizerG.Add(self.emptyCell)
+        
         self.statusText = txt = wx.StaticText(self, -1, "")
         txt.SetFont(txtFont)
         sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
