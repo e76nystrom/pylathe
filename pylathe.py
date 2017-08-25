@@ -882,7 +882,7 @@ class UpdatePass():
         self.cutAmount = 0.0
         self.calcPass = None
         self.genPass = None
-        self.passDiam = []
+        self.passSize = []
 
     def calcFeed(self, feed, cutAmount, finish=0):
         self.cutAmount = cutAmount
@@ -891,7 +891,7 @@ class UpdatePass():
         self.actualFeed = cutToFinish / self.passes
         if finish != 0:
             self.passes += 1
-        self.passDiam = [None for i in range(self.passes + 1)]
+        self.passSize = [None for i in range(self.passes + 1)]
         self.initPass()
 
     def setupFeed(self, actualFeed, cutAmount):
@@ -1049,7 +1049,7 @@ class Turn(UpdatePass):
             if not self.neg:
                 feed = -feed
         self.curX = self.xStart + feed
-        self.passDiam[self.passCount] = self.curX
+        self.passSize[self.passCount] = self.curX * 2.0
         self.safeX = self.curX + self.xRetract
         print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
               (self.passCount, feed, self.curX, self.curX * 2.0))
@@ -3011,12 +3011,12 @@ class JogPanel(wx.Panel, FormRoutines):
         return(xPos, yPos)
 
     def OnZMenu(self, e):
-        menu = PosMenu(AXIS_Z)
+        menu = PosMenu(self, AXIS_Z)
         self.PopupMenu(menu, self.menuPos(e, self.zPos))
         menu.Destroy()
 
     def OnXMenu(self, e):
-        menu = PosMenu(AXIS_X)
+        menu = PosMenu(self, AXIS_X)
         self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
 
@@ -3541,8 +3541,9 @@ def jogPanelPos(ctl):
         return(xPos, yPos)
 
 class PosMenu(wx.Menu):
-    def __init__(self, axis):
+    def __init__(self, jogPanel, axis):
         wx.Menu.__init__(self)
+        self.jogPanel = jogPanel
         self.axis = axis
         item = wx.MenuItem(self, wx.NewId(), "Set")
         self.Append(item)
@@ -3571,23 +3572,23 @@ class PosMenu(wx.Menu):
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
     def getPosCtl(self):
-        ctl = jogPanel.zPos if self.axis == AXIS_Z else jogPanel.xPos
+        ctl = self.jogPanel.zPos if self.axis == AXIS_Z else \
+              self.jogPanel.xPos
         return(jogPanelPos(ctl))
 
     def OnSet(self, e):
-        dialog = SetPosDialog(jogPanel, self.axis)
+        dialog = SetPosDialog(self.jogPanel)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
     def OnZero(self, e):
-        global jogPanel
         updateZPos(0) if self.axis == AXIS_Z else \
             updateXPos(0)
-        jogPanel.focus()
+        self.jogPanel.focus()
 
     def OnProbe(self, e):
-        dialog = ProbeDialog(jogPanel, self.axis)
+        dialog = ProbeDialog(self.jogPanel, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
@@ -3598,29 +3599,30 @@ class PosMenu(wx.Menu):
         queParm(X_HOME_SPEED, getInfoData(xHomeSpeed))
         queParm(X_HOME_DIR, 1 if getBoolInfo(xHomeDir) else -1)
         command(XHOMEAXIS)
-        jogPanel.probe(HOME_X)
-        jogPanel.focus()
+        self.jogPanel.probe(HOME_X)
+        self.jogPanel.focus()
 
     def OnGoto(self, e):
-        dialog = GotoDialog(jogPanel, self.axis)
+        dialog = GotoDialog(self.jogPanel, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
     def OnFixX(self, e):
-        dialog = jogPanel.fixXPosDialog
+        dialog = self.jogPanel.fixXPosDialog
         if dialog == None:
-            self.FixXPosDialog = dialog = FixXPosDialog(jogPanel)
+            self.FixXPosDialog = dialog = FixXPosDialog(self.jogPanel)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
 class SetPosDialog(wx.Dialog):
-    def __init__(self, frame, axis):
+    def __init__(self, jogPanel, axis):
+        self.jogPanel = jogPanel
         self.axis = axis
         pos = (10, 10)
         title = "Position %s" % ('Z' if axis == AXIS_Z else 'X')
-        wx.Dialog.__init__(self, frame, -1, title, pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -3727,8 +3729,9 @@ class ProbeDialog(wx.Dialog):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                          wx.NORMAL, False, u'Consolas')
+        # posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
+        #                   wx.NORMAL, False, u'Consolas')
+        posFont = frame.posFont
 
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
