@@ -3848,7 +3848,7 @@ class GotoDialog(wx.Dialog):
     def __init__(self, jogPanel, axis):
         self.axis = axis
         pos = (10, 10)
-        title = "Go to %s" % ('Z Position' if AXIS == AXIS_Z else 'X Diameter')
+        title = "Go to %s" % ('Z Position' if axis == AXIS_Z else 'X Diameter')
         wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
