@@ -208,9 +208,7 @@ cmdList = \
     ("ZJMOV", "", "start z jog"),
     ("ZJSPEED", "", "start z jog at speed"),
     ("ZSTOP", "", "stop z movement"),
-    ("ZHOME", "", "set current z location as home"),
     ("ZSETLOC", "", ""),
-    ("ZGOHOME", "", "z go to home position"),
     
     "x motion commands",
     
@@ -219,9 +217,7 @@ cmdList = \
     ("XJMOV", "", "start z jog"),
     ("XJSPEED", "", "start x jog at speed"),
     ("XSTOP", "", "stop x movement"),
-    ("XHOME", "", "set current x location as home"),
     ("XSETLOC", "", ""),
-    ("XGOHOME", "", "x go to home position"),
     ("XHOMEAXIS", "", "x home axis"),
     
     "spindle operations",
