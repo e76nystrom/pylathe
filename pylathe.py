@@ -2902,6 +2902,8 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.GridSizer(3, 0, 0)
 
+        # first line
+
         self.addButton(sizerG, 'E Stop', self.OnEStop, btnSize)
 
         self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
@@ -2912,7 +2914,9 @@ class JogPanel(wx.Panel, FormRoutines):
         else:
             sizerG.Add(self.emptyCell)
 
-        self.addButton(sizerG, 'Done', self.OnDone, btnSize)
+        # second line
+
+        self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
 
         self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
 
@@ -2922,7 +2926,9 @@ class JogPanel(wx.Panel, FormRoutines):
         else:
             sizerG.Add(self.emptyCell)
 
-        self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
+        # third line
+
+        self.addButton(sizerG, 'Done', self.OnDone, btnSize)
 
         self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
 
