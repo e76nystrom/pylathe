@@ -950,7 +950,6 @@ class UpdatePass():
 
     def updatePass(self):
         global moveCommands
-        self.springFlag = False
         if (self.passCount < self.passes) or self.springFlag:
             if self.springFlag:
                 self.springFlag = False
