@@ -4314,10 +4314,12 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
+        
         self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                                wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
+        self.setFront(testFont)
 
         moveCommands = MoveCommands()
 
