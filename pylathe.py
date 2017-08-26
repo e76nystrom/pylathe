@@ -4342,7 +4342,7 @@ class MainFrame(wx.Frame):
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
-        openSerial(getInfoData(commPort), 57600)
+        openSerial(getInfoData(commPort), getInfoData(commRate))
         if XILINX:
             comm.xRegs = xRegs
 
