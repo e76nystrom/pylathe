@@ -4688,7 +4688,7 @@ class MainFrame(wx.Frame):
 
     def OnTestSpindle(self, e):
         if self.testSpindleDialog == None:
-            self.testSpindleDialog = TestSpindleDialog(self)
+            self.testSpindleDialog = TestSpindleDialog(self, defaultFont)
         else:
             self.testSpindleDialog.Raise()
         self.testSpindleDialog.spindleTest.test()
@@ -4696,7 +4696,7 @@ class MainFrame(wx.Frame):
 
     def OnTestSync(self, e):
         if self.testSyncDialog == None:
-            self.testSyncDialog = TestSyncDialog(self)
+            self.testSyncDialog = TestSyncDialog(self, defaultFont)
         else:
             self.testSyncDialog.Raise()
         self.testSyncDialog.syncTest.test()
@@ -4704,7 +4704,7 @@ class MainFrame(wx.Frame):
 
     def OnTestTaper(self, e):
         if self.testTaperDialog == None:
-            self.testTaperDialog = TestTaperDialog(self)
+            self.testTaperDialog = TestTaperDialog(self, defaultFont)
         else:
             self.testTaperDialog.Raise()
         self.testTaperDialog.taperTest.test()
@@ -4712,7 +4712,7 @@ class MainFrame(wx.Frame):
 
     def OnTestMove(self, e):
         if self.testMoveDialog == None:
-            self.testMoveDialog = TestMoveDialog(self)
+            self.testMoveDialog = TestMoveDialog(self, defaultFont)
         else:
             self.testMoveDialog.Raise()
         self.testMoveDialog.moveTest.test()
@@ -5005,11 +5005,11 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
-def testText(dialog):
+def testText(dialog, defaultFont):
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
     txt = wx.TextCtrl(dialog, style=wx.TE_MULTILINE, size=(650,350))
-    # txt.SetFont(testFont)
+    txt.SetFont(testFont)
     # w, h = txt.GetTextExtent("0123456789")
     # w *= 8
     # h *= 24
@@ -5020,40 +5020,40 @@ def testText(dialog):
     dialog.sizerV.Fit(dialog)
     return(txt)
 
-class TestSpindleDialog(wx.Dialog):
+class TestSpindleDialog(wx.Dialog, defaultFont):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
-        txt = testText(self)
+        txt = testText(self, defaultFont)
         self.spindleTest = SpindleTest(txt)
 
-class TestSyncDialog(wx.Dialog):
+class TestSyncDialog(wx.Dialog, defaultFont):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Sync", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
-        txt = testText(self)
+        txt = testText(self, defaultFont)
         self.syncTest = SyncTest(txt)
 
-class TestTaperDialog(wx.Dialog):
+class TestTaperDialog(wx.Dialog, defaultFont):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Taper", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
-        txt = testText(self)
+        txt = testText(self, defaultFont)
         self.taperTest = TaperTest(txt)
 
-class TestMoveDialog(wx.Dialog):
+class TestMoveDialog(wx.Dialog, defaultFont):
     def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Move", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
-        txt = testText(self)
+        txt = testText(self, defaultFont)
         self.moveTest = MoveTest(txt)
 
 def dbgPrt(txt, format, values):
