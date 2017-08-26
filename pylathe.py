@@ -4947,6 +4947,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
 
         self.fields = (
             ("Comm Port", commPort, None), \
+            ("Baud Rate", commRate, 'd'), \
         )
         self.fieldList(sizerG, self.fields)
 
