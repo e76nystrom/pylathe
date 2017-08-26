@@ -184,7 +184,10 @@ class FormRoutines():
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
             else:
-                self.addField(sizer, label, index)
+                if label.startswiht('-'):
+                    self.addField(sizer, label[1:], index, (-1, -1))
+                else:
+                    self.addField(sizer, label, index)
 
     def addFieldText(self, sizer, label, key, keyText):
         if len(label) != 0:
@@ -198,13 +201,13 @@ class FormRoutines():
         initInfo(key, tc)
         return(tc)
 
-    def addField(self, sizer, label, key):
+    def addField(self, sizer, label, key, size=(60, -1)):
         if len(label) != 0:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        tc = wx.TextCtrl(self, -1, "", size=(60, -1))
+        tc = wx.TextCtrl(self, -1, "", size=size)
         sizer.Add(tc, flag=wx.ALL, border=2)
         if key in configInfo.info:
             val = getInfo(key)
@@ -4979,7 +4982,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDRO", cfgDRO, None), \
             ("bLCD", cfgLCD, None), \
             ("bProbe Inv", cfgPrbInv, None), \
-            ("fcy", cfgFcy, 'd'), \
+            ("-fcy", cfgFcy, 'd'), \
             ("bDisable Commands", cfgCmdDis, None), \
             ("bDraw Moves", cfgDraw, None), \
             ("bSave Debug", cfgDbgSave, None), \
