@@ -942,7 +942,7 @@ class UpdatePass():
 
     def initPass(self):
         setParm(TOTAL_PASSES, self.passes)
-        self.passCount = 1
+        self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
         self.feed = 0.0
@@ -952,19 +952,18 @@ class UpdatePass():
         global moveCommands
         if self.passCount <= self.passes:
             self.springFlag = False
-            if self.sPassInt != 0:
-                self.sPassCtr += 1
-                if self.sPassCtr > self.sPassInt:
-                    self.sPassCtr = 0
-                    self.springFlag = True
             if self.springFlag:
                 moveCommands.nextPass(0x100 | self.passCount)
-                self.genPass()
             else:
+                self.passCount += 1
                 moveCommands.nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
-                self.genPass()
-                self.passCount += 1
+                if self.sPassInt != 0:
+                    self.sPassCtr += 1
+                    if self.sPassCtr >= self.sPassInt:
+                        self.sPassCtr = 0
+                        self.springFlag = True
+            self.genPass()
         else:
             if self.springFlag:
                 self.springFlag = False
