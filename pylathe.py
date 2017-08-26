@@ -962,8 +962,7 @@ class UpdatePass():
                     self.sPassCtr += 1
                     if self.sPassCtr >= self.sPassInt:
                         self.sPassCtr = 0
-                        if (self.passCount != self.passes) or \
-                           (self.spasses != 0):
+                        if (self.passCount != self.passes) or (self.spasses != 0):
                             self.springFlag = True
             self.genPass()
         else:
