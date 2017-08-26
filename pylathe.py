@@ -184,7 +184,7 @@ class FormRoutines():
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
             else:
-                if label.startswiht('-'):
+                if label.startswith('-'):
                     self.addField(sizer, label[1:], index, (-1, -1))
                 else:
                     self.addField(sizer, label, index)
