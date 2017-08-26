@@ -4688,7 +4688,7 @@ class MainFrame(wx.Frame):
 
     def OnTestSpindle(self, e):
         if self.testSpindleDialog == None:
-            self.testSpindleDialog = TestSpindleDialog(self, defaultFont)
+            self.testSpindleDialog = TestSpindleDialog(self, self.defaultFont)
         else:
             self.testSpindleDialog.Raise()
         self.testSpindleDialog.spindleTest.test()
@@ -4696,7 +4696,7 @@ class MainFrame(wx.Frame):
 
     def OnTestSync(self, e):
         if self.testSyncDialog == None:
-            self.testSyncDialog = TestSyncDialog(self, defaultFont)
+            self.testSyncDialog = TestSyncDialog(self, self.defaultFont)
         else:
             self.testSyncDialog.Raise()
         self.testSyncDialog.syncTest.test()
@@ -4704,7 +4704,7 @@ class MainFrame(wx.Frame):
 
     def OnTestTaper(self, e):
         if self.testTaperDialog == None:
-            self.testTaperDialog = TestTaperDialog(self, defaultFont)
+            self.testTaperDialog = TestTaperDialog(self, self.defaultFont)
         else:
             self.testTaperDialog.Raise()
         self.testTaperDialog.taperTest.test()
@@ -4712,7 +4712,7 @@ class MainFrame(wx.Frame):
 
     def OnTestMove(self, e):
         if self.testMoveDialog == None:
-            self.testMoveDialog = TestMoveDialog(self, defaultFont)
+            self.testMoveDialog = TestMoveDialog(self, self.defaultFont)
         else:
             self.testMoveDialog.Raise()
         self.testMoveDialog.moveTest.test()
