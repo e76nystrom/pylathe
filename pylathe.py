@@ -5005,7 +5005,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
-def testText(dialog, defaultFont):
+def testText(dialog):
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
     txt = wx.TextCtrl(dialog, style=wx.TE_MULTILINE, size=(650,350))
@@ -5020,8 +5020,8 @@ def testText(dialog, defaultFont):
     dialog.sizerV.Fit(dialog)
     return(txt)
 
-class TestSpindleDialog(wx.Dialog, defaultFont):
-    def __init__(self, frame):
+class TestSpindleDialog(wx.Dialog):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -5029,8 +5029,8 @@ class TestSpindleDialog(wx.Dialog, defaultFont):
         txt = testText(self, defaultFont)
         self.spindleTest = SpindleTest(txt)
 
-class TestSyncDialog(wx.Dialog, defaultFont):
-    def __init__(self, frame):
+class TestSyncDialog(wx.Dialog):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Sync", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -5038,8 +5038,8 @@ class TestSyncDialog(wx.Dialog, defaultFont):
         txt = testText(self, defaultFont)
         self.syncTest = SyncTest(txt)
 
-class TestTaperDialog(wx.Dialog, defaultFont):
-    def __init__(self, frame):
+class TestTaperDialog(wx.Dialog):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Taper", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
@@ -5047,8 +5047,8 @@ class TestTaperDialog(wx.Dialog, defaultFont):
         txt = testText(self, defaultFont)
         self.taperTest = TaperTest(txt)
 
-class TestMoveDialog(wx.Dialog, defaultFont):
-    def __init__(self, frame):
+class TestMoveDialog(wx.Dialog):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Move", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
