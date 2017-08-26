@@ -4319,7 +4319,7 @@ class MainFrame(wx.Frame):
                                wx.NORMAL, False, u'Consolas')
         testFont = wx.Font(10, wx.MODERN, wx.NORMAL,
                           wx.NORMAL, False, u'Consolas')
-        self.SetFront(testFont)
+        self.SetFont(testFont)
 
         moveCommands = MoveCommands()
 
