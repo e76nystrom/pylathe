@@ -959,11 +959,12 @@ class UpdatePass():
                     self.springFlag = True
             if self.springFlag:
                 moveCommands.nextPass(0x100 | self.passCount)
+                self.genPass()
             else:
                 moveCommands.nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
+                self.genPass()
                 self.passCount += 1
-            self.genPass()
         else:
             if self.springFlag:
                 self.springFlag = False
@@ -1083,8 +1084,8 @@ class Turn(UpdatePass):
             if not self.neg:
                 feed = -feed
         self.curX = self.xStart + feed
-        self.passSize[self.passCount] = self.curX * 2.0
         self.safeX = self.curX + self.xRetract
+        self.passSize[self.passCount] = self.curX * 2.0
         print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
               (self.passCount, feed, self.curX, self.curX * 2.0))
 
