@@ -5005,11 +5005,11 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
-def testText(dialog):
+def testText(dialog, defaultFont):
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
     txt = wx.TextCtrl(dialog, style=wx.TE_MULTILINE, size=(650,350))
-    txt.SetFont(testFont)
+    txt.SetFont(defaultFont)
     # w, h = txt.GetTextExtent("0123456789")
     # w *= 8
     # h *= 24
