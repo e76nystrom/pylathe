@@ -184,8 +184,8 @@ class FormRoutines():
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
             else:
-                if label.startswith('-'):
-                    self.addField(sizer, label[1:], index, (-1, -1))
+                if label.startswith('w'):
+                    self.addField(sizer, label[1:], index, (80, -1))
                 else:
                     self.addField(sizer, label, index)
 
@@ -4982,7 +4982,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDRO", cfgDRO, None), \
             ("bLCD", cfgLCD, None), \
             ("bProbe Inv", cfgPrbInv, None), \
-            ("-fcy", cfgFcy, 'd'), \
+            ("wfcy", cfgFcy, 'd'), \
             ("bDisable Commands", cfgCmdDis, None), \
             ("bDraw Moves", cfgDraw, None), \
             ("bSave Debug", cfgDbgSave, None), \
