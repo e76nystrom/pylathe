@@ -5021,7 +5021,7 @@ def testText(dialog):
     return(txt)
 
 class TestSpindleDialog(wx.Dialog):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, frame):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
