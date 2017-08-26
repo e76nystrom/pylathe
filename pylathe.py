@@ -954,10 +954,12 @@ class UpdatePass():
             if self.springFlag:
                 self.springFlag = False
                 moveCommands.nextPass(0x100 | self.passCount)
+                self.genPass()
             else:
                 self.passCount += 1
                 moveCommands.nextPass(self.passCount)
                 self.calcPass(self.passCount == self.passes)
+                self.genPass()
                 if self.sPassInt != 0:
                     self.sPassCtr += 1
                     if self.sPassCtr >= self.sPassInt:
@@ -967,7 +969,6 @@ class UpdatePass():
                             self.springFlag = True
                         else:
                             return(True)
-                self.genPass()
         else:
             if self.spring < self.sPasses:
                 self.spring += 1
