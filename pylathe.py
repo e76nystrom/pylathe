@@ -965,6 +965,8 @@ class UpdatePass():
                         if (self.passCount != self.passes) or \
                            (self.sPasses != 0):
                             self.springFlag = True
+                        else:
+                            return(True)
             self.genPass()
         else:
             if self.spring < self.sPasses:
