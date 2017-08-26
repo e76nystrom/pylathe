@@ -4323,11 +4323,11 @@ class MainFrame(wx.Frame):
 
         moveCommands = MoveCommands()
 
-        self.zDialog = ZDialog(self)
-        self.xDialog = XDialog(self)
-        self.spindleDialog = SpindleDialog(self)
-        self.portDialog = PortDialog(self)
-        self.configDialog = ConfigDialog(self)
+        self.zDialog = ZDialog(self, defaultFont)
+        self.xDialog = XDialog(self, defaultFont)
+        self.spindleDialog = SpindleDialog(self, defualtFont)
+        self.portDialog = PortDialog(self, defaultFont)
+        self.configDialog = ConfigDialog(self, defualtFont)
 
         self.testSpindleDialog = None
         self.testSyncDialog = None
@@ -4719,10 +4719,11 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.Show()
 
 class ZDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4776,10 +4777,11 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             zDataSent = False
 
 class XDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4852,10 +4854,11 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             xDataSent = False
 
 class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4929,10 +4932,11 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             spindleDataSent = False
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4958,11 +4962,12 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         self.Show(False)
 
 class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         global XILINX
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Config Setup", pos, \
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
