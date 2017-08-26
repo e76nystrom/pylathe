@@ -1115,6 +1115,7 @@ class Turn(UpdatePass):
             self.cutAmount += add
             self.calculatePass(True)
             self.setup()
+            moveCommands.nextPass(self.passCount)
             self.runPass()
             self.m.moveX(self.xStart + self.xRetract)
             self.m.stopSpindle()
