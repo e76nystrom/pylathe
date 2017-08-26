@@ -19,6 +19,7 @@ configList = \
     ('cfgXilinx', 'config xilinx interface present'),
 
     ('commPort', 'comm port'),
+    ('commRate', 'comm baud rate'),
 
     ('cuPause', 'cutoff pause before cutting'),
     ('cuRPM', 'cutoff rpm'),
