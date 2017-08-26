@@ -973,6 +973,7 @@ class UpdatePass():
                 self.genPass()
             else:
                 return(False)
+        print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
 class Turn(UpdatePass):
