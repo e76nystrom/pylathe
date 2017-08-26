@@ -89,7 +89,6 @@ print(sys.version)
 print(wx.version())
 stdout.flush()
 
-testFont = None
 f = None
 mainFrame = None
 jogPanel = None
@@ -4310,16 +4309,17 @@ class UpdateThread(Thread):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
-        global moveCommands, testFont, jogShuttle
+        global moveCommands, jogShuttle
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
         
         self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                                wx.NORMAL, False, u'Consolas')
-        testFont = wx.Font(10, wx.MODERN, wx.NORMAL,
-                          wx.NORMAL, False, u'Consolas')
-        self.SetFont(testFont)
+        self.defaultFont = defaultFont = \
+            wx.Font(10, wx.MODERN, wx.NORMAL,
+                    wx.NORMAL, False, u'Consolas')
+        self.SetFont(defaultFont)
 
         moveCommands = MoveCommands()
 
@@ -5006,11 +5006,10 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.Show(False)
 
 def testText(dialog):
-    global testFont
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
     txt = wx.TextCtrl(dialog, style=wx.TE_MULTILINE, size=(650,350))
-    txt.SetFont(testFont)
+    # txt.SetFont(testFont)
     # w, h = txt.GetTextExtent("0123456789")
     # w *= 8
     # h *= 24
@@ -5022,7 +5021,7 @@ def testText(dialog):
     return(txt)
 
 class TestSpindleDialog(wx.Dialog):
-    def __init__(self, frame):
+    def __init__(self, frame, defaultFont):
         pos = (10, 10)
         wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
