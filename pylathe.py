@@ -4327,7 +4327,7 @@ class MainFrame(wx.Frame):
         self.xDialog = XDialog(self, defaultFont)
         self.spindleDialog = SpindleDialog(self, defaultFont)
         self.portDialog = PortDialog(self, defaultFont)
-        self.configDialog = ConfigDialog(self, defualtFont)
+        self.configDialog = ConfigDialog(self, defaultFont)
 
         self.testSpindleDialog = None
         self.testSyncDialog = None
