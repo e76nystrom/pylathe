@@ -925,6 +925,7 @@ class UpdatePass():
         if finish != 0:
             self.passes += 1
         self.passSize = [None for i in range(self.passes + 1)]
+        self.passSize[0] = 0.0
         self.initPass()
 
     def setupFeed(self, actualFeed, cutAmount):
