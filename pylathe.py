@@ -202,7 +202,7 @@ class FormRoutines():
         return(tc)
 
     def addField(self, sizer, label, key, size=(60, -1)):
-        if len(label) != 0:
+        if label != None:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=2)
@@ -1196,7 +1196,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButton(sizerG, 'Add', self.OnAdd)
 
-        self.add = self.addField(sizerG, "", tuAddFeed)
+        self.add = self.addField(sizerG, None, tuAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", tuRPM)
 
@@ -1437,7 +1437,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButton(sizerG, 'Add', self.OnAdd)
 
-        self.add = self.addField(sizerG, "", faAddFeed)
+        self.add = self.addField(sizerG, None, faAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", faRPM)
 
@@ -2045,7 +2045,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                                             style=wx.RB_GROUP, \
                                             action=self.OnDelta)
 
-        self.zDelta = self.addField(sizerG, "", tpZDelta)
+        self.zDelta = self.addField(sizerG, None, tpZDelta)
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.xDelta = self.addField(sizerG, "Delta X", tpXDelta)
@@ -2054,7 +2054,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.angleBtn = self.addRadioButton(sizerG, "Angle", tpAngleBtn, \
                                             action=self.OnAngle)
 
-        self.angle = self.addField(sizerG, "", tpAngle)
+        self.angle = self.addField(sizerG, None, tpAngle)
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
         self.xRetract = self.addField(sizerG, "X Retract", tpXRetract)
@@ -2078,7 +2078,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButton(sizerG, 'Add', self.OnAdd)
 
-        self.add = self.addField(sizerG, "", tpAddFeed)
+        self.add = self.addField(sizerG, None, tpAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", tpRPM)
 
@@ -2536,13 +2536,13 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                                                 style=wx.RB_GROUP, \
                                                 action=self.OnFirstFeed)
 
-        self.firstFeed = self.addField(sizerG, "", thFirstFeed)
+        self.firstFeed = self.addField(sizerG, None, thFirstFeed)
 
-        self.firstFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
-                                                thLastFeedBtn, \
-                                                action=self.OnLastFeed)
+        self.lastFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
+                                               thLastFeedBtn, \
+                                               action=self.OnLastFeed)
 
-        self.lastFeed = self.addField(sizerG, "", thLastFeed)
+        self.lastFeed = self.addField(sizerG, None, thLastFeed)
 
         # pass info
 
@@ -2564,7 +2564,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButton(sizerG, 'Add', self.OnAdd)
 
-        self.add = self.addField(sizerG, "", thAddFeed)
+        self.add = self.addField(sizerG, None, thAddFeed)
 
         self.rpm = self.addField(sizerG, "RPM", thRPM)
 
