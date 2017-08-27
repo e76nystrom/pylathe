@@ -2329,7 +2329,7 @@ class ScrewThread(UpdatePass):
 
         self.curArea = 0.0
         self.prevFeed = 0.0
-        print("pass     area  xfeed  zfeed  delta   xsize")
+        print("pass     area  xfeed  zfeed  delta  xsize")
 
         while self.updatePass():
             pass
@@ -2392,14 +2392,14 @@ class ScrewThread(UpdatePass):
                 offset = -offset
             self.zOffset += offset
 
-        print("%4d %8.6f %6.4f %6.4f %6.4f %6.5f" % \
-              (self.passCount, self.curArea, feed, self.zOffset, \
-               feed - self.prevFeed, self.curX * 2.0))
-        self.prevFeed = feed
         if self.internal:
             feed = -feed
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.curX * 2.0
+        print("%4d %8.6f %7.4f %6.4f %6.4f %7.5f" % \
+              (self.passCount, self.curArea, feed, self.zOffset, \
+               feed - self.prevFeed, self.curX * 2.0))
+        self.prevFeed = feed
 
         if self.d != None:
             p1 = (self.zOffset, feed)
