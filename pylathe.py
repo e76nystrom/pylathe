@@ -2919,7 +2919,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerG = wx.GridSizer(3, 0, 0)
+        sizerG = wx.FlexGridSizer(3, 0, 0)
 
         # first line
 
