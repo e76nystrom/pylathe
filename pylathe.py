@@ -2532,14 +2532,14 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.xExitRev = self.addField(sizerG, "Exit Rev", thExitRev)
 
         self.firstFeedBtn = self.addRadioButton(sizerG, "First Feed", \
-                                                tuFirstFeedBtn, \
+                                                thFirstFeedBtn, \
                                                 style=wx.RB_GROUP, \
                                                 action=self.OnFirstFeed)
 
         self.firstFeed = self.addField(sizerG, "", thFirstFeed)
 
         self.firstFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
-                                                tuLastFeedBtn, \
+                                                thLastFeedBtn, \
                                                 action=self.OnLastFeed)
 
         self.lastFeed = self.addField(sizerG, "", thLastFeed)
