@@ -2523,7 +2523,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.angle = self.addField(sizerG, "Angle", thAngle)
 
-        self.alternate = self.addCheckBox(sizerG, "Alternate", thalternate)n
+        self.alternate = self.addCheckBox(sizerG, "Alternate", thalternate)
 
         # special thread parameters
 
