@@ -3565,7 +3565,8 @@ class JogPanel(wx.Panel, FormRoutines):
         if self.jogCode != code:
             if self.jogCode == None:
                 sendSpindleData()
-                setParm(SP_JOG_DIR, val)
+                dir = 0 if code == wx.WXK_NUMPAD_PAGEDOWN else 1
+                setParm(SP_JOG_DIR, dir)
                 self.jogCode = code
                 self.repeat = 0
         try:
@@ -3586,8 +3587,8 @@ class JogPanel(wx.Panel, FormRoutines):
         print("jog spingle")
         stdout.flush()
         self.btnRpt.action = self.spindleJogCmd
-        self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
-        self.btnRpt.val = 1
+        self.btnRpt.code = wx.WXK_NUMPAD_PAGEUP
+        self.btnRpt.val = 0
         self.btnRpt.event.set()
 
     def OnJogUp(self, e):
