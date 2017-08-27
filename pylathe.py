@@ -1503,13 +1503,15 @@ class Cutoff(UpdatePass):
         self.zStart = getFloatVal(cu.zStart)
         self.zRetract = getFloatVal(cu.zRetract)
         self.zCutoff = getFloatVal(cu.zCutoff)
+        self.toolWidth = getFloatVal(cu.toolWidth)
 
     def runOperation(self):
         self.getParameters()
 
         self.safeX = self.xStart + self.xRetract
+        self.cutoffZ = self.zCutoff - self.toolWidth
 
-        self.passSize[0] = self.zCutoff
+        self.passSize[0] = self.cutoffZ
         if getBoolInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
@@ -1539,7 +1541,7 @@ class Cutoff(UpdatePass):
         else:
             m.queXSetup(getFloatInfo(cuXFeed))
         m.moveX(self.safeX)
-        m.moveZ(self.zCutoff)
+        m.moveZ(self.cutoffZ)
         m.moveX(self.xStart)
 
 class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
