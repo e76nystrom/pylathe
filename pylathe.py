@@ -2293,7 +2293,7 @@ class ScrewThread(UpdatePass):
         if self.panel.firstFeedBtn.GetValue():
             firstWidth = 2 * self.firstFeed * self.tanAngle
             self.areaPass = 0.5 * self.firstFeed * firstWidth
-            print("firstFeed %6.4f firstWidth %6.4f "firstArea %8.6f" % \
+            print("firstFeed %6.4f firstWidth %6.4f firstArea %8.6f" % \
                   (self.firstFeed, firstWidth, firstArea))
         else:
             lastDepth = self.depth - self.lastFeed
