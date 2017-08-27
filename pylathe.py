@@ -2600,7 +2600,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def OnInternal(self, e):
         pass
 
-    def OnFisrtFeed(self, e):
+    def OnFirstFeed(self, e):
         self.updateFirstFeed()
 
     def OnLastFeed(self, e):
