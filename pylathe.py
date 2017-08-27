@@ -2447,10 +2447,15 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.formatList =  ((thAddFeed, 'f'), \
+                            (thAlternate, None), \
                             (thAngle, 'fs'), \
                             (thExitRev, 'fs'), \
+                            (thFirstFeed, 'f'), \
+                            (thFirstFeedBtn, None), \
                             (thHFactor, 'f'), \
                             (thInternal, None), \
+                            (thLastFeed, 'f'), \
+                            (thLastFeedBtn, None), \
                             (thMM, None), \
                             (thPasses, 'd'), \
                             (thPause, None), \
@@ -2460,8 +2465,6 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                             (thSpring, 'n'), \
                             (thTPI, None), \
                             (thXDepth, 'f'), \
-                            (thXFirstFeed, 'f'), \
-                            (thXLastFeed, 'f'), \
                             (thXRetract, 'f'), \
                             (thXStart, 'f'), \
                             (thXTaper, 'f'), \
