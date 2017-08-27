@@ -2325,7 +2325,7 @@ class ScrewThread(UpdatePass):
         if getBoolInfo(cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
 
-        self.threadSetup()
+        self.setup()
 
         self.curArea = 0.0
         self.prevFeed = 0.0
