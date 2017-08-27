@@ -1484,12 +1484,12 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def addAction(self):
         self.control.addPass()
 
-class Cutoff(UpdatePass):
+class Cutoff():
     def __init__(self, cutoffPanel):
-        UpdatePass.__init__(self)
         self.panel = cutoffPanel
         global moveCommands
         self.m = moveCommands
+        self.passSize = [0.0, ]
 
     def getParameters(self):
         cu = self.panel
