@@ -343,8 +343,8 @@ class ActionRoutines():
                         self.sendAction()
                 except CommTimeout:
                     commTimeout()
-                except AttributeError:
-                    pass
+                # except AttributeError:
+                #     pass
         else:
             jogPanel.setStatus(STR_FIELD_ERROR)
         jogPanel.focus()
