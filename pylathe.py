@@ -2329,7 +2329,7 @@ class ScrewThread(UpdatePass):
 
         self.curArea = 0.0
         self.prevFeed = 0.0
-        print("pass     area   xfeed  zfeed  delta  xsize")
+        print("pass     area   xfeed  zfeed   delta  xsize")
 
         while self.updatePass():
             pass
