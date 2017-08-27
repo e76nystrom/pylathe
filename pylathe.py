@@ -2962,8 +2962,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
 
         if STEPPER_DRIVE:
-            self.addControlButton(sizerG, 'Jog Spindle +', self.OnJogSpindle, \
-                                  self.OnJogUp)
+            self.addControlButton(sizerG, 'Jog Spindle +', \
+                                  self.OnJogSpindleFwd, self.OnJogUp)
         else:
             sizerG.Add(self.emptyCell)
 
@@ -2974,8 +2974,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
 
         if STEPPER_DRIVE:
-            self.addControlButton(sizerG, 'Jog Spindle -', self.OnJogSpindle, \
-                                  self.OnJogUp)
+            self.addControlButton(sizerG, 'Jog Spindle -', \
+                                  self.OnJogSpindleRev, self.OnJogUp)
         else:
             sizerG.Add(self.emptyCell)
 
@@ -3308,6 +3308,9 @@ class JogPanel(wx.Panel, FormRoutines):
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
             self.spindleJogCmd(code, 0)
             return
+        elif code == wx.WXK_NUMPAD_PAGEUP:
+            self.spindleJogCmd(code, 1)
+            return
         # print("key down %x" % (code))
         # stdout.flush()
         evt.Skip()
@@ -3327,6 +3330,9 @@ class JogPanel(wx.Panel, FormRoutines):
             self.jogDone(XSTOP)
             return
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
+            command(SPINDLE_STOP)
+            return
+        elif code == wx.WXK_NUMPAD_PAGEUP:
             command(SPINDLE_STOP)
             return
         # print("key up %x" % (code))
@@ -3562,17 +3568,26 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.jogCode = code
                 self.repeat = 0
         try:
+            sendParm(SP_JOG_DIR, val)
             command(SPINDLE_JOG)
         except CommTimeout:
             commTimeout()
         self.combo.SetFocus()
 
-    def OnJogSpindle(self, e):
+    def OnJogSpindleFwd(self, e):
         print("jog spingle")
         stdout.flush()
         self.btnRpt.action = self.spindleJogCmd
         self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
         self.btnRpt.val = 0
+        self.btnRpt.event.set()
+
+    def OnJogSpindleRev(self, e):
+        print("jog spingle")
+        stdout.flush()
+        self.btnRpt.action = self.spindleJogCmd
+        self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
+        self.btnRpt.val = 1
         self.btnRpt.event.set()
 
     def OnJogUp(self, e):
