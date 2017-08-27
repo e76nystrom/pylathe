@@ -2586,6 +2586,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def update(self):
         self.formatData(self.formatList)
         self.updateFirstFeed()
+        self.updateLastFeed()
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
