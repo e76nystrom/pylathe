@@ -2480,7 +2480,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.GridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(8, 0, 0)
 
         # z parameters
 
