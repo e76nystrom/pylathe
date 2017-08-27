@@ -1373,7 +1373,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.formatList = ((faAddFeed, 'f'), \
-                           (faPasses, 'f'), \
+                           (faPasses, 'd'), \
                            (faPause, None), \
                            (faRPM, 'd'), \
                            (faSPInt, 'd'), \
