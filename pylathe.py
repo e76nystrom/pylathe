@@ -1577,11 +1577,11 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
+        self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
+
         self.zStart = self.addField(sizerG, "Z Start", cuZStart)
 
         self.zRetract = self.addField(sizerG, "Z Retract", cuZRetract)
-
-        self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
         self.toolWidth = self.addField(sizerG, "Tool Width", cuToolWidth)
 
@@ -2019,9 +2019,9 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zStart = self.addField(sizerG, "Z Start", tpZStart)
-
         self.zLength = self.addField(sizerG, "Z Length", tpZLength)
+
+        self.zStart = self.addField(sizerG, "Z Start", tpZStart)
 
         self.zFeed = self.addField(sizerG, "Z Feed", tpZFeed)
 
@@ -2508,6 +2508,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
         # initInfo(thDepth, btn)
 
+        # thread parameters
+
         self.thread = self.addField(sizerG, "Thread", thPitch)
 
         self.tpi = self.addRadioButton(sizerG, "TPI", thTPI, style=wx.RB_GROUP)
@@ -2519,7 +2521,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         sizerG.Add(self.emptyCell)
         sizerG.Add(self.emptyCell)
 
-        #
+        # special thread parameters
 
         self.xTaper = self.addField(sizerG, "Taper", thXTaper)
 
