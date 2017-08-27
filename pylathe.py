@@ -2616,7 +2616,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.control.thread()
+        self.control.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
@@ -2624,7 +2624,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             dbg = open('dbg.txt', 'w')
 
     def addAction(self):
-        self.control.threadAdd()
+        self.control.addPass()
 
 class ButtonRepeat(Thread):
     def __init__(self):
