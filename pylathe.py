@@ -915,7 +915,7 @@ class UpdatePass():
         self.cutAmount = 0.0
         self.calcPass = None
         self.genPass = None
-        self.passSize = []
+        self.passSize = [0.0, ]
 
     def calcFeed(self, feed, cutAmount, finish=0):
         self.cutAmount = cutAmount
@@ -1326,6 +1326,7 @@ class Face(UpdatePass):
     def calculatePass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
+        self.passSize[self.passCount] = self.curZ
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
         print("pass %2d feed %5.3f z %5.3f" % \
@@ -1354,6 +1355,7 @@ class Face(UpdatePass):
             self.cutAmount += add
             self.setup()
             self.calculatePass(True)
+            moveCommands.nextPass(self.passCount)
             self.runPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.zStart + self.zRetract)
@@ -1506,6 +1508,7 @@ class Cutoff():
 
         self.safeX = self.xStart + self.xRetract
 
+        self.passSize[0] = self.zCutoff
         if getBoolInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
@@ -1549,6 +1552,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.configList = None
         self.formatList = ((cuPause, None), \
                            (cuRPM, 'd'), \
+                           (cuToolWidth, 'f'), \
                            (cuXEnd, 'f'), \
                            (cuXFeed, 'f'), \
                            (cuXRetract, 'f'), \
@@ -1586,8 +1590,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.toolWidth = self.addField(sizerG, "Tool Width", cuToolWidth)
 
         # buttons
 
@@ -1776,6 +1779,7 @@ class Taper(UpdatePass):
             else:
                 self.startZ = self.zStart - self.zLength
                 self.startX = self.endX + self.taper * self.zLength
+            self.passSize[self.passCount] = self.curX * 2.0
         else:
             feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
@@ -1785,6 +1789,7 @@ class Taper(UpdatePass):
             taperLength = self.feed * self.taper
             self.endX = self.xStart - taperLength \
                         if taperLength < self.xLength else self.xEnd
+            self.passSize[self.passCount] = self.startZ
         print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
               "%6.3f %6.3f" % \
               (self.passCount, self.startZ, self.startX, \
@@ -1826,6 +1831,7 @@ class Taper(UpdatePass):
             self.cutAmount += add
             self.taperSetup()
             self.calcExternalPass(True)
+            moveCommands.nextPass(self.passCount)
             self.externalPass()
             if self.taperX:
                 self.m.moveX(self.safeX)
@@ -1886,6 +1892,7 @@ class Taper(UpdatePass):
             self.startZ = self.zEnd
             self.startX = (self.boreRadius + self.feed - \
                            self.zLength * self.taper)
+        self.passSize[self.passCount] = self.endX * 2.0
         print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
               "%6.3f %6.3f" % \
               (self.passCount, self.feed, self.startX, self.startZ, \
@@ -1920,6 +1927,7 @@ class Taper(UpdatePass):
             self.taperSetup()
             self.m.moveZ(self.safeZ)
             self.calcInternalPass()
+            moveCommands.nextPass(self.passCount)
             self.internalPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.safeZ)
@@ -2386,6 +2394,7 @@ class ScrewThread(UpdatePass):
         if self.internal:
             feed = -feed
         self.curX = self.xStart - feed
+        self.passSize[self.passCount] = self.curX * 2.0
 
         if self.d != None:
             p1 = (self.zOffset, feed)
@@ -2416,6 +2425,7 @@ class ScrewThread(UpdatePass):
         self.feed += add
         self.setup(True)
         self.calculatePass(add=True)
+        moveCommands.nextPass(self.passCount)
         self.runPass()
         self.m.stopSpindle();
         self.m.done(1)
