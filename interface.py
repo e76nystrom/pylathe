@@ -23,6 +23,7 @@ configList = \
 
     ('cuPause', 'cutoff pause before cutting'),
     ('cuRPM', 'cutoff rpm'),
+    ('cuToolWidth', 'cutoff tool width'),
     ('cuXEnd', 'cutoff x end'),
     ('cuXFeed', 'cutoff x feed'),
     ('cuXRetract', 'cutoff x retract'),
