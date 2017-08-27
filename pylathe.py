@@ -3568,7 +3568,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.jogCode = code
                 self.repeat = 0
         try:
-            sendParm(SP_JOG_DIR, val)
+            setParm(SP_JOG_DIR, val)
             command(SPINDLE_JOG)
         except CommTimeout:
             commTimeout()
