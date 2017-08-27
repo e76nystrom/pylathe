@@ -1154,7 +1154,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.GridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(8, 0, 0)
 
         # z parameters
 
@@ -1395,7 +1395,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.GridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(8, 0, 0)
 
         # z parameters
 
@@ -1573,7 +1573,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.GridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(8, 0, 0)
 
         # z parameters
 
@@ -5001,7 +5001,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
             ("Comm Port", commPort, None), \
@@ -5033,7 +5033,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.GridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
 
         self.fields = (
             ("bHW Control", cfgXilinx, None), \
