@@ -2290,17 +2290,17 @@ class ScrewThread(UpdatePass):
         print("depth %6.4f actualWdith %6.4f area %8.6f" % \
               (self.depth, actualWidth, area))
 
-        firstWidth = 2 * self.firstFeed * self.tanAngle
-        firstArea = 0.5 * self.firstFeed * firstWidth
-        passes = int(ceil(area / firstArea))
-        print("firstFeed %6.4f firstWidth %6.4f firstArea %8.6f passes %d" % \
-              (self.firstFeed, firstWidth, firstArea, passes))
-
-        lastDepth = self.depth - self.lastFeed
-        lastArea = (lastDepth * lastDepth) * self.tanAngle
-        self.areaPass = area - lastArea
-        print("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % \
-              (area, lastDepth, lastArea, self.areaPass))
+        if self.panel.firstFeedBtn.GetValue():
+            firstWidth = 2 * self.firstFeed * self.tanAngle
+            self.areaPass = 0.5 * self.firstFeed * firstWidth
+            print("firstFeed %6.4f firstWidth %6.4f "firstArea %8.6f" % \
+                  (self.firstFeed, firstWidth, firstArea))
+        else:
+            lastDepth = self.depth - self.lastFeed
+            lastArea = (lastDepth * lastDepth) * self.tanAngle
+            self.areaPass = area - lastArea
+            print("area %8.6f lastDepth %6.4f lastArea %8.6f areaPass %8.6f" % \
+                  (area, lastDepth, lastArea, self.areaPass))
 
         self.passes = int(ceil(area / self.areaPass))
         self.threadPanel.passes.SetValue("%d" % (self.passes))
@@ -2384,7 +2384,7 @@ class ScrewThread(UpdatePass):
         else:
             feed = self.feed
 
-        if True:
+        if not panel.alternate.GetValue():
             self.zOffset = feed * self.tanAngle
         else:
             offset = (feed - self.prevFeed) * self.tanAngle
@@ -2520,8 +2520,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.angle = self.addField(sizerG, "Angle", thAngle)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.alternate = self.addCheckBox(sizerG, "Alternate", thalternate)n
 
         # special thread parameters
 
@@ -2529,9 +2528,18 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.xExitRev = self.addField(sizerG, "Exit Rev", thExitRev)
 
-        self.firstFeed = self.addField(sizerG, "First Feed", thXFirstFeed)
+        self.firstFeedBtn = self.addRadioButton(sizerG, "First Feed", \
+                                                tuFirstFeedBtn, \
+                                                style=wx.RB_GROUP, \
+                                                action=self.OnFirstFeed)
 
-        self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
+        self.firstFeed = self.addField(sizerG, "", thFirstFeed)
+
+        self.firstFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
+                                                tuLastFeedBtn, \
+                                                action=self.OnLastFeed)
+
+        self.lastFeed = self.addField(sizerG, "", thLastFeed)
 
         # pass info
 
@@ -2574,10 +2582,27 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
+        self.updateFirstFeed()
 
+    def updateFirstFeed(self):
+        if self.firstFeedBtn.GetValue():
+            self.firstFeed.SetEditable(True)
+            self.lastFeed.SetEditable(False)
+
+    def updateLasttFeed(self):
+        if self.lastFeedBtn.GetValue():
+            self.lastFeed.SetEditable(True)
+            self.firstFeed.SetEditable(False)
+            
     def OnInternal(self, e):
         pass
 
+    def OnFisrtFeed(self, e):
+        self.updateFirstFeed()
+
+    def OnLastFeed(self, e):
+        self.updateLastFeed()
+    
     def sendData(self):
         moveCommands.queClear()
         sendClear()
