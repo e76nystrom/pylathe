@@ -1326,9 +1326,9 @@ class Face(UpdatePass):
     def calculatePass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
-        self.passSize[self.passCount] = self.curZ
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
+        self.passSize[self.passCount] = self.curZ
         print("pass %2d feed %5.3f z %5.3f" % \
               (self.passCount, feed, self.curZ))
 
