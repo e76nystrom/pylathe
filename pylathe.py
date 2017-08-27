@@ -1395,17 +1395,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        # x parameters
-
         sizerG = wx.GridSizer(8, 0, 0)
-
-        self.xStart = self.addField(sizerG, "X Start D", faXStart)
-
-        self.xEnd = self.addField(sizerG, "X End D", faXEnd)
-
-        self.xFeed = self.addField(sizerG, "X Feed", faXFeed)
-
-        self.xRetract = self.addField(sizerG, "X Retract", faXRetract)
 
         # z parameters
 
@@ -1416,6 +1406,16 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zFeed = self.addField(sizerG, "Z Feed", faZFeed)
 
         self.zRetract = self.addField(sizerG, "Z Retract", faZRetract)
+
+        # x parameters
+
+        self.xStart = self.addField(sizerG, "X Start D", faXStart)
+
+        self.xEnd = self.addField(sizerG, "X End D", faXEnd)
+
+        self.xFeed = self.addField(sizerG, "X Feed", faXFeed)
+
+        self.xRetract = self.addField(sizerG, "X Retract", faXRetract)
 
         # pass info
 
@@ -1573,17 +1573,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        # x parameters
-
         sizerG = wx.GridSizer(8, 0, 0)
-
-        self.xStart = self.addField(sizerG, "X Start D", cuXStart)
-
-        self.xEnd = self.addField(sizerG, "X End D", cuXEnd)
-
-        self.xFeed = self.addField(sizerG, "X Feed", cuXFeed)
-
-        self.xRetract = self.addField(sizerG, "X Retract", cuXRetract)
 
         # z parameters
 
@@ -1594,6 +1584,16 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zCutoff = self.addField(sizerG, "Z Cutoff", cuZCutoff)
 
         self.toolWidth = self.addField(sizerG, "Tool Width", cuToolWidth)
+
+        # x parameters
+
+        self.xStart = self.addField(sizerG, "X Start D", cuXStart)
+
+        self.xEnd = self.addField(sizerG, "X End D", cuXEnd)
+
+        self.xFeed = self.addField(sizerG, "X Feed", cuXFeed)
+
+        self.xRetract = self.addField(sizerG, "X Retract", cuXRetract)
 
         # buttons
 
@@ -2000,6 +2000,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
+
+        # standard taper select
 
         txt = wx.StaticText(self, -1, "Select Taper")
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
@@ -2475,9 +2477,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        # z parameters
-
         sizerG = wx.GridSizer(8, 0, 0)
+
+        # z parameters
 
         self.zEnd = self.addField(sizerG, "Z End", thZEnd)
 
