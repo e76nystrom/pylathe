@@ -976,7 +976,7 @@ class UpdatePass():
                 self.genPass()
             else:
                 return(False)
-        print("updatePass %d %s" % (self.passCount, self.springFlag))
+        # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
 class Turn(UpdatePass):
@@ -2329,7 +2329,7 @@ class ScrewThread(UpdatePass):
 
         self.curArea = 0.0
         self.prevFeed = 0.0
-        print("pass     area  xfeed  zfeed  delta")
+        print("pass     area  xfeed  zfeed  delta   xsize")
 
         while self.updatePass():
             pass
@@ -2392,9 +2392,9 @@ class ScrewThread(UpdatePass):
                 offset = -offset
             self.zOffset += offset
 
-        print("%4d %8.6f %6.4f %6.4f %6.4f" % \
+        print("%4d %8.6f %6.4f %6.4f %6.4f %6.5f" % \
               (self.passCount, self.curArea, feed, self.zOffset, \
-               feed - self.prevFeed))
+               feed - self.prevFeed, self.curX * 2.0))
         self.prevFeed = feed
         if self.internal:
             feed = -feed
