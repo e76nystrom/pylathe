@@ -2487,8 +2487,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
-        self.internal = self.addCheckBox(sizerG, "Internal", thInternal, \
-                                         action=self.OnInternal)
+        sizerG.Add(self.emptyCell)
+
         # x parameters
 
         self.xStart = self.addField(sizerG, "X Start D", thXStart)
@@ -2541,7 +2541,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", thSpring)
 
-        sizerG.Add(self.emptyCell)
+        self.internal = self.addCheckBox(sizerG, "Internal", thInternal, \
+                                         action=self.OnInternal)
         sizerG.Add(self.emptyCell)
 
         # buttons
