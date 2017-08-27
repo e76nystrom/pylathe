@@ -2275,7 +2275,7 @@ class ScrewThread(UpdatePass):
 
         self.angle = radians(getFloatVal(th.angle))
 
-    def thread(self):
+    def runOperation(self):
         self.getParameters()
 
         print("tpi %4.1f pitch %5.3f lastFeed %6.4f" % \
@@ -2303,12 +2303,12 @@ class ScrewThread(UpdatePass):
                   (area, lastDepth, lastArea, self.areaPass))
 
         self.passes = int(ceil(area / self.areaPass))
-        self.threadPanel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes))
         self.areaPass = area / self.passes
         print("passes %d areaPass %8.6f" % \
               (self.passes, self.areaPass))
 
-        self.setupSpringPasses(self.threadPanel)
+        self.setupSpringPasses(self.panel)
         self.setupAction(self.calculatePass, self.runPass)
         self.initPass()
 
@@ -2353,7 +2353,7 @@ class ScrewThread(UpdatePass):
         m.quePause()
         self.m.done(0)
         m.startSpindle(getIntInfo(thRPM))
-        feedType = FEED_TPI if self.threadPanel.tpi.GetValue() else FEED_METRIC
+        feedType = FEED_TPI if self.panel.tpi.GetValue() else FEED_METRIC
         m.queFeedType(feedType)
         m.saveTaper(getFloatInfo(thXTaper))
         m.saveRunout(getFloatInfo(thExitRev))
@@ -2416,7 +2416,7 @@ class ScrewThread(UpdatePass):
         self.m.moveZ(startZ + self.zBackInc)
         self.m.moveZ(startZ)
         self.m.moveX(self.curX, CMD_JOG)
-        if self.threadPanel.pause.GetValue():
+        if self.panel.pause.GetValue():
             print("pause")
             self.m.quePause()
         if m.passNum & 0x300 == 0:
@@ -2426,7 +2426,7 @@ class ScrewThread(UpdatePass):
         self.m.moveX(self.safeX)
 
     def addPass(self):
-        add = getFloatVal(self.threadPanel.add)
+        add = getFloatVal(self.panel.add)
         self.feed += add
         self.setup(True)
         self.calculatePass(add=True)
