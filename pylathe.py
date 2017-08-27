@@ -2384,7 +2384,7 @@ class ScrewThread(UpdatePass):
         else:
             feed = self.feed
 
-        if not panel.alternate.GetValue():
+        if not self.panel.alternate.GetValue():
             self.zOffset = feed * self.tanAngle
         else:
             offset = (feed - self.prevFeed) * self.tanAngle
