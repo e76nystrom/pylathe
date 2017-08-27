@@ -2488,6 +2488,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zRetract = self.addField(sizerG, "Z Retract", thZRetract)
 
         sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # x parameters
 
@@ -2497,7 +2498,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.depth = self.addField(sizerG, "Depth", thXDepth)
 
-        self.firstFeed = self.addField(sizerG, "First Feed", thXFirstFeed)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
@@ -2527,10 +2529,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.xExitRev = self.addField(sizerG, "Exit Rev", thExitRev)
 
-        self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
+        self.firstFeed = self.addField(sizerG, "First Feed", thXFirstFeed)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.lastFeed = self.addField(sizerG, "Last Feed", thXLastFeed)
 
         # pass info
 
@@ -2543,7 +2544,6 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.internal = self.addCheckBox(sizerG, "Internal", thInternal, \
                                          action=self.OnInternal)
-        sizerG.Add(self.emptyCell)
 
         # buttons
 
