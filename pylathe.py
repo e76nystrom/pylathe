@@ -1515,7 +1515,7 @@ class Cutoff():
         if getBoolInfo(cfgDraw):
             self.m.draw("cutoff", self.xStart, self.zStart)
 
-        self.cutoffSetup()
+        self.setup()
 
         if self.panel.pause.GetValue():
             print("pause")
