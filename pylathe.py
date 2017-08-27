@@ -2592,7 +2592,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             self.firstFeed.SetEditable(True)
             self.lastFeed.SetEditable(False)
 
-    def updateLasttFeed(self):
+    def updateLastFeed(self):
         if self.lastFeedBtn.GetValue():
             self.lastFeed.SetEditable(True)
             self.firstFeed.SetEditable(False)
