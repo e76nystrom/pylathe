@@ -3594,6 +3594,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnJogUp(self, e):
         self.btnRpt.event.clear()
         self.btnRpt.action = None
+        self.jogCode = None
         try:
             command(SPINDLE_STOP)
         except CommTimeout:
