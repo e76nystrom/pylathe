@@ -1637,7 +1637,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.runOperation()
+        self.control.runOperation()
 
     def startAction(self):
         command(CMD_RESUME)
