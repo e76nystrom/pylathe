@@ -2290,7 +2290,8 @@ class ScrewThread(UpdatePass):
         print("depth %6.4f actualWdith %6.4f area %8.6f" % \
               (self.depth, actualWidth, area))
 
-        if self.panel.firstFeedBtn.GetValue():
+        firstFeed = self.panel.firstFeedBtn.GetValue()
+        if firstFeed:
             firstWidth = 2 * self.firstFeed * self.tanAngle
             self.areaPass = 0.5 * self.firstFeed * firstWidth
             print("firstFeed %6.4f firstWidth %6.4f areaPass %8.6f" % \
@@ -2307,6 +2308,14 @@ class ScrewThread(UpdatePass):
         self.areaPass = area / self.passes
         print("passes %d areaPass %8.6f" % \
               (self.passes, self.areaPass))
+
+        if firstFeed:
+            lastA = self.area - self.areaPass
+            lastD = sqrt(lastA / self.tanAngle)
+            self.panel.firstFeed.SetValue("0.4f" % (lastD))
+        else:
+            firstF = sqrt(self.areaPass / self.tanAngle)
+            self.panel.firstFeed.SetValue("0.4f" % (firstF))
 
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calculatePass, self.runPass)
