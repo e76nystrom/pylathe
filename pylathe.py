@@ -1679,7 +1679,7 @@ class Taper(UpdatePass):
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
         self.finish = abs(getFloatVal(tp.finish))
-        self.pause = self.taperPanel.pause.GetValue()
+        self.pause = self.panel.pause.GetValue()
 
         totalTaper = taperInch * self.zLength
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
@@ -1746,10 +1746,10 @@ class Taper(UpdatePass):
         self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
-        self.setupSpringPasses(self.taperPanel)
+        self.setupSpringPasses(self.panel)
         self.setupAction(self.calcExternalPass, self.externalPass)
 
-        self.taperPanel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
@@ -1830,7 +1830,7 @@ class Taper(UpdatePass):
 
     def externalAdd(self):
         if self.feed >= self.cutAmount:
-            add = getFloatVal(self.taperPanel.add) / 2
+            add = getFloatVal(self.panel.add) / 2
             self.cutAmount += add
             self.taperSetup()
             self.calcExternalPass(True)
@@ -1855,10 +1855,10 @@ class Taper(UpdatePass):
         self.cut = self.xEnd - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
-        self.setupSpringPasses(self.taperPanel)
+        self.setupSpringPasses(self.panel)
         self.setupAction(self.calcInternalPass, self.internalPass)
 
-        self.taperPanel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
@@ -1924,7 +1924,7 @@ class Taper(UpdatePass):
 
     def internalAdd(self):
         if self.feed >= self.cutAmount:
-            add = getFloatVal(self.taperPanel.add) / 2
+            add = getFloatVal(self.panel.add) / 2
             self.feed += add
             self.passCount += 1
             self.taperSetup()
