@@ -325,6 +325,7 @@ class ActionRoutines():
         if self.IsShown():
             jogPanel.currentPanel = self
             jogPanel.currentControl = self.control
+            self.update()
         else:
             self.active = False
 
