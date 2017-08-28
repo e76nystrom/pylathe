@@ -1980,7 +1980,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (tpSmallDiamText, None), \
                            (tpSpring, 'd'), \
                            (tpTaperSel, None), \
-                           (tpXDelta, 'f6'), \
+                           (tpXDelta, 'f5'), \
                            (tpXFeed, 'f'), \
                            (tpXFinish, 'f'), \
                            (tpXInFeed, 'f'), \
@@ -2312,10 +2312,10 @@ class ScrewThread(UpdatePass):
         if firstFeed:
             lastA = self.area - self.areaPass
             lastD = sqrt(lastA / self.tanAngle)
-            self.panel.firstFeed.SetValue("0.4f" % (lastD))
+            self.panel.firstFeed.SetValue("%0.4f" % (lastD))
         else:
             firstF = sqrt(self.areaPass / self.tanAngle)
-            self.panel.firstFeed.SetValue("0.4f" % (firstF))
+            self.panel.firstFeed.SetValue("%0.4f" % (firstF))
 
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calculatePass, self.runPass)
