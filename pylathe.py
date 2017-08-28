@@ -1756,7 +1756,7 @@ class Taper(UpdatePass):
         if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
 
-        self.taperSetup()
+        self.setup()
 
         while self.updatePass():
             pass
@@ -1832,7 +1832,7 @@ class Taper(UpdatePass):
         if self.feed >= self.cutAmount:
             add = getFloatVal(self.panel.add) / 2
             self.cutAmount += add
-            self.taperSetup()
+            self.setup()
             self.calcExternalPass(True)
             moveCommands.nextPass(self.passCount)
             self.externalPass()
@@ -1870,7 +1870,7 @@ class Taper(UpdatePass):
         if getBoolInfo(cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
 
-        self.taperSetup()
+        self.setup()
 
         while self.updatePass():
             pass
@@ -1927,7 +1927,7 @@ class Taper(UpdatePass):
             add = getFloatVal(self.panel.add) / 2
             self.feed += add
             self.passCount += 1
-            self.taperSetup()
+            self.taper()
             self.m.moveZ(self.safeZ)
             self.calcInternalPass()
             moveCommands.nextPass(self.passCount)
