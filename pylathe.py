@@ -1217,7 +1217,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetValue("Diam")
+        jogPanel.passText.SetLabel("Diam")
 
     def sendData(self):
         global moveCommands
@@ -1459,7 +1459,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetValue("Len")
+        jogPanel.passText.SetLabel("Len")
 
     def sendData(self):
         global moveCommands
@@ -1625,7 +1625,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetValue("Len")
+        jogPanel.passText.SetLabel("Len")
 
     def sendData(self):
         global moveCommands
@@ -2125,12 +2125,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.internal.GetValue():
             infoSetLabel(tpLargeDiamText, "Bore Diam")
             infoSetLabel(tpSmallDiamText, "Large Diam")
-            jogPanel.passText.SetValue("L Diam")
+            jogPanel.passText.SetLabel("L Diam")
 
         else:
             infoSetLabel(tpLargeDiamText, "Large Diam")
             infoSetLabel(tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetValue("S Diam")
+            jogPanel.passText.SetLabel("S Diam")
         self.sizerV.Layout()
 
     def updateAngle(self):
@@ -2602,7 +2602,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.formatData(self.formatList)
         self.updateFirstFeed()
         self.updateLastFeed()
-        jogPanel.passText.SetValue("M Diam")
+        jogPanel.passText.SetLabel("M Diam")
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
