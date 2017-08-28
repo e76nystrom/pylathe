@@ -1848,7 +1848,7 @@ class Taper(UpdatePass):
     def internalTaper(self, taperInch):
         print("internalTaper")
         self.internal = True
-        self.getTaperParameters(taperInch)
+        self.getParameters(taperInch)
 
         self.boreRadius = self.xStart = self.largeDiameter / 2.0
         self.xEnd = self.smallDiameter / 2.0
