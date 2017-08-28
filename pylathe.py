@@ -2088,7 +2088,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.internal = self.addCheckBox(sizerH, "Internal", tpInternal)
+        self.internal = self.addCheckBox(sizerH, "Internal", tpInternal, \
+                                         self.OnInternal)
 
         sizerG.Add(sizerH)
 
