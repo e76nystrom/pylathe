@@ -2312,7 +2312,7 @@ class ScrewThread(UpdatePass):
         if firstFeed:
             lastA = self.area - self.areaPass
             lastD = sqrt(lastA / self.tanAngle)
-            self.panel.firstFeed.SetValue("%0.4f" % (lastD))
+            self.panel.lastFeed.SetValue("%0.4f" % (lastD))
         else:
             firstF = sqrt(self.areaPass / self.tanAngle)
             self.panel.firstFeed.SetValue("%0.4f" % (firstF))
