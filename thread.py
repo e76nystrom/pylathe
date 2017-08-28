@@ -35,7 +35,7 @@ TIP   = 'TIP'
 WIRE  = 'WIRE'
 
 threadWires = (0.018, 0.024, 0.029, 0.032, 0.040, 0.045, 0.055, 0.063,
-               0.072, 0.081, 0.092, 0.108, 0.120, 0.127, 0.143, 0.285) 
+               0.072, 0.081, 0.092, 0.108, 0.120, 0.127, 0.143, 0.285)
 
 class ThreadCalc():
     def __init__(self, frame=None):
@@ -82,13 +82,13 @@ class ThreadCalc():
         # hs unr double height of external unr thread
         self.extDblHUNR = 2.0 * 11.0 / 16.0 * self.height
         print("extDblHUNR %0.6f" % (self.extDblHUNR))
-    
+
         # external major diameter
         self.extMaxMajDiam = diam - self.allowance
         self.extMinMajDiam = self.extMaxMajDiam - self.tolMajDiam
         self.extAvgMajDiam = (self.extMinMajDiam +
                          (self.extMaxMajDiam - self.extMinMajDiam) / 2)
-        print("extMaxMajDiam %0.4f extAvgMajDiam %0.4f extMinMajDiam %0.4f" % 
+        print("extMaxMajDiam %0.4f extAvgMajDiam %0.4f extMinMajDiam %0.4f" %
                (self.extMaxMajDiam, self.extAvgMajDiam, self.extMinMajDiam))
 
         # external pitch diameter
@@ -96,7 +96,7 @@ class ThreadCalc():
         self.extPitchDiam = self.diam - 2.0 * 3.0 / 8.0 * self.height
         self.extMinPitchDiam = self.extMaxPitchDiam - self.extPitchDiamTol
         print("extPitchDiam %0.4f" % (self.extPitchDiam))
-        print("extMaxPitchDiam %0.4f extMinPitchDiam %0.4f" % 
+        print("extMaxPitchDiam %0.4f extMinPitchDiam %0.4f" %
               (self.extMaxPitchDiam, self.extMinPitchDiam))
 
         # external minor diameter
@@ -104,7 +104,7 @@ class ThreadCalc():
         self.extMaxUNRMinorDiam = self.extMaxMajDiam - self.extDblHUNR
         self.extMaxMinorDiam = self.extMaxUNMinorDiam
         self.extMinMinorDiam = diam - 2.0 * 7.0 / 8.0 * self.height
-        print("extMaxMinorDiam %0.4f extMinMinorDiam %0.4f" % 
+        print("extMaxMinorDiam %0.4f extMinMinorDiam %0.4f" %
               (self.extMaxMinorDiam, self.extMinMinorDiam))
 
         a = (self.extMaxMajDiam - self.extMaxPitchDiam) / 2
@@ -134,13 +134,13 @@ class ThreadCalc():
         # internal pitch diameter
         self.intMinPitchDiam = diam - self.intDblAddendum
         self.intMaxPitchDiam = self.intMinPitchDiam + self.intPitchDiamTol
-        print("intMaxPitchDiam %0.4f intMinPitchDiam %0.4f" % 
+        print("intMaxPitchDiam %0.4f intMinPitchDiam %0.4f" %
               (self.intMaxPitchDiam, self.intMinPitchDiam))
 
         # internal minor diameter
         self.intMinMinorDiam = diam - self.intDblHeight
         self.intMaxMinorDiam = self.intMinMinorDiam + self.intMinorDiamTol
-        print("intMaxMinorDiam %0.4f intMinMinorDiam %0.4f" % 
+        print("intMaxMinorDiam %0.4f intMinMinorDiam %0.4f" %
               (self.intMaxMinorDiam, self.intMinMinorDiam))
 
         bestWire = 0.5 * self.pitch / cos30
@@ -346,7 +346,7 @@ class ThreadCalc():
             self.color[PITCH] = wx.Colour("yellow")
             self.color[TIP] = wx.Colour("blue")
             self.color[WIRE] = wx.Colour("magenta")
-            
+
             self.vS1 = 3
             self.hS1 = 3
 
@@ -489,7 +489,7 @@ class ThreadCalc():
             self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
         if self.dc != None:
-            txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" % 
+            txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" %
                    (self.actualWire, self.minWire, self.maxWire))
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
@@ -587,22 +587,22 @@ class ThreadCalc():
         except:
             print("dxf file save error")
 
-class MainFrame(wx.Frame): 
-    def __init__(self, parent, title): 
+class MainFrame(wx.Frame):
+    def __init__(self, parent, title):
         super(MainFrame, self).__init__(parent, title = title)
         self.Maximize(True)
-        self.InitUI() 
+        self.InitUI()
         # colors = wx.lib.colourdb.getColourList()
         # for line in colors:
         #     print line
         # stdout.flush()
-         
-    def InitUI(self): 
+
+    def InitUI(self):
         global arg1, arg2
         self.zoom = False
         self.left = None
-        self.Bind(wx.EVT_PAINT, self.OnPaint) 
-        self.Centre() 
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Centre()
         self.tc = ThreadCalc(self)
         self.tc.calc(arg1, arg2)
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -618,21 +618,21 @@ class MainFrame(wx.Frame):
             self.offset = False
         self.tc.setZoomOffset(self.zoom, self.offset)
         self.Refresh()
-		
-    def OnPaint(self, e): 
-        dc = wx.PaintDC(self) 
+
+    def OnPaint(self, e):
+        dc = wx.PaintDC(self)
         dc.SetMapMode(wx.MM_TEXT)
         brush = wx.Brush("white")
-        dc.SetBackground(brush)  
-        dc.Clear() 
+        dc.SetBackground(brush)
+        dc.Clear()
         self.tc.calcScale()
         self.tc.draw(dc)
-        
+
         # color = wx.Colour(255,0,0)
-        # dc.SetTextForeground(color) 
+        # dc.SetTextForeground(color)
         # dc.DrawText("Hello wxPython",10,10)
         # dc.DrawLine(10,10, 100,10)
-		
+
 arg1 = None
 arg2 = None
 if __name__ == '__main__':
@@ -654,6 +654,6 @@ if __name__ == '__main__':
         tc.draw()
         tc.close()
     else:
-        ex = wx.App() 
-        MainFrame(None,'Drawing demo') 
+        ex = wx.App()
+        MainFrame(None,'Drawing demo')
         ex.MainLoop()
