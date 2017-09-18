@@ -4650,11 +4650,11 @@ class MainFrame(wx.Frame):
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
 
-        print("a")
-        stdout.flush()
-
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
+
+        print("a")
+        stdout.flush()
 
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
