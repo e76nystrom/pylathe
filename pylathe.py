@@ -4656,9 +4656,9 @@ class MainFrame(wx.Frame):
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
 
-        readInfo(configFile, config)
         stdout.flush()
         self.showPanel()
+        readInfo(configFile, config)
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
