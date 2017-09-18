@@ -4658,9 +4658,6 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile, config)
 
-        print("a")
-        stdout.flush()
-
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
         if DRO:
@@ -4678,6 +4675,9 @@ class MainFrame(wx.Frame):
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
+
+        print("a")
+        stdout.flush()
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
