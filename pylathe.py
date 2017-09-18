@@ -4657,8 +4657,6 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile, config)
-        print("initui")
-        stdout.flush()
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
@@ -4682,6 +4680,8 @@ class MainFrame(wx.Frame):
         w, h = self.GetSize()
         self.SetPosition(((3 * dw) / 4 - w, 0))
 
+        print("initui")
+        stdout.flush()
         self.showPanel()
 
         self.turnPanel.update()
