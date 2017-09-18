@@ -98,7 +98,6 @@ zDataSent = False
 xDataSent = False
 zHomeOffset = 0.0
 xHomeOffset = 0.0
-print("DRO %s" % (DRO))
 if DRO:
     zDROOffset = 0.0
     xDROOffset = 0.0
