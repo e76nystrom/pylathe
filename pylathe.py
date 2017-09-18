@@ -821,6 +821,7 @@ def sendZData(send=False):
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
             print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
+            stdout.flush()
             jogPanel.zDROInch = getIntInfo(zDROInch)
             jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
             stdout.flush()
@@ -867,6 +868,8 @@ def sendXData(send=False):
             motorRatio = getFloatInfo(xMotorRatio)
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
+            stdout.flush()
             jogPanel.xDROInch = getIntInfo(xDROInch)
             jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
             val = jogPanel.combo.GetValue()
