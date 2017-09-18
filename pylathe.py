@@ -10,7 +10,7 @@ import sys
 import os
 import subprocess
 import traceback
-from sys import stdout
+from sys import stdout, stderr
 import serial
 from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
@@ -4678,8 +4678,9 @@ class MainFrame(wx.Frame):
                     print("new done")
                 except:
                     print("newInfo error")
-                    traceback.print_exc()
                     stdout.flush()
+                    traceback.print_exc()
+                    stderr.flush()
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
