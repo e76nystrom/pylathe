@@ -4643,14 +4643,15 @@ class MainFrame(wx.Frame):
         self.panels['taperPanel'] = panel
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
-        print("a")
-        stdout.flush()
 
         if STEPPER_DRIVE:
             self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
+
+        print("a")
+        stdout.flush()
 
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
