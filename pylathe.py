@@ -4673,6 +4673,7 @@ class MainFrame(wx.Frame):
             if not key in configInfo.info:
                 print("new")
                 newInfo(key, "%0.4f" % (eval(var)))
+                print("new")
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
