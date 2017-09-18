@@ -4432,9 +4432,9 @@ class MainFrame(wx.Frame):
 
         self.dirName = os.getcwd()
 
-        self.initUI()
         print("initui")
         stdout.flush()
+        self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
         openSerial(getInfoData(commPort), getInfoData(commRate))
