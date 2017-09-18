@@ -4666,6 +4666,8 @@ class MainFrame(wx.Frame):
                      (zSvDROPosition, 'zDROPostion'), \
                      (xSvDROPosition, 'xDROPositon'))
 
+        stdout.flush()
+        self.showPanel()
         for (key, var) in vars:
             exec('global ' + var)
             if not key in configInfo.info:
@@ -4681,8 +4683,6 @@ class MainFrame(wx.Frame):
         self.SetPosition(((3 * dw) / 4 - w, 0))
 
         print("initui")
-        stdout.flush()
-        self.showPanel()
 
         self.turnPanel.update()
         self.facePanel.update()
