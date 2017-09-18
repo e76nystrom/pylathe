@@ -4644,6 +4644,8 @@ class MainFrame(wx.Frame):
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
+        self.showPanel()
+        readInfo(configFile, config)
         if STEPPER_DRIVE:
             self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
@@ -4657,8 +4659,6 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         stdout.flush()
-        self.showPanel()
-        readInfo(configFile, config)
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
