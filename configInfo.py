@@ -166,9 +166,9 @@ def getFloatInfo(key):
         try:
             return(float(val))
         except ValueError:
-            print("getFloatInfo ValueError %s" % val)
+            print("getFloatInfo ValueError key %d %s" % (key, val))
     except KeyError:
-        print("getFloatInfo KeyError %s" % (key))
+        print("getFloatInfo KeyError %d" % (key))
     stdout.flush()
     return(0.0)
 
