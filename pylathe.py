@@ -4664,7 +4664,7 @@ class MainFrame(wx.Frame):
             vars += ((zSvDROOffset, 'zDROOffset'), \
                      (xSvDROOffset, 'xDROOffset'), \
                      (zSvDROPosition, 'zDROPostion'), \
-                     (xSvDROPosition, 'xDROPositon'))
+                     (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
             exec('global ' + var)
