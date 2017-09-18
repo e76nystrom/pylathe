@@ -4665,23 +4665,17 @@ class MainFrame(wx.Frame):
         if DRO:
             vars += ((zSvDROOffset, 'zDROOffset'), \
                      (xSvDROOffset, 'xDROOffset'), \
-                     (zSvDROPosition, 'zDROPostion'), \
-                     (xSvDROPosition, 'xDROPositon'))
+                     (zSvDROPosition, 'zDROPosition'), \
+                     (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
-            print("key  %d %s" % (key, var))
-            stdout.flush()
             exec('global ' + var)
             if not key in configInfo.info:
                 try:
-                    print("new %s" % (eval(var)))
                     newInfo(key, "%0.4f" % (eval(var)))
-                    print("new done")
-                except:
-                    print("newInfo error")
+                except NameError:
+                    print("MainFrame initUI %s not defined" % (var))
                     stdout.flush()
-                    traceback.print_exc()
-                    stderr.flush()
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
