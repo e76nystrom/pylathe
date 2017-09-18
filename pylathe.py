@@ -4671,7 +4671,8 @@ class MainFrame(wx.Frame):
             stdout.flush()
             exec('global ' + var)
             if not key in configInfo.info:
-               newInfo(key, "%0.4f" % (eval(var)))
+                print("new")
+                newInfo(key, "%0.4f" % (eval(var)))
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
