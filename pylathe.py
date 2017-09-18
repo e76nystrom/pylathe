@@ -4667,7 +4667,7 @@ class MainFrame(wx.Frame):
                      (xSvDROPosition, 'xDROPositon'))
 
         for (key, var) in vars:
-            print("key  %s" % (key))
+            print("key  %d %s" % (key, var))
             stdout.flush()
             exec('global ' + var)
             if not key in configInfo.info:
