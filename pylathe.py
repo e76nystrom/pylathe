@@ -9,6 +9,7 @@ from time import sleep, time
 import sys
 import os
 import subprocess
+import traceback
 from sys import stdout
 import serial
 from threading import Thread, Lock, Event
@@ -4677,15 +4678,13 @@ class MainFrame(wx.Frame):
                     print("new done")
                 except:
                     print("newInfo error")
+                    traceback.print_exc()
                     stdout.flush()
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
-
-        print("a")
-        stdout.flush()
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
