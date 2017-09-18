@@ -36,6 +36,7 @@ from setup import createConfig, createStrings, createCommands, \
 from interface import configList, strList, cmdList, parmList, enumList, regList
 
 (config, configTable) = createConfig(configList)
+configInfo.configTable = configTable
 
 configFile = "config.txt"
 
