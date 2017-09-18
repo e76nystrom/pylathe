@@ -114,7 +114,7 @@ def newInfo(key, val):
     if key in info:
         print("newInfo duplicate key %s" % (key))
         stdout.flush()
-    print("key %d" % (key))
+    print("newInof key %d" % (key))
     stdout.flush()
     info[key] = InfoValue(val)
 
