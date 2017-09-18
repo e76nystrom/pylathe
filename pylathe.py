@@ -4432,8 +4432,6 @@ class MainFrame(wx.Frame):
 
         self.dirName = os.getcwd()
 
-        print("initui")
-        stdout.flush()
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
@@ -4659,6 +4657,8 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile, config)
+        print("initui")
+        stdout.flush()
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
