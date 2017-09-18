@@ -111,8 +111,6 @@ def initInfo(key, val):
 
 def newInfo(key, val):
     global info
-    print("newInfo key %d" % (key))
-    stdout.flush()
     if key in info:
         print("newInfo duplicate key %s" % (key))
         stdout.flush()
