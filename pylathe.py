@@ -4663,7 +4663,7 @@ class MainFrame(wx.Frame):
         if DRO:
             vars += ((zSvDROOffset, 'zDROOffset'), \
                      (xSvDROOffset, 'xDROOffset'), \
-                     (zSvDROPosition, 'zDROPostion'), \
+                     (zSvDROPosition, 'zDROPosition'), \
                      (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
