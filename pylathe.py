@@ -4657,6 +4657,8 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile, config)
+        stdout.flush()
+        self.showPanel()
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
@@ -4666,8 +4668,6 @@ class MainFrame(wx.Frame):
                      (zSvDROPosition, 'zDROPostion'), \
                      (xSvDROPosition, 'xDROPositon'))
 
-        stdout.flush()
-        self.showPanel()
         for (key, var) in vars:
             exec('global ' + var)
             if not key in configInfo.info:
