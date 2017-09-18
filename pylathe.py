@@ -4671,7 +4671,7 @@ class MainFrame(wx.Frame):
             stdout.flush()
             exec('global ' + var)
             if not key in configInfo.info:
-                print("new")
+                print("new %s" % (eval(var)))
                 newInfo(key, "%0.4f" % (eval(var)))
                 print("new done")
             else:
