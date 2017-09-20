@@ -1,3 +1,4 @@
+#!/cygdrive/c/DevSoftware/Python/Python36-32/Python.exe
 #!/cygdrive/c/Python27/Python.exe
 #!/usr/bin/python
 ################################################################################
@@ -5,6 +6,7 @@
 import wx
 import wx.lib.colourdb
 import sys
+import re
 from sys import stdout, argv
 from math import cos, radians, sqrt
 
@@ -33,7 +35,7 @@ TIP   = 'TIP'
 WIRE  = 'WIRE'
 
 threadWires = (0.018, 0.024, 0.029, 0.032, 0.040, 0.045, 0.055, 0.063,
-               0.072, 0.081, 0.092, 0.108, 0.120, 0.127, 0.143, 0.285) 
+               0.072, 0.081, 0.092, 0.108, 0.120, 0.127, 0.143, 0.285)
 
 class ThreadCalc():
     def __init__(self, frame=None):
@@ -42,18 +44,18 @@ class ThreadCalc():
         self.offset = None
 
     def calc(self, diam, tpi, series='un'):
-        print "diam %0.3f tpi %0.1f series %s" % (diam, tpi, series)
+        print("diam %0.3f tpi %0.1f series %s" % (diam, tpi, series))
         self.diam = diam
         self.tpi = tpi
         self.pitch = 1.0 / tpi
         cos30 = cos(radians(30))
         self.height = self.pitch * cos30
-        print "pitch %0.4f height %0.4f" % (self.pitch, self.height)
+        print("pitch %0.4f height %0.4f" % (self.pitch, self.height))
 
         oneThird = 1.0 / 3.0
         pitchSqrd = self.pitch * self.pitch
         self.tolMajDiam = 0.06 * pitchSqrd ** oneThird
-        print "tolMajDiam %0.6f" % (self.tolMajDiam)
+        print("tolMajDiam %0.6f" % (self.tolMajDiam))
 
         # TD2 external pitch diameter tolerance
         if series == "unef" or (series == "un") and (tpi >= 10.0):
@@ -63,81 +65,83 @@ class ThreadCalc():
         self.extPitchDiamTol = (0.0015 * (diam ** oneThird) +
                            0.0015 * sqrt(lenEngagement) +
                            0.015 * pitchSqrd ** oneThird)
-        print ("extPitchDiamTol %0.6f lenEngagement %0.6f" %
-               (self.extPitchDiamTol, lenEngagement))
+        print("extPitchDiamTol %0.6f lenEngagement %0.6f" %
+              (self.extPitchDiamTol, lenEngagement))
         # es allowance
         self.allowance = 0.3 * self.extPitchDiamTol
-        print "allowance %0.6f" % (self.allowance)
+        print("allowance %0.6f" % (self.allowance))
 
         # Has external thread addendum
         self.extDblAddendum = 2.0 * 3.0 / 8.0 * self.height # has
-        print "extDblAddendum %0.6f" % (self.extDblAddendum)
+        print("extDblAddendum %0.6f" % (self.extDblAddendum))
 
         # hs un double height of external un thread
         self.extDblHUN = 2.0 * 5.0 / 8.0 * self.height
-        print "extDblHUN %0.6f" % (self.extDblHUN)
+        print("extDblHUN %0.6f" % (self.extDblHUN))
 
         # hs unr double height of external unr thread
         self.extDblHUNR = 2.0 * 11.0 / 16.0 * self.height
-        print "extDblHUNR %0.6f" % (self.extDblHUNR)
-    
+        print("extDblHUNR %0.6f" % (self.extDblHUNR))
+
         # external major diameter
         self.extMaxMajDiam = diam - self.allowance
         self.extMinMajDiam = self.extMaxMajDiam - self.tolMajDiam
-        print ("extMaxMajDiam %0.4f extMinMajDiam %0.4f" % 
-               (self.extMaxMajDiam, self.extMinMajDiam))
+        self.extAvgMajDiam = (self.extMinMajDiam +
+                         (self.extMaxMajDiam - self.extMinMajDiam) / 2)
+        print("extMaxMajDiam %0.4f extAvgMajDiam %0.4f extMinMajDiam %0.4f" %
+               (self.extMaxMajDiam, self.extAvgMajDiam, self.extMinMajDiam))
 
         # external pitch diameter
         self.extMaxPitchDiam = self.extMaxMajDiam - self.extDblAddendum
         self.extPitchDiam = self.diam - 2.0 * 3.0 / 8.0 * self.height
         self.extMinPitchDiam = self.extMaxPitchDiam - self.extPitchDiamTol
-        print "extPitchDiam %0.4f" % (self.extPitchDiam)
-        print ("extMaxPitchDiam %0.4f extMinPitchDiam %0.4f" % 
-               (self.extMaxPitchDiam, self.extMinPitchDiam))
+        print("extPitchDiam %0.4f" % (self.extPitchDiam))
+        print("extMaxPitchDiam %0.4f extMinPitchDiam %0.4f" %
+              (self.extMaxPitchDiam, self.extMinPitchDiam))
 
         # external minor diameter
         self.extMaxUNMinorDiam = self.extMaxMajDiam - self.extDblHUN
         self.extMaxUNRMinorDiam = self.extMaxMajDiam - self.extDblHUNR
         self.extMaxMinorDiam = self.extMaxUNMinorDiam
         self.extMinMinorDiam = diam - 2.0 * 7.0 / 8.0 * self.height
-        print ("extMaxMinorDiam %0.4f extMinMinorDiam %0.4f" % 
-               (self.extMaxMinorDiam, self.extMinMinorDiam))
+        print("extMaxMinorDiam %0.4f extMinMinorDiam %0.4f" %
+              (self.extMaxMinorDiam, self.extMinMinorDiam))
 
         a = (self.extMaxMajDiam - self.extMaxPitchDiam) / 2
         b = (self.extMaxPitchDiam - self.extMinMinorDiam) / 2
-        print "a %0.4f b %0.4f" % (a, b)
+        print("a %0.4f b %0.4f" % (a, b))
 
         # TD1 internal minor diameter tolerance
         self.intMinorDiamTol = 0.25 * self.pitch - 0.4 * pitchSqrd
-        print "intMinorDiamTol %0.6f" % (self.intMinorDiamTol)
+        print("intMinorDiamTol %0.6f" % (self.intMinorDiamTol))
 
         # TD2 internal pitch diameter tolerance
         self.intPitchDiamTol = 1.3 * self.extPitchDiamTol
-        print "intPitchDiamTol %0.6f" % (self.intPitchDiamTol)
+        print("intPitchDiamTol %0.6f" % (self.intPitchDiamTol))
 
         # hn double heigth of internal thread
         self.intDblHeight = 2.0 * 5.0 / 8.0 * self.height
-        print "intDblHeight %0.6f" % (self.intDblHeight)
+        print("intDblHeight %0.6f" % (self.intDblHeight))
 
         # hb double external thread addendum
         self.intDblAddendum = 3.0 / 4.0 * self.height
-        print "intDblAddendum %0.6f" % (self.intDblAddendum)
+        print("intDblAddendum %0.6f" % (self.intDblAddendum))
 
         # internal major diameter
         self.intMinMajDiam = diam
-        print "intMinMajDiam %0.4f" % (self.intMinMajDiam)
+        print("intMinMajDiam %0.4f" % (self.intMinMajDiam))
 
         # internal pitch diameter
         self.intMinPitchDiam = diam - self.intDblAddendum
         self.intMaxPitchDiam = self.intMinPitchDiam + self.intPitchDiamTol
-        print ("intMaxPitchDiam %0.4f intMinPitchDiam %0.4f" % 
-               (self.intMaxPitchDiam, self.intMinPitchDiam))
+        print("intMaxPitchDiam %0.4f intMinPitchDiam %0.4f" %
+              (self.intMaxPitchDiam, self.intMinPitchDiam))
 
         # internal minor diameter
         self.intMinMinorDiam = diam - self.intDblHeight
         self.intMaxMinorDiam = self.intMinMinorDiam + self.intMinorDiamTol
-        print ("intMaxMinorDiam %0.4f intMinMinorDiam %0.4f" % 
-               (self.intMaxMinorDiam, self.intMinMinorDiam))
+        print("intMaxMinorDiam %0.4f intMinMinorDiam %0.4f" %
+              (self.intMaxMinorDiam, self.intMinMinorDiam))
 
         bestWire = 0.5 * self.pitch / cos30
         min = 1.0
@@ -146,17 +150,17 @@ class ThreadCalc():
                 actualWire = size
                 break
         self.actualWire = actualWire
-        print "bestWire %0.4f actialWire %0.3f" % (bestWire, actualWire)
+        print("bestWire %0.4f actialWire %0.3f" % (bestWire, actualWire))
         c = 3 * actualWire - self.height
         self.wireMeasurement = self.extPitchDiam + c
         self.minWire = self.extMinPitchDiam + c
         self.maxWire = self.extMaxPitchDiam + c
-        print "wireMeasurement %0.4f" % (self.wireMeasurement)
-        print "minWire %0.4f maxWire %0.4f" % (self.minWire, self.maxWire)
+        print("wireMeasurement %0.4f" % (self.wireMeasurement))
+        print("minWire %0.4f maxWire %0.4f" % (self.minWire, self.maxWire))
 
     def calcScale(self):
         self.size = size = self.frame.GetSize()
-        print "w %d h %d" % (size.width, size.height)
+        print("w %d h %d" % (size.width, size.height))
         stdout.flush()
         actualWidth = 5 * self.pitch
         self.xOffset = 0
@@ -203,7 +207,7 @@ class ThreadCalc():
 
     def addText(self, text, p0, align=None, layer='TEXT'):
         if self.d != None:
-            (x, y) = self.dxfPoint
+            (x, y) = self.dxfPoint(p0)
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align != None:
@@ -281,7 +285,7 @@ class ThreadCalc():
     def drawRefLine(self, y, label, layer, align=AL_RIGHT):
         yPos = -y / 2
         txt = "%0.4f" % (y)
-        self.drawLine((self.pitch, yPos),
+        self.drawLine((-self.pitch, yPos),
                       (self.pitch, yPos), layer=layer)
         if align != None:
             hOffset = 0
@@ -300,9 +304,10 @@ class ThreadCalc():
         d = None
         if dc == None:
             tmp = "thread%0.3f-%0.1f" % (self.diam, self.tpi)
-            tmp = tmp.replace("0.", "-")
-            tmp = tmp.replace(".0", "")
-            tmp = tmp.replace(".", "-") + ".dxf"
+            # tmp = tmp.replace("0.", "-")
+            # tmp = tmp.replace(".0", "")
+            tmp = tmp.replace("." , "-")
+            tmp = re.sub("-0$", "", tmp) + ".dxf"
             d = dxf.drawing(tmp)
             d.add_layer(REF, color=0)
             d.add_layer(TEXT, color=0)
@@ -341,20 +346,29 @@ class ThreadCalc():
             self.color[PITCH] = wx.Colour("yellow")
             self.color[TIP] = wx.Colour("blue")
             self.color[WIRE] = wx.Colour("magenta")
-            
+
             self.vS1 = 3
             self.hS1 = 3
 
+        self.extMeasuredDiam = self.extAvgMajDiam
+        self.tipRadius = 0.06 / 25.4
+        self.drawExternal()
+        self.drawInternal()
+
+        # external threads
+
+    def drawExternal(self):
+        radius = self.diam / 2
         pitch = self.pitch
+        tipRadius = self.tipRadius
+        extMeasuredDiam = self.extMeasuredDiam
         halfP = pitch / 2
         cos295 = cos(radians(29.5))
         sqrt3 = sqrt(3)
 
-        # external threads
-
         self.x0 = -1.275 * pitch
 
-        self.drawRefLine(self.diam, '', REF, AL_CENTER|CENTER|BELOW)
+        self.drawRefLine(self.diam, 'Diam', REF, AL_RIGHT|RIGHT|BELOW)
         # txt = "Diameter %0.4f" % (self.diam)
         # self.addText(txt, (0, -self.diam / 2), CENTER|BELOW)
 
@@ -366,25 +380,19 @@ class ThreadCalc():
         self.addText(txt, (0, -self.diam / 2 + self.height),
                      CENTER|ABOVE)
 
-        radius = self.diam / 2
-        p0 = (halfP, -radius)
+        p0 = (-halfP, -radius)
         p1 = (halfP , -radius)
         p2 = (0, -radius + self.height)
         self.drawLine(p0, p1, layer=REF)
         self.drawLine(p1, p2, layer=REF)
         self.drawLine(p2, p0, layer=REF)
-        p2 = (pitch , -radius + self.height)
+        p2 = (-pitch , -radius + self.height)
         self.drawLine(p0, p2, layer=REF)
         p2 = (pitch , -radius + self.height)
         self.drawLine(p1, p2, layer=REF)
 
-        extAvgMajDiam = (self.extMinMajDiam +
-                         (self.extMaxMajDiam - self.extMinMajDiam) / 2)
-
-        extMeasuredDiam = self.extMinMajDiam
-
         x0 = 0 - halfP
-        for x0 in (halfP, halfP):
+        for x0 in (-halfP, 0 + halfP):
             y = -extMeasuredDiam / 2
             ofs =  (self.diam / 2 + y) / sqrt3
             p0 = (x0 - ofs, y)
@@ -397,14 +405,14 @@ class ThreadCalc():
 
         self.drawRefLine(self.extMaxMajDiam, 'Max Major', MAJOR,
                          AL_RIGHT|LEFT|MIDDLE)
-        self.drawRefLine(extAvgMajDiam, 'Avg Major', MAJOR,
+        self.drawRefLine(self.extAvgMajDiam, 'Avg Major', MAJOR,
                          AL_RIGHT|LEFT|MIDDLE)
         self.drawRefLine(self.extMinMajDiam, 'Min Major', MAJOR,
                          AL_RIGHT|LEFT|MIDDLE)
 
         self.drawRefLine(self.extMaxPitchDiam, 'Max Pitch', PITCH,
                          AL_RIGHT|LEFT|MIDDLE)
-        self.drawRefLine(self.extPitchDiam, 'Pitch', PITCH,
+        self.drawRefLine(self.extPitchDiam, 'Pitch Diam', PITCH,
                          AL_RIGHT|RIGHT|BELOW)
         self.drawRefLine(self.extMinPitchDiam, 'Min Pitch', PITCH,
                          AL_RIGHT|LEFT|MIDDLE)
@@ -414,7 +422,6 @@ class ThreadCalc():
         self.drawRefLine(self.extMinMinorDiam, 'Min Minor', MINOR,
                          AL_RIGHT|LEFT|MIDDLE)
 
-        tipRadius = 0.06 / 25.4
         tipDepth = (self.height - tipRadius)
         p0 = (0, -self.diam / 2 + tipDepth - tipRadius)
         self.drawCircle(tipRadius, p0, layer="TIP")
@@ -429,7 +436,7 @@ class ThreadCalc():
 
         flatWidth = .125 * pitch
         txt = "Flat width %0.4f" % (flatWidth)
-        p0 = (flatWidth / 2, -self.extMinMinorDiam / 2)
+        p0 = (-flatWidth / 2, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, RIGHT|ABOVE)
 
         txt = "Tip Radius %0.4f" % (tipRadius)
@@ -438,24 +445,29 @@ class ThreadCalc():
 
         flatDepth = self.height - sqrt3 / 2 * flatWidth
         y = -self.diam / 2 + flatDepth
-        p0 = (flatWidth / 2, y)
+        p0 = (-flatWidth / 2, y)
         p1 = (flatWidth / 2, y)
         self.drawLine(p0, p1, layer=REF)
 
-        flatDepth = self.height - (self.diam - extMeasuredDiam) / 2
-        txt = "Flat depth %0.4f" % (flatDepth)
-        p0 = (halfP, -self.extMinMinorDiam / 2)
+        flatFeed = (extMeasuredDiam - self.extMinMinorDiam) / 2
+        print("flatFeed %0.4f extMeasuredDiam %0.4f extMinMinorDiam %0.4f" % \
+              (flatFeed, extMeasuredDiam, self.extMinMinorDiam))
+        txt = "Flat Feed %0.4f" % (flatFeed)
+        p0 = (-halfP, -self.extMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
-        txt = "29.5 feed %0.4f" % (flatDepth / cos295)
+        angleFeed = flatFeed / cos295
+        txt = "angle feed %0.4f" % (angleFeed)
         self.addText(txt, p0, CENTER|BELOW)
+        print("flatDepth %0.4f flatFeed %0.4f angleFeed %0.4f" % \
+              (flatDepth, flatFeed, angleFeed))
 
-        # print "tipDepth %0.5f flatDepth %0.5f" % (tipDepth, flatDepth)
+        # print("tipDepth %0.5f flatDepth %0.5f" % (tipDepth, flatDepth))
 
         y =  -self.extMaxMinorDiam / 2
         minDepth = extMeasuredDiam / 2 + y
         txt = "Min depth %0.4f" % (minDepth)
-        self.addText(txt, (halfP, y), CENTER|ABOVE)
+        self.addText(txt, (-halfP, y), CENTER|ABOVE)
 
         wireRadius = self.actualWire / 2
         wireDepth = self.height - self.actualWire
@@ -464,11 +476,11 @@ class ThreadCalc():
         self.drawCircle(wireRadius, p0, layer="WIRE")
 
         yWire -= wireRadius
-        if d != None:
+        if self.d != None:
+            textH = -(self.textH + self.vS)
             txt = "Wire Size %0.4f" % (self.actualWire)
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
-            textH = -(self.textH + self.vS)
             txt = "Min Wire %0.4f" % (self.minWire)
             self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
@@ -476,28 +488,38 @@ class ThreadCalc():
             txt = "Max Wire %0.4f" % (self.maxWire)
             self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
-        if dc != None:
-            txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" % 
+        if self.dc != None:
+            txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" %
                    (self.actualWire, self.minWire, self.maxWire))
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
 
         # internal threads
 
+    def drawInternal(self):
+        radius = self.diam / 2
+        pitch = self.pitch
+        tipRadius = self.tipRadius
+        extMeasuredDiam = self.extMeasuredDiam
+        halfP = pitch / 2
+        cos295 = cos(radians(29.5))
+        sqrt3 = sqrt(3)
+        extMeasuredDiam = self.extMinMajDiam
+
         self.x0 = 1.275 * pitch
 
         intFlatWidth = 0.041667 * pitch
         intFlatDiam = self.intMinMajDiam - intFlatWidth * sqrt3
-        print ("intFlatWidth %0.4f intFlatDiam %0.4f" %
-               (intFlatWidth, intFlatDiam))
+        print("intFlatWidth %0.4f intFlatDiam %0.4f" %
+              (intFlatWidth, intFlatDiam))
 
-        p0 = (halfP, -radius)
+        p0 = (-halfP, -radius)
         p1 = (halfP , -radius)
         p2 = (0, -radius + self.height)
         self.drawLine(p0, p1, layer=REF)
         self.drawLine(p1, p2, layer=REF)
         self.drawLine(p2, p0, layer=REF)
 
-        p2 = (pitch , -radius + self.height)
+        p2 = (-pitch , -radius + self.height)
         self.drawLine(p0, p2, layer=REF)
         p2 = (pitch , -radius + self.height)
         self.drawLine(p1, p2, layer=REF)
@@ -505,12 +527,12 @@ class ThreadCalc():
         y = -self.intMinMinorDiam / 2
         ofs = (self.height -self.intMinMajDiam / 2 - y) / sqrt3
         p2 = (ofs, y)
-        p3 = (ofs, y)
+        p3 = (-ofs, y)
         self.drawShape([p0, p1, p2, p3], color=0, colorName="lightblue")
 
-        px = (pitch + ofs, y)
-        p2 = (pitch, y)
-        p3 = (pitch, -radius)
+        px = (-pitch + ofs, y)
+        p2 = (-pitch, y)
+        p3 = (-pitch, -radius)
         self.drawShape([p0, px, p2, p3], color=0, colorName="lightblue")
 
         px = (pitch - ofs, y)
@@ -551,34 +573,36 @@ class ThreadCalc():
 
         intFlatDepth = (intFlatDiam - self.intMinMinorDiam) / 2
         txt = "Flat depth %0.4f" % (intFlatDepth)
-        p0 = (halfP, -self.intMinMinorDiam / 2)
+        p0 = (-halfP, -self.intMinMinorDiam / 2)
         self.addText(txt, p0, CENTER|ABOVE)
 
         txt = "Flat feed %0.4f" % (intFlatDepth / cos295)
         self.addText(txt, p0, CENTER|BELOW)
 
+    def close(self):
         try:
-            if d != None:
-                d.save()
+            if self.d != None:
+                self.d.save()
+                self.d = None
         except:
-            print "dxf file save error"
+            print("dxf file save error")
 
-class MainFrame(wx.Frame): 
-    def __init__(self, parent, title): 
+class MainFrame(wx.Frame):
+    def __init__(self, parent, title):
         super(MainFrame, self).__init__(parent, title = title)
         self.Maximize(True)
-        self.InitUI() 
+        self.InitUI()
         # colors = wx.lib.colourdb.getColourList()
         # for line in colors:
         #     print line
         # stdout.flush()
-         
-    def InitUI(self): 
+
+    def InitUI(self):
         global arg1, arg2
         self.zoom = False
         self.left = None
-        self.Bind(wx.EVT_PAINT, self.OnPaint) 
-        self.Centre() 
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Centre()
         self.tc = ThreadCalc(self)
         self.tc.calc(arg1, arg2)
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
@@ -594,32 +618,32 @@ class MainFrame(wx.Frame):
             self.offset = False
         self.tc.setZoomOffset(self.zoom, self.offset)
         self.Refresh()
-		
-    def OnPaint(self, e): 
-        dc = wx.PaintDC(self) 
+
+    def OnPaint(self, e):
+        dc = wx.PaintDC(self)
         dc.SetMapMode(wx.MM_TEXT)
         brush = wx.Brush("white")
-        dc.SetBackground(brush)  
-        dc.Clear() 
+        dc.SetBackground(brush)
+        dc.Clear()
         self.tc.calcScale()
         self.tc.draw(dc)
-        
+
         # color = wx.Colour(255,0,0)
-        # dc.SetTextForeground(color) 
+        # dc.SetTextForeground(color)
         # dc.DrawText("Hello wxPython",10,10)
         # dc.DrawLine(10,10, 100,10)
-		
+
 arg1 = None
 arg2 = None
 if __name__ == '__main__':
-    print "starting"
+    print("starting")
     stdout.flush()
     if len(argv) >= 3:
         try:
             arg1 = float(argv[1])
             arg2 = float(argv[2])
         except ValueError:
-            print "invalid argument"
+            print("invalid argument")
             sys.exit()
     else:
             arg1 = 0.5
@@ -628,7 +652,8 @@ if __name__ == '__main__':
         tc = ThreadCalc()
         tc.calc(arg1, arg2)
         tc.draw()
+        tc.close()
     else:
-        ex = wx.App() 
-        MainFrame(None,'Drawing demo') 
+        ex = wx.App()
+        MainFrame(None,'Drawing demo')
         ex.MainLoop()

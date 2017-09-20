@@ -1,7 +1,38 @@
 from sys import stdout
-cmds = None
-parms = None
-xRegs = None
+# cmds = None
+# parms = None
+# xRegs = None
+
+importList = []
+
+def createConfig(configList):
+    global config, configTable
+    importList.append("config")
+    importList.append("configTable")
+    config = {}
+    configTable = []
+    for i, (name, comment) in enumerate(configList):
+        config[name] = i
+        if name in globals():
+            print("createConfig %s already defined" % name)
+        else:
+            globals()[name] = i
+            configTable.append(name)
+            importList.append(name)
+    return(config, configTable)
+
+def createStrings(strList):
+    global strTable
+    importList.append("strTable")
+    strTable = []
+    for i, (name, value) in enumerate(strList):
+        config[name] = i
+        if name in globals():
+            print("createConfig %s already defined" % name)
+        else:
+            globals()[name] = i
+            strTable.append(value)
+            importList.append(name)
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
@@ -10,12 +41,15 @@ def createCommands(cmdList, cLoc, fData=False):
         # jFile = open(jLoc + 'Cmd.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Cmd\n{\n");
-    global cmds
-    cmds = {}
-    val = 0
-    for i in range(0, len(cmdList)):
+    global cmdTable
+    importList.append("cmdTable")
+    # cmds = {}
+    cmdTable = []
+    index = 0
+    for i in range(len(cmdList)):
         data = cmdList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             if (len(data) != 0):
                 (regName, action, regComment) = data
                 # if  isinstance(action, basestring):
@@ -24,11 +58,18 @@ def createCommands(cmdList, cLoc, fData=False):
                 if fData:
                     tmp = " %s, " % (regName)
                     cFile.write("%s/* 0x%02x %s */\n" % 
-                                (tmp.ljust(32), val, regComment))
+                                (tmp.ljust(32), index, regComment))
                     # jFile.write("%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), val, regComment))
-                cmds[regName] = (val, action)
-                val += 1
+                    #             (tmp.ljust(32), index, regComment))
+                # cmds[regName] = (index, action)
+                cmdTable.append((regName, action))
+                if regName in globals():
+                    print("createCommands %s already defined" % regName)
+                else:
+                    # globals()[regName] = regName
+                    globals()[regName] = index
+                    importList.append(regName)
+                index += 1
         else:
             if fData:
                 if (len(data) > 0):
@@ -42,9 +83,8 @@ def createCommands(cmdList, cLoc, fData=False):
         cFile.close()
         # jFile.write("};\n")
         # jFile.close()
-
-    # for key in cmds:
-    #    print key, cmds[key]
+        # for key in cmds:
+        #    print(key, cmds[key])
 
 def createParameters(parmList, cLoc, fData=False):
     if fData:
@@ -56,12 +96,15 @@ def createParameters(parmList, cLoc, fData=False):
         # jFile = open(jLoc + 'Parm.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Parm\n{\n")
-    global parms, parmVars
-    parms = {}
-    val = 0
-    for i in range(0, len(parmList)):
+    global parmTable
+    # parms = {}
+    parmTable = []
+    importList.append("parmTable")
+    index = 0
+    for i in range(len(parmList)):
         data = parmList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (regName, regComment, varType) = data
             tmp = regName.split("_")
             if len(tmp) > 1:
@@ -84,19 +127,26 @@ def createParameters(parmList, cLoc, fData=False):
             if fData:
                 tmp = " %s, " % (regName)
                 cFile.write("%s/* 0x%02x %s */\n" % 
-                            (tmp.ljust(32), val, regComment))
+                            (tmp.ljust(32), index, regComment))
                 # tmp = " PARM(%s, %s), " % (varName, regAct)
                 tmp = " PARM(%s), " % (varName)
                 c1File.write("%s/* 0x%02x %s */\n" % 
-                             (tmp.ljust(32), val, regComment))
+                             (tmp.ljust(32), index, regComment))
                 tmp = " EXT %s %s;" % (varType, varName)
                 c2File.write("%s/* 0x%02x %s */\n" % 
-                             (tmp.ljust(32), val, regComment))
+                             (tmp.ljust(32), index, regComment))
                 tmp = "  %s, " % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment))
-            parms[regName] = (val, varType, varName)
-            val += 1
+                #             (tmp.ljust(32), index, regComment))
+            # parms[regName] = (index, varType, varName)
+            parmTable.append((regName, varType, varName))
+            if regName in globals():
+                print("createParameters %s already defined" % regName)
+            else:
+                # globals()[regName] = regName
+                globals()[regName] = index
+                importList.append(regName)
+            index += 1
         else:
             if fData:
                 cFile.write("\n// %s\n\n" % (data))
@@ -113,44 +163,66 @@ def createParameters(parmList, cLoc, fData=False):
         # jFile.close()
 
     #for key in parms:
-    #    print key, parms[key]
+    #    print(key, parms[key])
 
-def createCtlStates(stateList, cLoc, fData=False):
+def createEnums(enumList, cLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'ctlstates.h', 'w')
         # jFile = open(jLoc + 'CtlStates.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlStates\n{\n");
     val = 0
-    for i in range(0, len(stateList)):
-        data = stateList[i]
-        if not isinstance(data, basestring):
+    for i in range(len(enumList)):
+        data = enumList[i]
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             state = data[0]
             comment = data[1]
             if fData:
                 tmp =  " %s, " % (state)
-                cFile.write("%s/* %2d %s */\n" % 
-                            (tmp.ljust(32), val, comment));
+                cFile.write("%s/* %2d x%02x %s */\n" % \
+                            (tmp.ljust(32), val, val, comment));
                 # jFile.write('  "%-10s %s", \n' % (state, comment));
-            globals()[state] = val
+            if state in globals():
+                print("createCtlStates %s already defined" % state)
+            else:
+                globals()[state] = val
+                eval("%s.append('%s')" % (enum, state))
+                stringList.append((state, comment))
+                importList.append(state)
             val += 1
         else:
-            if fData:
-                if data.startswith("enum"):
-                    tmp = data.split()
-                    cFile.write("%s %s\n" % (tmp[0], tmp[1].upper()))
-                    # tmp =  " public static final String[] %s = \n" % (tmp[1])
+            if data.startswith("enum"):
+                tmp = data.split()
+                if len(tmp) != 2:
+                    print("enum failure")
+                    stdout.flush()
+                var = tmp[1]
+                enum = tmp[1].replace('_', "") + "List"
+                globals()[enum] = []
+                importList.append(enum)
+                val = 0
+                stringList = []
+                if fData:
+                    cFile.write("enum %s\n" % (var.upper()))
+                    # tmp =  " public static final String[] %s = \n" % (var])
                     # jFile.write(tmp)
-                    val = 0
-                elif data.startswith("{") or data.startswith("}"):
+            elif data.startswith("{") or data.startswith("}"):
+                if fData:
                     cFile.write("%s\n" % (data))
+                    if data.startswith("}"):
+                        cFile.write("\n#ifdef ENUM_%s\n\n" % (var.upper()))
+                        cFile.write("char *%s[] = \n{\n" % (enum))
+                        for index, (s, comment) in enumerate(stringList):
+                            tmp =  " \"%s\", " % (s)
+                            cFile.write("%s/* %2d x%02x %s */\n" % \
+                                        (tmp.ljust(32), index, index, comment))
+                        cFile.write("};\n\n#endif\n")
                     # jFile.write(" %s\n" % (data))
-                else:
+            else:
+                if fData:
                     cFile.write("\n// %s\n\n" % (data))
                     # jFile.write("\n // %s\n\n" % (data))
-            else:
-                if data.startswith("enum"):
-                    val = 0
     if fData:
         cFile.close()
         # jFile.write("};\n")
@@ -162,9 +234,10 @@ def createCtlBits(regList, cLoc, fData=False):
         # jFile = open(jLoc + 'CtlBits.java', 'w')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlBits\n{\n");
-    for i in range(0, len(regList)):
+    for i in range(len(regList)):
         data = regList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (var, val, comment) = data
             if fData:
                 tmp =  "#define %-12s %s" % (var, val)
@@ -174,7 +247,11 @@ def createCtlBits(regList, cLoc, fData=False):
                 tmp =  " public static final int %-10s = %s;" % (var, val)
                 # jFile.write("%s /* %s */\n" % 
                 #             (tmp, comment));
-            globals()[var] = eval(val)
+            if var in globals():
+                print("createctlBits %s already defined" % var)
+            else:
+                globals()[var] = eval(val)
+                importList.append(var)
         else:
             if fData:
                 cFile.write("\n// %s\n\n" % (data))
@@ -205,29 +282,36 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         # j1File.write("package lathe;\n\n");
         # j1File.write("public class XilinxStr\n{\n");
         # j1File.write(" public static final String[] xilinxStr =\n {\n");
-    global xRegs
-    xRegs = {}
-    val = 0
-    for i in range(0, len(xilinxList)):
+    # global xRegs
+    global xRegTable
+    importList.append("xRegTable")
+    # xRegs = {}
+    xRegTable = []
+    index = 0
+    for i in range(len(xilinxList)):
         data = xilinxList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             (regName, regComment) = data
             if fData:
                 tmp = " %s, " % (regName)
                 cFile.write("%s/* 0x%02x %s */\n" % 
-                            (tmp.ljust(32), val, regComment));
+                            (tmp.ljust(32), index, regComment));
                 if xFile:
                     xFile.write(('constant %-12s : unsigned(opb-1 downto 0) ' +
                                  ':= x"%02x"; -- %s\n') %
-                                (regName, val, regComment))
+                                (regName, index, regComment))
                 # tmp = "  %s, " % (regName)
                 # jFile.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment));
+                #             (tmp.ljust(32), index, regComment));
                 # tmp = "  \"%s\", " % (regName)
                 # j1File.write("%s/* 0x%02x %s */\n" % 
-                #             (tmp.ljust(32), val, regComment));
-            xRegs[regName] = val
-            val += 1
+                #             (tmp.ljust(32), index, regComment));
+            # xRegs[regName] = index
+            globals()[regName] = index
+            xRegTable.append(regName)
+            importList.append(regName)
+            index += 1
         else:
             if fData:
                 if (len(data) > 0):
@@ -254,7 +338,7 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
         # jFile.close()
 
     # for key in xRegs:
-    #     print "%-12s %02x" % (key, xRegs[key])
+    #     print("%-12s %02x" % (key, xRegs[key]))
 
 def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     if fData:
@@ -274,9 +358,10 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     regName = ""
     bitStr = []
     lastShift = -1
-    for i in range(0, len(xilinxBitList)):
+    for i in range(len(xilinxBitList)):
         data = xilinxBitList[i]
-        if not isinstance(data, basestring):
+        # if not isinstance(data, basestring):
+        if not isinstance(data, str):
             if len(data) == 1:
                 xLst = []
                 regName = data[0]
@@ -305,7 +390,11 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     #             (tmp, comment));
                 if (shift > maxShift):
                     maxShift = shift
-                globals()[cVar] = bit << shift
+                if cVar in globals():
+                    print("createXilinxBits %s already defined" % cVar)
+                else:
+                    globals()[cVar] = bit << shift
+                    importList.append(cVar)
                 lastShift = shift
         else:
             if fData:
@@ -316,15 +405,16 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
                     if xFile:
                         xFile.write(" constant %s_size : integer := %d;\n" %
                                     (regName, maxShift + 1))
-                        xFile.write(" signal %sReg : unsigned(%s_size-1 downto 0);\n" %
+                        xFile.write(" signal %sReg : "\
+                                    "unsigned(%s_size-1 downto 0);\n" %
                                     (regName, regName))
-                    for i in range(0, len(xLst)):
+                    for i in range(len(xLst)):
                         if xFile:
                             xFile.write(xLst[i])
                     # if (len(bitStr) != 0):
                     #     jFile.write(("\n public static final " +
                     #                 "String[] %sBits =\n {\n") % (regName))
-                    #     for i in range(0, len(bitStr)):
+                    #     for i in range(len(bitStr)):
                     #         jFile.write(bitStr[i])
                     #     jFile.write(" };\n");
                     #     bitStr = []
@@ -336,7 +426,11 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
             else:
                 if (len(regName) > 0):
                     var = "%s_size" % (regName)
-                    globals()[var] = maxShift + 1
+                    if var in globals():
+                        print("createXilinxBits %s already defined" % var)
+                    else:
+                        globals()[var] = maxShift + 1
+                        importList.append(var)
     if fData:
         cFile.close()
         if xFile:
@@ -344,5 +438,5 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
             xFile.write("package body CtlBits is\n\n")
             xFile.write("end CtlBits;\n")
             xFile.close()
-        # jFile.write("};\n")
-        # jFile.close()
+            # jFile.write("};\n")
+            # jFile.close()
