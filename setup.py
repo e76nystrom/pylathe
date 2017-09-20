@@ -1,5 +1,4 @@
 from sys import stdout
-import io
 # cmds = None
 # parms = None
 # xRegs = None
@@ -37,7 +36,7 @@ def createStrings(strList):
 
 def createCommands(cmdList, cLoc, fData=False):
     if fData:
-        cFile = io.open(cLoc + 'cmdList.h', 'w', newline='\n')
+        cFile = open(cLoc + 'cmdList.h', 'wb')
         cFile.write("enum COMMANDS\n{\n");
         # jFile = open(jLoc + 'Cmd.java', 'w')
         # jFile.write("package lathe;\n\n");
