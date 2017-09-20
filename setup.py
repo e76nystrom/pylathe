@@ -38,7 +38,7 @@ def createCommands(cmdList, cLoc, fData=False):
     if fData:
         cFile = open(cLoc + 'cmdList.h', 'wb')
         cFile.write("enum COMMANDS\n{\n");
-        # jFile = open(jLoc + 'Cmd.java', 'w')
+        # jFile = open(jLoc + 'Cmd.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Cmd\n{\n");
     global cmdTable
@@ -88,12 +88,12 @@ def createCommands(cmdList, cLoc, fData=False):
 
 def createParameters(parmList, cLoc, fData=False):
     if fData:
-        cFile = open(cLoc + 'parmList.h', 'w')
+        cFile = open(cLoc + 'parmList.h', 'wb')
         cFile.write("enum PARM\n{\n")
-        c1File = open(cLoc + 'remparm.h', 'w')
+        c1File = open(cLoc + 'remparm.h', 'wb')
         c1File.write("T_PARM remparm[] =\n{\n")
-        c2File = open(cLoc + 'remvardef.h', 'w')
-        # jFile = open(jLoc + 'Parm.java', 'w')
+        c2File = open(cLoc + 'remvardef.h', 'wb')
+        # jFile = open(jLoc + 'Parm.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Parm\n{\n")
     global parmTable
@@ -167,8 +167,8 @@ def createParameters(parmList, cLoc, fData=False):
 
 def createEnums(enumList, cLoc, fData=False):
     if fData:
-        cFile = open(cLoc + 'ctlstates.h', 'w')
-        # jFile = open(jLoc + 'CtlStates.java', 'w')
+        cFile = open(cLoc + 'ctlstates.h', 'wb')
+        # jFile = open(jLoc + 'CtlStates.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlStates\n{\n");
     val = 0
@@ -230,8 +230,8 @@ def createEnums(enumList, cLoc, fData=False):
 
 def createCtlBits(regList, cLoc, fData=False):
     if fData:
-        cFile = open(cLoc + 'ctlbits.h', 'w')
-        # jFile = open(jLoc + 'CtlBits.java', 'w')
+        cFile = open(cLoc + 'ctlbits.h', 'wb')
+        # jFile = open(jLoc + 'CtlBits.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class CtlBits\n{\n");
     for i in range(len(regList)):
@@ -263,10 +263,10 @@ def createCtlBits(regList, cLoc, fData=False):
 
 def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
     if fData:
-        cFile = open(cLoc + 'xilinxreg.h', 'w')
+        cFile = open(cLoc + 'xilinxreg.h', 'wb')
         cFile.write("enum XILINX\n{\n");
         try:
-            xFile = open(xLoc + 'RegDef.vhd', 'w')
+            xFile = open(xLoc + 'RegDef.vhd', 'wb')
         except (OSError, IOError) as e:
             xFile = None
         if xFile:
@@ -275,10 +275,10 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
             xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
             xFile.write("package RegDef is\n\n")
             xFile.write("constant opb : positive := 8;\n\n")
-        # jFile = open(jLoc + 'Xilinx.java', 'w')
+        # jFile = open(jLoc + 'Xilinx.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public enum Xilinx\n {\n");
-        # j1File = open(jLoc + 'XilinxStr.java', 'w')
+        # j1File = open(jLoc + 'XilinxStr.java', 'wb')
         # j1File.write("package lathe;\n\n");
         # j1File.write("public class XilinxStr\n{\n");
         # j1File.write(" public static final String[] xilinxStr =\n {\n");
@@ -342,9 +342,9 @@ def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
 
 def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
     if fData:
-        cFile = open(cLoc + 'xilinxbits.h', 'w')
+        cFile = open(cLoc + 'xilinxbits.h', 'wb')
         try:
-            xFile = open(xLoc + 'CtlBits.vhd', 'w')
+            xFile = open(xLoc + 'CtlBits.vhd', 'wb')
         except IOError as e:
             xFile = None
         if xFile:
@@ -352,7 +352,7 @@ def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
             xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
             xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
             xFile.write("package CtlBits is\n")
-        # jFile = open(jLoc + 'XilinxBits.java', 'w')
+        # jFile = open(jLoc + 'XilinxBits.java', 'wb')
         # jFile.write("package lathe;\n\n");
         # jFile.write("public class XilinxBits\n{\n");
     regName = ""
