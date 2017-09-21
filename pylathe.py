@@ -3643,7 +3643,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def updateZPos(self, val):
         global zHomeOffset, zDROOffset
         sendZData()
-        zLoc = getParm(Z_LOC)
+        zLoc = getParm(Z_LOC, True)
         if zLoc != None:
             zLoc /= self.zStepsInch
             zHomeOffset = zLoc - val
