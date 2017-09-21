@@ -3,6 +3,7 @@ from sys import stdout
 
 info = []
 infoData = []
+configTable = None
 
 class InfoValue():
     def __init__(self, val):
@@ -166,9 +167,10 @@ def getFloatInfo(key):
         try:
             return(float(val))
         except ValueError:
-            print("getFloatInfo ValueError %s" % val)
+            print("getFloatInfo ValueError key %d %s %s" % \
+                  (key, configTable[key], val))
     except KeyError:
-        print("getFloatInfo KeyError %s" % (key))
+        print("getFloatInfo KeyError %d" % (key))
     stdout.flush()
     return(0.0)
 

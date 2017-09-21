@@ -223,13 +223,13 @@ def setParm(parmIndex, val):
     commLock.release()
 
 def getParm(parmIndex, dbg=False):
-    global ser, commLock, timeout
+    global ser, parmTable, commLock, timeout
     if ser is None:
         return(None)
     # cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
     cmd = '\x01%x %x \r' % (READVAL, parmIndex)
     if dbg:
-        print("%-15s %s " % (parm, cmd.strip('\x01\r')), end="")
+        print("%-15s %s" % (parmTable[parmIndex], cmd.strip('\x01\r')), end="")
     commLock.acquire(True)
     ser.write(cmd)
     rsp = "";
@@ -239,7 +239,8 @@ def getParm(parmIndex, dbg=False):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("getParm timeout %s" % (parm)) #, flush=True)
+                print("getParm timeout %s" % \
+                      (parmTable[parmIndex])) #, flush=True)
                 stdout.flush()
             raise CommTimeout()
             break;
