@@ -4323,7 +4323,8 @@ class UpdateThread(Thread):
         return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
-        tmp = float(jogPanel.xDROInvert * xDROPos) / jogPanel.xDROInch - \
+        global xDROPosition
+        tmp = float(jogPanel.xDROInvert * xDROPosition) / jogPanel.xDROInch - \
               xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
@@ -4368,7 +4369,8 @@ class UpdateThread(Thread):
         return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
-        tmp = float(jogPanel.zDROInvert * zDROPos) / jogPanel.zDROInch - \
+        global zDROPositin
+        tmp = float(jogPanel.zDROInvert * zDROPosition) / jogPanel.zDROInch - \
               zDROOffset
         self.zDro = val
         return("zdro %7.4f" % (tmp))
