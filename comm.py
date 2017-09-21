@@ -249,8 +249,6 @@ def getParm(parmIndex, dbg=False):
             if len(result) == 3:
                 commLock.release()
                 try:
-                    if dbg:
-                        print("result %s" % (result))
                     retVal = int(result[2], 16)
                 except:
                     print("getParm error on %s" % (result)) #, flush=True)
