@@ -9,7 +9,8 @@ from time import sleep, time
 import sys
 import os
 import subprocess
-from sys import stdout
+import traceback
+from sys import stdout, stderr
 import serial
 from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
@@ -35,6 +36,7 @@ from setup import createConfig, createStrings, createCommands, \
 from interface import configList, strList, cmdList, parmList, enumList, regList
 
 (config, configTable) = createConfig(configList)
+configInfo.configTable = configTable
 
 configFile = "config.txt"
 
@@ -819,6 +821,8 @@ def sendZData(send=False):
             motorRatio = getFloatInfo(zMotorRatio)
             jogPanel.zStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
+            stdout.flush()
             jogPanel.zDROInch = getIntInfo(zDROInch)
             jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
             stdout.flush()
@@ -865,6 +869,8 @@ def sendXData(send=False):
             motorRatio = getFloatInfo(xMotorRatio)
             jogPanel.xStepsInch = (microSteps * motorSteps * \
                                    motorRatio) / pitch
+            print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
+            stdout.flush()
             jogPanel.xDROInch = getIntInfo(xDROInch)
             jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
             val = jogPanel.combo.GetValue()
@@ -2864,6 +2870,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
+        self.lastZOffset = 0.0
+        self.lastXOffset = 0.0
 
     def initUI(self):
         global emptyCell
@@ -3459,12 +3467,22 @@ class JogPanel(wx.Panel, FormRoutines):
             self.curPass.SetValue(curPass)
 
             if DRO:
-                zDroLoc = float(self.zDROInvert * zDROPos) / self.zDROInch - \
-                          zDROOffset
+                zDROPos = int(zDROPos)
+                zDroLoc = float(zDROPos) / self.zDROInch
+                xDROPos = int(xDROPos)
+                xDroLoc = float(xDROPos) / self.xDROInch
+                if (self.lastZOffset != zDROOffset or \
+                    self.lastXOffset != xDROOffset):
+                    self.lastZOffset = zDROOffset
+                    self.lastXOffset = xDROOffset
+                    print("zDROPos %d %0.4f zDROOffset %0.4f " \
+                          "xDROPos %d %0.4f xDROOffset %0.4f" % \
+                          (zDROPos, zDroLoc, zDROOffset, \
+                           xDROPos, xDroLoc, xDROOffset))
+                stdout.flush()
+                zDroLoc = self.zDROInvert * zDroLoc - zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
-
-                xDroLoc = float(self.xDROInvert * xDROPos) / self.xDROInch - \
-                          xDROOffset
+                xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
@@ -3635,23 +3653,26 @@ class JogPanel(wx.Panel, FormRoutines):
         sendZData()
         zLoc = getParm(Z_LOC)
         if zLoc != None:
-            zLoc /= self.zStepsInch
+            zLoc = float(zLoc) / self.zStepsInch
             zHomeOffset = zLoc - val
             setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
             setParm(Z_HOME_OFFSET, zHomeOffset)
-            print("zHomeOffset %0.4f" % (zHomeOffset))
+            print("pos %0.4f zLoc %0.4f zHomeOffset %0.4f" % \
+                  (val, zLoc, zHomeOffset))
         if DRO:
-            zDROPos = getParm(Z_DRO_POS)
-            print("zDROPos %0.4f" % (zDROPos / self.zDROInch))
+            zDROPos = getParm(Z_DRO_POS, True)
             if zDROPos != None:
                 droPos = float(zDROPos) / self.zDROInch
+                print("pos %0.4f zDROPos %d %0.4f invert %d" % \
+                      (val, zDROPos, droPos, self.zDROInvert))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
                 if self.zDROInvert:
                     droPos = -droPos
                 zDROOffset = droPos - val
                 setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
-                print("zDROOffset %0.4f" % (zDROOffset))
+                print("zDROOffset %d %0.4f" % \
+                      (int(zDROOffset * self.zDROInch), zDROOffset))
         stdout.flush()
 
     def updateXPos(self, val):
@@ -3660,23 +3681,26 @@ class JogPanel(wx.Panel, FormRoutines):
         sendXData()
         xLoc = getParm(X_LOC)
         if xLoc != None:
-            xLoc /= self.xStepsInch
+            xLoc = float(xLoc) / self.xStepsInch
             xHomeOffset = xLoc - val
             setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
             setParm(X_HOME_OFFSET, xHomeOffset)
-            print("xHomeOffset %0.4f" % (xHomeOffset))
+            print("pos %0.4f xLoc %0.4f xHomeOffset %0.4f" % \
+                  (val, xLoc, xHomeOffset))
         if DRO:
             xDROPos = getParm(X_DRO_POS)
-            print("xDROPos %0.4f" % (xDROPos / self.xDROInch))
             if xDROPos != None:
                 droPos = float(xDROPos) / self.xDROInch
+                print("pos %0.4f xDROPos %d %0.4f invert %d" % \
+                      (val, xDROPos, droPos, self.xDROInvert))
                 setInfo(xSvDROPosition, "%0.4f" % (droPos))
                 if self.xDROInvert:
                     droPos = -droPos
                 xDROOffset = droPos - val
                 setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
                 setParm(X_DRO_OFFSET, xDROOffset)
-                print("xDROOffset %0.4f" % (xDROOffset))
+                print("xDROOffset %d %0.4f" % \
+                      (int(xDROOffset * self.xDROInch), xDROOffset))
         stdout.flush()
 
     def getPos(self, ctl):
@@ -4317,7 +4341,8 @@ class UpdateThread(Thread):
         return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
-        tmp = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
+        global xDROPosition
+        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
               xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
@@ -4362,9 +4387,10 @@ class UpdateThread(Thread):
         return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
-        tmp = float(jogPanel.zDROInvert * zDROPos) / jogPanel.zDROInch - \
+        global zDROPositin
+        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
               zDROOffset
-        self.zDro = val
+        self.zDro = tmp
         return("zdro %7.4f" % (tmp))
 
     def dbgZExp(self, val):
@@ -4669,7 +4695,11 @@ class MainFrame(wx.Frame):
         for (key, var) in vars:
             exec('global ' + var)
             if not key in configInfo.info:
-               newInfo(key, "%0.4f" % (eval(var)))
+                try:
+                    newInfo(key, "%0.4f" % (eval(var)))
+                except NameError:
+                    print("MainFrame initUI %s not defined" % (var))
+                    stdout.flush()
             else:
                 exp = var + ' = getFloatInfo(' + key + ')'
                 exec(exp)
