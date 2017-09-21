@@ -3645,7 +3645,7 @@ class JogPanel(wx.Panel, FormRoutines):
         sendZData()
         zLoc = getParm(Z_LOC)
         if zLoc != None:
-            zLoc /= self.zStepsInch
+            zLoc = float(zLoc) / self.zStepsInch
             zHomeOffset = zLoc - val
             setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
             setParm(Z_HOME_OFFSET, zHomeOffset)
@@ -3653,16 +3653,16 @@ class JogPanel(wx.Panel, FormRoutines):
         if DRO:
             zDROPos = getParm(Z_DRO_POS, True)
             if zDROPos != None:
-                zDROPos = float(zDROPos)
-                print("zDROPos %0.4f" % (zDROPos / self.zDROInch))
-                droPos = zDROPos / self.zDROInch
+                droPos = float(zDROPos) / self.zDROInch
+                print("pos %0.4f zDROPos %d %0.4f" % (val, zDROPos, droPos))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
                 if self.zDROInvert:
                     droPos = -droPos
                 zDROOffset = droPos - val
                 setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
-                print("zDROOffset %0.4f" % (zDROOffset))
+                print("zDROOffset %d %0.4f" % \
+                      (int(zDROOffset * self.zDROInch), zDROOffset))
         stdout.flush()
 
     def updateXPos(self, val):
@@ -3671,7 +3671,7 @@ class JogPanel(wx.Panel, FormRoutines):
         sendXData()
         xLoc = getParm(X_LOC)
         if xLoc != None:
-            xLoc /= self.xStepsInch
+            xLoc = float(xLoc) / self.xStepsInch
             xHomeOffset = xLoc - val
             setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
             setParm(X_HOME_OFFSET, xHomeOffset)
@@ -3679,16 +3679,16 @@ class JogPanel(wx.Panel, FormRoutines):
         if DRO:
             xDROPos = getParm(X_DRO_POS)
             if xDROPos != None:
-                xDROPos = float(xDROPos)
-                print("xDROPos %0.4f" % (xDROPos / self.xDROInch))
                 droPos = float(xDROPos) / self.xDROInch
+                print("pos %0.4f xDROPos %d %0.4f" % (val, xDROPos, droPos))
                 setInfo(xSvDROPosition, "%0.4f" % (droPos))
                 if self.xDROInvert:
                     droPos = -droPos
                 xDROOffset = droPos - val
                 setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
                 setParm(X_DRO_OFFSET, xDROOffset)
-                print("xDROOffset %0.4f" % (xDROOffset))
+                print("xDROOffset %d %0.4f" % \
+                      (int(xDROOffset * self.xDROInch), xDROOffset))
         stdout.flush()
 
     def getPos(self, ctl):
