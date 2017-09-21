@@ -239,7 +239,8 @@ def getParm(parmIndex, dbg=False):
             commLock.release()
             if not timeout:
                 timeout = True
-                print("getParm timeout %s" % (parm)) #, flush=True)
+                print("getParm timeout %s" % \
+                      (parmTable[parmIndex])) #, flush=True)
                 stdout.flush()
             raise CommTimeout()
             break;
