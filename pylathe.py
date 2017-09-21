@@ -3657,12 +3657,14 @@ class JogPanel(wx.Panel, FormRoutines):
             zHomeOffset = zLoc - val
             setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
             setParm(Z_HOME_OFFSET, zHomeOffset)
-            print("zHomeOffset %0.4f" % (zHomeOffset))
+            print("pos %0.4f zLoc %0.4f zHomeOffset %0.4f" % \
+                  (val, zLoc, zHomeOffset))
         if DRO:
             zDROPos = getParm(Z_DRO_POS, True)
             if zDROPos != None:
                 droPos = float(zDROPos) / self.zDROInch
-                print("pos %0.4f zDROPos %d %0.4f" % (val, zDROPos, droPos))
+                print("pos %0.4f zDROPos %d %0.4f invert %d" % \
+                      (val, zDROPos, droPos, self.zDROInvert))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
                 if self.zDROInvert:
                     droPos = -droPos
@@ -3683,12 +3685,14 @@ class JogPanel(wx.Panel, FormRoutines):
             xHomeOffset = xLoc - val
             setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
             setParm(X_HOME_OFFSET, xHomeOffset)
-            print("xHomeOffset %0.4f" % (xHomeOffset))
+            print("pos %0.4f xLoc %0.4f xHomeOffset %0.4f" % \
+                  (val, xLoc, xHomeOffset))
         if DRO:
             xDROPos = getParm(X_DRO_POS)
             if xDROPos != None:
                 droPos = float(xDROPos) / self.xDROInch
-                print("pos %0.4f xDROPos %d %0.4f" % (val, xDROPos, droPos))
+                print("pos %0.4f xDROPos %d %0.4f invert %d" % \
+                      (val, xDROPos, droPos, self.xDROInvert))
                 setInfo(xSvDROPosition, "%0.4f" % (droPos))
                 if self.xDROInvert:
                     droPos = -droPos
