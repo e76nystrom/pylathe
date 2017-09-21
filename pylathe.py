@@ -2870,6 +2870,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
+        self.lastZOffset = 0.0
+        self.lastXOffset = 0.0
 
     def initUI(self):
         global emptyCell
@@ -3469,10 +3471,14 @@ class JogPanel(wx.Panel, FormRoutines):
                 zDroLoc = float(zDROPos) / self.zDROInch
                 xDROPos = int(xDROPos)
                 xDroLoc = float(xDROPos) / self.xDROInch
-                print("zDROPos %d %0.4f zDROOffset %0.4f " \
-                      "xDROPos %d %0.4f xDROOffset %0.4f" % \
-                      (zDROPos, zDroLoc, zDROOffset, \
-                       xDROPos, xDroLoc, xDROOffset))
+                if (self.lastZOffset != zDROOffset or \
+                    self.lastXOffset != xDROOffset):
+                    self.lastZOffset = zDROOffset
+                    self.lastXOffset = xDROOffset
+                    print("zDROPos %d %0.4f zDROOffset %0.4f " \
+                          "xDROPos %d %0.4f xDROOffset %0.4f" % \
+                          (zDROPos, zDroLoc, zDROOffset, \
+                           xDROPos, xDroLoc, xDROOffset))
                 stdout.flush()
                 zDroLoc = self.zDROInvert * zDroLoc - zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
