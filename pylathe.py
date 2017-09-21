@@ -3465,6 +3465,8 @@ class JogPanel(wx.Panel, FormRoutines):
             self.curPass.SetValue(curPass)
 
             if DRO:
+                zDROPos = int(zDROPos)
+                xDROPos = int(xDROPos)
                 print("zDROPos %d xDROPos %d" %  (zDROPos, xDROPos))
                 stdout.flush()
                 zDroLoc = float(self.zDROInvert * zDROPos) / self.zDROInch - \
