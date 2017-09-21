@@ -4360,6 +4360,7 @@ class UpdateThread(Thread):
     def dbgZLoc(self, val):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
         if self.zDro != None:
+            print("zLoc %0.4f zDro %0.4f" % (tmp, self.zDro)
             diff = " %0.4f" % (self.zDro - tmp)
             self.zDro = None
         else:
