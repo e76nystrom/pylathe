@@ -3480,9 +3480,9 @@ class JogPanel(wx.Panel, FormRoutines):
                           (zDROPos, zDroLoc, zDROOffset, \
                            xDROPos, xDroLoc, xDROOffset))
                 stdout.flush()
-                zDroLoc = self.zDROInvert * zDroLoc + zDROOffset
+                zDroLoc = self.zDROInvert * zDroLoc - zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
-                xDroLoc = self.xDROInvert * xDroLoc + xDROOffset
+                xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
@@ -4342,7 +4342,7 @@ class UpdateThread(Thread):
 
     def dbgXDro(self, val):
         global xDROPosition
-        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch + \
+        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
               xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
@@ -4388,7 +4388,7 @@ class UpdateThread(Thread):
 
     def dbgZDro(self, val):
         global zDROPositin
-        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch + \
+        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
               zDROOffset
         self.zDro = tmp
         return("zdro %7.4f" % (tmp))
