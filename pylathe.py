@@ -4387,7 +4387,7 @@ class UpdateThread(Thread):
         global zDROPositin
         tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch + \
               zDROOffset
-        self.zDro = val
+        self.zDro = tmp
         return("zdro %7.4f" % (tmp))
 
     def dbgZExp(self, val):
