@@ -3471,8 +3471,8 @@ class JogPanel(wx.Panel, FormRoutines):
                 xDroLoc = float(xDROPos) / self.xDROInch
                 print("zDROPos %d %0.4f zDROOffset %0.4f " \
                       "xDROPos %d %0.4f xDROOffset %0.4f" % \
-                      (zDROPos, zDROLoc, zDROOffset, \
-                       xDROPos, xDROLoc, xDROOffset))
+                      (zDROPos, zDroLoc, zDROOffset, \
+                       xDROPos, xDroLoc, xDROOffset))
                 stdout.flush()
                 zDroLoc = self.zDROInvert * zDroLoc - zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
