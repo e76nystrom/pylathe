@@ -3467,11 +3467,11 @@ class JogPanel(wx.Panel, FormRoutines):
             if DRO:
                 zDroLoc = float(self.zDROInvert * zDROPos) / self.zDROInch - \
                           zDROOffset
-                self.zDROPosition.SetValue("%0.4f" % (zDroLoc))
+                self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
                 xDroLoc = float(self.xDROInvert * xDROPos) / self.xDROInch - \
                           xDROOffset
-                self.xDROPosition.SetValue("%0.4f" % (xDroLoc))
+                self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
             if xHomed:
