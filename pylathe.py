@@ -4323,7 +4323,7 @@ class UpdateThread(Thread):
         return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
-        tmp = float(jogPanel.xDroInvert * xDROPos) / jogPanel.xDROInch - \
+        tmp = float(jogPanel.xDROInvert * xDROPos) / jogPanel.xDROInch - \
               xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
