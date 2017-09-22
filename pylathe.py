@@ -3954,7 +3954,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 val = float(val)
             except ValueError:
                 val = 0.0
-            if self.axis = AXIS_X:
+            if self.axis == AXIS_X:
                 val *= 2.0
             self.pos.SetValue("%0.4f" % (val))
             self.pos.SetSelection(-1, -1)
