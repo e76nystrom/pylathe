@@ -200,4 +200,4 @@ def getInitialInfo(key):
     except KeyError:
         print("getInitialInfo KeyError %s" % (key))
         stdout.flush()
-        return(False)
+return(False)
