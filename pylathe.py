@@ -25,7 +25,6 @@ if WINDOWS:
 HOME_TEST = False
 dbg = None
 
-
 import configInfo
 from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
     newInfo, setInfo, setInfoData, getInfo, getInfoData, getBoolInfo, \
