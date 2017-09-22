@@ -4696,7 +4696,12 @@ class MainFrame(wx.Frame):
             exec('global ' + var)
             if not key in configInfo.info:
                 try:
-                    newInfo(key, "%0.4f" % (eval(var)))
+                    val = "%0.4f" % (eval(var))
+                    print("newInfoData %3d %16s %16s %s " % \
+                          (key, configTable[key], var, val), end='')
+                    newInfo(key, val)
+                    val = getInfoData(key)
+                    print("%s" % val)
                 except NameError:
                     print("MainFrame initUI %s not defined" % (var))
                     stdout.flush()

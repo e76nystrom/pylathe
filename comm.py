@@ -27,7 +27,7 @@ def openSerial(port, rate):
     try:
         ser = serial.Serial(port, 57600, timeout=1)
     except IOError:
-        print("unable to open port") #, flush=True)
+        print("unable to open port %s" % (port)) #, flush=True)
         stdout.flush()
 
 class CommTimeout(Exception):

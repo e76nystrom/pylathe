@@ -116,6 +116,7 @@ def newInfo(key, val):
         print("newInfo duplicate key %s" % (key))
         stdout.flush()
     info[key] = InfoValue(val)
+    infoData[key] = val
 
 def setInfo(key, val):
     global info
@@ -168,6 +169,9 @@ def getFloatInfo(key):
             return(float(val))
         except ValueError:
             print("getFloatInfo ValueError key %d %s %s" % \
+                  (key, configTable[key], val))
+        except TypeError:
+            print("getFloatInfo TypeError key %d %s %s" % \
                   (key, configTable[key], val))
     except KeyError:
         print("getFloatInfo KeyError %d" % (key))
