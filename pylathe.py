@@ -21,7 +21,6 @@ import re
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
-
     
 HOME_TEST = False
 dbg = None
