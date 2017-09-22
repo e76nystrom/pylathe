@@ -3666,7 +3666,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("pos %0.4f zDROPos %d %0.4f invert %d" % \
                       (val, zDROPos, droPos, self.zDROInvert))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
-                zDROOffset = self.zDROInver * droPos - val
+                zDROOffset = self.zDROInvert * droPos - val
                 setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %d %0.4f" % \
