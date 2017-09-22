@@ -3949,7 +3949,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
             return
         if self.IsShown():
             val = jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
-               jogPanel.xPos.GetValue()
+               jogPanel.xPos.GetValue() * 2.0
             try:
                 val = float(val)
             except ValueError:
