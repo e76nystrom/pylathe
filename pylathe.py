@@ -22,6 +22,7 @@ WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
 
+    
 HOME_TEST = False
 dbg = None
 
@@ -3666,9 +3667,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("pos %0.4f zDROPos %d %0.4f invert %d" % \
                       (val, zDROPos, droPos, self.zDROInvert))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
-                if self.zDROInvert:
-                    droPos = -droPos
-                zDROOffset = droPos - val
+                zDROOffset = self.zDROInver * droPos - val
                 setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %d %0.4f" % \
@@ -3694,9 +3693,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("pos %0.4f xDROPos %d %0.4f invert %d" % \
                       (val, xDROPos, droPos, self.xDROInvert))
                 setInfo(xSvDROPosition, "%0.4f" % (droPos))
-                if self.xDROInvert:
-                    droPos = -droPos
-                xDROOffset = droPos - val
+                xDROOffset = self.xDROInvert * droPos - val
                 setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
                 setParm(X_DRO_OFFSET, xDROOffset)
                 print("xDROOffset %d %0.4f" % \
@@ -4697,11 +4694,11 @@ class MainFrame(wx.Frame):
             if not key in configInfo.info:
                 try:
                     val = "%0.4f" % (eval(var))
-                    print("newInfoData %3d %16s %16s %s " % \
-                          (key, configTable[key], var, val), end='')
+                    # print("newInfoData %3d %16s %16s %s " % \
+                    #       (key, configTable[key], var, val), end='')
                     newInfo(key, val)
-                    val = getInfoData(key)
-                    print("%s" % val)
+                    # val = getInfoData(key)
+                    # print("%s" % val)
                 except NameError:
                     print("MainFrame initUI %s not defined" % (var))
                     stdout.flush()
