@@ -21,7 +21,7 @@ import re
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
-
+    
 HOME_TEST = False
 dbg = None
 
@@ -3666,9 +3666,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("pos %0.4f zDROPos %d %0.4f invert %d" % \
                       (val, zDROPos, droPos, self.zDROInvert))
                 setInfo(zSvDROPosition, "%0.4f" % (droPos))
-                if self.zDROInvert:
-                    droPos = -droPos
-                zDROOffset = droPos - val
+                zDROOffset = self.zDROInvert * droPos - val
                 setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
                 setParm(Z_DRO_OFFSET, zDROOffset)
                 print("zDROOffset %d %0.4f" % \
@@ -3694,9 +3692,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("pos %0.4f xDROPos %d %0.4f invert %d" % \
                       (val, xDROPos, droPos, self.xDROInvert))
                 setInfo(xSvDROPosition, "%0.4f" % (droPos))
-                if self.xDROInvert:
-                    droPos = -droPos
-                xDROOffset = droPos - val
+                xDROOffset = self.xDROInvert * droPos - val
                 setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
                 setParm(X_DRO_OFFSET, xDROOffset)
                 print("xDROOffset %d %0.4f" % \
@@ -3818,6 +3814,8 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         if self.IsShown():
             val = self.jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
                self.jogPanel.xPos.GetValue()
+            if self.axis == AXIS_X:
+                val = "%0.4f" % (float(val) * 2)
             self.pos.SetValue(val)
             self.pos.SetSelection(-1, -1)
 
@@ -3958,6 +3956,8 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 val = float(val)
             except ValueError:
                 val = 0.0
+            if self.axis == AXIS_X:
+                val *= 2.0
             self.pos.SetValue("%0.4f" % (val))
             self.pos.SetSelection(-1, -1)
 
@@ -4696,7 +4696,12 @@ class MainFrame(wx.Frame):
             exec('global ' + var)
             if not key in configInfo.info:
                 try:
-                    newInfo(key, "%0.4f" % (eval(var)))
+                    val = "%0.4f" % (eval(var))
+                    # print("newInfoData %3d %16s %16s %s " % \
+                    #       (key, configTable[key], var, val), end='')
+                    newInfo(key, val)
+                    # val = getInfoData(key)
+                    # print("%s" % val)
                 except NameError:
                     print("MainFrame initUI %s not defined" % (var))
                     stdout.flush()
