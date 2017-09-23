@@ -4240,6 +4240,8 @@ class UpdateThread(Thread):
                 result = getString(READDBG, 10)
                 if not self.threadRun:
                     break
+                if result == None:
+                    continue
                 tmp = result.split()
                 rLen = len(tmp)
                 # if rLen > 0:
