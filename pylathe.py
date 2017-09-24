@@ -3657,7 +3657,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.Update()
 
     def updateZPos(self, val):
-        global zHomeOffset, zDROOffset
+        global zHomeOffset
         sendZData()
         zLoc = getParm(Z_LOC)
         if zLoc != None:
@@ -3672,6 +3672,7 @@ class JogPanel(wx.Panel, FormRoutines):
             updateZDroPos(self, val)
 
     def updateZDroPos(self, val, zDROPos=None):
+        global zDROOffset
         if zDROPos == None:
             zDROPos = getParm(Z_DRO_POS, True)
         if zDROPos != None:
@@ -3687,7 +3688,7 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
 
     def updateXPos(self, val):
-        global xHomeOffset, xDROOffset
+        global xHomeOffset
         val /= 2.0
         sendXData()
         xLoc = getParm(X_LOC)
@@ -3703,6 +3704,7 @@ class JogPanel(wx.Panel, FormRoutines):
             updateXDroPos(self, val)
 
     def updateXDroPos(self, val, xDROPos=None):
+        global xDROOffset
         if xDROPos == None:
             xDROPos = getParm(X_DRO_POS)
         if xDROPos != None:
