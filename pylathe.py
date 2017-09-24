@@ -823,9 +823,14 @@ def sendZData(send=False):
                                    motorRatio) / pitch
             print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
             stdout.flush()
-            jogPanel.zDROInch = getIntInfo(zDROInch)
-            jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
-            stdout.flush()
+
+            if DRO:
+                jogPanel.zDROInch = getIntInfo(zDROInch)
+                jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
+                queParm(Z_DRO_INCH, jogPanel.zDROInch)
+                val = -1 if getBoolInfo(xInvDRO) else 1
+                queParm(X_DRO_DIR, val)
+
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -871,8 +876,13 @@ def sendXData(send=False):
                                    motorRatio) / pitch
             print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
             stdout.flush()
-            jogPanel.xDROInch = getIntInfo(xDROInch)
-            jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
+
+            if DRO:
+                jogPanel.xDROInch = getIntInfo(xDROInch)
+                jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
+                queParm(X_DRO_INCH, jogPanel.xDROInch)
+                queParm(Z_DRO_DIR, jogPanel.xDROInvert)
+
             val = jogPanel.combo.GetValue()
             try:
                 val = float(val)
@@ -4486,37 +4496,31 @@ class MainFrame(wx.Frame):
                 queParm(CFG_DRO, getBoolInfo(cfgDRO))
                 queParm(CFG_LCD, getBoolInfo(cfgLCD))
                 command(CMD_SETUP)
+
                 sendZData()
                 val = getInfoData(jogZPos)
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
+                if DRO:
+                    jogPanel.updateZDroPos(val)
+                    
                 sendXData()
                 val = getInfoData(jogXPos)
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
-                    val = int(getFloatInfo(zSvDROPosition) * \
-                              jogPanel.zStepsInch)
-                    queParm(Z_DRO_POS, val)
-                    val = int(getFloatInfo(xSvDROPosition) * \
-                              jogPanel.xStepsInch)
-                    queParm(X_DRO_POS, val)
-                    queParm(Z_DRO_OFFSET, zDROOffset)
-                    queParm(X_DRO_OFFSET, xDROOffset)
-                    queParm(Z_DRO_INCH, jogPanel.zDROInch)
-                    queParm(X_DRO_INCH, jogPanel.xDROInch)
-                    sendMulti()
-                val = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
-                queParm(X_HOME_LOC, val)
-                queParm(Z_HOME_OFFSET, zHomeOffset)
-                queParm(X_HOME_OFFSET, xHomeOffset)
-                queParm(X_HOME_STATUS, HOME_SUCCESS if xHomed else HOME_ACTIVE)
-                val = -1 if getBoolInfo(zInvDRO) else 1
-                queParm(Z_DRO_DIR, val)
-                val = -1 if getBoolInfo(xInvDRO) else 1
-                queParm(X_DRO_DIR, val)
-                sendMulti()
+                    jogPanel.updateXDroPos(val)
+                    
                 sendSpindleData()
+
+                if HOME_TEST:
+                    val = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
+                    queParm(X_HOME_LOC, val)
+                    queParm(Z_HOME_OFFSET, zHomeOffset)
+                    queParm(X_HOME_OFFSET, xHomeOffset)
+                    queParm(X_HOME_STATUS,
+                            HOME_SUCCESS if xHomed else HOME_ACTIVE)
+                    sendMulti()
             except CommTimeout:
                 commTimeout()
 
