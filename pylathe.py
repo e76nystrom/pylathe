@@ -3700,7 +3700,7 @@ class JogPanel(wx.Panel, FormRoutines):
                   (val, xLoc, xHomeOffset))
             stdout.flush()
         if DRO:
-            updateXDroPos(self, val):
+            updateXDroPos(self, val)
 
     def updateXDroPos(self, val, xDROPos=None):
         if xDROPos == None:
