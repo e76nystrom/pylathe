@@ -4502,14 +4502,14 @@ class MainFrame(wx.Frame):
                 setParm(Z_SET_LOC, val)
                 command(ZSETLOC)
                 if DRO:
-                    jogPanel.updateZDroPos(val)
+                    jogPanel.updateZDroPos(float(val))
                     
                 sendXData()
                 val = getInfoData(jogXPos)
                 setParm(X_SET_LOC, val)
                 command(XSETLOC)
                 if DRO:
-                    jogPanel.updateXDroPos(val)
+                    jogPanel.updateXDroPos(float(val))
                     
                 sendSpindleData()
 
