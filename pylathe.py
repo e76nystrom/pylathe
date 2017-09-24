@@ -4702,11 +4702,11 @@ class MainFrame(wx.Frame):
 
         vars = ((zSvHomeOffset, 'zHomeOffset'), \
                 (xSvHomeOffset, 'xHomeOffset'))
-        if DRO:
-            vars += ((zSvDROOffset, 'zDROOffset'), \
-                     (xSvDROOffset, 'xDROOffset'), \
-                     (zSvDROPosition, 'zDROPosition'), \
-                     (xSvDROPosition, 'xDROPosition'))
+        # if DRO:
+        #     vars += ((zSvDROOffset, 'zDROOffset'), \
+        #              (xSvDROOffset, 'xDROOffset'), \
+        #              (zSvDROPosition, 'zDROPosition'), \
+        #              (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
             exec('global ' + var)
