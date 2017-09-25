@@ -10,7 +10,15 @@ class InfoValue():
         self.value = val
 
     def GetValue(self):
-        return(self.value)
+        val = self.value
+        if isinstance(val, str):
+            return(val)
+        elif isinstance(val, float):
+            return("%0.4f" % (val))
+        elif isinstance(val, int):
+            return(str(val))
+        else:
+            return("")
 
     def SetValue(self, val):
         self.value = val
@@ -26,7 +34,9 @@ def saveList(file, configTable, varList):
     for index in varList:
         name = configTable[index]
         val = info[index]
-        writeConfig(f, name, val)
+        str = formatConfig(name, val)
+        if str != None:
+            f.write(str)
     f.close()
 
 def saveInfo(file, configTable):
@@ -37,28 +47,32 @@ def saveInfo(file, configTable):
     #     val = info[index]
     for index, (val) in enumerate(info):
         name = configTable[index]
-        writeConfig(f, name, val)
+        str = formatConfig(name, val)
+        if str != None:
+            f.write(str)
     f.close()
 
-def writeConfig(f, name, val):
+def formatConfig(name, val):
     valClass = val.__class__.__name__
     # print(name, valClass)
     # stdout.flush()
     if valClass == 'TextCtrl':
-        f.write("%s=%s\n" % (name, val.GetValue()))
+        return("%s=%s\n" % (name, val.GetValue()))
     elif valClass == 'RadioButton':
-        f.write("%s=%s\n" % (name, val.GetValue()))
+        return("%s=%s\n" % (name, val.GetValue()))
     elif valClass == 'CheckBox':
-        f.write("%s=%s\n" % (name, val.GetValue()))
+        return("%s=%s\n" % (name, val.GetValue()))
     elif valClass == 'ComboBox':
-        f.write("%s=%s\n" % (name, val.GetValue()))
+        return("%s=%s\n" % (name, val.GetValue()))
     elif valClass == 'InfoValue':
         f.write("%s=%s\n" % (name, val.GetValue()))
-    elif valClass == 'StaticText':
-        pass
+    else:
+        return(None)
 
 def readInfo(file, config, configList=None):
     global info
+    print("readInfo %s" % (file))
+    stdout.flush()
     try:
         f = open(file, 'r')
         for line in f:
@@ -126,6 +140,14 @@ def setInfo(key, val):
 def setInfoData(key, val):
     global infoData
     infoData[key] = val
+
+def getInfoInstance(key):
+    global info
+    try:
+        return(info[key])
+    except KeyError:
+        print("getInfoInstance KeyError %s" % (key))
+    return(None)
 
 def getInfo(key):
     global info
