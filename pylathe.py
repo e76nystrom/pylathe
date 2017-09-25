@@ -4731,7 +4731,7 @@ class MainFrame(wx.Frame):
 
         for (key, var) in vars:
             if var == None:
-                var = 0.0
+                var = '0.0'
             else:
                 exec('global ' + var)
             if not key in configInfo.info:
