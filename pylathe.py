@@ -3671,7 +3671,7 @@ class JogPanel(wx.Panel, FormRoutines):
                   (val, zLoc, zHomeOffset))
             stdout.flush()
         if DRO:
-            self.updateZDroPos(self, val)
+            self.updateZDroPos(val)
 
     def updateZDroPos(self, val, zDROPos=None):
         global zDROOffset
@@ -3703,7 +3703,7 @@ class JogPanel(wx.Panel, FormRoutines):
                   (val, xLoc, xHomeOffset))
             stdout.flush()
         if DRO:
-            self.updateXDroPos(self, val)
+            self.updateXDroPos(val)
 
     def updateXDroPos(self, val, xDROPos=None):
         global xDROOffset
