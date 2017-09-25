@@ -98,7 +98,9 @@ jogPanel = None
 spindleDataSent = False
 zDataSent = False
 xDataSent = False
+zPosition = 0.0
 zHomeOffset = 0.0
+xPosition = 0.0
 xHomeOffset = 0.0
 if DRO:
     zDROOffset = 0.0
@@ -4719,9 +4721,9 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile, config)
         
-        vars = ((zSvPosition, None), \
+        vars = ((zSvPosition, 'zPosition'), \
                 (zSvHomeOffset, 'zHomeOffset'), \
-                (xSvPosition, None), \
+                (xSvPosition, 'xPosition'), \
                 (xSvHomeOffset, 'xHomeOffset'))
         if DRO:
             vars += ((zSvDROOffset, 'zDROOffset'), \
@@ -4730,10 +4732,7 @@ class MainFrame(wx.Frame):
                      (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
-            if var == None:
-                var = '0.0'
-            else:
-                exec('global ' + var)
+            exec('global ' + var)
             if configInfo.info[key] == None:
                 try:
                     val = "%0.4f" % (eval(var))
