@@ -39,6 +39,7 @@ from interface import configList, strList, cmdList, parmList, enumList, regList
 configInfo.configTable = configTable
 
 configFile = "config.txt"
+posFile = "posInfo.txt"
 
 clrInfo(len(config))
 readInfo(configFile, config)
@@ -2872,10 +2873,6 @@ class JogPanel(wx.Panel, FormRoutines):
         self.probeLoc = 0.0
         self.zStepsInch = 0
         self.xStepsInch = 0
-        self.zDROInch = 0
-        self.xDROInch = 0
-        self.zDROInvert = 1
-        self.xDROInvert = 1
         self.zMenu = None
         self.xMenu = None
         self.mvStatus = 0
@@ -2884,6 +2881,15 @@ class JogPanel(wx.Panel, FormRoutines):
         self.currentControl = None
         self.lastZOffset = 0.0
         self.lastXOffset = 0.0
+        self.zLoc = 0
+        self.xLoc = 0
+        if DRO:
+            self.zDROInch = 0
+            self.xDROInch = 0
+            self.zDROInvert = 1
+            self.xDROInvert = 1
+            self.zDROLoc = 0
+            self.xDROLoc = 0
 
     def initUI(self):
         global emptyCell
@@ -4482,6 +4488,7 @@ class MainFrame(wx.Frame):
 
         self.dirName = os.getcwd()
 
+        print("MainFram initUI")
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
@@ -4547,6 +4554,12 @@ class MainFrame(wx.Frame):
 
     def onClose(self, event):
         global done, jogPanel
+        posList = (zSvHomeOffset, xSvHomeOffset, \
+                   xSvHomeOffset, xSvHomeOffset)
+        if DRO:
+            posList += (zSvDROPosition, zSVDROOffset,\
+                        xSvDROPosition, xSVDROOffset)
+        saveList(posFile, posList)
         done = True
         self.update.threadRun = False
         buttonRepeat.threadRun = False
@@ -4705,13 +4718,16 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile, config)
 
-        vars = ((zSvHomeOffset, 'zHomeOffset'), \
+        
+        vars = ((zSvPosition, 'zLoc'), \
+                (zSvHomeOffset, 'zHomeOffset'), \
+                (xSvPosition, 'xLoc'), \
                 (xSvHomeOffset, 'xHomeOffset'))
-        # if DRO:
-        #     vars += ((zSvDROOffset, 'zDROOffset'), \
-        #              (xSvDROOffset, 'xDROOffset'), \
-        #              (zSvDROPosition, 'zDROPosition'), \
-        #              (xSvDROPosition, 'xDROPosition'))
+        if DRO:
+            vars += ((zSvDROOffset, 'zDROOffset'), \
+                     (xSvDROOffset, 'xDROOffset'), \
+                     (zSvDROPosition, 'zDROPosition'), \
+                     (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
             exec('global ' + var)
