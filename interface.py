@@ -163,9 +163,10 @@ configList = \
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
 
+    ('xSvPosition', 'z axis '),
+    ('xSvHomeOffset', 'z axis '),
     ('xSvDROPosition', 'x axis '),
     ('xSvDROOffset', 'x axis '),
-    ('xSvHomeOffset', 'x axis '),
 
     ('zAccel', 'z axis '),
     ('zBacklash', 'z axis '),
@@ -187,9 +188,10 @@ configList = \
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
 
-    ('zSvDROOffset', 'z axis '),
-    ('zSvDROPosition', 'z axis '),
+    ('zSvPosition', 'z axis '),
     ('zSvHomeOffset', 'z axis '),
+    ('zSvDROPosition', 'z axis '),
+    ('zSvDROOffset', 'z axis '),
 )
 
 strList = \
