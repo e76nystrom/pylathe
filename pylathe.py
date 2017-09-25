@@ -4746,7 +4746,7 @@ class MainFrame(wx.Frame):
                     print("MainFrame initUI %s not defined" % (var))
                     stdout.flush()
             else:
-                exp = var + ' = getFloatInfo(' + key + ')'
+                exp = var + ' = getFloatInfo(' + str(key) + ')'
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
