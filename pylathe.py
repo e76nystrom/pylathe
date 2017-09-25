@@ -4557,7 +4557,7 @@ class MainFrame(wx.Frame):
         posList = (zSvPosition, zSvHomeOffset, \
                    xSvPosition, xSvHomeOffset)
         if DRO:
-            posList += (zSvDROPosition, zSVDROOffset,\
+            posList += (zSvDROPosition, zSVDROOffset, \
                         xSvDROPosition, xSVDROOffset)
         saveList(posFile, configTable, posList)
         done = True
