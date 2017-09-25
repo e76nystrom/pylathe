@@ -4554,7 +4554,7 @@ class MainFrame(wx.Frame):
 
     def onClose(self, event):
         global done, jogPanel
-        posList = (zSvPosition, xSvHomeOffset, \
+        posList = (zSvPosition, zSvHomeOffset, \
                    xSvPosition, xSvHomeOffset)
         if DRO:
             posList += (zSvDROPosition, zSVDROOffset,\
