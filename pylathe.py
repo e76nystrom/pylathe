@@ -4719,9 +4719,9 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile, config)
         
-        vars = ((zSvPosition, 'zLoc'), \
+        vars = ((zSvPosition, '0'), \
                 (zSvHomeOffset, 'zHomeOffset'), \
-                (xSvPosition, 'xLoc'), \
+                (xSvPosition, '0'), \
                 (xSvHomeOffset, 'xHomeOffset'))
         if DRO:
             vars += ((zSvDROOffset, 'zDROOffset'), \
