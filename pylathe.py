@@ -2883,15 +2883,19 @@ class JogPanel(wx.Panel, FormRoutines):
         self.currentControl = None
         self.lastZOffset = 0.0
         self.lastXOffset = 0.0
-        self.zLoc = 0
-        self.xLoc = 0
+        self.zPosition = None
+        self.zHomeOffset = None
+        self.xPosition = None
+        self.xHomeOffset = None
         if DRO:
             self.zDROInch = 0
             self.xDROInch = 0
             self.zDROInvert = 1
             self.xDROInvert = 1
-            self.zDROLoc = 0
-            self.xDROLoc = 0
+            self.zDROPostition = None
+            self.zDROOffset = None
+            self.xDROPostition = None
+            self.xDROOffset = None
 
     def initUI(self):
         global emptyCell
@@ -3460,9 +3464,11 @@ class JogPanel(wx.Panel, FormRoutines):
         if len(val) == 7:
             (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
             if z != '#':
+                self.zPosition.value = z
                 zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
             if x != '#':
+                self.zPosition.value = x
                 xLoc = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLoc))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLoc * 2)))
@@ -3488,6 +3494,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             if DRO:
                 zDROPos = int(zDROPos)
+                self.zDROPosition.value = zDROPos
                 zDroLoc = float(zDROPos) / self.zDROInch
                 if self.lastZOffset != zDROOffset:
                     self.lastZOffset = zDROOffset
@@ -3498,6 +3505,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
                 xDROPos = int(xDROPos)
+                self.xDROPosition.value = xDROPos
                 xDroLoc = float(xDROPos) / self.xDROInch
                 if self.lastXOffset != xDROOffset:
                     self.lastXOffset = xDROOffset
@@ -3535,6 +3543,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     val = getParm(Z_HOME_STATUS)
                     if val & PROBE_SUCCESS:
                         zHomeOffset = zLoc - self.probeLoc
+                        self.zHomeOffset.value = zHomeOffset
                         setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
                         if DRO:
                             self.updateZDroPos(self.probeLoc, zDROPos)
@@ -3550,6 +3559,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     val = getParm(X_HOME_STATUS)
                     if val & PROBE_SUCCESS:
                         xHomeOffset = xLoc - self.probeLoc
+                        self.xHomeOffset.value = xHomeOffset
                         setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
                         if DRO:
                             self.updateXDroPos(self.probeLoc, xDROPos)
@@ -3673,7 +3683,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if zLoc != None:
             zLoc = float(zLoc) / self.zStepsInch
             zHomeOffset = zLoc - val
-            setInfo(zSvHomeOffset, "%0.4f" % (zHomeOffset))
+            self.zHomeOffset.value = zHomeOffset
             setParm(Z_HOME_OFFSET, zHomeOffset)
             print("pos %0.4f zLoc %0.4f zHomeOffset %0.4f" % \
                   (val, zLoc, zHomeOffset))
@@ -3689,9 +3699,8 @@ class JogPanel(wx.Panel, FormRoutines):
             droPos = float(zDROPos) / self.zDROInch
             print("pos %0.4f zDROPos %d %0.4f invert %d" % \
                   (val, zDROPos, droPos, self.zDROInvert))
-            setInfo(zSvDROPosition, "%0.4f" % (droPos))
             zDROOffset = self.zDROInvert * droPos - val
-            setInfo(zSvDROOffset, "%0.4f" % (zDROOffset))
+            self.zDROOffset.value = zDROOffset
             setParm(Z_DRO_OFFSET, zDROOffset)
             print("zDROOffset %d %0.4f" % \
                   (int(zDROOffset * self.zDROInch), zDROOffset))
@@ -3705,7 +3714,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if xLoc != None:
             xLoc = float(xLoc) / self.xStepsInch
             xHomeOffset = xLoc - val
-            setInfo(xSvHomeOffset, "%0.4f" % (xHomeOffset))
+            self.xHomeOffset.value = xHomeOffset
             setParm(X_HOME_OFFSET, xHomeOffset)
             print("pos %0.4f xLoc %0.4f xHomeOffset %0.4f" % \
                   (val, xLoc, xHomeOffset))
@@ -3721,9 +3730,8 @@ class JogPanel(wx.Panel, FormRoutines):
             droPos = float(xDROPos) / self.xDROInch
             print("pos %0.4f xDROPos %d %0.4f invert %d" % \
                   (val, xDROPos, droPos, self.xDROInvert))
-            setInfo(xSvDROPosition, "%0.4f" % (droPos))
             xDROOffset = self.xDROInvert * droPos - val
-            setInfo(xSvDROOffset, "%0.4f" % (xDROOffset))
+            self.xDROOffset.value = xDROOffset
             setParm(X_DRO_OFFSET, xDROOffset)
             print("xDROOffset %d %0.4f" % \
                   (int(xDROOffset * self.xDROInch), xDROOffset))
@@ -4749,6 +4757,26 @@ class MainFrame(wx.Frame):
                 exec(exp)
                 print("%s = %s" % (var, eval(var)))
             stdout.flush()
+
+        vars = ((zSvPosition, 'zPosition'), \
+                (zSvHomeOffset, 'zHomeOffset'), \
+                (xSvPosition, 'xPosition'), \
+                (xSvHomeOffset, 'xHomeOffset'))
+        if DRO:
+            vars += ((zSvDROOffset, 'zDROOffset'), \
+                     (xSvDROOffset, 'xDROOffset'), \
+                     (zSvDROPosition, 'zDROPosition'), \
+                     (xSvDROPosition, 'xDROPosition'))
+
+        jogPanel.zPosition = getInfoInstance(zSvPosition)
+        jogPanel.zHomeOffset = getInfoInstance(zSvHomeOffset)
+        jogPanel.xPosition = getInfoInstance(xSvPosition)
+        jogPanel.xHomeOffset = getInfoInstance(xSvHomeOffset)
+        if DRO:
+            jogPanel.zDROPosition = getInfoInstance(zSvDROPosition)
+            jogPanel.zDROOffset = getInfoInstance(zSvDROOffset)
+            jogPanel.xDROPosition = getInfoInstance(xSvDROPosition)
+            jogPanel.xDROOffset = getInfoInstance(xSvDROOffset)
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
