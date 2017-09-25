@@ -4554,12 +4554,12 @@ class MainFrame(wx.Frame):
 
     def onClose(self, event):
         global done, jogPanel
-        posList = (zSvHomeOffset, xSvHomeOffset, \
-                   xSvHomeOffset, xSvHomeOffset)
+        posList = (zSvPosition, xSvHomeOffset, \
+                   xSvPosition, xSvHomeOffset)
         if DRO:
             posList += (zSvDROPosition, zSVDROOffset,\
                         xSvDROPosition, xSVDROOffset)
-        saveList(posFile, posList)
+        saveList(posFile, configTable, posList)
         done = True
         self.update.threadRun = False
         buttonRepeat.threadRun = False
