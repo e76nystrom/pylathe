@@ -4710,6 +4710,7 @@ class MainFrame(wx.Frame):
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
 
+        print("MainFrame JogPanel")
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
 
@@ -4717,7 +4718,6 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile, config)
-
         
         vars = ((zSvPosition, 'zLoc'), \
                 (zSvHomeOffset, 'zHomeOffset'), \
