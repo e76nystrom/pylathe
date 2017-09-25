@@ -65,7 +65,7 @@ def formatConfig(name, val):
     elif valClass == 'ComboBox':
         return("%s=%s\n" % (name, val.GetValue()))
     elif valClass == 'InfoValue':
-        f.write("%s=%s\n" % (name, val.GetValue()))
+        return("%s=%s\n" % (name, val.GetValue()))
     else:
         return(None)
 
