@@ -814,22 +814,23 @@ def sendSpindleData(send=False, rpm=None):
 def sendZData(send=False):
     global zDataSent, jogPanel
     try:
-        if send or (not zDataSent):
-            pitch = getFloatInfo(zPitch)
-            motorSteps = getIntInfo(zMotorSteps)
-            microSteps = getIntInfo(zMicroSteps)
-            motorRatio = getFloatInfo(zMotorRatio)
-            jogPanel.zStepsInch = (microSteps * motorSteps * \
-                                   motorRatio) / pitch
-            print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
-            stdout.flush()
+        pitch = getFloatInfo(zPitch)
+        motorSteps = getIntInfo(zMotorSteps)
+        microSteps = getIntInfo(zMicroSteps)
+        motorRatio = getFloatInfo(zMotorRatio)
+        jogPanel.zStepsInch = (microSteps * motorSteps * \
+                               motorRatio) / pitch
+        # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
 
+        if DRO:
+            jogPanel.zDROInch = getIntInfo(zDROInch)
+            jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
+        # stdout.flush()
+
+        if send or (not zDataSent):
             if DRO:
-                jogPanel.zDROInch = getIntInfo(zDROInch)
-                jogPanel.zDROInvert = -1 if getBoolInfo(zInvDRO) else 1
                 queParm(Z_DRO_INCH, jogPanel.zDROInch)
-                val = -1 if getBoolInfo(xInvDRO) else 1
-                queParm(X_DRO_DIR, val)
+                queParm(X_DRO_DIR, jogPanel.zDROInvert)
 
             val = jogPanel.combo.GetValue()
             try:
@@ -867,19 +868,20 @@ def sendZData(send=False):
 def sendXData(send=False):
     global xDataSent, jogPanel
     try:
+        pitch = getFloatInfo(xPitch)
+        motorSteps = getIntInfo(xMotorSteps)
+        microSteps = getIntInfo(xMicroSteps)
+        motorRatio = getFloatInfo(xMotorRatio)
+        jogPanel.xStepsInch = (microSteps * motorSteps * \
+                               motorRatio) / pitch
+        # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
+        if DRO:
+            jogPanel.xDROInch = getIntInfo(xDROInch)
+            jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
+        # stdout.flush()
+        
         if send or (not xDataSent):
-            pitch = getFloatInfo(xPitch)
-            motorSteps = getIntInfo(xMotorSteps)
-            microSteps = getIntInfo(xMicroSteps)
-            motorRatio = getFloatInfo(xMotorRatio)
-            jogPanel.xStepsInch = (microSteps * motorSteps * \
-                                   motorRatio) / pitch
-            print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
-            stdout.flush()
-
             if DRO:
-                jogPanel.xDROInch = getIntInfo(xDROInch)
-                jogPanel.xDROInvert = -1 if getBoolInfo(xInvDRO) else 1
                 queParm(X_DRO_INCH, jogPanel.xDROInch)
                 queParm(Z_DRO_DIR, jogPanel.xDROInvert)
 
@@ -4525,6 +4527,9 @@ class MainFrame(wx.Frame):
                     sendMulti()
             except CommTimeout:
                 commTimeout()
+        else:
+            sendZData()
+            sendXData()
 
         eventTable = (\
                       (EV_ZLOC, self.jogPanel.updateZ), \
