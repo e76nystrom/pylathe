@@ -4719,9 +4719,9 @@ class MainFrame(wx.Frame):
 
         readInfo(configFile, config)
         
-        vars = ((zSvPosition, '0'), \
+        vars = ((zSvPosition, None), \
                 (zSvHomeOffset, 'zHomeOffset'), \
-                (xSvPosition, '0'), \
+                (xSvPosition, None), \
                 (xSvHomeOffset, 'xHomeOffset'))
         if DRO:
             vars += ((zSvDROOffset, 'zDROOffset'), \
@@ -4730,7 +4730,10 @@ class MainFrame(wx.Frame):
                      (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
-            exec('global ' + var)
+            if val == None:
+                val = 0
+            else:
+                exec('global ' + var)
             if not key in configInfo.info:
                 try:
                     val = "%0.4f" % (eval(var))
