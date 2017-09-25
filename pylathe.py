@@ -4730,8 +4730,8 @@ class MainFrame(wx.Frame):
                      (xSvDROPosition, 'xDROPosition'))
 
         for (key, var) in vars:
-            if val == None:
-                val = 0
+            if var == None:
+                var = 0
             else:
                 exec('global ' + var)
             if not key in configInfo.info:
