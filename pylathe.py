@@ -4734,7 +4734,7 @@ class MainFrame(wx.Frame):
                 var = '0.0'
             else:
                 exec('global ' + var)
-            if not key in configInfo.info:
+            if configInfo[key] == None:
                 try:
                     val = "%0.4f" % (eval(var))
                     # print("newInfoData %3d %16s %16s %s " % \
