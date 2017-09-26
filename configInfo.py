@@ -142,16 +142,16 @@ def getInfoInstance(key):
     global info
     try:
         return(info[key])
-    except KeyError:
-        print("getInfoInstance KeyError %s" % (key))
+    except IndexError:
+        print("getInfoInstance indexError %s" % (key))
     return(None)
 
 def getInfo(key):
     global info
     try:
         return(info[key].GetValue())
-    except KeyError:
-        print("getInfo KeyError %s" % (key))
+    except IndexError:
+        print("getInfo IndexError %s" % (key))
     stdout.flush()
     return('')
 
@@ -159,28 +159,28 @@ def getInfoData(key):
     global infoData
     try:
         return(infoData[key])
-    except KeyError:
-        print("getInfo KeyError %s" % (key))
+    except IndexError:
+        print("getInfo IndexError %s" % (key))
     stdout.flush()
     return('')
 
 def getBoolInfo(key):
     global info
     try:
-        val = infoData[key]
+        val = info[key].GetValue()
         if isinstance(val, bool):
             return(1 if val else 0)
         else:
             return(1 if val == 'True' else 0)
-    except KeyError:
-        print("getBoolInfo KeyError %s" % (key))
+    except IndexError:
+        print("getBoolInfo IndexError %s" % (key))
     stdout.flush()
     return(0)
 
 def getFloatInfo(key):
     global info
     try:
-        val = infoData[key]
+        val = info[key].GetValue()
         try:
             return(float(val))
         except ValueError:
@@ -189,22 +189,22 @@ def getFloatInfo(key):
         except TypeError:
             print("getFloatInfo TypeError key %d %s %s" % \
                   (key, configTable[key], val))
-    except KeyError:
-        print("getFloatInfo KeyError %d" % (key))
+    except IndexError:
+        print("getFloatInfo IndexError %d" % (key))
     stdout.flush()
     return(0.0)
 
 def getIntInfo(key):
     global info
     try:
-        val = infoData[key]
+        val = info[key].GetValue()
         try:
             return(int(val))
         except ValueError as e:
             print("getIntInfo ValueError key %d %s %s" % \
                   (key, configTable[key], val))
-    except KeyError as e:
-        print("getIntInfo KeyError %s" % (key))
+    except IndexError as e:
+        print("getIntInfo IndexError %s" % (key))
     stdout.flush()
     return(0)
 
@@ -216,7 +216,7 @@ def getInitialInfo(key):
     try:
         tmp = info[key]
         return(tmp.GetValue() == 'True')
-    except KeyError:
-        print("getInitialInfo KeyError %s" % (key))
+    except IndexError:
+        print("getInitialInfo IndexError %s" % (key))
         stdout.flush()
     return(False)
