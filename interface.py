@@ -404,9 +404,9 @@ parmList = \
     ("INDEX_PERIOD", "index period", "int"),
     ("REV_COUNTER", "revolution counter", "unsigned int"),
 
-    "z position offset",
+    "z home offset",
 
-    ("Z_POS_OFFSET", "z position", "float"),
+    ("Z_HOME_OFFSET", "z home offset", "float"),
 
     "z dro",
 
@@ -428,9 +428,9 @@ parmList = \
     ("X_HOME_START", "x start of home signal", "int"),
     ("X_HOME_END", "x end of home signal", "int"),
 
-    # "x position offset",
+    # "x home offset",
 
-    ("X_POS_OFFSET", "x position offset", "float"),
+    ("X_HOME_OFFSET", "x home offset", "float"),
 
     # "x dro",
 
