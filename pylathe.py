@@ -4729,55 +4729,51 @@ class MainFrame(wx.Frame):
         self.SetSizerAndFit(sizerV)
 
         readInfo(configFile, config)
+        readInfo(posFile, config)
         
-        vars = ((zSvPosition, 'zPosition'), \
-                (zSvHomeOffset, 'zHomeOffset'), \
-                (xSvPosition, 'xPosition'), \
-                (xSvHomeOffset, 'xHomeOffset'))
-        if DRO:
-            vars += ((zSvDROOffset, 'zDROOffset'), \
-                     (xSvDROOffset, 'xDROOffset'), \
-                     (zSvDROPosition, 'zDROPosition'), \
-                     (xSvDROPosition, 'xDROPosition'))
+        # vars = ((zSvPosition, 'zPosition'), \
+        #         (zSvHomeOffset, 'zHomeOffset'), \
+        #         (xSvPosition, 'xPosition'), \
+        #         (xSvHomeOffset, 'xHomeOffset'))
+        # if DRO:
+        #     vars += ((zSvDROOffset, 'zDROOffset'), \
+        #              (xSvDROOffset, 'xDROOffset'), \
+        #              (zSvDROPosition, 'zDROPosition'), \
+        #              (xSvDROPosition, 'xDROPosition'))
 
-        for (key, var) in vars:
-            exec('global ' + var)
+        # for (key, var) in vars:
+        #     exec('global ' + var)
+        #     if configInfo.info[key] == None:
+        #         try:
+        #             val = "%0.4f" % (eval(var))
+        #             # print("newInfoData %3d %16s %16s %s " % \
+        #             #       (key, configTable[key], var, val), end='')
+        #             newInfo(key, val)
+        #             # val = getInfoData(key)
+        #             # print("%s" % val)
+        #         except NameError:
+        #             print("MainFrame initUI %s not defined" % (var))
+        #             stdout.flush()
+        #     else:
+        #         exp = var + ' = getFloatInfo(' + str(key) + ')'
+        #         exec(exp)
+        #         print("%s = %s" % (var, eval(var)))
+        #     stdout.flush()
+
+        vars = (('jogPanel.zPosition', zSvPosition), \
+                ('jogPanel.zHomeOffset', zSvHomeOffset), \
+                ('jogPanel.xPosition', xSvPosition), \
+                ('jogPanel.xHomeOffset', xSvHomeOffset))
+        if DRO:
+            vars += (('jogPanel.zDROPosition', zSvDROPosition), \
+                     ('jogPanel.zDROOffset', zSvDROOffset), \
+                     ('jogPanel.xDROPosition', xSvDROPosition), \
+                     ('jogPanel.xDROOffset', xSvDROOffset))
+        for (var, key) in vars:
             if configInfo.info[key] == None:
-                try:
-                    val = "%0.4f" % (eval(var))
-                    # print("newInfoData %3d %16s %16s %s " % \
-                    #       (key, configTable[key], var, val), end='')
-                    newInfo(key, val)
-                    # val = getInfoData(key)
-                    # print("%s" % val)
-                except NameError:
-                    print("MainFrame initUI %s not defined" % (var))
-                    stdout.flush()
-            else:
-                exp = var + ' = getFloatInfo(' + str(key) + ')'
-                exec(exp)
-                print("%s = %s" % (var, eval(var)))
-            stdout.flush()
-
-        vars = ((zSvPosition, 'zPosition'), \
-                (zSvHomeOffset, 'zHomeOffset'), \
-                (xSvPosition, 'xPosition'), \
-                (xSvHomeOffset, 'xHomeOffset'))
-        if DRO:
-            vars += ((zSvDROOffset, 'zDROOffset'), \
-                     (xSvDROOffset, 'xDROOffset'), \
-                     (zSvDROPosition, 'zDROPosition'), \
-                     (xSvDROPosition, 'xDROPosition'))
-
-        jogPanel.zPosition = getInfoInstance(zSvPosition)
-        jogPanel.zHomeOffset = getInfoInstance(zSvHomeOffset)
-        jogPanel.xPosition = getInfoInstance(xSvPosition)
-        jogPanel.xHomeOffset = getInfoInstance(xSvHomeOffset)
-        if DRO:
-            jogPanel.zDROPosition = getInfoInstance(zSvDROPosition)
-            jogPanel.zDROOffset = getInfoInstance(zSvDROOffset)
-            jogPanel.xDROPosition = getInfoInstance(xSvDROPosition)
-            jogPanel.xDROOffset = getInfoInstance(xSvDROOffset)
+                newInfo(key, 0)
+            exp = var + = 'getInfoInstance(' + str(key) + ')'
+            exec(exp)
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
