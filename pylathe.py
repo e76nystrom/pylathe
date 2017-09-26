@@ -3247,8 +3247,14 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zDown(wx.WXK_LEFT)
 
     def OnZPosDown(self, e):
+        print("OnZPosDown")
+        stdout.flush()
         self.zPosButton.SetFocus()
+        print("OnZPosDown focus")
+        stdout.flush()
         self.zDown(wx.WXK_RIGHT)
+        print("zDown")
+        stdout.flush()
 
     def xJogCmd(self, code, val):
         self.repeat += 1
