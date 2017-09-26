@@ -2681,8 +2681,8 @@ class ButtonRepeat(Thread):
         self.action = None
         self.code = None
         self.val = None
-        self.jogCode = None
-        self.repeat = 0
+        # self.jogCode = None
+        # self.repeat = 0
         self.start()
 
     def run(self):
@@ -2695,103 +2695,103 @@ class ButtonRepeat(Thread):
                 # if self.action != None:
                 #     self.action(self.code, self.val)
                 if self.action == JOG_Z:
-                    self.zJogCmd(self.code, self.val)
+                    jogPanel.zJogCmd(self.code, self.val)
                 elif self.action == JOG_X:
-                    self.xJogCmd(self.code, self.val)
+                    jogPanel.xJogCmd(self.code, self.val)
                 elif self.action == JOG_SPINDLE:
-                    self.spindleJogCmd(self.code, self.val)
+                    jogPanel.spindleJogCmd(self.code, self.val)
                 sleep(timeout)
                 timeout = .05
 
-    def zJogCmd(self, code, val):
-        self.repeat += 1
-        sendZData()
-        if val == 'Cont':
-            if self.jogCode != code: # new jog code
-                if self.jogCode == None: # jogging stopped
-                    self.jogCode = code
-                    self.repeat = 0
-                    dir = 1
-                    if code == wx.WXK_LEFT:
-                        dir = -1
-                    print("zJogCmd %d" % (dir))
-                    try:
-                        queParm(Z_JOG_MAX, getInfoData(zJogMax))
-                        queParm(Z_JOG_DIR, dir)
-                        command(ZJMOV)
-                    except CommTimeout:
-                        commTimeout()
-            else:
-                try:
-                    command(ZJMOV)
-                except CommTimeout:
-                    commTimeout()
-        else:
-            if self.jogCode == None:
-                self.jogCode = code
-                if code == wx.WXK_LEFT:
-                    val = '-' + val
-                print("zJogCmd %s" % (val))
-                stdout.flush()
-                try:
-                    queParm(Z_FLAG, CMD_JOG)
-                    queParm(Z_MOVE_DIST, val)
-                    command(ZMOVEREL)
-                except CommTimeout:
-                    commTimeout()
+    # def zJogCmd(self, code, val):
+    #     self.repeat += 1
+    #     sendZData()
+    #     if val == 'Cont':
+    #         if self.jogCode != code: # new jog code
+    #             if self.jogCode == None: # jogging stopped
+    #                 self.jogCode = code
+    #                 self.repeat = 0
+    #                 dir = 1
+    #                 if code == wx.WXK_LEFT:
+    #                     dir = -1
+    #                 print("zJogCmd %d" % (dir))
+    #                 try:
+    #                     queParm(Z_JOG_MAX, getInfoData(zJogMax))
+    #                     queParm(Z_JOG_DIR, dir)
+    #                     command(ZJMOV)
+    #                 except CommTimeout:
+    #                     commTimeout()
+    #         else:
+    #             try:
+    #                 command(ZJMOV)
+    #             except CommTimeout:
+    #                 commTimeout()
+    #     else:
+    #         if self.jogCode == None:
+    #             self.jogCode = code
+    #             if code == wx.WXK_LEFT:
+    #                 val = '-' + val
+    #             print("zJogCmd %s" % (val))
+    #             stdout.flush()
+    #             try:
+    #                 queParm(Z_FLAG, CMD_JOG)
+    #                 queParm(Z_MOVE_DIST, val)
+    #                 command(ZMOVEREL)
+    #             except CommTimeout:
+    #                 commTimeout()
 
-    def xJogCmd(self, code, val):
-        self.repeat += 1
-        sendXData()
-        if val == 'Cont':
-            if self.jogCode != code:
-                if self.jogCode == None:
-                    self.jogCode = code
-                    self.repeat = 0
-                    dir = 1
-                    if code == wx.WXK_UP:
-                        dir = -1
-                    print("xJogCmd %d" % (dir))
-                    stdout.flush()
-                    try:
-                        queParm(X_JOG_MAX, getInfoData(xJogMax))
-                        queParm(X_JOG_DIR, dir)
-                        command(XJMOV)
-                    except CommTimeout:
-                        commTimeout()
-            else:
-                try:
-                    command(XJMOV)
-                except CommTimeout:
-                    commTimeout()
-        else:
-            if self.jogCode == None:
-                self.jogCode = code
-                if code == wx.WXK_UP:
-                    val = '-' + val
-                print("xJogCmd %s" % (val))
-                stdout.flush()
-                try:
-                    queParm(X_FLAG, CMD_JOG)
-                    queParm(X_MOVE_DIST, val)
-                    command(XMOVEREL)
-                except CommTimeout:
-                    commTimeout()
+    # def xJogCmd(self, code, val):
+    #     self.repeat += 1
+    #     sendXData()
+    #     if val == 'Cont':
+    #         if self.jogCode != code:
+    #             if self.jogCode == None:
+    #                 self.jogCode = code
+    #                 self.repeat = 0
+    #                 dir = 1
+    #                 if code == wx.WXK_UP:
+    #                     dir = -1
+    #                 print("xJogCmd %d" % (dir))
+    #                 stdout.flush()
+    #                 try:
+    #                     queParm(X_JOG_MAX, getInfoData(xJogMax))
+    #                     queParm(X_JOG_DIR, dir)
+    #                     command(XJMOV)
+    #                 except CommTimeout:
+    #                     commTimeout()
+    #         else:
+    #             try:
+    #                 command(XJMOV)
+    #             except CommTimeout:
+    #                 commTimeout()
+    #     else:
+    #         if self.jogCode == None:
+    #             self.jogCode = code
+    #             if code == wx.WXK_UP:
+    #                 val = '-' + val
+    #             print("xJogCmd %s" % (val))
+    #             stdout.flush()
+    #             try:
+    #                 queParm(X_FLAG, CMD_JOG)
+    #                 queParm(X_MOVE_DIST, val)
+    #                 command(XMOVEREL)
+    #             except CommTimeout:
+    #                 commTimeout()
                 
-    def spindleJogCmd(self, code, val):
-        self.repeat += 1
-        if self.jogCode != code:
-            if self.jogCode == None:
-                sendSpindleData()
-                dir = 0 if code == wx.WXK_NUMPAD_PAGEDOWN else 1
-                setParm(SP_JOG_DIR, dir)
-                self.jogCode = code
-                self.repeat = 0
-        try:
-            command(SPINDLE_JOG)
-        except CommTimeout:
-            commTimeout()
-        self.combo.SetFocus()
+    # def spindleJogCmd(self, code, val):
+    #     self.repeat += 1
+    #     if self.jogCode != code:
+    #         if self.jogCode == None:
+    #             sendSpindleData()
+    #             dir = 0 if code == wx.WXK_NUMPAD_PAGEDOWN else 1
+    #             setParm(SP_JOG_DIR, dir)
+    #             self.jogCode = code
+    #             self.repeat = 0
+    #     try:
+    #         command(SPINDLE_JOG)
+    #     except CommTimeout:
+    #         commTimeout()
+    #     self.combo.SetFocus()
 
 class JogShuttle():
     def __init__(self):
