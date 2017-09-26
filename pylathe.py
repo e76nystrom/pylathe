@@ -4532,7 +4532,7 @@ class MainFrame(wx.Frame):
                 setParm(X_HOME_OFFSET, getIntInfo(xSvHomeOffset))
                 if DRO:
                     setParm(X_DRO_POS, getIntInfo(xSvDROPosition))
-                    setParm(X_DRO_OFFSET, getFloagInfo(xSvDROOffset))
+                    setParm(X_DRO_OFFSET, getFloatInfo(xSvDROOffset))
                 sendMulti()
                     
                 sendSpindleData()
