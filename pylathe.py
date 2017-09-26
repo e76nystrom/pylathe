@@ -4520,26 +4520,28 @@ class MainFrame(wx.Frame):
                 command(CMD_SETUP)
 
                 sendZData()
-                val = getInfoData(jogZPos)
-                setParm(Z_SET_LOC, val)
-                command(ZSETLOC)
+                setParm(Z_LOC, getIntInfo(zSvPosition))
+                setParm(Z_HOME_OFFSET, getIntInfo(zSvHomeOffset))
                 if DRO:
-                    jogPanel.updateZDroPos(float(val))
-                    
+                    setParm(Z_DRO_POS, getIntInfo(zSvDroPosition))
+                    setParm(Z_DRO_OFFSET, getFloagInfo(zSvDroOffset))
+                sendMulti()
+                
                 sendXData()
-                val = getInfoData(jogXPos)
-                setParm(X_SET_LOC, val)
-                command(XSETLOC)
+                setParm(X_LOC, getIntInfo(xSvPosition))
+                setParm(X_HOME_OFFSET, getIntInfo(xSvHomeOffset))
                 if DRO:
-                    jogPanel.updateXDroPos(float(val))
+                    setParm(X_DRO_POS, getIntInfo(xSvDroPosition))
+                    setParm(X_DRO_OFFSET, getFloagInfo(xSvDroOffset))
+                sendMulti()
                     
                 sendSpindleData()
 
                 if HOME_TEST:
                     val = str(int(getFloatInfo(xHomeLoc) * jogPanel.xStepsInch))
                     queParm(X_HOME_LOC, val)
-                    queParm(Z_HOME_OFFSET, zHomeOffset)
-                    queParm(X_HOME_OFFSET, xHomeOffset)
+                    # queParm(Z_HOME_OFFSET, zHomeOffset)
+                    # queParm(X_HOME_OFFSET, xHomeOffset)
                     queParm(X_HOME_STATUS,
                             HOME_SUCCESS if xHomed else HOME_ACTIVE)
                     sendMulti()
