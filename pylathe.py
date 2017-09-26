@@ -4769,10 +4769,12 @@ class MainFrame(wx.Frame):
                      ('jogPanel.zDROOffset', zSvDROOffset), \
                      ('jogPanel.xDROPosition', xSvDROPosition), \
                      ('jogPanel.xDROOffset', xSvDROOffset))
+
         for (var, key) in vars:
             if configInfo.info[key] == None:
                 newInfo(key, 0)
-            exp = var + = 'getInfoInstance(' + str(key) + ')'
+            exp = var + ' = getInfoInstance(' + str(key) + ')'
+            print(exp)
             exec(exp)
 
         dw, dh = wx.DisplaySize()
