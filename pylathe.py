@@ -50,6 +50,7 @@ from setup import cfgXilinx, cfgDRO, spStepDrive
 XILINX = getInitialInfo(cfgXilinx)
 DRO = getInitialInfo(cfgDRO)
 STEPPER_DRIVE = getInitialInfo(spStepDrive)
+REM_DBG = False
 
 clrInfo(len(config))
 
@@ -4280,6 +4281,8 @@ class UpdateThread(Thread):
                 if not self.threadRun:
                     break
                 if result == None:
+                    continue
+                if not REM_DBG:
                     continue
                 tmp = result.split()
                 rLen = len(tmp)
