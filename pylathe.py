@@ -3469,7 +3469,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 zLoc = float(z) / self.zStepsInch
                 self.zPos.SetValue("%0.4f" % (zLoc - zHomeOffset))
             if x != '#':
-                self.zPosition.value = x
+                self.xPosition.value = x
                 xLoc = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLoc))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLoc * 2)))
