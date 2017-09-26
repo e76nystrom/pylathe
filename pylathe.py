@@ -4523,16 +4523,16 @@ class MainFrame(wx.Frame):
                 setParm(Z_LOC, getIntInfo(zSvPosition))
                 setParm(Z_HOME_OFFSET, getIntInfo(zSvHomeOffset))
                 if DRO:
-                    setParm(Z_DRO_POS, getIntInfo(zSvDroPosition))
-                    setParm(Z_DRO_OFFSET, getFloagInfo(zSvDroOffset))
+                    setParm(Z_DRO_POS, getIntInfo(zSvDROPosition))
+                    setParm(Z_DRO_OFFSET, getFloagInfo(zSvDROOffset))
                 sendMulti()
                 
                 sendXData()
                 setParm(X_LOC, getIntInfo(xSvPosition))
                 setParm(X_HOME_OFFSET, getIntInfo(xSvHomeOffset))
                 if DRO:
-                    setParm(X_DRO_POS, getIntInfo(xSvDroPosition))
-                    setParm(X_DRO_OFFSET, getFloagInfo(xSvDroOffset))
+                    setParm(X_DRO_POS, getIntInfo(xSvDROPosition))
+                    setParm(X_DRO_OFFSET, getFloagInfo(xSvDROOffset))
                 sendMulti()
                     
                 sendSpindleData()
