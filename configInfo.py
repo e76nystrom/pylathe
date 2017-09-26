@@ -42,9 +42,6 @@ def saveList(file, configTable, varList):
 def saveInfo(file, configTable):
     global info
     f = open(file, 'w')
-    # for key in sorted(config.keys()):
-    #     index = config[key]
-    #     val = info[index]
     for index, (val) in enumerate(info):
         name = configTable[index]
         str = formatConfig(name, val)
@@ -170,8 +167,6 @@ def getInfoData(key):
 def getBoolInfo(key):
     global info
     try:
-        # tmp = info[key].GetValue()
-        # if tmp:
         val = infoData[key]
         if isinstance(val, bool):
             return(1 if val else 0)
@@ -185,7 +180,6 @@ def getBoolInfo(key):
 def getFloatInfo(key):
     global info
     try:
-        # val = info[key].GetValue()
         val = infoData[key]
         try:
             return(float(val))
@@ -203,16 +197,15 @@ def getFloatInfo(key):
 def getIntInfo(key):
     global info
     try:
-        # val = info[key].GetValue()
         val = infoData[key]
         try:
             return(int(val))
         except ValueError as e:
-            print("getIntInfo ValueError %s" % val)
-            stdout.flush()
+            print("getIntInfo ValueError key %d %s %s" % \
+                  (key, configTable[key], val))
     except KeyError as e:
         print("getIntInfo KeyError %s" % (key))
-        stdout.flush()
+    stdout.flush()
     return(0)
 
 def infoSetLabel(key, val):
