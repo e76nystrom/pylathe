@@ -404,11 +404,9 @@ parmList = \
     ("INDEX_PERIOD", "index period", "int"),
     ("REV_COUNTER", "revolution counter", "unsigned int"),
 
-    "z home offsets",
+    "z position offset",
 
-    ("Z_HOME_OFFSET", "z offset home to zero", "float"),
-    ("Z_PROBE_SPEED", "z probe speed", "float"),
-    ("PROBE_INV", "invert polarity of probe", "int"),
+    ("Z_POS_OFFSET", "z position", "float"),
 
     "z dro",
 
@@ -427,13 +425,12 @@ parmList = \
     "x home test parameters",
 
     ("X_HOME_LOC", "x home test location", "int"),
-    ("PROBE_DIST", "probe test distance", "int"),
     ("X_HOME_START", "x start of home signal", "int"),
     ("X_HOME_END", "x end of home signal", "int"),
 
-    # "x home offset",
+    # "x position offset",
 
-    ("X_HOME_OFFSET", "x offset home to zero", "float"),
+    ("X_POS_OFFSET", "x position offset", "float"),
 
     # "x dro",
 
@@ -451,6 +448,12 @@ parmList = \
 
     ("Z_HOME_DONE", "z home done", "int"),
     ("Z_HOME_STATUS", "z home status", "int"),
+
+    "probe configuration",
+ 
+    ("PROBE_SPEED", "probe speed", "float"),
+    ("PROBE_DIST", "probe test distance", "int"),
+    ("PROBE_INV", "invert polarity of probe", "int"),
 
     "configuration",
 
