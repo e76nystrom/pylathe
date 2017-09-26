@@ -49,6 +49,16 @@ def saveInfo(file, configTable):
             f.write(str)
     f.close()
 
+def updateFieldInfoData(fields):
+    global infoData
+    for (label, index fmt) in fields:
+        infoData[index] = info[index].GetValue()
+
+def updateFormatInfoData(formatList):
+    global infoData
+    for (index, fmt) in formatList:
+        infoData[index] = info[index].GetValue()
+
 def formatConfig(name, val):
     valClass = val.__class__.__name__
     # print(name, valClass)
@@ -129,15 +139,6 @@ def newInfo(key, val):
     info[key] = InfoValue(val)
     infoData[key] = val
 
-def setInfo(key, val):
-    global info
-    info[key].SetValue(val)
-    infoData[key] = val
-
-def setInfoData(key, val):
-    global infoData
-    infoData[key] = val
-
 def getInfoInstance(key):
     global info
     try:
@@ -145,6 +146,13 @@ def getInfoInstance(key):
     except IndexError:
         print("getInfoInstance indexError %s" % (key))
     return(None)
+
+# info is used where infoData is not updated
+
+def setInfo(key, val):
+    global info
+    info[key].SetValue(val)
+    infoData[key] = val
 
 def getInfo(key):
     global info
@@ -155,25 +163,30 @@ def getInfo(key):
     stdout.flush()
     return('')
 
-def getInfoData(key):
-    global infoData
-    try:
-        return(infoData[key])
-    except IndexError:
-        print("getInfo IndexError %s" % (key))
-    stdout.flush()
-    return('')
-
 def getBoolInfo(key):
     global info
     try:
-        val = info[key].GetValue()
+        val = infoData[key]
         if isinstance(val, bool):
             return(1 if val else 0)
         else:
             return(1 if val == 'True' else 0)
     except IndexError:
         print("getBoolInfo IndexError %s" % (key))
+    stdout.flush()
+    return(0)
+
+def getIntInfo(key):
+    global info
+    try:
+        val = info[key].GetVaue()
+        try:
+            return(int(val))
+        except ValueError as e:
+            print("getIntInfo ValueError key %d %s %s" % \
+                  (key, configTable[key], val))
+    except IndexError as e:
+        print("getIntInfo IndexError %s" % (key))
     stdout.flush()
     return(0)
 
@@ -194,10 +207,39 @@ def getFloatInfo(key):
     stdout.flush()
     return(0.0)
 
-def getIntInfo(key):
+# infoData is used because calling info[key].GetValue will hang when
+# it is called from a non wx thread
+
+def setInfoData(key, val):
+    global infoData
+    infoData[key] = val
+
+def getInfoData(key):
+    global infoData
+    try:
+        return(infoData[key])
+    except IndexError:
+        print("getInfoData IndexError %s" % (key))
+    stdout.flush()
+    return('')
+
+def getBoolInfoData(key):
     global info
     try:
-        val = info[key].GetValue()
+        val = infoData[key]
+        if isinstance(val, bool):
+            return(1 if val else 0)
+        else:
+            return(1 if val == 'True' else 0)
+    except IndexError:
+        print("getBoolInfoData IndexError %s" % (key))
+    stdout.flush()
+    return(0)
+
+def getIntInfoData(key):
+    global info
+    try:
+        val = infoData[key]
         try:
             return(int(val))
         except ValueError as e:
@@ -208,10 +250,27 @@ def getIntInfo(key):
     stdout.flush()
     return(0)
 
+def getFloatInfoData(key):
+    global info
+    try:
+        val = infoData[key]
+        try:
+            return(float(val))
+        except ValueError:
+            print("getFloatInfoData ValueError key %d %s %s" % \
+                  (key, configTable[key], val))
+        except TypeError:
+            print("getFloatInfo TypeError key %d %s %s" % \
+                  (key, configTable[key], val))
+    except IndexError:
+        print("getFloatInfo IndexError %d" % (key))
+    stdout.flush()
+    return(0.0)
+
 def infoSetLabel(key, val):
     info[key].SetLabel(val)
 
-def getInitialInfo(key):
+def getInitialBoolInfo(key):
     global info
     try:
         tmp = info[key]
