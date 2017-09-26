@@ -51,7 +51,7 @@ def saveInfo(file, configTable):
 
 def updateFieldInfoData(fields):
     global infoData
-    for (label, index fmt) in fields:
+    for (label, index, fmt) in fields:
         infoData[index] = info[index].GetValue()
 
 def updateFormatInfoData(formatList):
@@ -179,7 +179,7 @@ def getBoolInfo(key):
 def getIntInfo(key):
     global info
     try:
-        val = info[key].GetVaue()
+        val = info[key].GetValue()
         try:
             return(int(val))
         except ValueError as e:
