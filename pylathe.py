@@ -4521,7 +4521,7 @@ class MainFrame(wx.Frame):
 
                 sendZData()
                 setParm(Z_LOC, getIntInfo(zSvPosition))
-                setParm(Z_HOME_OFFSET, getIntInfo(zSvHomeOffset))
+                setParm(Z_HOME_OFFSET, getFloatInfo(zSvHomeOffset))
                 if DRO:
                     setParm(Z_DRO_POS, getIntInfo(zSvDROPosition))
                     setParm(Z_DRO_OFFSET, getFloatInfo(zSvDROOffset))
@@ -4529,7 +4529,7 @@ class MainFrame(wx.Frame):
                 
                 sendXData()
                 setParm(X_LOC, getIntInfo(xSvPosition))
-                setParm(X_HOME_OFFSET, getIntInfo(xSvHomeOffset))
+                setParm(X_HOME_OFFSET, getFloatInfo(xSvHomeOffset))
                 if DRO:
                     setParm(X_DRO_POS, getIntInfo(xSvDROPosition))
                     setParm(X_DRO_OFFSET, getFloatInfo(xSvDROOffset))
