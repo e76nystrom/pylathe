@@ -2685,6 +2685,7 @@ class ButtonRepeat(Thread):
                 break
             while self.event.isSet():
                 if self.action != None:
+                    print("action", self.action)
                     self.action(self.code, self.val)
                 sleep(timeout)
                 timeout = .05
