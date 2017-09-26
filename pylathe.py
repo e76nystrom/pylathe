@@ -27,9 +27,10 @@ dbg = None
 
 import configInfo
 from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
-    newInfo, setInfo, setInfoData, getInfo, getInfoInstance, \
+    newInfo, setInfo, setInfoData, getInfoInstance, \
+    getInfo, getBoolInfo, getIntInfo, getFloatInfo, \
     updateFieldInfoData, updateFormatInfoData, \
-    getInfoData, getBoolInfoData, getFloatInfoData, getIntInfoData, \
+    getInfoData, getBoolInfoData, getIntInfoData, getFloatInfoData, \
     clrInfo, infoSetLabel, getInitialBoolInfo
 
 from setup import createConfig, createStrings, createCommands, \
@@ -2041,7 +2042,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
-        initInfoData(tpTaperSel, combo)
+        initInfo(tpTaperSel, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
