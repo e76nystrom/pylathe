@@ -28,7 +28,7 @@ dbg = None
 import configInfo
 from configInfo import InfoValue, saveList, saveInfo, readInfo, initInfo, \
     newInfo, setInfo, setInfoData, getInfo, getInfoInstance, \
-    updateFieldInfoData, updateFormatInfoData,
+    updateFieldInfoData, updateFormatInfoData, \
     getInfoData, getBoolInfoData, getFloatInfoData, getIntInfoData, \
     clrInfo, infoSetLabel, getInitialBoolInfo
 
