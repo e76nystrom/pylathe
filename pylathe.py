@@ -4524,7 +4524,7 @@ class MainFrame(wx.Frame):
                 setParm(Z_HOME_OFFSET, getIntInfo(zSvHomeOffset))
                 if DRO:
                     setParm(Z_DRO_POS, getIntInfo(zSvDROPosition))
-                    setParm(Z_DRO_OFFSET, getFloagInfo(zSvDROOffset))
+                    setParm(Z_DRO_OFFSET, getFloatInfo(zSvDROOffset))
                 sendMulti()
                 
                 sendXData()
