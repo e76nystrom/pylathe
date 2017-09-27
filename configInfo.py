@@ -26,7 +26,7 @@ class ConfigInfo():
         self.configTable = configTable
 
     def clrInfo(self, size):
-        info = [None for i in range(size)]
+        self.info = [None for i in range(size)]
         self.infoData = [None for i in range(size)]
 
     def saveList(self, file, varList):
@@ -39,7 +39,7 @@ class ConfigInfo():
                 f.write(str)
         f.close()
 
-    def saveInfo(self, file)
+    def saveInfo(self, file):
         f = open(file, 'w')
         for index, (val) in enumerate(info):
             name = self.configTable[index]
@@ -201,7 +201,7 @@ class ConfigInfo():
     def setInfoData(self, index, val):
         self.infoData[index] = val
 
-    def getInfoData(index):
+    def getInfoData(self, index):
         try:
             return(self.infoData[index])
         except IndexError:
