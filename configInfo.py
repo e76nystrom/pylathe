@@ -20,29 +20,29 @@ class InfoValue():
         self.value = val
 
 class ConfigInfo():
-    def __init__(self):
+    def __init__(self, configTable):
         self.info = []
         self.infoData = []
-        self.configTable = None
+        self.configTable = configTable
 
     def clrInfo(self, size):
         info = [None for i in range(size)]
         self.infoData = [None for i in range(size)]
 
-    def saveList(self, file, configTable, varList):
+    def saveList(self, file, varList):
         f = open(file, 'w')
         for index in varList:
-            name = configTable[index]
+            name = self.configTable[index]
             val = self.info[index]
             str = self.formatConfig(name, val)
             if str != None:
                 f.write(str)
         f.close()
 
-    def saveInfo(self, file, configTable):
+    def saveInfo(self, file)
         f = open(file, 'w')
         for index, (val) in enumerate(info):
-            name = configTable[index]
+            name = self.configTable[index]
             str = self.formatConfig(name, val)
             if str != None:
                 f.write(str)
