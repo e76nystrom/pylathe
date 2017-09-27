@@ -41,7 +41,7 @@ class ConfigInfo():
 
     def saveInfo(self, file):
         f = open(file, 'w')
-        for index, (val) in enumerate(info):
+        for index, (val) in enumerate(self.info):
             name = self.configTable[index]
             str = self.formatConfig(name, val)
             if str != None:
