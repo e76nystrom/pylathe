@@ -216,7 +216,7 @@ class FormRoutines():
         if cfg.info[index] != None:
             val = cfg.getInfo(index)
             tc.SetValue(val)
-        cfg.initInfo(key, tc)
+        cfg.initInfo(index, tc)
         return(tc)
 
     def addCheckBox(self, sizer, label, index, action=None):
@@ -231,7 +231,7 @@ class FormRoutines():
         if cfg.info[index] != None:
             val = cfg.getInfo(index)
             cb.SetValue(val == 'True')
-        cfg.initInfo(key, cb)
+        cfg.initInfo(index, cb)
         return(cb)
 
     def addButton(self, sizer, label, action, size=(60, -1), border=2, \
@@ -402,7 +402,7 @@ class DialogActions():
             return
         moveCommands.queClear()
         try:
-            if callabale(self.setupAction):
+            if callable(self.setupAction):
                 self.setupAction()
         except AttributeError:
             pass
@@ -4591,7 +4591,7 @@ class MainFrame(wx.Frame):
         if DRO:
             posList += (zSvDROPosition, zSvDROOffset, \
                         xSvDROPosition, xSvDROOffset)
-        cfg.saveList(posFile posList)
+        cfg.saveList(posFile, posList)
         done = True
         self.update.threadRun = False
         buttonRepeat.threadRun = False
