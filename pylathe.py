@@ -4540,17 +4540,25 @@ class MainFrame(wx.Frame):
                 sendZData()
                 setParm(Z_LOC, cfg.getInfo(zSvPosition))
                 setParm(Z_HOME_OFFSET, cfg.getInfo(zSvHomeOffset))
+                global zHomeOffset
+                zHomeOffset = cfg.getFloatInfo(zSvHomeOffset)
                 if DRO:
                     setParm(Z_DRO_POS, cfg.getInfo(zSvDROPosition))
                     setParm(Z_DRO_OFFSET, cfg.getInfo(zSvDROOffset))
+                    global zDROOffset
+                    zDROOffset = cfg.getFloatInfo(zSvDROOffset)
                 sendMulti()
                 
                 sendXData()
                 setParm(X_LOC, cfg.getIntInfo(xSvPosition))
                 setParm(X_HOME_OFFSET, cfg.getFloatInfo(xSvHomeOffset))
+                global xHomeOffset
+                xHomeOffset = cfg.getFloatInfo(xSvHomeOffset)
                 if DRO:
                     setParm(X_DRO_POS, cfg.getIntInfo(xSvDROPosition))
-                    setParm(X_DRO_OFFSET, cfg.getFloatInfo(xSvDROOffset))
+                    setParm(X_DRO_OFFSET, cfg.getFloatInfo(xSvDROOffset)) 
+                    global xDROOffset
+                    xDROOffset = cfg.getFloatInfo(xSvDROOffset)
                 sendMulti()
                     
                 sendSpindleData()
