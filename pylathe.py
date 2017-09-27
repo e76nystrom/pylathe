@@ -205,7 +205,7 @@ class FormRoutines():
         cfg.initInfo(key, tc)
         return(tc)
 
-    def addField(self, sizer, label, key, size=(60, -1)):
+    def addField(self, sizer, label, index, size=(60, -1)):
         if label != None:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
@@ -213,13 +213,13 @@ class FormRoutines():
 
         tc = wx.TextCtrl(self, -1, "", size=size)
         sizer.Add(tc, flag=wx.ALL, border=2)
-        if key in cfg.info:
-            val = cfg.getInfo(key)
+        if cfg.info[index] != None:
+            val = cfg.getInfo(index)
             tc.SetValue(val)
         cfg.initInfo(key, tc)
         return(tc)
 
-    def addCheckBox(self, sizer, label, key, action=None):
+    def addCheckBox(self, sizer, label, index, action=None):
         txt = wx.StaticText(self, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
@@ -228,8 +228,8 @@ class FormRoutines():
         if action != None:
             self.Bind(wx.EVT_CHECKBOX, action, cb)
         sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-        if key in cfg.info:
-            val = cfg.getInfo(key)
+        if cfg.info[index] != None:
+            val = cfg.getInfo(index)
             cb.SetValue(val == 'True')
         cfg.initInfo(key, cb)
         return(cb)
@@ -4873,7 +4873,6 @@ class MainFrame(wx.Frame):
 
     def showPanel(self):
         key = mainPanel
-        # if not key in info:
         if cfg.info[key] == None:
             cfg.initInfo(key, InfoValue('turnPanel'))
         showPanel = cfg.getInfoData(key)
