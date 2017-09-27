@@ -4996,7 +4996,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         self.Show(False)
 
     def setupAction(self):
-            sendZData(True)
+        sendZData(True)
 
     def showAction(self, changed):
         global zDataSent
