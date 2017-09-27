@@ -109,6 +109,9 @@ class ConfigInfo():
                     elif funcClass == 'ComboBox':
                         func.SetValue(val)
                         self.infoData[index] = val
+                    elif funcClass == 'InfoValue':
+                        func.SetValue(val)
+                        self.infoData[index] = val
                 else:
                     func = InfoValue(val)
                     self.info[index] = func
