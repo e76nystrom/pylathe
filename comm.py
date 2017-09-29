@@ -35,9 +35,9 @@ class Comm():
             print("unable to open port %s" % (port))
             stdout.flush()
 
-    def command(ser, cmdVal):
+    def command(self, cmdVal):
         if len(self.parmList) > 0:
-            sendMulti()
+            self.sendMulti()
         (cmd, action) = cmdTable[cmdVal]
         if self.SWIG and (action != None):
             if self.importLathe:
@@ -73,7 +73,7 @@ class Comm():
         self.commLock.release()
         return(rsp.strip("\n\r"))
 
-    def queParm(ser, parmIndex, val):
+    def queParm(self, parmIndex, val):
         cmdInfo = parmTable[parmIndex]
         parm = cmdInfo[0]
         parmType = cmdInfo[1]
@@ -114,7 +114,7 @@ class Comm():
             stdout.flush()
         length = len(cmd)
         if self.cmdLen + length > 80:
-            sendMulti()
+            self.sendMulti()
         self.cmdLen += length
         self.parmList.append(cmd)
 
@@ -224,7 +224,7 @@ class Comm():
                 self.commLock.release()
                 if not self.timeout:
                     self.timeout = True
-                    print("getParm timeout %s" % \ (parmTable[parmIndex]))
+                    print("getParm timeout %s" % (parmTable[parmIndex]))
                     stdout.flush()
                 raise CommTimeout()
                 break;
