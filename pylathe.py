@@ -4760,35 +4760,6 @@ class MainFrame(wx.Frame):
         cfg.readInfo(configFile, config)
         cfg.readInfo(posFile, config)
         
-        # vars = ((zSvPosition, 'zPosition'), \
-        #         (zSvHomeOffset, 'zHomeOffset'), \
-        #         (xSvPosition, 'xPosition'), \
-        #         (xSvHomeOffset, 'xHomeOffset'))
-        # if DRO:
-        #     vars += ((zSvDROOffset, 'zDROOffset'), \
-        #              (xSvDROOffset, 'xDROOffset'), \
-        #              (zSvDROPosition, 'zDROPosition'), \
-        #              (xSvDROPosition, 'xDROPosition'))
-
-        # for (key, var) in vars:
-        #     exec('global ' + var)
-        #     if cfg.info[key] == None:
-        #         try:
-        #             val = "%0.4f" % (eval(var))
-        #             # print("newInfoData %3d %16s %16s %s " % \
-        #             #       (key, configTable[key], var, val), end='')
-        #             cfg.newInfo(key, val)
-        #             # val = cfg.getInfoData(key)
-        #             # print("%s" % val)
-        #         except NameError:
-        #             print("MainFrame initUI %s not defined" % (var))
-        #             stdout.flush()
-        #     else:
-        #         exp = var + ' = cfg.getFloatInfo(' + str(key) + ')'
-        #         exec(exp)
-        #         print("%s = %s" % (var, eval(var)))
-        #     stdout.flush()
-
         vars = (('jogPanel.zPosition', zSvPosition), \
                 ('jogPanel.zHomeOffset', zSvHomeOffset), \
                 ('jogPanel.xPosition', xSvPosition), \
@@ -4803,7 +4774,6 @@ class MainFrame(wx.Frame):
             if cfg.info[key] == None:
                 cfg.newInfo(key, 0)
             exp = var + ' = cfg.getInfoInstance(' + str(key) + ')'
-            print(exp)
             exec(exp)
 
         dw, dh = wx.DisplaySize()
