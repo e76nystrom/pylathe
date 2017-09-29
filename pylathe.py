@@ -22,6 +22,7 @@ WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
     
+SWIG = False
 HOME_TEST = False
 dbg = None
 
@@ -804,7 +805,7 @@ def sendSpindleData(send=False, rpm=None):
                 if cfg.getBoolInfoData(xInvDir):
                      cfgReg |= XDIR_POL
                 comm.queParm(X_CFG_REG, cfgReg)
-                comm.sendMulti(()
+                comm.sendMulti()
             spindleDataSent = True
     except CommTimeout:
         commTimeout()
@@ -3335,7 +3336,7 @@ class JogPanel(wx.Panel, FormRoutines):
             val = 0.001
         comm.queParm(Z_MPG_INC, val * self.zStepsInch)
         comm.queParm(X_MPG_INC, val * self.xStepsInch)
-        comm.sendMulti(()
+        comm.sendMulti()
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
@@ -3958,7 +3959,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         comm.queParm(PROBE_INV, cfg.getBoolInfoData(cfgPrbInv))
         comm.queParm(Z_PROBE_SPEED, cfg.getInfoData(zProbeSpeed))
         comm.queParm(Z_HOME_STATUS, '0');
-        comm.sendMulti(()
+        comm.sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
         self.jogPanel.probe(AXIS_Z, probeLoc)
@@ -3970,7 +3971,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         comm.queParm(PROBE_INV, cfg.getBoolInfoData(cfgPrbInv))
         comm.queParm(X_HOME_SPEED, cfg.getInfoData(xHomeSpeed))
         comm.queParm(X_HOME_STATUS, '0');
-        comm.sendMulti(()
+        comm.sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
         self.jogPanel.probe(AXIS_X, probeLoc)
@@ -4543,7 +4544,7 @@ class MainFrame(wx.Frame):
                     comm.setParm(Z_DRO_OFFSET, cfg.getInfo(zSvDROOffset))
                     global zDROOffset
                     zDROOffset = cfg.getFloatInfo(zSvDROOffset)
-                comm.sendMulti(()
+                comm.sendMulti()
                 
                 sendXData()
                 comm.setParm(X_LOC, cfg.getIntInfo(xSvPosition))
@@ -4555,7 +4556,7 @@ class MainFrame(wx.Frame):
                     comm.setParm(X_DRO_OFFSET, cfg.getFloatInfo(xSvDROOffset)) 
                     global xDROOffset
                     xDROOffset = cfg.getFloatInfo(xSvDROOffset)
-                comm.sendMulti(()
+                comm.sendMulti()
                     
                 sendSpindleData()
 
@@ -4567,7 +4568,7 @@ class MainFrame(wx.Frame):
                     # comm.queParm(X_HOME_OFFSET, xHomeOffset)
                     comm.queParm(X_HOME_STATUS,
                             HOME_SUCCESS if xHomed else HOME_ACTIVE)
-                    comm.sendMulti(()
+                    comm.sendMulti()
             except CommTimeout:
                 commTimeout()
         else:
