@@ -73,7 +73,6 @@ comm.SWIG = SWIG
 
 if XILINX:
     comm.enableXininx()
-    from comm import setXReg, getXReg, dspXReg
     from interface import xilinxList, xilinxBitList
 
 if SWIG:
