@@ -6,471 +6,436 @@ import serial
 from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
     LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
-ser = None
-timeout = False
-commLock = Lock()
-
-xDbgPrint = True
-SWIG = False
-importLathe = True
-lastCmd = ''
-
 cmdOverhead = 8
-parmList = []
-cmdLen = cmdOverhead
-
-def enableXilinx():
-    from setup import xRegTable
-
-def openSerial(port, rate):
-    global ser
-    try:
-        ser = serial.Serial(port, 57600, timeout=1)
-    except IOError:
-        print("unable to open port %s" % (port)) #, flush=True)
-        stdout.flush()
 
 class CommTimeout(Exception):
     pass
 
-def command(cmdVal):
-    global SWIG, ser, cmdTable, commLock, timeout, xDbgPrint, \
-        parmList, lastCmd
-    if len(parmList) > 0:
-        sendMulti()
-    # (cmdVal, action) = cmds[cmd]
-    (cmd, action) = cmdTable[cmdVal]
-    if SWIG and (action != None):
-        global importLathe
-        if importLathe:
-            import lathe
-            importLathe = False
-        actionCmd = "lathe." + action + "()"
-        eval(actionCmd)
-        # action()
-    cmdStr = '\x01%x \r' % (cmdVal)
-    if xDbgPrint:
-        if cmd != lastCmd:
-            lastCmd = cmd
-            print("%-15s %s" % (cmd, cmdStr.strip('\x01\r'))) #, flush=True)
-            stdout.flush()
-    if ser is None:
-        return(None);
-    commLock.acquire(True)
-    ser.write(str.encode(cmdStr))
-    rsp = ""
-    while True:
-        tmp = str(ser.read(1))
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("timeout %s" % (cmd.strip('\x01\r'))) #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp;
-    commLock.release()
-    return(rsp.strip("\n\r"))
+class Comm():
+    def __init__(self):
+        self.ser = None
+        self.timeout = False
+        self.commLock = Lock()
 
-def queParm(parmIndex, val):
-    global parmTable, parmList, cmdLen
-    # cmdInfo = parms[parm]
-    # parmIndex = cmdInfo[0]
-    cmdInfo = parmTable[parmIndex]
-    parm = cmdInfo[0]
-    parmType = cmdInfo[1]
-    valString = "0"
-    if SWIG and (len(cmdInfo) == 3):
-        global importLathe
-        if importLathe:
-            import lathe
-            importLathe = False
-        parmVar = cmdInfo[2]
-        if parmType == 'float':
-            valString = "%5.6f" % (float(val))
-        else:
-            valString = "%d" % (int(val))
-        cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
-        exec(cmd)
-    if parmType == 'float':
+        self.xDbgPrint = True
+        self.SWIG = False
+        self.importLathe = True
+        self.lastCmd = ''
+
+        self.parmList = []
+        self.cmdLen = cmdOverhead
+
+    def enableXilinx(self):
+        from setup import xRegTable
+
+    def openSerial(self, port, rate):
         try:
-            valString = "%5.6f" % (float(val))
-            valString = valString.rstrip('0')
-        except ValueError:
-            valString = "0.0"
-            print("ValueError float queParm %s %s" % (parm, val)) #, flush=True)
+            self.ser = serial.Serial(port, 57600, timeout=1)
+        except IOError:
+            print("unable to open port %s" % (port))
             stdout.flush()
-    else:
-        try:
-            val = int(val)
-            if val < 10 :
-                valString = "%d" % (val)
+
+    def command(ser, cmdVal):
+        if len(self.parmList) > 0:
+            sendMulti()
+        (cmd, action) = cmdTable[cmdVal]
+        if self.SWIG and (action != None):
+            if self.importLathe:
+                import lathe
+                self.importLathe = False
+            actionCmd = "lathe." + action + "()"
+            eval(actionCmd)
+        cmdStr = '\x01%x \r' % (cmdVal)
+        if self.xDbgPrint:
+            if cmd != self.lastCmd:
+                self.lastCmd = cmd
+                print("%-15s %s" % (cmd, cmdStr.strip('\x01\r')))
+                stdout.flush()
+        if self.ser is None:
+            return(None);
+        self.commLock.acquire(True)
+        self.ser.write(str.encode(cmdStr))
+        rsp = ""
+        while True:
+            tmp = str(self.ser.read(1))
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout %s" % (cmd.strip('\x01\r')))
+                    stdout.flush()
+                raise CommTimeout()
+                break
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp;
+        self.commLock.release()
+        return(rsp.strip("\n\r"))
+
+    def queParm(ser, parmIndex, val):
+        cmdInfo = parmTable[parmIndex]
+        parm = cmdInfo[0]
+        parmType = cmdInfo[1]
+        valString = "0"
+        if self.SWIG and (len(cmdInfo) == 3):
+            if self.importLathe:
+                import lathe
+                self.importLathe = False
+            parmVar = cmdInfo[2]
+            if parmType == 'float':
+                valString = "%5.6f" % (float(val))
             else:
-                valString = "x%x" % (val)
-        except ValueError:
-            valString = "0"
-            print("ValueError int queParm %s %s" % (parm, val)) #, flush=True)
-            stdout.flush()
-    cmd = ' %x %s' % (parmIndex, valString)
-    if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip())) #, flush=True)
-        stdout.flush()
-    length = len(cmd)
-    if cmdLen + length > 80:
-        sendMulti()
-    cmdLen += length
-    parmList.append(cmd)
-
-def sendMulti():
-    global ser, parmList, cmdLen, cmdOverhead, cmds, commLock, timeout
-    count = len(parmList)
-    if count == 0:
-        return
-    # cmd = '\x01%x %x' %  (cmds['LOADMULTI'][0], count)
-    cmd = '\x01%x %x' %  (LOADMULTI, count)
-    for parm in parmList:
-        cmd += parm
-    cmd += ' \r';
-    if xDbgPrint:
-        print("cmdlen %d len(cmd) %d" % (cmdLen, len(cmd)))
-    parmList = []
-    cmdLen = cmdOverhead
-    if xDbgPrint:
-        print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r'))) #, flush=True)
-        stdout.flush()
-    if ser is None:
-        return
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("setParm timeout %s" % (parm)) #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp
-    commLock.release()
-
-def setParm(parmIndex, val):
-    global ser, parmTable, cmds, commLock, timeout, xDbgPrint
-    # cmdInfo = parms[parm]
-    # parmIndex = cmdInfo[0]
-    cmdInfo = parmTable[parmIndex]
-    parm = cmdInfo[0]
-    parmType = cmdInfo[1]
-    valString = "0"
-    if SWIG and (len(cmdInfo) == 3):
-        global importLathe
-        if importLathe:
-            import lathe
-            importLathe = False
-        parmVar = cmdInfo[2]
+                valString = "%d" % (int(val))
+            cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
+            exec(cmd)
         if parmType == 'float':
-            valString = "%5.6f" % (float(val))
+            try:
+                valString = "%5.6f" % (float(val))
+                valString = valString.rstrip('0')
+            except ValueError:
+                valString = "0.0"
+                print("ValueError float queParm %s %s" % (parm, val))
+                stdout.flush()
         else:
-            valString = "%d" % (int(val))
-        cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
-        exec(cmd)
-    if parmType == 'float':
-        try:
-            valString = "%5.6f" % (float(val))
-            valString = valString.rstrip('0')
-        except ValueError:
-            valString = "0.0"
-            print("ValueError setParm %s %s" % (parm, val)) #, flush=True)
+            try:
+                val = int(val)
+                if val < 10 :
+                    valString = "%d" % (val)
+                else:
+                    valString = "x%x" % (val)
+            except ValueError:
+                valString = "0"
+                print("ValueError int queParm %s %s" % (parm, val))
+                stdout.flush()
+        cmd = ' %x %s' % (parmIndex, valString)
+        if self.xDbgPrint:
+            print("%-15s %s" % (parm, cmd.strip()))
             stdout.flush()
-    else:
-        try:
-            valString = "x%x" % (int(val))
-        except ValueError:
-            valString = "0"
-    # cmd = '\x01%x %x %s \r' % (cmds['LOADVAL'][0], parmIndex, valString)
-    cmd = '\x01%x %x %s \r' % (LOADVAL, parmIndex, valString)
-    if xDbgPrint:
-        print("%-15s %s" % (parm, cmd.strip('\x01\r'))) #, flush=True)
-        stdout.flush()
-    if ser is None:
-        return
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("setParm timeout %s" % (parm)) #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp
-    commLock.release()
+        length = len(cmd)
+        if self.cmdLen + length > 80:
+            sendMulti()
+        self.cmdLen += length
+        self.parmList.append(cmd)
 
-def getParm(parmIndex, dbg=False):
-    global ser, parmTable, commLock, timeout
-    if ser is None:
-        return(None)
-    # cmd = '\x01%x %x \r' % (cmds['READVAL'][0], parms[parm][0])
-    cmd = '\x01%x %x \r' % (READVAL, parmIndex)
-    if dbg:
-        print("%-15s %s" % (parmTable[parmIndex], cmd.strip('\x01\r')), end="")
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("getParm timeout %s" % \
-                      (parmTable[parmIndex])) #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            timeout = False
-            result = rsp.split()
-            if len(result) == 3:
-                commLock.release()
-                try:
-                    retVal = int(result[2], 16)
-                except:
-                    print("getParm error on %s" % (result)) #, flush=True)
+    def sendMulti(self):
+        count = len(self.parmList)
+        if count == 0:
+            return
+        cmd = '\x01%x %x' %  (LOADMULTI, count)
+        for parm in self.parmList:
+            cmd += parm
+        cmd += ' \r';
+        if self.xDbgPrint:
+            print("cmdlen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
+        self.parmList = []
+        self.cmdLen = cmdOverhead
+        if self.xDbgPrint:
+            print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
+            stdout.flush()
+        if self.ser is None:
+            return
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("setParm timeout %s" % (parm))
                     stdout.flush()
-                    retVal = 0
-                if retVal & 0x80000000:
-                    retVal -= 0x100000000
-                if dbg:
-                    print("%08x" % (retVal)) #, flush=True)
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp
+        self.commLock.release()
+
+    def setParm(self, parmIndex, val):
+        cmdInfo = parmTable[parmIndex]
+        parm = cmdInfo[0]
+        parmType = cmdInfo[1]
+        valString = "0"
+        if self.SWIG and (len(cmdInfo) == 3):
+            if self.importLathe:
+                import lathe
+                self.importLathe = False
+            parmVar = cmdInfo[2]
+            if parmType == 'float':
+                valString = "%5.6f" % (float(val))
+            else:
+                valString = "%d" % (int(val))
+            cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
+            exec(cmd)
+        if parmType == 'float':
+            try:
+                valString = "%5.6f" % (float(val))
+                valString = valString.rstrip('0')
+            except ValueError:
+                valString = "0.0"
+                print("ValueError setParm %s %s" % (parm, val))
+                stdout.flush()
+        else:
+            try:
+                valString = "x%x" % (int(val))
+            except ValueError:
+                valString = "0"
+        cmd = '\x01%x %x %s \r' % (LOADVAL, parmIndex, valString)
+        if self.xDbgPrint:
+            print("%-15s %s" % (parm, cmd.strip('\x01\r')))
+            stdout.flush()
+        if self.ser is None:
+            return
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("setParm timeout %s" % (parm))
                     stdout.flush()
-                return(retVal)
-        rsp = rsp + tmp;
-    commLock.release()
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp
+        self.commLock.release()
 
-def getString(command, parm=None):
-    global ser, commLock, timeout
-    if ser is None:
-        return(None)
-    # cmd = '\x01%x \r' % (cmds['READDBG'][0])
-    arg = "" if parm == None else " %x" % parm
-    cmd = '\x01%x%s \r' % (command, arg)
-    cmdLen = len(cmd) - 1
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("getString timeout") #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            commLock.release()
-            timeout = False
-            if len(rsp) <= 3:
-                return ""
-            return(rsp[cmdLen:])
-        rsp = rsp + tmp;
-    commLock.release()
+    def getParm(self, parmIndex, dbg=False):
+        if self.ser is None:
+            return(None)
+        cmd = '\x01%x %x \r' % (READVAL, parmIndex)
+        if dbg:
+            print("%-15s %s" % \
+                  (parmTable[parmIndex], cmd.strip('\x01\r')), end="")
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("getParm timeout %s" % \ (parmTable[parmIndex]))
+                    stdout.flush()
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.timeout = False
+                result = rsp.split()
+                if len(result) == 3:
+                    self.commLock.release()
+                    try:
+                        retVal = int(result[2], 16)
+                    except:
+                        print("getParm error on %s" % (result))
+                        stdout.flush()
+                        retVal = 0
+                    if retVal & 0x80000000:
+                        retVal -= 0x100000000
+                    if dbg:
+                        print("%08x" % (retVal))
+                        stdout.flush()
+                    return(retVal)
+            rsp = rsp + tmp;
+        self.commLock.release()
 
-def setXReg(reg, val):
-    global ser, xRegs, commLock, timeout, xDbgPrint
-    if not (reg in xRegs):
-        print("invalid register " + reg) #, flush=True)
-        stdout.flush()
-        return
-    val = int(val)
-    if xDbgPrint:
-        print("%-12s %2x %8x %12d" % \
-              (reg, xRegs[reg], val & 0xffffffff, val)) #, flush=True)
-        stdout.flush()
-    if ser is None:
-        return
-    # cmd = '\x01%x %x %08x \r' % (cmds['LOADXREG'][0], xRegs[reg], \
-    #                            val & 0xffffffff)
-    cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("timeout")
-            raise CommTimeout
-            break;
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp;
-    commLock.release()
+    def getString(self, command, parm=None):
+        if self.ser is None:
+            return(None)
+        arg = "" if parm == None else " %x" % parm
+        cmd = '\x01%x%s \r' % (command, arg)
+        self.cmdLen = len(cmd) - 1
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("getString timeout")
+                    stdout.flush()
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.commLock.release()
+                self.timeout = False
+                if len(rsp) <= 3:
+                    return ""
+                return(rsp[self.cmdLen:])
+            rsp = rsp + tmp;
+        self.commLock.release()
 
-def setXRegN(reg, val):
-    global ser, xRegTable, commLock, timeout, xDbgPrint
-    if ser is None:
-        return
-    val = int(val)
-    if xDbgPrint:
-        print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
-    # cmd = '\x01%x %x %08x \r' % (cmds['LOADXREG'][0], reg, \
-    #                            val & 0xffffffff)
-    cmd = '\x01%x %x %08x \r' % (LOADXREG, reg, val & 0xffffffff)
-    if xDbgPrint:
-        pass
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("timeout")
-            raise CommTimeout
-            break;
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp;
-    commLock.release()
+    def setXReg(self, reg, val):
+        if not (reg in xRegs):
+            print("invalid register " + reg)
+            stdout.flush()
+            return
+        val = int(val)
+        if self.xDbgPrint:
+            print("%-12s %2x %8x %12d" % \
+                  (reg, xRegs[reg], val & 0xffffffff, val))
+            stdout.flush()
+        if self.ser is None:
+            return
+        cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout")
+                raise CommTimeout
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp;
+        self.commLock.release()
 
-def getXReg(reg):
-    global ser, xRegTable, commLock, timeout
-    if ser is None:
-        return(0)
-    # if not (reg in xRegs):
-    #     print("invalid register " + reg)
-    #     return(0);
-    # cmd = '\x01%x %x \r' % (cmds['READXREG'][0], xRegs[reg])
-    cmd = '\x01%x %x \r' % (READXREG, reg)
-    if xDbgPrint:
-        pass
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("timeout")
-            raise CommTimeout
-            break;
-        if tmp == '*':
-            timeout = False
-            result = rsp.split()
-            if len(result) == 3:
-                val = int(result[2], 16)
-                if val & 0x80000000:
-                    val = -((val ^ 0xffffffff) + 1)
-                commLock.release()
-                return(val)
-        rsp = rsp + tmp;
+    def setXRegN(self, reg, val):
+        if self.ser is None:
+            return
+        val = int(val)
+        if self.xDbgPrint:
+            print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
+        cmd = '\x01%x %x %08x \r' % (LOADXREG, reg, val & 0xffffffff)
+        if self.xDbgPrint:
+            pass
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout")
+                raise CommTimeout
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp;
+        self.commLock.release()
+
+    def getXReg(self, reg):
+        if self.ser is None:
+            return(0)
+        cmd = '\x01%x %x \r' % (READXREG, reg)
+        if self.xDbgPrint:
+            pass
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout")
+                raise CommTimeout
+                break;
+            if tmp == '*':
+                self.timeout = False
+                result = rsp.split()
+                if len(result) == 3:
+                    val = int(result[2], 16)
+                    if val & 0x80000000:
+                        val = -((val ^ 0xffffffff) + 1)
+                    self.commLock.release()
+                    return(val)
+            rsp = rsp + tmp;
 
 
-def dspXReg(reg, label=''):
-    # val = getXReg(reg)
-    global xRegTable, xDbgPrint
-    if xDbgPrint:
-        print ("%-12s %2x %8x %12d %s" %
-               (xRegTable[reg], reg, val & 0xffffffff, val, label))
-    return(val)
+    def dspXReg(self, reg, label=''):
+        if self.xDbgPrint:
+            print ("%-12s %2x %8x %12d %s" %
+                   (xRegTable[reg], reg, val & 0xffffffff, val, label))
+        return(val)
 
-def sendMove(opString, op, val):
-    global ser, commLock, timeout
-    if isinstance(val, float):
-        valStr = "%0.4f" % (val)
-        prtStr = "%7.4f" % (val)
-    elif isinstance(val, int):
-        valStr = "x%x" % (val)
-        prtStr = "%7x" % (val)
-    elif isinstance(val, str):
-        valStr = val
-        prtStr = val
-    else:
-        print("sendMove val invalid type") #, flush=True)
-        stdout.flush()
-        return
-    # cmd = '\x01%x x%x %s \r' % (cmds['QUEMOVE'][0], op, valStr)
-    if '.' in valStr:
-        valStr = valStr.rstrip('0')
-    cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
-    if xDbgPrint:
-        print("cmd %-14s %3x %s" % (opString, op, prtStr)) #, flush=True)
-        stdout.flush()
-    if ser is None:
-        return
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("sendMove timeout") #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            timeout = False
-            break
-        rsp = rsp + tmp
-    commLock.release()
+    def sendMove(self, opString, op, val):
+        if isinstance(val, float):
+            valStr = "%0.4f" % (val)
+            prtStr = "%7.4f" % (val)
+        elif isinstance(val, int):
+            valStr = "x%x" % (val)
+            prtStr = "%7x" % (val)
+        elif isinstance(val, str):
+            valStr = val
+            prtStr = val
+        else:
+            print("sendMove val invalid type")
+            stdout.flush()
+            return
+        if '.' in valStr:
+            valStr = valStr.rstrip('0')
+        cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
+        if self.xDbgPrint:
+            print("cmd %-14s %3x %s" % (opString, op, prtStr))
+            stdout.flush()
+        if self.ser is None:
+            return
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("sendMove timeout")
+                    stdout.flush()
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp
+        self.commLock.release()
 
-def getQueueStatus():
-    global ser, commLock, timeout
-    if ser is None:
-        return(None)
-    # cmd = '\x01%x \r' % (cmds['MOVEQUESTATUS'][0])
-    cmd = '\x01%x \r' % (MOVEQUESTATUS)
-    commLock.acquire(True)
-    ser.write(cmd)
-    rsp = "";
-    while True:
-        tmp = ser.read(1)
-        if len(tmp) == 0:
-            commLock.release()
-            if not timeout:
-                timeout = True
-                print("getQueStatus timeout") #, flush=True)
-                stdout.flush()
-            raise CommTimeout()
-            break;
-        if tmp == '*':
-            timeout = False
-            result = rsp.split()
-            if len(result) == 2:
-                commLock.release()
-                retVal = int(result[1], 16)
-                if retVal & 0x80000000:
-                    retVal -= 0x100000000
-                return(retVal)
-        rsp = rsp + tmp;
-    commLock.release()
+    def getQueueStatus(self):
+        if self.ser is None:
+            return(None)
+        cmd = '\x01%x \r' % (MOVEQUESTATUS)
+        self.commLock.acquire(True)
+        self.ser.write(cmd)
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1)
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("getQueStatus timeout")
+                    stdout.flush()
+                raise CommTimeout()
+                break;
+            if tmp == '*':
+                self.timeout = False
+                result = rsp.split()
+                if len(result) == 2:
+                    self.commLock.release()
+                    retVal = int(result[1], 16)
+                    if retVal & 0x80000000:
+                        retVal -= 0x100000000
+                    return(retVal)
+            rsp = rsp + tmp;
+        self.commLock.release()
