@@ -891,8 +891,7 @@ enumList =\
     
 if __name__ == '__main__':
     import os
-    from setup import createCommands, createParameters,\
-        createCtlBits, createEnums, createXilinxReg, createXilinxBits
+    from setup import Setup
 
     # print os.path.realpath(__file__)
     # print os.getcwd()
@@ -904,9 +903,10 @@ if __name__ == '__main__':
     xLoc = path + '/../../Xilinx/LatheCtl/'
 
     print("creating interface files")
-    createCommands(cmdList, cLoc, fData)
-    createParameters(parmList, cLoc, fData)
-    createCtlBits(regList, cLoc, fData)
-    createEnums(enumList, cLoc, fData)
-    createXilinxReg(xilinxList, cLoc, xLoc, fData)
-    createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+    setup = Setup()
+    setup.createCommands(cmdList, cLoc, fData)
+    setup.createParameters(parmList, cLoc, fData)
+    setup.createCtlBits(regList, cLoc, fData)
+    setup.createEnums(enumList, cLoc, fData)
+    setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
+    setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
