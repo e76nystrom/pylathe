@@ -259,7 +259,8 @@ class ConfigInfo():
     def getInitialBoolInfo(self, index):
         try:
             tmp = self.info[index]
-            return(tmp.GetValue() == 'True')
+            if tmp != None:
+                return(tmp.GetValue() == 'True')
         except IndexError:
             print("getInitialInfo IndexError %s" % (index))
             stdout.flush()
