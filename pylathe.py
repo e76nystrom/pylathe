@@ -26,15 +26,16 @@ SWIG = False
 HOME_TEST = False
 dbg = None
 
-from setup import createConfig, createStrings, createCommands, \
-    createParameters, createCtlBits, createEnums
 from interface import configList, strList, cmdList, parmList, enumList, regList
 from configInfo import ConfigInfo
 
 configFile = "config.txt"
 posFile = "posInfo.txt"
 
-(config, configTable) = createConfig(configList)
+from setup import Setup
+setup = Setup()
+(config, configTable) = setup.createConfig(configList)
+
 cfg = ConfigInfo(configTable)
 cfg.clrInfo(len(config))
 cfg.readInfo(configFile, config)
@@ -49,20 +50,19 @@ REM_DBG = False
 cfg.clrInfo(len(config))
 
 cLoc = "../Lathe/include/"
-
 fData = False
-createCommands(cmdList, cLoc, fData)
-createStrings(strList)
-createParameters(parmList, cLoc, fData)
-createCtlBits(regList, cLoc, fData)
-createEnums(enumList, cLoc, fData)
-if XILINX:
-    from setup import createXilinxReg, createXilinxBits
-    xLoc = '../../Xilinx/LatheCtl/'
-    createXilinxReg(xilinxList, cLoc, xLoc, fData)
-    createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
-from setup import importList
+setup.createCommands(cmdList, cLoc, fData)
+setup.createStrings(strList)
+setup.createParameters(parmList, cLoc, fData)
+setup.createCtlBits(regList, cLoc, fData)
+setup.createEnums(enumList, cLoc, fData)
+if XILINX:
+    xLoc = '../../Xilinx/LatheCtl/'
+    setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
+    setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+
+importList = setup.importListn
 cmd = "from setup import "
 for var in importList:
     cmd += var + ","
