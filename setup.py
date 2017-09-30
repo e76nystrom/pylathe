@@ -6,48 +6,54 @@ class Setup():
 
     def createConfig(self, configList):
         global config, configTable
-        self.importList.append("config")
-        self.importList.append("configTable")
         config = {}
         configTable = []
+        imports = []
+        imports.append("config")
+        imports.append("configTable")
         for i, (name, comment) in enumerate(configList):
             config[name] = i
             if name in globals():
                 print("createConfig %s already defined" % name)
             else:
                 globals()[name] = i
-                self.importList.append(name)
+                imports.append(name)
                 configTable.append(name)
+        self.configImports = imports
+        self.importList += imports
         self.config = config
         self.confgTable = configTable
         return(config, configTable)
 
     def createStrings(self, strList):
         global strTable
-        self.importList.append("strTable")
         strTable = []
+        imports = []
+        imports.append("strTable")
         for i, (name, value) in enumerate(strList):
             config[name] = i
             if name in globals():
                 print("createConfig %s already defined" % name)
             else:
                 globals()[name] = i
-                self.importList.append(name)
+                imports.append(name)
                 strTable.append(value)
+        self.strImports = imports
+        self.importList += imports
         self.strTable = strTable
         return(strTable)
 
     def createCommands(self, cmdList, cLoc, fData=False):
+        global cmdTable
+        imports = []
+        imports.append("cmdTable")
+        cmdTable = []
         if fData:
             cFile = open(cLoc + 'cmdList.h', 'wb')
             cFile.write("enum COMMANDS\n{\n");
             # jFile = open(jLoc + 'Cmd.java', 'wb')
             # jFile.write("package lathe;\n\n");
             # jFile.write("public enum Cmd\n{\n");
-        self.importList.append("cmdTable")
-        global cmdTable
-        self.importList.append("cmdTable")
-        cmdTable = []
         index = 0
         for i in range(len(cmdList)):
             data = cmdList[i]
@@ -69,7 +75,7 @@ class Setup():
                         print("createCommands %s already defined" % regName)
                     else:
                         globals()[regName] = index
-                        self.importList.append(regName)
+                        imports.append(regName)
                     index += 1
             else:
                 if fData:
@@ -86,10 +92,16 @@ class Setup():
             # jFile.close()
             # for key in cmds:
             #    print(key, cmds[key])
+        self.cmdImports = imports
+        self.importList += imports
         self.cmdTable = cmdTable
         return(cmdTable)
 
     def createParameters(self, parmList, cLoc, fData=False):
+        global parmTable
+        parmTable = []
+        imports = []
+        imports.append("parmTable")
         if fData:
             cFile = open(cLoc + 'parmList.h', 'wb')
             cFile.write("enum PARM\n{\n")
@@ -99,9 +111,6 @@ class Setup():
             # jFile = open(jLoc + 'Parm.java', 'wb')
             # jFile.write("package lathe;\n\n");
             # jFile.write("public enum Parm\n{\n")
-        global parmTable
-        self.importList.append("parmTable")
-        parmTable = []
         index = 0
         for i in range(len(parmList)):
             data = parmList[i]
@@ -145,7 +154,7 @@ class Setup():
                     print("createParameters %s already defined" % regName)
                 else:
                     globals()[regName] = index
-                    self.importList.append(regName)
+                    imports.append(regName)
                 index += 1
             else:
                 if fData:
@@ -164,10 +173,13 @@ class Setup():
 
         #for key in parms:
         #    print(key, parms[key])
+        self.parmImports = imports
+        self.importList += imports
         self.parmTable = parmTable
         return(parmTable)
 
     def createEnums(self, enumList, cLoc, fData=False):
+        imports = []
         if fData:
             cFile = open(cLoc + 'ctlstates.h', 'wb')
             # jFile = open(jLoc + 'CtlStates.java', 'wb')
@@ -189,7 +201,7 @@ class Setup():
                     print("createCtlStates %s already defined" % state)
                 else:
                     globals()[state] = val
-                    self.importList.append(state)
+                    imports.append(state)
                     eval("%s.append('%s')" % (enum, state))
                     stringList.append((state, comment))
                 val += 1
@@ -202,7 +214,7 @@ class Setup():
                     var = tmp[1]
                     enum = tmp[1].replace('_', "") + "List"
                     globals()[enum] = []
-                    self.importList.append(enum)
+                    imports.append(enum)
                     val = 0
                     stringList = []
                     if fData:
@@ -230,8 +242,11 @@ class Setup():
             cFile.close()
             # jFile.write("};\n")
             # jFile.close()
+        self.enumImports = imports
+        self.importList += imports
 
     def createCtlBits(self, regList, cLoc, fData=False):
+        imports = []
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
@@ -254,7 +269,7 @@ class Setup():
                     print("createctlBits %s already defined" % var)
                 else:
                     globals()[var] = eval(val)
-                    self.importList.append(var)
+                    imports.append(var)
             else:
                 if fData:
                     cFile.write("\n// %s\n\n" % (data))
@@ -263,8 +278,14 @@ class Setup():
             cFile.close()
             # jFile.write("};\n")
             # jFile.close()
+        self.enumImports = imports
+        self.importList += imports
 
     def createXilinxReg(self, xilinxList, cLoc, xLoc, fData=False):
+        global xRegTable
+        xRegTable = []
+        imports = []
+        imports.append("xRegTable")
         if fData:
             cFile = open(cLoc + 'xilinxreg.h', 'wb')
             cFile.write("enum XILINX\n{\n");
@@ -285,9 +306,6 @@ class Setup():
             # j1File.write("package lathe;\n\n");
             # j1File.write("public class XilinxStr\n{\n");
             # j1File.write(" public static final String[] xilinxStr =\n {\n");
-        global xRegTable
-        self.importList.append("xRegTable")
-        xRegTable = []
         index = 0
         for i in range(len(xilinxList)):
             data = xilinxList[i]
@@ -310,7 +328,7 @@ class Setup():
                     # j1File.write("%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment));
                 globals()[regName] = index
-                self.importList.append(regName)
+                imports.append(regName)
                 xRegTable.append(regName)
                 index += 1
             else:
@@ -340,10 +358,13 @@ class Setup():
 
         # for key in xRegs:
         #     print("%-12s %02x" % (key, xRegs[key]))
+        self.xRegImports = imports
+        self.importList += imports
         self.xRegTable = xRegTable
         return(xRegTable)
 
     def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False):
+        imports = []
         if fData:
             cFile = open(cLoc + 'xilinxbits.h', 'wb')
             try:
@@ -398,7 +419,7 @@ class Setup():
                         print("createXilinxBits %s already defined" % cVar)
                     else:
                         globals()[cVar] = bit << shift
-                        self.importList.append(cVar)
+                        imports.append(cVar)
                     lastShift = shift
             else:
                 if fData:
@@ -435,7 +456,7 @@ class Setup():
                             print("createXilinxBits %s already defined" % var)
                         else:
                             globals()[var] = maxShift + 1
-                            self.importList.append(var)
+                            imports.append(var)
         if fData:
             cFile.close()
             if xFile:
@@ -445,3 +466,5 @@ class Setup():
                 xFile.close()
                 # jFile.write("};\n")
                 # jFile.close()
+        self.xBitImports = imports
+        self.importList += imports
