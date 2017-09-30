@@ -40,7 +40,10 @@ cfg = ConfigInfo(configTable)
 cfg.clrInfo(len(config))
 cfg.readInfo(configFile, config)
 
-from setup import cfgXilinx, cfgDRO, spStepDrive
+cmd = "from setup import "
+for var in setup.configImports:
+    cmd += var + ","
+exec(cmd[:-1])
 
 XILINX = cfg.getInitialBoolInfo(cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cfgDRO)
