@@ -4,7 +4,7 @@ class Setup():
     def __init__(self):
         self.self.importList = []
 
-    def createConfig(configList):
+    def createConfig(self, configList):
         global config, configTable
         self.importList.append("config")
         self.importList.append("configTable")
@@ -22,7 +22,7 @@ class Setup():
         self.confgTable = configTable
         return(config, configTable)
 
-    def createStrings(strList):
+    def createStrings(self, strList):
         global strTable
         self.importList.append("strTable")
         strTable = []
@@ -37,7 +37,7 @@ class Setup():
         self.strTable = strTable
         return(strTable)
 
-    def createCommands(cmdList, cLoc, fData=False):
+    def createCommands(self, cmdList, cLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'cmdList.h', 'wb')
             cFile.write("enum COMMANDS\n{\n");
@@ -89,7 +89,7 @@ class Setup():
         self.cmdTable = cmdTable
         return(cmdTable)
 
-    def createParameters(parmList, cLoc, fData=False):
+    def createParameters(self, parmList, cLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'parmList.h', 'wb')
             cFile.write("enum PARM\n{\n")
@@ -167,7 +167,7 @@ class Setup():
         self.parmTable = parmTable
         return(parmTable)
 
-    def createEnums(enumList, cLoc, fData=False):
+    def createEnums(self, enumList, cLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'ctlstates.h', 'wb')
             # jFile = open(jLoc + 'CtlStates.java', 'wb')
@@ -231,7 +231,7 @@ class Setup():
             # jFile.write("};\n")
             # jFile.close()
 
-    def createCtlBits(regList, cLoc, fData=False):
+    def createCtlBits(self, regList, cLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
@@ -264,7 +264,7 @@ class Setup():
             # jFile.write("};\n")
             # jFile.close()
 
-    def createXilinxReg(xilinxList, cLoc, xLoc, fData=False):
+    def createXilinxReg(self, xilinxList, cLoc, xLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'xilinxreg.h', 'wb')
             cFile.write("enum XILINX\n{\n");
@@ -343,7 +343,7 @@ class Setup():
         self.xRegTable = xRegTable
         return(xRegTable)
 
-    def createXilinxBits(xilinxBitList, cLoc, xLoc, fData=False):
+    def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False):
         if fData:
             cFile = open(cLoc + 'xilinxbits.h', 'wb')
             try:
