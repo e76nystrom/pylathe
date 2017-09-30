@@ -62,7 +62,7 @@ if XILINX:
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
     setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
-importList = setup.importListn
+importList = setup.importList
 cmd = "from setup import "
 for var in importList:
     cmd += var + ","
