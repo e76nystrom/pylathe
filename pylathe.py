@@ -20,7 +20,6 @@ from dxfwrite import DXFEngine as dxf
 import re
 WINDOWS = system() == 'Windows'
 if WINDOWS:
-    import pywinusb
     from pywinusb.hid import find_all_hid_devices
     
 SWIG = False
@@ -1333,7 +1332,7 @@ class Face(UpdatePass):
             m.queFeedType(FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(faXFeed))
         else:
-            m.queXSetup(cfg.getFloatInfoData(faxFeed))
+            m.queXSetup(cfg.getFloatInfoData(faXFeed))
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
         m.text("%7.3f" % (self.zStart), \
