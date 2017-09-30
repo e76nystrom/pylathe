@@ -48,7 +48,7 @@ exec(cmd[:-1])
 XILINX = cfg.getInitialBoolInfo(cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cfgDRO)
 REM_DBG = cfg.getInitialBoolInfo(cfgRemDbg)
-STEPPER_DRIVE = cfg.getInitialBoolInfo(spStepDrive)
+STEP_DRV = cfg.getInitialBoolInfo(spStepDrive)
 
 cfg.clrInfo(len(config))
 
@@ -778,7 +778,7 @@ def sendSpindleData(send=False, rpm=None):
     try:
         if send or (not spindleDataSent):
             comm.queParm(STEPPER_DRIVE, cfg.getBoolInfoData(spStepDrive))
-            if STEPPER_DRIVE:
+            if STEP_DRV:
                 comm.queParm(SP_STEPS, cfg.getInfoData(spMotorSteps))
                 comm.queParm(SP_MICRO, cfg.getInfoData(spMicroSteps))
                 comm.queParm(SP_MIN_RPM, cfg.getInfoData(spMinRPM))
@@ -1065,7 +1065,7 @@ class Turn(UpdatePass):
             pass
 
         self.m.moveX(self.xStart + self.xRetract)
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.m.stopSpindle();
         self.m.done(1)
         self.m.drawClose()
@@ -1079,7 +1079,7 @@ class Turn(UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
         m.quePause()
         self.m.done(0)
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(tuRPM))
             m.queFeedType(FEED_PITCH)
             m.zSynSetup(cfg.getFloatInfoData(tuZFeed))
@@ -1313,7 +1313,7 @@ class Face(UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart + self.zRetract)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1327,7 +1327,7 @@ class Face(UpdatePass):
         m.setLoc(self.zStart, self.safeX)
         m.quePause()
         self.m.done(0)
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(faRPM))
             m.queFeedType(FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(faXFeed))
@@ -1547,7 +1547,7 @@ class Cutoff():
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1557,7 +1557,7 @@ class Cutoff():
         m = self.m
         m.quePause()
         self.m.done(0)
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cuRPM))
             m.queFeedType(FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(cuXFeed))
@@ -1788,7 +1788,7 @@ class Taper(UpdatePass):
         self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
         self.m.printZText("%2d %7.4f", LEFT|MIDDLE)
         self.m.moveZ(self.safeZ)
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -3018,7 +3018,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.addControlButton(sizerG, 'Jog Spindle +', \
                                   self.OnJogSpindleFwd, self.OnJogUp)
         else:
@@ -3030,7 +3030,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.addControlButton(sizerG, 'Jog Spindle -', \
                                   self.OnJogSpindleRev, self.OnJogUp)
         else:
@@ -3042,7 +3042,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.addButton(sizerG, 'Start Spindle', \
                            self.OnStartSpindle, btnSize)
         else:
@@ -3632,7 +3632,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.currentPanel.active = False
 
     def OnStartSpindle(self, e):
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             panel = self.getPanel()
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
@@ -4684,7 +4684,7 @@ class MainFrame(wx.Frame):
         menu = operationMenu.Append(ID_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTaper, menu)
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             ID_THREAD = wx.NewId()
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
@@ -4744,7 +4744,7 @@ class MainFrame(wx.Frame):
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
@@ -4786,7 +4786,7 @@ class MainFrame(wx.Frame):
         self.facePanel.update()
         self.cutoffPanel.update()
         self.taperPanel.update()
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.threadPanel.update()
 
         self.taperPanel.updateUI()
@@ -5062,7 +5062,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         self.fields = (
             ("bStepper Drive", spStepDrive, None), \
         )
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             self.fields += (
                 ("Motor Steps", spMotorSteps, 'd'), \
                 ("Micro Steps", spMicroSteps, 'd'), \
@@ -5081,7 +5081,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         # spindle start and stop
 
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
             self.addButton(sizerH, 'Start', self.OnStart, border=5)
