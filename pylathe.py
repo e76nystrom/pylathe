@@ -20,6 +20,7 @@ from dxfwrite import DXFEngine as dxf
 import re
 WINDOWS = system() == 'Windows'
 if WINDOWS:
+    import pywinusb
     from pywinusb.hid import find_all_hid_devices
     
 SWIG = False
