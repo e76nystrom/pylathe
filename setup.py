@@ -2,7 +2,7 @@ from sys import stdout
 
 class Setup():
     def __init__(self):
-        self.self.importList = []
+        self.importList = []
 
     def createConfig(self, configList):
         global config, configTable
