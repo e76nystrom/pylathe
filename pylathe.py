@@ -5179,7 +5179,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDisable Commands", cfgCmdDis, None), \
             ("bDraw Moves", cfgDraw, None), \
             ("bSave Debug", cfgDbgSave, None), \
-            ("bRemote Degug", cfgRemDbg, None), \
+            ("bRemote Debug", cfgRemDbg, None), \
         )
         if XILINX:
             self.fields += (
