@@ -44,8 +44,8 @@ from setup import cfgXilinx, cfgDRO, spStepDrive
 
 XILINX = cfg.getInitialBoolInfo(cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cfgDRO)
+REM_DBG = cfg.getInitialBoolInfo(cfgRemDbg)
 STEPPER_DRIVE = cfg.getInitialBoolInfo(spStepDrive)
-REM_DBG = False
 
 cfg.clrInfo(len(config))
 
@@ -5176,6 +5176,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDisable Commands", cfgCmdDis, None), \
             ("bDraw Moves", cfgDraw, None), \
             ("bSave Debug", cfgDbgSave, None), \
+            ("bRemote Degug", cfgRemDbg, None), \
         )
         if XILINX:
             self.fields += (
