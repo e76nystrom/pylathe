@@ -4790,6 +4790,7 @@ class MainFrame(wx.Frame):
             self.threadPanel.update()
 
         self.taperPanel.updateUI()
+        self.fit()
 
     def OnSave(self, e):
         cfg.saveInfo(configFile)
