@@ -47,7 +47,7 @@ class Setup():
         self.importList.append("cmdTable")
         global cmdTable
         self.importList.append("cmdTable")
-        self.cmdTable = []
+        cmdTable = []
         index = 0
         for i in range(len(cmdList)):
             data = cmdList[i]
