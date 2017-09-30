@@ -13,6 +13,7 @@ configList = \
     ('cfgLCD', 'config enable lcd'),
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
+    ('cfgRemDbg', 'config print remote debug info'),
     ('cfgTestMode', 'conifg test mode'),
     ('cfgTestRPM', 'config xilinx test rpm value'),
     ('cfgXFreq', 'config xilinx frequency'),
