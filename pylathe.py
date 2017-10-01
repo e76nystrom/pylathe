@@ -25,25 +25,134 @@ if WINDOWS:
 SWIG = False
 HOME_TEST = False
 dbg = None
+SETUP = False
 
-from interface import configList, strList, cmdList, parmList, enumList, regList
+if SETUP:
+    from interface import configList, strList, cmdList, parmList, \
+        enumList, regList
+else:
+    from configDef import config, configTable, cfgCmdDis, cfgDbgSave, cfgDRO, \
+        cfgDraw, cfgEncoder, cfgFcy, cfgFreqMult, cfgInvEncDir, cfgLCD, \
+        cfgMPG, cfgPrbInv, cfgRemDbg, cfgTestMode, cfgTestRPM, cfgXFreq, \
+        cfgXilinx, commPort, commRate, cuPause, cuRPM, cuToolWidth, cuXEnd, \
+        cuXFeed, cuXRetract, cuXStart, cuZCutoff, cuZRetract, cuZStart, \
+        droXPos, droZPos, faAddFeed, faPasses, faPause, faRPM, faSPInt, \
+        faSpring, faXEnd, faXFeed, faXRetract, faXStart, faZEnd, faZFeed, \
+        faZRetract, faZStart, jogInc, jogXPos, jogXPosDiam, jogZPos, \
+        mainPanel, spAccel, spAccelTime, spInvDir, spJogAccelTime, spJogMax, \
+        spJogMin, spMaxRPM, spMicroSteps, spMinRPM, spMotorSteps, \
+        spStepDrive, spTestIndex, thAddFeed, thAlternate, thAngle, thExitRev, \
+        thFirstFeed, thFirstFeedBtn, thHFactor, thInternal, thLastFeed, \
+        thLastFeedBtn, thMM, thPasses, thPause, thPitch, thRPM, thSPInt, \
+        thSpring, thTPI, thXDepth, thXRetract, thXStart, thXTaper, thZEnd, \
+        thZRetract, thZStart, tpAddFeed, tpAngle, tpAngleBtn, tpDeltaBtn, \
+        tpInternal, tpLargeDiam, tpLargeDiamText, tpPasses, tpPause, tpRPM, \
+        tpSPInt, tpSmallDiam, tpSmallDiamText, tpSpring, tpTaperSel, \
+        tpXDelta, tpXFeed, tpXFinish, tpXInFeed, tpXRetract, tpZDelta, \
+        tpZFeed, tpZLength, tpZRetract, tpZStart, tuAddFeed, tuPasses, \
+        tuPause, tuRPM, tuSPInt, tuSpring, tuXEnd, tuXFeed, tuXRetract, \
+        tuXStart, tuZEnd, tuZFeed, tuZRetract, tuZStart, xAccel, xBacklash, \
+        xDROInch, xHomeBackoffDist, xHomeDir, xHomeDist, xHomeEnd, xHomeLoc, \
+        xHomeSpeed, xHomeStart, xInvDRO, xInvDir, xInvEnc, xInvMpg, xJogMax, \
+        xJogMin, xJogSpeed, xMaxSpeed, xMicroSteps, xMinSpeed, xMotorRatio, \
+        xMotorSteps, xParkLoc, xPitch, xProbeDist, xSvPosition, \
+        xSvHomeOffset, xSvDROPosition, xSvDROOffset, zAccel, zBacklash, \
+        zDROInch, zInvDRO, zInvDir, zInvEnc, zInvMpg, zJogMax, zJogMin, \
+        zJogSpeed, zMaxSpeed, zMicroSteps, zMinSpeed, zMotorRatio, \
+        zMotorSteps, zParkLoc, zPitch, zProbeDist, zProbeSpeed, zSvPosition, \
+        zSvHomeOffset, zSvDROPosition, zSvDROOffset
+    from stringDef import strTable, STR_OP_NOT_ACTIVE, STR_OP_IN_PROGRESS, \
+        STR_NOT_PAUSED, STR_NOT_SENT, STR_NO_ADD, STR_PASS_ERROR, \
+        STR_NOT_HOMED, STR_FIELD_ERROR, STR_READALL_ERROR, STR_TIMEOUT_ERROR, \
+        STR_CLR
+    from cmdDef import cmdTable, ZMOVEABS, ZMOVEREL, ZJMOV, ZJSPEED, ZSTOP, \
+        ZSETLOC, XMOVEABS, XMOVEREL, XJMOV, XJSPEED, XSTOP, XSETLOC, \
+        XHOMEAXIS, SPINDLE_START, SPINDLE_JOG, SPINDLE_JOG_SPEED, \
+        SPINDLE_STOP, CMD_PAUSE, CMD_RESUME, CMD_STOP, CMD_MEASURE, \
+        CMD_CLEAR, CMD_SETUP, CMD_SPSETUP, CMD_ZSETUP, CMD_ZSYNSETUP, \
+        CMD_ZTAPERSETUP, CMD_XSETUP, CMD_XSYNSETUP, CMD_XTAPERSETUP, \
+        READSTAT, READISTATE, LOADVAL, LOADMULTI, READVAL, LOADXREG, \
+        READXREG, CLEARQUE, QUEMOVE, MOVEQUESTATUS, READALL, READDBG, CLRDBG, \
+        ENCSTART, ENCSTOP
+    from parmDef import parmTable, SP_STEPS, SP_MICRO, SP_MIN_RPM, \
+        SP_MAX_RPM, SP_ACCEL_TIME, SP_ACCEL, SP_JOG_MIN_RPM, SP_JOG_MAX_RPM, \
+        SP_JOG_RPM, SP_JOG_ACCEL_TIME, SP_JOG_DIR, SP_DIR_FLAG, \
+        SP_TEST_INDEX, Z_PITCH, Z_RATIO, Z_MICRO, Z_MOTOR, Z_ACCEL_TIME, \
+        Z_ACCEL, Z_BACKLASH, Z_DIR_FLAG, Z_MPG_FLAG, X_PITCH, X_RATIO, \
+        X_MICRO, X_MOTOR, X_ACCEL_TIME, X_ACCEL, X_BACKLASH, X_DIR_FLAG, \
+        X_MPG_FLAG, X_DIAMETER, Z_MOVE_MIN, Z_MOVE_MAX, Z_JOG_MIN, Z_JOG_MAX, \
+        Z_JOG_SPEED, X_MOVE_MIN, X_MOVE_MAX, X_JOG_MIN, X_JOG_MAX, \
+        X_JOG_SPEED, TOTAL_PASSES, CURRENT_PASS, MV_STATUS, Z_MOVE_DIST, \
+        Z_MOVE_POS, Z_JOG_DIR, Z_SET_LOC, Z_LOC, Z_FLAG, Z_ABS_LOC, \
+        Z_MPG_INC, X_MOVE_DIST, X_MOVE_POS, X_JOG_DIR, X_SET_LOC, X_LOC, \
+        X_FLAG, X_ABS_LOC, X_MPG_INC, INDEX_PRE_SCALER, LAST_INDEX_PERIOD, \
+        INDEX_PERIOD, REV_COUNTER, Z_HOME_OFFSET, Z_DRO_POS, Z_DRO_OFFSET, \
+        Z_DRO_INCH, Z_DRO_DIR, X_HOME_SPEED, X_HOME_DIST, \
+        X_HOME_BACKOFF_DIST, X_HOME_DIR, X_HOME_LOC, X_HOME_START, \
+        X_HOME_END, X_HOME_OFFSET, X_DRO_POS, X_DRO_OFFSET, X_DRO_INCH, \
+        X_DRO_DIR, X_HOME_DONE, X_HOME_STATUS, Z_HOME_DONE, Z_HOME_STATUS, \
+        PROBE_SPEED, PROBE_DIST, PROBE_INV, STEPPER_DRIVE, CFG_XILINX, \
+        CFG_MPG, CFG_DRO, CFG_LCD, CFG_FCY, SETUP_DONE, ENC_MAX, ENC_ENABLE, \
+        ENC_PRE_SCALER, ENC_TIMER, ENC_RUN_COUNT, ENC_RUN, ENC_COUNTER, \
+        ENC_REV_COUNTER, RPM, X_FREQUENCY, FREQ_MULT, X_CFG_REG, MAX_PARM
+    from enumDef import zStatesList, ZIDLE, ZWAITBKLS, ZSTARTMOVE, ZWAITMOVE, \
+        ZDONE, xStatesList, XIDLE, XWAITBKLS, XSTARTMOVE, XWAITMOVE, XDONE, \
+        mStatesList, M_IDLE, M_WAIT_Z, M_WAIT_X, M_WAIT_SPINDLE, \
+        M_WAIT_PROBE, M_WAIT_MEASURE, M_WAIT_SAFE_X, M_WAIT_SAFE_Z, \
+        mCommandsList, MOVE_Z, MOVE_X, SAVE_Z, SAVE_X, SAVE_Z_OFFSET, \
+        SAVE_X_OFFSET, SAVE_TAPER, MOVE_ZX, MOVE_XZ, TAPER_ZX, TAPER_XZ, \
+        START_SPINDLE, STOP_SPINDLE, Z_SYN_SETUP, X_SYN_SETUP, PASS_NUM, \
+        QUE_PAUSE, SAVE_DIAMETER, SAVE_FEED_TYPE, Z_FEED_SETUP, X_FEED_SETUP, \
+        SAVE_RUNOUT, SAVE_DEPTH, PROBE_Z, PROBE_X, OP_DONE, hStatesList, \
+        H_IDLE, H_CHECK_ONHOME, H_WAIT_FINDHOME, H_BACKOFF_HOME, \
+        H_WAIT_BACKOFF, H_WAIT_SLOWFIND, dMessageList, D_PASS, D_DONE, \
+        D_TEST, D_XMOV, D_XLOC, D_XDST, D_XSTP, D_XST, D_XBSTP, D_XDRO, \
+        D_XEXP, D_XWT, D_XDN, D_ZMOV, D_ZLOC, D_ZDST, D_ZSTP, D_ZST, D_ZBSTP, \
+        D_ZDRO, D_ZEXP, D_ZWT, D_ZDN, D_HST, D_MSTA, D_MCMD, evEventsList, \
+        EV_ZLOC, EV_XLOC, EV_RPM, EV_READ_ALL, EV_ERROR, EV_MAX
+    from ctlBitDef import CMD_MSK, CMD_MOV, CMD_JOG, CMD_SYN, CMD_MAX, \
+        CMD_SPEED, JOGSLOW, Z_SYN_START, X_SYN_TAPER, ZPOS, ZNEG, \
+        X_SYN_START, Z_SYN_TAPER, XFIND_HOME, XCLEAR_HOME, FIND_PROBE, \
+        CLEAR_PROBE, XPOS, XNEG, FEED_PITCH, FEED_TPI, FEED_METRIC, \
+        FIND_HOME, CLEAR_HOME, PROBE_SET, PROBE_CLR, HOME_ACTIVE, \
+        HOME_SUCCESS, HOME_FAIL, PROBE_SUCCESS, PROBE_FAIL, MV_PAUSE, \
+        MV_ACTIVE, MV_HOME_ACTIVE, MV_XHOME, MV_MEASURE
+    from xRegDef import xRegTable, XNOOP, XLDZCTL, XLDXCTL, XLDTCTL, XLDPCTL, \
+        XLDCFG, XLDDCTL, XLDDREG, XREADREG, XRDSR, XLDPHASE, XLDZFREQ, XLDZD, \
+        XLDZINCR1, XLDZINCR2, XLDZACCEL, XLDZACLCNT, XLDZDIST, XLDZLOC, \
+        XLDXFREQ, XLDXD, XLDXINCR1, XLDXINCR2, XLDXACCEL, XLDXACLCNT, \
+        XLDXDIST, XLDXLOC, XRDZSUM, XRDZXPOS, XRDZYPOS, XRDZACLSUM, XRDZASTP, \
+        XRDXSUM, XRDXXPOS, XRDXYPOS, XRDXACLSUM, XRDXASTP, XRDZDIST, \
+        XRDXDIST, XRDZLOC, XRDXLOC, XRDFREQ, XCLRFREQ, XRDSTATE, XRDPSYN, \
+        XRDTPHS, XLDZLIM, XRDZPOS, XLDTFREQ, XLDTCOUNT, XRDZCTL, XRDXCTL
+    from xBitDef import ZRESET, ZSTART, ZSRC_SYN, ZSRC_FRQ, ZDIR_IN, \
+        ZDIR_POS, ZDIR_NEG, ZSET_LOC, ZBACKLASH, ZWAIT_SYNC, XRESET, XSTART, \
+        XSRC_SYN, XSRC_FRQ, XDIR_IN, XDIR_POS, XDIR_NEG, XSET_LOC, XBACKLASH, \
+        TENA, TZ, TX, PRESET, PLIMIT, PZERO, ZSTEP_POL, ZDIR_POL, XSTEP_POL, \
+        XDIR_POL, ENC_POL, ZPULSE_MULT, DBG_ENA, DBG_SEL, DBG_DIR, DBG_COUNT, \
+        DBG_INIT, DBG_RSYN, DBG_MOVE, S_Z_DONE_INT, S_X_DONE_INT, S_DBG_DONE, \
+        S_Z_START, S_X_START, S_ENC_DIR_IN
+
+
 from configInfo import ConfigInfo
 
 configFile = "config.txt"
 posFile = "posInfo.txt"
 
-from setup import Setup
-setup = Setup()
-(config, configTable) = setup.createConfig(configList)
+if SETUP:
+    from setup import Setup
+    setup = Setup()
+    (config, configTable) = setup.createConfig(configList)
 
 cfg = ConfigInfo(configTable)
 cfg.clrInfo(len(config))
 cfg.readInfo(configFile, config)
 
-cmd = "from setup import "
-for var in setup.configImports:
-    cmd += var + ","
-exec(cmd[:-1])
+if SETUP:
+    cmd = "from setup import "
+    for var in setup.configImports:
+        cmd += var + ","
+    exec(cmd[:-1])
 
 XILINX = cfg.getInitialBoolInfo(cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cfgDRO)
@@ -55,21 +164,22 @@ cfg.clrInfo(len(config))
 cLoc = "../Lathe/include/"
 fData = False
 
-setup.createCommands(cmdList, cLoc, fData)
-setup.createStrings(strList)
-setup.createParameters(parmList, cLoc, fData)
-setup.createCtlBits(regList, cLoc, fData)
-setup.createEnums(enumList, cLoc, fData)
-if XILINX:
-    xLoc = '../../Xilinx/LatheCtl/'
-    setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
-    setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+if SETUP:
+    setup.createCommands(cmdList, cLoc, fData)
+    setup.createStrings(strList)
+    setup.createParameters(parmList, cLoc, fData)
+    setup.createCtlBits(regList, cLoc, fData)
+    setup.createEnums(enumList, cLoc, fData)
+    if XILINX:
+        xLoc = '../../Xilinx/LatheCtl/'
+        setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
+        setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
-importList = setup.importList
-cmd = "from setup import "
-for var in importList:
-    cmd += var + ","
-exec(cmd[:-1])
+    importList = setup.importList
+    cmd = "from setup import "
+    for var in importList:
+        cmd += var + ","
+    exec(cmd[:-1])
 
 from comm import Comm, CommTimeout
 comm = Comm()

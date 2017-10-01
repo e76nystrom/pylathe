@@ -2,9 +2,16 @@ from __future__ import print_function
 from sys import stdout
 from threading import Thread, Lock, Event
 import serial
+SETUP = False
 
-from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
-    LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
+if SETUP:
+    from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
+        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
+else:
+    from parmDef import parmTable
+    from configDef import cfgXilinx
+    from cmdDef import cmdTable,  LOADMULTI, \
+        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
 cmdOverhead = 8
 

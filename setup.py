@@ -8,9 +8,9 @@ class Setup():
     def listImports(self, file, importList):
         line = "from %s import " % (file)
         for i in importList:
-            if len(line) + len(i) > 76:
+            if len(line) + len(i) > 72:
                 print(line + "\\")
-                line = "    "
+                line = "    %s, " % (i)
             else:
                 line += i + ", "
         if line.endswith(", "):
@@ -47,6 +47,14 @@ class Setup():
                 if not f is None:
                     f.write("\n# %s\n\n" % (data))
         if not f is None:
+            f.write("\nconfig = { \\\n")
+            for key in config:
+                f.write("    '%s' : %d,\n" % (key, config[key]))
+            f.write("    }\n")
+            f.write("\nconfigTable = ( \\\n")
+            for val in configTable:
+                f.write("    '%s',\n" % (val))
+            f.write("    )\n")
             self.listImports(file, imports)
             f.close()
         self.importList += imports
@@ -121,13 +129,14 @@ class Setup():
                         # jFile.write("%s/* 0x%02x %s */\n" % 
                         #             (tmp.ljust(32), index, regComment))
                     cmdTable.append((regName, action))
+                    print("%s %d" % (regName, index))
                     if regName in globals():
                         print("createCommands %s already defined" % regName)
                     else:
                         globals()[regName] = index
                         imports.append(regName)
                         if not f is None:
-                            f.write("%s = %3d\n" % (regName.ljust(20), i))
+                            f.write("%s = %3d\n" % (regName.ljust(20), index))
                     index += 1
             else:
                 if fData:
@@ -142,9 +151,10 @@ class Setup():
         if not f is None:
             f.write("\n# command table\n\n")
             f.write("cmdTable = ( \\\n")
-            for i, (regName, action) in enumerate(cmdTable):
+            for index, (regName, action) in enumerate(cmdTable):
+                print("%s %d" % (regName, index))
                 tmp = "    (\"%s\", \"%s\")," % (regName, action)
-                f.write("%s# %3d\n" % (tmp.ljust(40), i))
+                f.write("%s# %3d\n" % (tmp.ljust(40), index))
             f.write("    )\n")
             self.listImports(file, imports)
             f.close()
@@ -235,6 +245,10 @@ class Setup():
                 if not f is None:
                     f.write("\n# %s\n\n" % (data))
         if not f is None:
+            f.write("\nparmTable = ( \\\n")
+            for val in parmTable:
+                f.write("    ('%s', '%s', '%s'),\n" % (val))
+            f.write("    )\n")
             self.listImports(file, imports)
             f.close()
         if fData:
@@ -417,7 +431,7 @@ class Setup():
         if self.file:
             file = 'xRegDef'
             f = open(file + '.py', 'wb')
-            f.write("\nxilinx registers\n\n")
+            f.write("\n# xilinx registers\n\n")
         index = 0
         for i in range(len(xilinxList)):
             data = xilinxList[i]

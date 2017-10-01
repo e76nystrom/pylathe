@@ -3,78 +3,78 @@
 
 # z motion commands
 
-ZMOVEABS             =   1
-ZMOVEREL             =   2
-ZJMOV                =   3
-ZJSPEED              =   4
-ZSTOP                =   5
-ZSETLOC              =   6
+ZMOVEABS             =   0
+ZMOVEREL             =   1
+ZJMOV                =   2
+ZJSPEED              =   3
+ZSTOP                =   4
+ZSETLOC              =   5
 
 # x motion commands
 
-XMOVEABS             =   8
-XMOVEREL             =   9
-XJMOV                =  10
-XJSPEED              =  11
-XSTOP                =  12
-XSETLOC              =  13
-XHOMEAXIS            =  14
+XMOVEABS             =   6
+XMOVEREL             =   7
+XJMOV                =   8
+XJSPEED              =   9
+XSTOP                =  10
+XSETLOC              =  11
+XHOMEAXIS            =  12
 
 # spindle operations
 
-SPINDLE_START        =  16
-SPINDLE_JOG          =  17
-SPINDLE_JOG_SPEED    =  18
-SPINDLE_STOP         =  19
+SPINDLE_START        =  13
+SPINDLE_JOG          =  14
+SPINDLE_JOG_SPEED    =  15
+SPINDLE_STOP         =  16
 
 # end operations
 
-CMD_PAUSE            =  21
-CMD_RESUME           =  22
-CMD_STOP             =  23
-CMD_MEASURE          =  24
+CMD_PAUSE            =  17
+CMD_RESUME           =  18
+CMD_STOP             =  19
+CMD_MEASURE          =  20
 
 # setup operations
 
-CMD_CLEAR            =  26
-CMD_SETUP            =  27
-CMD_SPSETUP          =  28
-CMD_ZSETUP           =  29
-CMD_ZSYNSETUP        =  30
-CMD_ZTAPERSETUP      =  31
-CMD_XSETUP           =  32
-CMD_XSYNSETUP        =  33
-CMD_XTAPERSETUP      =  34
+CMD_CLEAR            =  21
+CMD_SETUP            =  22
+CMD_SPSETUP          =  23
+CMD_ZSETUP           =  24
+CMD_ZSYNSETUP        =  25
+CMD_ZTAPERSETUP      =  26
+CMD_XSETUP           =  27
+CMD_XSYNSETUP        =  28
+CMD_XTAPERSETUP      =  29
 
 # state information
 
-READSTAT             =  36
-READISTATE           =  37
+READSTAT             =  30
+READISTATE           =  31
 
 # load processor and xilinx parameters
 
-LOADVAL              =  39
-LOADMULTI            =  40
-READVAL              =  41
-LOADXREG             =  42
-READXREG             =  43
+LOADVAL              =  32
+LOADMULTI            =  33
+READVAL              =  34
+LOADXREG             =  35
+READXREG             =  36
 
 # move command operations
 
-CLEARQUE             =  45
-QUEMOVE              =  46
-MOVEQUESTATUS        =  47
+CLEARQUE             =  37
+QUEMOVE              =  38
+MOVEQUESTATUS        =  39
 
 # location and debug info
 
-READALL              =  49
-READDBG              =  50
-CLRDBG               =  51
+READALL              =  40
+READDBG              =  41
+CLRDBG               =  42
 
 # encoder commands
 
-ENCSTART             =  53
-ENCSTOP              =  54
+ENCSTART             =  43
+ENCSTOP              =  44
 
 # command table
 
