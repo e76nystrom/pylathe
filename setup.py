@@ -8,6 +8,9 @@ class Setup():
     def open(self, fileName):
         self.file = open(fileName, "w")
 
+    def close(self):
+        sefl.file.close()
+
     def createConfig(self, configList):
         global config, configTable
         config = {}
