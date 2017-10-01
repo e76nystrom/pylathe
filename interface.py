@@ -905,9 +905,11 @@ if __name__ == '__main__':
 
     print("creating interface files")
     setup = Setup()
+    setup.open("latheInterface.py")
     setup.createCommands(cmdList, cLoc, fData)
     setup.createParameters(parmList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
     setup.createEnums(enumList, cLoc, fData)
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
     setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+    setup.close()
