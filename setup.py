@@ -3,6 +3,10 @@ from sys import stdout
 class Setup():
     def __init__(self):
         self.importList = []
+        self.file = None
+
+    def open(self, fileName):
+        self.file = open(fileName, "w")
 
     def createConfig(self, configList):
         global config, configTable
@@ -11,6 +15,9 @@ class Setup():
         imports = []
         imports.append("config")
         imports.append("configTable")
+        f = self.file
+        if not self.f is None:
+            f.write("# configtable\n\n")
         for i, (name, comment) in enumerate(configList):
             config[name] = i
             if name in globals():
@@ -19,6 +26,9 @@ class Setup():
                 globals()[name] = i
                 imports.append(name)
                 configTable.append(name)
+                if not f is None:
+                    tmp = "%s = %2d" % (name, i)
+                    f.write("%s # %s\n" % (tmp.ljust(32), comment))
         self.configImports = imports
         self.importList += imports
         self.config = config
