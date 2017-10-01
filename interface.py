@@ -2,6 +2,8 @@
 
 configList = \
 ( \
+  "system config",
+  
     ('cfgCmdDis', 'config disable sending commands'),
     ('cfgDbgSave', 'config save debug info'),
     ('cfgDRO', 'config dro present'),
@@ -19,8 +21,12 @@ configList = \
     ('cfgXFreq', 'config xilinx frequency'),
     ('cfgXilinx', 'config xilinx interface present'),
 
+  "communications config",
+
     ('commPort', 'comm port'),
     ('commRate', 'comm baud rate'),
+
+  "cutoff config",
 
     ('cuPause', 'cutoff pause before cutting'),
     ('cuRPM', 'cutoff rpm'),
@@ -33,8 +39,12 @@ configList = \
     ('cuZRetract', 'cutoff offset to z retract'),
     ('cuZStart', 'cutoff z location'),
 
+  "dro position",
+
     ('droXPos', 'dro x position '),
     ('droZPos', 'dro z position '),
+
+  "face config",
 
     ('faAddFeed', 'face '),
     ('faPasses', 'face '),
@@ -51,12 +61,18 @@ configList = \
     ('faZRetract', 'face '),
     ('faZStart', 'face '),
 
+  "jog config",
+
     ('jogInc', 'jog '),
     ('jogXPos', 'jog '),
     ('jogXPosDiam', 'jog '),
     ('jogZPos', 'jog '),
 
+  "main panel",
+
     ('mainPanel', 'name of main panel'),
+
+  "spindle config",
 
     ('spAccel', 'spindle acceleration'),
     ('spAccelTime', 'spindle accelerationtime'),
@@ -70,6 +86,8 @@ configList = \
     ('spMotorSteps', 'spindle motor stpes per revolution'),
     ('spStepDrive', 'spindle stepper drive'),
     ('spTestIndex', 'spindle test generate internal index pulse'),
+
+  "threading config",
 
     ('thAddFeed', 'thread '),
     ('thAlternate', 'thread '),
@@ -97,6 +115,8 @@ configList = \
     ('thZRetract', 'thread '),
     ('thZStart', 'thread '),
 
+  "taper config",
+
     ('tpAddFeed', 'tp '),
     ('tpAngle', 'tp '),
     ('tpAngleBtn', 'tp '),
@@ -122,6 +142,8 @@ configList = \
     ('tpZLength', 'tp '),
     ('tpZRetract', 'tp '),
     ('tpZStart', 'tp '),
+
+  "turn config",
   
     ('tuAddFeed', 'turn '),
     ('tuPasses', 'turn '),
@@ -137,6 +159,8 @@ configList = \
     ('tuZFeed', 'turn '),
     ('tuZRetract', 'turn '),
     ('tuZStart', 'turn '),
+
+  "x axis config",
 
     ('xAccel', 'turn '),
     ('xBacklash', 'turn '),
@@ -164,10 +188,14 @@ configList = \
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
 
+  "x axis position config",
+
     ('xSvPosition', 'z axis '),
     ('xSvHomeOffset', 'z axis '),
     ('xSvDROPosition', 'x axis '),
     ('xSvDROOffset', 'x axis '),
+
+  "z axis config",
 
     ('zAccel', 'z axis '),
     ('zBacklash', 'z axis '),
@@ -188,6 +216,8 @@ configList = \
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
+
+  "z axis position config",
 
     ('zSvPosition', 'z axis '),
     ('zSvHomeOffset', 'z axis '),
@@ -905,11 +935,12 @@ if __name__ == '__main__':
 
     print("creating interface files")
     setup = Setup()
-    setup.open("latheInterface.py")
+    setup.file = True
+    setup.createConfig(configList)
+    setup.createStrings(strList)
     setup.createCommands(cmdList, cLoc, fData)
     setup.createParameters(parmList, cLoc, fData)
-    setup.createCtlBits(regList, cLoc, fData)
     setup.createEnums(enumList, cLoc, fData)
+    setup.createCtlBits(regList, cLoc, fData)
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
     setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
-    setup.close()
