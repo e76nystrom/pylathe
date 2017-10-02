@@ -205,6 +205,14 @@ class FormRoutines():
                 else:
                     self.addField(sizer, label, index)
 
+    def getConfigList(self):
+        if self.configList == None:
+            self.configList = []
+            for i, (name) in enumerate(cf.configTable):
+                if name.startswith(self.prefix):
+                    self.configList.append(i)
+        return(self.configList)
+
     def addFieldText(self, sizer, label, key, keyText):
         if len(label) != 0:
             txt = wx.StaticText(self, -1, label)
@@ -622,18 +630,18 @@ class MoveCommands():
 
     def queZSetup(self, feed):
         self.queMove(en.Z_FEED_SETUP, feed)
-        self.saveZOffset();
-        self.saveXOffset();
+        self.saveZOffset()
+        self.saveXOffset()
 
     def queXSetup(self, feed):
         self.queMove(en.X_FEED_SETUP, feed)
-        self.saveZOffset();
-        self.saveXOffset();
+        self.saveZOffset()
+        self.saveXOffset()
 
     def startSpindle(self, rpm):
         self.queMove(en.START_SPINDLE, rpm)
-        self.saveZOffset();
-        self.saveXOffset();
+        self.saveZOffset()
+        self.saveXOffset()
 
     def stopSpindle(self):
         self.queMove(en.STOP_SPINDLE, 0)
@@ -744,7 +752,7 @@ class MoveCommands():
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
     try:
-        comm.command(cm.CLRDBG);
+        comm.command(cm.CLRDBG)
         comm.command(cm.CMD_CLEAR)
     except CommTimeout:
         commTimeout()
@@ -1081,7 +1089,7 @@ class Turn(UpdatePass):
 
         self.m.moveX(self.xStart + self.xRetract)
         if STEP_DRV:
-            self.m.stopSpindle();
+            self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
@@ -1167,6 +1175,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
+        self.prefix = 'tu'
         self.formatList = ((cf.tuAddFeed, 'f'), \
                            (cf.tuPasses, 'd'), \
                            (cf.tuPause, None), \
@@ -1242,14 +1251,6 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
-
-    def getConfigList(self):
-        if self.configList == None:
-            self.configList = []
-            for i, (name) in enumerate(cf.configTable):
-                if name.startswith('tu'):
-                    self.configList.append(i)
-        return(self.configList)
 
     def update(self):
         self.formatData(self.formatList)
@@ -1409,6 +1410,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
+        self.prefix = 'fa'
         self.formatList = ((cf.faAddFeed, 'f'), \
                            (cf.faPasses, 'd'), \
                            (cf.faPause, None), \
@@ -1484,14 +1486,6 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
-
-    def getConfigList(self):
-        if self.configList == None:
-            self.configList = []
-            for i, (name) in enumerate(cf.configTable):
-                if name.startswith('fa'):
-                    self.configList.append(i)
-        return(self.configList)
 
     def update(self):
         self.formatData(self.formatList)
@@ -1591,6 +1585,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
+        self.prefix = 'cf'
         self.formatList = ((cf.cuPause, None), \
                            (cf.cuRPM, 'd'), \
                            (cf.cuToolWidth, 'f'), \
@@ -1650,14 +1645,6 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
-
-    def getConfigList(self):
-        if self.configList == None:
-            self.configList = []
-            for i, (name) in enumerate(cf.configTable):
-                if name.startswith('cu'):
-                    self.configList.append(i)
-        return(self.configList)
 
     def update(self):
         self.formatData(self.formatList)
@@ -1880,7 +1867,7 @@ class Taper(UpdatePass):
                 self.m.moveZ(self.startZ)
             else:
                 pass
-            self.m.stopSpindle();
+            self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -1918,7 +1905,7 @@ class Taper(UpdatePass):
         self.m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
-        self.m.stopSpindle();
+        self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
@@ -1973,7 +1960,7 @@ class Taper(UpdatePass):
             self.internalPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.safeZ)
-            self.m.stopSpindle();
+            self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -2004,6 +1991,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.m = moveCommands
+        self.prefix = 'tp'
         self.formatList = ((cf.tpAddFeed, 'f'), \
                            (cf.tpAngle, 'fs'), \
                            (cf.tpAngleBtn, None), \
@@ -2138,14 +2126,6 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
-
-    def getConfigList(self):
-        if self.configList == None:
-            self.configList = []
-            for i, (name) in enumerate(cf.configTable):
-                if name.startswith('ta'):
-                    self.configList.append(i)
-        return(self.configList)
 
     def update(self):
         self.updateUI()
@@ -2391,7 +2371,7 @@ class ScrewThread(UpdatePass):
 
         self.drawClose()
         self.m.drawClose()
-        self.m.stopSpindle();
+        self.m.stopSpindle()
         self.m.done(1)
         stdout.flush()
 
@@ -2484,7 +2464,7 @@ class ScrewThread(UpdatePass):
         self.calculatePass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass()
-        self.m.stopSpindle();
+        self.m.stopSpindle()
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
         jogPanel.setStatus(st.STR_NO_ADD)
@@ -2498,6 +2478,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         ActionRoutines.__init__(self, self.control)
         self.InitUI()
         self.configList = None
+        self.prefix = 'th'
         self.formatList =  ((cf.thAddFeed, 'f'), \
                             (cf.thAlternate, None), \
                             (cf.thAngle, 'fs'), \
@@ -2627,14 +2608,6 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
-
-    def getConfigList(self):
-        if self.configList == None:
-            self.configList = []
-            for i, (name) in enumerate(cf.configTable):
-                if name.startswith('th'):
-                    self.configList.append(i)
-        return(self.configList)
 
     def update(self):
         self.formatData(self.formatList)
@@ -3345,7 +3318,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.xDown(wx.WXK_UP)
 
     def OnCombo(self, e):
-        val = self.combo.GetValue();
+        val = self.combo.GetValue()
         print("combo val %s" % (val))
         try:
             val = float(val)
@@ -3558,7 +3531,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if mvStatus & ct.MV_PAUSE:
                 text  += 'P'
             if mvStatus & ct.MV_ACTIVE:
-                text += 'A';
+                text += 'A'
             self.statusText.SetLabel(text)
 
             if self.xHome:
@@ -3979,7 +3952,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         moveCommands.queClear()
         comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
         comm.queParm(pm.Z_PROBE_SPEED, cfg.getInfoData(cf.zProbeSpeed))
-        comm.queParm(pm.Z_HOME_STATUS, '0');
+        comm.queParm(pm.Z_HOME_STATUS, '0')
         comm.sendMulti()
         moveCommands.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
@@ -3991,7 +3964,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         moveCommands.queClear()
         comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
         comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-        comm.queParm(pm.X_HOME_STATUS, '0');
+        comm.queParm(pm.X_HOME_STATUS, '0')
         comm.sendMulti()
         moveCommands.probeX(getFloatVal(self.probeDist))
         self.Show(False)
@@ -4100,7 +4073,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
                             jogPanel.xStepsInch
             except (ValueError, TypeError):
                 xDiameter = 0.0
-            self.curXPos.SetValue("%0.4f" % (xDiameter));
+            self.curXPos.SetValue("%0.4f" % (xDiameter))
             self.actualXPos.SetFocus()
             self.actualXPos.SetSelection(-1, -1)
 
@@ -5304,18 +5277,18 @@ class SpindleTest():
 
         f = open('spindle.txt','w')
 
-        dbgPrt(txt,"minRPM %d maxRPM %d", (minRPM, maxRPM))
+        dbgPrt(txt, "minRPM %d maxRPM %d", (minRPM, maxRPM))
 
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
         spindleMotorSteps = cfg.getIntInfoData(cf.spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
+        dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
-        dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us " +
+        dbgPrt(txt, "spindleClocksStep %d spindleClockPeriod %6.3f us " +
                "spindleClocksRev %d",
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
 
@@ -5324,7 +5297,7 @@ class SpindleTest():
         sStepsSecMin = float(minRPM * spindleStepsRev) / 60
         sStepsSecMax = float(maxRPM * spindleStepsRev) / 60
         deltaV = sStepsSecMax - sStepsSecMin
-        dbgPrt(txt,"deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f", \
+        dbgPrt(txt, "deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f", \
                (deltaV, sStepsSecMin, sStepsSecMax))
         if False:
             accelStepsSec2 = deltaV / aTime
@@ -5333,38 +5306,38 @@ class SpindleTest():
             accelStepsSec2 = (accel / 60) * spindleStepsRev
             aTime = deltaV / accelStepsSec2
 
-        dbgPrt(txt,"accel %0.1f rpm per sec", (accel))
+        dbgPrt(txt, "accel %0.1f rpm per sec", (accel))
 
         accelMinTime = sStepsSecMin / accelStepsSec2
         accelMaxTime = sStepsSecMax / accelStepsSec2
-        dbgPrt(txt,"accelMinTime %5.5f accelMaxTime %5.2f", \
+        dbgPrt(txt, "accelMinTime %5.5f accelMaxTime %5.2f", \
                (accelMinTime, accelMaxTime))
 
         accelMinSteps = int((sStepsSecMin * accelMinTime) / 2.0 + 0.5)
         accelMaxSteps = int((sStepsSecMax * accelMaxTime) / 2.0 + 0.5)
-        dbgPrt(txt,"accelMinSteps %d accelMaxSteps %d ", \
+        dbgPrt(txt, "accelMinSteps %d accelMaxSteps %d ", \
                (accelMinSteps, accelMaxSteps))
 
         accelTime = deltaV / accelStepsSec2
         accelSteps = accelMaxSteps - accelMinSteps
-        accelClocks = accelTime * fcy;
-        dbgPrt(txt,"accelStepsSec2 %0.1f accelTime %5.3f accelSteps %d "\
+        accelClocks = accelTime * fcy
+        dbgPrt(txt, "accelStepsSec2 %0.1f accelTime %5.3f accelSteps %d "\
                "accelClocks %d", \
                (accelStepsSec2, accelTime, accelSteps, accelClocks))
 
         accelRev = float(accelSteps) / spindleStepsRev
-        dbgPrt(txt,"accelRev %5.3f", (accelRev))
+        dbgPrt(txt, "accelRev %5.3f", (accelRev))
 
         cFactorA = (fcy * sqrt(2)) / sqrt(accelStepsSec2)
         cFactorB = spindleClocksStep / (sqrt(accelMaxSteps) -
                                         sqrt(accelMaxSteps - 1))
-        dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
+        dbgPrt(txt, "cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
         cFactor = cFactorB
 
         lastCount = int(cFactor * sqrt(accelMinSteps))
         lastTime = float(lastCount) / fcy
 
-        dbgPrt(txt,"accelMinSteps %d lastCount %d lastTime %0.6f", \
+        dbgPrt(txt, "accelMinSteps %d lastCount %d lastTime %0.6f", \
                (accelMinSteps, lastCount, lastTime))
 
         f.write("\n")
@@ -5401,10 +5374,10 @@ class SpindleTest():
 
         finalCount = int(cFactor * sqrt(accelMaxSteps))
         finalCount -= int(cFactor * sqrt(accelMaxSteps - 1))
-        dbgPrt(txt,"finalCount %d lastCtr %d spindleClocksStep %d", \
+        dbgPrt(txt, "finalCount %d lastCtr %d spindleClocksStep %d", \
                (finalCount, ctr, spindleClocksStep))
 
-        f.write("\n***\n\n");
+        f.write("\n***\n\n")
 
         while step > accelMinSteps:
             step -= 1
@@ -5458,13 +5431,13 @@ class SyncTest(object):
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
         spindleMotorSteps = cfg.getIntInfoData(cf.spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
+        dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
-        dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us "\
+        dbgPrt(txt, "spindleClocksStep %d spindleClockPeriod %6.3f us "\
                "spindleClocksRev %d", \
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
@@ -5481,7 +5454,7 @@ class SyncTest(object):
             motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
-        dbgPrt(txt,"zStepsInch %d", (zStepsInch))
+        dbgPrt(txt, "zStepsInch %d", (zStepsInch))
 
         if arg1 >= 8:
             inch = True
@@ -5489,7 +5462,7 @@ class SyncTest(object):
             tpi = arg1
         else:
             inch = False
-            pitch = arg1;
+            pitch = arg1
             if pitch < .3:
                 inchPitch = True
 
@@ -5498,7 +5471,7 @@ class SyncTest(object):
             if revCycle > 20:
                 revCycle = 20
             cycleDist = revCycle * pitch
-            dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f", \
+            dbgPrt(txt, "pitch %5.3f revCycle %d cycleDist %5.3f", \
                    (pitch, revCycle, cycleDist))
             clocksCycle = spindleClocksRev * revCycle
             spindleStepsCycle = spindleStepsRev * revCycle
@@ -5508,24 +5481,24 @@ class SyncTest(object):
             spindleStepsCycle = spindleStepsRev * tpi
             zStepsCycle = zStepsInch
             pitch = 1.0 / tpi
-            dbgPrt(txt,"tpi %d pitch %5.3f", (tpi, pitch))
+            dbgPrt(txt, "tpi %d pitch %5.3f", (tpi, pitch))
         else:
             revolutions = 127
             inches = (pitch * revolutions) / 25.4
-            dbgPrt(txt,"pitch %4.2f mm inches %5.3f", (pitch, inches))
+            dbgPrt(txt, "pitch %4.2f mm inches %5.3f", (pitch, inches))
 
             clocksCycle = spindleClocksRev * revolutions
             spindleStepsCycle = spindleStepsRev * revolutions
             zStepsCycle = zStepsInch * inches
 
         cycleTime = float(clocksCycle) / fcy
-        dbgPrt(txt,"clocksCycle %d cycleTime %4.2f\nspindleStepsCycle %d "\
+        dbgPrt(txt, "clocksCycle %d cycleTime %4.2f\nspindleStepsCycle %d "\
                "zStepsCycle %d", \
                (clocksCycle, cycleTime, spindleStepsCycle, zStepsCycle))
 
         zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
-        dbgPrt(txt,"zClocksStep %d remainder %d", \
+        dbgPrt(txt, "zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
         dx = zStepsCycle
@@ -5533,7 +5506,7 @@ class SyncTest(object):
         incr1 = 2 * dy
         incr2 = incr1 - 2 * dx
         d = incr1 - dx
-        dbgPrt(txt,"incr1 %d incr2 %d d %d", (incr1, incr2, d))
+        dbgPrt(txt, "incr1 %d incr2 %d d %d", (incr1, incr2, d))
 
         sum = d
         x = 0
@@ -5548,35 +5521,35 @@ class SyncTest(object):
                 y += 1
                 sum += incr2
                 clocks += 1
-        dbgPrt(txt,"clocks %d x %d y %d", (clocks, x, y))
+        dbgPrt(txt, "clocks %d x %d y %d", (clocks, x, y))
 
-        dbgPrt(txt,"", ())
+        dbgPrt(txt, "", ())
 
         zSpeedIPM = pitch * maxRPM
         zStepsPerSec = int((zSpeedIPM * zStepsInch) / 60)
-        dbgPrt(txt,"zSpeedIPM %4.2f in/min zStepsSec %d steps/sec", \
+        dbgPrt(txt, "zSpeedIPM %4.2f in/min zStepsSec %d steps/sec", \
                (zSpeedIPM, zStepsPerSec))
 
         zAccel = .5                      # acceleration in per sec^2
         zAccelTime = ((zSpeedIPM / 60.0) / zAccel) # acceleration time
-        dbgPrt(txt,"zAccel %5.3f in/sec^2 zAccelTime %8.6f sec", \
+        dbgPrt(txt, "zAccel %5.3f in/sec^2 zAccelTime %8.6f sec", \
                (zAccel, zAccelTime))
 
         zAccelStepsSec2 = zAccel * zStepsInch
-        dbgPrt(txt,"zAccelStepsSec2 %3.0f steps/sec^2", (zAccelStepsSec2))
+        dbgPrt(txt, "zAccelStepsSec2 %3.0f steps/sec^2", (zAccelStepsSec2))
 
         zAccelSteps = int((zAccelTime * zStepsPerSec) / 2.0)
         if zAccelSteps != 0:
             cFactorA = (fcy * sqrt(2)) / sqrt(zAccelStepsSec2)
             cFactorB = zClocksStep / (sqrt(zAccelSteps) -
                                       sqrt(zAccelSteps - 1))
-            dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
+            dbgPrt(txt, "cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
             cFactor1 = cFactorB
 
             zAccelClocks = int(cFactor1 * sqrt(zAccelSteps))
             zAccelTime = float(zAccelClocks) / fcy
             zAccelDist = float(zAccelSteps) / zStepsInch
-            dbgPrt(txt,"zAccelTime %8.6f zAccelSteps %d zAccelClocks %d "\
+            dbgPrt(txt, "zAccelTime %8.6f zAccelSteps %d zAccelClocks %d "\
                    "zAccelDist %5.3f", \
                    (zAccelTime, zAccelSteps, zAccelClocks, zAccelDist))
 
@@ -5586,22 +5559,22 @@ class SyncTest(object):
 
             isrCount = finalCount + initialCount
 
-            dbgPrt(txt,"initialCount %d initialTime %8.6f accelTime %8.6f "\
+            dbgPrt(txt, "initialCount %d initialTime %8.6f accelTime %8.6f "\
                    "hwTime %8.6f", \
                    (initialCount, float(initialCount) / fcy, \
                     float(finalCount) / fcy, float(isrCount) / fcy))
 
             zAccelSpindleSteps = int(isrCount / spindleClocksStep)
             remainder = isrCount - zAccelSpindleSteps * spindleClocksStep
-            dbgPrt(txt,"zAccelSpindleSteps %d remainder %d", \
+            dbgPrt(txt, "zAccelSpindleSteps %d remainder %d", \
                    (zAccelSpindleSteps, remainder))
 
-            f.write("\n");
+            f.write("\n")
 
             lastCount = 0
             lastTime = 0
             lastCtr = 0
-            # dbgPrt(txt,"lastCount %d lastTime %0.6f" % (lastCount, lastTime)
+            # dbgPrt(txt, "lastCount %d lastTime %0.6f" % (lastCount, lastTime)
             for step in range(1, zAccelSteps + 1):
                 count = int(cFactor1 * sqrt(step))
                 ctr = count - lastCount
@@ -5617,17 +5590,17 @@ class SyncTest(object):
                 lastCtr = ctr
                 lastTime = time
 
-            f.write("\n");
+            f.write("\n")
 
             # countRemainder = zAccelClocks - lastCount
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
-            # dbgPrt(txt,"lastCount %d countRemainder %d div %d rem %d" % \
+            # dbgPrt(txt, "lastCount %d countRemainder %d div %d rem %d" % \
             #        (lastCount, countRemainder, div, rem))
 
             lastCount1 = int(cFactor1 * sqrt(zAccelSteps))
             lastTime1 = time = float(count) / fcy
-            dbgPrt(txt,"lastCount1 %d lastTime1 %0.6f", \
+            dbgPrt(txt, "lastCount1 %d lastTime1 %0.6f", \
                    (lastCount1, lastTime1))
 
             # spindleSteps = lastCount1 / spindleClocksStep
@@ -5636,12 +5609,12 @@ class SyncTest(object):
 
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
-            # dbgPrt(txt,"spindleSteps %d lastCount %d countRemainder %d div "\
+            # dbgPrt(txt, "spindleSteps %d lastCount %d countRemainder %d div "\
             #"%d rem %d", \
             #        (spindleSteps, lastCount, countRemainder, div, rem))
 
             finalCount -= int(cFactor1 * sqrt(zAccelSteps - 1))
-            dbgPrt(txt,"finalCount %d lastCtr %d zClocksStep %d", \
+            dbgPrt(txt, "finalCount %d lastCtr %d zClocksStep %d", \
                    (finalCount, lastCtr, zClocksStep))
 
         f.close()
@@ -5661,13 +5634,13 @@ class TaperTest(object):
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
         spindleMotorSteps = cfg.getIntInfoData(cf.spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
-        dbgPrt(txt,"spindleStepsRev %d", (spindleStepsRev))
+        dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
         spindleClocksRev = spindleStepsRev * spindleClocksStep
-        dbgPrt(txt,"spindleClocksStep %d spindleClockPeriod %6.3f us "\
+        dbgPrt(txt, "spindleClocksStep %d spindleClockPeriod %6.3f us "\
                "spindleClocksRev %d", \
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
@@ -5678,21 +5651,21 @@ class TaperTest(object):
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
-        dbgPrt(txt,"zStepsInch %d", (zStepsInch))
+        dbgPrt(txt, "zStepsInch %d", (zStepsInch))
 
         pitch = cfg.getFloatInfoData(cf.xPitch)
         microSteps = cfg.getFloatInfoData(cf.xMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.xMotorSteps)
         motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
         xStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
-        dbgPrt(txt,"xStepsInch %d", (xStepsInch))
+        dbgPrt(txt, "xStepsInch %d", (xStepsInch))
 
         pitch = cfg.getFloatInfoData(cf.tpZFeed)
         revCycle = int(1.0 / pitch + 0.5)
         if revCycle > 20:
             revCycle = 20
         cycleDist = revCycle * pitch
-        dbgPrt(txt,"pitch %5.3f revCycle %d cycleDist %5.3f", \
+        dbgPrt(txt, "pitch %5.3f revCycle %d cycleDist %5.3f", \
                (pitch, revCycle, cycleDist))
         clocksCycle = spindleClocksRev * revCycle
         spindleStepsCycle = spindleStepsRev * revCycle
@@ -5700,7 +5673,7 @@ class TaperTest(object):
 
         zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
-        dbgPrt(txt,"zClocksStep %d remainder %d", \
+        dbgPrt(txt, "zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
 
         arg2 = cfg.getFloatInfoData(cf.tpZDelta)
@@ -5711,32 +5684,32 @@ class TaperTest(object):
 
         zCycleDist = float(zStepsCycle) / zStepsInch
         xCycleDist = (d1 / d0) * zCycleDist
-        dbgPrt(txt,"zCycleDist %5.3f xCycleDist %5.3f", \
+        dbgPrt(txt, "zCycleDist %5.3f xCycleDist %5.3f", \
                (zCycleDist, xCycleDist))
 
         d0Steps = int(zCycleDist * zStepsInch)
         d1Steps = int(xCycleDist * xStepsInch)
         d0Clocks = d0Steps * zClocksStep
-        dbgPrt(txt,"d0Steps %d d1Steps %d d0Clocks %d", \
-               (d0Steps, d1Steps, d0Clocks));
+        dbgPrt(txt, "d0Steps %d d1Steps %d d0Clocks %d", \
+               (d0Steps, d1Steps, d0Clocks))
 
         # d1ClocksStep = int(d0Clocks / d1Steps)
         # d1Remainder = d0Clocks - d1Steps * d1ClocksStep
-        # dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
+        # dbgPrt(txt, "d1ClocksStep %d d1Remainder %d", \
         #        (d1ClocksStep, d1Remainder))
 
         d1ClocksStep = int(clocksCycle / d1Steps)
         d1Remainder = clocksCycle - d1Steps * d1ClocksStep
-        dbgPrt(txt,"d1ClocksStep %d d1Remainder %d", \
+        dbgPrt(txt, "d1ClocksStep %d d1Remainder %d", \
                (d1ClocksStep, d1Remainder))
 
-        dx = d1Steps;
-        dy = d1Remainder;
-        incr1 = 2 * dy;
-        incr2 = incr1 - 2 * dx;
-        d = incr1 - dx;
-        dbgPrt(txt,"incr1 %d incr2 %d d %d", \
-               (incr1, incr2, d));
+        dx = d1Steps
+        dy = d1Remainder
+        incr1 = 2 * dy
+        incr2 = incr1 - 2 * dx
+        d = incr1 - dx
+        dbgPrt(txt, "incr1 %d incr2 %d d %d", \
+               (incr1, incr2, d))
 
         f.close()
 
@@ -5758,52 +5731,52 @@ class MoveTest(object):
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
-        dbgPrt(txt,"zStepsInch %d", (zStepsInch))
+        dbgPrt(txt, "zStepsInch %d", (zStepsInch))
 
         minSpeed = cfg.getFloatInfoData(cf.zMinSpeed) # minimum speed ipm
         maxSpeed = cfg.getFloatInfoData(cf.zMaxSpeed) # maximum speed ipm
         zMoveAccelTime = cfg.getFloatInfoData(cf.zAccel) # accel time seconds
-        dbgPrt(txt,"zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
+        dbgPrt(txt, "zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
                (minSpeed, maxSpeed, zMoveAccelTime))
 
         zMStepsSec = int((maxSpeed * zStepsInch) / 60.0)
         zMClocksStep = int(fcy / zMStepsSec)
-        dbgPrt(txt,"zMStepsSec %d zMClocksStep %d", (zMStepsSec, zMClocksStep))
+        dbgPrt(txt, "zMStepsSec %d zMClocksStep %d", (zMStepsSec, zMClocksStep))
 
         zMinStepsSec = int((zStepsInch * minSpeed) / 60.0)
         zMaxStepsSec = int((zStepsInch * maxSpeed) / 60.0)
-        dbgPrt(txt,"zMinStepsSec %d zMaxStepsSec %d", \
+        dbgPrt(txt, "zMinStepsSec %d zMaxStepsSec %d", \
                (zMinStepsSec, zMaxStepsSec))
 
         zMDeltaV = zMaxStepsSec - zMinStepsSec
         zMAccelStepsSec2 = zMDeltaV / zMoveAccelTime
-        dbgPrt(txt,"zMDeltaV %d zMAccelStepsSec2 %6.3f", \
+        dbgPrt(txt, "zMDeltaV %d zMAccelStepsSec2 %6.3f", \
                (zMDeltaV, zMAccelStepsSec2))
 
         if zMAccelStepsSec2 != 0:
             zMAccelMinTime = zMinStepsSec / zMAccelStepsSec2
             zMAccelMaxTime = zMaxStepsSec / zMAccelStepsSec2
-            dbgPrt(txt,"zMAccelMinTime %d zMAccelMaxTime %d", \
+            dbgPrt(txt, "zMAccelMinTime %d zMAccelMaxTime %d", \
                    (zMAccelMinTime, zMAccelMaxTime))
 
             zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
             zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
-            dbgPrt(txt,"zMAccelMinSteps %d zMAccelMaxSteps %d", \
+            dbgPrt(txt, "zMAccelMinSteps %d zMAccelMaxSteps %d", \
                    (zMAccelMinSteps, zMAccelMaxSteps))
 
             zMAccelTime = zMDeltaV / zMAccelStepsSec2
             zMAccelSteps = zMAccelMaxSteps - zMAccelMinSteps
             zMAccelClocks = int(zMAccelTime * fcy)
-            dbgPrt(txt,"zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d", \
+            dbgPrt(txt, "zMAccelTime %5.3f zMAccelSteps %d zMAccelClocks %d", \
                    (zMAccelTime, zMAccelSteps, zMAccelClocks))
 
             zMAccelDist = float(zMAccelSteps) / zStepsInch
-            dbgPrt(txt,"zMAccelDist %5.3f", (zMAccelDist))
+            dbgPrt(txt, "zMAccelDist %5.3f", (zMAccelDist))
 
             cFactorA = (fcy * sqrt(2)) / sqrt(zMAccelStepsSec2)
             cFactorB = zMClocksStep / (sqrt(zMAccelSteps) -
                                        sqrt(zMAccelSteps - 1))
-            dbgPrt(txt,"cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
+            dbgPrt(txt, "cFactorA %0.2f cFactorB %0.2f", (cFactorA, cFactorB))
             zMCFactor = cFactorB
 
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
@@ -5833,10 +5806,10 @@ class MoveTest(object):
 
             finalCount = int(zMCFactor * (sqrt(zMAccelSteps) -
                                           sqrt(zMAccelSteps - 1)))
-            dbgPrt(txt,"finalCount %d lastCtr %d zMClocksStep %d", \
+            dbgPrt(txt, "finalCount %d lastCtr %d zMClocksStep %d", \
                    (finalCount, ctr, zMClocksStep))
 
-            f.write("\n***\n\n");
+            f.write("\n***\n\n")
 
             while step > zMAccelMinSteps:
                 step -= 1
@@ -5866,7 +5839,7 @@ while True:
         break
     tmp = sys.argv[n]
     # if len(tmp) != 0 and tmp[0].isdigit():
-    #     break;
+    #     break
     tmp = tmp.lower()
     if tmp == 'xhomed':
         xHomed = True
