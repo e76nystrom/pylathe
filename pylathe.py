@@ -2479,31 +2479,31 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.prefix = 'th'
-        self.formatList =  ((cf.thAddFeed, 'f'), \
-                            (cf.thAlternate, None), \
-                            (cf.thAngle, 'fs'), \
-                            (cf.thExitRev, 'fs'), \
-                            (cf.thFirstFeed, 'f'), \
-                            (cf.thFirstFeedBtn, None), \
-                            (cf.thHFactor, 'f'), \
-                            (cf.thInternal, None), \
-                            (cf.thLastFeed, 'f'), \
-                            (cf.thLastFeedBtn, None), \
-                            (cf.thMM, None), \
-                            (cf.thPasses, 'd'), \
-                            (cf.thPause, None), \
-                            (cf.thPitch, 'fs'), \
-                            (cf.thRPM, 'd'), \
-                            (cf.thSPInt, 'n'), \
-                            (cf.thSpring, 'n'), \
-                            (cf.thTPI, None), \
-                            (cf.thXDepth, 'f'), \
-                            (cf.thXRetract, 'f'), \
-                            (cf.thXStart, 'f'), \
-                            (cf.thXTaper, 'f'), \
-                            (cf.thZEnd, 'f'), \
-                            (cf.thZRetract, 'f'), \
-                            (cf.thZStart, 'f'))
+        self.formatList = ((cf.thAddFeed, 'f'), \
+                           (cf.thAlternate, None), \
+                           (cf.thAngle, 'fs'), \
+                           (cf.thExitRev, 'fs'), \
+                           (cf.thFirstFeed, 'f'), \
+                           (cf.thFirstFeedBtn, None), \
+                           (cf.thHFactor, 'f'), \
+                           (cf.thInternal, None), \
+                           (cf.thLastFeed, 'f'), \
+                           (cf.thLastFeedBtn, None), \
+                           (cf.thMM, None), \
+                           (cf.thPasses, 'd'), \
+                           (cf.thPause, None), \
+                           (cf.thPitch, 'fs'), \
+                           (cf.thRPM, 'd'), \
+                           (cf.thSPInt, 'n'), \
+                           (cf.thSpring, 'n'), \
+                           (cf.thTPI, None), \
+                           (cf.thXDepth, 'f'), \
+                           (cf.thXRetract, 'f'), \
+                           (cf.thXStart, 'f'), \
+                           (cf.thXTaper, 'f'), \
+                           (cf.thZEnd, 'f'), \
+                           (cf.thZRetract, 'f'), \
+                           (cf.thZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2624,7 +2624,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.lastFeedBtn.GetValue():
             self.lastFeed.SetEditable(True)
             self.firstFeed.SetEditable(False)
-            
+
     def OnInternal(self, e):
         pass
 
@@ -2633,7 +2633,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def OnLastFeed(self, e):
         self.updateLastFeed()
-    
+
     def sendData(self):
         moveCommands.queClear()
         sendClear()
@@ -2786,7 +2786,7 @@ class JogShuttle():
         speed = jogShuttle.zSpeed[index]
         if val < 0:
             speed = -speed
-        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or
+        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or \
             (jogShuttle.zCurSpeed <= 0 and speed <= 0)):
             jogShuttle.zCurSpeed = speed
             try:
@@ -2811,7 +2811,7 @@ class JogShuttle():
         speed = jogShuttle.xSpeed[index]
         if val > 0:
             speed = -speed
-        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or
+        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or \
             (jogShuttle.xCurSpeed <= 0 and speed <= 0)):
             jogShuttle.xCurSpeed = speed
             try:
@@ -2836,7 +2836,7 @@ class JogShuttle():
         speed = jogShuttle.spindleSpeed[index]
         if val < 0:
             speed = -speed
-        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or
+        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or \
             (jogShuttle.spindleCurSpeed <= 0 and speed <= 0)):
             jogShuttle.spindleCurSpeed = speed
             try:
