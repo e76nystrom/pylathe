@@ -129,7 +129,6 @@ class Setup():
                         # jFile.write("%s/* 0x%02x %s */\n" % 
                         #             (tmp.ljust(32), index, regComment))
                     cmdTable.append((regName, action))
-                    print("%s %d" % (regName, index))
                     if regName in globals():
                         print("createCommands %s already defined" % regName)
                     else:
@@ -152,7 +151,6 @@ class Setup():
             f.write("\n# command table\n\n")
             f.write("cmdTable = ( \\\n")
             for index, (regName, action) in enumerate(cmdTable):
-                print("%s %d" % (regName, index))
                 tmp = "    (\"%s\", \"%s\")," % (regName, action)
                 f.write("%s# %3d\n" % (tmp.ljust(40), index))
             f.write("    )\n")
