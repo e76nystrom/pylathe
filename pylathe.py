@@ -2248,7 +2248,7 @@ class ScrewThread(UpdatePass):
 
     def draw(self, diam, tpi):
         tmp = "tfeed%0.3f-%0.1f" % (diam, tpi)
-        tmp = tmp.replace("." , "-")
+        tmp = tmp.replace(".", "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
         d = dxf.drawing(tmp)
         d.add_layer(REF, color=0)
