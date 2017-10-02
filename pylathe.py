@@ -4148,7 +4148,6 @@ class UpdateThread(Thread):
     def readAll(self):
         if done:
             return
-        tmp = comm.xDbgPrint
         comm.xDbgPrint = False
         try:
             result = comm.command(cm.READALL)
