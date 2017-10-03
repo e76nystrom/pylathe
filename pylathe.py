@@ -4935,7 +4935,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = cf.mainPanel
         if cfg.info[key] is None:
-            cfg.initInfo(key, cfg.infoValue('turnPanel'))
+            cfg.initInfo(key, cfg.InfoValue('turnPanel'))
         showPanel = cfg.getInfoData(key)
 
         for key in self.panels:
