@@ -975,20 +975,22 @@ def sendXData(send=False):
 
 class UpdatePass():
     def __init__(self):
+        self.calcPass = None    # pass calculation routine
+        self.genPass = None     # pass generation routine
+
         self.passes = 0
-        self.passInt = 0
-        self.sPasses = 0
-        self.actualFeed = 0.0
-        self.cutAmount = 0.0
-        self.calcPass = None
-        self.genPass = None
-        self.feed = 0.0
-        self.sPassCtr = 0
-        self.spring = 0
         self.passCount = 0
+        self.passSize = [0.0, ]
+
         self.springFlag = False
         self.sPassInt = 0
-        self.passSize = [0.0, ]
+        self.sPasses = 0
+        self.sPassCtr = 0
+        self.spring = 0
+
+        self.cutAmount = 0.0
+        self.feed = 0.0
+        self.actualFeed = 0.0
 
     def calcFeed(self, feed, cutAmount, finish=0):
         self.cutAmount = cutAmount
