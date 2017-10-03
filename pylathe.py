@@ -4378,8 +4378,8 @@ class UpdateThread(Thread):
                 # if rLen > 0:
                 #     print("%2d (%s)" % (rLen, result))
                 index = 2
-                t = ("%8.3f " % (time() - baseTime)) if baseTime is not None else \
-                    "   0.000 "
+                t = (("%8.3f " % (time() - baseTime))
+                     if baseTime is not None else "   0.000 ")
                 while index <= rLen:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
@@ -5683,8 +5683,8 @@ class SyncTest(object):
 
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
-            # dbgPrt(txt, "spindleSteps %d lastCount %d countRemainder %d div "\
-            #"%d rem %d", \
+            # dbgPrt(txt, "spindleSteps %d lastCount %d "\
+            #       "countRemainder %d div "%d rem %d", \
             #        (spindleSteps, lastCount, countRemainder, div, rem))
 
             finalCount -= int(cFactor1 * sqrt(zAccelSteps - 1))
