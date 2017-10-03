@@ -5332,7 +5332,7 @@ class TestMoveDialog(wx.Dialog):
 
 def dbgPrt(txt, fmt, values):
     txt.AppendText((fmt + "\n") % values)
-    f.write((format + "\n") % values)
+    f.write((fmt + "\n") % values)
 
 fcy = 90000000
 
