@@ -974,7 +974,7 @@ def sendXData(send=False):
         commTimeout()
 
 class LatheOp():
-    def __init__(self, turnPanel):
+    def __init__(self):
         self.m = moveCommands
         self.zStart = 0.0
         self.zEnd = 0.0
