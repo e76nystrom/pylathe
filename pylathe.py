@@ -1068,7 +1068,7 @@ class UpdatePass():
 
 class Turn(LatheOp, UpdatePass):
     def __init__(self, turnPanel):
-        LatheOp,__init__(self)
+        LatheOp.__init__(self)
         UpdatePass.__init__(self)
         self.panel = turnPanel
         self.xCut = 0.0
