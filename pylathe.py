@@ -2286,10 +2286,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def OnDeltaFocus(self, e):
         self.updateDelta()
+        self.updateUI()
         e.Skip()
 
     def OnAngleFocus(self, e):
         self.updateAngle()
+        self.updateUI()
         e.Skip()
 
     def OnInternal(self, e):
