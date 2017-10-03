@@ -1904,8 +1904,7 @@ class Taper(UpdatePass):
             else:
                 self.startZ = self.zStart - self.zLength
                 self.startX = self.endX + self.taper * self.zLength
-            print("***fix curX")
-            self.passSize[self.passCount] = self.curX * 2.0
+            self.passSize[self.passCount] = self.endX * 2.0
         else:
             feed = self.cutAmount if final else \
                    self.passCount * self.actualFeed
@@ -2245,7 +2244,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetLabel("S Diam")
+            jogPanel.passText.SetLabel("S Diam" if self.taperX else \
+                                       "Z Start")
         self.sizerV.Layout()
 
     def updateAngle(self):
