@@ -1053,18 +1053,24 @@ class UpdatePass():
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
-class Turn(UpdatePass):
+class LatheOp():
     def __init__(self, turnPanel):
-        UpdatePass.__init__(self)
-        self.panel = turnPanel
         self.m = moveCommands
         self.zStart = 0.0
         self.zEnd = 0.0
+        self.zFeed = 0.0
         self.zRetract = 0.0
+
         self.xStart = 0.0
         self.xEnd = 0.0
         self.xFeed = 0.0
         self.xRetract = 0.0
+
+class Turn(UpdatePass):
+    def __init__(self, LatheOp, turnPanel):
+        LatheOp,__init__(self)
+        UpdatePass.__init__(self)
+        self.panel = turnPanel
         self.xCut = 0.0
         self.curX = 0.0
         self.safeX = 0.0
