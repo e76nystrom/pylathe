@@ -2236,6 +2236,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.zDelta.SetEditable(val)
         self.xDelta.SetEditable(val)
         self.angle.SetEditable(not val)
+        taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
         if self.internal.GetValue():
             cfg.infoSetLabel(cf.tpLargeDiamText, "Bore Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Large Diam")
@@ -2244,7 +2245,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetLabel("S Diam" if self.control.taperX else \
+            jogPanel.passText.SetLabel("S Diam" if taper < 1.0 else \
                                        "Z Start")
         self.sizerV.Layout()
 
