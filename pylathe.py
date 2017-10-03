@@ -974,7 +974,8 @@ def sendXData(send=False):
         commTimeout()
 
 class LatheOp():
-    def __init__(self):
+    def __init__(self, panel):
+        self.panel = panel
         self.m = moveCommands
         self.zStart = 0.0
         self.zEnd = 0.0
@@ -985,6 +986,9 @@ class LatheOp():
         self.xEnd = 0.0
         self.xFeed = 0.0
         self.xRetract = 0.0
+
+        self.safeX = 0.0
+        self.safeZ = 0.0
 
 class UpdatePass():
     def __init__(self):
@@ -1068,13 +1072,10 @@ class UpdatePass():
 
 class Turn(LatheOp, UpdatePass):
     def __init__(self, turnPanel):
-        LatheOp.__init__(self)
+        LatheOp.__init__(self, turnPanel)
         UpdatePass.__init__(self)
-        self.panel = turnPanel
         self.xCut = 0.0
         self.curX = 0.0
-        self.safeX = 0.0
-        self.safeZ = 0.0
         self.internal = False
         self.neg = False
 
@@ -1327,26 +1328,14 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def addAction(self):
         self.control.addPass()
 
-class Face(UpdatePass):
+class Face(LatheOp, UpdatePass):
     def __init__(self, facePanel):
+        LatheOp.__init__(self, facePanel)
         UpdatePass.__init__(self)
-        self.panel = facePanel
-        self.m = moveCommands
-        self.xStart = 0.0
-        self.xEnd = 0.0
-        self.xFeed = 0.0
-        self.xRetract = 0.0
-
-        self.zStart = 0.0
-        self.zEnd = 0.0
-        self.zFeed = 0.0
-        self.zRetract = 0.0
 
         self.internal = False
         self.zCut = 0.0
         self.curZ = 0.0
-        self.safeZ = 0.0
-        self.safeX = 0.0
 
     def getParameters(self):
         fa = self.panel
@@ -1578,23 +1567,14 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def addAction(self):
         self.control.addPass()
 
-class Cutoff():
+class Cutoff(LatheOp):
     def __init__(self, cutoffPanel):
-        self.panel = cutoffPanel
-        self.m = moveCommands
+        LatheOp.__init__(self, cutoffPanel)
         self.passSize = [0.0, ]
-        self.xStart = 0.0
-        self.xEnd = 0.0
-        self.xFeed = 0.0
-        self.xRetract = 0.0
 
-        self.zStart = 0.0
-        self.zRetract = 0.0
         self.zCutoff = 0.0
         self.toolWidth = 0.0
 
-        self.safeZ = 0.0
-        self.safeX = 0.0
         self.cutoffZ = 0.0
 
     def getParameters(self):
@@ -1743,23 +1723,15 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
-class Taper(UpdatePass):
+class Taper(LatheOp, UpdatePass):
     def __init__(self, taperPanel):
+        LatheOp.__init__(self, taperPanel)
         UpdatePass.__init__(self)
-        self.panel = taperPanel
-        self.m = moveCommands
-        self.zStart = 0.0
-        self.zEnd = 0.0
+
         self.zLength = 0.0
-        self.zFeed = 0.0
-        self.zRetract = 0.0
         self.largeDiameter = 0.0
         self.smallDiameter = 0.0
 
-        self.xStart = 0.0
-        self.xEnd = 0.0
-        self.xFeed = 0.0
-        self.xRetract = 0.0
         self.xLength = 0.0
         self.finish = 0.0
         self.pause = False
@@ -1777,8 +1749,6 @@ class Taper(UpdatePass):
         self.taperLength = 0.0
         self.endZ = 0.0
         self.endX = 0.0
-        self.safeX = 0.0
-        self.safeZ = 0.0
 
         # morse #3 taper
         # taper = 0.0502
@@ -2346,26 +2316,20 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 REF   = 'REF'
 TEXT  = 'TEXT'
 
-class ScrewThread(UpdatePass):
+class ScrewThread(LatheOp, UpdatePass):
     def __init__(self, threadPanel):
+        LatheOp.__init__(self, threadPanel)
         UpdatePass.__init__(self)
-        self.panel = threadPanel
-        self.m = moveCommands
         self.d = None
         self.internal = False
         self.tpi = 0.0
         self.pitch = 0.0
-        self.zStart = 0.0
-        self.zEnd = 0.0
-        self.zRetract = 0.0
+
         self.zBackInc = 0.003
-        self.safeZ = 0.0
         self.firstFeed = 0.0
         self.lastFeed = 0.0
         self.depth = 0.0
-        self.xStart = 0.0
-        self.xEnd = 0.0
-        self.xRetract = 0.0
+
         self.angle = 0.0
         self.tanAngle = 0.0
         self.area = 0.0
@@ -2374,7 +2338,6 @@ class ScrewThread(UpdatePass):
         self.curX = 0.0
         self.startZ = 0.0
         self.prevFeed = 0.0
-        self.safeX = 0.0
         self.depth = 0.0
         self.zAccel = 0.0
         self.zOffset = 0.0
