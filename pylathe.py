@@ -973,6 +973,19 @@ def sendXData(send=False):
     except CommTimeout:
         commTimeout()
 
+class LatheOp():
+    def __init__(self, turnPanel):
+        self.m = moveCommands
+        self.zStart = 0.0
+        self.zEnd = 0.0
+        self.zFeed = 0.0
+        self.zRetract = 0.0
+
+        self.xStart = 0.0
+        self.xEnd = 0.0
+        self.xFeed = 0.0
+        self.xRetract = 0.0
+
 class UpdatePass():
     def __init__(self):
         self.calcPass = None    # pass calculation routine
@@ -1053,21 +1066,8 @@ class UpdatePass():
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
-class LatheOp():
+class Turn(LatheOp, UpdatePass):
     def __init__(self, turnPanel):
-        self.m = moveCommands
-        self.zStart = 0.0
-        self.zEnd = 0.0
-        self.zFeed = 0.0
-        self.zRetract = 0.0
-
-        self.xStart = 0.0
-        self.xEnd = 0.0
-        self.xFeed = 0.0
-        self.xRetract = 0.0
-
-class Turn(UpdatePass):
-    def __init__(self, LatheOp, turnPanel):
         LatheOp,__init__(self)
         UpdatePass.__init__(self)
         self.panel = turnPanel
