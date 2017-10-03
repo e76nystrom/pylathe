@@ -151,6 +151,7 @@ class FormRoutines():
     def __init__(self, panel=True):
         self.emptyCell = (0, 0)
         self.configList = None
+        self.prefix = ""
 
     def formatData(self, formatList):
         success = True
@@ -341,6 +342,7 @@ class ActionRoutines():
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.safeX = None
         self.safeZ = None
+        self.formatList = None
 
     def formatData(self, formatList):
         pass
@@ -352,6 +354,9 @@ class ActionRoutines():
         pass
 
     def addAction(self):
+        pass
+
+    def update(self):
         pass
 
     def getSafeLoc(self):
@@ -436,6 +441,15 @@ class DialogActions():
         self.changed = False
         self.Bind(wx.EVT_SHOW, self.OnShow)
 
+    def setupAction(self):
+        pass
+
+    def showAction(self, changed):
+        pass
+
+    def formatData(self, fields):
+        pass
+
     def OnSetup(self, e):
         if not self.formatData(self.fields):
             return
@@ -445,12 +459,6 @@ class DialogActions():
                 self.setupAction()
         except AttributeError:
             pass
-
-    def formatData(self, fields):
-        pass
-
-    def showAction(self, changed):
-        pass
 
     def OnShow(self, e):
         if done:
@@ -4927,7 +4935,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = cf.mainPanel
         if cfg.info[key] is None:
-            cfg.initInfo(key, cfg.InfoValue('turnPanel'))
+            cfg.initInfo(key, cfg.infoValue('turnPanel'))
         showPanel = cfg.getInfoData(key)
 
         for key in self.panels:
