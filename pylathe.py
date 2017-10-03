@@ -44,7 +44,7 @@ if SETUP:
     setup = Setup()
     (config, configTable) = setup.createConfig(configList)
 
-from configInfo import ConfigInfo
+from configInfo import ConfigInfo, InfoValue
 cfg = ConfigInfo(cf.configTable)
 cfg.clrInfo(len(cf.config))
 cfg.readInfo(configFile, cf.config)
@@ -4935,7 +4935,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = cf.mainPanel
         if cfg.info[key] is None:
-            cfg.initInfo(key, cfg.InfoValue('turnPanel'))
+            cfg.initInfo(key, InfoValue('turnPanel'))
         showPanel = cfg.getInfoData(key)
 
         for key in self.panels:
