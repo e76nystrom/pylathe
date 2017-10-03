@@ -2244,7 +2244,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetLabel("S Diam" if self.taperX else \
+            jogPanel.passText.SetLabel("S Diam" if self.control.taperX else \
                                        "Z Start")
         self.sizerV.Layout()
 
