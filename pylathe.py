@@ -44,7 +44,7 @@ if SETUP:
     setup = Setup()
     (config, configTable) = setup.createConfig(configList)
 
-from configInfo import ConfigInfo
+from configInfo import ConfigInfo, InfoValue
 cfg = ConfigInfo(cf.configTable)
 cfg.clrInfo(len(cf.config))
 cfg.readInfo(configFile, cf.config)
@@ -151,6 +151,7 @@ class FormRoutines():
     def __init__(self, panel=True):
         self.emptyCell = (0, 0)
         self.configList = None
+        self.prefix = ""
 
     def formatData(self, formatList):
         success = True
@@ -341,6 +342,7 @@ class ActionRoutines():
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.safeX = None
         self.safeZ = None
+        self.formatList = None
 
     def formatData(self, formatList):
         pass
@@ -352,6 +354,9 @@ class ActionRoutines():
         pass
 
     def addAction(self):
+        pass
+
+    def update(self):
         pass
 
     def getSafeLoc(self):
@@ -436,6 +441,15 @@ class DialogActions():
         self.changed = False
         self.Bind(wx.EVT_SHOW, self.OnShow)
 
+    def setupAction(self):
+        pass
+
+    def showAction(self, changed):
+        pass
+
+    def formatData(self, fields):
+        pass
+
     def OnSetup(self, e):
         if not self.formatData(self.fields):
             return
@@ -445,12 +459,6 @@ class DialogActions():
                 self.setupAction()
         except AttributeError:
             pass
-
-    def formatData(self, fields):
-        pass
-
-    def showAction(self, changed):
-        pass
 
     def OnShow(self, e):
         if done:
@@ -4378,8 +4386,8 @@ class UpdateThread(Thread):
                 # if rLen > 0:
                 #     print("%2d (%s)" % (rLen, result))
                 index = 2
-                t = ("%8.3f " % (time() - baseTime)) if baseTime is not None else \
-                    "   0.000 "
+                t = (("%8.3f " % (time() - baseTime))
+                     if baseTime is not None else "   0.000 ")
                 while index <= rLen:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
@@ -4927,7 +4935,7 @@ class MainFrame(wx.Frame):
     def showPanel(self):
         key = cf.mainPanel
         if cfg.info[key] is None:
-            cfg.initInfo(key, cfg.InfoValue('turnPanel'))
+            cfg.initInfo(key, InfoValue('turnPanel'))
         showPanel = cfg.getInfoData(key)
 
         for key in self.panels:
@@ -5683,8 +5691,8 @@ class SyncTest(object):
 
             # div = int(countRemainder / zAccelSteps)
             # rem = countRemainder - zAccelSteps * div
-            # dbgPrt(txt, "spindleSteps %d lastCount %d countRemainder %d div "\
-            #"%d rem %d", \
+            # dbgPrt(txt, "spindleSteps %d lastCount %d "\
+            #       "countRemainder %d div "%d rem %d", \
             #        (spindleSteps, lastCount, countRemainder, div, rem))
 
             finalCount -= int(cFactor1 * sqrt(zAccelSteps - 1))
