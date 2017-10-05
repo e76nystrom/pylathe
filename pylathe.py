@@ -22,6 +22,9 @@ WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
 
+from configInfo import ConfigInfo, InfoValue
+from comm import Comm, CommTimeout
+
 SWIG = False
 HOME_TEST = False
 SETUP = False
@@ -44,7 +47,6 @@ if SETUP:
     setup = Setup()
     (config, configTable) = setup.createConfig(configList)
 
-from configInfo import ConfigInfo, InfoValue
 cfg = ConfigInfo(cf.configTable)
 cfg.clrInfo(len(cf.config))
 cfg.readInfo(configFile, cf.config)
@@ -87,13 +89,11 @@ else:
         import xBitDef.py as xb
         import xRegDef.py as xr
 
-from comm import Comm, CommTimeout
 comm = Comm()
 comm.SWIG = SWIG
 
 if XILINX:
     comm.enableXilinx()
-    from interface import xilinxList, xilinxBitList
 
 if SWIG:
     import lathe
@@ -499,10 +499,9 @@ def getIntVal(tc):
     except ValueError:
         return(0)
 
-moveQue = Queue()
-
 class MoveCommands():
     def __init__(self):
+        moveQue = Queue()
         self.d = None
         self.lastX = 0.0
         self.lastZ = 0.0
@@ -649,18 +648,18 @@ class MoveCommands():
     def queMove(self, op, val):
         if self.send:
             opString = en.mCommandsList[op]
-            moveQue.put((opString, op, val))
+            self.moveQue.put((opString, op, val))
 
     def queMoveF(self, op, flag, val):
         if self.send:
             opString = en.mCommandsList[op]
             op |= (flag << 8)
-            moveQue.put((opString, op, val))
+            self.moveQue.put((opString, op, val))
 
     def queClear(self):
         self.send = not cfg.getBoolInfoData(cf.cfgCmdDis)
-        while not moveQue.empty():
-            moveQue.get()
+        while not self.moveQue.empty():
+            self.moveQue.get()
 
     def queZSetup(self, feed):
         self.queMove(en.Z_FEED_SETUP, feed)
@@ -4335,7 +4334,7 @@ class UpdateThread(Thread):
                     print("CommTimeout on func")
                     stdout.flush()
                 except serial.SerialException:
-                    print("func SerialException")
+                    print("SerialException on func")
                     stdout.flush()
                     break
                 except RuntimeError:
@@ -4347,6 +4346,7 @@ class UpdateThread(Thread):
 
             # process move queue
 
+            moveQue = moveCommands.moveQue
             if not moveQue.empty() or (op is not None):
                 if not self.threadRun:
                     break
