@@ -501,7 +501,7 @@ def getIntVal(tc):
 
 class MoveCommands():
     def __init__(self):
-        moveQue = Queue()
+        self.moveQue = Queue()
         self.d = None
         self.lastX = 0.0
         self.lastZ = 0.0
