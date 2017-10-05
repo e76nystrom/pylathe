@@ -193,24 +193,24 @@ class ThreadCalc():
         return (x, y)
 
     def drawLine(self, p0, p1, layer=0):
-        if self.d != None:
+        if self.d is not None:
             self.d.add(dxf.line(self.dxfPoint(p0), self.dxfPoint(p1),
                                 layer=layer))
 
-        if self.dc != None:
+        if self.dc is not None:
             (x0, y0) = self.fixPoint(p0)
             (x1, y1) = self.fixPoint(p1)
             pen = self.pen[layer]
-            if pen != None:
+            if pen is not None:
                 self.dc.SetPen(pen)
             self.dc.DrawLine(x0, y0, x1, y1)
 
     def addText(self, text, p0, align=None, layer='TEXT'):
-        if self.d != None:
+        if self.d is not None:
             (x, y) = self.dxfPoint(p0)
             hOffset = self.hS
             vOffset = -self.textH / 2
-            if align != None:
+            if align is not None:
                 textW = len(text) * self.textH * .75
                 if align & RIGHT:
                     hOffset = -textW
@@ -229,9 +229,9 @@ class ThreadCalc():
             self.d.add(dxf.text(text, (x + hOffset, y + vOffset),
                                 height=self.textH, layer=layer))
 
-        if self.dc != None:
+        if self.dc is not None:
             size = self.dc.GetMultiLineTextExtent(text)
-            if align != None:
+            if align is not None:
                 if align & RIGHT:
                     hOffset = -size.width
                 elif align & CENTER:
@@ -247,18 +247,18 @@ class ThreadCalc():
                     vOffset = -size.height / 2
 
             color = self.color[layer]
-            if color != None:
+            if color is not None:
                 self.dc.SetTextForeground(color)
             (x, y) = self.fixPoint(p0)
             self.dc.DrawText(text, x + hOffset, y + vOffset)
 
     def drawCircle(self, radius, center, layer):
-        if self.d != None:
+        if self.d is not None:
             self.d.add(dxf.circle(radius, self.dxfPoint(center), layer=layer))
 
-        if self.dc != None:
+        if self.dc is not None:
             pen = self.pen[layer]
-            if pen != None:
+            if pen is not None:
                 self.dc.SetPen(pen)
             (x, y) = self.fixPoint(center)
             radius *= self.scale
@@ -267,13 +267,13 @@ class ThreadCalc():
             self.dc.DrawEllipse(x - radius, y - radius, size, size)
 
     def drawShape(self, path, color, colorName):
-        if self.d != None:
+        if self.d is not None:
             points = []
             for p in path:
                 points.append(self.dxfPoint(p))
             self.d.add(dxf.solid(points, color=color))
 
-        if self.dc != None:
+        if self.dc is not None:
             points = []
             for p in path:
                 points.append(self.fixPoint(p))
@@ -287,7 +287,7 @@ class ThreadCalc():
         txt = "%0.4f" % (y)
         self.drawLine((-self.pitch, yPos),
                       (self.pitch, yPos), layer=layer)
-        if align != None:
+        if align is not None:
             hOffset = 0
             if align & AL_LEFT:
                 hOffset = -self.pitch
@@ -302,7 +302,7 @@ class ThreadCalc():
     def draw(self, dc=None):
         self.dc = dc
         d = None
-        if dc == None:
+        if dc is None:
             tmp = "thread%0.3f-%0.1f" % (self.diam, self.tpi)
             # tmp = tmp.replace("0.", "-")
             # tmp = tmp.replace(".0", "")
@@ -321,7 +321,7 @@ class ThreadCalc():
             self.hS = self.textH
         self.d = d
 
-        if self.dc != None:
+        if self.dc is not None:
             if self.zoom:
                 fontSize = 12
             else:
@@ -476,7 +476,7 @@ class ThreadCalc():
         self.drawCircle(wireRadius, p0, layer="WIRE")
 
         yWire -= wireRadius
-        if self.d != None:
+        if self.d is not None:
             textH = -(self.textH + self.vS)
             txt = "Wire Size %0.4f" % (self.actualWire)
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
@@ -488,7 +488,7 @@ class ThreadCalc():
             txt = "Max Wire %0.4f" % (self.maxWire)
             self.addText(txt, (0, yWire + textH), CENTER | BELOW, WIRE)
 
-        if self.dc != None:
+        if self.dc is not None:
             txt = ("Wire Size %0.4f\nMin Wire %0.4f\nMax Wire %0.4f" %
                    (self.actualWire, self.minWire, self.maxWire))
             self.addText(txt, (0, yWire), CENTER | BELOW, WIRE)
@@ -581,7 +581,7 @@ class ThreadCalc():
 
     def close(self):
         try:
-            if self.d != None:
+            if self.d is not None:
                 self.d.save()
                 self.d = None
         except:
