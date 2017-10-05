@@ -3173,7 +3173,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.addButton(sizerG, 'S', self.OnXSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
-        self.step = step = ["Cont", "0.001", "0.002", "0.005", \
+        self.step = step = ["Cont", "0.0001", "0.0002", "0.0005", \
+                            "0.001", "0.002", "0.005", \
                             "0.010", "0.020", "0.050", \
                             "0.100", "0.200", "0.500", "1.000"]
 
