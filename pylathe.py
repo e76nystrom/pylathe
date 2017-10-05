@@ -5951,5 +5951,5 @@ app = MainApp(redirect=False)
 # wx.lib.inspection.InspectionTool().Show()
 app.MainLoop()
 
-if not (comm.ser is None):
+if comm.ser is not None:
     comm.ser.close()
