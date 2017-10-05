@@ -39,14 +39,14 @@ class Setup():
                     globals()[name] = index
                     imports.append(name)
                     configTable.append(name)
-                    if not f is None:
+                    if f is not None:
                         tmp = "%s = %3d" % (name.ljust(16), index)
                         f.write("%s# %s\n" % (tmp.ljust(32), comment))
                 index += 1
             else:
-                if not f is None:
+                if f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             f.write("\nconfig = { \\\n")
             for key in config:
                 f.write("    '%s' : %d,\n" % (key, config[key]))
@@ -81,10 +81,10 @@ class Setup():
                 globals()[name] = i
                 imports.append(name)
                 strTable.append(value)
-                if not f is None:
+                if f is not None:
                     tmp = "%s = %2d" % (name.ljust(20), i)
                     f.write("%s# %s\n" % (tmp.ljust(32), value))
-        if not f is None:
+        if f is not None:
             f.write("\nstrTable = ( \\\n")
             for s in strTable:
                 f.write("    \"%s\", \\\n" % (s))
@@ -134,7 +134,7 @@ class Setup():
                     else:
                         globals()[regName] = index
                         imports.append(regName)
-                        if not f is None:
+                        if f is not None:
                             f.write("%s = %3d\n" % (regName.ljust(20), index))
                     index += 1
             else:
@@ -145,9 +145,9 @@ class Setup():
                     else:
                         cFile.write("\n")
                         # jFile.write("\n")
-                if not f is None:
+                if f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             f.write("\n# command table\n\n")
             f.write("cmdTable = ( \\\n")
             for index, (regName, action) in enumerate(cmdTable):
@@ -231,7 +231,7 @@ class Setup():
                 else:
                     globals()[regName] = index
                     imports.append(regName)
-                    if not f is None:
+                    if f is not None:
                         f.write("%s = %3d\n" % (regName.ljust(20), index))
                 index += 1
             else:
@@ -240,9 +240,9 @@ class Setup():
                     c1File.write("\n// %s\n\n" % (data))
                     c2File.write("\n// %s\n\n" % (data))
                     # jFile.write("\n// %s\n\n" % (data))
-                if not f is None:
+                if f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             f.write("\nparmTable = ( \\\n")
             for val in parmTable:
                 f.write("    ('%s', '%s', '%s'),\n" % (val))
@@ -296,7 +296,7 @@ class Setup():
                     imports.append(state)
                     eval("%s.append('%s')" % (enum, state))
                     stringList.append((state, comment))
-                    if not f is None:
+                    if f is not None:
                         tmp = "%s = %2d" % (state.ljust(16), val)
                         f.write("%s# %s\n" % (tmp.ljust(32), comment))
                 val += 1
@@ -330,7 +330,7 @@ class Setup():
                                              index, comment))
                             cFile.write("};\n\n#endif\n")
                         # jFile.write(" %s\n" % (data))
-                    if data.startswith("}") and not f is None:
+                    if data.startswith("}") and f is not None:
                         f.write("\n%s = ( \\\n" % (enum))
                         for s in eval(enum):
                             f.write("    \"%s\",\n" % (s))
@@ -339,9 +339,9 @@ class Setup():
                     if fData:
                         cFile.write("\n// %s\n\n" % (data))
                         # jFile.write("\n // %s\n\n" % (data))
-                    if not f is None:
+                    if f is not None:
                         f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             self.listImports(file, imports)
             f.close()
         if fData:
@@ -381,16 +381,16 @@ class Setup():
                 else:
                     globals()[var] = eval(val)
                     imports.append(var)
-                    if not f is None:
+                    if f is not None:
                         tmp = "%s = %s" % (var.ljust(16), val)
                         f.write("%s# %s\n" % (tmp.ljust(32), comment))
             else:
                 if fData:
                     cFile.write("\n// %s\n\n" % (data))
                     # jFile.write("\n// %s\n\n" % (data))
-                if not f is None:
+                if f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             f.close()
         if fData:
             self.listImports(file, imports)
@@ -454,7 +454,7 @@ class Setup():
                 globals()[regName] = index
                 imports.append(regName)
                 xRegTable.append(regName)
-                if not f is None:
+                if f is not None:
                     tmp = "%s = %2d" % (regName.ljust(16), index)
                     f.write("%s# %s\n" % (tmp.ljust(32), regComment))
                 index += 1
@@ -470,9 +470,9 @@ class Setup():
                         if xFile:
                             xFile.write("\n");
                         # jFile.write("\n");
-                if not f is None:
+                if f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             f.write("\n# xilinx table\n\n")
             f.write("xRegTable = ( \\\n")
             for i, regName in enumerate(xRegTable):
@@ -563,7 +563,7 @@ class Setup():
                     else:
                         globals()[cVar] = bit << shift
                         imports.append(cVar)
-                        if not f is None:
+                        if f is not None:
                             tmp = "%s = 0x%02x" % (cVar.ljust(12), bit << shift)
                             f.write("%s# %s\n" % (tmp.ljust(32), comment))
                     lastShift = shift
@@ -604,9 +604,9 @@ class Setup():
                         else:
                             globals()[var] = maxShift + 1
                             imports.append(var)
-                if len(data) != 0 and not f is None:
+                if len(data) != 0 and f is not None:
                     f.write("\n# %s\n\n" % (data))
-        if not f is None:
+        if f is not None:
             self.listImports(file, imports)
             f.close()
         if fData:
