@@ -46,7 +46,7 @@ class Comm():
         if len(self.parmList) > 0:
             self.sendMulti()
         (cmd, action) = cmdTable[cmdVal]
-        if self.SWIG and (action != None):
+        if self.SWIG and (action is not None):
             if self.importLathe:
                 import lathe
                 self.importLathe = False
@@ -258,7 +258,7 @@ class Comm():
     def getString(self, command, parm=None):
         if self.ser is None:
             return(None)
-        arg = "" if parm == None else " %x" % parm
+        arg = "" if parm is None else " %x" % parm
         cmd = '\x01%x%s \r' % (command, arg)
         self.cmdLen = len(cmd) - 1
         self.commLock.acquire(True)
