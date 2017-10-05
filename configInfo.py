@@ -35,7 +35,7 @@ class ConfigInfo():
             name = self.configTable[index]
             val = self.info[index]
             str = self.formatConfig(name, val)
-            if str != None:
+            if str is not None:
                 f.write(str)
         f.close()
 
@@ -44,7 +44,7 @@ class ConfigInfo():
         for index, (val) in enumerate(self.info):
             name = self.configTable[index]
             str = self.formatConfig(name, val)
-            if str != None:
+            if str is not None:
                 f.write(str)
         f.close()
 
@@ -88,10 +88,10 @@ class ConfigInfo():
                     stdout.flush()
                     continue
                 index = config[key]
-                if configList != None:
+                if configList is not None:
                     if not index in configList:
                         continue
-                if self.info[index] != None:
+                if self.info[index] is not None:
                     func = self.info[index]
                     funcClass = func.__class__.__name__
                     # print(key, val, funcClass)
@@ -124,13 +124,13 @@ class ConfigInfo():
         f.close()
 
     def initInfo(self, index, val):
-        if self.info[index] != None:
+        if self.info[index] is not None:
             print("initInfo duplicate index %s" % (index))
             stdout.flush()
         self.info[index] = val
 
     def newInfo(self, index, val):
-        if self.info[index] != None:
+        if self.info[index] is not None:
             print("newInfo duplicate index %s" % (index))
             stdout.flush()
         self.info[index] = InfoValue(val)
@@ -259,7 +259,7 @@ class ConfigInfo():
     def getInitialBoolInfo(self, index):
         try:
             tmp = self.info[index]
-            if tmp != None:
+            if tmp is not None:
                 return(tmp.GetValue() == 'True')
         except IndexError:
             print("getInitialInfo IndexError %s" % (index))
