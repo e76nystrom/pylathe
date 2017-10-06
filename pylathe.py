@@ -4628,6 +4628,7 @@ class MainFrame(wx.Frame):
                 print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
                       (zPosition, zPosition, \
                        float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
+                stdout.flush()
                 if DRO:
                     global zDROOffset
                     zPosition = cfg.getIntInfo(cf.zSvDROPosition)
@@ -4637,6 +4638,7 @@ class MainFrame(wx.Frame):
                     print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
                           (zPosition, zPosition, \
                            float(zPosition) / jogPanel.zDROInch, zDROOffset))
+                    stdout.flush()
                 comm.sendMulti()
 
                 global xHomeOffset
@@ -4648,6 +4650,7 @@ class MainFrame(wx.Frame):
                 print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
                       (xPosition, xPosition, \
                        float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
+                stdout.flush()
                 if DRO:
                     global xDROOffset
                     xPosition = cfg.getIntInfo(cf.xSvDROPosition)
@@ -4657,6 +4660,7 @@ class MainFrame(wx.Frame):
                     print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
                           (xPosition, xPosition, \
                            float(xPosition) / jogPanel.xDROInch, xDROOffset))
+                    stdout.flush()
 
                 if HOME_TEST:
                     val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
