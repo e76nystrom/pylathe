@@ -4655,7 +4655,7 @@ class MainFrame(wx.Frame):
                     xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
                     comm.setParm(pm.X_DRO_OFFSET, xDROOffset)
                     print("xDROPosition %d xDROOffset %7.4f" % \
-                          (xPositon, xPosition, \
+                          (xPosition, xPosition, \
                            float(xPosition) / jogPanel.xDROInch, xDROOffset))
 
                 if HOME_TEST:
