@@ -4621,36 +4621,42 @@ class MainFrame(wx.Frame):
 
                 global zHomeOffset
                 sendZData()
-                comm.setParm(pm.Z_LOC, cfg.getIntInfo(cf.zSvPosition))
+                zPosition = cfg.getIntInfo(cf.zSvPosition)
+                comm.setParm(pm.Z_LOC, zPosition)
                 zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
                 comm.setParm(pm.Z_HOME_OFFSET, zHomeOffset)
-                print("zLoc %d zHomeOffset %7.4f" % \
-                      (cfg.getIntInfo(cf.zSvPosition), zHomeOffset))
+                print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
+                      (zPosition, zPosition, \
+                       float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
                 if DRO:
                     global zDROOffset
-                    comm.setParm(pm.Z_DRO_POS, \
-                                 cfg.getIntInfo(cf.zSvDROPosition))
+                    zPosition = cfg.getIntInfo(cf.zSvDROPosition)
+                    comm.setParm(pm.Z_DRO_POS, zPosition)
                     zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
                     comm.setParm(pm.Z_DRO_OFFSET, zDROOffset)
-                    print("zDROPosition %d zDROOffset %7.4f" % \
-                          (cfg.getIntInfo(cf.zSvDROPosition), zDROOffset))
+                    print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
+                          (zPosition, zPosition, \
+                           float(zPosition) / jogPanel.zDROInch, zDROOffset))
                 comm.sendMulti()
 
                 global xHomeOffset
                 sendXData()
-                comm.setParm(pm.X_LOC, cfg.getIntInfo(cf.xSvPosition))
+                xPosition = cfg.getIntInfo(cf.xSvPosition)
+                comm.setParm(pm.X_LOC, xPosition)
                 xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
                 comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
-                print("xLoc %d xHomeOffset %7.4f" % \
-                      (cfg.getIntInfo(cf.xSvPosition), xHomeOffset))
+                print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
+                      (xPosition, xPosition, \
+                       float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
                 if DRO:
                     global xDROOffset
-                    comm.setParm(pm.X_DRO_POS, \
-                                 cfg.getIntInfo(cf.xSvDROPosition))
+                    xPosition = cfg.getIntInfo(cf.xSvDROPosition)
+                    comm.setParm(pm.X_DRO_POS, xPosition)
                     xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
                     comm.setParm(pm.X_DRO_OFFSET, xDROOffset)
                     print("xDROPosition %d xDROOffset %7.4f" % \
-                          (cfg.getIntInfo(cf.xSvDROPosition), xDROOffset))
+                          (xPositon, xPosition, \
+                           float(xPosition) / jogPanel.xDROInch, xDROOffset))
 
                 if HOME_TEST:
                     val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
