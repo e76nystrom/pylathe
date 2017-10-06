@@ -4619,44 +4619,49 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
                 comm.command(cm.CMD_SETUP)
 
-                sendZData()
-                comm.setParm(pm.Z_LOC, cfg.getInfo(cf.zSvPosition))
-                comm.setParm(pm.Z_HOME_OFFSET, cfg.getInfo(cf.zSvHomeOffset))
                 global zHomeOffset
+                sendZData()
+                comm.setParm(pm.Z_LOC, cfg.getIntInfo(cf.zSvPosition))
                 zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
+                comm.setParm(pm.Z_HOME_OFFSET, zHomeOffset)
+                print("zLoc %d zHomeOffset %7.4f" % \
+                      (cfg.getIntInfo(cf.zSvPosition), zHomeOffset))
                 if DRO:
-                    comm.setParm(pm.Z_DRO_POS, cfg.getInfo(cf.zSvDROPosition))
-                    comm.setParm(pm.Z_DRO_OFFSET, cfg.getInfo(cf.zSvDROOffset))
                     global zDROOffset
+                    comm.setParm(pm.Z_DRO_POS, \
+                                 cfg.getIntInfo(cf.zSvDROPosition))
                     zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
+                    comm.setParm(pm.Z_DRO_OFFSET, zDROOffset)
+                    print("zDROPosition %d zDROOffset %7.4f" % \
+                          (cfg.getIntInfo(cf.zSvDROPosition), zDROOffset))
                 comm.sendMulti()
 
+                global xHomeOffset
                 sendXData()
                 comm.setParm(pm.X_LOC, cfg.getIntInfo(cf.xSvPosition))
-                comm.setParm(pm.X_HOME_OFFSET,
-                             cfg.getFloatInfo(cf.xSvHomeOffset))
-                global xHomeOffset
                 xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
+                comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
+                print("xLoc %d xHomeOffset %7.4f" % \
+                      (cfg.getIntInfo(cf.xSvPosition), xHomeOffset))
                 if DRO:
+                    global xDROOffset
                     comm.setParm(pm.X_DRO_POS, \
                                  cfg.getIntInfo(cf.xSvDROPosition))
-                    comm.setParm(pm.X_DRO_OFFSET, \
-                                 cfg.getFloatInfo(cf.xSvDROOffset))
-                    global xDROOffset
                     xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
-                comm.sendMulti()
-
-                sendSpindleData()
+                    comm.setParm(pm.X_DRO_OFFSET, xDROOffset)
+                    print("xDROPosition %d xDROOffset %7.4f" % \
+                          (cfg.getIntInfo(cf.xSvDROPosition), xDROOffset))
 
                 if HOME_TEST:
                     val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
                                   jogPanel.xStepsInch))
                     comm.queParm(pm.X_HOME_LOC, val)
-                    # comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
-                    # comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
                     comm.queParm(pm.X_HOME_STATUS, \
                                  ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
-                    comm.sendMulti()
+                comm.sendMulti()
+
+                sendSpindleData()
+
             except CommTimeout:
                 commTimeout()
         else:
