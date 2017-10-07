@@ -3637,7 +3637,9 @@ class JogPanel(wx.Panel, FormRoutines):
                         if val & ct.HOME_SUCCESS:
                             self.homeDone("home success")
                             xHomed = True
+                            comm.setParm(pm.X_LOC, 0)
                             if DRO:
+                                comm.setParm(pm.X_DRO_POS, 0)
                                 self.updateXDroPos(xLocation)
                         elif val & ct.HOME_FAIL:
                             self.homeDone("home success")
