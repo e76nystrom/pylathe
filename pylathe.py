@@ -516,6 +516,8 @@ class MoveCommands():
         self.zText = None
         self.fileName = None
         self.style = None
+        self.zOffset = 0.0
+        self.xOffset = 0.0
 
     def draw(self, cmd, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (cmd, diam, parm)
@@ -718,14 +720,18 @@ class MoveCommands():
             print("moveX  %7.4f" % (xLocation))
 
     def saveZOffset(self):
-        self.queMove(en.SAVE_Z_OFFSET, zHomeOffset)
-        if self.dbg:
-            print("saveZOffset  %7.4f" % (zHomeOffset))
+        if self.zOffset != zHomeOffset:
+            self.zOffset = zHomeOffset
+            self.queMove(en.SAVE_Z_OFFSET, zHomeOffset)
+            if self.dbg:
+                print("saveZOffset  %7.4f" % (zHomeOffset))
 
     def saveXOffset(self):
-        self.queMove(en.SAVE_X_OFFSET, xHomeOffset)
-        if self.dbg:
-            print("savexOffset  %7.4f" % (xHomeOffset))
+        if self.xOffset != xHomeOffset:
+            self.xOffset = xHomeOffset
+            self.queMove(en.SAVE_X_OFFSET, xHomeOffset)
+            if self.dbg:
+                print("savexOffset  %7.4f" % (xHomeOffset))
 
     def moveXZ(self, zLocation, xLocation):
         self.queMove(en.SAVE_Z, zLocation)
