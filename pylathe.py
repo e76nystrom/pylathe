@@ -1809,11 +1809,15 @@ class Taper(LatheOp, UpdatePass):
             m.saveTaper(self.taper)
         else:
             m.saveTaper(1.0 / self.taper)
-        m.startSpindle(cfg.getIntInfoData(cf.tpRPM))
-        m.queFeedType(ct.FEED_PITCH)
-
-        m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
-        m.xSynSetup(cfg.getFloatInfoData(cf.tpXInFeed))
+            
+        if STEPPER_DRIVE:
+            m.startSpindle(cfg.getIntInfoData(cf.tpRPM))
+            m.queFeedType(ct.FEED_PITCH)
+            m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
+            m.xSynSetup(cfg.getFloatInfoData(cf.tpXInFeed))
+        else:
+            m.queZSetup(cfg.getFloatInfoData(cf.tpZFeed))
+            m.queXSetup(cfg.getFloatInfoData(cf.tpXInFeed))
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
