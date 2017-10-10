@@ -836,6 +836,7 @@ def sendSpindleData(send=False, rpm=None):
     try:
         if send or (not spindleDataSent):
             comm.queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
+            comm.queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
             if STEP_DRV or MOTOR_TEST:
                 comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
