@@ -147,49 +147,50 @@ PROBE_INV            =  88
 # configuration
 
 STEPPER_DRIVE        =  89
-CFG_XILINX           =  90
-CFG_MPG              =  91
-CFG_DRO              =  92
-CFG_LCD              =  93
-CFG_FCY              =  94
+MOTOR_TEST           =  90
+CFG_XILINX           =  91
+CFG_MPG              =  92
+CFG_DRO              =  93
+CFG_LCD              =  94
+CFG_FCY              =  95
 
 # setup
 
-SETUP_DONE           =  95
+SETUP_DONE           =  96
 
 # encoder counts per revolution
 
-ENC_MAX              =  96
+ENC_MAX              =  97
 
 # test encoder setup variables
 
-ENC_ENABLE           =  97
-ENC_PRE_SCALER       =  98
-ENC_TIMER            =  99
-ENC_RUN_COUNT        = 100
+ENC_ENABLE           =  98
+ENC_PRE_SCALER       =  99
+ENC_TIMER            = 100
+ENC_RUN_COUNT        = 101
 
 # test encoder status variables
 
-ENC_RUN              = 101
-ENC_COUNTER          = 102
-ENC_REV_COUNTER      = 103
+ENC_RUN              = 102
+ENC_COUNTER          = 103
+ENC_REV_COUNTER      = 104
 
 # measured spindle speed
 
-RPM                  = 104
+RPM                  = 105
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 105
-FREQ_MULT            = 106
+X_FREQUENCY          = 106
+FREQ_MULT            = 107
 
 # xilinx configuration register
 
-X_CFG_REG            = 107
+X_CFG_REG            = 108
 
 # max parameter number
 
-MAX_PARM             = 108
+MAX_PARM             = 109
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -282,6 +283,7 @@ parmTable = ( \
     ('PROBE_DIST', 'int', 'probeDist'),
     ('PROBE_INV', 'int', 'probeInv'),
     ('STEPPER_DRIVE', 'char', 'stepperDrive'),
+    ('MOTOR_TEST', 'char', 'motorTest'),
     ('CFG_XILINX', 'char', 'cfgXilinx'),
     ('CFG_MPG', 'char', 'cfgMpg'),
     ('CFG_DRO', 'char', 'cfgDro'),

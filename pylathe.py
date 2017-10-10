@@ -1814,7 +1814,7 @@ class Taper(LatheOp, UpdatePass):
         else:
             m.saveTaper(1.0 / self.taper)
             
-        if STEPPER_DRIVE:
+        if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tpRPM))
             m.queFeedType(ct.FEED_PITCH)
             m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
@@ -5179,6 +5179,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         self.fields = (
             ("bStepper Drive", cf.spStepDrive, None), \
+            ("bMotor Test", cf.spMotorTest, None), \
         )
         if STEP_DRV or MOTOR_TEST:
             self.fields += (
