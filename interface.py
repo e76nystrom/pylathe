@@ -84,6 +84,7 @@ configList = \
     ('spMicroSteps', 'spindle micro steps'),
     ('spMinRPM', 'spindle minimum rpm'),
     ('spMotorSteps', 'spindle motor stpes per revolution'),
+    ('spMotorTest', 'use stepper drive to test motor'),
     ('spStepDrive', 'spindle stepper drive'),
     ('spTestIndex', 'spindle test generate internal index pulse'),
 
@@ -489,6 +490,7 @@ parmList = \
     "configuration",
 
     ("STEPPER_DRIVE", "stepper driven spindle", "char"),
+    ("MOTOR_TEST", "use stepper drive to test motor", "char"),
     ("CFG_XILINX", "using xilinx", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
