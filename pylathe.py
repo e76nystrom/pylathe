@@ -61,6 +61,7 @@ XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
 REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
 STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
+MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
 
 cfg.clrInfo(len(cf.config))
 
@@ -835,7 +836,7 @@ def sendSpindleData(send=False, rpm=None):
     try:
         if send or (not spindleDataSent):
             comm.queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
-            if STEP_DRV:
+            if STEP_DRV or MOTOR_TEST:
                 comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
                 comm.queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
@@ -1150,7 +1151,7 @@ class Turn(LatheOp, UpdatePass):
             pass
 
         self.m.moveX(self.xStart + self.xRetract)
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1225,7 +1226,8 @@ class Turn(LatheOp, UpdatePass):
             moveCommands.nextPass(self.passCount)
             self.runPass()
             self.m.moveX(self.xStart + self.xRetract)
-            self.m.stopSpindle()
+            if STEP_DRV or MOTOR_TEST:
+                self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -1393,7 +1395,7 @@ class Face(LatheOp, UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart + self.zRetract)
 
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1462,7 +1464,8 @@ class Face(LatheOp, UpdatePass):
             self.runPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.zStart + self.zRetract)
-            self.m.stopSpindle()
+            if STEP_DRV or MOTOR_TEST:
+                self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -1623,7 +1626,7 @@ class Cutoff(LatheOp):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart)
 
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1880,7 +1883,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
         self.m.printZText("%2d %7.4f", LEFT|MIDDLE)
         self.m.moveZ(self.safeZ)
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
@@ -1960,7 +1963,8 @@ class Taper(LatheOp, UpdatePass):
                 self.m.moveZ(self.startZ)
             else:
                 pass
-            self.m.stopSpindle()
+            if STEP_DRV or MOTOR_TEST:
+                self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -1998,7 +2002,8 @@ class Taper(LatheOp, UpdatePass):
         self.m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
-        self.m.stopSpindle()
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
@@ -2053,7 +2058,8 @@ class Taper(LatheOp, UpdatePass):
             self.internalPass()
             self.m.moveX(self.safeX)
             self.m.moveZ(self.safeZ)
-            self.m.stopSpindle()
+            if STEP_DRV or MOTOR_TEST:
+                self.m.stopSpindle()
             self.m.done(1)
             comm.command(cm.CMD_RESUME)
 
@@ -3145,7 +3151,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
 
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.addButton(sizerG, 'Start Spindle', \
                            self.OnStartSpindle, btnSize)
         else:
@@ -3730,7 +3736,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.currentPanel.active = False
 
     def OnStartSpindle(self, e):
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             panel = self.getPanel()
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
@@ -5173,7 +5179,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         self.fields = (
             ("bStepper Drive", cf.spStepDrive, None), \
         )
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.fields += (
                 ("Motor Steps", cf.spMotorSteps, 'd'), \
                 ("Micro Steps", cf.spMicroSteps, 'd'), \
