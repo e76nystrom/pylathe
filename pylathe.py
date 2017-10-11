@@ -153,6 +153,7 @@ class FormRoutines():
         self.emptyCell = (0, 0)
         self.configList = None
         self.prefix = ""
+        self.focusField = None
 
     def formatData(self, formatList):
         success = True
@@ -228,7 +229,9 @@ class FormRoutines():
                       wx.ALIGN_CENTER_VERTICAL, border=2)
             cfg.initInfo(keyText, txt)
 
-        tc = wx.TextCtrl(self, -1, "", size=(60, -1))
+        tc = wx.TextCtrl(self, -1, "", size=(60, -1), \
+                         style=wx.TE_PROCESS_ENTER)
+        tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
         sizer.Add(tc, flag=wx.ALL, border=2)
         cfg.initInfo(key, tc)
         return(tc)
@@ -239,7 +242,9 @@ class FormRoutines():
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        tc = wx.TextCtrl(self, -1, "", size=size)
+        tc = wx.TextCtrl(self, -1, "", size=size, \
+                         style=wx.TE_PROCESS_ENTER)
+        tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
         sizer.Add(tc, flag=wx.ALL, border=2)
         if cfg.info[index] is not None:
             val = cfg.getInfo(index)
@@ -336,6 +341,25 @@ class FormRoutines():
         sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
         return(tc if not text else (tc, txt))
 
+    def setFocus(self):
+        field = self.focusField
+        if field is not None:
+            field.SetFocus()
+            field.SetSelection(-1, -1)
+            
+    def setAddFocus(self):
+        field = self.add
+        if field is not None:
+            field.SetFocus()
+            field.SetSelection(-1, -1)
+
+    def OnEnter(self, e):
+        if self.formatData(self.formatList):
+            jogPanel.setStatus(st.STR_CLR)
+            jogPanel.focus()
+        else:
+            jogPanel.setStatus(st.STR_FIELD_ERROR)
+            
 class ActionRoutines():
     def __init__(self, control):
         self.control = control
@@ -349,7 +373,7 @@ class ActionRoutines():
         pass
 
     def sendAction(self):
-        pass
+        return(False)
 
     def startAction(self):
         pass
@@ -386,10 +410,10 @@ class ActionRoutines():
                 jogPanel.setStatus(st.STR_OP_IN_PROGRESS)
             else:
                 jogPanel.setStatus(st.STR_CLR)
-                self.active = True
                 try:
                     if callable(self.sendAction):
-                        self.sendAction()
+                        if self.sendAction():
+                            self.active = True
                 except CommTimeout:
                     commTimeout()
                 # except AttributeError:
@@ -1096,14 +1120,20 @@ class Turn(LatheOp, UpdatePass):
 
     def getParameters(self):
         tu = self.panel
-        self.zStart = getFloatVal(tu.zStart)
-        self.zEnd = getFloatVal(tu.zEnd)
-        self.zRetract = getFloatVal(tu.zRetract)
+        self.internal = tu.internal.GetValue()
 
-        self.xStart = getFloatVal(tu.xStart) / 2.0
-        self.xEnd = getFloatVal(tu.xEnd) / 2.0
+        if self.internal:
+            self.xStart = getFloatVal(tu.xDiam1) / 2.0
+            self.xEnd = getFloatVal(tu.xDiam0) / 2.0
+        else:
+            self.xStart = getFloatVal(tu.xDiam0) / 2.0
+            self.xEnd = getFloatVal(tu.xDiam1) / 2.0
         self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
+
+        self.zStart = getFloatVal(tu.zStart) / 2.0
+        self.zEnd = getFloatVal(tu.zEnd) / 2.0
+        self.zRetract = getFloatVal(tu.zRetract)
 
     def runOperation(self):
         self.getParameters()
@@ -1112,17 +1142,24 @@ class Turn(LatheOp, UpdatePass):
             if self.xEnd <= 0:
                 self.neg = True
             else:
-                print("error")
-                return
+                jogPanel.setStatus(st.STR_SIGN_ERROR)
+                return(False)
         else:
             if self.xEnd >= 0:
                 self.neg = False
             else:
-                print("error")
-                return
+                jogPanel.setStatus(st.STR_SIGN_ERROR)
+                return(False)
 
         self.xCut = abs(self.xStart) - abs(self.xEnd)
-        self.internal = self.xCut < 0
+        if self.internal:
+            if self.xCut > 0:
+                jogPanel.setStatus(st.STR_INTERNAL_ERROR)
+                return(False)
+        else:
+            if self.xCut < 0:
+                jogPanel.setStatus(st.STR_EXTERNAL_ERROR)
+                return(False)
         self.xCut = abs(self.xCut)
 
         self.calcFeed(self.xFeed, self.xCut)
@@ -1157,6 +1194,7 @@ class Turn(LatheOp, UpdatePass):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
+        return(True)
 
     def setup(self):
         m = self.m
@@ -1243,15 +1281,16 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.configList = None
         self.prefix = 'tu'
         self.formatList = ((cf.tuAddFeed, 'f'), \
+                           (cf.tuInternal, None), \
                            (cf.tuPasses, 'd'), \
                            (cf.tuPause, None), \
                            (cf.tuRPM, 'd'), \
                            (cf.tuSPInt, 'd'), \
                            (cf.tuSpring, 'd'), \
-                           (cf.tuXEnd, 'f'), \
+                           (cf.tuXDiam0, 'f'), \
+                           (cf.tuXDiam1, 'f'), \
                            (cf.tuXFeed, 'f'), \
                            (cf.tuXRetract, 'f'), \
-                           (cf.tuXStart, 'f'),\
                            (cf.tuZEnd, 'f'), \
                            (cf.tuZFeed, 'f'), \
                            (cf.tuZRetract, 'f'), \
@@ -1267,6 +1306,19 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerG = wx.FlexGridSizer(8, 0, 0)
 
+        # x parameters
+
+        self.xDiam0 = self.addFieldText(sizerG, "X Start D", cf.tuXDiam0, \
+                                        cf.tuXDiam0Text)
+        self.focusField = self.xDiam0
+
+        self.xDiam1 = self.addFieldText(sizerG, "X End D", cf.tuXDiam1, \
+                                        cf.tuXDiam1Text)
+
+        self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
+
+        self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract)
+
         # z parameters
 
         self.zEnd = self.addField(sizerG, "Z End", cf.tuZEnd)
@@ -1277,16 +1329,6 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", cf.tuZRetract)
 
-        # x parameters
-
-        self.xStart = self.addField(sizerG, "X Start D", cf.tuXStart)
-
-        self.xEnd = self.addField(sizerG, "X End D", cf.tuXEnd)
-
-        self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
-
-        self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract)
-
         # pass info
 
         self.passes = self.addField(sizerG, "Passes", cf.tuPasses)
@@ -1296,9 +1338,9 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", cf.tuSpring)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
-
+        self.internal = self.addCheckBox(sizerG, "Internal", cf.tuInternal, \
+                                         self.OnInternal)
+        
         # buttons
 
         self.addButton(sizerG, 'Send', self.OnSend)
@@ -1316,9 +1358,21 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
-        self.sizerV.Fit(self)
+        sizerV.Fit(self)
+
+    def OnInternal(self, e):
+        self.updateUI()
+            
+    def updateUI(self):
+        if self.internal.GetValue():
+            cfg.infoSetLabel(cf.tuXDiam0Text, "  X End D")
+            cfg.infoSetLabel(cf.tuXDiam1Text, "X Start D")
+        else:
+            cfg.infoSetLabel(cf.tuXDiam0Text, "X Start D")
+            cfg.infoSetLabel(cf.tuXDiam1Text, "  X End D")
 
     def update(self):
+        self.updateUI()
         self.formatData(self.formatList)
         jogPanel.passText.SetLabel("Diam")
 
@@ -1334,7 +1388,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.control.runOperation()
+        return(self.control.runOperation())
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -1401,6 +1455,7 @@ class Face(LatheOp, UpdatePass):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
+        return(True)
 
     def setup(self):
         m = self.m
@@ -1574,7 +1629,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         jogPanel.setStatus(st.STR_CLR)
         self.sendData()
-        self.control.runOperation()
+        return(self.control.runOperation())
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -1632,6 +1687,7 @@ class Cutoff(LatheOp):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
+        return(True)
 
     def setup(self):
         m = self.m
@@ -1733,7 +1789,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.control.runOperation()
+        return(self.control.runOperation())
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -1889,6 +1945,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
+        return(True)
 
     def calcExternalPass(self, final=False):
         if self.taperX:
@@ -2008,6 +2065,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.done(1)
         self.m.drawClose()
         stdout.flush()
+        return(True)
 
     def calcInternalPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
@@ -2319,8 +2377,9 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         self.sendData()
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-        self.control.internalTaper(taper) if self.internal.GetValue() else \
-            self.control.externalTaper(taper)
+        rtn = self.control.internalTaper(taper) if self.internal.GetValue() \
+              else self.control.externalTaper(taper)
+        return(rtn)
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -2497,6 +2556,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.stopSpindle()
         self.m.done(1)
         stdout.flush()
+        return(True)
 
     def setup(self, add=False):
         m = self.m
@@ -2767,7 +2827,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def sendAction(self):
         self.sendData()
-        self.control.runOperation()
+        return(self.control.runOperation())
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -3233,9 +3293,10 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
-        (x, y) = e.GetPosition()
-        xPos += x
-        yPos += y
+        if e is not None:
+            (x, y) = e.GetPosition()
+            xPos += x
+            yPos += y
         return(xPos, yPos)
 
     def OnZMenu(self, e):
@@ -3534,17 +3595,33 @@ class JogPanel(wx.Panel, FormRoutines):
                 if val > 1:
                     combo.SetSelection(val - 1)
         elif code == ord('r'):
-            panel = cfg.getInfoData(cf.mainPanel)
-            panel = mainFrame.panels[panel]
+            panel = mainFrame.getCurrentPanel()
             panel.OnSend(None)
         elif code == ord('s'):
             self.OnResume(None)
         elif code == ord('p'):
             self.OnPause(None)
+        elif code == ord('a'):
+            panel = mainFrame.getCurrentPanel()
+            panel.OnAdd(None)
+        elif code == ord('A'):
+            panel = mainFrame.getCurrentPanel()
+            panel.setAddFocus()
         elif code == wx.WXK_F9:
             self.OnStartSpindle(None)
         elif code == wx.WXK_ESCAPE:
             self.OnStop(None)
+        elif code == ord('f'):
+            panel = mainFrame.getCurrentPanel()
+            panel.setFocus()
+        elif code == ord('z'):
+            self.OnZMenu(None)
+        elif code == ord('x'):
+            self.OnXMenu(None)
+        elif code == ord('d'):
+            self.OnDone(None)
+        elif code == ord('C'):
+            self.setStatus(st.STR_CLR)
         else:
             print("key char %x" % (code))
             stdout.flush()
@@ -4606,6 +4683,8 @@ class MainFrame(wx.Frame):
 
         moveCommands = MoveCommands()
 
+        self.currentPanel = None
+        
         self.zDialog = ZDialog(self, defaultFont)
         self.xDialog = XDialog(self, defaultFont)
         self.spindleDialog = SpindleDialog(self, defaultFont)
@@ -4619,7 +4698,6 @@ class MainFrame(wx.Frame):
 
         self.dirName = os.getcwd()
 
-        print("MainFram initUI")
         self.initUI()
 
         self.jogShuttle = jogShuttle = JogShuttle()
@@ -4628,76 +4706,7 @@ class MainFrame(wx.Frame):
         if XILINX:
             comm.xRegs = xr.xRegTable
 
-        sendClear()
-        stdout.flush()
-
-        if comm.ser is not None:
-            try:
-                comm.queParm(pm.CFG_XILINX, cfg.getBoolInfoData(cf.cfgXilinx))
-                comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
-                comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
-                comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
-                comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
-                comm.command(cm.CMD_SETUP)
-
-                global zHomeOffset
-                sendZData()
-                zPosition = cfg.getIntInfo(cf.zSvPosition)
-                comm.queParm(pm.Z_LOC, zPosition)
-                zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
-                comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
-                print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
-                      (zPosition, zPosition, \
-                       float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
-                stdout.flush()
-                if DRO:
-                    global zDROOffset
-                    zPosition = cfg.getIntInfo(cf.zSvDROPosition)
-                    comm.queParm(pm.Z_DRO_POS, zPosition)
-                    zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
-                    comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
-                    print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
-                          (zPosition, zPosition, \
-                           float(zPosition) / jogPanel.zDROInch, zDROOffset))
-                    stdout.flush()
-                comm.sendMulti()
-
-                global xHomeOffset
-                sendXData()
-                xPosition = cfg.getIntInfo(cf.xSvPosition)
-                comm.queParm(pm.X_LOC, xPosition)
-                xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
-                comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
-                print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
-                      (xPosition, xPosition, \
-                       float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
-                stdout.flush()
-                if DRO:
-                    global xDROOffset
-                    xPosition = cfg.getIntInfo(cf.xSvDROPosition)
-                    comm.queParm(pm.X_DRO_POS, xPosition)
-                    xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
-                    comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
-                    print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
-                          (xPosition, xPosition, \
-                           float(xPosition) / jogPanel.xDROInch, xDROOffset))
-                    stdout.flush()
-
-                if HOME_TEST:
-                    val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
-                                  jogPanel.xStepsInch))
-                    comm.queParm(pm.X_HOME_LOC, val)
-                    comm.queParm(pm.X_HOME_STATUS, \
-                                 ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
-                comm.sendMulti()
-
-                sendSpindleData()
-
-            except CommTimeout:
-                commTimeout()
-        else:
-            sendZData()
-            sendXData()
+        self.initDevice()
 
         eventTable = (\
                       (en.EV_ZLOC, self.jogPanel.updateZ), \
@@ -4840,7 +4849,7 @@ class MainFrame(wx.Frame):
         # self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         # self.Bind(wx.EVT_CHAR_HOOK, self.OnKeyChar)
 
-        sizerV = wx.BoxSizer(wx.VERTICAL)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.panels = {}
         self.turnPanel = panel = TurnPanel(self, self.hdrFont)
@@ -4912,6 +4921,78 @@ class MainFrame(wx.Frame):
         self.taperPanel.updateUI()
         self.Fit()
 
+    def initDevice(self):
+        sendClear()
+        stdout.flush()
+
+        if comm.ser is not None:
+            try:
+                comm.queParm(pm.CFG_XILINX, cfg.getBoolInfoData(cf.cfgXilinx))
+                comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
+                comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
+                comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
+                comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
+                comm.command(cm.CMD_SETUP)
+
+                global zHomeOffset
+                sendZData()
+                zPosition = cfg.getIntInfo(cf.zSvPosition)
+                comm.queParm(pm.Z_LOC, zPosition)
+                zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
+                comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
+                print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
+                      (zPosition, zPosition, \
+                       float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
+                stdout.flush()
+                if DRO:
+                    global zDROOffset
+                    zPosition = cfg.getIntInfo(cf.zSvDROPosition)
+                    comm.queParm(pm.Z_DRO_POS, zPosition)
+                    zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
+                    comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
+                    print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
+                          (zPosition, zPosition, \
+                           float(zPosition) / jogPanel.zDROInch, zDROOffset))
+                    stdout.flush()
+                comm.sendMulti()
+
+                global xHomeOffset
+                sendXData()
+                xPosition = cfg.getIntInfo(cf.xSvPosition)
+                comm.queParm(pm.X_LOC, xPosition)
+                xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
+                comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
+                print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
+                      (xPosition, xPosition, \
+                       float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
+                stdout.flush()
+                if DRO:
+                    global xDROOffset
+                    xPosition = cfg.getIntInfo(cf.xSvDROPosition)
+                    comm.queParm(pm.X_DRO_POS, xPosition)
+                    xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
+                    comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
+                    print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
+                          (xPosition, xPosition, \
+                           float(xPosition) / jogPanel.xDROInch, xDROOffset))
+                    stdout.flush()
+
+                if HOME_TEST:
+                    val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
+                                  jogPanel.xStepsInch))
+                    comm.queParm(pm.X_HOME_LOC, val)
+                    comm.queParm(pm.X_HOME_STATUS, \
+                                 ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
+                comm.sendMulti()
+
+                sendSpindleData()
+
+            except CommTimeout:
+                commTimeout()
+        else:
+            sendZData()
+            sendXData()
+
     def OnSave(self, e):
         cfg.saveInfo(configFile)
 
@@ -4969,6 +5050,9 @@ class MainFrame(wx.Frame):
     def OnConfigSetup(self, e):
         self.showDialog(self.configDialog)
 
+    def getCurrentPanel(self):
+        return(self.currentPanel)
+    
     def showPanel(self):
         key = cf.mainPanel
         if cfg.info[key] is None:
@@ -4977,7 +5061,11 @@ class MainFrame(wx.Frame):
 
         for key in self.panels:
             panel = self.panels[key]
-            panel.Show() if key == showPanel else panel.Hide()
+            if key == showPanel:
+                panel.Show()
+                self.currentPanel = panel
+            else:
+                panel.Hide()
         self.Layout()
         self.Fit()
 

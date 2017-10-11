@@ -11,7 +11,10 @@ STR_NOT_HOMED        =  6       # X Not Homed
 STR_FIELD_ERROR      =  7       # Entry Field Error
 STR_READALL_ERROR    =  8       # ReadAll Error
 STR_TIMEOUT_ERROR    =  9       # Timeout Error
-STR_CLR              = 10       # 
+STR_SIGN_ERROR       = 10       # X End and X Start do not have same sign
+STR_INTERNAL_ERROR   = 11       # X End < X Start
+STR_EXTERNAL_ERROR   = 12       # X End > X Start
+STR_CLR              = 13       # 
 
 strTable = ( \
     "Operation Not Active", \
@@ -24,5 +27,8 @@ strTable = ( \
     "Entry Field Error", \
     "ReadAll Error", \
     "Timeout Error", \
+    "X End and X Start do not have same sign", \
+    "X End < X Start", \
+    "X End > X Start", \
     "", \
     )
