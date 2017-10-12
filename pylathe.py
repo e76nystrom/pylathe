@@ -672,6 +672,10 @@ class MoveCommands():
                 print("dxf file save error")
                 traceback.print_exc()
 
+    def queInit(self):
+        self.zOffset = None
+        self.xOffset = None
+
     def queMove(self, op, val):
         if self.send:
             opString = en.mCommandsList[op]
@@ -1202,6 +1206,8 @@ class Turn(LatheOp, UpdatePass):
         m.drawLineZ(self.zStart, REF)
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
+
+        m.queInit()
         m.quePause()
         self.m.done(0)
         if STEP_DRV:
