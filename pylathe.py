@@ -694,6 +694,7 @@ class MoveCommands():
         self.send = not cfg.getBoolInfoData(cf.cfgCmdDis)
         while not self.moveQue.empty():
             self.moveQue.get()
+        self.queInit()
 
     def queZSetup(self, feed):
         self.queMove(en.Z_FEED_SETUP, feed)
@@ -744,12 +745,14 @@ class MoveCommands():
         self.drawLineZ(zLocation)
         if self.dbg:
             print("moveZ  %7.4f" % (zLocation))
+            stdout.flush()
 
     def moveX(self, xLocation, flag=ct.CMD_MAX):
         self.queMoveF(en.MOVE_X, flag, xLocation)
         self.drawLineX(xLocation)
         if self.dbg:
             print("moveX  %7.4f" % (xLocation))
+            stdout.flush()
 
     def saveZOffset(self):
         if self.zOffset != zHomeOffset:
@@ -757,6 +760,7 @@ class MoveCommands():
             self.queMove(en.SAVE_Z_OFFSET, zHomeOffset)
             if self.dbg:
                 print("saveZOffset  %7.4f" % (zHomeOffset))
+                stdout.flush()
 
     def saveXOffset(self):
         if self.xOffset != xHomeOffset:
@@ -764,6 +768,7 @@ class MoveCommands():
             self.queMove(en.SAVE_X_OFFSET, xHomeOffset)
             if self.dbg:
                 print("savexOffset  %7.4f" % (xHomeOffset))
+                stdout.flush()
 
     def moveXZ(self, zLocation, xLocation):
         self.queMove(en.SAVE_Z, zLocation)
@@ -1243,9 +1248,9 @@ class Turn(LatheOp, UpdatePass):
         self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
         self.passSize[self.passCount] = self.curX * 2.0
-        print("pass %2d feed %5.3f x %5.3f diameter %5.3f" % \
-              (self.passCount, feed, self.curX, self.curX * 2.0))
-        stdout.flush()
+        jogPanel.dPrt("pass %2d feed %5.3f x %5.3f diameter %5.3f\n" % \
+                      (self.passCount, feed, self.curX, self.curX * 2.0), \
+                      True, True)
 
     def runPass(self):
         m = self.m
@@ -3079,7 +3084,20 @@ class JogPanel(wx.Panel, FormRoutines):
             self.zDROOffset = None
             self.xDROPostition = None
             self.xDROOffset = None
+        self.dbg = open("dbgLog.txt", "ab")
 
+    def close(self):
+        self.dbg.close()
+
+    def dPrt(self, text, console=False, flush=False):
+        self.dbg.write(text)
+        if flush:
+            self.dbg.flush()
+        if console:
+            print(text, end='')
+            if flush:
+                stdout.flush
+                
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
@@ -4236,8 +4254,10 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 m.moveZ(loc)
             else:
                 sendXData()
+                m.dbg = True
                 m.saveXOffset()
                 m.moveX(loc / 2.0)
+                m.dbg = False
             comm.command(cm.CMD_RESUME)
             self.Show(False)
             jogPanel.focus()
@@ -4304,9 +4324,21 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             self.actualXPos.SetValue('0.000')
             return
         offset = (actualX - curX) / 2.0
+        curOffset = xHomeOffset
         xHomeOffset -= offset
+        comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
+        jogPanel.xHomeOffset.value = xHomeOffset
 
-        cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
+        dPrt = jogPanel.dPrt
+        dPrt("fix x\n")
+        dPrt("curX %7.4f actualX %7.4f offset %7.4f\n" \
+                  "xHomeOffset cur %7.4f new %7.4f\n" % \
+                  (curX, actualX, offset, curOffset, xHomeOffset))
+        curLoc = float(jogPanel.xPosition.value) / jogPanel.xStepsInch
+        dPrt("xDiam cur %7.4f new %7.4f\n\n" % \
+                  ((curLoc - curOffset) * 2, (curLoc - xHomeOffset) * 2), \
+             flush=True)
+
         print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" % \
               (curX, actualX, offset, xHomeOffset))
         stdout.flush()
@@ -4753,6 +4785,7 @@ class MainFrame(wx.Frame):
                         cf.xSvDROPosition, cf.xSvDROOffset)
         cfg.saveList(posFile, posList)
         done = True
+        jogPanel.close()
         self.update.threadRun = False
         buttonRepeat.threadRun = False
         self.Destroy()
