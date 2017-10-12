@@ -1373,7 +1373,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def update(self):
         self.updateUI()
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Diam")
+        jogPanel.setPassText("Diam")
 
     def sendData(self):
         try:
@@ -1611,7 +1611,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Len")
+        jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
@@ -1773,7 +1773,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Len")
+        jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
@@ -2296,12 +2296,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.internal.GetValue():
             cfg.infoSetLabel(cf.tpLargeDiamText, "Bore Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Large Diam")
-            jogPanel.passText.SetLabel("L Diam")
+            jogPanel.setPassText("L Diam")
 
         else:
             cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetLabel("S Diam" if taper < 1.0 else \
+            jogPanel.setPassText("S Diam" if taper < 1.0 else \
                                        "Z Start")
         self.sizerV.Layout()
 
@@ -2793,7 +2793,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.formatData(self.formatList)
         self.updateFirstFeed()
         self.updateLastFeed()
-        jogPanel.passText.SetLabel("M Diam")
+        jogPanel.setPassText("M Diam")
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
@@ -3286,6 +3286,9 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
+
+    def setPassText(self, txt):
+        self.passText.SetLabel(txt)
 
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
@@ -4905,8 +4908,6 @@ class MainFrame(wx.Frame):
         w, h = self.GetSize()
         self.SetPosition(((3 * dw) / 4 - w, 0))
 
-        self.showPanel()
-
         self.turnPanel.update()
         self.facePanel.update()
         self.cutoffPanel.update()
@@ -4914,7 +4915,7 @@ class MainFrame(wx.Frame):
         if STEP_DRV:
             self.threadPanel.update()
 
-        self.taperPanel.updateUI()
+        self.showPanel()
         self.Fit()
 
     def initDevice(self):
