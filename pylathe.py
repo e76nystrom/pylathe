@@ -62,6 +62,7 @@ DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
 REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
 STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
 MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
+HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
 cfg.clrInfo(len(cf.config))
 
@@ -107,14 +108,20 @@ stdout.flush()
 f = None
 mainFrame = None
 updateThread = None
+moveCommands = None
+buttonRepeat = None
 jogPanel = None
+jogShuttle = None
+
 spindleDataSent = False
 zDataSent = False
 xDataSent = False
+
 zPosition = 0.0
 zHomeOffset = 0.0
 xPosition = 0.0
 xHomeOffset = 0.0
+
 if DRO:
     zDROOffset = 0.0
     xDROOffset = 0.0
@@ -122,10 +129,6 @@ if DRO:
     xDROPosition = 0.0
 xHomed = False
 done = False
-jogShuttle = None
-moveCommands = None
-
-buttonRepeat = None
 
 AL_LEFT   = 0x001
 AL_RIGHT  = 0x002
@@ -3747,7 +3750,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     if val & ct.PROBE_SUCCESS:
                         zHomeOffset = zLocation - self.probeLoc
                         self.zHomeOffset.value = zHomeOffset
-                        cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % (zHomeOffset))
+                        # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % (zHomeOffset))
                         if DRO:
                             self.updateZDroPos(self.probeLoc, zDROPos)
                         print("z %s zLocation %7.4f probeLoc %7.4f "\
@@ -3763,7 +3766,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     if val & ct.PROBE_SUCCESS:
                         xHomeOffset = xLocation - self.probeLoc
                         self.xHomeOffset.value = xHomeOffset
-                        cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
+                        # cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
                         if DRO:
                             self.updateXDroPos(self.probeLoc, xDROPos)
                         print("x %s xLocation %7.4f probeLoc %7.4f "\
@@ -4004,14 +4007,27 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnHomeX(self, e):
-        comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
-        comm.queParm(pm.X_HOME_BACKOFF_DIST, \
-                     cfg.getInfoData(cf.xHomeBackoffDist))
-        comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-        comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
-                     else -1)
-        comm.command(cm.XHOMEAXIS)
-        self.jogPanel.probe(HOME_X)
+        global xHomeOffset, xHomed
+        if not HOME_IN_PLACE:
+            comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
+            comm.queParm(pm.X_HOME_BACKOFF_DIST, \
+                         cfg.getInfoData(cf.xHomeBackoffDist))
+            comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
+            comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
+                         else -1)
+            comm.command(cm.XHOMEAXIS)
+            self.jogPanel.probe(HOME_X)
+        else: 
+            xLocation = float(jogPanel.xPos.GetValue())
+            xHomeOffset = 0 - xLocation
+            jogPanel.xHomeOffset.value = xHomeOffset
+            comm.setParm(pm.X_LOC, 0)
+            comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
+            if DRO:
+                comm.setParm(pm.X_DRO_POS, 0)
+                jogPanel.updateXDroPos(xLocation)
+            jogPanel.homeDone("home success")
+            xHomed = True
         self.jogPanel.focus()
 
     def OnGoto(self, e):
@@ -5389,6 +5405,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDraw Moves", cf.cfgDraw, None), \
             ("bSave Debug", cf.cfgDbgSave, None), \
             ("bRemote Debug", cf.cfgRemDbg, None), \
+            ("bHome in Place", cf.cfgHomeInPlace, None), \
         )
         if XILINX:
             self.fields += (

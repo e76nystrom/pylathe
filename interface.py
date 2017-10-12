@@ -11,6 +11,7 @@ configList = \
     ('cfgEncoder', 'config xilinx encoder counts per revolution'),
     ('cfgFcy', 'config microprocesssor clock frequency'),
     ('cfgFreqMult', 'config xilinx frequency multiplier'),
+    ('cfgHomeInPlace', 'config home in place'),
     ('cfgInvEncDir', 'config xilinx invert encoder direction'),
     ('cfgLCD', 'config enable lcd'),
     ('cfgMPG', 'config enable manual pulse generator'),
