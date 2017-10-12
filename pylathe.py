@@ -1035,7 +1035,7 @@ class LatheOp():
 
 class UpdatePass():
     def __init__(self):
-        self.calcPass = None    # pass calculation routine
+        self.calculatePass = None    # pass calculation routine
         self.genPass = None     # pass generation routine
 
         self.passes = 0
@@ -1070,7 +1070,7 @@ class UpdatePass():
         self.sPasses = getIntVal(panel.spring)
 
     def setupAction(self, calcPass, genPass):
-        self.calcPass = calcPass
+        self.calculatePass = calcPass
         self.genPass = genPass
 
     def initPass(self):
@@ -1135,8 +1135,8 @@ class Turn(LatheOp, UpdatePass):
         self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
-        self.zStart = getFloatVal(tu.zStart) / 2.0
-        self.zEnd = getFloatVal(tu.zEnd) / 2.0
+        self.zStart = getFloatVal(tu.zStart)
+        self.zEnd = getFloatVal(tu.zEnd)
         self.zRetract = getFloatVal(tu.zRetract)
 
     def runOperation(self):
@@ -1168,7 +1168,7 @@ class Turn(LatheOp, UpdatePass):
 
         self.calcFeed(self.xFeed, self.xCut)
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.calculatePass, self.runPass)
+        self.setupAction(self.calcPass, self.runPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
         print("xCut %5.3f passes %d internal %s" % \
@@ -1228,7 +1228,7 @@ class Turn(LatheOp, UpdatePass):
         m.text("%7.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), CENTER)
 
-    def calculatePass(self, final=False):
+    def calcPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         if self.internal:
@@ -1263,18 +1263,17 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
 
     def addPass(self):
-        if self.feed >= self.xCut:
-            add = getFloatVal(self.panel.add)
-            self.cutAmount += add
-            self.calculatePass(True)
-            self.setup()
-            moveCommands.nextPass(self.passCount)
-            self.runPass()
-            self.m.moveX(self.xStart + self.xRetract)
-            if STEP_DRV or MOTOR_TEST:
-                self.m.stopSpindle()
-            self.m.done(1)
-            comm.command(cm.CMD_RESUME)
+        add = getFloatVal(self.panel.add) / 2.0
+        self.cutAmount += add
+        self.calcPass(True)
+        self.setup()
+        moveCommands.nextPass(self.passCount)
+        self.runPass()
+        self.m.moveX(self.xStart + self.xRetract)
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
+        self.m.done(1)
+        comm.command(cm.CMD_RESUME)
 
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -1380,7 +1379,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def update(self):
         self.updateUI()
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Diam")
+        jogPanel.setPassText("Diam")
 
     def sendData(self):
         try:
@@ -1433,7 +1432,7 @@ class Face(LatheOp, UpdatePass):
 
         self.calcFeed(self.zFeed, self.zCut)
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.calculatePass, self.runPass)
+        self.setupAction(self.calcPass, self.runPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
         print("zCut %5.3f passes %d internal %s" % \
@@ -1489,7 +1488,7 @@ class Face(LatheOp, UpdatePass):
         m.text("%7.3f" % (self.xEnd * 2.0), \
                (self.zEnd, self.xEnd), CENTER)
 
-    def calculatePass(self, final=False):
+    def calcPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         self.curZ = self.zStart - feed
@@ -1517,19 +1516,18 @@ class Face(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def addPass(self):
-        if self.feed >= self.zCut:
-            add = getFloatVal(self.panel.add)
-            self.cutAmount += add
-            self.setup()
-            self.calculatePass(True)
-            moveCommands.nextPass(self.passCount)
-            self.runPass()
-            self.m.moveX(self.safeX)
-            self.m.moveZ(self.zStart + self.zRetract)
-            if STEP_DRV or MOTOR_TEST:
-                self.m.stopSpindle()
-            self.m.done(1)
-            comm.command(cm.CMD_RESUME)
+        add = getFloatVal(self.panel.add)
+        self.cutAmount += add
+        self.setup()
+        self.calcPass(True)
+        moveCommands.nextPass(self.passCount)
+        self.runPass()
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.zStart + self.zRetract)
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
+        self.m.done(1)
+        comm.command(cm.CMD_RESUME)
 
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -1619,7 +1617,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Len")
+        jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
@@ -1781,7 +1779,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
-        jogPanel.passText.SetLabel("Len")
+        jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
@@ -1900,7 +1898,7 @@ class Taper(LatheOp, UpdatePass):
         m.text("%0.3f" % (self.zEnd), \
                (self.zEnd, self.safeX), RIGHT | MIDDLE)
 
-    def externalTaper(self, taperInch):
+    def externalSetup(self, taperInch):
         print("externalTaper")
         self.internal = False
         self.getParameters(taperInch)
@@ -1929,7 +1927,7 @@ class Taper(LatheOp, UpdatePass):
 
         self.calcFeed(feed, self.cut, finish)
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.calcExternalPass, self.externalPass)
+        self.setupAction(self.externalCalcPass, self.externalRunPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
@@ -1953,7 +1951,7 @@ class Taper(LatheOp, UpdatePass):
         stdout.flush()
         return(True)
 
-    def calcExternalPass(self, final=False):
+    def ExternalCalcPass(self, final=False):
         if self.taperX:
             feed = self.cutAmount if final else \
                    self.passCount * self.actualFeed
@@ -1984,7 +1982,7 @@ class Taper(LatheOp, UpdatePass):
                self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
         stdout.flush()
 
-    def externalPass(self):
+    def externalRunPass(self):
         m = self.m
         m.moveZ(self.startZ - self.backInc) # move past start
         m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
@@ -2014,25 +2012,24 @@ class Taper(LatheOp, UpdatePass):
                        (self.safeZ, self.endX))
         m.moveX(self.safeX)
 
-    def externalAdd(self):
-        if self.feed >= self.cutAmount:
-            add = getFloatVal(self.panel.add) / 2
-            self.cutAmount += add
-            self.setup()
-            self.calcExternalPass(True)
-            moveCommands.nextPass(self.passCount)
-            self.externalPass()
-            if self.taperX:
-                self.m.moveX(self.safeX)
-                self.m.moveZ(self.startZ)
-            else:
-                pass
-            if STEP_DRV or MOTOR_TEST:
-                self.m.stopSpindle()
-            self.m.done(1)
-            comm.command(cm.CMD_RESUME)
+    def externalAddPass(self):
+        add = getFloatVal(self.panel.add) / 2
+        self.cutAmount += add
+        self.setup()
+        self.externalCalcPass(True)
+        moveCommands.nextPass(self.passCount)
+        self.externalPass()
+        if self.taperX:
+            self.m.moveX(self.safeX)
+            self.m.moveZ(self.startZ)
+        else:
+            pass
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
+        self.m.done(1)
+        comm.command(cm.CMD_RESUME)
 
-    def internalTaper(self, taperInch):
+    def internalSetup(self, taperInch):
         print("internalTaper")
         self.internal = True
         self.getParameters(taperInch)
@@ -2043,7 +2040,7 @@ class Taper(LatheOp, UpdatePass):
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.calcInternalPass, self.internalPass)
+        self.setupAction(self.InternalCalcPass, self.internalRunPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
@@ -2073,7 +2070,7 @@ class Taper(LatheOp, UpdatePass):
         stdout.flush()
         return(True)
 
-    def calcInternalPass(self, final=False):
+    def internalCalcPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
         self.feed = feed
         self.endX = self.boreRadius + feed
@@ -2091,7 +2088,7 @@ class Taper(LatheOp, UpdatePass):
                self.endX, self.endZ, \
                2.0 * self.startX, 2.0 * self.endX))
 
-    def internalPass(self):
+    def internalRunPass(self):
         m = self.m
         m.moveZ(self.startZ - self.backInc) # past the start point
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
@@ -2111,22 +2108,21 @@ class Taper(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
-    def internalAdd(self):
-        if self.feed >= self.cutAmount:
-            add = getFloatVal(self.panel.add) / 2
-            self.feed += add
-            self.passCount += 1
-            self.taper()
-            self.m.moveZ(self.safeZ)
-            self.calcInternalPass()
-            moveCommands.nextPass(self.passCount)
-            self.internalPass()
-            self.m.moveX(self.safeX)
-            self.m.moveZ(self.safeZ)
-            if STEP_DRV or MOTOR_TEST:
-                self.m.stopSpindle()
-            self.m.done(1)
-            comm.command(cm.CMD_RESUME)
+    def internalAddPass(self):
+        add = getFloatVal(self.panel.add) / 2
+        self.feed += add
+        self.passCount += 1
+        self.taper()
+        self.m.moveZ(self.safeZ)
+        self.internalCalcPass()
+        moveCommands.nextPass(self.passCount)
+        self.internalPass()
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.safeZ)
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
+        self.m.done(1)
+        comm.command(cm.CMD_RESUME)
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -2306,12 +2302,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.internal.GetValue():
             cfg.infoSetLabel(cf.tpLargeDiamText, "Bore Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Large Diam")
-            jogPanel.passText.SetLabel("L Diam")
+            jogPanel.setPassText("L Diam")
 
         else:
             cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
             cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
-            jogPanel.passText.SetLabel("S Diam" if taper < 1.0 else \
+            jogPanel.setPassText("S Diam" if taper < 1.0 else \
                                        "Z Start")
         self.sizerV.Layout()
 
@@ -2383,8 +2379,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         self.sendData()
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-        rtn = self.control.internalTaper(taper) if self.internal.GetValue() \
-              else self.control.externalTaper(taper)
+        rtn = self.control.internalSetup(taper) if self.internal.GetValue() \
+              else self.control.externalSetup(taper)
         return(rtn)
 
     def startAction(self):
@@ -2393,8 +2389,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             updateThread.openDebug()
 
     def addAction(self):
-        self.control.internalAdd() if self.internal.GetValue() else \
-            self.control.externalAdd()
+        self.control.internalAddPass() if self.internal.GetValue() else \
+            self.control.externalAddPass()
 
     # def OnDebug(self, e):
     #     self.sendData()
@@ -2529,7 +2525,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.panel.firstFeed.SetValue("%0.4f" % (firstF))
 
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.calculatePass, self.runPass)
+        self.setupAction(self.calcPass, self.runPass)
         self.initPass()
 
         if self.internal:
@@ -2594,7 +2590,7 @@ class ScrewThread(LatheOp, UpdatePass):
                    (self.zEnd, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
 
-    def calculatePass(self, final=False, add=False):
+    def calcPass(self, final=False, add=False):
         if not add:
             if final:
                 self.curArea = self.area
@@ -2648,10 +2644,10 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.moveX(self.safeX)
 
     def addPass(self):
-        add = getFloatVal(self.panel.add)
+        add = getFloatVal(self.panel.add) / 2.0
         self.feed += add
         self.setup(True)
-        self.calculatePass(add=True)
+        self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass()
         self.m.stopSpindle()
@@ -2803,7 +2799,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.formatData(self.formatList)
         self.updateFirstFeed()
         self.updateLastFeed()
-        jogPanel.passText.SetLabel("M Diam")
+        jogPanel.setPassText("M Diam")
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
@@ -3296,6 +3292,9 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
+
+    def setPassText(self, txt):
+        self.passText.SetLabel(txt)
 
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
@@ -4915,8 +4914,6 @@ class MainFrame(wx.Frame):
         w, h = self.GetSize()
         self.SetPosition(((3 * dw) / 4 - w, 0))
 
-        self.showPanel()
-
         self.turnPanel.update()
         self.facePanel.update()
         self.cutoffPanel.update()
@@ -4924,7 +4921,7 @@ class MainFrame(wx.Frame):
         if STEP_DRV:
             self.threadPanel.update()
 
-        self.taperPanel.updateUI()
+        self.showPanel()
         self.Fit()
 
     def initDevice(self):
