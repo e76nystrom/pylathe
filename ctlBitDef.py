@@ -66,3 +66,9 @@ MV_ACTIVE        = (1 << 1)     # movement active
 MV_HOME_ACTIVE   = (1 << 2)     # home active
 MV_XHOME         = (1 << 3)     # X home success
 MV_MEASURE       = (1 << 4)     # pause for measurement
+
+# pause flags
+
+PAUSE_ENA_Z_JOG  = (1 << 0)     # enable z job during pause
+PAUSE_ENA_X_JOG  = (1 << 1)     # enable x jog during pause
+DISABLE_JOG      = (1 << 2)     # jogging disabled

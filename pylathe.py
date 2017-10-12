@@ -734,8 +734,8 @@ class MoveCommands():
             else:
                 print("pass %d]" % (passNum))
 
-    def quePause(self):
-        self.queMove(en.QUE_PAUSE, 0)
+    def quePause(self, val=0):
+        self.queMove(en.QUE_PAUSE, val)
 
     def saveDiameter(self, val):
         self.queMove(en.SAVE_DIAMETER, val)
@@ -1216,7 +1216,7 @@ class Turn(LatheOp, UpdatePass):
         m.setLoc(self.safeZ, self.safeX)
 
         m.queInit()
-        m.quePause()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
@@ -1252,13 +1252,13 @@ class Turn(LatheOp, UpdatePass):
                       (self.passCount, feed, self.curX, self.curX * 2.0), \
                       True, True)
 
-    def runPass(self):
+    def runPass(self, addPass=False):
         m = self.m
         m.moveX(self.curX, ct.CMD_JOG)
         m.saveDiameter(self.curX * 2.0)
         if self.panel.pause.GetValue():
             print("pause")
-            self.m.quePause()
+            self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
                    (self.safeZ, self.curX))
@@ -1276,7 +1276,7 @@ class Turn(LatheOp, UpdatePass):
         self.calcPass(True)
         self.setup()
         moveCommands.nextPass(self.passCount)
-        self.runPass()
+        self.runPass(True)
         self.m.moveX(self.xStart + self.xRetract)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
@@ -1476,7 +1476,7 @@ class Face(LatheOp, UpdatePass):
         m.drawLineZ(self.zStart, REF)
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.zStart, self.safeX)
-        m.quePause()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.faRPM))
@@ -1506,12 +1506,12 @@ class Face(LatheOp, UpdatePass):
               (self.passCount, feed, self.curZ))
         stdout.flush()
 
-    def runPass(self):
+    def runPass(self, addPass=False):
         m = self.m
         m.moveZ(self.curZ, ct.CMD_JOG)
         if self.panel.pause.GetValue():
             print("pause")
-            m.quePause()
+            m.quePause(ct.PAUSE_ENA_Z_JOG if addPass else 0)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.curZ), \
                    (self.curZ, self.safeX), RIGHT if self.internal else None)
@@ -1529,7 +1529,7 @@ class Face(LatheOp, UpdatePass):
         self.setup()
         self.calcPass(True)
         moveCommands.nextPass(self.passCount)
-        self.runPass()
+        self.runPass(True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart + self.zRetract)
         if STEP_DRV or MOTOR_TEST:
@@ -1703,7 +1703,7 @@ class Cutoff(LatheOp):
 
     def setup(self):
         m = self.m
-        m.quePause()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
@@ -1875,7 +1875,7 @@ class Taper(LatheOp, UpdatePass):
         m.drawLineZ(self.zStart, REF)
         m.drawLineX(self.xEnd, REF)
         m.setLoc(self.safeZ, self.safeX)
-        m.quePause()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
         if self.taperX:
             m.saveTaper(self.taper)
@@ -1990,13 +1990,13 @@ class Taper(LatheOp, UpdatePass):
                self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
         stdout.flush()
 
-    def externalRunPass(self):
+    def externalRunPass(self, addPass=False):
         m = self.m
         m.moveZ(self.startZ - self.backInc) # move past start
         m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
         if self.pause:
             print("pause")
-            m.quePause()
+            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if self.taperX:
             if m.passNum & 0x300 == 0:
                 if self.taperLength < self.zLength:
@@ -2026,7 +2026,7 @@ class Taper(LatheOp, UpdatePass):
         self.setup()
         self.externalCalcPass(True)
         moveCommands.nextPass(self.passCount)
-        self.externalPass()
+        self.externalRunPass(True)
         if self.taperX:
             self.m.moveX(self.safeX)
             self.m.moveZ(self.startZ)
@@ -2096,14 +2096,14 @@ class Taper(LatheOp, UpdatePass):
                self.endX, self.endZ, \
                2.0 * self.startX, 2.0 * self.endX))
 
-    def internalRunPass(self):
+    def internalRunPass(self, addPass=False):
         m = self.m
         m.moveZ(self.startZ - self.backInc) # past the start point
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
             print("pause")
-            m.quePause()
+            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if m.passNum & 0x300 == 0:
             m.saveZText((m.passNum, self.startZ, self.startX, \
                          self.startX * 2.0), (self.startZ, self.safeX))
@@ -2124,7 +2124,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.moveZ(self.safeZ)
         self.internalCalcPass()
         moveCommands.nextPass(self.passCount)
-        self.internalPass()
+        self.internalRunPass(True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
         if STEP_DRV or MOTOR_TEST:
@@ -2575,7 +2575,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
-        m.quePause()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
         m.startSpindle(cfg.getIntInfoData(cf.thRPM))
         feedType = ct.FEED_TPI if self.panel.tpi.GetValue() else ct.FEED_METRIC
@@ -2636,7 +2636,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.drawLine(p1, pb)
             self.p0 = p1
 
-    def runPass(self):
+    def runPass(self, addPass=False):
         m = self.m
         startZ = self.safeZ - self.zOffset
         self.m.moveZ(startZ + self.zBackInc)
@@ -2644,7 +2644,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.moveX(self.curX, ct.CMD_JOG)
         if self.panel.pause.GetValue():
             print("pause")
-            self.m.quePause()
+            self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if m.passNum & 0x300 == 0:
             m.saveXText((m.passNum, startZ, self.zOffset, \
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
@@ -2657,7 +2657,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.setup(True)
         self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
-        self.runPass()
+        self.runPass(True)
         self.m.stopSpindle()
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
@@ -3084,6 +3084,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.zDROOffset = None
             self.xDROPostition = None
             self.xDROOffset = None
+            self.xDRODiam = False
         self.dbg = open("dbgLog.txt", "ab")
 
     def close(self):
@@ -3733,6 +3734,8 @@ class JogPanel(wx.Panel, FormRoutines):
                           (xDROPos, xDroLoc, xDROOffset))
                     stdout.flush()
                 xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
+                if self.droDiam:
+                    xDroLoc *= 2.0
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
@@ -4002,6 +4005,11 @@ class PosMenu(wx.Menu):
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
+            if DRO:
+                item = wx.MenuItem(self, wx.NewId(), "DRO Diam")
+                self.Append(item)
+                self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
+
     def getPosCtl(self):
         ctl = self.jogPanel.zPos if self.axis == AXIS_Z else \
               self.jogPanel.xPos
@@ -4062,6 +4070,9 @@ class PosMenu(wx.Menu):
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
+
+    def OnDroDiam(self, e):
+        self.droDiam = not self.droDiam
 
 class SetPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPnl, axis):
