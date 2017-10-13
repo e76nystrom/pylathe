@@ -82,7 +82,9 @@ SAVE_RUNOUT      = 21           # save thread runout
 SAVE_DEPTH       = 22           # save thread depth
 PROBE_Z          = 23           # probe in z direction
 PROBE_X          = 24           # probe in x direction
-OP_DONE          = 25           # operation done
+SAVE_Z_DRO       = 25           # save z dro reading
+SAVE_X_DRO       = 26           # save x dro reading
+OP_DONE          = 27           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -110,6 +112,8 @@ mCommandsList = ( \
     "SAVE_DEPTH",
     "PROBE_Z",
     "PROBE_X",
+    "SAVE_Z_DRO",
+    "SAVE_X_DRO",
     "OP_DONE",
     )
 
@@ -143,22 +147,24 @@ D_XSTP           =  6           # x steps
 D_XST            =  7           # x state
 D_XBSTP          =  8           # x backlash steps
 D_XDRO           =  9           # x dro location
-D_XEXP           = 10           # x expected location
-D_XWT            = 11           # x wait
-D_XDN            = 12           # x done
-D_ZMOV           = 13           # z move location
-D_ZLOC           = 14           # z location
-D_ZDST           = 15           # z distance
-D_ZSTP           = 16           # z steps
-D_ZST            = 17           # z state
-D_ZBSTP          = 18           # z backlash steps
-D_ZDRO           = 19           # z dro location
-D_ZEXP           = 20           # z expected location
-D_ZWT            = 21           # z wait
-D_ZDN            = 22           # z done
-D_HST            = 23           # home state
-D_MSTA           = 24           # move state
-D_MCMD           = 25           # move command
+D_XPDRO          = 10           # x pass dro location
+D_XEXP           = 11           # x expected location
+D_XWT            = 12           # x wait
+D_XDN            = 13           # x done
+D_ZMOV           = 14           # z move location
+D_ZLOC           = 15           # z location
+D_ZDST           = 16           # z distance
+D_ZSTP           = 17           # z steps
+D_ZST            = 18           # z state
+D_ZBSTP          = 19           # z backlash steps
+D_ZDRO           = 20           # z dro location
+D_ZPDRO          = 21           # z pass dro location
+D_ZEXP           = 22           # z expected location
+D_ZWT            = 23           # z wait
+D_ZDN            = 24           # z done
+D_HST            = 25           # home state
+D_MSTA           = 26           # move state
+D_MCMD           = 27           # move command
 
 dMessageList = ( \
     "D_PASS",
@@ -171,6 +177,7 @@ dMessageList = ( \
     "D_XST",
     "D_XBSTP",
     "D_XDRO",
+    "D_XPDRO",
     "D_XEXP",
     "D_XWT",
     "D_XDN",
@@ -181,6 +188,7 @@ dMessageList = ( \
     "D_ZST",
     "D_ZBSTP",
     "D_ZDRO",
+    "D_ZPDRO",
     "D_ZEXP",
     "D_ZWT",
     "D_ZDN",

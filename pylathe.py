@@ -820,6 +820,12 @@ class MoveCommands():
         if self.dbg:
             print("probeX %7.4f" % (xDist))
 
+    def saveZDro(self):
+        self.queMove(en.SAVE_Z_DRO)
+
+    def saveXDro(self):
+        self.queMove(en.SAVE_X_DRO)
+
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
 
@@ -1256,6 +1262,8 @@ class Turn(LatheOp, UpdatePass):
         m = self.m
         m.moveX(self.curX, ct.CMD_JOG)
         m.saveDiameter(self.curX * 2.0)
+        if DRO:
+            m.saveXDro()
         if self.panel.pause.GetValue():
             print("pause")
             self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
@@ -1264,6 +1272,8 @@ class Turn(LatheOp, UpdatePass):
                    (self.safeZ, self.curX))
         m.moveZ(self.zStart)
         m.moveZ(self.zEnd, ct.CMD_SYN)
+        if DRO:
+            m.saveZDro()
         m.moveX(self.safeX)
         if m.passNum & 0x300 == 0:
             m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
@@ -4374,6 +4384,7 @@ class UpdateThread(Thread):
         self.parmList = (self.readAll, )
         self.zDro = None
         self.xDro = None
+        self.passVal = None
         self.dbg = None
         self.start()
 
@@ -4450,6 +4461,7 @@ class UpdateThread(Thread):
                     (en.D_XST, self.dbgXState), \
                     (en.D_XBSTP, self.dbgXBSteps), \
                     (en.D_XDRO, self.dbgXDro), \
+                    (en.D_XPDRO, self.dbgXPDro), \
                     (en.D_XEXP, self.dbgXExp), \
                     (en.D_XWT, self.dbgXWait), \
                     (en.D_XDN, self.dbgXDone), \
@@ -4461,6 +4473,7 @@ class UpdateThread(Thread):
                     (en.D_ZST, self.dbgZState), \
                     (en.D_ZBSTP, self.dbgZBSteps), \
                     (en.D_ZDRO, self.dbgZDro), \
+                    (en.D_ZPDRO, self.dbgZPDro), \
                     (en.D_ZEXP, self.dbgZExp), \
                     (en.D_ZWT, self.dbgZWait), \
                     (en.D_ZDN, self.dbgZDone), \
@@ -4560,12 +4573,13 @@ class UpdateThread(Thread):
                         try:
                             action = dbgTbl[cmd]
                             output = action(val)
-                            if self.dbg is None:
-                                print(t + output)
-                                stdout.flush()
-                            else:
-                                self.dbg.write(t + output + "\n")
-                                self.dbg.flush()
+                            if output is not None:
+                                if self.dbg is None:
+                                    print(t + output)
+                                    stdout.flush()
+                                else:
+                                    self.dbg.write(t + output + "\n")
+                                    self.dbg.flush()
                             if cmd == en.D_DONE:
                                 if val == 0:
                                     baseTime = time()
@@ -4601,6 +4615,7 @@ class UpdateThread(Thread):
         #     return("spring\n")
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
+        self.passVal = val
         result = "spring\n" if val & 0x100 else \
                  "spring %d\n" % (val & 0xff) if val & 0x200 else \
                  "pass %d\n" % (val)
@@ -4650,6 +4665,12 @@ class UpdateThread(Thread):
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
 
+    def dbgXPDro(self, val):
+        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
+              xDROOffset
+        jogPanel.dPrt("pass %d xdro %7.4f\n" % (self.passVal, tmp * 2.0))
+        return(None)
+
     def dbgXExp(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
         return("xexp %7.4f" % (tmp))
@@ -4694,6 +4715,12 @@ class UpdateThread(Thread):
               zDROOffset
         self.zDro = tmp
         return("zdro %7.4f" % (tmp))
+
+    def dbgZPDro(self, val):
+        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
+              zDROOffset
+        jogPanel.dPrt("pass %d zdro %7.4f\n" % (self.passVal, tmp * 2.0))
+        return(None)
 
     def dbgZExp(self, val):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
