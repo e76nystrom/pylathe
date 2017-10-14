@@ -151,6 +151,18 @@ JOG_SPINDLE = 2
 def commTimeout():
     jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
+def getFloatVal(tc):
+    try:
+        return(float(tc.GetValue()))
+    except ValueError:
+        return(0.0)
+
+def getIntVal(tc):
+    try:
+        return(int(tc.GetValue()))
+    except ValueError:
+        return(0)
+
 class FormRoutines():
     def __init__(self, panel=True):
         self.emptyCell = (0, 0)
@@ -373,19 +385,26 @@ class ActionRoutines():
         self.formatList = None
 
     def formatData(self, formatList):
-        pass
+        print("ActionRoutines formatData stub called")
+        stdout.flush()
+        return(True)
 
     def sendAction(self):
+        print("ActionRoutines sendAction stub called")
+        stdout.flush()
         return(False)
 
     def startAction(self):
-        pass
+        print("ActionRoutines startAction stub called")
+        stdout.flush()
 
     def addAction(self):
-        pass
+        print("ActionRoutines addAction stub called")
+        stdout.flush()
 
     def update(self):
-        pass
+        print("ActionRoutines update stub called")
+        stdout.flush()
 
     def getSafeLoc(self):
         control = self.control
@@ -438,7 +457,8 @@ class ActionRoutines():
             except CommTimeout:
                 commTimeout()
             except AttributeError:
-                pass
+                print("ActionRoutines OnStart AttributeError")
+                stdout.flush()
         jogPanel.focus()
 
     def OnAdd(self, e):
@@ -458,7 +478,8 @@ class ActionRoutines():
             except CommTimeout:
                 commTimeout()
             except AttributeError:
-                pass
+                print("ActionRoutines OnAdd AttributeError")
+                stdout.flush()
         jogPanel.focus()
 
 class DialogActions():
@@ -470,13 +491,16 @@ class DialogActions():
         self.Bind(wx.EVT_SHOW, self.OnShow)
 
     def setupAction(self):
-        pass
+        print("DialogAction setupAction stub called")
+        stdout.flush()
 
     def showAction(self, changed):
-        pass
+        print("DialogAction showAction stub called")
+        stdout.flush()
 
     def formatData(self, fields):
-        pass
+        print("DialogAction formatData stub called")
+        stdout.flush()
 
     def OnSetup(self, e):
         if not self.formatData(self.fields):
@@ -486,14 +510,15 @@ class DialogActions():
             if callable(self.setupAction):
                 self.setupAction()
         except AttributeError:
-            pass
+            print("Dialog OnSetup AttributeError")
+            stdout.flush()
 
     def OnShow(self, e):
         if done:
             return
         changed = False
         if self.IsShown():
-            self.changed = not self.formatData(self.fields)
+            self.formatData(self.fields)
             self.fieldInfo = {}
             for (label, index, fmt) in self.fields:
                 self.fieldInfo[index] = cfg.getInfo(index)
@@ -503,29 +528,23 @@ class DialogActions():
                 if self.fieldInfo[index] != val:
                     cfg.setInfoData(index, val)
                     self.sendData = True
+                    changed = True
         if changed:
             try:
                 if callable(self.showAction):
                     self.showAction(changed)
             except AttributeError:
-                pass
+                print("Dialog OnShow AttributeError")
+                stdout.flush()
+
+    def OnOk(self, e):
+        if self.formatData(self.fields):
+            self.Show(False)
 
     def OnCancel(self, e):
         for (label, index, fmt) in self.fields:
             cfg.setInfo(index, self.fieldInfo[index])
         self.Show(False)
-
-def getFloatVal(tc):
-    try:
-        return(float(tc.GetValue()))
-    except ValueError:
-        return(0.0)
-
-def getIntVal(tc):
-    try:
-        return(int(tc.GetValue()))
-    except ValueError:
-        return(0)
 
 class MoveCommands():
     def __init__(self):
@@ -5322,7 +5341,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK)
+        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
 
         self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
 
@@ -5391,7 +5410,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.addDialogButton(sizerH, wx.ID_OK)
+        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
 
         self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
 
@@ -5444,7 +5463,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK)
+        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
 
         self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
 
@@ -5453,6 +5472,9 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
+
+    def showAction(self, changed):
+        pass
 
 class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame, defaultFont):
@@ -5494,7 +5516,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK)
+        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
 
         self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
 
@@ -5503,6 +5525,9 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
+
+    def showAction(self, changed):
+        pass
 
 def testText(dialog, defaultFont):
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
