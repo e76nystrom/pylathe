@@ -840,10 +840,10 @@ class MoveCommands():
             print("probeX %7.4f" % (xDist))
 
     def saveZDro(self):
-        self.queMove(en.SAVE_Z_DRO)
+        self.queMove(en.SAVE_Z_DRO, 0)
 
     def saveXDro(self):
-        self.queMove(en.SAVE_X_DRO)
+        self.queMove(en.SAVE_X_DRO, 0)
 
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
@@ -1220,6 +1220,7 @@ class Turn(LatheOp, UpdatePass):
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("turn", self.zStart, self.zEnd)
 
+        jogPanel.dPrt("\nturn runOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -1242,7 +1243,7 @@ class Turn(LatheOp, UpdatePass):
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
+        m.done(0)
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
             m.queFeedType(ct.FEED_PITCH)
@@ -1300,6 +1301,7 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
 
     def addPass(self):
+        jogPanel.dPrt("\nturn addPass\n")
         add = getFloatVal(self.panel.add) / 2.0
         self.cutAmount += add
         self.calcPass(True)
@@ -3113,7 +3115,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.zDROOffset = None
             self.xDROPostition = None
             self.xDROOffset = None
-            self.xDRODiam = False
+            self.xDroDiam = False
         self.dbg = open("dbgLog.txt", "ab")
 
     def close(self):
@@ -3199,6 +3201,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=cf.droZPos)
+            self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
             # x dro Position
 
@@ -3206,6 +3209,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.addDialogField(sizerG, "X", "0.0000", txtFont, \
                                     posFont, (120, -1), border=(10, 2), \
                                     edit=False, index=cf.droXPos)
+            self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
@@ -3636,6 +3640,7 @@ class JogPanel(wx.Panel, FormRoutines):
         code = evt.GetKeyCode()
         if code == ord('c'):
             self.combo.SetSelection(0)
+            self.OnCombo(None)
         elif code == ord('i'):
             combo = self.combo
             val = combo.GetSelection()
@@ -3644,12 +3649,14 @@ class JogPanel(wx.Panel, FormRoutines):
             else:
                 combo.SetSelection(1) if val >= len(self.step) - 1 else \
                     combo.SetSelection(val + 1)
+            self.OnCombo(None)
         elif code == ord('I'):
             combo = self.combo
             val = combo.GetSelection()
             if val > 0:
                 if val > 1:
                     combo.SetSelection(val - 1)
+            self.OnCombo(None)
         elif code == ord('r'):
             panel = mainFrame.getCurrentPanel()
             panel.OnSend(None)
@@ -3678,10 +3685,72 @@ class JogPanel(wx.Panel, FormRoutines):
             self.OnDone(None)
         elif code == ord('C'):
             self.setStatus(st.STR_CLR)
+        elif code == ord('P'):
+            panel = mainFrame.currentPanel
+            val = panel.pause.GetValue()
+            panel.pause.SetValue(not val)
+        elif code == ord('t'):
+            self.axisTest(-0.025)
+        elif code == ord('T'):
+            self.axisTest(0.025, passes=20)
+        elif code == ord('S'):
+            self.axisTest(0.025, passes=5, retract=0.020, \
+                          pause=False, axis=AXIS_X)
+        elif code == ord('U'):
+            self.axisTest(0.025, passes=5, retract=0.020, \
+                          pause=False, axis=AXIS_Z)
         else:
             print("key char %x" % (code))
             stdout.flush()
             evt.Skip()
+
+    def testPass(self, passNum, curLoc, retract=None, pause=True, axis=AXIS_X):
+        m = moveCommands
+        m.nextPass(passNum)
+        m.moveX(curLoc) if axis == AXIS_X else m.moveZ(curLoc)
+        if DRO:
+            m.saveXDro() if axis == AXIS_X else m.saveZDro()
+        if pause:
+            m.quePause()
+        if retract is not None:
+            m.moveX(curLoc + retract) if axis == AXIS_X else \
+                m.moveZ(curLoc + retract)
+            if DRO:
+                m.saveXDro() if axis == AXIS_X else m.saveZDro()
+
+    def axisTest(self, inc=0.025, passes=10, retract=None, \
+              pause=True, axis=AXIS_X):
+        if cfg.getBoolInfoData(cf.cfgDbgSave):
+            updateThread.openDebug("dbg_%s.txt" % \
+                                   ("x" if axis == AXIS_X else "z"))
+        if retract is not None:
+            retract = abs(retract) if inc < 0.0 else -abs(retract)
+        jogPanel.dPrt("\naxisTest inc %7.4f%s\n" % \
+                      (inc, "" if retract is None else \
+                       " retract %7.4f" % (retract)), flush=True)
+        m = moveCommands
+        m.queClear()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        m.done(0)
+        if axis == AXIS_X:
+            curLoc = float(self.xPosition.value) / self.xStepsInch - xHomeOffset
+            m.saveXOffset()
+        else:
+            curLoc = float(self.zPosition.value) / self.zStepsInch - zHomeOffset
+            m.saveZOffset()
+        jogPanel.dPrt("curLoc %7.4f\n" % (curLoc), console=True)
+
+        passNum = 0
+        self.testPass(99, curLoc + (0.050 if inc < 0 else -0.050), \
+                      pause=pause, axis=axis)
+        self.testPass(passNum, curLoc, pause=pause, axis=axis)
+
+        for i in range(passes):
+            passNum += 1
+            curLoc += inc
+            print("pass %2d curLoc %7.4f" % (passNum, curLoc))
+            self.testPass(passNum, curLoc, retract, pause, axis)
+        m.done(1)            
 
     def updateZ(self, val):
         txt = "%7.3f" % (float(val) / self.zStepsInch) \
@@ -3763,7 +3832,7 @@ class JogPanel(wx.Panel, FormRoutines):
                           (xDROPos, xDroLoc, xDROOffset))
                     stdout.flush()
                 xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
-                if self.droDiam:
+                if self.xDroDiam:
                     xDroLoc *= 2.0
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
@@ -3842,6 +3911,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnStop(self, e):
+        self.homeDone("stopped")
         moveCommands.queClear()
         comm.command(cm.CMD_STOP)
         self.clrActive()
@@ -4004,9 +4074,9 @@ class JogPanel(wx.Panel, FormRoutines):
         return(xPos, yPos)
 
 class PosMenu(wx.Menu):
-    def __init__(self, jogPnl, axis):
+    def __init__(self, jP, axis):
         wx.Menu.__init__(self)
-        self.jogPanel = jogPnl
+        self.jP = jP
         self.axis = axis
         item = wx.MenuItem(self, wx.NewId(), "Set")
         self.Append(item)
@@ -4040,23 +4110,23 @@ class PosMenu(wx.Menu):
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
 
     def getPosCtl(self):
-        ctl = self.jogPanel.zPos if self.axis == AXIS_Z else \
-              self.jogPanel.xPos
-        return(self.jogPanel.getPos(ctl))
+        ctl = self.jP.zPos if self.axis == AXIS_Z else \
+              self.jP.xPos
+        return(self.jP.getPos(ctl))
 
     def OnSet(self, e):
-        dialog = SetPosDialog(self.jogPanel, self.axis)
+        dialog = SetPosDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
     def OnZero(self, e):
-        self.jogPanel.updateZPos(0) if self.axis == AXIS_Z else \
-            self.jogPanel.updateXPos(0)
-        self.jogPanel.focus()
+        self.jP.updateZPos(0) if self.axis == AXIS_Z else \
+            self.jP.updateXPos(0)
+        self.jP.focus()
 
     def OnProbe(self, e):
-        dialog = ProbeDialog(self.jogPanel, self.axis)
+        dialog = ProbeDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
@@ -4071,7 +4141,7 @@ class PosMenu(wx.Menu):
             comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
                          else -1)
             comm.command(cm.XHOMEAXIS)
-            self.jogPanel.probe(HOME_X)
+            self.jP.probe(HOME_X)
         else: 
             xLocation = float(jogPanel.xPos.GetValue())
             xHomeOffset = 0 - xLocation
@@ -4080,28 +4150,29 @@ class PosMenu(wx.Menu):
             comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
             if DRO:
                 comm.setParm(pm.X_DRO_POS, 0)
-                jogPanel.updateXDroPos(xLocation)
-            jogPanel.homeDone("home success")
+                self.jP.updateXDroPos(xLocation)
+            self.jP.homeDone("home success")
             xHomed = True
-        self.jogPanel.focus()
+        self.jP.focus()
 
     def OnGoto(self, e):
-        dialog = GotoDialog(self.jogPanel, self.axis)
+        dialog = GotoDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
     def OnFixX(self, e):
-        jogPnl = self.jogPanel
-        dialog = jogPnl.fixXPosDialog
+        jP = self.jP
+        dialog = jP.fixXPosDialog
         if dialog is None:
-            jogPnl.fixXPosDialog = dialog = FixXPosDialog(self.jogPanel)
+            jP.fixXPosDialog = dialog = FixXPosDialog(jP)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
     def OnDroDiam(self, e):
-        self.droDiam = not self.droDiam
+        self.jP.xDroDiam = not self.jP.xDroDiam
+        self.jP.focus()
 
 class SetPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPnl, axis):
@@ -4401,6 +4472,10 @@ class UpdateThread(Thread):
         self.notifyWindow = notifyWindow
         self.threadRun = True
         self.parmList = (self.readAll, )
+        self.xLoc = None
+        self.zLoc = None
+        self.xIntLoc = None
+        self.zIntLoc = None
         self.zDro = None
         self.xDro = None
         self.passVal = None
@@ -4654,13 +4729,16 @@ class UpdateThread(Thread):
         return("xmov %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXLoc(self, val):
+        iTmp = int(val)
+        self.xIntLoc = iTmp
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        self.xLoc = tmp
         if self.xDro is not None:
-            diff = " %0.4f" % (self.xDro - tmp)
+            diff = " diff %7.4f" % (self.xDro - tmp)
             self.xDro = None
         else:
             diff = ""
-        return("xloc %7.4f %7.4f%s" % (tmp, tmp * 2.0, diff))
+        return("xloc %6d %7.4f %7.4f%s" % (iTmp, tmp, tmp * 2.0, diff))
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -4687,8 +4765,10 @@ class UpdateThread(Thread):
     def dbgXPDro(self, val):
         tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
               xDROOffset
-        jogPanel.dPrt("pass %d xdro %7.4f\n" % (self.passVal, tmp * 2.0))
-        return(None)
+        s = "pass %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
+            (self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
+        jogPanel.dPrt(s + "\n", flush=True)
+        return("xpdro " + s)
 
     def dbgXExp(self, val):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
@@ -4705,13 +4785,16 @@ class UpdateThread(Thread):
         return("zmov %7.4f" % (tmp))
 
     def dbgZLoc(self, val):
+        iTmp = int(val)
+        self.zIntLoc = iTmp
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        self.zLoc = tmp
         if self.zDro is not None:
-            diff = " %0.4f" % (self.zDro - tmp)
+            diff = " diff %7.4f" % (self.zDro - tmp)
             self.zDro = None
         else:
             diff = ""
-        return("zloc %7.4f%s" % (tmp, diff))
+        return("zloc %6d %7.4f%s" % (iTmp, tmp, diff))
 
     def dbgZDst(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -4738,8 +4821,10 @@ class UpdateThread(Thread):
     def dbgZPDro(self, val):
         tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
               zDROOffset
-        jogPanel.dPrt("pass %d zdro %7.4f\n" % (self.passVal, tmp * 2.0))
-        return(None)
+        s = "pass %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
+            (self.passVal, tmp, self.zLoc, self.zLoc - tmp)
+        jogPanel.dPrt(s + "\n", flush=True)
+        return("zpdro " + s)
 
     def dbgZExp(self, val):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
