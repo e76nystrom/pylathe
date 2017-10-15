@@ -2037,13 +2037,25 @@ class Taper(LatheOp, UpdatePass):
                     m.text("%2d %7.3f" % (m.passNum, self.startX * 2.0), \
                            (self.endZ, self.startX), RIGHT)
             m.moveX(self.startX, ct.CMD_SYN)
+            if DRO:
+                m.saveZDro()
+                m.saveXDro()
             m.taperZX(self.endZ, self.endX)
+            if DRO:
+                m.saveZDro()
+                m.saveXDro()
         else:
             if m.passNum & 0x300 == 0:
                 m.saveZText((m.passNum, self.startZ), \
                             (self.startZ, self.safeX))
             m.moveX(self.startX)
+            if DRO:
+                m.saveZDro()
+                m.saveXDro()
             m.taperXZ(self.endX, self.endZ)
+            if DRO:
+                m.saveZDro()
+                m.saveXDro()
         m.drawLine(self.endZ, self.endX)
         m.moveZ(self.safeZ)
         if m.passNum & 0x300 == 0:
@@ -2138,8 +2150,16 @@ class Taper(LatheOp, UpdatePass):
         if m.passNum & 0x300 == 0:
             m.saveZText((m.passNum, self.startZ, self.startX, \
                          self.startX * 2.0), (self.startZ, self.safeX))
-        m.taperZX(self.endZ, self.endX) if self.taperX else \
+        if DRO:
+            m.saveZDro()
+            m.saveXDro()
+        if self.taperX:
+            m.taperZX(self.endZ, self.endX)
+        else:
             m.taperXZ(self.endX, self.endZ)
+        if DRO:
+            m.saveZDro()
+            m.saveXDro()
         m.drawLine(self.endZ, self.endX)
         if m.passNum & 0x300 == 0:
             m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
