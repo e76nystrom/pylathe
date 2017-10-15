@@ -1125,7 +1125,7 @@ class UpdatePass():
             else:
                 self.passCount += 1
                 moveCommands.nextPass(self.passCount)
-                self.calcPass(self.passCount == self.passes)
+                self.calculatePass(self.passCount == self.passes)
                 self.genPass()
                 if self.sPassInt != 0:
                     self.sPassCtr += 1
@@ -1990,7 +1990,7 @@ class Taper(LatheOp, UpdatePass):
         stdout.flush()
         return(True)
 
-    def ExternalCalcPass(self, final=False):
+    def externalCalcPass(self, final=False):
         if self.taperX:
             feed = self.cutAmount if final else \
                    self.passCount * self.actualFeed
@@ -2079,7 +2079,7 @@ class Taper(LatheOp, UpdatePass):
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
         self.setupSpringPasses(self.panel)
-        self.setupAction(self.InternalCalcPass, self.internalRunPass)
+        self.setupAction(self.internalCalcPass, self.internalRunPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
@@ -2412,6 +2412,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             sendSpindleData()
             sendZData()
             sendXData()
+            comm.setParm(pm.TAPER_CYCLE_DIST, \
+                         cfg.getInfoData(cf.cfgTaperCycleDist))
         except CommTimeout:
             commTimeout()
 
@@ -5584,6 +5586,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bSave Debug", cf.cfgDbgSave, None), \
             ("bRemote Debug", cf.cfgRemDbg, None), \
             ("bHome in Place", cf.cfgHomeInPlace, None), \
+            ("Taper Cycle Dist", cf.cfgTaperCycleDist, 'f'), \
         )
         if XILINX:
             self.fields += (

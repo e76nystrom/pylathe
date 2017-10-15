@@ -92,105 +92,109 @@ X_FLAG               =  58
 X_ABS_LOC            =  59
 X_MPG_INC            =  60
 
+# taper parameters
+
+TAPER_CYCLE_DIST     =  61
+
 # index pulse variables
 
-INDEX_PRE_SCALER     =  61
-LAST_INDEX_PERIOD    =  62
-INDEX_PERIOD         =  63
-REV_COUNTER          =  64
+INDEX_PRE_SCALER     =  62
+LAST_INDEX_PERIOD    =  63
+INDEX_PERIOD         =  64
+REV_COUNTER          =  65
 
 # z home offset
 
-Z_HOME_OFFSET        =  65
+Z_HOME_OFFSET        =  66
 
 # z dro
 
-Z_DRO_POS            =  66
-Z_DRO_OFFSET         =  67
-Z_DRO_INCH           =  68
-Z_DRO_DIR            =  69
+Z_DRO_POS            =  67
+Z_DRO_OFFSET         =  68
+Z_DRO_INCH           =  69
+Z_DRO_DIR            =  70
 
 # x home parameters
 
-X_HOME_SPEED         =  70
-X_HOME_DIST          =  71
-X_HOME_BACKOFF_DIST  =  72
-X_HOME_DIR           =  73
+X_HOME_SPEED         =  71
+X_HOME_DIST          =  72
+X_HOME_BACKOFF_DIST  =  73
+X_HOME_DIR           =  74
 
 # x home test parameters
 
-X_HOME_LOC           =  74
-X_HOME_START         =  75
-X_HOME_END           =  76
-X_HOME_OFFSET        =  77
-X_DRO_POS            =  78
-X_DRO_OFFSET         =  79
-X_DRO_INCH           =  80
-X_DRO_DIR            =  81
+X_HOME_LOC           =  75
+X_HOME_START         =  76
+X_HOME_END           =  77
+X_HOME_OFFSET        =  78
+X_DRO_POS            =  79
+X_DRO_OFFSET         =  80
+X_DRO_INCH           =  81
+X_DRO_DIR            =  82
 
 # x home or probe status
 
-X_HOME_DONE          =  82
-X_HOME_STATUS        =  83
+X_HOME_DONE          =  83
+X_HOME_STATUS        =  84
 
 # Z home or probe status
 
-Z_HOME_DONE          =  84
-Z_HOME_STATUS        =  85
+Z_HOME_DONE          =  85
+Z_HOME_STATUS        =  86
 
 # probe configuration
 
-PROBE_SPEED          =  86
-PROBE_DIST           =  87
-PROBE_INV            =  88
+PROBE_SPEED          =  87
+PROBE_DIST           =  88
+PROBE_INV            =  89
 
 # configuration
 
-STEPPER_DRIVE        =  89
-MOTOR_TEST           =  90
-CFG_XILINX           =  91
-CFG_MPG              =  92
-CFG_DRO              =  93
-CFG_LCD              =  94
-CFG_FCY              =  95
+STEPPER_DRIVE        =  90
+MOTOR_TEST           =  91
+CFG_XILINX           =  92
+CFG_MPG              =  93
+CFG_DRO              =  94
+CFG_LCD              =  95
+CFG_FCY              =  96
 
 # setup
 
-SETUP_DONE           =  96
+SETUP_DONE           =  97
 
 # encoder counts per revolution
 
-ENC_MAX              =  97
+ENC_MAX              =  98
 
 # test encoder setup variables
 
-ENC_ENABLE           =  98
-ENC_PRE_SCALER       =  99
-ENC_TIMER            = 100
-ENC_RUN_COUNT        = 101
+ENC_ENABLE           =  99
+ENC_PRE_SCALER       = 100
+ENC_TIMER            = 101
+ENC_RUN_COUNT        = 102
 
 # test encoder status variables
 
-ENC_RUN              = 102
-ENC_COUNTER          = 103
-ENC_REV_COUNTER      = 104
+ENC_RUN              = 103
+ENC_COUNTER          = 104
+ENC_REV_COUNTER      = 105
 
 # measured spindle speed
 
-RPM                  = 105
+RPM                  = 106
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 106
-FREQ_MULT            = 107
+X_FREQUENCY          = 107
+FREQ_MULT            = 108
 
 # xilinx configuration register
 
-X_CFG_REG            = 108
+X_CFG_REG            = 109
 
 # max parameter number
 
-MAX_PARM             = 109
+MAX_PARM             = 110
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -254,6 +258,7 @@ parmTable = ( \
     ('X_FLAG', 'int', 'xFlag'),
     ('X_ABS_LOC', 'int', 'xAbsLoc'),
     ('X_MPG_INC', 'int', 'xMpgInc'),
+    ('TAPER_CYCLE_DIST', 'float', 'taperCycleDist'),
     ('INDEX_PRE_SCALER', 'int', 'indexPreScaler'),
     ('LAST_INDEX_PERIOD', 'int', 'lastIndexPeriod'),
     ('INDEX_PERIOD', 'int', 'indexPeriod'),

@@ -17,6 +17,7 @@ configList = \
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
     ('cfgRemDbg', 'config print remote debug info'),
+    ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
     ('cfgTestRPM', 'config xilinx test rpm value'),
     ('cfgXFreq', 'config xilinx frequency'),
@@ -436,6 +437,10 @@ parmList = \
     # ("X_FEED_PASS", "x feed per pass", "float"),
     # ("X_DIAMETER", "x diameter", "int"),
     
+    "taper parameters",
+
+    ("TAPER_CYCLE_DIST", "taperCycleDist", "float"),
+ 
     "index pulse variables",
 
     ("INDEX_PRE_SCALER", "index pre scaler", "int"),
