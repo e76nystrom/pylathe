@@ -1234,33 +1234,38 @@ class Turn(LatheOp, UpdatePass):
         stdout.flush()
         return(True)
 
-    def setup(self):
+    def setup(self, add=False):
         m = self.m
-        m.setLoc(self.zEnd, self.xStart)
-        m.drawLineZ(self.zStart, REF)
-        m.drawLineX(self.xEnd, REF)
-        m.setLoc(self.safeZ, self.safeX)
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         m.done(0)
+        
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
             m.queFeedType(ct.FEED_PITCH)
             m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
         else:
             m. queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
+            
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        m.text("%7.3f" % (self.xStart * 2.0), \
-               (self.safeZ, self.xStart))
-        m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if self.internal else BELOW))
-        m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
-               (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), CENTER)
+        
+        if not add:
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.safeZ, self.xStart))
+            m.text("%7.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+                   (self.safeZ, self.safeX))
+            m.text("%7.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), CENTER)
 
     def calcPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
@@ -1285,19 +1290,20 @@ class Turn(LatheOp, UpdatePass):
         if DRO:
             m.saveXDro()
         if self.panel.pause.GetValue():
-            print("pause")
             self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
-                   (self.safeZ, self.curX))
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
+                       (self.safeZ, self.curX))
         m.moveZ(self.zStart)
         m.moveZ(self.zEnd, ct.CMD_SYN)
         if DRO:
             m.saveZDro()
         m.moveX(self.safeX)
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
-                   (self.zEnd, self.safeX), RIGHT)
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
+                       (self.zEnd, self.safeX), RIGHT)
         m.moveZ(self.safeZ)
 
     def addPass(self):
@@ -1305,7 +1311,7 @@ class Turn(LatheOp, UpdatePass):
         add = getFloatVal(self.panel.add) / 2.0
         self.cutAmount += add
         self.calcPass(True)
-        self.setup()
+        self.setup(True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
         self.m.moveX(self.xStart + self.xRetract)
@@ -1486,6 +1492,7 @@ class Face(LatheOp, UpdatePass):
             self.m.draw("face", self.xStart, self.xEnd)
             self.m.setTextAngle(90)
 
+        jogPanel.dPrt("\nface runOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -1501,31 +1508,38 @@ class Face(LatheOp, UpdatePass):
         stdout.flush()
         return(True)
 
-    def setup(self):
+    def setup(self, add=False):
         m = self.m
-        m.setLoc(self.zEnd, self.xStart)
-        m.drawLineZ(self.zStart, REF)
-        m.drawLineX(self.xEnd, REF)
-        m.setLoc(self.zStart, self.safeX)
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.zStart, self.safeX)
+
+        m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
+
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.faRPM))
             m.queFeedType(ct.FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(cf.faXFeed))
         else:
             m.queXSetup(cfg.getFloatInfoData(cf.faXFeed))
+
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
-        m.text("%7.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), None if self.internal else RIGHT)
-        m.text("%7.3f %6.3f" % \
-               (self.safeX * 2.0, self.actualFeed), \
-               (self.safeZ, self.safeX))
-        m.text("%7.3f" % (self.xStart * 2.0), \
-               (self.zEnd, self.xStart), CENTER)
-        m.text("%7.3f" % (self.xEnd * 2.0), \
-               (self.zEnd, self.xEnd), CENTER)
+
+        if not add:
+            m.text("%7.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), None if self.internal else RIGHT)
+            m.text("%7.3f %6.3f" % \
+                   (self.safeX * 2.0, self.actualFeed), \
+                   (self.safeZ, self.safeX))
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.zEnd, self.xStart), CENTER)
+            m.text("%7.3f" % (self.xEnd * 2.0), \
+                   (self.zEnd, self.xEnd), CENTER)
 
     def calcPass(self, final=False):
         feed = self.cutAmount if final else self.passCount * self.actualFeed
@@ -1540,24 +1554,31 @@ class Face(LatheOp, UpdatePass):
     def runPass(self, addPass=False):
         m = self.m
         m.moveZ(self.curZ, ct.CMD_JOG)
+        if DRO:
+            m.saveZDro()
         if self.panel.pause.GetValue():
-            print("pause")
             m.quePause(ct.PAUSE_ENA_Z_JOG if addPass else 0)
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.curZ), \
-                   (self.curZ, self.safeX), RIGHT if self.internal else None)
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.curZ), \
+                       (self.curZ, self.safeX), \
+                       RIGHT if self.internal else None)
         m.moveX(self.xStart)
         m.moveX(self.xEnd, ct.CMD_SYN)
+        if DRO:
+            m.saveXDro()
         m.moveZ(self.safeZ)
-        if m.passNum & 0x300 == 0:
-            m.text("%2d %7.3f" % (m.passNum, self.safeZ), \
-                   (self.safeZ, self.xEnd), None if self.internal else RIGHT)
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.safeZ), \
+                       (self.safeZ, self.xEnd), \
+                       None if self.internal else RIGHT)
         m.moveX(self.safeX)
 
     def addPass(self):
         add = getFloatVal(self.panel.add)
         self.cutAmount += add
-        self.setup()
+        self.setup(True)
         self.calcPass(True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
@@ -1719,7 +1740,6 @@ class Cutoff(LatheOp):
         self.setup()
 
         if self.panel.pause.GetValue():
-            print("pause")
             self.m.quePause()
         self.m.moveX(self.xEnd, ct.CMD_SYN)
         self.m.moveX(self.safeX)
@@ -1734,14 +1754,18 @@ class Cutoff(LatheOp):
 
     def setup(self):
         m = self.m
+
+        m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
+
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
             m.queFeedType(ct.FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(cf.cuXFeed))
         else:
             m.queXSetup(cfg.getFloatInfoData(cf.cuXFeed))
+
         m.moveX(self.safeX)
         m.moveZ(self.cutoffZ)
         m.moveX(self.xStart)
@@ -1900,14 +1924,18 @@ class Taper(LatheOp, UpdatePass):
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
-    def setup(self):
+    def setup(self, add=False):
         m = self.m
-        m.setLoc(self.zEnd, self.xStart)
-        m.drawLineZ(self.zStart, REF)
-        m.drawLineX(self.xEnd, REF)
-        m.setLoc(self.safeZ, self.safeX)
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
+
+        m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
+        
         if self.taperX:
             m.saveTaper(self.taper)
         else:
@@ -1924,20 +1952,22 @@ class Taper(LatheOp, UpdatePass):
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        m.text("%0.3f" % (self.zStart), \
-               (self.zStart, self.xEnd), \
-               CENTER | (ABOVE if self.internal else BELOW))
-        m.text("%0.3f" % (self.safeZ), \
-               (self.safeZ, self.safeX), \
-               CENTER | (BELOW if self.internal else ABOVE))
-        m.text("%0.3f" % (self.xStart * 2.0), \
-               (self.zEnd, self.xStart), RIGHT | MIDDLE)
-        m.text("%0.3f Feed %0.3f" % (self.safeX * 2.0, self.actualFeed), \
-               (self.safeZ, self.safeX), ABOVE if self.internal else BELOW)
-        m.text("%0.3f" % (self.zEnd), \
-               (self.zEnd, self.safeX), RIGHT | MIDDLE)
+        
+        if not add:
+            m.text("%0.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%0.3f" % (self.safeZ), \
+                   (self.safeZ, self.safeX), \
+                   CENTER | (BELOW if self.internal else ABOVE))
+            m.text("%0.3f" % (self.xStart * 2.0), \
+                   (self.zEnd, self.xStart), RIGHT | MIDDLE)
+            m.text("%0.3f Feed %0.3f" % (self.safeX * 2.0, self.actualFeed), \
+                   (self.safeZ, self.safeX), ABOVE if self.internal else BELOW)
+            m.text("%0.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), RIGHT | MIDDLE)
 
-    def externalSetup(self, taperInch):
+    def externalRunOperation(self, taperInch):
         print("externalTaper")
         self.internal = False
         self.getParameters(taperInch)
@@ -1975,6 +2005,7 @@ class Taper(LatheOp, UpdatePass):
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
 
+        jogPanel.dPrt("\taper nexternalRunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -2026,10 +2057,9 @@ class Taper(LatheOp, UpdatePass):
         m.moveZ(self.startZ - self.backInc) # move past start
         m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
         if self.pause:
-            print("pause")
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if self.taperX:
-            if m.passNum & 0x300 == 0:
+            if not addPass and m.passNum & 0x300 == 0:
                 if self.taperLength < self.zLength:
                     m.text("%2d %7.3f" % (m.passNum, self.startZ), \
                            (self.startZ, self.safeX), CENTER | ABOVE)
@@ -2045,7 +2075,7 @@ class Taper(LatheOp, UpdatePass):
                 m.saveZDro()
                 m.saveXDro()
         else:
-            if m.passNum & 0x300 == 0:
+            if not addPass and m.passNum & 0x300 == 0:
                 m.saveZText((m.passNum, self.startZ), \
                             (self.startZ, self.safeX))
             m.moveX(self.startX)
@@ -2056,31 +2086,28 @@ class Taper(LatheOp, UpdatePass):
             if DRO:
                 m.saveZDro()
                 m.saveXDro()
-        m.drawLine(self.endZ, self.endX)
-        m.moveZ(self.safeZ)
-        if m.passNum & 0x300 == 0:
+        if not addPass and m.passNum & 0x300 == 0:
+            m.drawLine(self.endZ, self.endX)
             m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
                        (self.safeZ, self.endX))
+        m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
     def externalAddPass(self):
         add = getFloatVal(self.panel.add) / 2
         self.cutAmount += add
-        self.setup()
+        self.setup(True)
         self.externalCalcPass(True)
-        moveCommands.nextPass(self.passCount)
+        self.m.nextPass(self.passCount)
         self.externalRunPass(True)
-        if self.taperX:
-            self.m.moveX(self.safeX)
-            self.m.moveZ(self.startZ)
-        else:
-            pass
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.startZ)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
 
-    def internalSetup(self, taperInch):
+    def internalRunOperation(self, taperInch):
         print("internalTaper")
         self.internal = True
         self.getParameters(taperInch)
@@ -2105,6 +2132,7 @@ class Taper(LatheOp, UpdatePass):
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
 
+        jogPanel.dPrt("\ntaper internalRunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -2145,9 +2173,8 @@ class Taper(LatheOp, UpdatePass):
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
-            print("pause")
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
-        if m.passNum & 0x300 == 0:
+        if not addPass and m.passNum & 0x300 == 0:
             m.saveZText((m.passNum, self.startZ, self.startX, \
                          self.startX * 2.0), (self.startZ, self.safeX))
         if DRO:
@@ -2160,21 +2187,21 @@ class Taper(LatheOp, UpdatePass):
         if DRO:
             m.saveZDro()
             m.saveXDro()
-        m.drawLine(self.endZ, self.endX)
-        if m.passNum & 0x300 == 0:
-            m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
-                        (self.safeZ, self.endX))
+        if not addPass:
+            m.drawLine(self.endZ, self.endX)
+            if m.passNum & 0x300 == 0:
+                m.saveXText((m.passNum, self.endX * 2.0, self.endX), \
+                            (self.safeZ, self.endX))
         m.moveZ(self.safeZ)
         m.moveX(self.safeX)
 
     def internalAddPass(self):
         add = getFloatVal(self.panel.add) / 2
-        self.feed += add
+        self.cutAmount += add
         self.passCount += 1
-        self.taper()
-        self.m.moveZ(self.safeZ)
-        self.internalCalcPass()
-        moveCommands.nextPass(self.passCount)
+        self.setup(True)
+        self.internalCalcPass(True)
+        self.m.nextPass(self.passCount)
         self.internalRunPass(True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
@@ -2440,9 +2467,11 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def sendAction(self):
         self.sendData()
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
-        rtn = self.control.internalSetup(taper) if self.internal.GetValue() \
-              else self.control.externalSetup(taper)
-        return(rtn)
+        if self.internal.GetValue():
+            return(self.control.internalRunOperation(taper))
+        else:
+            return(self.control.externalRunOperation(taper))
+
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
@@ -2602,6 +2631,7 @@ class ScrewThread(LatheOp, UpdatePass):
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
 
+        jogPanel.dPrt("\nthread runOperation\n")
         self.setup()
 
         self.curArea = 0.0
@@ -2628,17 +2658,23 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
+
+        m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(0)
+
         m.startSpindle(cfg.getIntInfoData(cf.thRPM))
+
         feedType = ct.FEED_TPI if self.panel.tpi.GetValue() else ct.FEED_METRIC
         m.queFeedType(feedType)
         m.saveTaper(cfg.getFloatInfoData(cf.thXTaper))
         m.saveRunout(cfg.getFloatInfoData(cf.thExitRev))
         m.saveDepth(self.depth)
         m.zSynSetup(cfg.getFloatInfoData(cf.thPitch))
+
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
+
         if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
                    (self.zEnd, self.xStart), RIGHT)
@@ -2696,12 +2732,16 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.moveZ(startZ)
         self.m.moveX(self.curX, ct.CMD_JOG)
         if self.panel.pause.GetValue():
-            print("pause")
             self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
-        if m.passNum & 0x300 == 0:
+        if DRO:
+            m.saveXDro()
+            m.saveZDro()
+        if not addPass and m.passNum & 0x300 == 0:
             m.saveXText((m.passNum, startZ, self.zOffset, \
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, ct.CMD_SYN | ct.Z_SYN_START)
+        if DRO:
+            m.saveZDro()
         self.m.moveX(self.safeX)
 
     def addPass(self):
