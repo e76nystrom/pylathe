@@ -1547,9 +1547,8 @@ class Face(LatheOp, UpdatePass):
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
         self.passSize[self.passCount] = self.curZ
-        print("pass %2d feed %5.3f z %5.3f" % \
-              (self.passCount, feed, self.curZ))
-        stdout.flush()
+        jogPanel.dPrt("pass %2d feed %5.3f z %5.3f\n" % \
+                      (self.passCount, feed, self.curZ), True, True)
 
     def runPass(self, addPass=False):
         m = self.m
@@ -2005,7 +2004,7 @@ class Taper(LatheOp, UpdatePass):
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("taper", self.zStart, self.taper)
 
-        jogPanel.dPrt("\taper nexternalRunOperation\n")
+        jogPanel.dPrt("\ntaper nexternalRunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -2046,11 +2045,11 @@ class Taper(LatheOp, UpdatePass):
             self.endX = self.xStart - taperLength \
                         if taperLength < self.xLength else self.xEnd
             self.passSize[self.passCount] = self.startZ
-        print("%2d start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-              "%6.3f %6.3f" % \
-              (self.passCount, self.startZ, self.startX, \
-               self.endZ, self.endX, 2.0 * self.startX, 2.0 * self.endX))
-        stdout.flush()
+        jogPanel.dPrt("%2d start (%6.3f %6.3f) end (%6.3f %6.3f) "\
+                      "%6.3f %6.3f\n" % \
+                      (self.passCount, self.startZ, self.startX, \
+                       self.endZ, self.endX, self.startX * 2.0, \
+                       self.endX * 2.0), True, True)
 
     def externalRunPass(self, addPass=False):
         m = self.m
@@ -2161,11 +2160,11 @@ class Taper(LatheOp, UpdatePass):
             self.startX = (self.boreRadius + self.feed - \
                            self.zLength * self.taper)
         self.passSize[self.passCount] = self.endX * 2.0
-        print("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-              "%6.3f %6.3f" % \
-              (self.passCount, self.feed, self.startX, self.startZ, \
-               self.endX, self.endZ, \
-               2.0 * self.startX, 2.0 * self.endX))
+        jogPanel.dPrt("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+                      "%6.3f %6.3f\n" % \
+                      (self.passCount, self.feed, self.startX,
+                       self.startZ, self.endX, self.endZ, \
+                       self.startX * 2.0, self.endX * 2.0), True, True)
 
     def internalRunPass(self, addPass=False):
         m = self.m
@@ -2710,10 +2709,11 @@ class ScrewThread(LatheOp, UpdatePass):
             feed = -feed
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.curX * 2.0
-        print("%4d %8.6f %7.4f %6.4f %7.4f %6.4f" % \
-              (self.passCount, self.curArea, feed, self.zOffset, \
-               feed - self.prevFeed, self.curX * 2.0))
-        stdout.flush()
+        jogPanel.dPrt("%4d area %8.6f fd %7.4f %7.4f ofs %6.4f "\
+                      "diam %6.4f z %6.4f\n" % \
+                      (self.passCount, self.curArea, feed, \
+                       feed - self.prevFeed, self.zOffset, self.curX * 2.0, \
+                       self.safeZ - self.zOffset), True, True)
         self.prevFeed = feed
 
         if self.d is not None:
