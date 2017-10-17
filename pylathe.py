@@ -1085,6 +1085,8 @@ class UpdatePass():
         self.feed = 0.0
         self.actualFeed = 0.0
 
+        self.pause = False
+
     def calcFeed(self, feed, cutAmount, finish=0):
         self.cutAmount = cutAmount
         cutToFinish = cutAmount - finish
@@ -1115,6 +1117,7 @@ class UpdatePass():
         self.spring = 0
         self.feed = 0.0
         self.springFlag = False
+        self.pause = self.panel.pause.GetValue()
 
     def updatePass(self):
         if (self.passCount < self.passes) or self.springFlag:
@@ -2550,7 +2553,11 @@ class ScrewThread(LatheOp, UpdatePass):
         self.zBackInc = 0.003
         self.safeZ = self.zStart + self.zRetract
 
-        if th.tpi.GetValue():
+        self.tpiBtn = th.tpi.GetValue()
+        self.alternate = th.alternate.GetValue()
+        self.firstFeedBtn = th.firstFeedBtn.GetValue()
+
+        if self.tpiBtn:
             self.tpi = getFloatVal(th.thread)
             self.pitch = 1.0 / self.tpi
         else:
@@ -2579,14 +2586,13 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch)
         self.tanAngle = tan(self.angle)
-        actualWidth = 2 * self.depth * self.tanAngle
-        self.safeZ += actualWidth / 2.0
-        self.area = area = 0.5 * self.depth * actualWidth
-        print("depth %6.4f actualWdith %6.4f area %8.6f" % \
-              (self.depth, actualWidth, area))
+        halfWidth = self.depth * self.tanAngle
+        self.safeZ += halfWidth
+        self.area = area = self.depth * halfWidth
+        print("depth %6.4f halfWdith %6.4f area %8.6f safeZ %6.4f" % \
+              (self.depth, halfWidth, area, self.safeZ))
 
-        firstFeed = self.panel.firstFeedBtn.GetValue()
-        if firstFeed:
+        if self.firstFeedBtn:
             firstWidth = 2 * self.firstFeed * self.tanAngle
             self.areaPass = 0.5 * self.firstFeed * firstWidth
             print("firstFeed %6.4f firstWidth %6.4f areaPass %8.6f" % \
@@ -2605,7 +2611,7 @@ class ScrewThread(LatheOp, UpdatePass):
         print("passes %d areaPass %8.6f" % \
               (self.passes, self.areaPass))
 
-        if firstFeed:
+        if self.firstFeedBtn:
             lastA = self.area - self.areaPass
             lastD = self.depth - sqrt(lastA / self.tanAngle)
             self.panel.lastFeed.SetValue("%0.4f" % (lastD))
@@ -2635,7 +2641,13 @@ class ScrewThread(LatheOp, UpdatePass):
 
         self.curArea = 0.0
         self.prevFeed = 0.0
-        print("pass     area   xfeed  zfeed   delta  xsize")
+        self.zOffset = 0.0
+        if not self.alternate:
+            jogPanel.dPrt("pass     area   xfeed  xdelta zoffset  " \
+                          "xsize startz\n", True, True)
+        else:
+            jogPanel.dPrt("pass     area   xfeed  xdelta  offset " \
+                          "zoffset  xsize startz\n", True, True)
 
         while self.updatePass():
             pass
@@ -2664,7 +2676,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         m.startSpindle(cfg.getIntInfoData(cf.thRPM))
 
-        feedType = ct.FEED_TPI if self.panel.tpi.GetValue() else ct.FEED_METRIC
+        feedType = ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC
         m.queFeedType(feedType)
         m.saveTaper(cfg.getFloatInfoData(cf.thXTaper))
         m.saveRunout(cfg.getFloatInfoData(cf.thExitRev))
@@ -2697,33 +2709,47 @@ class ScrewThread(LatheOp, UpdatePass):
         else:
             feed = self.feed
 
-        if not self.panel.alternate.GetValue():
+        if not self.alternate:
             self.zOffset = feed * self.tanAngle
         else:
             offset = (feed - self.prevFeed) * self.tanAngle
-            if self.passCount & 1:
+            if (self.passCount & 1) == 0:
                 offset = -offset
             self.zOffset += offset
+            # print("zOffset %7.4f offset %7.4f" % (self.zOffset, offset))
+
+        self.curX = self.xStart - feed
+        self.passSize[self.passCount] = self.curX * 2.0
+        if not self.alternate:
+            jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
+                          (self.passCount, self.curArea, feed, \
+                           feed - self.prevFeed, self.zOffset, \
+                           self.curX * 2.0, self.safeZ + self.zOffset), \
+                          True, True)
+        else:
+            jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
+                          (self.passCount, self.curArea, feed, \
+                           feed - self.prevFeed, offset, self.zOffset, \
+                           self.curX * 2.0, self.safeZ + self.zOffset), \
+                          True, True)
+        self.prevFeed = feed
 
         if self.internal:
             feed = -feed
-        self.curX = self.xStart - feed
-        self.passSize[self.passCount] = self.curX * 2.0
-        jogPanel.dPrt("%4d area %8.6f fd %7.4f %7.4f ofs %6.4f "\
-                      "diam %6.4f z %6.4f\n" % \
-                      (self.passCount, self.curArea, feed, \
-                       feed - self.prevFeed, self.zOffset, self.curX * 2.0, \
-                       self.safeZ - self.zOffset), True, True)
-        self.prevFeed = feed
 
         if self.d is not None:
             p1 = (self.zOffset, feed)
             pa = (self.zOffset - feed * self.tanAngle, 0)
             pb = (self.zOffset + feed * self.tanAngle, 0)
-            self.drawLine(self.p0, p1)
-            self.drawLine(p1, pa)
-            self.drawLine(p1, pb)
-            self.p0 = p1
+            if not self.alternate:
+                self.drawLine(self.p0, p1)
+                self.drawLine(p1, pa)
+                self.drawLine(p1, pb)
+                self.p0 = p1
+            else:
+                self.drawLine(p1, pa)
+                self.drawLine(pa, pb)
+                self.drawLine(pb, p1)
 
     def runPass(self, addPass=False):
         m = self.m
@@ -2731,7 +2757,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.moveZ(startZ + self.zBackInc)
         self.m.moveZ(startZ)
         self.m.moveX(self.curX, ct.CMD_JOG)
-        if self.panel.pause.GetValue():
+        if self.pause:
             self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if DRO:
             m.saveXDro()
