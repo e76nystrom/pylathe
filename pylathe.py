@@ -579,6 +579,7 @@ class MoveCommands():
         self.d = d
         self.xText = []
         self.zText = []
+        self.flip = -1
 
     def setTextAngle(self, textAngle):
         self.textAngle = textAngle
@@ -588,22 +589,29 @@ class MoveCommands():
             self.lastX = x
             self.lastZ = z
 
+    def addLine(self, p0, p1, layer=0):
+        if self.d is not None:
+            (p0X, p0Y) = p0
+            (p1X, p1Y) = p1
+            self.d.add(dxf.line((p0X, self.flip * p0Y), \
+                                (p1X, self.flip * p1Y), layer=layer))
+            
     def drawLineX(self, x, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.lastX), \
-                                (self.lastZ, x), layer=layer))
+            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
+                                (self.lastZ, self.flip * x), layer=layer))
             self.lastX = x
 
     def drawLineZ(self, z, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.lastX), \
-                                (z, self.lastX), layer=layer))
+            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
+                                (z, self.flip * self.lastX), layer=layer))
             self.lastZ = z
 
     def drawLine(self, z, x, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.lastX), \
-                                (z, x), layer=layer))
+            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
+                                (z, self.flip * x), layer=layer))
             self.lastX = x
             self.lastZ = z
 
@@ -655,6 +663,8 @@ class MoveCommands():
             hOffset = self.hS
             vOffset = -self.textH / 2
             if align is not None:
+                if align & CENTER:
+                    text = text.strip()
                 textW = len(text) * self.textH * 0.9
                 if align & RIGHT:
                     hOffset = -(textW + self.hS)
@@ -663,16 +673,25 @@ class MoveCommands():
                 elif align & LEFT:
                     hOffset = self.hS
 
-                if align & ABOVE:
-                    vOffset = self.vS
-                elif align & BELOW:
-                    vOffset = -(self.textH + self.vS)
-                elif align & MIDDLE:
-                    vOffset = -(self.textH / 2)
+                if self.flip == 1:
+                    if align & ABOVE:
+                        vOffset = self.vS
+                    elif align & BELOW:
+                        vOffset = -(self.textH + self.vS)
+                    elif align & MIDDLE:
+                        vOffset = -(self.textH / 2)
+                else:
+                    if align & ABOVE:
+                        vOffset = -(self.textH + self.vS)
+                    elif align & BELOW:
+                        vOffset = self.vS
+                    elif align & MIDDLE:
+                        vOffset = -(self.textH / 2)
 
             if self.textAngle != 0.0:
                 (vOffset, hOffset) = (hOffset, -vOffset)
-            self.d.add(dxf.text(text, (x + hOffset, y + vOffset), \
+            self.d.add(dxf.text(text, (x + hOffset, \
+                                       self.flip * y + vOffset), \
                                 height=self.textH, rotation=self.textAngle, \
                                 layer=layer, style=self.style))
 
@@ -2688,12 +2707,12 @@ class ScrewThread(LatheOp, UpdatePass):
 
         if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
-                   (self.zEnd, self.xStart), RIGHT)
+                   (self.zEnd, self.xStart), MIDDLE | RIGHT)
             m.text("%0.3f" % (self.zStart), \
                    (self.zStart, self.xEnd), \
                    CENTER | (ABOVE if self.internal else BELOW))
             m.text("%7.3f" % (self.safeX * 2.0,), \
-                   (self.safeZ, self.safeX))
+                   (self.safeZ, self.safeX), MIDDLE)
             m.text("%7.3f" % (self.zEnd), \
                    (self.zEnd, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
@@ -2709,6 +2728,7 @@ class ScrewThread(LatheOp, UpdatePass):
         else:
             feed = self.feed
 
+
         if not self.alternate:
             self.zOffset = feed * self.tanAngle
         else:
@@ -2718,8 +2738,14 @@ class ScrewThread(LatheOp, UpdatePass):
             self.zOffset += offset
             # print("zOffset %7.4f offset %7.4f" % (self.zOffset, offset))
 
+        self.prevFeed = feed
+        if self.internal:
+            feed = - feed
+            self.feed = feed
+
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.curX * 2.0
+
         if not self.alternate:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
@@ -2732,10 +2758,17 @@ class ScrewThread(LatheOp, UpdatePass):
                            feed - self.prevFeed, offset, self.zOffset, \
                            self.curX * 2.0, self.safeZ + self.zOffset), \
                           True, True)
-        self.prevFeed = feed
 
-        if self.internal:
-            feed = -feed
+        if self.m.d is not None:
+            addLine = self.m.addLine
+            z = self.safeZ - self.zOffset
+            w = feed * self.tanAngle
+            p0 = (z, self.curX)
+            pa = (z + w, self.xStart)
+            pb = (z - w, self.xStart)
+            addLine(p0, pa)
+            addLine(p0, pb)
+            addLine(pa, pb)
 
         if self.d is not None:
             p1 = (self.zOffset, feed)
