@@ -204,6 +204,7 @@ configList = \
   "z axis config",
 
     ('zAccel', 'z axis '),
+    ('zBackInc', 'z axis distance to go past for taking out backlash'),
     ('zBacklash', 'z axis '),
     ('zDROInch', 'z axis '),
     ('zInvDRO', 'z axis '),

@@ -549,22 +549,23 @@ class DialogActions():
 class MoveCommands():
     def __init__(self):
         self.moveQue = Queue()
+        self.passNum = 0
+        self.send = False
+        self.dbg = False
+        self.zOffset = 0.0
+        self.xOffset = 0.0
+
         self.d = None
         self.lastX = 0.0
         self.lastZ = 0.0
-        self.passNum = 0
-        self.send = False
         self.textH = 0.005
         self.vS = self.textH / 2
         self.hS = self.textH
         self.textAngle = 0.0
-        self.dbg = False
         self.xText = None
         self.zText = None
         self.fileName = None
         self.style = None
-        self.zOffset = 0.0
-        self.xOffset = 0.0
 
     def draw(self, cmd, diam, parm):
         tmp = "%s%0.3f-%0.3f" % (cmd, diam, parm)
@@ -698,20 +699,19 @@ class MoveCommands():
     def drawClose(self):
         if self.d is not None:
             try:
-                if self.d is not None:
-                    self.d.save()
-                    fileName = self.fileName
-                    if WINDOWS:
-                        fileName = fileName.replace("\\", "/")
-                        fileName = fileName.replace("C:", "/cygdrive/c")
-                    subprocess.call(["sed", "-i", "-e", \
-                                     "'s/arial/consolas/g'", \
-                                     fileName])
-                    self.fileName = None
-                    self.d = None
+                self.d.save()
+                fileName = self.fileName
+                if WINDOWS:
+                    fileName = fileName.replace("\\", "/")
+                    fileName = fileName.replace("C:", "/cygdrive/c")
+                subprocess.call(["sed", "-i", "-e", \
+                                 "'s/arial/consolas/g'", \
+                                 fileName])
             except:
                 print("dxf file save error")
                 traceback.print_exc()
+            self.fileName = None
+            self.d = None
 
     def queInit(self):
         self.zOffset = None
@@ -1899,7 +1899,6 @@ class Taper(LatheOp, UpdatePass):
 
         self.taperX = False
         self.taper = 0.0
-        self.backInc = 0.002
 
         self.cut = 0.0
         self.internal = False
@@ -1910,6 +1909,7 @@ class Taper(LatheOp, UpdatePass):
         self.taperLength = 0.0
         self.endZ = 0.0
         self.endX = 0.0
+        self.zbackInc = 0.0
 
         # morse #3 taper
         # taper = 0.0502
@@ -1938,6 +1938,7 @@ class Taper(LatheOp, UpdatePass):
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
+        self.zBackInc = cfg.getFloatInfoData(cf.zBackInc)
         self.finish = abs(getFloatVal(tp.finish))
         self.pause = self.panel.pause.GetValue()
 
@@ -2075,7 +2076,8 @@ class Taper(LatheOp, UpdatePass):
 
     def externalRunPass(self, addPass=False):
         m = self.m
-        m.moveZ(self.startZ - self.backInc) # move past start
+        if self.zBackInc != 0.0:
+            m.moveZ(self.startZ - self.zBackInc) # move past start
         m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
@@ -2190,7 +2192,8 @@ class Taper(LatheOp, UpdatePass):
 
     def internalRunPass(self, addPass=False):
         m = self.m
-        m.moveZ(self.startZ - self.backInc) # past the start point
+        if self.zBackInc != 0.0:
+            m.moveZ(self.startZ - self.ZBackInc) # past the start point
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
@@ -2516,12 +2519,11 @@ class ScrewThread(LatheOp, UpdatePass):
     def __init__(self, threadPanel):
         LatheOp.__init__(self, threadPanel)
         UpdatePass.__init__(self)
-        self.d = None
         self.internal = False
         self.tpi = 0.0
         self.pitch = 0.0
 
-        self.zBackInc = 0.003
+        self.zBackInc = 0.0
         self.firstFeed = 0.0
         self.lastFeed = 0.0
         self.depth = 0.0
@@ -2535,31 +2537,32 @@ class ScrewThread(LatheOp, UpdatePass):
         self.startZ = 0.0
         self.prevFeed = 0.0
         self.depth = 0.0
-        self.zAccel = 0.0
+        self.zAccelDist = 0.0
         self.zOffset = 0.0
-        self.p0 = 0.0
+        # self.p0 = 0.0
+        # self.d = None
 
-    def draw(self, diam, tpi):
-        tmp = "tfeed%0.3f-%0.1f" % (diam, tpi)
-        tmp = tmp.replace(".", "-")
-        tmp = re.sub("-0$", "", tmp) + ".dxf"
-        d = dxf.drawing(tmp)
-        d.add_layer(REF, color=0)
-        d.add_layer(TEXT, color=0)
-        self.d = d
+    # def draw(self, diam, tpi):
+    #     tmp = "tfeed%0.3f-%0.1f" % (diam, tpi)
+    #     tmp = tmp.replace(".", "-")
+    #     tmp = re.sub("-0$", "", tmp) + ".dxf"
+    #     d = dxf.drawing(tmp)
+    #     d.add_layer(REF, color=0)
+    #     d.add_layer(TEXT, color=0)
+    #     self.d = d
 
-    def drawLine(self, p0, p1, layer=0):
-        if self.d is not None:
-            self.d.add(dxf.line(p0, p1, layer=layer))
+    # def drawLine(self, p0, p1, layer=0):
+    #     if self.d is not None:
+    #         self.d.add(dxf.line(p0, p1, layer=layer))
 
-    def drawClose(self):
-        try:
-            if self.d is not None:
-                self.d.save()
-                self.d = None
-        except:
-            print("dxf file save error")
-            traceback.print_exc()
+    # def drawClose(self):
+    #     try:
+    #         if self.d is not None:
+    #             self.d.save()
+    #             self.d = None
+    #     except:
+    #         print("dxf file save error")
+    #         traceback.print_exc()
 
     def getParameters(self):
         th = self.panel
@@ -2568,8 +2571,8 @@ class ScrewThread(LatheOp, UpdatePass):
         self.zStart = getFloatVal(th.zStart)
         self.zEnd = getFloatVal(th.zEnd)
         self.zRetract = getFloatVal(th.zRetract)
-        self.zAccel = 0.0
-        self.zBackInc = 0.003
+        self.zAccelDist = 0.0
+        self.zBackInc = cfg.getFloatInfoData(cf.zBackInc)
         self.safeZ = self.zStart + self.zRetract
 
         self.tpiBtn = th.tpi.GetValue()
@@ -2596,6 +2599,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         self.angle = radians(getFloatVal(th.angle))
 
+
     def runOperation(self):
         self.getParameters()
 
@@ -2606,7 +2610,10 @@ class ScrewThread(LatheOp, UpdatePass):
             self.depth = (cos(self.angle) * self.pitch)
         self.tanAngle = tan(self.angle)
         halfWidth = self.depth * self.tanAngle
-        self.safeZ += halfWidth
+        if not self.alternate:
+            self.safeZ += halfWidth * 2.0
+        else:
+            self.safeZ += halfWidth
         self.area = area = self.depth * halfWidth
         print("depth %6.4f halfWdith %6.4f area %8.6f safeZ %6.4f" % \
               (self.depth, halfWidth, area, self.safeZ))
@@ -2646,11 +2653,11 @@ class ScrewThread(LatheOp, UpdatePass):
             self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
-        self.startZ = self.zStart + self.zAccel
+        self.startZ = self.zStart + self.zAccelDist
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
-            self.draw(self.xStart * 2.0, self.tpi)
-            self.p0 = (0, 0)
+        # if cfg.getBoolInfoData(cf.cfgDraw):
+        #     self.draw(self.xStart * 2.0, self.tpi)
+        #     self.p0 = (0, 0)
 
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
@@ -2674,7 +2681,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.printXText("%2d Z %6.4f Zofs %6.4f D %6.4f F %6.4f", \
                           LEFT, self.internal)
 
-        self.drawClose()
+        # self.drawClose()
         self.m.drawClose()
         self.m.stopSpindle()
         self.m.done(1)
@@ -2770,24 +2777,25 @@ class ScrewThread(LatheOp, UpdatePass):
             addLine(p0, pb)
             addLine(pa, pb)
 
-        if self.d is not None:
-            p1 = (self.zOffset, feed)
-            pa = (self.zOffset - feed * self.tanAngle, 0)
-            pb = (self.zOffset + feed * self.tanAngle, 0)
-            if not self.alternate:
-                self.drawLine(self.p0, p1)
-                self.drawLine(p1, pa)
-                self.drawLine(p1, pb)
-                self.p0 = p1
-            else:
-                self.drawLine(p1, pa)
-                self.drawLine(pa, pb)
-                self.drawLine(pb, p1)
+        # if self.d is not None:
+        #     p1 = (self.zOffset, feed)
+        #     pa = (self.zOffset - feed * self.tanAngle, 0)
+        #     pb = (self.zOffset + feed * self.tanAngle, 0)
+        #     if not self.alternate:
+        #         self.drawLine(self.p0, p1)
+        #         self.drawLine(p1, pa)
+        #         self.drawLine(p1, pb)
+        #         self.p0 = p1
+        #     else:
+        #         self.drawLine(p1, pa)
+        #         self.drawLine(pa, pb)
+        #         self.drawLine(pb, p1)
 
     def runPass(self, addPass=False):
         m = self.m
         startZ = self.safeZ - self.zOffset
-        self.m.moveZ(startZ + self.zBackInc)
+        if self.zBackInc:
+            self.m.moveZ(startZ + self.zBackInc)
         self.m.moveZ(startZ)
         self.m.moveX(self.curX, ct.CMD_JOG)
         if self.pause:
@@ -5454,6 +5462,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Micro Steps", cf.zMicroSteps, 'd'), \
             ("Motor Ratio", cf.zMotorRatio, 'fs'), \
             ("Backlash", cf.zBacklash, 'f'), \
+            ("Backlash Incrment", cf.zBackInc, 'f'), \
             ("Accel Unit/Sec2", cf.zAccel, 'fs'), \
             ("Min Speed U/Min", cf.zMinSpeed, 'fs'), \
             ("Max Speed U/Min", cf.zMaxSpeed, 'fs'), \

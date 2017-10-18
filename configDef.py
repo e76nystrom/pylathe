@@ -202,31 +202,32 @@ xSvDROOffset     = 159          # x axis
 # z axis config
 
 zAccel           = 160          # z axis 
-zBacklash        = 161          # z axis 
-zDROInch         = 162          # z axis 
-zInvDRO          = 163          # z axis 
-zInvDir          = 164          # z axis 
-zInvEnc          = 165          # z axis 
-zInvMpg          = 166          # z axis 
-zJogMax          = 167          # z axis 
-zJogMin          = 168          # z axis 
-zJogSpeed        = 169          # z axis 
-zMaxSpeed        = 170          # z axis 
-zMicroSteps      = 171          # z axis 
-zMinSpeed        = 172          # z axis 
-zMotorRatio      = 173          # z axis 
-zMotorSteps      = 174          # z axis 
-zParkLoc         = 175          # z axis 
-zPitch           = 176          # z axis 
-zProbeDist       = 177          # z axis 
-zProbeSpeed      = 178          # z axis 
+zBackInc         = 161          # z axis distance to go past for taking out backlash
+zBacklash        = 162          # z axis 
+zDROInch         = 163          # z axis 
+zInvDRO          = 164          # z axis 
+zInvDir          = 165          # z axis 
+zInvEnc          = 166          # z axis 
+zInvMpg          = 167          # z axis 
+zJogMax          = 168          # z axis 
+zJogMin          = 169          # z axis 
+zJogSpeed        = 170          # z axis 
+zMaxSpeed        = 171          # z axis 
+zMicroSteps      = 172          # z axis 
+zMinSpeed        = 173          # z axis 
+zMotorRatio      = 174          # z axis 
+zMotorSteps      = 175          # z axis 
+zParkLoc         = 176          # z axis 
+zPitch           = 177          # z axis 
+zProbeDist       = 178          # z axis 
+zProbeSpeed      = 179          # z axis 
 
 # z axis position config
 
-zSvPosition      = 179          # z axis 
-zSvHomeOffset    = 180          # z axis 
-zSvDROPosition   = 181          # z axis 
-zSvDROOffset     = 182          # z axis 
+zSvPosition      = 180          # z axis 
+zSvHomeOffset    = 181          # z axis 
+zSvDROPosition   = 182          # z axis 
+zSvDROOffset     = 183          # z axis 
 
 config = { \
     'faPasses' : 33,
@@ -236,10 +237,10 @@ config = { \
     'thZStart' : 88,
     'tpZFeed' : 110,
     'tuPasses' : 116,
-    'zInvDir' : 164,
+    'zInvDir' : 165,
     'spMicroSteps' : 58,
     'jogXPos' : 47,
-    'zJogSpeed' : 169,
+    'zJogSpeed' : 170,
     'jogZPos' : 49,
     'thAlternate' : 65,
     'jogInc' : 46,
@@ -253,7 +254,7 @@ config = { \
     'thXStart' : 84,
     'xHomeStart' : 140,
     'thSPInt' : 79,
-    'zMaxSpeed' : 170,
+    'zMaxSpeed' : 171,
     'cfgTestRPM' : 15,
     'xHomeLoc' : 138,
     'thSpring' : 80,
@@ -294,7 +295,7 @@ config = { \
     'faSPInt' : 36,
     'tpSmallDiam' : 100,
     'tpXFinish' : 106,
-    'zSvPosition' : 179,
+    'zSvPosition' : 180,
     'tpAddFeed' : 89,
     'tpDeltaBtn' : 92,
     'tpPasses' : 96,
@@ -305,11 +306,11 @@ config = { \
     'thExitRev' : 67,
     'thZEnd' : 86,
     'thFirstFeedBtn' : 69,
-    'zMinSpeed' : 172,
+    'zMinSpeed' : 173,
     'thRPM' : 78,
     'droZPos' : 31,
     'tpZDelta' : 109,
-    'zSvHomeOffset' : 180,
+    'zSvHomeOffset' : 181,
     'xInvDRO' : 141,
     'tuSpring' : 120,
     'xMotorRatio' : 151,
@@ -324,18 +325,18 @@ config = { \
     'xDROInch' : 133,
     'xInvDir' : 142,
     'tuZFeed' : 128,
-    'zInvEnc' : 165,
+    'zInvEnc' : 166,
     'cuZRetract' : 28,
     'xHomeDist' : 136,
     'cfgPrbInv' : 11,
     'thPitch' : 77,
     'tpZLength' : 111,
     'cuXFeed' : 24,
-    'zInvMpg' : 166,
+    'zInvMpg' : 167,
     'thPasses' : 75,
     'spMotorSteps' : 60,
     'cuZStart' : 29,
-    'zSvDROOffset' : 182,
+    'zSvDROOffset' : 183,
     'zAccel' : 160,
     'tpXRetract' : 108,
     'cfgTestMode' : 14,
@@ -354,52 +355,53 @@ config = { \
     'tuXDiam1Text' : 124,
     'tpAngleBtn' : 91,
     'tpPause' : 97,
-    'zBacklash' : 161,
+    'zBacklash' : 162,
     'cfgInvEncDir' : 8,
     'faPause' : 34,
     'faXRetract' : 40,
     'cuXStart' : 26,
     'cfgHomeInPlace' : 7,
     'xSvDROOffset' : 159,
-    'zParkLoc' : 175,
+    'zParkLoc' : 176,
     'faRPM' : 35,
     'spMaxRPM' : 57,
     'cfgFcy' : 5,
-    'zMicroSteps' : 171,
+    'zMicroSteps' : 172,
     'thLastFeed' : 72,
-    'zDROInch' : 162,
+    'zDROInch' : 163,
     'tuXRetract' : 126,
     'cuRPM' : 21,
     'xInvMpg' : 144,
     'tuZRetract' : 129,
     'tpSPInt' : 99,
     'spTestIndex' : 63,
-    'zJogMin' : 168,
-    'zMotorRatio' : 173,
-    'zPitch' : 176,
+    'zJogMin' : 169,
+    'zMotorRatio' : 174,
+    'zPitch' : 177,
     'spInvDir' : 53,
     'spJogAccelTime' : 54,
-    'zSvDROPosition' : 181,
+    'zBackInc' : 161,
+    'zSvDROPosition' : 182,
     'xBacklash' : 132,
     'mainPanel' : 50,
     'tpLargeDiam' : 94,
     'thAngle' : 66,
-    'zMotorSteps' : 174,
+    'zMotorSteps' : 175,
     'jogXPosDiam' : 48,
     'cuZCutoff' : 27,
     'xAccel' : 131,
     'spAccelTime' : 52,
     'tpLargeDiamText' : 95,
-    'zInvDRO' : 163,
+    'zInvDRO' : 164,
     'cuPause' : 20,
     'commRate' : 19,
     'cfgXilinx' : 17,
     'spAccel' : 51,
-    'zJogMax' : 167,
+    'zJogMax' : 168,
     'droXPos' : 30,
     'tuXDiam0Text' : 122,
     'tpXInFeed' : 107,
-    'zProbeDist' : 177,
+    'zProbeDist' : 178,
     'faZEnd' : 42,
     'xParkLoc' : 153,
     'xSvPosition' : 156,
@@ -409,7 +411,7 @@ config = { \
     'tpInternal' : 93,
     'cfgRemDbg' : 12,
     'thMM' : 74,
-    'zProbeSpeed' : 178,
+    'zProbeSpeed' : 179,
     'tuXDiam0' : 121,
     'tuXDiam1' : 123,
     }
@@ -576,6 +578,7 @@ configTable = ( \
     'xSvDROPosition',
     'xSvDROOffset',
     'zAccel',
+    'zBackInc',
     'zBacklash',
     'zDROInch',
     'zInvDRO',
