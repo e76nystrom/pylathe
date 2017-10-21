@@ -13,7 +13,7 @@ import traceback
 from sys import stdout, stderr
 import serial
 from threading import Thread, Lock, Event
-from math import radians, cos, tan, ceil, floor, sqrt, atan2, degrees
+from math import radians, cos, tan, ceil, floor, pi, sqrt, atan2, degrees
 from Queue import Queue, Empty
 from platform import system
 from dxfwrite import DXFEngine as dxf
@@ -3219,28 +3219,24 @@ class JogPanel(wx.Panel, FormRoutines):
         self.repeat = 0
         # self.lastTime = 0
         self.btnRpt = buttonRepeat = ButtonRepeat()
-        self.initUI()
-        self.setZPosDialog = None
-        self.setXPosDialog = None
+        self.surfaceSpeed = False
         self.fixXPosDialog = None
         self.xHome = False
         self.probeAxis = 0
         self.probeLoc = 0.0
-        self.zStepsInch = 0
-        self.xStepsInch = 0
-        self.zMenu = None
-        self.xMenu = None
+        self.probeStatus = 0
         self.mvStatus = 0
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
         self.lastZOffset = 0.0
         self.lastXOffset = 0.0
+        self.zStepsInch = 0
+        self.xStepsInch = 0
         self.zPosition = None
         self.zHomeOffset = None
         self.xPosition = None
         self.xHomeOffset = None
-        self.probeStatus = 0
         if DRO:
             self.zDROInch = 0
             self.xDROInch = 0
@@ -3252,6 +3248,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.xDROOffset = None
             self.xDroDiam = False
         self.dbg = open("dbgLog.txt", "ab")
+        self.initUI()
 
     def close(self):
         self.dbg.close()
@@ -3295,24 +3292,20 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # rpm
 
-        self.rpm = \
+        (self.rpm, self.rpmText) = \
             self.addDialogField(sizerG, "RPM", "0", txtFont, \
                                 posFont, (80, -1), border=(10, 2), \
-                                edit=False)
+                                edit=False, text=True)
+        self.rpm.Bind(wx.EVT_RIGHT_DOWN, self.OnRpmMenu)
+        self.setSurfaceSpeed()
 
         # second row
-
+        # pass size
+        
         (self.passSize, self.passText) = \
             self.addDialogField(sizerG, "Size", "0.000", txtFont, \
                                 posFont, (120, -1), border=(10,2), \
                                 edit=False, text=True)
-        # sizerG.Add(self.emptyCell)
-
-        # self.statusText = txt = wx.StaticText(self, -1, "")
-        # txt.SetFont(txtFont)
-        # sizerG.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
-        #            wx.ALIGN_CENTER_VERTICAL, border=10)
-
         # x diameter
 
         self.xPosDiam = \
@@ -3486,6 +3479,14 @@ class JogPanel(wx.Panel, FormRoutines):
     def setPassText(self, txt):
         self.passText.SetLabel(txt)
 
+    def setSurfaceSpeed(self, val=None):
+        if val is not None:
+            self.surfaceSpeed = val
+        if self.surfaceSpeed:
+            self.rpmText.SetLabel("FPM")
+        else:
+            self.rpmText.SetLabel("RPM")
+
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
         if e is not None:
@@ -3503,7 +3504,12 @@ class JogPanel(wx.Panel, FormRoutines):
         menu = PosMenu(self, AXIS_X)
         self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
-
+        
+    def OnRpmMenu(self, e):
+        menu = RpmMenu(self)
+        self.PopupMenu(menu, self.menuPos(e, self.xPos))
+        menu.Destroy()
+        
     def focus(self):
         self.combo.SetFocus()
 
@@ -3926,7 +3932,11 @@ class JogPanel(wx.Panel, FormRoutines):
                 xLocation = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLocation))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
-            self.rpm.SetValue(rpm)
+            if not self.surfaceSpeed:
+                self.rpm.SetValue(rpm)
+            else:
+                fpm = (float(rpm) * xLocation * 2 * pi) / 12.0
+                self.rpm.SetValue("%1.0f" % (fpm))
 
             val = int(curPass)
             passNum = val & 0xff
@@ -4169,6 +4179,26 @@ class JogPanel(wx.Panel, FormRoutines):
                   (int(zDROOffset * self.zDROInch), zDROOffset))
             stdout.flush()
 
+    def setZFromExt(self):
+        val = dro.command(eDro.extReadZ, True)
+        val = val.strip()
+        try:
+            rsp = float(val)
+        except ValueError:
+            print("setZFromExt ValueError %s" % (val))
+            stdout.flush()
+            rsp = 0.0
+        zPosition = int(rsp * jogPanel.zStepsInch)
+        zHomeOffset = 0.0
+        comm.queParm(pm.Z_LOC, zPosition)
+        comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
+        if DRO:
+            zDROPosition = int(rsp * jogPanel.zDROInch)
+            zDROOffset = 0.0
+            comm.queParm(pm.Z_DRO_POS, zDROPosition)
+            comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
+        comm.sendMulti()
+
     def updateXPos(self, val):
         global xHomeOffset
         val /= 2.0
@@ -4202,6 +4232,26 @@ class JogPanel(wx.Panel, FormRoutines):
                   (int(xDROOffset * self.xDROInch), xDROOffset))
             stdout.flush()
 
+    def setXFromExt(self):
+        val = dro.command(eDro.extReadX, True)
+        val = val.strip()
+        try:
+            rsp = float(val) / 2.0
+        except ValueError:
+            print("setXFromExt ValueError %s" % (val))
+            stdout.flush()
+            rsp = 0.0
+        xPosition = int(rsp * jogPanel.xStepsInch)
+        xHomeOffset = 0.0
+        comm.queParm(pm.X_LOC, xPosition)
+        comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
+        if DRO:
+            xDROPosition = int(rsp * jogPanel.xDROInch)
+            xDROOffset = 0.0
+            comm.queParm(pm.X_DRO_POS, xDROPosition)
+            comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
+        comm.sendMulti()
+
     def getPos(self, ctl):
         (xPos, yPos) = mainFrame.GetPosition()
         (x, y) = self.GetPosition()
@@ -4224,6 +4274,11 @@ class PosMenu(wx.Menu):
         item = wx.MenuItem(self, wx.NewId(), "Zero")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnZero, item)
+
+        if EXT_DRO:
+            item = wx.MenuItem(self, wx.NewId(), "Ext DRO")
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnSetFromExt, item)
 
         item = wx.MenuItem(self, wx.NewId(), "Probe")
         self.Append(item)
@@ -4311,6 +4366,13 @@ class PosMenu(wx.Menu):
 
     def OnDroDiam(self, e):
         self.jP.xDroDiam = not self.jP.xDroDiam
+        self.jP.focus()
+
+    def OnSetFromExt(self, e):
+        if self.axis == AXIS_Z:
+            self.jP.setZFromExt()
+        else:
+            self.jP.setXFromExt()
         self.jP.focus()
 
 class SetPosDialog(wx.Dialog, FormRoutines):
@@ -4595,6 +4657,24 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         self.Show(False)
         jogPanel.focus()
+
+class RpmMenu(wx.Menu):
+    def __init__(self, jP):
+        wx.Menu.__init__(self)
+        self.jP = jP
+        item = wx.MenuItem(self, wx.NewId(), "RPM")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnRPM, item)
+
+        item = wx.MenuItem(self, wx.NewId(), "Surface Speed")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnSurfaceSpeed, item)
+
+    def OnRPM(self, e):
+        self.jP.setSurfaceSpeed(False)
+
+    def OnSurfaceSpeed(self, e):
+        self.jP.setSurfaceSpeed(True)
 
 EVT_UPDATE_ID = wx.NewId()
 
@@ -5332,16 +5412,7 @@ class MainFrame(wx.Frame):
 
                 sendZData()
                 if EXT_DRO:
-                    rsp = float(dro.command(eDro.extReadZ, True))
-                    zPosition = int(rsp * jogPanel.zStepsInch)
-                    zHomeOffset = 0.0
-                    comm.queParm(pm.Z_LOC, zPosition)
-                    comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
-                    if DRO:
-                        zDROPosition = int(rsp * jogPanel.zDROInch)
-                        zDROOffset = 0.0
-                        comm.queParm(pm.Z_DRO_POS, zDROPosition)
-                        comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
+                    self.jogPanel.setZFromExt()
                 else:
                     zPosition = cfg.getIntInfo(cf.zSvPosition)
                     comm.queParm(pm.Z_LOC, zPosition)
@@ -5365,16 +5436,7 @@ class MainFrame(wx.Frame):
 
                 sendXData()
                 if EXT_DRO:
-                    rsp = float(dro.command(eDro.extReadX, True)) / 2.0
-                    xPosition = int(rsp * jogPanel.xStepsInch)
-                    xHomeOffset = 0.0
-                    comm.queParm(pm.X_LOC, xPosition)
-                    comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
-                    if DRO:
-                        xDROPosition = int(rsp * jogPanel.xDROInch)
-                        xDROOffset = 0.0
-                        comm.queParm(pm.X_DRO_POS, xDROPosition)
-                        comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
+                    self.jogPanel.setXFromExt()
                 else:
                     xPosition = cfg.getIntInfo(cf.xSvPosition)
                     comm.queParm(pm.X_LOC, xPosition)
