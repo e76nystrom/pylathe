@@ -9,6 +9,7 @@ configList = \
     ('cfgDRO', 'config dro present'),
     ('cfgDraw', 'config draw paths'),
     ('cfgEncoder', 'config xilinx encoder counts per revolution'),
+    ('cfgExtDro', 'config external digital readout'),
     ('cfgFcy', 'config microprocesssor clock frequency'),
     ('cfgFreqMult', 'config xilinx frequency multiplier'),
     ('cfgHomeInPlace', 'config home in place'),
@@ -43,8 +44,13 @@ configList = \
 
   "dro position",
 
-    ('droXPos', 'dro x position '),
-    ('droZPos', 'dro z position '),
+    ('droXPos', 'dro x position'),
+    ('droZPos', 'dro z position'),
+
+  "external dro",
+
+    ('extDroPort', 'external dro port'),
+    ('extDroRate', 'external dro baud Rate'),
 
   "face config",
 

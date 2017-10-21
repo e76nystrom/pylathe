@@ -59,6 +59,7 @@ if SETUP:
 
 XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
 DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
+EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
 REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
 STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
 MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
@@ -66,6 +67,11 @@ HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
 cfg.clrInfo(len(cf.config))
 
+if EXT_DRO:
+    import extDro as eDro
+    from extDro import DroTimeout
+    dro = eDro.ExtDro()
+    
 cLoc = "../Lathe/include/"
 fData = False
 
@@ -5027,6 +5033,72 @@ class MainFrame(wx.Frame):
         self.jogShuttle = jogShuttle = JogShuttle()
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
+
+        if EXT_DRO:
+            port = cfg.getInfoData(cf.extDroPort)
+            print("port %s" % (port))
+            stdout.flush()
+            if port is not None:
+                dro.openSerial(cfg.getInfoData(cf.extDroPort), \
+                               cfg.getInfoData(cf.extDroRate))
+                # rsp = dro.command("system.reset()\n", True)
+                # print(rsp)
+                # dro.flush()
+                delimiter = "\x1b[K"
+                # automate = False
+                # try:
+                #     dro.flush()
+                #     dro.command("\n", True, delimiter)
+                #     print("automation off")
+                # except DroTimeout:
+                #     print("automation on")
+                #     automate = True
+
+                # if automate:
+                #     try:
+                #         rsp = dro.command("luash.automate(nil)\n", \
+                #                           True, delimiter)
+                #         print("automation turned on")
+                #     except DroTimeout:
+                #         print("DroTimeont exception")
+
+                try:
+                    dro.command("luash.automate(nil)\n", True, delimiter)
+                    print("automation turned on")
+                    rsp = dro.command("func.show()\n", True, delimiter)
+                    rsp = re.sub("\x1b\[G.+?\x1b\[K", "", rsp)
+                    # print(rsp)
+                    rsp = rsp.split("\n")
+                    for option in rsp:
+                        tmp = option.strip().lower().split(":")
+                        if len(tmp) == 2:
+                            if tmp[0].strip() == "diameter":
+                                if tmp[1].strip() != "on":
+                                    dro.command("func.diameter(1)\n", \
+                                                True, delimiter)
+                                    break
+                    dro.command("machine.inch()\n", True, delimiter)
+                    dro.command("machine.abs()\n", True, delimiter)
+                    x = ("function x(t)", \
+                         "axis.zeroa(1,-t+axis.read(1))", 
+                         'print("ok\\n")',
+                         "end")
+                    for line in x:
+                        print(line)
+                        dro.command(line + "\n", True, delimiter)
+                    rsp = dro.command("luash.automate(true)\n", True)
+                    rsp = dro.command("print(axis.read(1))\n", True)
+                    print(rsp, end="")
+                    rsp = dro.command("print(axis.read(2))\n", True)
+                    print(rsp, end="")
+                    dro.command("x(3)\n")
+                    sleep(.1)
+                    dro.command("axis.zeroa(1,-2+axis.read(1))\n")
+                    sleep(.1)
+                    dro.command("axis.zeroa(2,-1+axis.read(2))\n")
+                except DroTimeout:
+                    print("DroTimeont excpetion")
+                                                                              
         if XILINX:
             comm.xRegs = xr.xRegTable
 
@@ -5668,10 +5740,15 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        self.fields = (
+        self.fields = ( \
             ("Comm Port", cf.commPort, None), \
             ("Baud Rate", cf.commRate, 'd'), \
         )
+        if EXT_DRO:
+            self.fields += ( \
+                ("Ext DRO Port", cf.extDroPort, None), \
+                ("Ext DRO Baud Rate", cf.extDroRate, 'd'), \
+            )
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -5706,6 +5783,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHW Control", cf.cfgXilinx, None), \
             ("bMPG", cf.cfgMPG, None), \
             ("bDRO", cf.cfgDRO, None), \
+            ("bExternal DRO", cf.cfgExtDro, None), \
             ("bLCD", cf.cfgLCD, None), \
             ("bProbe Inv", cf.cfgPrbInv, None), \
             ("wfcy", cf.cfgFcy, 'd'), \

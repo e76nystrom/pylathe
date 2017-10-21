@@ -55,7 +55,7 @@ class Setup():
             for val in configTable:
                 f.write("    '%s',\n" % (val))
             f.write("    )\n")
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         self.importList += imports
         self.configImports = imports
@@ -89,7 +89,7 @@ class Setup():
             for s in strTable:
                 f.write("    \"%s\", \\\n" % (s))
             f.write("    )\n")
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         self.strImports = imports
         self.importList += imports
@@ -154,7 +154,7 @@ class Setup():
                 tmp = "    (\"%s\", \"%s\")," % (regName, action)
                 f.write("%s# %3d\n" % (tmp.ljust(40), index))
             f.write("    )\n")
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.write("};\n")
@@ -247,7 +247,7 @@ class Setup():
             for val in parmTable:
                 f.write("    ('%s', '%s', '%s'),\n" % (val))
             f.write("    )\n")
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.write("};\n")
@@ -342,7 +342,7 @@ class Setup():
                     if f is not None:
                         f.write("\n# %s\n\n" % (data))
         if f is not None:
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.close()
@@ -393,7 +393,7 @@ class Setup():
         if f is not None:
             f.close()
         if fData:
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             cFile.close()
             # jFile.write("};\n")
             # jFile.close()
@@ -479,7 +479,7 @@ class Setup():
                 tmp = "    \"%s\"," % (regName)
                 f.write("%s# %3d\n" % (tmp.ljust(40), i))
             f.write("    )\n")
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.write("};\n")
@@ -607,7 +607,7 @@ class Setup():
                 if len(data) != 0 and f is not None:
                     f.write("\n# %s\n\n" % (data))
         if f is not None:
-            self.listImports(file, imports)
+            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.close()
