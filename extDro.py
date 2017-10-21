@@ -3,6 +3,27 @@ from sys import stdout
 from threading import Thread, Lock, Event
 import serial
 
+def setZ(val):
+    return("ax(2," + val + ")")
+
+def setX(val):
+    return("ax(1," + val + ")")
+
+extReadX = "print(axis.read(1))"
+extReadZ = "print(axis.read(2))"
+axisFunc = ("function ax(a, t)", \
+            "axis.zeroa(a,-t+axis.read(a))", 
+            'io.write("ok\\n")',
+            "end")
+delim = "\x1b[K"
+matchPrompt = "\x1b\[G.+?\x1b\[K"
+automateOn = "luash.automate(true)"
+automateOff = "luash.automate(nil)"
+showFunc = "func.show()"
+diamFunc = "func.diameter(1)"
+inchMode = "machine.inch()"
+absMode = "machine.abs()"
+
 class DroTimeout(Exception):
     pass
 
@@ -40,7 +61,7 @@ class ExtDro():
 
     def command(self, cmd, response=False, delimiter='\n'):
         self.droLock.acquire(True)
-        self.dro.write(cmd)
+        self.dro.write(cmd + '\n')
         rsp = ""
         while response:
             tmp = str(self.dro.read(1))

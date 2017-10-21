@@ -4149,8 +4149,10 @@ class JogPanel(wx.Panel, FormRoutines):
             print("pos %0.4f zLocation %0.4f zHomeOffset %0.4f" % \
                   (val, zLocation, zHomeOffset))
             stdout.flush()
-        if DRO:
-            self.updateZDroPos(val)
+            if DRO:
+                self.updateZDroPos(val)
+            if EXT_DRO:
+                dro.command(eDro.setZ("%0.4f" % (val)))
 
     def updateZDroPos(self, val, zDROPos=None):
         global zDROOffset
@@ -4180,8 +4182,10 @@ class JogPanel(wx.Panel, FormRoutines):
             print("pos %0.4f xLocation %0.4f xHomeOffset %0.4f" % \
                   (val, xLocation, xHomeOffset))
             stdout.flush()
-        if DRO:
-            self.updateXDroPos(val)
+            if DRO:
+                self.updateXDroPos(val)
+            if EXT_DRO:
+                dro.command(eDro.setX("%0.4f" % (val * 2.0)))
 
     def updateXDroPos(self, val, xDROPos=None):
         global xDROOffset
@@ -5044,11 +5048,11 @@ class MainFrame(wx.Frame):
                 # rsp = dro.command("system.reset()\n", True)
                 # print(rsp)
                 # dro.flush()
-                delimiter = "\x1b[K"
+
                 # automate = False
                 # try:
                 #     dro.flush()
-                #     dro.command("\n", True, delimiter)
+                #     dro.command("\n", True, eDro.delim)
                 #     print("automation off")
                 # except DroTimeout:
                 #     print("automation on")
@@ -5057,16 +5061,16 @@ class MainFrame(wx.Frame):
                 # if automate:
                 #     try:
                 #         rsp = dro.command("luash.automate(nil)\n", \
-                #                           True, delimiter)
+                #                           True, eDro.delim)
                 #         print("automation turned on")
                 #     except DroTimeout:
                 #         print("DroTimeont exception")
 
                 try:
-                    dro.command("luash.automate(nil)\n", True, delimiter)
+                    dro.command(eDro.automateOff, True, eDro.delim)
                     print("automation turned on")
-                    rsp = dro.command("func.show()\n", True, delimiter)
-                    rsp = re.sub("\x1b\[G.+?\x1b\[K", "", rsp)
+                    rsp = dro.command(eDro.showFunc, True, eDro.delim)
+                    rsp = re.sub(eDro.matchPrompt, "", rsp)
                     # print(rsp)
                     rsp = rsp.split("\n")
                     for option in rsp:
@@ -5074,28 +5078,22 @@ class MainFrame(wx.Frame):
                         if len(tmp) == 2:
                             if tmp[0].strip() == "diameter":
                                 if tmp[1].strip() != "on":
-                                    dro.command("func.diameter(1)\n", \
-                                                True, delimiter)
+                                    dro.command(eDro.diamFunc, \
+                                                True, eDro.delim)
                                     break
-                    dro.command("machine.inch()\n", True, delimiter)
-                    dro.command("machine.abs()\n", True, delimiter)
-                    x = ("function x(t)", \
-                         "axis.zeroa(1,-t+axis.read(1))", 
-                         'print("ok\\n")',
-                         "end")
-                    for line in x:
-                        print(line)
-                        dro.command(line + "\n", True, delimiter)
-                    rsp = dro.command("luash.automate(true)\n", True)
-                    rsp = dro.command("print(axis.read(1))\n", True)
-                    print(rsp, end="")
-                    rsp = dro.command("print(axis.read(2))\n", True)
-                    print(rsp, end="")
-                    dro.command("x(3)\n")
-                    sleep(.1)
-                    dro.command("axis.zeroa(1,-2+axis.read(1))\n")
-                    sleep(.1)
-                    dro.command("axis.zeroa(2,-1+axis.read(2))\n")
+                    dro.command(eDro.inchMode, True, eDro.delim)
+                    dro.command(eDro.absMode, True, eDro.delim)
+                    for line in eDro.axisFunc:
+                        dro.command(line, True, eDro.delim)
+                    rsp = dro.command(eDro.automateOn, True)
+                    # rsp = dro.command(eDro.extReadX, True)
+                    # print(rsp, end="")
+                    # rsp = dro.command(eDro.extReadZ, True)
+                    # print(rsp, end="")
+                    # dro.command(eDro.setZ(str(3.555)), True)
+                    # dro.command("axis.zeroa(1,-2+axis.read(1))")
+                    # dro.command("axis.zeroa(2,-4+axis.read(2));"\
+                    #             "io.write('ok\\n')", True)
                 except DroTimeout:
                     print("DroTimeont excpetion")
                                                                               
@@ -5317,6 +5315,9 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def initDevice(self):
+        global zPosition, zHomeOffset, xPosition, xHomeOffset
+        if DRO:
+            global zDROPosition, zDROOffset, xDROPosition, xDROOffset
         sendClear()
         stdout.flush()
 
@@ -5329,48 +5330,70 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
                 comm.command(cm.CMD_SETUP)
 
-                global zHomeOffset
                 sendZData()
-                zPosition = cfg.getIntInfo(cf.zSvPosition)
-                comm.queParm(pm.Z_LOC, zPosition)
-                zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
-                comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
-                print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
-                      (zPosition, zPosition, \
-                       float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
-                stdout.flush()
-                if DRO:
-                    global zDROOffset
-                    zPosition = cfg.getIntInfo(cf.zSvDROPosition)
-                    comm.queParm(pm.Z_DRO_POS, zPosition)
-                    zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
-                    comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
-                    print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
+                if EXT_DRO:
+                    rsp = float(dro.command(eDro.extReadZ, True))
+                    zPosition = int(rsp * jogPanel.zStepsInch)
+                    zHomeOffset = 0.0
+                    comm.queParm(pm.Z_LOC, zPosition)
+                    comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
+                    if DRO:
+                        zDROPosition = int(rsp * jogPanel.zDROInch)
+                        zDROOffset = 0.0
+                        comm.queParm(pm.Z_DRO_POS, zDROPosition)
+                        comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
+                else:
+                    zPosition = cfg.getIntInfo(cf.zSvPosition)
+                    comm.queParm(pm.Z_LOC, zPosition)
+                    zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
+                    comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
+                    print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
                           (zPosition, zPosition, \
-                           float(zPosition) / jogPanel.zDROInch, zDROOffset))
+                           float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
                     stdout.flush()
+                    if DRO:
+                        zDROPosition = cfg.getIntInfo(cf.zSvDROPosition)
+                        comm.queParm(pm.Z_DRO_POS, zDROPosition)
+                        zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
+                        comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
+                        print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
+                              (zDROPosition, zDROPosition, \
+                               float(zDROPosition) / jogPanel.zDROInch, \
+                               zDROOffset))
+                        stdout.flush()
                 comm.sendMulti()
 
-                global xHomeOffset
                 sendXData()
-                xPosition = cfg.getIntInfo(cf.xSvPosition)
-                comm.queParm(pm.X_LOC, xPosition)
-                xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
-                comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
-                print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
-                      (xPosition, xPosition, \
-                       float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
-                stdout.flush()
-                if DRO:
-                    global xDROOffset
-                    xPosition = cfg.getIntInfo(cf.xSvDROPosition)
-                    comm.queParm(pm.X_DRO_POS, xPosition)
-                    xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
-                    comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
-                    print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
+                if EXT_DRO:
+                    rsp = float(dro.command(eDro.extReadX, True)) / 2.0
+                    xPosition = int(rsp * jogPanel.xStepsInch)
+                    xHomeOffset = 0.0
+                    comm.queParm(pm.X_LOC, xPosition)
+                    comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
+                    if DRO:
+                        xDROPosition = int(rsp * jogPanel.xDROInch)
+                        xDROOffset = 0.0
+                        comm.queParm(pm.X_DRO_POS, xDROPosition)
+                        comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
+                else:
+                    xPosition = cfg.getIntInfo(cf.xSvPosition)
+                    comm.queParm(pm.X_LOC, xPosition)
+                    xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
+                    comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
+                    print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
                           (xPosition, xPosition, \
-                           float(xPosition) / jogPanel.xDROInch, xDROOffset))
+                           float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
                     stdout.flush()
+                    if DRO:
+                        xDROPosition = cfg.getIntInfo(cf.xSvDROPosition)
+                        comm.queParm(pm.X_DRO_POS, xDROPosition)
+                        xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
+                        comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
+                        print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
+                              (xDROPosition, xDROPosition, \
+                               float(xDROPosition) / jogPanel.xDROInch, \
+                               xDROOffset))
+                        stdout.flush()
 
                 if HOME_TEST:
                     val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
