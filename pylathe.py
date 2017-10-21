@@ -4190,11 +4190,13 @@ class JogPanel(wx.Panel, FormRoutines):
             rsp = 0.0
         zPosition = int(rsp * jogPanel.zStepsInch)
         zHomeOffset = 0.0
+        self.zHomeOffset.value = zHomeOffset
         comm.queParm(pm.Z_LOC, zPosition)
         comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
         if DRO:
             zDROPosition = int(rsp * jogPanel.zDROInch)
             zDROOffset = 0.0
+            self.zDROOffset.value = zDROOffset
             comm.queParm(pm.Z_DRO_POS, zDROPosition)
             comm.queParm(pm.Z_DRO_OFFSET, zDROOffset)
         comm.sendMulti()
@@ -4243,11 +4245,13 @@ class JogPanel(wx.Panel, FormRoutines):
             rsp = 0.0
         xPosition = int(rsp * jogPanel.xStepsInch)
         xHomeOffset = 0.0
+        self.xHomeOffset.value = xHomeOffset
         comm.queParm(pm.X_LOC, xPosition)
         comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
         if DRO:
             xDROPosition = int(rsp * jogPanel.xDROInch)
             xDROOffset = 0.0
+            self.xDROOffset.value = xDROOffset
             comm.queParm(pm.X_DRO_POS, xDROPosition)
             comm.queParm(pm.X_DRO_OFFSET, xDROOffset)
         comm.sendMulti()
