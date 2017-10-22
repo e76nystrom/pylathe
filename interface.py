@@ -76,6 +76,11 @@ configList = \
     ('jogXPosDiam', 'jog '),
     ('jogZPos', 'jog '),
 
+  "jog panel config",
+
+    ('jpSurfaceSpeed', 'jogpanle fpm or rpm'),
+    ('jpXDroDiam', 'jogpanel x dro diameter'),
+
   "main panel",
 
     ('mainPanel', 'name of main panel'),

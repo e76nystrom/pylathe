@@ -3219,7 +3219,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.repeat = 0
         # self.lastTime = 0
         self.btnRpt = buttonRepeat = ButtonRepeat()
-        self.surfaceSpeed = False
+        self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
         self.xHome = False
         self.probeAxis = 0
@@ -3246,7 +3246,8 @@ class JogPanel(wx.Panel, FormRoutines):
             self.zDROOffset = None
             self.xDROPostition = None
             self.xDROOffset = None
-            self.xDroDiam = False
+            # self.xDroDiam = False
+            self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
         self.dbg = open("dbgLog.txt", "ab")
         self.initUI()
 
@@ -3476,13 +3477,16 @@ class JogPanel(wx.Panel, FormRoutines):
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
+    def update(self):
+        self.setSurfaceSpeed()
+
     def setPassText(self, txt):
         self.passText.SetLabel(txt)
 
     def setSurfaceSpeed(self, val=None):
         if val is not None:
-            self.surfaceSpeed = val
-        if self.surfaceSpeed:
+            self.surfaceSpeed.value = val
+        if self.surfaceSpeed.value:
             self.rpmText.SetLabel("FPM")
         else:
             self.rpmText.SetLabel("RPM")
@@ -3932,7 +3936,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 xLocation = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLocation))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
-            if not self.surfaceSpeed:
+            if not self.surfaceSpeed.value:
                 self.rpm.SetValue(rpm)
             else:
                 fpm = (float(rpm) * xLocation * 2 * pi) / 12.0
@@ -3977,7 +3981,7 @@ class JogPanel(wx.Panel, FormRoutines):
                           (xDROPos, xDroLoc, xDROOffset))
                     stdout.flush()
                 xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
-                if self.xDroDiam:
+                if self.xDroDiam.value:
                     xDroLoc *= 2.0
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
@@ -5367,6 +5371,8 @@ class MainFrame(wx.Frame):
 
         cfg.readInfo(configFile, cf.config)
         cfg.readInfo(posFile, cf.config)
+
+        jogPanel.update()
 
         varList = (('jogPanel.zPosition', cf.zSvPosition), \
                 ('jogPanel.zHomeOffset', cf.zSvHomeOffset), \

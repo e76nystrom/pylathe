@@ -13,6 +13,8 @@ class InfoValue():
             return("%0.4f" % (val))
         elif isinstance(val, int):
             return(str(val))
+        elif isinstance(val, bool):
+            return(val)
         else:
             return("")
 
@@ -133,8 +135,9 @@ class ConfigInfo():
         if self.info[index] is not None:
             print("newInfo duplicate index %s" % (index))
             stdout.flush()
-        self.info[index] = InfoValue(val)
+        self.info[index] = info = InfoValue(val)
         self.infoData[index] = val
+        return(info)
 
     def getInfoInstance(self, index):
         try:
