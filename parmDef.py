@@ -112,7 +112,7 @@ Z_HOME_OFFSET        =  66
 Z_DRO_POS            =  67
 Z_DRO_OFFSET         =  68
 Z_DRO_INCH           =  69
-Z_DRO_DIR            =  70
+Z_DRO_INVERT         =  70
 
 # x home parameters
 
@@ -130,7 +130,7 @@ X_HOME_OFFSET        =  78
 X_DRO_POS            =  79
 X_DRO_OFFSET         =  80
 X_DRO_INCH           =  81
-X_DRO_DIR            =  82
+X_DRO_INVERT         =  82
 
 # x home or probe status
 
@@ -267,7 +267,7 @@ parmTable = ( \
     ('Z_DRO_POS', 'int', 'zDroPos'),
     ('Z_DRO_OFFSET', 'float', 'zDroOffset'),
     ('Z_DRO_INCH', 'int', 'zDroInch'),
-    ('Z_DRO_DIR', 'int', 'zDroDir'),
+    ('Z_DRO_INVERT', 'int', 'zDroInvert'),
     ('X_HOME_SPEED', 'float', 'xHomeSpeed'),
     ('X_HOME_DIST', 'float', 'xHomeDist'),
     ('X_HOME_BACKOFF_DIST', 'float', 'xHomeBackoffDist'),
@@ -279,7 +279,7 @@ parmTable = ( \
     ('X_DRO_POS', 'int', 'xDroPos'),
     ('X_DRO_OFFSET', 'float', 'xDroOffset'),
     ('X_DRO_INCH', 'int', 'xDroInch'),
-    ('X_DRO_DIR', 'int', 'xDroDir'),
+    ('X_DRO_INVERT', 'int', 'xDroInvert'),
     ('X_HOME_DONE', 'int', 'xHomeDone'),
     ('X_HOME_STATUS', 'int', 'xHomeStatus'),
     ('Z_HOME_DONE', 'int', 'zHomeDone'),
