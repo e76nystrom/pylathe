@@ -713,9 +713,9 @@ class MoveCommands():
                 subprocess.call(["sed", "-i", "-e", \
                                  "'s/arial/consolas/g'", \
                                  fileName])
-            except:
+            except IOError:
                 print("dxf file save error")
-                traceback.print_exc()
+                # traceback.print_exc()
             self.fileName = None
             self.d = None
 
@@ -2736,39 +2736,36 @@ class ScrewThread(LatheOp, UpdatePass):
                 self.curArea = self.area
             else:
                 self.curArea += self.areaPass
-            feed = sqrt(self.curArea / self.tanAngle)
-            self.feed = feed
-        else:
-            feed = self.feed
+            self.feed = sqrt(self.curArea / self.tanAngle)
 
+        feed = self.feed
+        passFeed = feed - self.prevFeed
+        self.prevFeed = feed
 
         if not self.alternate:
             self.zOffset = feed * self.tanAngle
         else:
-            offset = (feed - self.prevFeed) * self.tanAngle
+            offset = passFeed * self.tanAngle
             if (self.passCount & 1) == 0:
                 offset = -offset
             self.zOffset += offset
             # print("zOffset %7.4f offset %7.4f" % (self.zOffset, offset))
 
-        self.prevFeed = feed
         if self.internal:
-            feed = - feed
-            self.feed = feed
-
+            feed = -feed
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.curX * 2.0
 
         if not self.alternate:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
-                           feed - self.prevFeed, self.zOffset, \
+                           passFeed, self.zOffset, \
                            self.curX * 2.0, self.safeZ + self.zOffset), \
                           True, True)
         else:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
-                           feed - self.prevFeed, offset, self.zOffset, \
+                           passFeed, offset, self.zOffset, \
                            self.curX * 2.0, self.safeZ + self.zOffset), \
                           True, True)
 
