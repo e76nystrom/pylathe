@@ -4185,13 +4185,13 @@ class JogPanel(wx.Panel, FormRoutines):
             print("setZFromExt ValueError %s" % (val))
             stdout.flush()
             rsp = 0.0
-        zPosition = int(rsp * jogPanel.zStepsInch)
+        zPosition = int(rsp * jogPanel.zStepsInch + 0.5)
         zHomeOffset = 0.0
         self.zHomeOffset.value = zHomeOffset
         comm.queParm(pm.Z_LOC, zPosition)
         comm.queParm(pm.Z_HOME_OFFSET, zHomeOffset)
         if DRO:
-            zDROPosition = int(rsp * jogPanel.zDROInch)
+            zDROPosition = int(rsp * jogPanel.zDROInch + 0.5)
             zDROOffset = 0.0
             self.zDROOffset.value = zDROOffset
             comm.queParm(pm.Z_DRO_POS, zDROPosition)
@@ -4240,13 +4240,15 @@ class JogPanel(wx.Panel, FormRoutines):
             print("setXFromExt ValueError %s" % (val))
             stdout.flush()
             rsp = 0.0
-        xPosition = int(rsp * jogPanel.xStepsInch)
+        print("val %s rsp %9.6f" % (val, rsp))
+        xPosition = int(rsp * jogPanel.xStepsInch + 0.5)
         xHomeOffset = 0.0
         self.xHomeOffset.value = xHomeOffset
         comm.queParm(pm.X_LOC, xPosition)
         comm.queParm(pm.X_HOME_OFFSET, xHomeOffset)
         if DRO:
-            xDROPosition = int(rsp * jogPanel.xDROInch)
+            xDROPosition = int(rsp * jogPanel.xDROInch + 0.5)
+            print("xDROPosition %d" % (xDROPosition))
             xDROOffset = 0.0
             self.xDROOffset.value = xDROOffset
             comm.queParm(pm.X_DRO_POS, xDROPosition)
