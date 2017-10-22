@@ -177,9 +177,9 @@ tuZStart         = 135          # turn
 
 # x axis config
 
-xAccel           = 136          # turn 
-xBacklash        = 137          # turn 
-xDROInch         = 138          # turn 
+xAccel           = 136          # x axis 
+xBacklash        = 137          # x axis 
+xDROInch         = 138          # x axis 
 xHomeBackoffDist = 139          # x axis 
 xHomeDir         = 140          # x axis 
 xHomeDist        = 141          # x axis 
@@ -187,10 +187,10 @@ xHomeEnd         = 142          # x axis
 xHomeLoc         = 143          # x axis 
 xHomeSpeed       = 144          # x axis 
 xHomeStart       = 145          # x axis 
-xInvDRO          = 146          # x axis 
-xInvDir          = 147          # x axis 
+xInvDRO          = 146          # x axis invert dro
+xInvDir          = 147          # x axis invert stepper direction
 xInvEnc          = 148          # x axis 
-xInvMpg          = 149          # x axis 
+xInvMpg          = 149          # x axis invert mpg direction
 xJogMax          = 150          # x axis 
 xJogMin          = 151          # x axis 
 xJogSpeed        = 152          # x axis 

@@ -972,13 +972,12 @@ def sendZData(send=False):
 
         if DRO:
             jogPanel.zDROInch = cfg.getIntInfoData(cf.zDROInch)
-            jogPanel.zDROInvert = -1 if cfg.getBoolInfoData(cf.zInvDRO) else 1
         # stdout.flush()
 
         if send or (not zDataSent):
             if DRO:
                 comm.queParm(pm.Z_DRO_INCH, jogPanel.zDROInch)
-                comm.queParm(pm.X_DRO_DIR, jogPanel.zDROInvert)
+                comm.queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -1026,13 +1025,12 @@ def sendXData(send=False):
         # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
         if DRO:
             jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
-            jogPanel.xDROInvert = -1 if cfg.getBoolInfoData(cf.xInvDRO) else 1
         # stdout.flush()
 
         if send or (not xDataSent):
             if DRO:
                 comm.queParm(pm.X_DRO_INCH, jogPanel.xDROInch)
-                comm.queParm(pm.Z_DRO_DIR, jogPanel.xDROInvert)
+                comm.queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -3240,8 +3238,6 @@ class JogPanel(wx.Panel, FormRoutines):
         if DRO:
             self.zDROInch = 0
             self.xDROInch = 0
-            self.zDROInvert = 1
-            self.xDROInvert = 1
             self.zDROPostition = None
             self.zDROOffset = None
             self.xDROPostition = None
@@ -3969,7 +3965,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     print("zDROPos %d %0.4f zDROOffset %0.4f" % \
                           (zDROPos, zDroLoc, zDROOffset))
                     stdout.flush()
-                zDroLoc = self.zDROInvert * zDroLoc - zDROOffset
+                zDroLoc = zDroLoc - zDROOffset
                 self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
                 xDROPos = int(xDROPos)
@@ -3980,7 +3976,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     print("xDROPos %d %0.4f xDROOffset %0.4f" % \
                           (xDROPos, xDroLoc, xDROOffset))
                     stdout.flush()
-                xDroLoc = self.xDROInvert * xDroLoc - xDROOffset
+                xDroLoc = xDroLoc - xDROOffset
                 if self.xDroDiam.value:
                     xDroLoc *= 2.0
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
@@ -4174,9 +4170,9 @@ class JogPanel(wx.Panel, FormRoutines):
             zDROPos = comm.getParm(pm.Z_DRO_POS, True)
         if zDROPos is not None:
             droPos = float(zDROPos) / self.zDROInch
-            print("pos %0.4f zDROPos %d %0.4f invert %d" % \
-                  (val, zDROPos, droPos, self.zDROInvert))
-            zDROOffset = self.zDROInvert * droPos - val
+            print("pos %0.4f zDROPos %d %0.4f" % \
+                  (val, zDROPos, droPos))
+            zDROOffset = droPos - val
             self.zDROOffset.value = zDROOffset
             comm.setParm(pm.Z_DRO_OFFSET, zDROOffset)
             print("zDROOffset %d %0.4f" % \
@@ -4229,9 +4225,9 @@ class JogPanel(wx.Panel, FormRoutines):
             xDROPos = comm.getParm(pm.X_DRO_POS)
         if xDROPos is not None:
             droPos = float(xDROPos) / self.xDROInch
-            print("pos %0.4f xDROPos %d %0.4f invert %d" % \
-                  (val, xDROPos, droPos, self.xDROInvert))
-            xDROOffset = self.xDROInvert * droPos - val
+            print("pos %0.4f xDROPos %d %0.4f" % \
+                  (val, xDROPos, droPos))
+            xDROOffset = droPos - val
             self.xDROOffset.value = xDROOffset
             comm.setParm(pm.X_DRO_OFFSET, xDROOffset)
             print("xDROOffset %d %0.4f" % \
@@ -4373,7 +4369,7 @@ class PosMenu(wx.Menu):
         dialog.Show(True)
 
     def OnDroDiam(self, e):
-        self.jP.xDroDiam = not self.jP.xDroDiam
+        self.jP.xDroDiam.value = not self.jP.xDroDiam.value
         self.jP.focus()
 
     def OnSetFromExt(self, e):
@@ -4984,14 +4980,12 @@ class UpdateThread(Thread):
         return("xbst %7.4f %6d" % (tmp, val))
 
     def dbgXDro(self, val):
-        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
-              xDROOffset
+        tmp = float(val) / jogPanel.xDROInch - xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXPDro(self, val):
-        tmp = (jogPanel.xDROInvert * float(val)) / jogPanel.xDROInch - \
-              xDROOffset
+        tmp = float(val) / jogPanel.xDROInch - xDROOffset
         s = "pass %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
             (self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)
@@ -5040,14 +5034,12 @@ class UpdateThread(Thread):
         return("zbst %7.4f %6d" % (tmp, val))
 
     def dbgZDro(self, val):
-        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
-              zDROOffset
+        tmp = float(val) / jogPanel.zDROInch - zDROOffset
         self.zDro = tmp
         return("zdro %7.4f" % (tmp))
 
     def dbgZPDro(self, val):
-        tmp = (jogPanel.zDROInvert * float(val)) / jogPanel.zDROInch - \
-              zDROOffset
+        tmp = float(val) / jogPanel.zDROInch - zDROOffset
         s = "pass %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
             (self.passVal, tmp, self.zLoc, self.zLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)

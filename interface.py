@@ -179,9 +179,9 @@ configList = \
 
   "x axis config",
 
-    ('xAccel', 'turn '),
-    ('xBacklash', 'turn '),
-    ('xDROInch', 'turn '),
+    ('xAccel', 'x axis '),
+    ('xBacklash', 'x axis '),
+    ('xDROInch', 'x axis '),
     ('xHomeBackoffDist', 'x axis '),
     ('xHomeDir', 'x axis '),
     ('xHomeDist', 'x axis '),
@@ -189,10 +189,10 @@ configList = \
     ('xHomeLoc', 'x axis '),
     ('xHomeSpeed', 'x axis '),
     ('xHomeStart', 'x axis '),
-    ('xInvDRO', 'x axis '),
-    ('xInvDir', 'x axis '),
+    ('xInvDRO', 'x axis invert dro'),
+    ('xInvDir', 'x axis invert stepper direction'),
     ('xInvEnc', 'x axis '),
-    ('xInvMpg', 'x axis '),
+    ('xInvMpg', 'x axis invert mpg direction'),
     ('xJogMax', 'x axis '),
     ('xJogMin', 'x axis '),
     ('xJogSpeed', 'x axis '),
@@ -469,7 +469,7 @@ parmList = \
     ("Z_DRO_POS", "z dro location", "int"),
     ("Z_DRO_OFFSET", "z dro to zero", "float"),
     ("Z_DRO_INCH", "z dro scale", "int"),
-    ("Z_DRO_DIR", "z dro direction", "int"),
+    ("Z_DRO_INVERT", "z dro invert", "int"),
 
     "x home parameters",
 
@@ -493,7 +493,7 @@ parmList = \
     ("X_DRO_POS", "x dro location", "int"),
     ("X_DRO_OFFSET", "x dro to zero", "float"),
     ("X_DRO_INCH", "x dro scale", "int"),
-    ("X_DRO_DIR", "x dro direction", "int"),
+    ("X_DRO_INVERT", "x dro invert", "int"),
 
     "x home or probe status",
 
