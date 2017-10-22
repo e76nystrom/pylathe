@@ -1327,11 +1327,11 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.zEnd, ct.CMD_SYN)
         if DRO:
             m.saveZDro()
-        m.moveX(self.safeX)
         if not addPass:
             if m.passNum & 0x300 == 0:
                 m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
                        (self.zEnd, self.safeX), RIGHT)
+        m.moveX(self.safeX)
         m.moveZ(self.safeZ)
 
     def addPass(self):
@@ -1944,7 +1944,7 @@ class Taper(LatheOp, UpdatePass):
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
-        self.zBackInc = cfg.getFloatInfoData(cf.zBackInc)
+        self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
         self.finish = abs(getFloatVal(tp.finish))
         self.pause = self.panel.pause.GetValue()
 
@@ -2084,7 +2084,9 @@ class Taper(LatheOp, UpdatePass):
         m = self.m
         if self.zBackInc != 0.0:
             m.moveZ(self.startZ - self.zBackInc) # move past start
-        m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
+            m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
+        else:
+            m.moveZ(self.startZ)
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if self.taperX:
@@ -2578,7 +2580,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.zEnd = getFloatVal(th.zEnd)
         self.zRetract = getFloatVal(th.zRetract)
         self.zAccelDist = 0.0
-        self.zBackInc = cfg.getFloatInfoData(cf.zBackInc)
+        self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
         self.safeZ = self.zStart + self.zRetract
 
         self.tpiBtn = th.tpi.GetValue()
@@ -2813,9 +2815,8 @@ class ScrewThread(LatheOp, UpdatePass):
             m.saveXText((m.passNum, startZ, self.zOffset, \
                         self.curX * 2.0, self.feed), (self.safeZ, self.curX))
         self.m.moveZ(self.zEnd, ct.CMD_SYN | ct.Z_SYN_START)
-        if DRO:
-            m.saveZDro()
         self.m.moveX(self.safeX)
+        self.m.moveZ(self.safeZ)
 
     def addPass(self):
         add = getFloatVal(self.panel.add) / 2.0
@@ -2827,7 +2828,6 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.stopSpindle()
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
-        jogPanel.setStatus(st.STR_NO_ADD)
 
 class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
