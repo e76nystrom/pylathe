@@ -2754,7 +2754,7 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.internal:
             feed = -feed
         self.curX = self.xStart - feed
-        self.passSize[self.passCount] = self.curX * 2.0
+        self.passSize[self.passCount] = self.feed
 
         if not self.alternate:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
@@ -2968,7 +2968,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.formatData(self.formatList)
         self.updateFirstFeed()
         self.updateLastFeed()
-        jogPanel.setPassText("M Diam")
+        jogPanel.setPassText("Feed")
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
@@ -4000,10 +4000,13 @@ class JogPanel(wx.Panel, FormRoutines):
                         if val & ct.HOME_SUCCESS:
                             self.homeDone("home success")
                             xHomed = True
-                            comm.setParm(pm.X_LOC, 0)
-                            if DRO:
-                                comm.setParm(pm.X_DRO_POS, 0)
-                                self.updateXDroPos(xLocation)
+                            if not EXT_DRO:
+                                comm.setParm(pm.X_LOC, 0)
+                                if DRO:
+                                    comm.setParm(pm.X_DRO_POS, 0)
+                                    self.updateXDroPos(xLocation)
+                            else:
+                                self.setXFromExt()
                         elif val & ct.HOME_FAIL:
                             self.homeDone("home success")
                 elif self.probeAxis == AXIS_Z:
