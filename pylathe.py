@@ -94,8 +94,8 @@ if SETUP:
     exec(setupCmd[:-1])
 else:
     if XILINX:
-        import xBitDef.py as xb
-        import xRegDef.py as xr
+        import xBitDef as xb
+        import xRegDef as xr
 
 comm = Comm()
 comm.SWIG = SWIG
