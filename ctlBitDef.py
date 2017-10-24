@@ -14,7 +14,8 @@ JOGSLOW          = (6 << 0)     # slow jog for home or probe
 # z move command bits
 
 Z_SYN_START      = (1 << 4)     # start on sync pulse
-X_SYN_TAPER      = (1 << 5)     # taper on x
+Z_SYN_LEFT       = (1 << 5)     # start sync left
+X_SYN_TAPER      = (1 << 6)     # taper on x
 
 # z direction
 
@@ -72,3 +73,8 @@ MV_MEASURE       = (1 << 4)     # pause for measurement
 PAUSE_ENA_Z_JOG  = (1 << 0)     # enable z job during pause
 PAUSE_ENA_X_JOG  = (1 << 1)     # enable x jog during pause
 DISABLE_JOG      = (1 << 2)     # jogging disabled
+
+# thread flags
+
+TH_LEFT          = (1 << 0)     # left hand thread
+TH_RUNOUT        = (1 << 0)     # runout with thread

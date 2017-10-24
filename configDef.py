@@ -101,31 +101,31 @@ spTestIndex      =  68          # spindle test generate internal index pulse
 
 # threading config
 
-thAddFeed        =  69          # thread 
-thAlternate      =  70          # thread 
-thAngle          =  71          # thread 
-thExitRev        =  72          # thread 
-thFirstFeed      =  73          # thread 
-thFirstFeedBtn   =  74          # thread 
-thHFactor        =  75          # thread 
-thInternal       =  76          # thread 
-thLastFeed       =  77          # thread 
-thLastFeedBtn    =  78          # thread 
-thMM             =  79          # thread 
-thPasses         =  80          # thread 
-thPause          =  81          # thread 
-thPitch          =  82          # thread 
-thRPM            =  83          # thread 
-thSPInt          =  84          # thread 
-thSpring         =  85          # thread 
-thTPI            =  86          # thread 
-thXDepth         =  87          # thread 
-thXRetract       =  88          # thread 
-thXStart         =  89          # thread 
-thXTaper         =  90          # thread 
-thZEnd           =  91          # thread 
-thZRetract       =  92          # thread 
-thZStart         =  93          # thread 
+thAddFeed        =  69          # thread feed to add after done
+thAlternate      =  70          # thread althernate thread flanks
+thAngle          =  71          # thread hanlf angle of thread
+thFirstFeed      =  72          # thread first feed for thread area calc
+thFirstFeedBtn   =  73          # thread button to select first feed
+thInternal       =  74          # thread internal threads
+thLastFeed       =  75          # thread last feed for thread area calculation
+thLastFeedBtn    =  76          # thread button to select last feed
+thLeftHand       =  77          # thread left hand 
+thMM             =  78          # thread button for mm
+thPasses         =  79          # thread number of passes
+thPause          =  80          # thread pause between passes
+thRPM            =  81          # thread speed for threading operation
+thRunout         =  82          # thread runout for rh exit or lh entrance
+thSPInt          =  83          # thread spring pass interval
+thSpring         =  84          # thread number of spring passes at end
+thTPI            =  85          # thread select thread in threads per inch
+thThread         =  86          # thread field containing tpi or pitch
+thXDepth         =  87          # thread x depth of thread
+thXRetract       =  88          # thread x retract
+thXStart         =  89          # thread x diameter
+thXTaper         =  90          # thread x taper
+thZEnd           =  91          # thread z end of thread
+thZRetract       =  92          # thread z retract
+thZStart         =  93          # thread z start
 
 # taper config
 
@@ -253,7 +253,7 @@ config = { \
     'jogXPos' : 50,
     'zJogSpeed' : 175,
     'jogZPos' : 52,
-    'thPause' : 81,
+    'thPause' : 80,
     'jogInc' : 49,
     'tuAddFeed' : 119,
     'tpRPM' : 103,
@@ -264,11 +264,11 @@ config = { \
     'tpZRetract' : 117,
     'thXStart' : 89,
     'xHomeStart' : 145,
-    'thSPInt' : 84,
+    'thSPInt' : 83,
     'zMaxSpeed' : 176,
     'cfgTestRPM' : 16,
     'xHomeLoc' : 143,
-    'thSpring' : 85,
+    'thSpring' : 84,
     'xHomeEnd' : 142,
     'cfgMPG' : 11,
     'xHomeBackoffDist' : 139,
@@ -277,14 +277,14 @@ config = { \
     'xMotorSteps' : 157,
     'faZFeed' : 46,
     'thAddFeed' : 69,
-    'droZPos' : 32,
+    'thRunout' : 82,
     'xJogSpeed' : 152,
     'cuXRetract' : 26,
     'tpZStart' : 118,
     'cuToolWidth' : 23,
     'spJogMax' : 60,
     'tuRPM' : 123,
-    'thLastFeedBtn' : 78,
+    'thLastFeedBtn' : 76,
     'cfgDraw' : 3,
     'faXFeed' : 42,
     'xSvDROPosition' : 163,
@@ -293,8 +293,8 @@ config = { \
     'cfgLCD' : 10,
     'extDroRate' : 34,
     'xJogMax' : 150,
-    'thHFactor' : 75,
-    'thFirstFeed' : 73,
+    'tpXInFeed' : 112,
+    'thFirstFeed' : 72,
     'faAddFeed' : 35,
     'xJogMin' : 151,
     'faXEnd' : 41,
@@ -306,28 +306,29 @@ config = { \
     'faXStart' : 44,
     'cfgEncoder' : 4,
     'faSPInt' : 39,
-    'tpSmallDiam' : 105,
     'tpXFinish' : 111,
     'zSvPosition' : 185,
     'tpAddFeed' : 94,
     'tpDeltaBtn' : 97,
+    'thLeftHand' : 77,
     'tpPasses' : 101,
     'xHomeSpeed' : 144,
     'thXRetract' : 88,
     'cfgCmdDis' : 0,
     'cfgDRO' : 2,
     'commPort' : 19,
-    'thExitRev' : 72,
+    'droZPos' : 32,
     'thZEnd' : 91,
-    'thFirstFeedBtn' : 74,
+    'thFirstFeedBtn' : 73,
     'zMinSpeed' : 178,
-    'thRPM' : 83,
+    'thRPM' : 81,
     'tpZDelta' : 114,
     'zSvHomeOffset' : 186,
     'xInvDRO' : 146,
     'tuSpring' : 125,
     'xMotorRatio' : 156,
     'tuInternal' : 120,
+    'thThread' : 86,
     'cfgDbgSave' : 1,
     'tpSmallDiamText' : 106,
     'thXDepth' : 87,
@@ -342,11 +343,11 @@ config = { \
     'cuZRetract' : 29,
     'xHomeDist' : 141,
     'cfgPrbInv' : 12,
-    'thPitch' : 82,
+    'tpSmallDiam' : 105,
     'tpZLength' : 116,
     'cuXFeed' : 25,
     'zInvMpg' : 172,
-    'thPasses' : 80,
+    'thPasses' : 79,
     'spMotorSteps' : 65,
     'cuZStart' : 30,
     'zSvDROOffset' : 188,
@@ -361,9 +362,9 @@ config = { \
     'tuZEnd' : 132,
     'tuXFeed' : 130,
     'faSpring' : 40,
-    'thInternal' : 76,
+    'thInternal' : 74,
     'thZRetract' : 92,
-    'thTPI' : 86,
+    'thTPI' : 85,
     'tpXDelta' : 109,
     'tuXDiam1Text' : 129,
     'tpAngleBtn' : 96,
@@ -381,7 +382,7 @@ config = { \
     'spMaxRPM' : 62,
     'cfgFcy' : 6,
     'zMicroSteps' : 177,
-    'thLastFeed' : 77,
+    'thLastFeed' : 75,
     'zDROInch' : 168,
     'tuXRetract' : 131,
     'extDroPort' : 33,
@@ -415,7 +416,6 @@ config = { \
     'zJogMax' : 173,
     'droXPos' : 31,
     'tuXDiam0Text' : 127,
-    'tpXInFeed' : 112,
     'zProbeDist' : 183,
     'faZEnd' : 45,
     'xParkLoc' : 158,
@@ -426,7 +426,7 @@ config = { \
     'cfgTaperCycleDist' : 14,
     'tpInternal' : 98,
     'cfgRemDbg' : 13,
-    'thMM' : 79,
+    'thMM' : 78,
     'zProbeSpeed' : 184,
     'tuXDiam0' : 126,
     'tuXDiam1' : 128,
@@ -505,21 +505,21 @@ configTable = ( \
     'thAddFeed',
     'thAlternate',
     'thAngle',
-    'thExitRev',
     'thFirstFeed',
     'thFirstFeedBtn',
-    'thHFactor',
     'thInternal',
     'thLastFeed',
     'thLastFeedBtn',
+    'thLeftHand',
     'thMM',
     'thPasses',
     'thPause',
-    'thPitch',
     'thRPM',
+    'thRunout',
     'thSPInt',
     'thSpring',
     'thTPI',
+    'thThread',
     'thXDepth',
     'thXRetract',
     'thXStart',

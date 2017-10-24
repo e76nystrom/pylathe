@@ -80,11 +80,12 @@ Z_FEED_SETUP     = 19           # setup z feed
 X_FEED_SETUP     = 20           # setup x feed
 SAVE_RUNOUT      = 21           # save thread runout
 SAVE_DEPTH       = 22           # save thread depth
-PROBE_Z          = 23           # probe in z direction
-PROBE_X          = 24           # probe in x direction
-SAVE_Z_DRO       = 25           # save z dro reading
-SAVE_X_DRO       = 26           # save x dro reading
-OP_DONE          = 27           # operation done
+SAVE_FLAGS       = 23           # save thread flags
+PROBE_Z          = 24           # probe in z direction
+PROBE_X          = 25           # probe in x direction
+SAVE_Z_DRO       = 26           # save z dro reading
+SAVE_X_DRO       = 27           # save x dro reading
+OP_DONE          = 28           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -110,6 +111,7 @@ mCommandsList = ( \
     "X_FEED_SETUP",
     "SAVE_RUNOUT",
     "SAVE_DEPTH",
+    "SAVE_FLAGS",
     "PROBE_Z",
     "PROBE_X",
     "SAVE_Z_DRO",

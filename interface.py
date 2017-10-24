@@ -103,31 +103,31 @@ configList = \
 
   "threading config",
 
-    ('thAddFeed', 'thread '),
-    ('thAlternate', 'thread '),
-    ('thAngle', 'thread '),
-    ('thExitRev', 'thread '),
-    ('thFirstFeed', 'thread '),
-    ('thFirstFeedBtn', 'thread '),
-    ('thHFactor', 'thread '),
-    ('thInternal', 'thread '),
-    ('thLastFeed', 'thread '),
-    ('thLastFeedBtn', 'thread '),
-    ('thMM', 'thread '),
-    ('thPasses', 'thread '),
-    ('thPause', 'thread '),
-    ('thPitch', 'thread '),
-    ('thRPM', 'thread '),
-    ('thSPInt', 'thread '),
-    ('thSpring', 'thread '),
-    ('thTPI', 'thread '),
-    ('thXDepth', 'thread '),
-    ('thXRetract', 'thread '),
-    ('thXStart', 'thread '),
-    ('thXTaper', 'thread '),
-    ('thZEnd', 'thread '),
-    ('thZRetract', 'thread '),
-    ('thZStart', 'thread '),
+    ('thAddFeed', 'thread feed to add after done'),
+    ('thAlternate', 'thread althernate thread flanks'),
+    ('thAngle', 'thread hanlf angle of thread'),
+    ('thFirstFeed', 'thread first feed for thread area calc'),
+    ('thFirstFeedBtn', 'thread button to select first feed'),
+    ('thInternal', 'thread internal threads'),
+    ('thLastFeed', 'thread last feed for thread area calculation'),
+    ('thLastFeedBtn', 'thread button to select last feed'),
+    ('thLeftHand', 'thread left hand '),
+    ('thMM', 'thread button for mm'),
+    ('thPasses', 'thread number of passes'),
+    ('thPause', 'thread pause between passes'),
+    ('thRPM', 'thread speed for threading operation'),
+    ('thRunout', 'thread runout for rh exit or lh entrance'),
+    ('thSPInt', 'thread spring pass interval'),
+    ('thSpring', 'thread number of spring passes at end'),
+    ('thTPI', 'thread select thread in threads per inch'),
+    ('thThread', 'thread field containing tpi or pitch'),
+    ('thXDepth', 'thread x depth of thread'),
+    ('thXRetract', 'thread x retract'),
+    ('thXStart', 'thread x diameter'),
+    ('thXTaper', 'thread x taper'),
+    ('thZEnd', 'thread z end of thread'),
+    ('thZRetract', 'thread z retract'),
+    ('thZStart', 'thread z start'),
 
   "taper config",
 
@@ -304,11 +304,9 @@ cmdList = \
 
     ("CMD_ZSETUP", "zSetup", "setup z axis"),
     ("CMD_ZSYNSETUP", "zSynSetup", "setup z axis sync"),
-    ("CMD_ZTAPERSETUP", "zTaperSetup", "setup z axis taper"),
 
     ("CMD_XSETUP", "xSetup", "setup x axis"),
     ("CMD_XSYNSETUP", "xSynSetup", "setup z axis sync"),
-    ("CMD_XTAPERSETUP", "xTaperSetup", "setup z axis taper"),
     
     "state information",
     
@@ -578,7 +576,8 @@ regList =\
     "z move command bits",
     
     ("Z_SYN_START", "(1 << 4)", "start on sync pulse"),
-    ("X_SYN_TAPER", "(1 << 5)", "taper on x"),
+    ("Z_SYN_LEFT", "(1 << 5)", "start sync left"),
+    ("X_SYN_TAPER", "(1 << 6)", "taper on x"),
     
     "z direction",
     
@@ -637,6 +636,11 @@ regList =\
     ("PAUSE_ENA_Z_JOG", "(1 << 0)", "enable z job during pause"),
     ("PAUSE_ENA_X_JOG", "(1 << 1)", "enable x jog during pause"),
     ("DISABLE_JOG",     "(1 << 2)", "jogging disabled"),
+
+    "thread flags",
+
+    ("TH_LEFT", "(1 << 0)", "left hand thread"),
+    ("TH_RUNOUT", "(1 << 0)", "runout with thread"),
 
     # ("", "()", ""),
     # ("", "", ""),
@@ -884,6 +888,7 @@ enumList =\
     ("X_FEED_SETUP", "setup x feed"),
     ("SAVE_RUNOUT", "save thread runout"),
     ("SAVE_DEPTH", "save thread depth"),
+    ("SAVE_FLAGS", "save thread flags"),
     ("PROBE_Z", "probe in z direction"),
     ("PROBE_X", "probe in x direction"),
     ("SAVE_Z_DRO", "save z dro reading"),

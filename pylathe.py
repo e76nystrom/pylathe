@@ -842,6 +842,11 @@ class MoveCommands():
         if self.dbg:
             print("saveDepth %7.4f" % (depth))
 
+    def saveThreadFlags(self, flags):
+        self.queMove(en.SAVE_FLAGS, flags)
+        if self.dbg:
+            print("saveThreadFlags %02x" % (flags))
+
     def taperZX(self, zLocation, xLocation):
         self.queMove(en.SAVE_X, xLocation)
         self.queMoveF(en.TAPER_ZX, 1, zLocation)
@@ -2525,6 +2530,7 @@ class ScrewThread(LatheOp, UpdatePass):
     def __init__(self, threadPanel):
         LatheOp.__init__(self, threadPanel)
         UpdatePass.__init__(self)
+        self.rightHand = False
         self.internal = False
         self.tpi = 0.0
         self.pitch = 0.0
@@ -2574,12 +2580,16 @@ class ScrewThread(LatheOp, UpdatePass):
         th = self.panel
         self.internal = th.internal.GetValue()
 
+        self.rightHand = not th.leftHand.GetValue()
         self.zStart = getFloatVal(th.zStart)
         self.zEnd = getFloatVal(th.zEnd)
-        self.zRetract = getFloatVal(th.zRetract)
+        self.zRetract = abs(getFloatVal(th.zRetract))
         self.zAccelDist = 0.0
         self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
-        self.safeZ = self.zStart + self.zRetract
+        if self.rightHand:
+            self.safeZ = self.zStart + self.zRetract
+        else:
+            self.safeZ = self.zStart - self.zRetract
 
         self.tpiBtn = th.tpi.GetValue()
         self.alternate = th.alternate.GetValue()
@@ -2593,6 +2603,8 @@ class ScrewThread(LatheOp, UpdatePass):
             self.tpi = 1.0 / self.pitch
 
         self.xStart = getFloatVal(th.xStart) / 2.0
+        self.xRetract = abs(getFloatVal(th.xRetract))
+        self.safeX = self.xStart + self.xRetract
 
         self.firstFeed = getFloatVal(th.firstFeed)
         self.lastFeed = getFloatVal(th.lastFeed)
@@ -2601,16 +2613,61 @@ class ScrewThread(LatheOp, UpdatePass):
         self.xEnd = self.xStart + self.depth if self.internal else \
                     self.xStart - self.depth
 
-        self.xRetract = abs(getFloatVal(th.xRetract))
 
         self.angle = radians(getFloatVal(th.angle))
+        self.runout = getFloatVal(th.runout)
 
+    def setup(self, add=False):
+        m = self.m
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
+
+        m.queInit()
+        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        self.m.done(0)
+
+        th = self.panel
+        m.startSpindle(getIntVal(th.rpm))
+
+        m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
+        m.saveTaper(getFloatVal(th.xTaper))
+        if self.rightHand:
+            m.saveDepth(self.depth)
+        else:
+            m.saveDepth(self.depth + self.xRetract)
+        m.saveRunout(self.runout)
+        flag = 0
+        if not self.rightHand:
+            flag |= ct.TH_LEFT
+        if self.runoutDist != 0:
+            flag |= ct.TH_RUNOUT
+        m.saveThreadFlags(flag)
+        m.zSynSetup(getFloatVal(th.thread))
+
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+
+        if not add:
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.zEnd, self.xStart), MIDDLE | \
+                   (RIGHT if self.rightHand else LEFT))
+            m.text("%0.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%7.3f" % (self.safeX * 2.0,), \
+                   (self.safeZ, self.safeX), \
+                   CENTER | (BELOW if self.internal else ABOVE))
+            m.text("%7.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), \
+                   CENTER | (BELOW if self.internal else ABOVE))
 
     def runOperation(self):
         self.getParameters()
 
-        print("tpi %4.1f pitch %5.3f lastFeed %6.4f" % \
-              (self.tpi, self.pitch, self.lastFeed))
+        print("tpi %4.1f pitch %5.3f" % (self.tpi, self.pitch))
 
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch)
@@ -2623,6 +2680,16 @@ class ScrewThread(LatheOp, UpdatePass):
         self.area = area = self.depth * halfWidth
         print("depth %6.4f halfWdith %6.4f area %8.6f safeZ %6.4f" % \
               (self.depth, halfWidth, area, self.safeZ))
+
+        # depth / runoutDist = (depth + retract) / total
+        # total = (depth + retract) / (depth / runoutDist)
+        # total = ((depth + retract) * runoutDist) / depth
+        # total = (1 + xRetract / depth) * runoutDist
+        runoutDist = self.runout * self.pitch
+        self.runoutDist = (1 + self.xRetract / self.depth) * runoutDist
+
+        print("runout %4.2f runoutDist %7.4f totalDist %7.4f\n" % \
+              (self.runout, runoutDist, self.runoutDist))
 
         if self.firstFeedBtn:
             firstWidth = 2 * self.firstFeed * self.tanAngle
@@ -2659,7 +2726,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.xRetract = -self.xRetract
 
         self.safeX = self.xStart + self.xRetract
-        self.startZ = self.zStart + self.zAccelDist
+        # self.startZ = self.zStart + self.zAccelDist
 
         # if cfg.getBoolInfoData(cf.cfgDraw):
         #     self.draw(self.xStart * 2.0, self.tpi)
@@ -2685,7 +2752,8 @@ class ScrewThread(LatheOp, UpdatePass):
             pass
 
         self.m.printXText("%2d Z %6.4f Zofs %6.4f D %6.4f F %6.4f", \
-                          LEFT, self.internal)
+                          LEFT if self.rightHand else RIGHT, \
+                          self.internal)
 
         # self.drawClose()
         self.m.drawClose()
@@ -2693,42 +2761,6 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.done(1)
         stdout.flush()
         return(True)
-
-    def setup(self, add=False):
-        m = self.m
-        if not add:
-            m.setLoc(self.zEnd, self.xStart)
-            m.drawLineZ(self.zStart, REF)
-            m.drawLineX(self.xEnd, REF)
-            m.setLoc(self.safeZ, self.safeX)
-
-        m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
-
-        m.startSpindle(cfg.getIntInfoData(cf.thRPM))
-
-        feedType = ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC
-        m.queFeedType(feedType)
-        m.saveTaper(cfg.getFloatInfoData(cf.thXTaper))
-        m.saveRunout(cfg.getFloatInfoData(cf.thExitRev))
-        m.saveDepth(self.depth)
-        m.zSynSetup(cfg.getFloatInfoData(cf.thPitch))
-
-        m.moveX(self.safeX)
-        m.moveZ(self.safeZ)
-
-        if not add:
-            m.text("%7.3f" % (self.xStart * 2.0), \
-                   (self.zEnd, self.xStart), MIDDLE | RIGHT)
-            m.text("%0.3f" % (self.zStart), \
-                   (self.zStart, self.xEnd), \
-                   CENTER | (ABOVE if self.internal else BELOW))
-            m.text("%7.3f" % (self.safeX * 2.0,), \
-                   (self.safeZ, self.safeX), MIDDLE)
-            m.text("%7.3f" % (self.zEnd), \
-                   (self.zEnd, self.safeX), \
-                   CENTER | (BELOW if self.internal else ABOVE))
 
     def calcPass(self, final=False, add=False):
         if not add:
@@ -2796,22 +2828,44 @@ class ScrewThread(LatheOp, UpdatePass):
 
     def runPass(self, addPass=False):
         m = self.m
-        startZ = self.safeZ - self.zOffset
-        if self.zBackInc:
-            self.m.moveZ(startZ + self.zBackInc)
-        self.m.moveZ(startZ)
-        self.m.moveX(self.curX, ct.CMD_JOG)
+        if self.rightHand:
+            startZ = self.safeZ - self.zOffset
+            if self.zBackInc:
+                m.moveZ(startZ + self.zBackInc)
+        else:
+            if not self.internal:
+                m.moveX(self.safeX + (self.depth + self.zBackInc))
+                m.moveX(self.safeX - self.feed)
+            else:
+                m.moveX(self.safeX - (self.depth + self.zBackInc))
+                m.moveX(self.safeX + self.feed)
+            startZ = self.safeZ - self.runoutDist + self.zOffset
+            if self.zBackInc:
+                m.moveZ(startZ - self.zBackInc)
+
+        m.moveZ(startZ)
+
+        if self.rightHand:
+            m.moveX(self.curX, ct.CMD_JOG)
+
         if self.pause:
-            self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
         if DRO:
             m.saveXDro()
             m.saveZDro()
+        
         if not addPass and m.passNum & 0x300 == 0:
             m.saveXText((m.passNum, startZ, self.zOffset, \
-                        self.curX * 2.0, self.feed), (self.safeZ, self.curX))
-        self.m.moveZ(self.zEnd, ct.CMD_SYN | ct.Z_SYN_START)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.safeZ)
+                        self.curX * 2.0, self.feed), \
+                        (self.safeZ + \
+                         (0 if self.rightHand else - self.runoutDist), \
+                         self.curX))
+
+        m.moveZ(self.zEnd, ct.CMD_SYN | \
+                (ct.Z_SYN_START if self.rightHand else ct.Z_SYN_LEFT))
+
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
 
     def addPass(self):
         add = getFloatVal(self.panel.add) / 2.0
@@ -2837,23 +2891,23 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.formatList = ((cf.thAddFeed, 'f'), \
                            (cf.thAlternate, None), \
                            (cf.thAngle, 'fs'), \
-                           (cf.thExitRev, 'fs'), \
                            (cf.thFirstFeed, 'f'), \
                            (cf.thFirstFeedBtn, None), \
-                           (cf.thHFactor, 'f'), \
                            (cf.thInternal, None), \
                            (cf.thLastFeed, 'f'), \
                            (cf.thLastFeedBtn, None), \
+                           (cf.thLeftHand, None), \
                            (cf.thMM, None), \
                            (cf.thPasses, 'd'), \
                            (cf.thPause, None), \
-                           (cf.thPitch, 'fs'), \
                            (cf.thRPM, 'd'), \
                            (cf.thSPInt, 'n'), \
                            (cf.thSpring, 'n'), \
                            (cf.thTPI, None), \
+                           (cf.thThread, 'fs'), \
                            (cf.thXDepth, 'f'), \
                            (cf.thXRetract, 'f'), \
+                           (cf.thRunout, 'fs'), \
                            (cf.thXStart, 'f'), \
                            (cf.thXTaper, 'f'), \
                            (cf.thZEnd, 'f'), \
@@ -2878,8 +2932,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.leftHand = self.addCheckBox(sizerG, "Left Hand", cf.thLeftHand, \
+                                         action=self.OnLeftHand)
 
         # x parameters
 
@@ -2889,8 +2943,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.depth = self.addField(sizerG, "Depth", cf.thXDepth)
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.alternate = self.addCheckBox(sizerG, "Alternate", cf.thAlternate)
+
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
@@ -2903,7 +2957,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # thread parameters
 
-        self.thread = self.addField(sizerG, "Thread", cf.thPitch)
+        self.thread = self.addField(sizerG, "Thread", cf.thThread)
 
         self.tpi = self.addRadioButton(sizerG, "TPI", cf.thTPI, \
                                        style=wx.RB_GROUP)
@@ -2912,13 +2966,6 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.angle = self.addField(sizerG, "Angle", cf.thAngle)
 
-        self.alternate = self.addCheckBox(sizerG, "Alternate", cf.thAlternate)
-
-        # special thread parameters
-
-        self.xTaper = self.addField(sizerG, "Taper", cf.thXTaper)
-
-        self.xExitRev = self.addField(sizerG, "Exit Rev", cf.thExitRev)
 
         self.firstFeedBtn = self.addRadioButton(sizerG, "First Feed", \
                                                 cf.thFirstFeedBtn, \
@@ -2926,6 +2973,15 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                                                 action=self.OnFirstFeed)
 
         self.firstFeed = self.addField(sizerG, None, cf.thFirstFeed)
+
+        # special thread parameters
+
+        self.xTaper = self.addField(sizerG, "Taper", cf.thXTaper)
+
+        self.runout = self.addField(sizerG, "Exit Rev", cf.thRunout)
+
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         self.lastFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
                                                cf.thLastFeedBtn, \
@@ -2979,6 +3035,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.lastFeedBtn.GetValue():
             self.lastFeed.SetEditable(True)
             self.firstFeed.SetEditable(False)
+
+    def OnLeftHand(self, e):
+        pass
 
     def OnInternal(self, e):
         pass
@@ -6121,7 +6180,7 @@ class SyncTest(object):
         zAxis = True
         panel = cfg.getInfoData(cf.mainPanel)
         if panel == 'threadPanel':
-            arg1 = cfg.getFloatInfoData(cf.thPitch)
+            arg1 = cfg.getFloatInfoData(cf.thThread)
         elif panel == 'turnPanel':
             arg1 = cfg.getFloatInfoData(cf.tuZFeed)
         elif panel == 'facePanel':
