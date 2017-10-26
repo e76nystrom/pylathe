@@ -2613,14 +2613,15 @@ class ScrewThread(LatheOp, UpdatePass):
         self.xEnd = self.xStart + self.depth if self.internal else \
                     self.xStart - self.depth
 
-
         self.angle = radians(getFloatVal(th.angle))
         self.runout = getFloatVal(th.runout)
+
+        self.endZ = self.zEnd
 
     def setup(self, add=False):
         m = self.m
         if not add:
-            m.setLoc(self.zEnd, self.xStart)
+            m.setLoc(self.endZ, self.xStart)
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
@@ -2635,10 +2636,19 @@ class ScrewThread(LatheOp, UpdatePass):
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
         if self.rightHand:
-            m.saveDepth(self.depth)
+            depth = self.depth
+            if self.runoutDist != 0:
+                depth += 0.005
+            if self.internal:
+                depth = -depth
         else:
-            m.saveDepth(self.depth + self.xRetract)
-        m.saveRunout(self.runout)
+            depth = self.depth
+            if self.runoutDist != 0:
+                depth += self.xRetract
+            if not self.internal:
+                depth = -depth
+        m.saveDepth(depth)
+        m.saveRunout(self.runoutDist)
         flag = 0
         if not self.rightHand:
             flag |= ct.TH_LEFT
@@ -2652,7 +2662,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
-                   (self.zEnd, self.xStart), MIDDLE | \
+                   (self.endZ, self.xStart), MIDDLE | \
                    (RIGHT if self.rightHand else LEFT))
             m.text("%0.3f" % (self.zStart), \
                    (self.zStart, self.xEnd), \
@@ -2660,8 +2670,8 @@ class ScrewThread(LatheOp, UpdatePass):
             m.text("%7.3f" % (self.safeX * 2.0,), \
                    (self.safeZ, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
-            m.text("%7.3f" % (self.zEnd), \
-                   (self.zEnd, self.safeX), \
+            m.text("%7.3f" % (self.endZ), \
+                   (self.endZ, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
 
     def runOperation(self):
@@ -2681,15 +2691,20 @@ class ScrewThread(LatheOp, UpdatePass):
         print("depth %6.4f halfWdith %6.4f area %8.6f safeZ %6.4f" % \
               (self.depth, halfWidth, area, self.safeZ))
 
-        # depth / runoutDist = (depth + retract) / total
-        # total = (depth + retract) / (depth / runoutDist)
-        # total = ((depth + retract) * runoutDist) / depth
-        # total = (1 + xRetract / depth) * runoutDist
-        runoutDist = self.runout * self.pitch
-        self.runoutDist = (1 + self.xRetract / self.depth) * runoutDist
-
-        print("runout %4.2f runoutDist %7.4f totalDist %7.4f\n" % \
-              (self.runout, runoutDist, self.runoutDist))
+        if self.rightHand:
+            self.runoutDist = self.runout * self.pitch
+            self.endZ = self.zEnd - self.runoutDist
+            print("runout %4.2f runoutDist %7.4f endZ %7.4f\n" % \
+                  (self.runout, runoutDist, self.endZ))
+        else:
+            # depth / runoutDist = (depth + retract) / total
+            # total = (depth + retract) / (depth / runoutDist)
+            # total = ((depth + retract) * runoutDist) / depth
+            # total = (1 + xRetract / depth) * runoutDist
+            runoutDist = self.runout * self.pitch
+            self.runoutDist = (1 + self.xRetract / self.depth) * runoutDist
+            print("runout %4.2f runoutDist %7.4f totalDist %7.4f\n" % \
+                  (self.runout, runoutDist, self.runoutDist))
 
         if self.firstFeedBtn:
             firstWidth = 2 * self.firstFeed * self.tanAngle
@@ -2861,7 +2876,7 @@ class ScrewThread(LatheOp, UpdatePass):
                          (0 if self.rightHand else - self.runoutDist), \
                          self.curX))
 
-        m.moveZ(self.zEnd, ct.CMD_SYN | \
+        m.moveZ(self.endZ, ct.CMD_SYN | \
                 (ct.Z_SYN_START if self.rightHand else ct.Z_SYN_LEFT))
 
         m.moveX(self.safeX)
