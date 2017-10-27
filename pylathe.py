@@ -243,19 +243,20 @@ class FormRoutines():
                     self.configList.append(i)
         return(self.configList)
 
-    def addFieldText(self, sizer, label, key, keyText):
+    def addFieldText(self, sizer, label, key, keyText=None):
         if len(label) != 0:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                       wx.ALIGN_CENTER_VERTICAL, border=2)
-            cfg.initInfo(keyText, txt)
+            if keyText is not None:
+                cfg.initInfo(keyText, txt)
 
         tc = wx.TextCtrl(self, -1, "", size=(60, -1), \
                          style=wx.TE_PROCESS_ENTER)
         tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
         sizer.Add(tc, flag=wx.ALL, border=2)
         cfg.initInfo(key, tc)
-        return(tc)
+        return(tc, txt)
 
     def addField(self, sizer, label, index, size=(60, -1)):
         if label is not None:
@@ -784,15 +785,15 @@ class MoveCommands():
     def saveDiameter(self, val):
         self.queMove(en.SAVE_DIAMETER, val)
 
-    def moveZ(self, zLocation, flag=ct.CMD_MAX):
-        self.queMoveF(en.MOVE_Z, flag, zLocation)
+    def moveZ(self, zLocation, flag=ct.CMD_MAX, backlash=0.0):
+        self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
         self.drawLineZ(zLocation)
         if self.dbg:
             print("moveZ  %7.4f" % (zLocation))
             stdout.flush()
 
-    def moveX(self, xLocation, flag=ct.CMD_MAX):
-        self.queMoveF(en.MOVE_X, flag, xLocation)
+    def moveX(self, xLocation, flag=ct.CMD_MAX, backlash=0.0):
+        self.queMoveF(en.MOVE_X, flag, xLocation + backlash)
         self.drawLineX(xLocation)
         if self.dbg:
             print("moveX  %7.4f" % (xLocation))
@@ -1145,6 +1146,7 @@ class UpdatePass():
         self.spring = 0
         self.feed = 0.0
         self.springFlag = False
+        self.lastPass = False
         self.pause = self.panel.pause.GetValue()
 
     def updatePass(self):
@@ -1157,6 +1159,10 @@ class UpdatePass():
                 self.passCount += 1
                 moveCommands.nextPass(self.passCount)
                 self.calculatePass(self.passCount == self.passes)
+                self.lastPass = self.passCount == self.passes and \
+                                self.sPasses == 0
+                # print("passCount %d lastPass %s" % \
+                #       (self.passCount, self.lastPass))
                 self.genPass()
                 if self.sPassInt != 0:
                     self.sPassCtr += 1
@@ -1171,6 +1177,9 @@ class UpdatePass():
             if self.spring < self.sPasses:
                 self.spring += 1
                 moveCommands.nextPass(0x200 | self.spring)
+                self.lastPass = self.spring == self.sPasses
+                # print("spring %d lastPass %s" % \
+                #       (self.spring, self.lastPass))
                 self.genPass()
             else:
                 return(False)
@@ -1389,12 +1398,12 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # x parameters
 
-        self.xDiam0 = self.addFieldText(sizerG, "X Start D", cf.tuXDiam0, \
-                                        cf.tuXDiam0Text)
+        (self.xDiam0, self.diam0Txt) = \
+            self.addFieldText(sizerG, "X Start D", cf.tuXDiam0)
         self.focusField = self.xDiam0
 
-        self.xDiam1 = self.addFieldText(sizerG, "X End D", cf.tuXDiam1, \
-                                        cf.tuXDiam1Text)
+        (self.xDiam1, self.diam1Txt) = \
+            self.addFieldText(sizerG, "X End D", cf.tuXDiam1)
 
         self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
 
@@ -1446,11 +1455,12 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
             
     def updateUI(self):
         if self.internal.GetValue():
-            cfg.infoSetLabel(cf.tuXDiam0Text, "  X End D")
-            cfg.infoSetLabel(cf.tuXDiam1Text, "X Start D")
+            self.diam0Txt.SetLabel("X End D")
+            self.diam1Txt.SetLabel("X Start D")
         else:
-            cfg.infoSetLabel(cf.tuXDiam0Text, "X Start D")
-            cfg.infoSetLabel(cf.tuXDiam1Text, "  X End D")
+            self.diam0Txt.SetLabel("X Start D")
+            self.diam1Txt.SetLabel("X End D")
+        self.sizerV.Layout()
 
     def update(self):
         self.updateUI()
@@ -2086,7 +2096,7 @@ class Taper(LatheOp, UpdatePass):
     def externalRunPass(self, addPass=False):
         m = self.m
         if self.zBackInc != 0.0:
-            m.moveZ(self.startZ - self.zBackInc) # move past start
+            m.moveZ(self.startZ, backlash=-self.zBackInc) # move past start
             m.moveZ(self.startZ, ct.CMD_JOG) # move to takeout backlash
         else:
             m.moveZ(self.startZ)
@@ -2204,7 +2214,7 @@ class Taper(LatheOp, UpdatePass):
     def internalRunPass(self, addPass=False):
         m = self.m
         if self.zBackInc != 0.0:
-            m.moveZ(self.startZ - self.ZBackInc) # past the start point
+            m.moveZ(self.startZ, backlash=-self.ZBackInc) # past the start
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
@@ -2337,11 +2347,11 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # x parameters
 
-        self.largeDiam = self.addFieldText(sizerG, "Large Diam", \
-                                           cf.tpLargeDiam, cf.tpLargeDiamText)
+        (self.largeDiam, self.largeDiamTxt) = \
+            self.addFieldText(sizerG, "Large Diam", cf.tpLargeDiam)
 
-        self.smallDiam = self.addFieldText(sizerG, "Small Diam", \
-                                           cf.tpSmallDiam, cf.tpSmallDiamText)
+        (self.smallDiam, self.smallDiamTxt) = \
+            self.addFieldText(sizerG, "Small Diam", cf.tpSmallDiam)
 
         self.xInFeed = self.addField(sizerG, "X In Feed R", cf.tpXInFeed)
 
@@ -2421,13 +2431,13 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.angle.SetEditable(not val)
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
         if self.internal.GetValue():
-            cfg.infoSetLabel(cf.tpLargeDiamText, "Bore Diam")
-            cfg.infoSetLabel(cf.tpSmallDiamText, "Large Diam")
+            self.largeDiamTxt.SetLabel("Bore Diam")
+            self.smallDiamTxt.SetLabel("Large Diam")
             jogPanel.setPassText("L Diam")
 
         else:
-            cfg.infoSetLabel(cf.tpLargeDiamText, "Large Diam")
-            cfg.infoSetLabel(cf.tpSmallDiamText, "Small Diam")
+            self.largeDiamTxt.SetLabel("Large Diam")
+            self.smallDiamTxt.SetLabel("Small Diam")
             jogPanel.setPassText("S Diam" if taper < 1.0 else \
                                        "Z Start")
         self.sizerV.Layout()
@@ -2581,15 +2591,18 @@ class ScrewThread(LatheOp, UpdatePass):
         self.internal = th.internal.GetValue()
 
         self.rightHand = not th.leftHand.GetValue()
-        self.zStart = getFloatVal(th.zStart)
-        self.zEnd = getFloatVal(th.zEnd)
+        if self.rightHand:
+            self.zStart = getFloatVal(th.z1)
+            self.zEnd = getFloatVal(th.z0)
+        else:
+            self.zStart = getFloatVal(th.z0)
+            self.zEnd = getFloatVal(th.z1)
         self.zRetract = abs(getFloatVal(th.zRetract))
         self.zAccelDist = 0.0
         self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
-        if self.rightHand:
-            self.safeZ = self.zStart + self.zRetract
-        else:
-            self.safeZ = self.zStart - self.zRetract
+        self.safeZ = (self.zStart if self.rightHand else self.zEnd) + \
+                     self.zRetract
+        self.startZ = self.safeZ if self.rightHand else self.zStart
 
         self.tpiBtn = th.tpi.GetValue()
         self.alternate = th.alternate.GetValue()
@@ -2656,9 +2669,11 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_RUNOUT
         m.saveThreadFlags(flag)
         m.zSynSetup(getFloatVal(th.thread))
+        if (not self.rightHand) and self.runoutDist == 0.0:
+            m.xSynSetup(getFloatVal(th.lastFeed))
 
         m.moveX(self.safeX)
-        m.moveZ(self.safeZ)
+        m.moveZ(self.safeZ if self.rightHand else self.startZ)
 
         if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
@@ -2668,7 +2683,7 @@ class ScrewThread(LatheOp, UpdatePass):
                    (self.zStart, self.xEnd), \
                    CENTER | (ABOVE if self.internal else BELOW))
             m.text("%7.3f" % (self.safeX * 2.0,), \
-                   (self.safeZ, self.safeX), \
+                   (self.startZ, self.safeX), \
                    CENTER | (BELOW if self.internal else ABOVE))
             m.text("%7.3f" % (self.endZ), \
                    (self.endZ, self.safeX), \
@@ -2682,20 +2697,24 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.depth == 0:
             self.depth = (cos(self.angle) * self.pitch)
         self.tanAngle = tan(self.angle)
-        halfWidth = self.depth * self.tanAngle
-        if not self.alternate:
-            self.safeZ += halfWidth * 2.0
+
+        w = halfWidth = self.depth * self.tanAngle
+        if self.rightHand:
+            if not self.alternate:
+                w *= 2.0
+            self.startZ += w
         else:
-            self.safeZ += halfWidth
+            self.startZ -= w
+                
         self.area = area = self.depth * halfWidth
-        print("depth %6.4f halfWdith %6.4f area %8.6f safeZ %6.4f" % \
-              (self.depth, halfWidth, area, self.safeZ))
+        print("depth %6.4f halfWdith %6.4f area %8.6f startZ %6.4f" % \
+              (self.depth, halfWidth, area, self.startZ))
 
         if self.rightHand:
             self.runoutDist = self.runout * self.pitch
             self.endZ = self.zEnd - self.runoutDist
             print("runout %4.2f runoutDist %7.4f endZ %7.4f\n" % \
-                  (self.runout, runoutDist, self.endZ))
+                  (self.runout, self.runoutDist, self.endZ))
         else:
             # depth / runoutDist = (depth + retract) / total
             # total = (depth + retract) / (depth / runoutDist)
@@ -2803,26 +2822,29 @@ class ScrewThread(LatheOp, UpdatePass):
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.feed
 
+        self.startZPass = self.startZ + (-self.zOffset if self.rightHand else \
+                                         self.zOffset)
+        startZPass = self.startZPass
+
         if not self.alternate:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
                            passFeed, self.zOffset, \
-                           self.curX * 2.0, self.safeZ + self.zOffset), \
+                           self.curX * 2.0, startZPass), \
                           True, True)
         else:
             jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
                            passFeed, offset, self.zOffset, \
-                           self.curX * 2.0, self.safeZ + self.zOffset), \
+                           self.curX * 2.0, startZPass), \
                           True, True)
 
         if self.m.d is not None:
             addLine = self.m.addLine
-            z = self.safeZ - self.zOffset
             w = feed * self.tanAngle
-            p0 = (z, self.curX)
-            pa = (z + w, self.xStart)
-            pb = (z - w, self.xStart)
+            p0 = (startZPass, self.curX)
+            pa = (startZPass + w, self.xStart)
+            pb = (startZPass - w, self.xStart)
             addLine(p0, pa)
             addLine(p0, pb)
             addLine(pa, pb)
@@ -2843,25 +2865,35 @@ class ScrewThread(LatheOp, UpdatePass):
 
     def runPass(self, addPass=False):
         m = self.m
+        startZPass = self.startZPass
+        startZ = self.startZPass
         if self.rightHand:
-            startZ = self.safeZ - self.zOffset
             if self.zBackInc:
-                m.moveZ(startZ + self.zBackInc)
+                m.moveZ(startZPass, backlash=self.zBackInc)
         else:
-            if not self.internal:
-                m.moveX(self.safeX + (self.depth + self.zBackInc))
-                m.moveX(self.safeX - self.feed)
+            if self.runoutDist != 0:
+                startZPass -= self.runoutDist
+                if not self.internal:
+                    m.moveX(self.safeX + self.depth, backlash=self.zBackInc)
+                    m.moveX(self.safeX + self.depth - self.feed)
+                else:
+                    m.moveX(self.safeX - self.depth, backlash=-self.zBackInc)
+                    m.moveX(self.safeX - self.depth + self.feed)
+                if self.zBackInc:
+                        m.moveZ(startZPass, backlash=-self.zBackInc)
             else:
-                m.moveX(self.safeX - (self.depth + self.zBackInc))
-                m.moveX(self.safeX + self.feed)
-            startZ = self.safeZ - self.runoutDist + self.zOffset
-            if self.zBackInc:
-                m.moveZ(startZ - self.zBackInc)
+                if self.zBackInc:
+                    m.moveZ(startZPass, backlash=-self.zBackInc)
 
-        m.moveZ(startZ)
+        m.moveZ(startZPass)
 
         if self.rightHand:
             m.moveX(self.curX, ct.CMD_JOG)
+        else:
+            if self.runoutDist != 0:
+                m.drawLine(startZ, self.curX)
+            else:
+                m.moveX(self.curX, ct.X_SYN_START)
 
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
@@ -2870,17 +2902,16 @@ class ScrewThread(LatheOp, UpdatePass):
             m.saveZDro()
         
         if not addPass and m.passNum & 0x300 == 0:
-            m.saveXText((m.passNum, startZ, self.zOffset, \
+            m.saveXText((m.passNum, startZPass, self.zOffset, \
                         self.curX * 2.0, self.feed), \
-                        (self.safeZ + \
-                         (0 if self.rightHand else - self.runoutDist), \
-                         self.curX))
+                        (self.startZ, self.curX))
 
         m.moveZ(self.endZ, ct.CMD_SYN | \
                 (ct.Z_SYN_START if self.rightHand else ct.Z_SYN_LEFT))
 
         m.moveX(self.safeX)
-        m.moveZ(self.safeZ)
+        m.moveZ(self.safeZ if self.rightHand or self.lastPass else \
+                self.startZ)
 
     def addPass(self):
         add = getFloatVal(self.panel.add) / 2.0
@@ -2925,9 +2956,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (cf.thRunout, 'fs'), \
                            (cf.thXStart, 'f'), \
                            (cf.thXTaper, 'f'), \
-                           (cf.thZEnd, 'f'), \
-                           (cf.thZRetract, 'f'), \
-                           (cf.thZStart, 'f'))
+                           (cf.thZ0, 'f'), \
+                           (cf.thZ1, 'f'), \
+                           (cf.thZRetract, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2937,13 +2968,15 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(8, 0, 0)
+        self.sizerG = sizerG = wx.FlexGridSizer(8, 0, 0)
 
         # z parameters
 
-        self.zEnd = self.addField(sizerG, "Z End", cf.thZEnd)
+        (self.z0, self.z0Txt) = \
+            self.addFieldText(sizerG, "Z End", cf.thZ0, cf.thZ0Text)
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.thZStart)
+        (self.z1, self.z1Txt) = \
+            self.addFieldText(sizerG, "Z Start", cf.thZ1, cf.thZ0Text)
 
         self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract)
 
@@ -3037,8 +3070,10 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def update(self):
         self.formatData(self.formatList)
+        self.updateLeftHand()
         self.updateFirstFeed()
         self.updateLastFeed()
+        self.sizerV.Layout()
         jogPanel.setPassText("Feed")
 
     def updateFirstFeed(self):
@@ -3051,8 +3086,17 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             self.lastFeed.SetEditable(True)
             self.firstFeed.SetEditable(False)
 
+    def updateLeftHand(self):
+        if self.leftHand.GetValue():
+            self.z0Txt.SetLabel("Z Start")
+            self.z1Txt.SetLabel("Z End")
+        else:
+            self.z0Txt.SetLabel("Z End")
+            self.z1Txt.SetLabel("Z Start")
+
     def OnLeftHand(self, e):
-        pass
+        self.updateLeftHand()
+        self.sizerV.Layout()
 
     def OnInternal(self, e):
         pass
@@ -4006,7 +4050,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if not self.surfaceSpeed.value:
                 self.rpm.SetValue(rpm)
             else:
-                fpm = (float(rpm) * xLocation * 2 * pi) / 12.0
+                fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
                 self.rpm.SetValue("%1.0f" % (fpm))
 
             val = int(curPass)
