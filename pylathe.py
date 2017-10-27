@@ -2670,6 +2670,7 @@ class ScrewThread(LatheOp, UpdatePass):
         m.saveThreadFlags(flag)
         m.zSynSetup(getFloatVal(th.thread))
         if (not self.rightHand) and self.runoutDist == 0.0:
+            m.queFeedType(ct.FEED_PITCH)
             m.xSynSetup(getFloatVal(th.lastFeed))
 
         m.moveX(self.safeX)
@@ -2893,7 +2894,8 @@ class ScrewThread(LatheOp, UpdatePass):
             if self.runoutDist != 0:
                 m.drawLine(startZ, self.curX)
             else:
-                m.moveX(self.curX, ct.X_SYN_START)
+                m.moveX(self.xStart, ct.CMD_JOG)
+                m.moveX(self.curX, ct.CMD_SYN | ct.X_SYN_START)
 
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
