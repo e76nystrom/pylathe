@@ -16,117 +16,117 @@ cfgLCD           =  10          # config enable lcd
 cfgMPG           =  11          # config enable manual pulse generator
 cfgPrbInv        =  12          # config invert probe signal
 cfgRemDbg        =  13          # config print remote debug info
-cfgTaperCycleDist =  14         # config taper cycle distance
-cfgTestMode      =  15          # conifg test mode
-cfgTestRPM       =  16          # config xilinx test rpm value
-cfgXFreq         =  17          # config xilinx frequency
-cfgXilinx        =  18          # config xilinx interface present
+cfgSpEncoder     =  14          # config spindle encoder
+cfgTaperCycleDist =  15         # config taper cycle distance
+cfgTestMode      =  16          # conifg test mode
+cfgTestRPM       =  17          # config xilinx test rpm value
+cfgXFreq         =  18          # config xilinx frequency
+cfgXilinx        =  19          # config xilinx interface present
 
 # communications config
 
-commPort         =  19          # comm port
-commRate         =  20          # comm baud rate
+commPort         =  20          # comm port
+commRate         =  21          # comm baud rate
 
 # cutoff config
 
-cuPause          =  21          # cutoff pause before cutting
-cuRPM            =  22          # cutoff rpm
-cuToolWidth      =  23          # cutoff tool width
-cuXEnd           =  24          # cutoff x end
-cuXFeed          =  25          # cutoff x feed
-cuXRetract       =  26          # cutoff x retract
-cuXStart         =  27          # cutoff x start
-cuZCutoff        =  28          # cutoff offset to z cutoff
-cuZRetract       =  29          # cutoff offset to z retract
-cuZStart         =  30          # cutoff z location
+cuPause          =  22          # cutoff pause before cutting
+cuRPM            =  23          # cutoff rpm
+cuToolWidth      =  24          # cutoff tool width
+cuXEnd           =  25          # cutoff x end
+cuXFeed          =  26          # cutoff x feed
+cuXRetract       =  27          # cutoff x retract
+cuXStart         =  28          # cutoff x start
+cuZCutoff        =  29          # cutoff offset to z cutoff
+cuZRetract       =  30          # cutoff offset to z retract
+cuZStart         =  31          # cutoff z location
 
 # dro position
 
-droXPos          =  31          # dro x position
-droZPos          =  32          # dro z position
+droXPos          =  32          # dro x position
+droZPos          =  33          # dro z position
 
 # external dro
 
-extDroPort       =  33          # external dro port
-extDroRate       =  34          # external dro baud Rate
+extDroPort       =  34          # external dro port
+extDroRate       =  35          # external dro baud Rate
 
 # face config
 
-faAddFeed        =  35          # face 
-faPasses         =  36          # face 
-faPause          =  37          # face pause before cutting
-faRPM            =  38          # face 
-faSPInt          =  39          # face 
-faSpring         =  40          # face 
-faXEnd           =  41          # face 
-faXFeed          =  42          # face 
-faXRetract       =  43          # face 
-faXStart         =  44          # face 
-faZEnd           =  45          # face 
-faZFeed          =  46          # face 
-faZRetract       =  47          # face 
-faZStart         =  48          # face 
+faAddFeed        =  36          # face 
+faPasses         =  37          # face 
+faPause          =  38          # face pause before cutting
+faRPM            =  39          # face 
+faSPInt          =  40          # face 
+faSpring         =  41          # face 
+faXEnd           =  42          # face 
+faXFeed          =  43          # face 
+faXRetract       =  44          # face 
+faXStart         =  45          # face 
+faZEnd           =  46          # face 
+faZFeed          =  47          # face 
+faZRetract       =  48          # face 
+faZStart         =  49          # face 
 
 # jog config
 
-jogInc           =  49          # jog 
-jogXPos          =  50          # jog 
-jogXPosDiam      =  51          # jog 
-jogZPos          =  52          # jog 
+jogInc           =  50          # jog 
+jogXPos          =  51          # jog 
+jogXPosDiam      =  52          # jog 
+jogZPos          =  53          # jog 
 
 # jog panel config
 
-jpSurfaceSpeed   =  53          # jogpanle fpm or rpm
-jpXDroDiam       =  54          # jogpanel x dro diameter
+jpSurfaceSpeed   =  54          # jogpanle fpm or rpm
+jpXDroDiam       =  55          # jogpanel x dro diameter
 
 # main panel
 
-mainPanel        =  55          # name of main panel
+mainPanel        =  56          # name of main panel
 
 # spindle config
 
-spAccel          =  56          # spindle acceleration
-spAccelTime      =  57          # spindle accelerationtime
-spInvDir         =  58          # spindle invert direction
-spJogAccelTime   =  59          # spindle jog acceleration time
-spJogMax         =  60          # spindle jog max speed
-spJogMin         =  61          # spindle jog min speed
-spMaxRPM         =  62          # spindle jog max rpm
-spMicroSteps     =  63          # spindle micro steps
-spMinRPM         =  64          # spindle minimum rpm
-spMotorSteps     =  65          # spindle motor stpes per revolution
-spMotorTest      =  66          # use stepper drive to test motor
-spStepDrive      =  67          # spindle stepper drive
-spTestIndex      =  68          # spindle test generate internal index pulse
+spAccel          =  57          # spindle acceleration
+spAccelTime      =  58          # spindle accelerationtime
+spInvDir         =  59          # spindle invert direction
+spJogAccelTime   =  60          # spindle jog acceleration time
+spJogMax         =  61          # spindle jog max speed
+spJogMin         =  62          # spindle jog min speed
+spMaxRPM         =  63          # spindle jog max rpm
+spMicroSteps     =  64          # spindle micro steps
+spMinRPM         =  65          # spindle minimum rpm
+spMotorSteps     =  66          # spindle motor stpes per revolution
+spMotorTest      =  67          # use stepper drive to test motor
+spStepDrive      =  68          # spindle stepper drive
+spTestEncoder    =  69          # spindle test generate encoder test pulse
+spTestIndex      =  70          # spindle test generate internal index pulse
 
 # threading config
 
-thAddFeed        =  69          # thread feed to add after done
-thAlternate      =  70          # thread althernate thread flanks
-thAngle          =  71          # thread hanlf angle of thread
-thFirstFeed      =  72          # thread first feed for thread area calc
-thFirstFeedBtn   =  73          # thread button to select first feed
-thInternal       =  74          # thread internal threads
-thLastFeed       =  75          # thread last feed for thread area calculation
-thLastFeedBtn    =  76          # thread button to select last feed
-thLeftHand       =  77          # thread left hand 
-thMM             =  78          # thread button for mm
-thPasses         =  79          # thread number of passes
-thPause          =  80          # thread pause between passes
-thRPM            =  81          # thread speed for threading operation
-thRunout         =  82          # thread runout for rh exit or lh entrance
-thSPInt          =  83          # thread spring pass interval
-thSpring         =  84          # thread number of spring passes at end
-thTPI            =  85          # thread select thread in threads per inch
-thThread         =  86          # thread field containing tpi or pitch
-thXDepth         =  87          # thread x depth of thread
-thXRetract       =  88          # thread x retract
-thXStart         =  89          # thread x diameter
-thXTaper         =  90          # thread x taper
-thZ0             =  91          # thread z right end of thread left start
-thZ0Text         =  92          # thread
-thZ1             =  93          # thread z right start left end
-thZ1Text         =  94          # thread
+thAddFeed        =  71          # thread feed to add after done
+thAlternate      =  72          # thread althernate thread flanks
+thAngle          =  73          # thread hanlf angle of thread
+thFirstFeed      =  74          # thread first feed for thread area calc
+thFirstFeedBtn   =  75          # thread button to select first feed
+thInternal       =  76          # thread internal threads
+thLastFeed       =  77          # thread last feed for thread area calculation
+thLastFeedBtn    =  78          # thread button to select last feed
+thLeftHand       =  79          # thread left hand 
+thMM             =  80          # thread button for mm
+thPasses         =  81          # thread number of passes
+thPause          =  82          # thread pause between passes
+thRPM            =  83          # thread speed for threading operation
+thRunout         =  84          # thread runout for rh exit or lh entrance
+thSPInt          =  85          # thread spring pass interval
+thSpring         =  86          # thread number of spring passes at end
+thTPI            =  87          # thread select thread in threads per inch
+thThread         =  88          # thread field containing tpi or pitch
+thXDepth         =  89          # thread x depth of thread
+thXRetract       =  90          # thread x retract
+thXStart         =  91          # thread x diameter
+thXTaper         =  92          # thread x taper
+thZ0             =  93          # thread z right end of thread left start
+thZ1             =  94          # thread z right start left end
 thZRetract       =  95          # thread z retract
 
 # taper config
@@ -137,303 +137,295 @@ tpAngleBtn       =  98          # tp
 tpDeltaBtn       =  99          # tp 
 tpInternal       = 100          # tp 
 tpLargeDiam      = 101          # tp 
-tpLargeDiamText  = 102          # tp 
-tpPasses         = 103          # tp 
-tpPause          = 104          # tp 
-tpRPM            = 105          # tp 
-tpSPInt          = 106          # tp 
-tpSmallDiam      = 107          # tp 
-tpSmallDiamText  = 108          # tp 
-tpSpring         = 109          # tp 
-tpTaperSel       = 110          # tp 
-tpXDelta         = 111          # tp 
-tpXFeed          = 112          # tp 
-tpXFinish        = 113          # tp 
-tpXInFeed        = 114          # tp 
-tpXRetract       = 115          # tp 
-tpZDelta         = 116          # tp 
-tpZFeed          = 117          # tp 
-tpZLength        = 118          # tp 
-tpZRetract       = 119          # tp 
-tpZStart         = 120          # tp 
+tpPasses         = 102          # tp 
+tpPause          = 103          # tp 
+tpRPM            = 104          # tp 
+tpSPInt          = 105          # tp 
+tpSmallDiam      = 106          # tp 
+tpSpring         = 107          # tp 
+tpTaperSel       = 108          # tp 
+tpXDelta         = 109          # tp 
+tpXFeed          = 110          # tp 
+tpXFinish        = 111          # tp 
+tpXInFeed        = 112          # tp 
+tpXRetract       = 113          # tp 
+tpZDelta         = 114          # tp 
+tpZFeed          = 115          # tp 
+tpZLength        = 116          # tp 
+tpZRetract       = 117          # tp 
+tpZStart         = 118          # tp 
 
 # turn config
 
-tuAddFeed        = 121          # turn 
-tuInternal       = 122          # turn internal
-tuPasses         = 123          # turn 
-tuPause          = 124          # turn 
-tuRPM            = 125          # turn 
-tuSPInt          = 126          # turn 
-tuSpring         = 127          # turn 
-tuXDiam0         = 128          # turn 
-tuXDiam0Text     = 129          # turn 
-tuXDiam1         = 130          # turn 
-tuXDiam1Text     = 131          # turn 
-tuXFeed          = 132          # turn 
-tuXRetract       = 133          # turn 
-tuZEnd           = 134          # turn 
-tuZFeed          = 135          # turn 
-tuZRetract       = 136          # turn 
-tuZStart         = 137          # turn 
+tuAddFeed        = 119          # turn 
+tuInternal       = 120          # turn internal
+tuPasses         = 121          # turn 
+tuPause          = 122          # turn 
+tuRPM            = 123          # turn 
+tuSPInt          = 124          # turn 
+tuSpring         = 125          # turn 
+tuXDiam0         = 126          # turn 
+tuXDiam1         = 127          # turn 
+tuXFeed          = 128          # turn 
+tuXRetract       = 129          # turn 
+tuZEnd           = 130          # turn 
+tuZFeed          = 131          # turn 
+tuZRetract       = 132          # turn 
+tuZStart         = 133          # turn 
 
 # x axis config
 
-xAccel           = 138          # x axis 
-xBacklash        = 139          # x axis 
-xDROInch         = 140          # x axis 
-xHomeBackoffDist = 141          # x axis 
-xHomeDir         = 142          # x axis 
-xHomeDist        = 143          # x axis 
-xHomeEnd         = 144          # x axis 
-xHomeLoc         = 145          # x axis 
-xHomeSpeed       = 146          # x axis 
-xHomeStart       = 147          # x axis 
-xInvDRO          = 148          # x axis invert dro
-xInvDir          = 149          # x axis invert stepper direction
-xInvEnc          = 150          # x axis 
-xInvMpg          = 151          # x axis invert mpg direction
-xJogMax          = 152          # x axis 
-xJogMin          = 153          # x axis 
-xJogSpeed        = 154          # x axis 
-xMaxSpeed        = 155          # x axis 
-xMicroSteps      = 156          # x axis 
-xMinSpeed        = 157          # x axis 
-xMotorRatio      = 158          # x axis 
-xMotorSteps      = 159          # x axis 
-xParkLoc         = 160          # x axis 
-xPitch           = 161          # x axis 
-xProbeDist       = 162          # x axis 
+xAccel           = 134          # x axis 
+xBacklash        = 135          # x axis 
+xDROInch         = 136          # x axis 
+xHomeBackoffDist = 137          # x axis 
+xHomeDir         = 138          # x axis 
+xHomeDist        = 139          # x axis 
+xHomeEnd         = 140          # x axis 
+xHomeLoc         = 141          # x axis 
+xHomeSpeed       = 142          # x axis 
+xHomeStart       = 143          # x axis 
+xInvDRO          = 144          # x axis invert dro
+xInvDir          = 145          # x axis invert stepper direction
+xInvEnc          = 146          # x axis 
+xInvMpg          = 147          # x axis invert mpg direction
+xJogMax          = 148          # x axis 
+xJogMin          = 149          # x axis 
+xJogSpeed        = 150          # x axis 
+xMaxSpeed        = 151          # x axis 
+xMicroSteps      = 152          # x axis 
+xMinSpeed        = 153          # x axis 
+xMotorRatio      = 154          # x axis 
+xMotorSteps      = 155          # x axis 
+xParkLoc         = 156          # x axis 
+xPitch           = 157          # x axis 
+xProbeDist       = 158          # x axis 
 
 # x axis position config
 
-xSvPosition      = 163          # z axis 
-xSvHomeOffset    = 164          # z axis 
-xSvDROPosition   = 165          # x axis 
-xSvDROOffset     = 166          # x axis 
+xSvPosition      = 159          # z axis 
+xSvHomeOffset    = 160          # z axis 
+xSvDROPosition   = 161          # x axis 
+xSvDROOffset     = 162          # x axis 
 
 # z axis config
 
-zAccel           = 167          # z axis 
-zBackInc         = 168          # z axis distance to go past for taking out backlash
-zBacklash        = 169          # z axis 
-zDROInch         = 170          # z axis 
-zInvDRO          = 171          # z axis 
-zInvDir          = 172          # z axis 
-zInvEnc          = 173          # z axis 
-zInvMpg          = 174          # z axis 
-zJogMax          = 175          # z axis 
-zJogMin          = 176          # z axis 
-zJogSpeed        = 177          # z axis 
-zMaxSpeed        = 178          # z axis 
-zMicroSteps      = 179          # z axis 
-zMinSpeed        = 180          # z axis 
-zMotorRatio      = 181          # z axis 
-zMotorSteps      = 182          # z axis 
-zParkLoc         = 183          # z axis 
-zPitch           = 184          # z axis 
-zProbeDist       = 185          # z axis 
-zProbeSpeed      = 186          # z axis 
+zAccel           = 163          # z axis 
+zBackInc         = 164          # z axis distance to go past for taking out backlash
+zBacklash        = 165          # z axis 
+zDROInch         = 166          # z axis 
+zInvDRO          = 167          # z axis 
+zInvDir          = 168          # z axis 
+zInvEnc          = 169          # z axis 
+zInvMpg          = 170          # z axis 
+zJogMax          = 171          # z axis 
+zJogMin          = 172          # z axis 
+zJogSpeed        = 173          # z axis 
+zMaxSpeed        = 174          # z axis 
+zMicroSteps      = 175          # z axis 
+zMinSpeed        = 176          # z axis 
+zMotorRatio      = 177          # z axis 
+zMotorSteps      = 178          # z axis 
+zParkLoc         = 179          # z axis 
+zPitch           = 180          # z axis 
+zProbeDist       = 181          # z axis 
+zProbeSpeed      = 182          # z axis 
 
 # z axis position config
 
-zSvPosition      = 187          # z axis 
-zSvHomeOffset    = 188          # z axis 
-zSvDROPosition   = 189          # z axis 
-zSvDROOffset     = 190          # z axis 
+zSvPosition      = 183          # z axis 
+zSvHomeOffset    = 184          # z axis 
+zSvDROPosition   = 185          # z axis 
+zSvDROOffset     = 186          # z axis 
 
 config = { \
-    'faPasses' : 36,
+    'faPasses' : 37,
     'cfgFreqMult' : 7,
-    'spStepDrive' : 67,
-    'faZRetract' : 47,
-    'tpZFeed' : 117,
-    'tuPasses' : 123,
-    'thZ1Text' : 94,
-    'zInvDir' : 172,
-    'spMicroSteps' : 63,
-    'jogXPos' : 50,
-    'zJogSpeed' : 177,
-    'jogZPos' : 52,
-    'thPause' : 80,
-    'jogInc' : 49,
-    'tuAddFeed' : 121,
-    'tpRPM' : 105,
-    'faZStart' : 48,
-    'tuZStart' : 137,
-    'tpTaperSel' : 110,
-    'thXTaper' : 90,
-    'tpZRetract' : 119,
-    'thXStart' : 89,
-    'xHomeStart' : 147,
-    'thSPInt' : 83,
-    'zMaxSpeed' : 178,
-    'cfgTestRPM' : 16,
-    'xHomeLoc' : 145,
-    'thSpring' : 84,
-    'xHomeEnd' : 144,
+    'spStepDrive' : 68,
+    'faZRetract' : 48,
+    'tpZFeed' : 115,
+    'tuPasses' : 121,
+    'zInvDir' : 168,
+    'spMicroSteps' : 64,
+    'jogXPos' : 51,
+    'zJogSpeed' : 173,
+    'jogZPos' : 53,
+    'thPause' : 82,
+    'jogInc' : 50,
+    'tuAddFeed' : 119,
+    'tpRPM' : 104,
+    'faZStart' : 49,
+    'tuZStart' : 133,
+    'tpTaperSel' : 108,
+    'thXTaper' : 92,
+    'tpZRetract' : 117,
+    'thXStart' : 91,
+    'xHomeStart' : 143,
+    'thSPInt' : 85,
+    'zMaxSpeed' : 174,
+    'cfgTestRPM' : 17,
+    'tpLargeDiam' : 101,
+    'thSpring' : 86,
+    'xHomeEnd' : 140,
     'cfgMPG' : 11,
-    'thZ0Text' : 92,
-    'xHomeBackoffDist' : 141,
-    'xMinSpeed' : 157,
-    'xHomeDir' : 142,
-    'xMotorSteps' : 159,
-    'faZFeed' : 46,
-    'thAddFeed' : 69,
-    'thRunout' : 82,
-    'xJogSpeed' : 154,
-    'cuXRetract' : 26,
-    'tpZStart' : 120,
-    'cuToolWidth' : 23,
-    'spJogMax' : 60,
-    'tuRPM' : 125,
-    'thLastFeedBtn' : 76,
+    'xHomeBackoffDist' : 137,
+    'xMinSpeed' : 153,
+    'xHomeDir' : 138,
+    'xMotorSteps' : 155,
+    'faZFeed' : 47,
+    'thAddFeed' : 71,
+    'thRunout' : 84,
+    'xJogSpeed' : 150,
+    'cuXRetract' : 27,
+    'tpZStart' : 118,
+    'cuToolWidth' : 24,
+    'spJogMax' : 61,
+    'tuRPM' : 123,
+    'thLastFeedBtn' : 78,
     'cfgDraw' : 3,
-    'faXFeed' : 42,
-    'xSvDROPosition' : 165,
-    'cfgXFreq' : 17,
-    'tuSPInt' : 126,
+    'faXFeed' : 43,
+    'xSvDROPosition' : 161,
+    'cfgXFreq' : 18,
+    'tuSPInt' : 124,
     'cfgLCD' : 10,
-    'extDroRate' : 34,
-    'xJogMax' : 152,
-    'tpXInFeed' : 114,
-    'thFirstFeed' : 72,
-    'faAddFeed' : 35,
-    'xJogMin' : 153,
-    'faXEnd' : 41,
-    'spJogMin' : 61,
-    'xPitch' : 161,
+    'extDroRate' : 35,
+    'xJogMax' : 148,
+    'tpXInFeed' : 112,
+    'thFirstFeed' : 74,
+    'faAddFeed' : 36,
+    'xJogMin' : 149,
+    'faXEnd' : 42,
+    'spJogMin' : 62,
+    'xPitch' : 157,
     'cfgExtDro' : 5,
-    'xSvHomeOffset' : 164,
+    'xSvHomeOffset' : 160,
     'tpAngle' : 97,
-    'faXStart' : 44,
+    'faXStart' : 45,
     'cfgEncoder' : 4,
-    'faSPInt' : 39,
-    'tpXFinish' : 113,
-    'zSvPosition' : 187,
+    'faSPInt' : 40,
+    'tpXFinish' : 111,
+    'zSvPosition' : 183,
     'tpAddFeed' : 96,
     'tpDeltaBtn' : 99,
-    'thLeftHand' : 77,
-    'tpPasses' : 103,
-    'xHomeSpeed' : 146,
-    'thXRetract' : 88,
+    'thLeftHand' : 79,
+    'tpPasses' : 102,
+    'xHomeSpeed' : 142,
+    'thXRetract' : 90,
     'cfgCmdDis' : 0,
     'cfgDRO' : 2,
-    'commPort' : 19,
-    'droZPos' : 32,
-    'thFirstFeedBtn' : 73,
-    'zMinSpeed' : 180,
-    'thRPM' : 81,
-    'thZ1' : 93,
-    'tpZDelta' : 116,
-    'zSvHomeOffset' : 188,
-    'xInvDRO' : 148,
-    'tuSpring' : 127,
-    'xMotorRatio' : 158,
-    'tuInternal' : 122,
-    'thThread' : 86,
+    'commPort' : 20,
+    'droZPos' : 33,
+    'thFirstFeedBtn' : 75,
+    'zMinSpeed' : 176,
+    'thRPM' : 83,
+    'thZ1' : 94,
+    'tpZDelta' : 114,
+    'zSvHomeOffset' : 184,
+    'xInvDRO' : 144,
+    'tuSpring' : 125,
+    'xMotorRatio' : 154,
+    'tuInternal' : 120,
+    'thThread' : 88,
     'cfgDbgSave' : 1,
-    'tpSmallDiamText' : 108,
-    'thXDepth' : 87,
-    'cuXEnd' : 24,
-    'tuPause' : 124,
-    'xProbeDist' : 162,
-    'xMaxSpeed' : 155,
-    'xDROInch' : 140,
-    'xInvDir' : 149,
-    'tuZFeed' : 135,
-    'zInvEnc' : 173,
-    'cuZRetract' : 29,
-    'xHomeDist' : 143,
+    'thXDepth' : 89,
+    'cuXEnd' : 25,
+    'tuPause' : 122,
+    'xProbeDist' : 158,
+    'xMaxSpeed' : 151,
+    'xDROInch' : 136,
+    'xInvDir' : 145,
+    'tuZFeed' : 131,
+    'zInvEnc' : 169,
+    'cuZRetract' : 30,
+    'xHomeDist' : 139,
     'cfgPrbInv' : 12,
-    'tpSmallDiam' : 107,
-    'tpZLength' : 118,
-    'cuXFeed' : 25,
-    'zInvMpg' : 174,
-    'thPasses' : 79,
-    'spMotorSteps' : 65,
-    'cuZStart' : 30,
-    'zSvDROOffset' : 190,
-    'zAccel' : 167,
-    'tpXRetract' : 115,
-    'cfgTestMode' : 15,
-    'tpXFeed' : 112,
-    'thAlternate' : 70,
-    'xInvEnc' : 150,
-    'spMinRPM' : 64,
-    'tpSpring' : 109,
-    'tuZEnd' : 134,
-    'tuXFeed' : 132,
-    'faSpring' : 40,
-    'thInternal' : 74,
+    'tpSmallDiam' : 106,
+    'tpZLength' : 116,
+    'cuXFeed' : 26,
+    'zInvMpg' : 170,
+    'thPasses' : 81,
+    'spMotorSteps' : 66,
+    'cuZStart' : 31,
+    'zSvDROOffset' : 186,
+    'zAccel' : 163,
+    'tpXRetract' : 113,
+    'cfgTestMode' : 16,
+    'tpXFeed' : 110,
+    'thAlternate' : 72,
+    'xInvEnc' : 146,
+    'spMinRPM' : 65,
+    'tpSpring' : 107,
+    'tuZEnd' : 130,
+    'tuXFeed' : 128,
+    'faSpring' : 41,
+    'thInternal' : 76,
     'thZRetract' : 95,
-    'thTPI' : 85,
-    'tpXDelta' : 111,
-    'tuXDiam1Text' : 131,
+    'xHomeLoc' : 141,
+    'thTPI' : 87,
+    'tpXDelta' : 109,
     'tpAngleBtn' : 98,
-    'tpPause' : 104,
-    'zBacklash' : 169,
+    'tpPause' : 103,
+    'zBacklash' : 165,
     'cfgInvEncDir' : 9,
-    'faPause' : 37,
-    'thZ0' : 91,
-    'faXRetract' : 43,
-    'cuXStart' : 27,
+    'faPause' : 38,
+    'thZ0' : 93,
+    'spTestEncoder' : 69,
+    'faXRetract' : 44,
+    'cuXStart' : 28,
     'cfgHomeInPlace' : 8,
-    'jpSurfaceSpeed' : 53,
-    'xSvDROOffset' : 166,
-    'zParkLoc' : 183,
-    'faRPM' : 38,
-    'spMaxRPM' : 62,
+    'jpSurfaceSpeed' : 54,
+    'xSvDROOffset' : 162,
+    'zParkLoc' : 179,
+    'faRPM' : 39,
+    'spMaxRPM' : 63,
     'cfgFcy' : 6,
-    'zMicroSteps' : 179,
-    'thLastFeed' : 75,
-    'zDROInch' : 170,
-    'tuXRetract' : 133,
-    'extDroPort' : 33,
-    'cuRPM' : 22,
-    'xInvMpg' : 151,
-    'tuZRetract' : 136,
-    'tpSPInt' : 106,
-    'spTestIndex' : 68,
-    'zJogMin' : 176,
-    'zMotorRatio' : 181,
-    'zPitch' : 184,
-    'spInvDir' : 58,
-    'spJogAccelTime' : 59,
-    'zBackInc' : 168,
-    'zSvDROPosition' : 189,
-    'xBacklash' : 139,
-    'mainPanel' : 55,
-    'tpLargeDiam' : 101,
-    'thAngle' : 71,
-    'zMotorSteps' : 182,
-    'jogXPosDiam' : 51,
-    'cuZCutoff' : 28,
-    'xAccel' : 138,
-    'spAccelTime' : 57,
-    'tpLargeDiamText' : 102,
-    'zInvDRO' : 171,
-    'cuPause' : 21,
-    'commRate' : 20,
-    'cfgXilinx' : 18,
-    'spAccel' : 56,
-    'zJogMax' : 175,
-    'droXPos' : 31,
-    'tuXDiam0Text' : 129,
-    'zProbeDist' : 185,
-    'faZEnd' : 45,
-    'xParkLoc' : 160,
-    'xSvPosition' : 163,
-    'jpXDroDiam' : 54,
-    'spMotorTest' : 66,
-    'xMicroSteps' : 156,
-    'cfgTaperCycleDist' : 14,
+    'zMicroSteps' : 175,
+    'thLastFeed' : 77,
+    'zDROInch' : 166,
+    'tuXRetract' : 129,
+    'extDroPort' : 34,
+    'cuRPM' : 23,
+    'xInvMpg' : 147,
+    'tuZRetract' : 132,
+    'tpSPInt' : 105,
+    'spTestIndex' : 70,
+    'zJogMin' : 172,
+    'zMotorRatio' : 177,
+    'zPitch' : 180,
+    'spInvDir' : 59,
+    'spJogAccelTime' : 60,
+    'zBackInc' : 164,
+    'zSvDROPosition' : 185,
+    'xBacklash' : 135,
+    'mainPanel' : 56,
+    'cfgSpEncoder' : 14,
+    'thAngle' : 73,
+    'zMotorSteps' : 178,
+    'jogXPosDiam' : 52,
+    'cuZCutoff' : 29,
+    'xAccel' : 134,
+    'spAccelTime' : 58,
+    'zInvDRO' : 167,
+    'cuPause' : 22,
+    'commRate' : 21,
+    'cfgXilinx' : 19,
+    'spAccel' : 57,
+    'zJogMax' : 171,
+    'droXPos' : 32,
+    'zProbeDist' : 181,
+    'faZEnd' : 46,
+    'xParkLoc' : 156,
+    'xSvPosition' : 159,
+    'jpXDroDiam' : 55,
+    'spMotorTest' : 67,
+    'xMicroSteps' : 152,
+    'cfgTaperCycleDist' : 15,
     'tpInternal' : 100,
     'cfgRemDbg' : 13,
-    'thMM' : 78,
-    'zProbeSpeed' : 186,
-    'tuXDiam0' : 128,
-    'tuXDiam1' : 130,
+    'thMM' : 80,
+    'zProbeSpeed' : 182,
+    'tuXDiam0' : 126,
+    'tuXDiam1' : 127,
     }
 
 configTable = ( \
@@ -451,6 +443,7 @@ configTable = ( \
     'cfgMPG',
     'cfgPrbInv',
     'cfgRemDbg',
+    'cfgSpEncoder',
     'cfgTaperCycleDist',
     'cfgTestMode',
     'cfgTestRPM',
@@ -505,6 +498,7 @@ configTable = ( \
     'spMotorSteps',
     'spMotorTest',
     'spStepDrive',
+    'spTestEncoder',
     'spTestIndex',
     'thAddFeed',
     'thAlternate',
@@ -529,9 +523,7 @@ configTable = ( \
     'thXStart',
     'thXTaper',
     'thZ0',
-    'thZ0Text',
     'thZ1',
-    'thZ1Text',
     'thZRetract',
     'tpAddFeed',
     'tpAngle',
@@ -539,13 +531,11 @@ configTable = ( \
     'tpDeltaBtn',
     'tpInternal',
     'tpLargeDiam',
-    'tpLargeDiamText',
     'tpPasses',
     'tpPause',
     'tpRPM',
     'tpSPInt',
     'tpSmallDiam',
-    'tpSmallDiamText',
     'tpSpring',
     'tpTaperSel',
     'tpXDelta',
@@ -566,9 +556,7 @@ configTable = ( \
     'tuSPInt',
     'tuSpring',
     'tuXDiam0',
-    'tuXDiam0Text',
     'tuXDiam1',
-    'tuXDiam1Text',
     'tuXFeed',
     'tuXRetract',
     'tuZEnd',

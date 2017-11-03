@@ -63,6 +63,7 @@ EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
 REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
 STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
 MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
+SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
 HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
 cfg.clrInfo(len(cf.config))
@@ -929,6 +930,8 @@ def sendSpindleData(send=False, rpm=None):
         if send or (not spindleDataSent):
             comm.queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
             comm.queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
+            comm.queParm(pm.SPINDLE_ENCODER, \
+                         cfg.getBoolInfoData(cf.cfgSpEncoder))
             if STEP_DRV or MOTOR_TEST:
                 comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
@@ -945,9 +948,14 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
                 comm.queParm(pm.SP_TEST_INDEX, \
                              cfg.getBoolInfoData(cf.spTestIndex))
+                if MOTOR_TEST and SPINDLE_ENCODER:
+                    comm.queParm(pm.SP_TEST_ENCODER, \
+                                 cfg.getBoolInfoData(cf.spTestEncoder))
+                    comm.queParm(pm.ENC_PER_REV, \
+                                 cfg.getInfoData(cf.cfgEncoder))
                 comm.command(cm.CMD_SPSETUP)
             elif XILINX:
-                comm.queParm(pm.ENC_MAX, cfg.getInfoData(cf.cfgEncoder))
+                comm.queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
                 comm.queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
                 comm.queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
                 xilinxTestMode()
@@ -961,6 +969,8 @@ def sendSpindleData(send=False, rpm=None):
                     cfgReg |= xb.XDIR_POL
                 comm.queParm(pm.X_CFG_REG, cfgReg)
                 comm.sendMulti()
+            elif SPINDLE_ENCODER:
+                comm.setParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
             spindleDataSent = True
     except CommTimeout:
         commTimeout()
@@ -1365,8 +1375,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        self.control = Turn(self)
-        ActionRoutines.__init__(self, self.control)
+        ActionRoutines.__init__(self, Turn(self))
         self.InitUI()
         self.configList = None
         self.prefix = 'tu'
@@ -1634,8 +1643,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        self.control = Face(self)
-        ActionRoutines.__init__(self, self.control)
+        ActionRoutines.__init__(self, Face(self))
         self.InitUI()
         self.configList = None
         self.prefix = 'fa'
@@ -1815,8 +1823,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        self.control = Cutoff(self)
-        ActionRoutines.__init__(self, self.control)
+        ActionRoutines.__init__(self, Cutoff(self))
         self.InitUI()
         self.configList = None
         self.prefix = 'cf'
@@ -2260,8 +2267,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        self.control = Taper(self)
-        ActionRoutines.__init__(self, self.control)
+        ActionRoutines.__init__(self, Taper(self))
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -2289,13 +2295,11 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (cf.tpDeltaBtn, None), \
                            (cf.tpInternal, None), \
                            (cf.tpLargeDiam, 'f'), \
-                           (cf.tpLargeDiamText, None), \
                            (cf.tpPasses, 'd'), \
                            (cf.tpPause, None), \
                            (cf.tpRPM, 'd'), \
                            (cf.tpSPInt, 'd'), \
                            (cf.tpSmallDiam, 'f'), \
-                           (cf.tpSmallDiamText, None), \
                            (cf.tpSpring, 'd'), \
                            (cf.tpTaperSel, None), \
                            (cf.tpXDelta, 'f5'), \
@@ -2644,7 +2648,10 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.done(0)
 
         th = self.panel
-        m.startSpindle(getIntVal(th.rpm))
+        if STEP_DRV:
+            m.startSpindle(getIntVal(th.rpm))
+        else:
+            m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
 
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
@@ -2792,7 +2799,8 @@ class ScrewThread(LatheOp, UpdatePass):
 
         # self.drawClose()
         self.m.drawClose()
-        self.m.stopSpindle()
+        if STEP_DRV:
+            self.m.stopSpindle()
         self.m.done(1)
         stdout.flush()
         return(True)
@@ -2895,7 +2903,7 @@ class ScrewThread(LatheOp, UpdatePass):
                 m.drawLine(startZ, self.curX)
             else:
                 m.moveX(self.xStart, ct.CMD_JOG)
-                m.moveX(self.curX, ct.CMD_SYN | ct.X_SYN_START)
+                m.moveX(self.curX, ct.CMD_SYN)
 
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
@@ -2922,7 +2930,8 @@ class ScrewThread(LatheOp, UpdatePass):
         self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
-        self.m.stopSpindle()
+        if STEP_DRV:
+            self.m.stopSpindle()
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
 
@@ -2931,8 +2940,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        self.control = ScrewThread(self)
-        ActionRoutines.__init__(self, self.control)
+        ActionRoutines.__init__(self, ScrewThread(self))
         self.InitUI()
         self.configList = None
         self.prefix = 'th'
@@ -2975,10 +2983,10 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         # z parameters
 
         (self.z0, self.z0Txt) = \
-            self.addFieldText(sizerG, "Z End", cf.thZ0, cf.thZ0Text)
+            self.addFieldText(sizerG, "Z End", cf.thZ0)
 
         (self.z1, self.z1Txt) = \
-            self.addFieldText(sizerG, "Z Start", cf.thZ1, cf.thZ0Text)
+            self.addFieldText(sizerG, "Z Start", cf.thZ1)
 
         self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract)
 
@@ -5184,7 +5192,10 @@ class UpdateThread(Thread):
         return("msta %s" % (en.mStatesList[val]))
 
     def dbgMoveCmd(self, val):
-        return("mcmd %s" % (en.mCommandsList[val]))
+        if (val & 0xff) == 0:
+            return("mcmd %s" % (en.mCommandsList[val]))
+        else:
+            return("mcmd %s %02x" % (en.mCommandsList[val & 0xff], val >> 8))
 
     def abort(self):
         self.threadRun = False
@@ -5409,7 +5420,7 @@ class MainFrame(wx.Frame):
         menu = operationMenu.Append(ID_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTaper, menu)
 
-        if STEP_DRV:
+        if STEP_DRV or SPINDLE_ENCODER:
             ID_THREAD = wx.NewId()
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
@@ -5469,7 +5480,7 @@ class MainFrame(wx.Frame):
         sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
         panel.Hide()
 
-        if STEP_DRV:
+        if STEP_DRV or SPINDLE_ENCODER:
             self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
@@ -5670,6 +5681,10 @@ class MainFrame(wx.Frame):
                 self.currentPanel = panel
             else:
                 panel.Hide()
+        if self.currentPanel == None:
+            panel = self.turnPanel
+            panel.Show()
+            self.currentPanel = panel
         self.Layout()
         self.Fit()
 
@@ -5870,12 +5885,17 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(2, 0, 0)
 
-        self.fields = (
+        self.fields = ( \
             ("bStepper Drive", cf.spStepDrive, None), \
             ("bMotor Test", cf.spMotorTest, None), \
+            ("bSpindle Encoder", cf.cfgSpEncoder, None), \
         )
+        if SPINDLE_ENCODER:
+            self.fields += ( \
+                ("Encoder", cf.cfgEncoder, 'd'), \
+            )
         if STEP_DRV or MOTOR_TEST:
-            self.fields += (
+            self.fields += ( \
                 ("Motor Steps", cf.spMotorSteps, 'd'), \
                 ("Micro Steps", cf.spMicroSteps, 'd'), \
                 ("Min RPM", cf.spMinRPM, 'd'), \
@@ -5886,6 +5906,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 # ("Jog Accel Time", cf.spJogAccelTime, 'f'), \
                 ("bInvert Dir", cf.spInvDir, None), \
                 ("bTest Index", cf.spTestIndex, None), \
+                ("bTest Encoder", cf.spTestEncoder, None), \
             )
         self.fieldList(sizerG, self.fields)
 

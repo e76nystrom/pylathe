@@ -18,6 +18,7 @@ configList = \
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
     ('cfgRemDbg', 'config print remote debug info'),
+    ('cfgSpEncoder', 'config spindle encoder'),
     ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
     ('cfgTestRPM', 'config xilinx test rpm value'),
@@ -99,6 +100,7 @@ configList = \
     ('spMotorSteps', 'spindle motor stpes per revolution'),
     ('spMotorTest', 'use stepper drive to test motor'),
     ('spStepDrive', 'spindle stepper drive'),
+    ('spTestEncoder', 'spindle test generate encoder test pulse'),
     ('spTestIndex', 'spindle test generate internal index pulse'),
 
   "threading config",
@@ -352,6 +354,7 @@ parmList = \
     ("SP_JOG_DIR", "spindle direction", "char"),
     ("SP_DIR_FLAG", "spindle invert direction", "char"),
     ("SP_TEST_INDEX", "generate test index pulse", "char"),
+    ("SP_TEST_ENCODER", "generate encoder test pulse", "char"),
     
     "z axis parameters",
     
@@ -509,6 +512,7 @@ parmList = \
 
     ("STEPPER_DRIVE", "stepper driven spindle", "char"),
     ("MOTOR_TEST", "use stepper drive to test motor", "char"),
+    ("SPINDLE_ENCODER", "motor drive with spindle encoder", "char"),
     ("CFG_XILINX", "using xilinx", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
@@ -521,7 +525,7 @@ parmList = \
 
     "encoder counts per revolution",
 
-    ("ENC_MAX", "spindle encoder counts per revolution", "uint16_t"),
+    ("ENC_PER_REV", "spindle encoder counts per revolution", "uint16_t"),
 
     "test encoder setup variables",
 
