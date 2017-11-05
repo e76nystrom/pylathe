@@ -5192,7 +5192,7 @@ class UpdateThread(Thread):
         return("msta %s" % (en.mStatesList[val]))
 
     def dbgMoveCmd(self, val):
-        if (val & 0xff) == 0:
+        if (val & 0xff00) == 0:
             return("mcmd %s" % (en.mCommandsList[val]))
         else:
             return("mcmd %s %02x" % (en.mCommandsList[val & 0xff], val >> 8))
