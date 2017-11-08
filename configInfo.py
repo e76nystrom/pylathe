@@ -3,7 +3,7 @@ from sys import stdout
 
 class InfoValue():
     def __init__(self, val):
-        self.value = val
+        self.SetValue(val)
 
     def GetValue(self):
         val = self.value
@@ -19,7 +19,13 @@ class InfoValue():
             return("")
 
     def SetValue(self, val):
-        self.value = val
+        if val == "True":
+            self.value = True
+        elif val == "False":
+            self.value = False
+        else:
+            self.value = val
+        return(self.value)
 
 class ConfigInfo():
     def __init__(self, configTable):
@@ -112,12 +118,11 @@ class ConfigInfo():
                         func.SetValue(val)
                         self.infoData[index] = val
                     elif funcClass == 'InfoValue':
-                        func.SetValue(val)
-                        self.infoData[index] = val
+                        self.infoData[index] = func.SetValue(val)
                 else:
                     func = InfoValue(val)
                     self.info[index] = func
-                    self.infoData[index] = val
+                    self.infoData[index] = func.GetValue()
                 # stdout.flush()
         except Exception as e:
             print(line, "readInfo error")
