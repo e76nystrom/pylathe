@@ -971,6 +971,7 @@ def sendSpindleData(send=False, rpm=None):
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 comm.setParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
+                comm.command(cm.CMD_SPSETUP)
             spindleDataSent = True
     except CommTimeout:
         commTimeout()
