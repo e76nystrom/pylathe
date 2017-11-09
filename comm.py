@@ -1,6 +1,7 @@
 from __future__ import print_function
 from sys import stdout
 from threading import Thread, Lock, Event
+from ctypes import c_int32
 import serial
 SETUP = False
 
@@ -242,12 +243,13 @@ class Comm():
                     self.commLock.release()
                     try:
                         retVal = int(result[2], 16)
+                        retVal = c_int32(retval).value
                     except:
                         print("getParm error on %s" % (result))
                         stdout.flush()
                         retVal = 0
-                    if retVal & 0x80000000:
-                        retVal -= 0x100000000
+                    # if retVal & 0x80000000:
+                    #     retVal -= 0x100000000
                     if dbg:
                         print("%08x" % (retVal))
                         stdout.flush()
@@ -364,8 +366,9 @@ class Comm():
                 result = rsp.split()
                 if len(result) == 3:
                     val = int(result[2], 16)
-                    if val & 0x80000000:
-                        val = -((val ^ 0xffffffff) + 1)
+                    val = c_int32(val).value
+                    # if val & 0x80000000:
+                    #     val = -((val ^ 0xffffffff) + 1)
                     self.commLock.release()
                     return(val)
             rsp = rsp + tmp;
@@ -441,8 +444,9 @@ class Comm():
                 if len(result) == 2:
                     self.commLock.release()
                     retVal = int(result[1], 16)
-                    if retVal & 0x80000000:
-                        retVal -= 0x100000000
+                    retVal = c_int32(retVal).value
+                    # if retVal & 0x80000000:
+                    #     retVal -= 0x100000000
                     return(retVal)
             rsp = rsp + tmp;
         self.commLock.release()

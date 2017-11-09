@@ -928,6 +928,8 @@ enumList =\
     ("D_XEXP",  "x expected location"),
     ("D_XWT",   "x wait"),
     ("D_XDN",   "x done"),
+    ("D_XEST",  "x spindle encoder start count"),
+    ("D_XEDN",  "x spindle encoder done count"),
 
     ("D_ZMOV",  "z move location"),
     ("D_ZLOC",  "z location"),
@@ -940,7 +942,11 @@ enumList =\
     ("D_ZEXP",  "z expected location"),
     ("D_ZWT",   "z wait"),
     ("D_ZDN",   "z done"),
-
+    ("D_ZEST",  "z spindle encoder start count"),
+    ("D_ZEDN",  "Z spindle encoder done count"),
+    ("D_ZX",    "z "),
+    ("D_ZY",    "z "),
+ 
     ("D_HST", "home state"),
 
     ("D_MSTA", "move state"),

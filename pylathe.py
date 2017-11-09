@@ -14,6 +14,7 @@ from sys import stdout, stderr
 import serial
 from threading import Thread, Lock, Event
 from math import radians, cos, tan, ceil, floor, pi, sqrt, atan2, degrees
+from ctypes import c_uint32
 from Queue import Queue, Empty
 from platform import system
 from dxfwrite import DXFEngine as dxf
@@ -949,10 +950,12 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.SP_TEST_INDEX, \
                              cfg.getBoolInfoData(cf.spTestIndex))
                 if MOTOR_TEST and SPINDLE_ENCODER:
+                    count = (cfg.getIntInfoData(cf.spMotorSteps) * \
+                             cfg.getIntInfoData(cf.spMicroSteps))
+                    comm.queParm(pm.ENC_PER_REV, count)
+                    updateThread.encoderCount = count
                     comm.queParm(pm.SP_TEST_ENCODER, \
                                  cfg.getBoolInfoData(cf.spTestEncoder))
-                    comm.queParm(pm.ENC_PER_REV, \
-                                 cfg.getInfoData(cf.cfgEncoder))
                 comm.command(cm.CMD_SPSETUP)
             elif XILINX:
                 comm.queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
@@ -970,7 +973,9 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.X_CFG_REG, cfgReg)
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
-                comm.setParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
+                count = cfg.getInfoData(cf.cfgEncoder)
+                comm.queParm(pm.ENC_PER_REV, count)
+                updateThread.encoderCount = count
                 comm.command(cm.CMD_SPSETUP)
             spindleDataSent = True
     except CommTimeout:
@@ -4826,15 +4831,19 @@ class UpdateThread(Thread):
         self.notifyWindow = notifyWindow
         self.threadRun = True
         self.parmList = (self.readAll, )
+        self.encoderCount = None
         self.xLoc = None
         self.zLoc = None
         self.xIntLoc = None
         self.zIntLoc = None
         self.zDro = None
         self.xDro = None
+        self.xEncoderStart = None
+        self.zEncoderStart = None
+        self.xEncoderCount = None
+        self.zEncoderCount = None
         self.passVal = None
         self.dbg = None
-        self.start()
 
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(file, "wb")
@@ -4906,13 +4915,15 @@ class UpdateThread(Thread):
                     (en.D_XLOC, self.dbgXLoc), \
                     (en.D_XDST, self.dbgXDst), \
                     (en.D_XSTP, self.dbgXStp),
-                    (en.D_XST, self.dbgXState), \
+                    (en.D_XST,  self.dbgXState), \
                     (en.D_XBSTP, self.dbgXBSteps), \
                     (en.D_XDRO, self.dbgXDro), \
                     (en.D_XPDRO, self.dbgXPDro), \
                     (en.D_XEXP, self.dbgXExp), \
-                    (en.D_XWT, self.dbgXWait), \
-                    (en.D_XDN, self.dbgXDone), \
+                    (en.D_XWT,  self.dbgXWait), \
+                    (en.D_XDN,  self.dbgXDone), \
+                    (en.D_XEST, self.dbgXEncStart), \
+                    (en.D_XEDN, self.dbgXEncDone), \
 
                     (en.D_ZMOV, self.dbgZMov), \
                     (en.D_ZLOC, self.dbgZLoc), \
@@ -4925,6 +4936,10 @@ class UpdateThread(Thread):
                     (en.D_ZEXP, self.dbgZExp), \
                     (en.D_ZWT, self.dbgZWait), \
                     (en.D_ZDN, self.dbgZDone), \
+                    (en.D_ZEST, self.dbgZEncStart), \
+                    (en.D_ZEDN, self.dbgZEncDone), \
+                    (en.D_ZX, self.dbgZX), \
+                    (en.D_ZY, self.dbgZY), \
 
                     (en.D_HST, self.dbgHome), \
 
@@ -5092,15 +5107,20 @@ class UpdateThread(Thread):
             self.xDro = None
         else:
             diff = ""
-        return("xloc %6d %7.4f %7.4f%s" % (iTmp, tmp, tmp * 2.0, diff))
+        return("xloc %7d %7.4f %7.4f%s" % (iTmp, tmp, tmp * 2.0, diff))
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
-        return("xdst %7.4f %6d" % (tmp, val))
+        return("xdst %7.4f %7d" % (tmp, val))
 
     def dbgXStp(self, val):
-        tmp = float(val) / jogPanel.xStepsInch
-        return("xstp %7.4f %6d" % (tmp, val))
+        dist = float(val) / jogPanel.xStepsInch
+        if self.xEncoderCount is None:
+            return("xstp %7.4f %7d" % (dist, val))
+        else:
+            pitch = dist / (float(self.xEncoderCount) / self.encoderCount)
+            self.xEncoderCount = None
+            return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
         tmp = en.xStatesList[val]
@@ -5108,7 +5128,7 @@ class UpdateThread(Thread):
 
     def dbgXBSteps(self, val):
         tmp = float(val) / jogPanel.xStepsInch
-        return("xbst %7.4f %6d" % (tmp, val))
+        return("xbst %7.4f %7d" % (tmp, val))
 
     def dbgXDro(self, val):
         tmp = float(val) / jogPanel.xDROInch - xDROOffset
@@ -5132,6 +5152,15 @@ class UpdateThread(Thread):
     def dbgXDone(self, val):
         return("xdn  %2x" % (val))
 
+    def dbgXEncStart(self, val):
+        self.xEncoderStart = val
+        return(None)
+
+    def dbgXEncDone(self, val):
+        count = c_uint32(val - self.xEncoderStart).value
+        self.xEncoderCount = count
+        return("xedn %7.2f %7d" % (float(count) / self.encoderCount, count))
+
     def dbgZMov(self, val):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
         return("zmov %7.4f" % (tmp))
@@ -5146,15 +5175,20 @@ class UpdateThread(Thread):
             self.zDro = None
         else:
             diff = ""
-        return("zloc %6d %7.4f%s" % (iTmp, tmp, diff))
+        return("zloc %7d %7.4f%s" % (iTmp, tmp, diff))
 
     def dbgZDst(self, val):
         tmp = float(val) / jogPanel.zStepsInch
-        return("zdst %7.4f %6d" % (tmp, val))
+        return("zdst %7.4f %7d" % (tmp, val))
 
     def dbgZStp(self, val):
-        tmp = float(val) / jogPanel.zStepsInch
-        return("zstp %7.4f %6d" % (tmp, val))
+        dist = float(val) / jogPanel.zStepsInch
+        if self.zEncoderCount is None:
+            return("zstp %7.4f %7d" % (dist, val))
+        else:
+            pitch = dist / (float(self.zEncoderCount) / self.encoderCount)
+            self.zEncoderCount = None
+            return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
         tmp = en.zStatesList[val]
@@ -5162,7 +5196,7 @@ class UpdateThread(Thread):
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
-        return("zbst %7.4f %6d" % (tmp, val))
+        return("zbst %7.4f %7d" % (tmp, val))
 
     def dbgZDro(self, val):
         tmp = float(val) / jogPanel.zDROInch - zDROOffset
@@ -5185,6 +5219,21 @@ class UpdateThread(Thread):
 
     def dbgZDone(self, val):
         return("zdn  %2x" % (val))
+
+    def dbgZEncStart(self, val):
+        self.zEncoderStart = val
+        return(None)
+
+    def dbgZEncDone(self, val):
+        count = c_uint32(val - self.zEncoderStart).value
+        self.zEncoderCount = count
+        return("zedn %7.2f %7d" % (float(count) / self.encoderCount, count))
+
+    def dbgZX(self, val):
+        return("z_x  %7d" % (val))
+
+    def dbgZY(self, val):
+        return("z_y  %7d" % (val))
 
     def dbgHome(self, val):
         return("hsta %s" % (en.hStatesList[val]))
@@ -5217,7 +5266,6 @@ class UpdateThread(Thread):
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
-        global moveCommands, jogShuttle
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
@@ -5229,7 +5277,11 @@ class MainFrame(wx.Frame):
                     wx.NORMAL, False, u'Consolas')
         self.SetFont(defaultFont)
 
+        global moveCommands
         moveCommands = MoveCommands()
+
+        global updateThread
+        self.update = updateThread = UpdateThread(self)
 
         self.currentPanel = None
         
@@ -5248,6 +5300,7 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
+        global jogShuttle
         self.jogShuttle = jogShuttle = JogShuttle()
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
@@ -5328,8 +5381,7 @@ class MainFrame(wx.Frame):
         for (event, action) in eventTable:
             self.procUpdate[event] = action
 
-        global updateThread
-        self.update = updateThread = UpdateThread(self)
+        self.update.start()
 
     def onClose(self, e):
         global done
