@@ -973,7 +973,7 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.X_CFG_REG, cfgReg)
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
-                count = cfg.getInfoData(cf.cfgEncoder)
+                count = cfg.getIntInfoData(cf.cfgEncoder)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
                 comm.command(cm.CMD_SPSETUP)
@@ -5157,6 +5157,8 @@ class UpdateThread(Thread):
         return(None)
 
     def dbgXEncDone(self, val):
+        if self.xEncoderStart is None:
+            return(None)
         count = c_uint32(val - self.xEncoderStart).value
         self.xEncoderCount = count
         return("xedn %7.2f %7d" % (float(count) / self.encoderCount, count))
@@ -5225,6 +5227,8 @@ class UpdateThread(Thread):
         return(None)
 
     def dbgZEncDone(self, val):
+        if self.zEncoderStart is None:
+            return(None)
         count = c_uint32(val - self.zEncoderStart).value
         self.zEncoderCount = count
         return("zedn %7.2f %7d" % (float(count) / self.encoderCount, count))

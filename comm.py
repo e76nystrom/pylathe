@@ -243,7 +243,7 @@ class Comm():
                     self.commLock.release()
                     try:
                         retVal = int(result[2], 16)
-                        retVal = c_int32(retval).value
+                        retVal = c_int32(retVal).value
                     except:
                         print("getParm error on %s" % (result))
                         stdout.flush()
