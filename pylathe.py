@@ -949,11 +949,11 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
                 comm.queParm(pm.SP_TEST_INDEX, \
                              cfg.getBoolInfoData(cf.spTestIndex))
+                count = (cfg.getIntInfoData(cf.spMotorSteps) * \
+                         cfg.getIntInfoData(cf.spMicroSteps))
+                comm.queParm(pm.ENC_PER_REV, count)
+                updateThread.encoderCount = count
                 if MOTOR_TEST and SPINDLE_ENCODER:
-                    count = (cfg.getIntInfoData(cf.spMotorSteps) * \
-                             cfg.getIntInfoData(cf.spMicroSteps))
-                    comm.queParm(pm.ENC_PER_REV, count)
-                    updateThread.encoderCount = count
                     comm.queParm(pm.SP_TEST_ENCODER, \
                                  cfg.getBoolInfoData(cf.spTestEncoder))
                 comm.command(cm.CMD_SPSETUP)
@@ -5055,7 +5055,7 @@ class UpdateThread(Thread):
                             print("index error %s" % result)
                             stdout.flush()
                         except TypeError:
-                            print("type error %s" % result)
+                            print("type error %s %s" % (en.dMessageList[cmd], result))
                             stdout.flush()
                     except ValueError:
                         print("value error cmd %s val %s" % (cmd, val))
