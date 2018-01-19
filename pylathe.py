@@ -26,58 +26,34 @@ if WINDOWS:
 from configInfo import ConfigInfo, InfoValue
 from comm import Comm, CommTimeout
 
+import configDef as cf
+import stringDef as st
+import cmdDef as cm
+import parmDef as pm
+import enumDef as en
+import ctlBitDef as ct
+
 SWIG = False
 HOME_TEST = False
 SETUP = False
-configFile = "config.txt"
-posFile = "posInfo.txt"
 
-if SETUP:
-    from interface import configList, strList, cmdList, parmList, \
-        enumList, regList
-else:
-    import configDef as cf
-    import stringDef as st
-    import cmdDef as cm
-    import parmDef as pm
-    import enumDef as en
-    import ctlBitDef as ct
-
-if SETUP:
-    from setup import Setup
-    setup = Setup()
-    (config, configTable) = setup.createConfig(configList)
-
-cfg = ConfigInfo(cf.configTable)
-cfg.clrInfo(len(cf.config))
-cfg.readInfo(configFile, cf.config)
-
-if SETUP:
-    setupCmd = "from setup import "
-    for var in setup.configImports:
-        setupCmd += var + ","
-    exec(setupCmd[:-1])
-
-XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
-DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
-EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
-REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
-STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
-MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
-SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
-HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
-
-cfg.clrInfo(len(cf.config))
-
-if EXT_DRO:
-    import extDro as eDro
-    from extDro import DroTimeout
-    dro = eDro.ExtDro()
-    
 cLoc = "../Lathe/include/"
 fData = False
 
 if SETUP:
+    from interface import configList, strList, cmdList, parmList, \
+        enumList, regList
+
+    from setup import Setup
+    setup = Setup()
+    (config, configTable) = setup.createConfig(configList)
+
+
+    setupCmd = "from setup import "
+    for var in setup.configImports:
+        setupCmd += var + ","
+    exec(setupCmd[:-1])
+    
     setup.createCommands(cmdList, cLoc, fData)
     setup.createStrings(strList)
     setup.createParameters(parmList, cLoc, fData)
@@ -94,16 +70,6 @@ if SETUP:
     for var in importList:
         setupCmd += var + ","
     exec(setupCmd[:-1])
-else:
-    if XILINX:
-        import xBitDef as xb
-        import xRegDef as xr
-
-comm = Comm()
-comm.SWIG = SWIG
-
-if XILINX:
-    comm.enableXilinx()
 
 if SWIG:
     import lathe
@@ -130,11 +96,6 @@ zHomeOffset = 0.0
 xPosition = 0.0
 xHomeOffset = 0.0
 
-if DRO:
-    zDROOffset = 0.0
-    xDROOffset = 0.0
-    zDROPosition = 0.0
-    xDROPosition = 0.0
 xHomed = False
 done = False
 
@@ -956,7 +917,6 @@ def sendSpindleData(send=False, rpm=None):
                 if MOTOR_TEST and SPINDLE_ENCODER:
                     comm.queParm(pm.SP_TEST_ENCODER, \
                                  cfg.getBoolInfoData(cf.spTestEncoder))
-                comm.command(cm.CMD_SPSETUP)
             elif XILINX:
                 comm.queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
                 comm.queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
@@ -976,7 +936,7 @@ def sendSpindleData(send=False, rpm=None):
                 count = cfg.getIntInfoData(cf.cfgEncoder)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
-                comm.command(cm.CMD_SPSETUP)
+            comm.command(cm.CMD_SPSETUP)
             spindleDataSent = True
     except CommTimeout:
         commTimeout()
@@ -4968,6 +4928,7 @@ class UpdateThread(Thread):
             if i < len(self.parmList):
                 func = self.parmList[i]
                 try:
+                    pass
                     func()
                 except CommTimeout:
                     print("CommTimeout on func")
@@ -5274,6 +5235,10 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
 
+        self.dirName = os.getcwd()
+        self.parseCmdLine()
+        self.initialConfig()
+        
         self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                                wx.NORMAL, False, u'Consolas')
         self.defaultFont = defaultFont = \
@@ -5299,8 +5264,6 @@ class MainFrame(wx.Frame):
         self.testSyncDialog = None
         self.testTaperDialog = None
         self.testMoveDialog = None
-
-        self.dirName = os.getcwd()
 
         self.initUI()
 
@@ -5394,7 +5357,7 @@ class MainFrame(wx.Frame):
         if DRO:
             posList += (cf.zSvDROPosition, cf.zSvDROOffset, \
                         cf.xSvDROPosition, cf.xSvDROOffset)
-        cfg.saveList(posFile, posList)
+        cfg.saveList(self.posFile, posList)
         done = True
         jogPanel.close()
         self.update.threadRun = False
@@ -5551,8 +5514,8 @@ class MainFrame(wx.Frame):
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
 
-        cfg.readInfo(configFile, cf.config)
-        cfg.readInfo(posFile, cf.config)
+        cfg.readInfo(self.cfgFile, cf.config)
+        cfg.readInfo(self.posFile, cf.config)
 
         jogPanel.update()
 
@@ -5596,7 +5559,7 @@ class MainFrame(wx.Frame):
         if comm.ser is not None:
             try:
                 comm.queParm(pm.CFG_XILINX, cfg.getBoolInfoData(cf.cfgXilinx))
-                comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
+                # comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
@@ -5665,11 +5628,92 @@ class MainFrame(wx.Frame):
             sendZData()
             sendXData()
 
+    def parseCmdLine(self):
+        global xHomed
+        n = 1
+        self.cfgFile = None
+        self.posFile = "posInfo.txt"
+        while True:
+            if n >= len(sys.argv):
+                break
+            val = sys.argv[n]
+            if val.startswith('--'):
+                if len(val) >= 3:
+                    tmp = val[2:]
+                    if tmp == 'xhomed':
+                        xHomed = True
+                    elif tmp == 'help':
+                        self.help()
+            elif val.startswith('-'):
+                if len(val) >= 2:
+                    tmp = val[1]
+                    if tmp == 'h':
+                        self.help()
+                    elif tmp == 'p':
+                        n += 1
+                        if n < len(sys.argv):
+                            self.posFile = sys.argv[n]
+                            if not re.search('\.[a-zA-Z0-9]*$', self.posFile):
+                                self.posFile += ".txt"
+            elif val.startswith('?'):
+                self.help();
+            else:
+                if self.cfgFile is None:
+                    self.cfgFile = val
+                    if not re.search('\.[a-zA-Z0-9]*$', self.cfgFile):
+                        self.cfgFile += ".txt"
+            n += 1
+        if self.cfgFile is None:
+            self.cfgFile = "config.txt"
+
+    def initialConfig(self):
+        global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
+            MOTOR_TEST, SPINDLE_ENCODER, HOME_IN_PLACE
+
+        cfg = ConfigInfo(cf.configTable)
+        cfg.clrInfo(len(cf.config))
+        cfg.readInfo(self.cfgFile, cf.config)
+
+        XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
+        DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
+        EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
+        REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
+        STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
+        MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
+        SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+        HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
+
+        cfg.clrInfo(len(cf.config))
+
+        if XILINX:
+            global xb, xr
+            import xBitDef as xb
+            import xRegDef as xr
+
+        if EXT_DRO:
+            global dro
+            import extDro as eDro
+            from extDro import DroTimeout
+            dro = eDro.ExtDro()
+
+        if DRO:
+            global zDROOffset, xDROOffset, zDROPosition, xDROPosition
+            zDROOffset = 0.0
+            xDROOffset = 0.0
+            zDROPosition = 0.0
+            xDROPosition = 0.0
+
+        comm = Comm()
+        comm.SWIG = SWIG
+
+        if XILINX:
+            comm.enableXilinx()
+
     def OnSave(self, e):
-        cfg.saveInfo(configFile)
+        cfg.saveInfo(self.cfgFile)
 
     def OnRestat(self, e):
-        cfg.saveInfo(configFile)
+        cfg.saveInfo(self.cfgFile)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnSavePanel(self, e):

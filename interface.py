@@ -453,8 +453,8 @@ parmList = \
     "index pulse variables",
 
     ("INDEX_PRE_SCALER", "index pre scaler", "int"),
-    ("LAST_INDEX_PERIOD", "last index period", "int"),
-    ("INDEX_PERIOD", "index period", "int"),
+    ("LAST_INDEX_PERIOD", "last index period", "unsigned int"),
+    ("INDEX_PERIOD", "index period", "unsigned int"),
     ("REV_COUNTER", "revolution counter", "unsigned int"),
 
     "z home offset",
