@@ -113,10 +113,6 @@ HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
 
-JOG_Z = 0
-JOG_X = 1
-JOG_SPINDLE = 2
-
 def commTimeout():
     jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
@@ -3116,19 +3112,18 @@ class ButtonRepeat(Thread):
 
     def run(self):
         while True:
-            timeout = .5
+            flag = True
+            timeout = .25
             self.event.wait(.2)
             if not self.threadRun:
                 break
             while self.event.isSet():
-                # if self.action is not None:
-                #     self.action(self.code, self.val)
-                if self.action == JOG_Z:
-                    jogPanel.zJogCmd(self.code, self.val)
-                elif self.action == JOG_X:
-                    jogPanel.xJogCmd(self.code, self.val)
-                elif self.action == JOG_SPINDLE:
-                    jogPanel.spindleJogCmd(self.code, self.val)
+                if flag:
+                    flag = False
+                    print("buttonRepeat running %s" % (self.action))
+                    stdout.flush()
+                if self.action is not None:
+                    self.action(self.code, self.val)
                 sleep(timeout)
                 timeout = .05
 
@@ -3139,7 +3134,8 @@ class JogShuttle():
             allHids = find_all_hid_devices()
         if allHids:
             for index, device in enumerate(allHids):
-                if (device.vendor_id == 0xb33) and (device.product_id == 0x20):
+                if device.vendor_id == 0xb33 and \
+                   device.product_id == 0x20:
                     try:
                         device.open()
                         device.set_raw_data_handler(self.ShuttleInput)
@@ -3150,22 +3146,24 @@ class JogShuttle():
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, self.setZ), (32, self.setX), \
-                             (64, self.setSpindle), \
-                             (128, None), (1, None))
+        self.buttonAction = ((16, self.setZ), \
+                             (32, self.setX))
+        if STEP_DRV:
+            self.buttonAction += ((64, self.setSpindle),)
+        else:
+            self.buttonAction += ((64, None),)
+        self.buttonAction += ((128, None), \
+                              (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
 
         self.zSpeed = [None, None, None, None, None, None, None, None]
-        self.zCurIndex = -1
         self.zCurSpeed = 0.0
 
         self.xSpeed = [None, None, None, None, None, None, None, None]
-        self.xCurIndex = -1
         self.xCurSpeed = 0.0
 
         self.spindleSpeed = [None, None, None, None, None, None, None, None]
-        self.spindleCurIndex = -1
         self.spindleCurSpeed = 0.0
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
@@ -3174,130 +3172,133 @@ class JogShuttle():
         print(data)
         stdout.flush()
         outerRing = data[1]
-        if outerRing != jogShuttle.lastOuterRing:
-            if jogShuttle.axisAction is not None:
+        if outerRing != self.lastOuterRing:
+            self.lastOuterRing = outerRing
+            if self.axisAction is not None:
                 if outerRing > 128:
                     outerRing = -(256 - outerRing)
-                # jogShuttle.axisAction(outerRing)
-                buttonRepeat.action = jogShuttle.axisAction
+                print("outerRing %d self.axisAction %s" % \
+                      (outerRing, self.axisAction))
+                self.axisAction(0, outerRing)
+                buttonRepeat.action = self.axisAction
                 buttonRepeat.code = 0
                 buttonRepeat.val = outerRing
-                buttonRepeat.event.set()
-            jogShuttle.lastOuterRing = outerRing
+                if outerRing != 0:
+                    buttonRepeat.event.set()
+                    print("buttonRepeat.event.set()")
+                    stdout.flush()
         knob = data[2]
-        if knob != jogShuttle.lastKnob:
-            if jogShuttle.lastKnob is not None:
+        if knob != self.lastKnob:
+            if self.lastKnob is not None:
                 pass
-            jogShuttle.lastKnob = knob
+            self.lastKnob = knob
         button = data[4] | data[5]
-        if button | jogShuttle.lastButton:
-            changed = button ^ jogShuttle.lastButton
-            for action in jogShuttle.buttonAction:
+        if button | self.lastButton:
+            changed = button ^ self.lastButton
+            for action in self.buttonAction:
                 (val, function) = action
                 if changed & val:
                     if function is not None:
                         function(button, val)
-            jogShuttle.lastButton = button
+            self.lastButton = button
 
     def setZ(self, button, val):
         if button & val:
-            jogShuttle.axisAction = jogShuttle.jogZ
+            self.axisAction = self.jogZ
             maxSpeed = cfg.getFloatInfoData(cf.zMaxSpeed)
-            for val in range(len(jogShuttle.factor)):
-                jogShuttle.zSpeed[val] = maxSpeed * jogShuttle.factor[val]
+            for val in range(len(self.factor)):
+                self.zSpeed[val] = maxSpeed * self.factor[val]
             # print("set z")
             # stdout.flush()
 
     def setX(self, button, val):
         if button & val:
-            jogShuttle.axisAction = jogShuttle.jogX
+            self.axisAction = self.jogX
             maxSpeed = cfg.getFloatInfoData(cf.xMaxSpeed)
-            for val in range(len(jogShuttle.factor)):
-                jogShuttle.xSpeed[val] = maxSpeed * jogShuttle.factor[val]
+            for val in range(len(self.factor)):
+                self.xSpeed[val] = maxSpeed * self.factor[val]
             # print("set x")
             # stdout.flush()
 
     def setSpindle(self, button, val):
         if button & val:
-            jogShuttle.axisAction = jogShuttle.jogSpindle
+            self.axisAction = self.jogSpindle
             maxSpeed = cfg.getFloatInfoData(cf.spMaxRPM)
-            for val in range(len(jogShuttle.factor)):
-                jogShuttle.spindleSpeed[val] = \
-                    maxSpeed * jogShuttle.factor[val]
+            for val in range(len(self.factor)):
+                self.spindleSpeed[val] = \
+                    maxSpeed * self.factor[val]
             # print("set spindle")
             # stdout.flush()
 
-    def jogZ(self, code, val):
-        # print("jog z %d %d" % (val, jogShuttle.zCurIndex))
-        # stdout.flush()
-        index = abs(val)
-        speed = jogShuttle.zSpeed[index]
-        if val < 0:
-            speed = -speed
-        if ((jogShuttle.zCurSpeed >= 0 and speed >= 0) or \
-            (jogShuttle.zCurSpeed <= 0 and speed <= 0)):
-            jogShuttle.zCurSpeed = speed
+    def jogDone(self, cmd):
+            buttonRepeat.action = None
+            buttonRepeat.event.clear()
+            self.xCurIndex = -1
             try:
-                if index != jogShuttle.zCurIndex:
-                    jogShuttle.zCurIndex = index
+                comm.command(cmd)
+            except CommTimeout:
+                commTimeout()
+
+    def jogZ(self, code, val):
+        if val == 0:
+            self.jogDone(cm.ZSTOP)
+            
+            print("jogZ done")
+            stdout.flush()
+        else:
+            index = abs(val)
+            speed = self.zSpeed[index]
+            if val < 0:
+                speed = -speed
+            print("jog z val %2d speed %7.4f" % (val, speed))
+            stdout.flush()
+            try:
+                if self.zCurSpeed != speed:
+                    self.zCurSpeed = speed
                     comm.setParm(pm.Z_JOG_SPEED, speed)
                 comm.command(cm.ZJSPEED)
             except CommTimeout:
                 commTimeout()
-            if index == 0:
-                buttonRepeat.action = None
-                buttonRepeat.event.clear()
-                jogShuttle.zCurIndex = -1
-                # print("jogZ done")
-                # stdout.flush()
 
     def jogX(self, code, val):
-        # print("jog x %d" % (val))
-        # stdout.flush()
-        index = abs(val)
-        speed = jogShuttle.xSpeed[index]
-        if val > 0:
-            speed = -speed
-        if ((jogShuttle.xCurSpeed >= 0 and speed >= 0) or \
-            (jogShuttle.xCurSpeed <= 0 and speed <= 0)):
-            jogShuttle.xCurSpeed = speed
+        if val == 0:
+            self.jogDone(cm.XSTOP)
+            print("jogX done")
+            stdout.flush()
+        else:
+            index = abs(val)
+            speed = self.xSpeed[index]
+            if val > 0:
+                speed = -speed
+            print("jog x val %2d speed %7.4f" % (val, speed))
+            stdout.flush()
             try:
-                if index != jogShuttle.xCurIndex:
-                    jogShuttle.xCurIndex = index
+                if self.xCurSpeed != speed:
+                    self.xCurSpeed = speed
                     comm.setParm(pm.X_JOG_SPEED, speed)
                 comm.command(cm.XJSPEED)
             except CommTimeout:
                 commTimeout()
-            if index == 0:
-                buttonRepeat.action = None
-                buttonRepeat.event.clear()
-                jogShuttle.xCurIndex = -1
-                # print("jogX done")
-                # stdout.flush()
 
     def jogSpindle(self, code, val):
-        # print("jog spindle %d %d" % (val, jogShuttle.spindleCurIndex))
-        # stdout.flush()
-        index = abs(val)
-        speed = jogShuttle.spindleSpeed[index]
-        if val < 0:
-            speed = -speed
-        if ((jogShuttle.spindleCurSpeed >= 0 and speed >= 0) or \
-            (jogShuttle.spindleCurSpeed <= 0 and speed <= 0)):
-            jogShuttle.spindleCurSpeed = speed
+        if val == 0:
+            self.jogDone(cm.SPINDLE_STOP)
+            print("jogSpindle done")
+            stdout.flush()
+        else:
+            index = abs(val)
+            speed = self.spindleSpeed[index]
+            if val < 0:
+                speed = -speed
+            print("jog spindle val %2d %d" % (val, speed))
+            stdout.flush()
             try:
-                if index != jogShuttle.spindleCurIndex:
-                    jogShuttle.spindleCurIndex = index
+                if self.spindleCurSpeed != speed:
+                    self.spindleCurSpeed = speed
                     comm.setParm(pm.SP_JOG_RPM, speed)
                 comm.command(cm.SPINDLE_JOG_SPEED)
             except CommTimeout:
                 commTimeout()
-            if index == 0:
-                buttonRepeat.action = None
-                buttonRepeat.event.clear()
-                jogShuttle.spindleCurIndex = -1
-                # print("jogspindle done")
-                # stdout.flush()
 
 class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, parent, *args, **kwargs):
@@ -3695,8 +3696,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if val != "Cont":
             self.zJogCmd(code, val)
         else:
-            # self.btnRpt.action = self.zJogCmd
-            self.btnRpt.action = JOG_Z
+            self.btnRpt.action = self.zJogCmd
             self.btnRpt.code = code
             self.btnRpt.val = val
             self.btnRpt.event.set()
@@ -3769,8 +3769,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if val != "Cont":
             self.xJogCmd(code, val)
         else:
-            # self.btnRpt.action = self.xJogCmd
-            self.btnRpt.action = JOG_X
+            self.btnRpt.action = self.xJogCmd
             self.btnRpt.code = code
             self.btnRpt.val = val
             self.btnRpt.event.set()
@@ -4206,8 +4205,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnJogSpindleFwd(self, e):
         print("jog spingle")
         stdout.flush()
-        # self.btnRpt.action = self.spindleJogCmd
-        self.btnRpt.action = JOG_SPINDLE
+        self.btnRpt.action = self.spindleJogCmd
         self.btnRpt.code = wx.WXK_NUMPAD_PAGEDOWN
         self.btnRpt.val = 0
         self.btnRpt.event.set()
@@ -4215,8 +4213,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnJogSpindleRev(self, e):
         print("jog spingle")
         stdout.flush()
-        # self.btnRpt.action = self.spindleJogCmd
-        self.btnRpt.action = JOG_SPINDLE
+        self.btnRpt.action = self.spindleJogCmd
         self.btnRpt.code = wx.WXK_NUMPAD_PAGEUP
         self.btnRpt.val = 0
         self.btnRpt.event.set()
