@@ -5688,7 +5688,7 @@ class MainFrame(wx.Frame):
             import xRegDef as xr
 
         if EXT_DRO:
-            global dro
+            global dro, eDro
             import extDro as eDro
             from extDro import DroTimeout
             dro = eDro.ExtDro()
