@@ -11,6 +11,11 @@ CMD_MAX          = (4 << 0)     # rapid move
 CMD_SPEED        = (5 << 0)     # jog at speed
 JOGSLOW          = (6 << 0)     # slow jog for home or probe
 
+# common definitions
+
+DIR_POS          = 1            # positive direction
+DIR_NEG          = -1           # negative direction
+
 # z move command bits
 
 Z_SYN_START      = (1 << 4)     # start on sync pulse
