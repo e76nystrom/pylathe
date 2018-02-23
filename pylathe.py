@@ -4727,25 +4727,28 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         except ValueError:
             self.curXPos.SetValue('0.000')
             return
+        
         try:
             actualX = float(self.actualXPos.GetValue())
         except ValueError:
             self.actualXPos.SetValue('0.000')
             return
-        offset = (actualX - curX) / 2.0
-        curOffset = xHomeOffset
-        xHomeOffset -= offset
-        comm.setParm(pm.X_HOME_OFFSET, xHomeOffset)
-        jogPanel.xHomeOffset.value = xHomeOffset
+        
+        offset = (actualX - curX)
+        curHomeOffset = xHomeOffset
+        x = comm.getParm(pm.X_LOC)
+        print("x %d xPosition %d" % (x, int(jogPanel.xPosition.value)))
+        xLocation = 2 * (float(x) / jogPanel.xStepsInch - xHomeOffset)
+        jogPanel.updateXPos(xLocation + offset)
 
         dPrt = jogPanel.dPrt
         dPrt("fix x\n")
         dPrt("curX %7.4f actualX %7.4f offset %7.4f\n" \
                   "xHomeOffset cur %7.4f new %7.4f\n" % \
-                  (curX, actualX, offset, curOffset, xHomeOffset))
+                  (curX, actualX, offset, curHomeOffset, xHomeOffset))
         curLoc = float(jogPanel.xPosition.value) / jogPanel.xStepsInch
         dPrt("xDiam cur %7.4f new %7.4f\n\n" % \
-                  ((curLoc - curOffset) * 2, (curLoc - xHomeOffset) * 2), \
+                  ((curLoc - curHomeOffset) * 2, (curLoc - xHomeOffset) * 2), \
              flush=True)
 
         print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" % \
@@ -6779,21 +6782,21 @@ class MoveTest(object):
 
             f.close()
 
-n = 1
-while True:
-    if n >= len(sys.argv):
-        break
-    tmpArg = sys.argv[n]
-    # if len(tmpArg) != 0 and tmpArg[0].isdigit():
-    #     break
-    tmpArg = tmpArg.lower()
-    if tmpArg == 'xhomed':
-        xHomed = True
-    else:
-        print("invalid argument: %s" % (tmpArg))
-        stdout.flush()
-        break
-    n += 1
+# n = 1
+# while True:
+#     if n >= len(sys.argv):
+#         break
+#     tmpArg = sys.argv[n]
+#     # if len(tmpArg) != 0 and tmpArg[0].isdigit():
+#     #     break
+#     tmpArg = tmpArg.lower()
+#     if tmpArg == 'xhomed':
+#         xHomed = True
+#     else:
+#         print("invalid argument: %s" % (tmpArg))
+#         stdout.flush()
+#         break
+#     n += 1
 
 class MainApp(wx.App):
     def OnInit(self):
