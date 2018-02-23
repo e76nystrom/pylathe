@@ -193,6 +193,8 @@ configList = \
     ('xInvMpg', 'x axis invert mpg direction'),
     ('xJogMax', 'x axis '),
     ('xJogMin', 'x axis '),
+    ('xMpgInc', 'x axis jog increment'),
+    ('xMpgMax', 'x axis jog maximum'),
     ('xJogSpeed', 'x axis '),
     ('xMaxSpeed', 'x axis '),
     ('xMicroSteps', 'x axis '),
@@ -222,6 +224,8 @@ configList = \
     ('zInvMpg', 'z axis '),
     ('zJogMax', 'z axis '),
     ('zJogMin', 'z axis '),
+    ('zMpgInc', 'z axis jog increment'),
+    ('zMpgMax', 'z axis jog maximum'),
     ('zJogSpeed', 'z axis '),
     ('zMaxSpeed', 'z axis '),
     ('zMicroSteps', 'z axis '),
@@ -419,6 +423,7 @@ parmList = \
     ("Z_FLAG", "z move flag", "int"),
     ("Z_ABS_LOC", "z absolute location", "int"),
     ("Z_MPG_INC", "z man pulse gen incr", "int"),
+    ("Z_MPG_MAX", "z man pulse max distance", "int"),
     
     "x axis move values",
 
@@ -430,6 +435,7 @@ parmList = \
     ("X_FLAG", "x move flag", "int"),
     ("X_ABS_LOC", "x absolute location", "int"),
     ("X_MPG_INC", "X man pulse gen incr", "int"),
+    ("X_MPG_MAX", "x man pulse max distance", "int"),
     
     # "z turn/face parameters",
     
