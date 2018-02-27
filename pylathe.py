@@ -372,6 +372,9 @@ class ActionRoutines():
         print("ActionRoutines update stub called")
         stdout.flush()
 
+    def nextOperation(self):
+        pass
+
     def getSafeLoc(self):
         control = self.control
         control.getParameters()
@@ -1459,6 +1462,21 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def addAction(self):
         self.control.addPass()
+
+    def nextOperation(self):
+        if not self.active:
+            jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
+            return
+        
+        if self.internal.GetValue():
+            dCur = self.xDiam1
+            dNxt = self.xDiam0
+        else:
+            dCur = self.xDiam0
+            dNxt = self.xDiam1
+        dCur.SetValue(dNxt.GetValue())
+        dNxt.SetFocus()
+        dNxt.SetSelection(-1, -1)
 
 class Face(LatheOp, UpdatePass):
     def __init__(self, facePanel):
@@ -3127,6 +3145,26 @@ class ButtonRepeat(Thread):
                 sleep(timeout)
                 timeout = .05
 
+class Keypad():
+    def __init__(self):
+        allHids = None
+        if WINDOWS:
+            allHids = find_all_hid_devices()
+        if allHids:
+            for index, device in enumerate(allHids):
+                if device.vendor_id == 0x2341 and \
+                   device.product_id == 0x8036:
+                    try:
+                        device.open()
+                        device.set_raw_data_handler(self.KeypadInput)
+                    except:
+                        traceback.print_exc()
+                    break
+
+    def KeypadInput(self, data):
+        print(data)
+        stdout.flush()
+
 class JogShuttle():
     def __init__(self):
         allHids = None
@@ -3337,6 +3375,7 @@ class JogPanel(wx.Panel, FormRoutines):
             # self.xDroDiam = False
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
         self.dbg = open("dbgLog.txt", "ab")
+        self.initKeyTable()
         self.initUI()
 
     def close(self):
@@ -3867,73 +3906,158 @@ class JogPanel(wx.Panel, FormRoutines):
         # stdout.flush()
         evt.Skip()
 
+    def initKeyTable(self):
+        keyTable = (\
+                    (ord('c'), self.comboCont), \
+                    (ord('i'), self.comboInc), \
+                    (ord('I'), self.comboDec), \
+                    (ord('r'), self.start), \
+                    (ord('s'), (self.OnResume, None)), \
+                    (ord('p'), (self.OnPause, None)), \
+
+                    (ord('n'), self.nextOperation), \
+                    (ord('a'), self.add), \
+                    (ord('A'), self.addFocus), \
+                    (ord('f'), self.focusPanel), \
+                    (ord('P'), self.togglePause), \
+
+                    (wx.WXK_F9, (self.OnStartSpindle, None)), \
+                    (wx.WXK_ESCAPE, (self.OnStop, None)), \
+                    (ord('z'), (self.OnZMenu, None)), \
+                    (ord('x'), (self.OnXMenu, None)), \
+                    (ord('d'), (self.OnDone, None)), \
+                    (ord('C'), (self.setStatus, st.STR_CLR)), \
+                    (ord('?'), self.help), \
+        )
+        self.keyTable = {}
+        for (key, action) in keyTable:
+            self.keyTable[key] = action
+
+    def comboCont(self):
+        self.combo.SetSelection(0)
+        self.OnCombo(None)
+
+    def comboInc(self):
+        combo = self.combo
+        val = combo.GetSelection()
+        if val == 0:
+            combo.SetSelection(1)
+        else:
+            combo.SetSelection(1) if val >= len(self.step) - 1 else \
+                combo.SetSelection(val + 1)
+        self.OnCombo(None)
+
+    def comboDec(self):
+        combo = self.combo
+        val = combo.GetSelection()
+        if val > 0:
+            if val > 1:
+                combo.SetSelection(val - 1)
+        self.OnCombo(None)
+
+    def start(self):
+        panel = mainFrame.getCurrentPanel()
+        panel.OnSend(None)
+
+    def nextOperation(self):
+        panel = mainFrame.getCurrentPanel()
+        panel.nextOperation()
+
+    def add(self):
+        panel = mainFrame.getCurrentPanel()
+        panel.OnAdd(None)
+
+    def addFocus(self):
+        panel = mainFrame.getCurrentPanel()
+        panel.setAddFocus()
+
+    def focusPanel(self):
+        panel = mainFrame.getCurrentPanel()
+        panel.setFocus()
+
+    def togglePause(self):
+        panel = mainFrame.currentPanel
+        val = panel.pause.GetValue()
+        panel.pause.SetValue(not val)
+
+    def help(self):
+        dialog = HelpDialog(mainFrame)
+        mainFrame.showDialog(dialog)
+
     def OnKeyChar(self, evt):
         code = evt.GetKeyCode()
-        if code == ord('c'):
-            self.combo.SetSelection(0)
-            self.OnCombo(None)
-        elif code == ord('i'):
-            combo = self.combo
-            val = combo.GetSelection()
-            if val == 0:
-                combo.SetSelection(1)
+        if code in self.keyTable:
+            action = self.keyTable[code]
+            if isinstance(action, tuple):
+                (action, arg) = action
+                action(arg)
             else:
-                combo.SetSelection(1) if val >= len(self.step) - 1 else \
-                    combo.SetSelection(val + 1)
-            self.OnCombo(None)
-        elif code == ord('I'):
-            combo = self.combo
-            val = combo.GetSelection()
-            if val > 0:
-                if val > 1:
-                    combo.SetSelection(val - 1)
-            self.OnCombo(None)
-        elif code == ord('r'):
-            panel = mainFrame.getCurrentPanel()
-            panel.OnSend(None)
-        elif code == ord('s'):
-            self.OnResume(None)
-        elif code == ord('p'):
-            self.OnPause(None)
-        elif code == ord('a'):
-            panel = mainFrame.getCurrentPanel()
-            panel.OnAdd(None)
-        elif code == ord('A'):
-            panel = mainFrame.getCurrentPanel()
-            panel.setAddFocus()
-        elif code == wx.WXK_F9:
-            self.OnStartSpindle(None)
-        elif code == wx.WXK_ESCAPE:
-            self.OnStop(None)
-        elif code == ord('f'):
-            panel = mainFrame.getCurrentPanel()
-            panel.setFocus()
-        elif code == ord('z'):
-            self.OnZMenu(None)
-        elif code == ord('x'):
-            self.OnXMenu(None)
-        elif code == ord('d'):
-            self.OnDone(None)
-        elif code == ord('C'):
-            self.setStatus(st.STR_CLR)
-        elif code == ord('P'):
-            panel = mainFrame.currentPanel
-            val = panel.pause.GetValue()
-            panel.pause.SetValue(not val)
-        elif code == ord('t'):
-            self.axisTest(-0.025)
-        elif code == ord('T'):
-            self.axisTest(0.025, passes=20)
-        elif code == ord('S'):
-            self.axisTest(0.025, passes=5, retract=0.020, \
-                          pause=False, axis=AXIS_X)
-        elif code == ord('U'):
-            self.axisTest(0.025, passes=5, retract=0.020, \
-                          pause=False, axis=AXIS_Z)
+                action()
         else:
             print("key char %x" % (code))
             stdout.flush()
             evt.Skip()
+        # if code == ord('c'):
+        #     self.combo.SetSelection(0)
+        #     self.OnCombo(None)
+        # elif code == ord('i'):
+        #     combo = self.combo
+        #     val = combo.GetSelection()
+        #     if val == 0:
+        #         combo.SetSelection(1)
+        #     else:
+        #         combo.SetSelection(1) if val >= len(self.step) - 1 else \
+        #             combo.SetSelection(val + 1)
+        #     self.OnCombo(None)
+        # elif code == ord('I'):
+        #     combo = self.combo
+        #     val = combo.GetSelection()
+        #     if val > 0:
+        #         if val > 1:
+        #             combo.SetSelection(val - 1)
+        #     self.OnCombo(None)
+        # elif code == ord('r'):
+        #     panel = mainFrame.getCurrentPanel()
+        #     panel.OnSend(None)
+        # elif code == ord('s'):
+        #     self.OnResume(None)
+        # elif code == ord('p'):
+        #     self.OnPause(None)
+        # elif code == ord('a'):
+        #     panel = mainFrame.getCurrentPanel()
+        #     panel.OnAdd(None)
+        # elif code == ord('A'):
+        #     panel = mainFrame.getCurrentPanel()
+        #     panel.setAddFocus()
+        # elif code == wx.WXK_F9:
+        #     self.OnStartSpindle(None)
+        # elif code == wx.WXK_ESCAPE:
+        #     self.OnStop(None)
+        # elif code == ord('f'):
+        #     panel = mainFrame.getCurrentPanel()
+        #     panel.setFocus()
+        # elif code == ord('z'):
+        #     self.OnZMenu(None)
+        # elif code == ord('x'):
+        #     self.OnXMenu(None)
+        # elif code == ord('d'):
+        #     self.OnDone(None)
+        # elif code == ord('C'):
+        #     self.setStatus(st.STR_CLR)
+        # elif code == ord('P'):
+        #     panel = mainFrame.currentPanel
+        #     val = panel.pause.GetValue()
+        #     panel.pause.SetValue(not val)
+        # elif code == ord('t'):
+        #     self.axisTest(-0.025)
+        # elif code == ord('T'):
+        #     self.axisTest(0.025, passes=20)
+        # elif code == ord('S'):
+        #     self.axisTest(0.025, passes=5, retract=0.020, \
+        #                   pause=False, axis=AXIS_X)
+        # elif code == ord('U'):
+        #     self.axisTest(0.025, passes=5, retract=0.020, \
+        #                   pause=False, axis=AXIS_Z)
 
     def testPass(self, passNum, curLoc, retract=None, pause=True, axis=AXIS_X):
         m = moveCommands
@@ -4358,6 +4482,49 @@ class JogPanel(wx.Panel, FormRoutines):
         xPos += x
         yPos += y
         return(xPos, yPos)
+
+class HelpDialog(wx.Dialog):
+    def __init__(self, frame):
+        pos = (10, 10)
+        wx.Dialog.__init__(self, frame, -1, "Help", pos, \
+                           wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        helpText = (\
+                    ('ESC', "Stop everything"), \
+                    ('F9', "Start spindle"), \
+                    ('r', "Start"), \
+                    ('s', "Resume"), \
+                    ('p', "Pause"), \
+                    ('d', "Done"), \
+                    ('C', "Clear status"), \
+
+                    ('f', "Focus on operation"),
+                    ('n', "Next operation"), \
+                    ('a', "Add"), \
+                    ('A', "Focus on add value"), \
+                    ('P', "Toggle operation pause"), \
+                    ('z', "Z menu"), \
+                    ('x', "X menu"), \
+
+                    ('c', "Jog continuous"), \
+                    ('i', "Next jog val"), \
+                    ('I', "Prev jog val"), \
+                    ('?', "Help"), \
+        )
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+        sizerG = wx.FlexGridSizer(2, 0, 0)
+        for (char, text) in helpText:
+            char = wx.StaticText(self, -1, char)
+            sizerG.Add(char, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=5)
+            text= wx.StaticText(self, -1, text)
+            sizerG.Add(text, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=5)
+        sizerV.Add(sizerG, 0, wx.ALIGN_LEFT)
+
+        btn = wx.Button(self, wx.ID_OK)
+        btn.SetDefault()
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, border=5)
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(True)
 
 class PosMenu(wx.Menu):
     def __init__(self, jP, axis):
@@ -5269,6 +5436,10 @@ class MainFrame(wx.Frame):
 
         global jogShuttle
         self.jogShuttle = jogShuttle = JogShuttle()
+
+        global keypad
+        self.keypad = keypad = Keypad()
+        
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
