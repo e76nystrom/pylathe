@@ -947,8 +947,8 @@ def sendZData(send=False):
         motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
         microSteps = cfg.getIntInfoData(cf.zMicroSteps)
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
-        jogPanel.zStepsInch = (microSteps * motorSteps * \
-                               motorRatio) / pitch
+        jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
+                                           motorRatio) / pitch
         # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
 
         if DRO:
@@ -966,8 +966,10 @@ def sendZData(send=False):
                 if val > 0.020:
                     val = 0.020
             except ValueError:
-                val = 0.001
-            comm.queParm(pm.Z_MPG_INC, val * jogPanel.zStepsInch)
+                val = cfg.getFloatInfoData(cf.zMpgInc)
+            comm.queParm(pm.Z_MPG_INC, int(val * stepsInch))
+            comm.queParm(pm.Z_MPG_MAX, \
+                         int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
             comm.queParm(pm.Z_PITCH, cfg.getInfoData(cf.zPitch))
             comm.queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
@@ -1001,8 +1003,8 @@ def sendXData(send=False):
         motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
         microSteps = cfg.getIntInfoData(cf.xMicroSteps)
         motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
-        jogPanel.xStepsInch = (microSteps * motorSteps * \
-                               motorRatio) / pitch
+        jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
+                                           motorRatio) / pitch
         # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
         if DRO:
             jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
@@ -1019,8 +1021,10 @@ def sendXData(send=False):
                 if val > 0.020:
                     val = 0.020
             except ValueError:
-                val = 0.001
-            comm.queParm(pm.X_MPG_INC, val * jogPanel.xStepsInch)
+                val = cfg.getFloatInfoData(cf.xMpgInc)
+            comm.queParm(pm.X_MPG_INC, int(val * stepsInch))
+            comm.queParm(pm.X_MPG_MAX, \
+                         int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
             comm.queParm(pm.X_PITCH, cfg.getInfoData(cf.xPitch))
             comm.queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
@@ -6036,6 +6040,8 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Max Speed U/Min", cf.zMaxSpeed, 'fs'), \
             ("Jog Min U/Min", cf.zJogMin, 'fs'), \
             ("Jog Max U/Min", cf.zJogMax, 'fs'), \
+            ("MPG Jog Increment", cf.zMpgInc, 'fs'), \
+            ("MPG Jog Max Dist", cf.zMpgMax, 'fs'), \
             ("Park Loc", cf.zParkLoc, 'f'), \
             ("Probe Dist", cf.zProbeDist, 'f'), \
             ("Probe Speed", cf.zProbeSpeed, 'fs'), \
@@ -6094,6 +6100,8 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Max Speed U/Min", cf.xMaxSpeed, 'fs'), \
             ("Jog Min U/Min", cf.xJogMin, 'fs'), \
             ("Jog Max U/Min", cf.xJogMax, 'fs'), \
+            ("MPG Jog Increment", cf.xMpgInc, 'fs'), \
+            ("MPG Jog Max Dist", cf.xMpgMax, 'fs'), \
             ("Park Loc", cf.xParkLoc, 'f'), \
             ("bInvert Dir", cf.xInvDir, None), \
             ("bInvert MPG", cf.xInvMpg, None), \

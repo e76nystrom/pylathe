@@ -81,122 +81,124 @@ Z_LOC                =  50
 Z_FLAG               =  51
 Z_ABS_LOC            =  52
 Z_MPG_INC            =  53
+Z_MPG_MAX            =  54
 
 # x axis move values
 
-X_MOVE_DIST          =  54
-X_MOVE_POS           =  55
-X_JOG_DIR            =  56
-X_SET_LOC            =  57
-X_LOC                =  58
-X_FLAG               =  59
-X_ABS_LOC            =  60
-X_MPG_INC            =  61
+X_MOVE_DIST          =  55
+X_MOVE_POS           =  56
+X_JOG_DIR            =  57
+X_SET_LOC            =  58
+X_LOC                =  59
+X_FLAG               =  60
+X_ABS_LOC            =  61
+X_MPG_INC            =  62
+X_MPG_MAX            =  63
 
 # taper parameters
 
-TAPER_CYCLE_DIST     =  62
+TAPER_CYCLE_DIST     =  64
 
 # index pulse variables
 
-INDEX_PRE_SCALER     =  63
-LAST_INDEX_PERIOD    =  64
-INDEX_PERIOD         =  65
-REV_COUNTER          =  66
+INDEX_PRE_SCALER     =  65
+LAST_INDEX_PERIOD    =  66
+INDEX_PERIOD         =  67
+REV_COUNTER          =  68
 
 # z home offset
 
-Z_HOME_OFFSET        =  67
+Z_HOME_OFFSET        =  69
 
 # z dro
 
-Z_DRO_POS            =  68
-Z_DRO_OFFSET         =  69
-Z_DRO_INCH           =  70
-Z_DRO_INVERT         =  71
+Z_DRO_POS            =  70
+Z_DRO_OFFSET         =  71
+Z_DRO_INCH           =  72
+Z_DRO_INVERT         =  73
 
 # x home parameters
 
-X_HOME_SPEED         =  72
-X_HOME_DIST          =  73
-X_HOME_BACKOFF_DIST  =  74
-X_HOME_DIR           =  75
+X_HOME_SPEED         =  74
+X_HOME_DIST          =  75
+X_HOME_BACKOFF_DIST  =  76
+X_HOME_DIR           =  77
 
 # x home test parameters
 
-X_HOME_LOC           =  76
-X_HOME_START         =  77
-X_HOME_END           =  78
-X_HOME_OFFSET        =  79
-X_DRO_POS            =  80
-X_DRO_OFFSET         =  81
-X_DRO_INCH           =  82
-X_DRO_INVERT         =  83
+X_HOME_LOC           =  78
+X_HOME_START         =  79
+X_HOME_END           =  80
+X_HOME_OFFSET        =  81
+X_DRO_POS            =  82
+X_DRO_OFFSET         =  83
+X_DRO_INCH           =  84
+X_DRO_INVERT         =  85
 
 # x home or probe status
 
-X_HOME_DONE          =  84
-X_HOME_STATUS        =  85
+X_HOME_DONE          =  86
+X_HOME_STATUS        =  87
 
 # Z home or probe status
 
-Z_HOME_DONE          =  86
-Z_HOME_STATUS        =  87
+Z_HOME_DONE          =  88
+Z_HOME_STATUS        =  89
 
 # probe configuration
 
-PROBE_SPEED          =  88
-PROBE_DIST           =  89
-PROBE_INV            =  90
+PROBE_SPEED          =  90
+PROBE_DIST           =  91
+PROBE_INV            =  92
 
 # configuration
 
-STEPPER_DRIVE        =  91
-MOTOR_TEST           =  92
-SPINDLE_ENCODER      =  93
-CFG_XILINX           =  94
-CFG_MPG              =  95
-CFG_DRO              =  96
-CFG_LCD              =  97
-CFG_FCY              =  98
+STEPPER_DRIVE        =  93
+MOTOR_TEST           =  94
+SPINDLE_ENCODER      =  95
+CFG_XILINX           =  96
+CFG_MPG              =  97
+CFG_DRO              =  98
+CFG_LCD              =  99
+CFG_FCY              = 100
 
 # setup
 
-SETUP_DONE           =  99
+SETUP_DONE           = 101
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 100
+ENC_PER_REV          = 102
 
 # test encoder setup variables
 
-ENC_ENABLE           = 101
-ENC_PRE_SCALER       = 102
-ENC_TIMER            = 103
-ENC_RUN_COUNT        = 104
+ENC_ENABLE           = 103
+ENC_PRE_SCALER       = 104
+ENC_TIMER            = 105
+ENC_RUN_COUNT        = 106
 
 # test encoder status variables
 
-ENC_RUN              = 105
-ENC_COUNTER          = 106
-ENC_REV_COUNTER      = 107
+ENC_RUN              = 107
+ENC_COUNTER          = 108
+ENC_REV_COUNTER      = 109
 
 # measured spindle speed
 
-RPM                  = 108
+RPM                  = 110
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 109
-FREQ_MULT            = 110
+X_FREQUENCY          = 111
+FREQ_MULT            = 112
 
 # xilinx configuration register
 
-X_CFG_REG            = 111
+X_CFG_REG            = 113
 
 # max parameter number
 
-MAX_PARM             = 112
+MAX_PARM             = 114
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -253,6 +255,7 @@ parmTable = ( \
     ('Z_FLAG', 'int', 'zFlag'),
     ('Z_ABS_LOC', 'int', 'zAbsLoc'),
     ('Z_MPG_INC', 'int', 'zMpgInc'),
+    ('Z_MPG_MAX', 'int', 'zMpgMax'),
     ('X_MOVE_DIST', 'float', 'xMoveDist'),
     ('X_MOVE_POS', 'float', 'xMovePos'),
     ('X_JOG_DIR', 'int', 'xJogDir'),
@@ -261,6 +264,7 @@ parmTable = ( \
     ('X_FLAG', 'int', 'xFlag'),
     ('X_ABS_LOC', 'int', 'xAbsLoc'),
     ('X_MPG_INC', 'int', 'xMpgInc'),
+    ('X_MPG_MAX', 'int', 'xMpgMax'),
     ('TAPER_CYCLE_DIST', 'float', 'taperCycleDist'),
     ('INDEX_PRE_SCALER', 'int', 'indexPreScaler'),
     ('LAST_INDEX_PERIOD', 'unsigned int', 'lastIndexPeriod'),
