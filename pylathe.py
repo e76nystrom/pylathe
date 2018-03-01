@@ -906,6 +906,11 @@ def sendSpindleData(send=False, rpm=None):
                 comm.queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
                 comm.queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
 
+                comm.queParm(pm.SP_JOG_TIME_INITIAL, \
+                             cfg.getInfoData(cf.spJTimeInitial))
+                comm.queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
+                comm.queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
+
                 comm.queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
                 comm.queParm(pm.SP_TEST_INDEX, \
                              cfg.getBoolInfoData(cf.spTestIndex))
@@ -984,6 +989,11 @@ def sendZData(send=False):
             comm.queParm(pm.Z_JOG_MIN, cfg.getInfoData(cf.zJogMin))
             comm.queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
 
+            comm.queParm(pm.JOG_TIME_INITIAL,\
+                         cfg.getFloatInfoData(cf.jogTimeInitial))
+            comm.queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+            comm.queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
+
             comm.queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
             comm.queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
 
@@ -1038,6 +1048,11 @@ def sendXData(send=False):
 
             comm.queParm(pm.X_JOG_MIN, cfg.getInfoData(cf.xJogMin))
             comm.queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
+
+            comm.queParm(pm.JOG_TIME_INITIAL,\
+                         cfg.getFloatInfoData(cf.jogTimeInitial))
+            comm.queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+            comm.queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
 
             comm.queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
             comm.queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
@@ -3149,29 +3164,55 @@ class ButtonRepeat(Thread):
                 sleep(timeout)
                 timeout = .05
 
-class Keypad():
+EVT_KEYPAD_ID = wx.NewId()
+
+class KeypadEvent(wx.PyEvent):
+    def __init__(self, data):
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_KEYPAD_ID)
+        self.data = data
+    
+class Keypad(Thread):
+    def __init__(self, port, rate):
+        Thread.__init__(self)
+        self.threadRun = True
+        self.port = port
+        self.rate = rate
+        try:
+            self.ser = serial.Serial(port, rate, timeout=1)
+        except IOError:
+            print("unable to open port %s" % (port))
+            stdout.flush()
+            self.ser = None
+
+        self.start()
+
+    def run(self):
+        while self.threadRun:
+            if self.ser is not None:
+                try:
+                    tmp = str(self.ser.read(1))
+                except serial.SerialException:
+                    self.ser = none
+                    pass
+                if len(tmp) != 0:
+                    wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
+            else:
+                try:
+                    self.ser = serial.Serial(port, rate, timeout=1)
+                except IOError:
+                    print("unable to open port %s" % (port))
+                    stdout.flush()
+                    self.ser = None
+                    sleep(5)
+        print("keypad thread done")
+                    
+
+class JogShuttle(Thread):
     def __init__(self):
         allHids = None
-        if WINDOWS:
-            allHids = find_all_hid_devices()
-        if allHids:
-            for index, device in enumerate(allHids):
-                if device.vendor_id == 0x2341 and \
-                   device.product_id == 0x8036:
-                    try:
-                        device.open()
-                        device.set_raw_data_handler(self.KeypadInput)
-                    except:
-                        traceback.print_exc()
-                    break
-
-    def KeypadInput(self, data):
-        print(data)
-        stdout.flush()
-
-class JogShuttle():
-    def __init__(self):
-        allHids = None
+        self.threadRun = True
+        self.device = None
         if WINDOWS:
             allHids = find_all_hid_devices()
         if allHids:
@@ -3179,11 +3220,15 @@ class JogShuttle():
                 if device.vendor_id == 0xb33 and \
                    device.product_id == 0x20:
                     try:
+                        self.device = device
                         device.open()
                         device.set_raw_data_handler(self.ShuttleInput)
+                        self.run
                     except:
                         traceback.print_exc()
                     break
+        if self.device == None:
+            return
 
         self.lastOuterRing = 0
         self.lastKnob = None
@@ -3207,6 +3252,39 @@ class JogShuttle():
 
         self.spindleSpeed = [None, None, None, None, None, None, None, None]
         self.spindleCurSpeed = 0.0
+
+        self.start()
+
+    def run(self):
+        t = 1
+        while True:
+            if not self.threadRun:
+                break
+
+            if self.device is not None:
+                if not self.device.is_plugged():
+                    print("shuttle unplugged");
+                    stdout.flush()
+                    self.device = None
+                    t = 5
+            else:
+                allHids = find_all_hid_devices()
+                if allHids:
+                    for index, device in enumerate(allHids):
+                        if device.vendor_id == 0xb33 and \
+                           device.product_id == 0x20:
+                            try:
+                                self.device = device
+                                device.open()
+                                device.set_raw_data_handler(self.KeypadInput)
+                                print("open shuttle");
+                                stdout.flush()
+                                t = 1
+                            except:
+                                traceback.print_exc()
+            sleep(t)
+        print("shuttle Thread done")
+        stdout.flush()
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
@@ -3347,9 +3425,10 @@ class JogPanel(wx.Panel, FormRoutines):
         global buttonRepeat
         super(JogPanel, self).__init__(parent, *args, **kwargs)
         FormRoutines.__init__(self, False)
+        self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
+        self.Connect(-1, -1, EVT_KEYPAD_ID, self.keypadEvent)
         self.jogCode = None
         self.repeat = 0
-        # self.lastTime = 0
         self.btnRpt = buttonRepeat = ButtonRepeat()
         self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
@@ -3379,8 +3458,32 @@ class JogPanel(wx.Panel, FormRoutines):
             # self.xDroDiam = False
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
         self.dbg = open("dbgLog.txt", "ab")
+
+        eventTable = (\
+                      (en.EV_ZLOC, self.updateZ), \
+                      (en.EV_XLOC, self.updateX), \
+                      (en.EV_RPM, self.updateRPM), \
+                      (en.EV_READ_ALL, self.updateAll), \
+                      (en.EV_ERROR, self.updateError), \
+                      )
+
+        self.procUpdate = [None for i in range(en.EV_MAX)]
+        for (event, action) in eventTable:
+            self.procUpdate[event] = action
+
         self.initKeyTable()
+        self.initKeypadTable()
         self.initUI()
+
+    def OnUpdate(self, e):
+        index = e.data[0]
+        if index < len(self.procUpdate):
+            update = self.procUpdate[index]
+            if update is not None:
+                val = e.data[1:]
+                if len(val) == 1:
+                    val = val[0]
+                update(val)
 
     def close(self):
         self.dbg.close()
@@ -3910,6 +4013,45 @@ class JogPanel(wx.Panel, FormRoutines):
         # stdout.flush()
         evt.Skip()
 
+    def initKeypadTable(self):
+        keypadTable = (\
+                       (ord('a'), (self.OnEStop, None)), \
+                       (ord('b'), (self.OnStop, None)), \
+                       (ord('c'), (self.OnStartSpindle, None)), \
+                       (ord('d'), self.noAction), \
+
+                       (ord('e'), self.start), \
+                       (ord('f'), (self.OnResume, None)), \
+                       (ord('g'), (self.OnPause, None)), \
+                       (ord('h'), (self.OnDone, None)), \
+
+                       (ord('i'), self.noAction), \
+                       (ord('j'), self.noAction), \
+                       (ord('k'), self.noAction), \
+                       (ord('l'), self.noAction), \
+
+                       (ord('m'), self.noAction), \
+                       (ord('n'), self.noAction), \
+                       (ord('o'), self.noAction), \
+                       (ord('p'), self.noAction), \
+        )
+        self.keypadTable = {}
+        for (key, action) in keypadTable:
+            self.keypadTable[key] = action
+
+    def keypadEvent(self, event):
+        code = event.data
+        if code in self.keypadTable:
+            action = self.keypadTable[code]
+            if isinstance(action, tuple):
+                (action, arg) = action
+                action(arg)
+            else:
+                action()
+
+    def noAction(self):
+        pass
+
     def initKeyTable(self):
         keyTable = (\
                     (ord('c'), self.comboCont), \
@@ -3918,6 +4060,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     (ord('r'), self.start), \
                     (ord('s'), (self.OnResume, None)), \
                     (ord('p'), (self.OnPause, None)), \
+                    (ord('d'), (self.OnDone, None)), \
 
                     (ord('n'), self.nextOperation), \
                     (ord('a'), self.add), \
@@ -3929,7 +4072,6 @@ class JogPanel(wx.Panel, FormRoutines):
                     (wx.WXK_ESCAPE, (self.OnStop, None)), \
                     (ord('z'), (self.OnZMenu, None)), \
                     (ord('x'), (self.OnXMenu, None)), \
-                    (ord('d'), (self.OnDone, None)), \
                     (ord('C'), (self.setStatus, st.STR_CLR)), \
                     (ord('?'), self.help), \
         )
@@ -5187,7 +5329,8 @@ class UpdateThread(Thread):
                             print("index error %s" % result)
                             stdout.flush()
                         except TypeError:
-                            print("type error %s %s" % (en.dMessageList[cmd], result))
+                            print("type error %s %s" % \
+                                  (en.dMessageList[cmd], result))
                             stdout.flush()
                     except ValueError:
                         print("value error cmd %s val %s" % (cmd, val))
@@ -5404,8 +5547,6 @@ class MainFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
-
         self.dirName = os.getcwd()
         self.parseCmdLine()
         self.initialConfig()
@@ -5419,9 +5560,6 @@ class MainFrame(wx.Frame):
 
         global moveCommands
         moveCommands = MoveCommands()
-
-        global updateThread
-        self.update = updateThread = UpdateThread(self)
 
         self.currentPanel = None
         
@@ -5438,15 +5576,19 @@ class MainFrame(wx.Frame):
 
         self.initUI()
 
+        global updateThread
+        self.update = updateThread = UpdateThread(self.jogPanel)
+
         global jogShuttle
         self.jogShuttle = jogShuttle = JogShuttle()
 
-        global keypad
-        self.keypad = keypad = Keypad()
-        
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
+        global keypad
+        self.keypad = keypad = Keypad(cfg.getInfoData(cf.keypadPort), \
+                                      cfg.getInfoData(cf.keypadRate))
+        
         if EXT_DRO:
             port = cfg.getInfoData(cf.extDroPort)
             print("port %s" % (port))
@@ -5511,18 +5653,6 @@ class MainFrame(wx.Frame):
 
         self.initDevice()
 
-        eventTable = (\
-                      (en.EV_ZLOC, self.jogPanel.updateZ), \
-                      (en.EV_XLOC, self.jogPanel.updateX), \
-                      (en.EV_RPM, self.jogPanel.updateRPM), \
-                      (en.EV_READ_ALL, self.jogPanel.updateAll), \
-                      (en.EV_ERROR, self.jogPanel.updateError), \
-                      )
-
-        self.procUpdate = [None for i in range(en.EV_MAX)]
-        for (event, action) in eventTable:
-            self.procUpdate[event] = action
-
         self.update.start()
 
     def onClose(self, e):
@@ -5535,19 +5665,12 @@ class MainFrame(wx.Frame):
         cfg.saveList(self.posFile, posList)
         done = True
         jogPanel.close()
+        print("set threadRun False")
+        stdout.flush()
         self.update.threadRun = False
         buttonRepeat.threadRun = False
+        keypad.threadRun = False
         self.Destroy()
-
-    def OnUpdate(self, e):
-        index = e.data[0]
-        if index < len(self.procUpdate):
-            update = self.procUpdate[index]
-            if update is not None:
-                val = e.data[1:]
-                if len(val) == 1:
-                    val = val[0]
-                update(val)
 
     def initUI(self):
         # file menu
@@ -6183,6 +6306,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Accel RPM/Sec2", cf.spAccel, 'fs'), \
                 ("Jog Min", cf.spJogMin, 'd'), \
                 ("Jog Max", cf.spJogMax, 'd'), \
+                ("Jog Time Initial", cf.spJTimeInitial, 'f2'), \
+                ("Jog Time Incrmemnt", cf.spJTimeInc, 'f2'), \
+                ("Jog Time Maximum", cf.spJTimeMax, 'f2'), \
                 # ("Jog Accel Time", cf.spJogAccelTime, 'f'), \
                 ("bInvert Dir", cf.spInvDir, None), \
                 ("bTest Index", cf.spTestIndex, None), \
@@ -6252,7 +6378,9 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
 
         self.fields = ( \
             ("Comm Port", cf.commPort, None), \
-            ("Baud Rate", cf.commRate, 'd'), \
+            ("Comm Rate", cf.commRate, 'd'), \
+            ("Keypad Port", cf.keypadPort, None), \
+            ("Keypad Rate", cf.keypadRate, 'd'), \
         )
         if EXT_DRO:
             self.fields += ( \
@@ -6303,6 +6431,9 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bRemote Debug", cf.cfgRemDbg, None), \
             ("bHome in Place", cf.cfgHomeInPlace, None), \
             ("Taper Cycle Dist", cf.cfgTaperCycleDist, 'f'), \
+            ("Jog Time Initial", cf.jogTimeInitial, 'f2'), \
+            ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
+            ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
         )
         if XILINX:
             self.fields += (

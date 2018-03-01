@@ -82,6 +82,17 @@ configList = \
     ('jpSurfaceSpeed', 'jogpanle fpm or rpm'),
     ('jpXDroDiam', 'jogpanel x dro diameter'),
 
+  "jog time parameters",
+
+    ('jogTimeInitial', 'jog time initial'),
+    ('jogTimeInc', 'jog time increment'),
+    ('jogTimeMax', 'jog time max'),
+
+  "keypad",
+
+    ('keypadPort', 'external dro port'),
+    ('keypadRate', 'external dro baud Rate'),
+
   "main panel",
 
     ('mainPanel', 'name of main panel'),
@@ -94,6 +105,9 @@ configList = \
     ('spJogAccelTime', 'spindle jog acceleration time'),
     ('spJogMax', 'spindle jog max speed'),
     ('spJogMin', 'spindle jog min speed'),
+    ('spJTimeInc', 'spindle jog increment'),
+    ('spJTimeInitial', 'spindle jog initial time '),
+    ('spJTimeMax', 'spindle jog max'),
     ('spMaxRPM', 'spindle jog max rpm'),
     ('spMicroSteps', 'spindle micro steps'),
     ('spMinRPM', 'spindle minimum rpm'),
@@ -355,6 +369,9 @@ parmList = \
     ("SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"),
     ("SP_JOG_RPM", "spindle jog rpm", "float"),
     ("SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"),
+    ("SP_JOG_TIME_INITIAL", "spindle jog time initial", "float"),
+    ("SP_JOG_TIME_INC", "spindle jog time increment", "float"),
+    ("SP_JOG_TIME_MAX", "spindle jog timemax", "float"),
     ("SP_JOG_DIR", "spindle direction", "char"),
     ("SP_DIR_FLAG", "spindle invert direction", "char"),
     ("SP_TEST_INDEX", "generate test index pulse", "char"),
@@ -437,6 +454,12 @@ parmList = \
     ("X_MPG_INC", "X man pulse gen incr", "int"),
     ("X_MPG_MAX", "x man pulse max distance", "int"),
     
+    "common jog parameters",
+
+    ("JOG_TIME_INITIAL", "jog time initial", "float"),
+    ("JOG_TIME_INC", "jog time increment", "float"),
+    ("JOG_TIME_MAX", "jog time max", "float"),
+
     # "z turn/face parameters",
     
     # ("Z_START_LOC", "z start", "float"),
