@@ -134,8 +134,11 @@ class FormRoutines():
         self.configList = None
         self.prefix = ""
         self.focusField = None
+        self.formatList = None
 
     def formatData(self, formatList):
+        if formatList is None:
+            return(True)
         success = True
         for fmt in formatList:
             if len(fmt) == 2:
@@ -161,22 +164,24 @@ class FormRoutines():
                 fmt = "%%0.%df" % digits
 
                 try:
-                    val = float(strVal)
-                    val = fmt % (val)
-                    if strip:
-                        if re.search("\.0*$", val):
-                            val = re.sub("\.0*$", "", val)
-                        else:
-                            val = val.rstrip('0')
-                    ctl.SetValue(val)
+                    if len(strVal) != 0:
+                        val = float(strVal)
+                        val = fmt % (val)
+                        if strip:
+                            if re.search("\.0*$", val):
+                                val = re.sub("\.0*$", "", val)
+                            else:
+                                val = val.rstrip('0')
+                        ctl.SetValue(val)
                 except ValueError:
                     success = False
                     strVal = ''
                     ctl.SetValue('')
             elif fieldType == 'd':
                 try:
-                    val = int(strVal)
-                    ctl.SetValue("%d" % (val))
+                    if len(strVal) != 0:
+                        val = int(strVal)
+                        ctl.SetValue("%d" % (val))
                 except ValueError:
                     success = False
                     strVal = ''
@@ -335,6 +340,8 @@ class FormRoutines():
             field.SetSelection(-1, -1)
 
     def OnEnter(self, e):
+        if self.formatList is None:
+            return
         if self.formatData(self.formatList):
             jogPanel.setStatus(st.STR_CLR)
             jogPanel.focus()
@@ -3174,6 +3181,10 @@ class KeypadEvent(wx.PyEvent):
     
 class Keypad(Thread):
     def __init__(self, port, rate):
+        if port is None:
+            return
+        if len(port) == 0:
+            return
         Thread.__init__(self)
         self.threadRun = True
         self.port = port
@@ -5586,8 +5597,12 @@ class MainFrame(wx.Frame):
                         cfg.getInfoData(cf.commRate))
 
         global keypad
-        self.keypad = keypad = Keypad(cfg.getInfoData(cf.keypadPort), \
-                                      cfg.getInfoData(cf.keypadRate))
+        port = cfg.getInfoData(cf.keypadPort)
+        if len(port) != 0:
+            self.keypad = keypad = Keypad(cfg.getInfoData(cf.keypadPort), \
+                                          cfg.getInfoData(cf.keypadRate))
+        else:
+            self.keypad = keypad = None
         
         if EXT_DRO:
             port = cfg.getInfoData(cf.extDroPort)
@@ -5669,7 +5684,8 @@ class MainFrame(wx.Frame):
         stdout.flush()
         self.update.threadRun = False
         buttonRepeat.threadRun = False
-        keypad.threadRun = False
+        if keypad is not None:
+            keypad.threadRun = False
         self.Destroy()
 
     def initUI(self):
