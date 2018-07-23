@@ -1,6 +1,6 @@
 #!/cygdrive/c/Python27/Python.exe
-#!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 #!/usr/bin/python
+#!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
 from __future__ import print_function
 import wx
@@ -1387,7 +1387,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
         # x parameters
 
@@ -1669,7 +1669,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
         # z parameters
 
@@ -1846,7 +1846,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
         # z parameters
 
@@ -2336,7 +2336,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
 
-        sizerG = wx.FlexGridSizer(8, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
         # z parameters
 
@@ -2977,8 +2977,8 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.sizerG = sizerG = wx.FlexGridSizer(8, 0, 0)
-
+        self.sizerG = sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
+        
         # z parameters
 
         (self.z0, self.z0Txt) = \
@@ -3188,6 +3188,7 @@ class Keypad(Thread):
         self.start()
 
     def run(self):
+        prtErr = True
         while self.threadRun:
             if self.ser is not None:
                 try:
@@ -3199,9 +3200,12 @@ class Keypad(Thread):
                     wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
             else:
                 try:
-                    self.ser = serial.Serial(port, rate, timeout=1)
+                    self.ser = serial.Serial(self.port, self.rate, timeout=1)
+                    prtErr = True
                 except IOError:
-                    print("unable to open port %s" % (port))
+                    if prtErr:
+                        print("unable to open port %s" % (self.port))
+                        prtErr = False
                     stdout.flush()
                     self.ser = None
                     sleep(5)
@@ -3502,7 +3506,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(6, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=6, rows=0, vgap=0, hgap=0)
 
         self.txtFont = txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
                                          wx.NORMAL, False, u'Consolas')
@@ -3600,7 +3604,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizerG = wx.FlexGridSizer(3, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=3, rows=0, vgap=0, hgap=0)
 
         # first line
 
@@ -3640,7 +3644,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH.Add(sizerG)
 
-        sizerG = wx.FlexGridSizer(5, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=5, rows=0, vgap=0, hgap=0)
         sFlag = wx.ALL|wx.CENTER|wx.ALIGN_CENTER_VERTICAL
 
         # first row
@@ -4657,7 +4661,7 @@ class HelpDialog(wx.Dialog):
                     ('?', "Help"), \
         )
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
         for (char, text) in helpText:
             char = wx.StaticText(self, -1, char)
             sizerG.Add(char, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=5)
@@ -4848,7 +4852,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.probeLoc = \
             self.addDialogField(sizerG, \
@@ -4996,7 +5000,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.curXPos = \
             self.addDialogField(sizerG, 'Current', "0.000", jogPnl.txtFont, \
@@ -6149,7 +6153,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
             ("Pitch", cf.zPitch, 'f'), \
@@ -6210,7 +6214,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
             ("Pitch", cf.xPitch, 'f'), \
@@ -6286,7 +6290,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = ( \
             ("bStepper Drive", cf.spStepDrive, None), \
@@ -6374,7 +6378,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = ( \
             ("Comm Port", cf.commPort, None), \
@@ -6415,7 +6419,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-        sizerG = wx.FlexGridSizer(2, 0, 0)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
             ("bHW Control", cf.cfgXilinx, None), \

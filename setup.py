@@ -400,17 +400,20 @@ class Setup():
         self.enumImports = imports
         self.importList += imports
 
-    def createXilinxReg(self, xilinxList, cLoc, xLoc, fData=False):
+    def createXilinxReg(self, xilinxList, cLoc, xLoc, fData=False, \
+                        pName="xRegDef", table="xRegTable", cName="xilinx", \
+                        xName="RegDef"):
         global xRegTable
         xRegTable = []
         imports = []
-        imports.append("xRegTable")
+        imports.append(table)
         if fData:
-            cFile = open(cLoc + 'xilinxreg.h', 'wb')
-            cFile.write("enum XILINX\n{\n");
+            cFile = open(cLoc + cName + 'reg.h', 'wb')
+            cFile.write("enum " + cName.upper() + "\n{\n");
             try:
-                xFile = open(xLoc + 'RegDef.vhd', 'wb')
+                xFile = open(xLoc + xName + '.vhd', 'wb')
             except (OSError, IOError) as e:
+                print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
                 xFile.write("library IEEE;\n")
@@ -427,8 +430,7 @@ class Setup():
             # j1File.write(" public static final String[] xilinxStr =\n {\n");
         f = None
         if self.file:
-            file = 'xRegDef'
-            f = open(file + '.py', 'wb')
+            f = open(pName + '.py', 'wb')
             f.write("\n# xilinx registers\n\n")
         index = 0
         for i in range(len(xilinxList)):
@@ -501,19 +503,22 @@ class Setup():
         self.xRegTable = xRegTable
         return(xRegTable)
 
-    def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False):
+    def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
+                         pName="xBitDef", xName="xilinx", \
+                         package="CtlBits", cName="Ctl"):
         imports = []
         if fData:
-            cFile = open(cLoc + 'xilinxbits.h', 'wb')
+            cFile = open(cLoc + cName + 'bits.h', 'wb')
             try:
-                xFile = open(xLoc + 'CtlBits.vhd', 'wb')
+                xFile = open(xLoc + xName + 'Bits.vhd', 'wb')
             except IOError as e:
+                print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
                 xFile.write("library IEEE;\n")
                 xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
                 xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
-                xFile.write("package CtlBits is\n")
+                xFile.write("package " + package + " is\n")
             # jFile = open(jLoc + 'XilinxBits.java', 'wb')
             # jFile.write("package lathe;\n\n");
             # jFile.write("public class XilinxBits\n{\n");
@@ -522,8 +527,7 @@ class Setup():
         lastShift = -1
         f = None
         if self.file:
-            file = 'xBitDef'
-            f = open(file + '.py', 'wb')
+            f = open(pName + '.py', 'wb')
             f.write("\n# xilinx bits\n")
         for i in range(len(xilinxBitList)):
             data = xilinxBitList[i]

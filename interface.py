@@ -857,6 +857,14 @@ xilinxBitList = \
     ""
 )
     
+xilinxEncBitList = \
+(\
+ "status register",
+
+    ("stat",),
+    ("done_Int", 1, 0, "z done interrrupt"),
+)
+
 enumList =\
 (\
     "z control states",
@@ -1001,6 +1009,15 @@ enumList =\
     "};",
 )
     
+xilinxEncList = \
+( \
+    "skip register zero",
+
+    ("XNOOP", "register 0"),
+
+    "load control registers",
+)
+
 if __name__ == '__main__':
     import os
     from setup import Setup
@@ -1025,3 +1042,17 @@ if __name__ == '__main__':
     setup.createCtlBits(regList, cLoc, fData)
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
     setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+
+    xLoc = path + '/../../Xilinx/Spartan6LedTest/'
+
+    setup.createXilinxReg(xilinxEncList, cLoc, xLoc, fData, \
+                          pName="xEncRegDef", \
+                          table="encRegTable", \
+                          cName="Enc", \
+                          xName="encRegDef" )
+    
+    setup.createXilinxBits(xilinxEncBitList, cLoc, xLoc, fData, \
+                           pName="xEncBitDef", \
+                           xName="xEnc", \
+                           package="xEncBits", \
+                           cName="xEnc")
