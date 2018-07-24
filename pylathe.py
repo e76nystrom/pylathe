@@ -5558,10 +5558,33 @@ class UpdateThread(Thread):
 #             print("key down")
 #         event.Skip()
 
+EVT_RESIZE_ID = wx.NewId()
+
+class ResizeEvent(wx.PyEvent):
+    def __init__(self):
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_RESIZE_ID)
+
+class Delay(Thread):
+    def __init__(self, frame):
+        Thread.__init__(self)
+        print("Delay start")
+        stdout.flush()
+        self.frame = frame
+        self.start()
+
+    def run(self):
+        sleep(1)
+        print("SendSizeEvent")
+        wx.PostEvent(self.frame, ResizeEvent())
+        print("Delay done")
+        stdout.flush()
+
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, -1, title)
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        self.Connect(-1, -1, EVT_RESIZE_ID, self.OnResize)
         self.dirName = os.getcwd()
         self.parseCmdLine()
         self.initialConfig()
@@ -5673,6 +5696,7 @@ class MainFrame(wx.Frame):
         self.initDevice()
 
         self.update.start()
+        self.delay = Delay(self)
 
     def onClose(self, e):
         global done
@@ -6026,6 +6050,12 @@ class MainFrame(wx.Frame):
 
         if XILINX:
             comm.enableXilinx()
+
+    def OnResize(self, e):
+        print("OnResize")
+        stdout.flush()
+        self.Layout()
+        self.Fit()
 
     def OnSave(self, e):
         cfg.saveInfo(self.cfgFile)
