@@ -505,7 +505,7 @@ class Setup():
 
     def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
                          pName="xBitDef", xName="xilinx", \
-                         package="CtlBits", cName="Ctl"):
+                         package="CtlBits", cName="xilinx"):
         imports = []
         if fData:
             cFile = open(cLoc + cName + 'bits.h', 'wb')

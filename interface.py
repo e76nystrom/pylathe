@@ -1043,16 +1043,16 @@ if __name__ == '__main__':
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
     setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
-    xLoc = path + '/../../Xilinx/Spartan6LedTest/'
+    # xLoc = path + '/../../Xilinx/Spartan6LedTest/'
 
-    setup.createXilinxReg(xilinxEncList, cLoc, xLoc, fData, \
-                          pName="xEncRegDef", \
-                          table="encRegTable", \
-                          cName="Enc", \
-                          xName="encRegDef" )
+    # setup.createXilinxReg(xilinxEncList, cLoc, xLoc, fData, \
+    #                       pName="xEncRegDef", \
+    #                       table="encRegTable", \
+    #                       cName="Enc", \
+    #                       xName="encRegDef" )
     
-    setup.createXilinxBits(xilinxEncBitList, cLoc, xLoc, fData, \
-                           pName="xEncBitDef", \
-                           xName="xEnc", \
-                           package="xEncBits", \
-                           cName="xEnc")
+    # setup.createXilinxBits(xilinxEncBitList, cLoc, xLoc, fData, \
+    #                        pName="xEncBitDef", \
+    #                        xName="xEnc", \
+    #                        package="xEncBits", \
+    #                        cName="xEnc")
