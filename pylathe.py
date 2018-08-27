@@ -113,6 +113,12 @@ HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
 
+TURN = 0
+FACE = 1
+CUTOFF = 2
+TAPER = 3
+THREAD = 4
+
 def commTimeout():
     jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
@@ -349,8 +355,9 @@ class FormRoutines():
             jogPanel.setStatus(st.STR_FIELD_ERROR)
             
 class ActionRoutines():
-    def __init__(self, control):
+    def __init__(self, control, op):
         self.control = control
+        self.op = op
         self.active = False
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.safeX = None
@@ -1101,6 +1108,7 @@ class UpdatePass():
         self.calculatePass = None    # pass calculation routine
         self.genPass = None     # pass generation routine
 
+        self.add = False
         self.passes = 0
         self.passCount = 0
         self.passSize = [0.0, ]
@@ -1118,6 +1126,7 @@ class UpdatePass():
         self.pause = False
 
     def calcFeed(self, feed, cutAmount, finish=0):
+        self.add = False
         self.cutAmount = cutAmount
         cutToFinish = cutAmount - finish
         self.passes = int(ceil(cutToFinish / abs(feed)))
@@ -1186,6 +1195,9 @@ class UpdatePass():
                 return(False)
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
+
+    def fixCut(self, actual):
+        pass
 
 class Turn(LatheOp, UpdatePass):
     def __init__(self, turnPanel):
@@ -1331,7 +1343,8 @@ class Turn(LatheOp, UpdatePass):
         if DRO:
             m.saveXDro()
         if self.panel.pause.GetValue():
-            self.m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
+            self.m.quePause(flag)
         if not addPass:
             if m.passNum & 0x300 == 0:
                 m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
@@ -1349,7 +1362,9 @@ class Turn(LatheOp, UpdatePass):
 
     def addPass(self):
         jogPanel.dPrt("\nturn addPass\n")
+        self.add = True
         add = getFloatVal(self.panel.add) / 2.0
+        self.panel.add.SetValue("0.000")
         self.cutAmount += add
         self.calcPass(True)
         self.setup(True)
@@ -1361,12 +1376,18 @@ class Turn(LatheOp, UpdatePass):
         self.m.done(1)
         comm.command(cm.CMD_RESUME)
 
+    def fixCut(self, actual):
+        if self.internal:
+            self.cutAmount = actual - self.xStart
+        else:
+            self.cutAmount = self.xStart - actual
+
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Turn(self))
+        ActionRoutines.__init__(self, Turn(self), TURN)
         self.InitUI()
         self.configList = None
         self.prefix = 'tu'
@@ -1483,6 +1504,13 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
+        control = self.control
+        if control.add:
+            if jogPanel.mvStatus & ct.MV_READ_X:
+                actualX = float(jogPanel.xPos.GetValue())
+                passNum = jogPanel.lastPass
+                control.passSize[passNum] = 2 * actualX
+                control.fixCut(actualX)
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -1500,7 +1528,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             dCur = self.xDiam0
             dNxt = self.xDiam1
-        dCur.SetValue(dNxt.GetValue())
+        dCur.SetValue(jogPanel.passSize.GetValue())
         dNxt.SetFocus()
         dNxt.SetSelection(-1, -1)
 
@@ -1649,7 +1677,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Face(self))
+        ActionRoutines.__init__(self, Face(self), FACE)
         self.InitUI()
         self.configList = None
         self.prefix = 'fa'
@@ -1829,7 +1857,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(CutoffPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Cutoff(self))
+        ActionRoutines.__init__(self, Cutoff(self), CUTOFF)
         self.InitUI()
         self.configList = None
         self.prefix = 'cf'
@@ -2273,7 +2301,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(TaperPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Taper(self))
+        ActionRoutines.__init__(self, Taper(self), TAPER)
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -2946,7 +2974,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         super(ThreadPanel, self).__init__(parent, *args, **kwargs)
         self.hdrFont = hdrFont
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, ScrewThread(self))
+        ActionRoutines.__init__(self, ScrewThread(self), THREAD)
         self.InitUI()
         self.configList = None
         self.prefix = 'th'
@@ -4362,6 +4390,9 @@ class JogPanel(wx.Panel, FormRoutines):
             if self.currentPanel.active:
                 text += '*'
             mvStatus = int(mvStatus)
+            if mvStatus != self.mvStatus:
+                print("mvStatus %x" % (mvStatus))
+                stdout.flush()
             self.mvStatus = mvStatus
             if mvStatus & ct.MV_MEASURE:
                 text += 'M'
@@ -4692,31 +4723,33 @@ class PosMenu(wx.Menu):
         wx.Menu.__init__(self)
         self.jP = jP
         self.axis = axis
-        item = wx.MenuItem(self, wx.NewId(), "Set")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnSet, item)
-
-        item = wx.MenuItem(self, wx.NewId(), "Zero")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnZero, item)
-
-        if EXT_DRO:
-            item = wx.MenuItem(self, wx.NewId(), "Ext DRO")
+        active = jogPanel.currentPanel.active
+        if not active:
+            item = wx.MenuItem(self, wx.NewId(), "Set")
             self.Append(item)
-            self.Bind(wx.EVT_MENU, self.OnSetFromExt, item)
+            self.Bind(wx.EVT_MENU, self.OnSet, item)
 
-        item = wx.MenuItem(self, wx.NewId(), "Probe")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnProbe, item)
-
-        if self.axis == AXIS_X:
-            item = wx.MenuItem(self, wx.NewId(), "Home")
+            item = wx.MenuItem(self, wx.NewId(), "Zero")
             self.Append(item)
-            self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+            self.Bind(wx.EVT_MENU, self.OnZero, item)
 
-        item = wx.MenuItem(self, wx.NewId(), "Go to")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnGoto, item)
+            if EXT_DRO:
+                item = wx.MenuItem(self, wx.NewId(), "Ext DRO")
+                self.Append(item)
+                self.Bind(wx.EVT_MENU, self.OnSetFromExt, item)
+
+            item = wx.MenuItem(self, wx.NewId(), "Probe")
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnProbe, item)
+
+            if self.axis == AXIS_X:
+                item = wx.MenuItem(self, wx.NewId(), "Home")
+                self.Append(item)
+                self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+
+            item = wx.MenuItem(self, wx.NewId(), "Go to")
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnGoto, item)
 
         if self.axis == AXIS_X:
             item = wx.MenuItem(self, wx.NewId(), "Fix X")
@@ -5068,6 +5101,14 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         print("x %d xPosition %d" % (x, int(jogPanel.xPosition.value)))
         xLocation = 2 * (float(x) / jogPanel.xStepsInch - xHomeOffset)
         jogPanel.updateXPos(xLocation + offset)
+
+        currentPanel = jogPanel.currentPanel
+        if currentPanel.active:
+            if currentPanel.op == TURN:
+                passNum = jogPanel.lastPass
+                control = currentPanel.control
+                control.passSize[passNum] = actualX
+                control.fixCut(actualX / 2.0)
 
         dPrt = jogPanel.dPrt
         dPrt("fix x\n")

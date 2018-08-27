@@ -68,16 +68,20 @@ PROBE_FAIL       = 2            #
 # movement status
 
 MV_PAUSE         = (1 << 0)     # movement paused
-MV_ACTIVE        = (1 << 1)     # movement active
-MV_HOME_ACTIVE   = (1 << 2)     # home active
-MV_XHOME         = (1 << 3)     # X home success
-MV_MEASURE       = (1 << 4)     # pause for measurement
+MV_READ_X        = (1 << 1)     # pause x may change
+MV_READ_Z        = (1 << 2)     # pause z may change
+MV_ACTIVE        = (1 << 3)     # movement active
+MV_HOME_ACTIVE   = (1 << 4)     # home active
+MV_XHOME         = (1 << 5)     # X home success
+MV_MEASURE       = (1 << 6)     # pause for measurement
 
 # pause flags
 
 PAUSE_ENA_Z_JOG  = (1 << 0)     # enable z job during pause
 PAUSE_ENA_X_JOG  = (1 << 1)     # enable x jog during pause
 DISABLE_JOG      = (1 << 2)     # jogging disabled
+PAUSE_READ_X     = (1 << 3)     # read x after pause
+PAUSE_READ_Z     = (1 << 4)     # read z after pause
 
 # thread flags
 
