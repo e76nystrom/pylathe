@@ -157,6 +157,11 @@ class FormRoutines():
             strVal = ctl.GetValue()
             if fieldType.startswith('f'):
                 strip = False
+                strVal = strVal.lower()
+                metric = strVal.endswith('mm')
+                if metric:
+                    strVal = strVal[:-2]
+                    strip = True
                 if fieldType.endswith('s'):
                     fieldType = fieldType[:-1]
                     strip = True
@@ -167,6 +172,8 @@ class FormRoutines():
                         digits = int(fieldType[1])
                     except ValueError:
                         pass
+                if metric:
+                    digits -= 2
                 fmt = "%%0.%df" % digits
 
                 try:
@@ -178,6 +185,9 @@ class FormRoutines():
                                 val = re.sub("\.0*$", "", val)
                             else:
                                 val = val.rstrip('0')
+                        if metric:
+                            val += 'mm'
+                            strVal += 'mm'
                         ctl.SetValue(val)
                 except ValueError:
                     success = False
@@ -962,7 +972,7 @@ def sendSpindleData(send=False, rpm=None):
 def sendZData(send=False):
     global zDataSent
     try:
-        pitch = cfg.getFloatInfoData(cf.zPitch)
+        pitch = cfg.getDistInfoData(cf.zPitch)
         motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
         microSteps = cfg.getIntInfoData(cf.zMicroSteps)
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
@@ -990,7 +1000,7 @@ def sendZData(send=False):
             comm.queParm(pm.Z_MPG_MAX, \
                          int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
-            comm.queParm(pm.Z_PITCH, cfg.getInfoData(cf.zPitch))
+            comm.queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
             comm.queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
             comm.queParm(pm.Z_MICRO, cfg.getInfoData(cf.zMicroSteps))
             comm.queParm(pm.Z_MOTOR, cfg.getInfoData(cf.zMotorSteps))
@@ -1023,10 +1033,12 @@ def sendZData(send=False):
 def sendXData(send=False):
     global xDataSent
     try:
-        pitch = cfg.getFloatInfoData(cf.xPitch)
+        pitch = cfg.getDistInfoData(cf.xPitch)
         motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
         microSteps = cfg.getIntInfoData(cf.xMicroSteps)
         motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
+        if motorRatio == 0:
+            motorRatio = 1
         jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
         # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
@@ -1050,7 +1062,7 @@ def sendXData(send=False):
             comm.queParm(pm.X_MPG_MAX, \
                          int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
-            comm.queParm(pm.X_PITCH, cfg.getInfoData(cf.xPitch))
+            comm.queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
             comm.queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
             comm.queParm(pm.X_MICRO, cfg.getInfoData(cf.xMicroSteps))
             comm.queParm(pm.X_MOTOR, cfg.getInfoData(cf.xMotorSteps))
@@ -1282,7 +1294,7 @@ class Turn(LatheOp, UpdatePass):
         self.m.moveX(self.xStart + self.xRetract)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         self.m.drawClose()
         stdout.flush()
         return(True)
@@ -1296,8 +1308,9 @@ class Turn(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        m.done(0)
+        if not add:
+            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        m.done(ct.PARM_START)
         
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
@@ -1364,7 +1377,7 @@ class Turn(LatheOp, UpdatePass):
         jogPanel.dPrt("\nturn addPass\n")
         self.add = True
         add = getFloatVal(self.panel.add) / 2.0
-        self.panel.add.SetValue("0.000")
+        self.panel.add.SetValue("0.0000")
         self.cutAmount += add
         self.calcPass(True)
         self.setup(True)
@@ -1373,7 +1386,7 @@ class Turn(LatheOp, UpdatePass):
         self.m.moveX(self.xStart + self.xRetract)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
     def fixCut(self, actual):
@@ -1531,6 +1544,8 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         dCur.SetValue(jogPanel.passSize.GetValue())
         dNxt.SetFocus()
         dNxt.SetSelection(-1, -1)
+        self.active = False
+        jogPanel.setStatus(st.STR_CLR)
 
 class Face(LatheOp, UpdatePass):
     def __init__(self, facePanel):
@@ -1587,7 +1602,7 @@ class Face(LatheOp, UpdatePass):
 
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         self.m.drawClose()
         stdout.flush()
         return(True)
@@ -1602,7 +1617,7 @@ class Face(LatheOp, UpdatePass):
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
+        self.m.done(ct.PARM_START)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.faRPM))
@@ -1669,7 +1684,7 @@ class Face(LatheOp, UpdatePass):
         self.m.moveZ(self.zStart + self.zRetract)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
@@ -1829,7 +1844,7 @@ class Cutoff(LatheOp):
 
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         self.m.drawClose()
         stdout.flush()
         return(True)
@@ -1839,7 +1854,7 @@ class Cutoff(LatheOp):
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
+        self.m.done(ct.PARM_START)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
@@ -2016,7 +2031,7 @@ class Taper(LatheOp, UpdatePass):
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
+        self.m.done(ct.PARM_START)
         
         if self.taperX:
             m.saveTaper(self.taper)
@@ -2098,7 +2113,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.moveZ(self.safeZ)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         self.m.drawClose()
         stdout.flush()
         return(True)
@@ -2189,8 +2204,15 @@ class Taper(LatheOp, UpdatePass):
         self.m.moveZ(self.startZ)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
+
+    def fixCut(self, actual):
+        pass
+        # if self.internal:
+        #     self.cutAmount = actual - self.xStart
+        # else:
+        #     self.cutAmount = self.xStart - actual
 
     def internalRunOperation(self, taperInch):
         print("internalTaper")
@@ -2229,7 +2251,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.moveZ(self.safeZ)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         self.m.drawClose()
         stdout.flush()
         return(True)
@@ -2293,7 +2315,7 @@ class Taper(LatheOp, UpdatePass):
         self.m.moveZ(self.safeZ)
         if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
@@ -2555,9 +2577,15 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             return(self.control.externalRunOperation(taper))
 
-
     def startAction(self):
         comm.command(cm.CMD_RESUME)
+        control = self.control
+        if control.add:
+            if jogPanel.mvStatus & ct.MV_READ_X:
+                actualX = float(jogPanel.xPos.GetValue())
+                passNum = jogPanel.lastPass
+                control.passSize[passNum] = 2 * actualX
+                control.fixCut(actualX)
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -2679,7 +2707,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(0)
+        self.m.done(ct.PARM_START)
 
         th = self.panel
         if STEP_DRV:
@@ -2835,7 +2863,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.m.drawClose()
         if STEP_DRV:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         stdout.flush()
         return(True)
 
@@ -2966,8 +2994,15 @@ class ScrewThread(LatheOp, UpdatePass):
         self.runPass(True)
         if STEP_DRV:
             self.m.stopSpindle()
-        self.m.done(1)
+        self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
+
+    def fixCut(self, actual):
+        pass
+        # if self.internal:
+        #     self.cutAmount = actual - self.xStart
+        # else:
+        #     self.cutAmount = self.xStart - actual
 
 class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -3164,6 +3199,13 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
+        control = self.control
+        if control.add:
+            if jogPanel.mvStatus & ct.MV_READ_X:
+                actualX = float(jogPanel.xPos.GetValue())
+                passNum = jogPanel.lastPass
+                control.passSize[passNum] = 2 * actualX
+                control.fixCut(actualX)
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -4115,6 +4157,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     (wx.WXK_ESCAPE, (self.OnStop, None)), \
                     (ord('z'), (self.OnZMenu, None)), \
                     (ord('x'), (self.OnXMenu, None)), \
+                    (ord('R'), (self.OnRpmMenu, None)), \
                     (ord('C'), (self.setStatus, st.STR_CLR)), \
                     (ord('?'), self.help), \
         )
@@ -4275,7 +4318,7 @@ class JogPanel(wx.Panel, FormRoutines):
         m = moveCommands
         m.queClear()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        m.done(0)
+        m.done(ct.PARM_START)
         if axis == AXIS_X:
             curLoc = float(self.xPosition.value) / self.xStepsInch - xHomeOffset
             m.saveXOffset()
@@ -4294,7 +4337,7 @@ class JogPanel(wx.Panel, FormRoutines):
             curLoc += inc
             print("pass %2d curLoc %7.4f" % (passNum, curLoc))
             self.testPass(passNum, curLoc, retract, pause, axis)
-        m.done(1)            
+        m.done(ct.PARM_DONE)            
 
     def updateZ(self, val):
         txt = "%7.3f" % (float(val) / self.zStepsInch) \
@@ -5104,11 +5147,16 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         currentPanel = jogPanel.currentPanel
         if currentPanel.active:
-            if currentPanel.op == TURN:
+            op = currentPanel.op
+            if (op == TURN) or \
+               (op == TAPER) or \
+               (op == THREAD):
                 passNum = jogPanel.lastPass
                 control = currentPanel.control
                 control.passSize[passNum] = actualX
                 control.fixCut(actualX / 2.0)
+            elif op == FACE:
+                pass
 
         dPrt = jogPanel.dPrt
         dPrt("fix x\n")
@@ -5416,9 +5464,9 @@ class UpdateThread(Thread):
         return(result)
 
     def dbgDone(self, val):
-        if val == 0:
+        if val == ct.PARM_START:
             return("strt")
-        elif val == 1:
+        elif val == ct.PARM_DONE:
             return("done")
 
     def dbgTest(self, val):
@@ -6793,12 +6841,12 @@ class SyncTest(object):
         dbgPrt(txt, "", ())
 
         if zAxis:
-            pitch = cfg.getFloatInfoData(cf.zPitch)
+            pitch = cfg.getDistInfoData(cf.zPitch)
             microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
             motorSteps = cfg.getFloatInfoData(cf.zMotorSteps)
             motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
         else:
-            pitch = cfg.getFloatInfoData(cf.xPitch)
+            pitch = cfg.getDistInfoData(cf.xPitch)
             microSteps = cfg.getFloatInfoData(cf.xMicroSteps)
             motorSteps = cfg.getFloatInfoData(cf.xMotorSteps)
             motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
@@ -6994,7 +7042,7 @@ class TaperTest(object):
                (spindleClocksStep, spindleClockPeriod, spindleClocksRev))
         dbgPrt(txt, "", ())
 
-        pitch = cfg.getFloatInfoData(cf.zPitch)
+        pitch = cfg.getDistInfoData(cf.zPitch)
         microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.zMotorSteps)
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
@@ -7002,7 +7050,7 @@ class TaperTest(object):
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt, "zStepsInch %d", (zStepsInch))
 
-        pitch = cfg.getFloatInfoData(cf.xPitch)
+        pitch = cfg.getDistInfoData(cf.xPitch)
         microSteps = cfg.getFloatInfoData(cf.xMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.xMotorSteps)
         motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)

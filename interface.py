@@ -680,6 +680,11 @@ regList =\
     ("TH_LEFT", "(1 << 0)", "left hand thread"),
     ("TH_RUNOUT", "(1 << 0)", "runout with thread"),
 
+    "parameters for op_done",
+
+    ("PARM_START", "0", "start of operation"),
+    ("PARM_DONE", "1", "done operation"),
+ 
     # ("", "()", ""),
     # ("", "", ""),
 )

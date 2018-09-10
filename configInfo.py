@@ -261,6 +261,32 @@ class ConfigInfo():
         stdout.flush()
         return(0.0)
 
+    def getDistInfoData(self, index, digits=None):
+        try:
+            val = self.infoData[index]
+            val = val.lower()
+            metric = val.endswith('mm')
+            if metric:
+                val = val[:-2]
+            try:
+                val = float(val)
+                if metric:
+                    val /= 25.4
+                    if digits is not None:
+                        fmt = "%%0.%df" % (digits,)
+                        val = fmt % (val,)
+                return(val)
+            except ValueError:
+                print("getFloatInfoData ValueError index %d %s %s" % \
+                      (index, self.configTable[index], val))
+            except TypeError:
+                print("getFloatInfo TypeError index %d %s %s" % \
+                      (index, self.configTable[index], val))
+        except IndexError:
+            print("getFloatInfo IndexError %d" % (index))
+        stdout.flush()
+        return(0.0)
+
     def infoSetLabel(self, index, val):
         self.info[index].SetLabel(val)
 
