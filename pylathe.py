@@ -18,6 +18,7 @@ from ctypes import c_uint32
 from Queue import Queue, Empty
 from platform import system
 from dxfwrite import DXFEngine as dxf
+from sync import Sync
 import re
 WINDOWS = system() == 'Windows'
 if WINDOWS:
@@ -80,6 +81,7 @@ print(wx.version())
 stdout.flush()
 
 f = None
+zSync = None
 mainFrame = None
 updateThread = None
 moveCommands = None
@@ -962,6 +964,7 @@ def sendSpindleData(send=False, rpm=None):
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
+                zSync.setEncoder(count)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
             comm.command(cm.CMD_SPSETUP)
@@ -978,6 +981,12 @@ def sendZData(send=False):
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
         jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
+
+        if SPINDLE_ENCODER:
+            zSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
+            zSync.setMotorSteps(motorSteps)
+            zSync.setMicroSteps(microSteps)
+                       
         # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
 
         if DRO:
@@ -2674,12 +2683,19 @@ class ScrewThread(LatheOp, UpdatePass):
         self.alternate = th.alternate.GetValue()
         self.firstFeedBtn = th.firstFeedBtn.GetValue()
 
+        val =  getFloatVal(th.thread)
         if self.tpiBtn:
-            self.tpi = getFloatVal(th.thread)
-            self.pitch = 1.0 / self.tpi
+            self.tpi = val
+            self.pitch = 1.0 / val
+            if SPINDLE_ENCODER:
+                (self.cycle, self.output) = \
+                    zSync.calcSync(val, dbg=True, metric=False)
         else:
-            self.pitch = getFloatVal(th.thread) / 25.4
+            self.pitch = val / 25.4
             self.tpi = 1.0 / self.pitch
+            if SPINDLE_ENCODER:
+                (self.cycle, self.output) = \
+                    zSync.calcSync(val, metric=True)
 
         self.xStart = getFloatVal(th.xStart) / 2.0
         self.xRetract = abs(getFloatVal(th.xRetract))
@@ -2705,6 +2721,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
+   
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(ct.PARM_START)
@@ -6133,6 +6150,10 @@ class MainFrame(wx.Frame):
             xDROOffset = 0.0
             zDROPosition = 0.0
             xDROPosition = 0.0
+
+        if SPINDLE_ENCODER:
+            global zSync
+            zSync = Sync()
 
         comm = Comm()
         comm.SWIG = SWIG
