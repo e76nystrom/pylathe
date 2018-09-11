@@ -117,6 +117,11 @@ configList = \
     ('spTestEncoder', 'spindle test generate encoder test pulse'),
     ('spTestIndex', 'spindle test generate internal index pulse'),
 
+  "sync communications config",
+
+    ('syncPort', 'sync comm port'),
+    ('syncRate', 'sync comm baud rate'),
+
   "threading config",
 
     ('thAddFeed', 'thread feed to add after done'),
@@ -355,6 +360,15 @@ cmdList = \
     ("ENCSTOP", "", "encoder stop"),
 )
     
+syncCmdList = \
+(\
+ ("SYNC_START", "", "start sync routine"),
+ ("SYNC_STOP", "", "stop sync routine"),
+ ("SYNC_LOADVAL", "", "load parameters"),
+ ("SYNC_LOADMULTI", "", "load multiple parameters"),
+ ("SYNC_READVAL", "", "read parameters"),
+)
+
 parmList = \
 (\
     "spindle parameters",
@@ -590,6 +604,13 @@ parmList = \
     ("MAX_PARM", "maximum parameter", "int16_t")
 )
     
+syncParmList = \
+(\
+ ("SYNC_CYCLE", "sync cycle length", "uint16_t"),
+ ("SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
+ ("SYNC_MAX_PARM", "sync maximum parameter", "int16_t")
+)
+
 regList =\
 (\
     "common move command bits",
@@ -1039,6 +1060,7 @@ if __name__ == '__main__':
     fData = True
     cLoc = path + '/../Lathe/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
+    syncLoc = path + '/../Sync/include/'
 
     print("creating interface files")
     setup = Setup()
@@ -1046,7 +1068,9 @@ if __name__ == '__main__':
     setup.createConfig(configList)
     setup.createStrings(strList)
     setup.createCommands(cmdList, cLoc, fData)
+    setup.createCommands(syncCmdList, syncLoc, fData, 'syncCmdDef')
     setup.createParameters(parmList, cLoc, fData)
+    setup.createParameters(syncParmList, syncLoc, fData, 'syncParmDef')
     setup.createEnums(enumList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
     setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)

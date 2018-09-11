@@ -34,6 +34,9 @@ import parmDef as pm
 import enumDef as en
 import ctlBitDef as ct
 
+import syncCmdDef as sc
+import syncParmDef as sp
+
 SWIG = False
 HOME_TEST = False
 SETUP = False
@@ -82,6 +85,7 @@ stdout.flush()
 
 f = None
 zSync = None
+syncComm = None
 mainFrame = None
 updateThread = None
 moveCommands = None
@@ -5729,6 +5733,14 @@ class MainFrame(wx.Frame):
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
+        if SPINDLE_ENCODER:
+            syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
+                                cfg.getInfoData(cf.syncRate))
+            syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
+                               sc.SYNC_READVAL)
+
+            syncComm.setupTables(sc.cmdTable, sp.parmTable)
+        
         global keypad
         port = cfg.getInfoData(cf.keypadPort)
         if len(port) != 0:
@@ -6152,8 +6164,9 @@ class MainFrame(wx.Frame):
             xDROPosition = 0.0
 
         if SPINDLE_ENCODER:
-            global zSync
+            global zSync, syncComm
             zSync = Sync()
+            syncComm = Comm()
 
         comm = Comm()
         comm.SWIG = SWIG
@@ -6542,6 +6555,11 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Keypad Port", cf.keypadPort, None), \
             ("Keypad Rate", cf.keypadRate, 'd'), \
         )
+        if SPINDLE_ENCODER:
+            self.fields += ( \
+                ("Sync Port", cf.syncPort, None), \
+                ("Sync Rate", cf.syncRate, 'd'), \
+            )
         if EXT_DRO:
             self.fields += ( \
                 ("Ext DRO Port", cf.extDroPort, None), \

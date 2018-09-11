@@ -96,7 +96,7 @@ class Setup():
         self.strTable = strTable
         return(strTable)
 
-    def createCommands(self, cmdList, cLoc, fData=False):
+    def createCommands(self, cmdList, cLoc, fData=False, file='cmdDef'):
         global cmdTable
         imports = []
         imports.append("cmdTable")
@@ -109,7 +109,6 @@ class Setup():
             # jFile.write("public enum Cmd\n{\n");
         f = None
         if self.file:
-            file = 'cmdDef'
             f = open(file + '.py', 'wb')
             f.write("\n# commands\n")
         index = 0
@@ -168,7 +167,7 @@ class Setup():
         self.cmdTable = cmdTable
         return(cmdTable)
 
-    def createParameters(self, parmList, cLoc, fData=False):
+    def createParameters(self, parmList, cLoc, fData=False, file='parmDef'):
         global parmTable
         parmTable = []
         imports = []
@@ -184,7 +183,6 @@ class Setup():
             # jFile.write("public enum Parm\n{\n")
         f = None
         if self.file:
-            file = 'parmDef'
             f = open(file + '.py', 'wb')
             f.write("\n# parameters\n")
         index = 0

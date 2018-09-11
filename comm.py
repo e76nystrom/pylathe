@@ -33,12 +33,36 @@ class Comm():
         self.parmList = []
         self.cmdLen = cmdOverhead
 
+        self.loadMulti = LOADMULTI
+        self.loadVal = LOADVAL
+        self.readVal = READVAL
+
+        self.cmdTable = cmdTable
+        self.parmTable = parmTable
+
+    def setupCmds(self, loadMulti, loadVal, readVal):
+        self.loadMulti = loadMulti
+        self.loadVal = loadVal
+        self.readVal = readVal
+
+    def setupTables(self, cmdTable, parmTable):
+        self.cmdTable = cmdTable
+        self.parmTable = parmTable
+
     def enableXilinx(self):
         from setup import xRegTable
 
     def openSerial(self, port, rate):
+        if port is None or rate is None:
+            return
+        if (len(port) == 0) or (len(rate) == 0):
+            return
         try:
-            self.ser = serial.Serial(port, 57600, timeout=2)
+            rate = int(rate)
+        except ValueError:
+            return
+        try:
+            self.ser = serial.Serial(port, rate, timeout=2)
         except IOError:
             print("unable to open port %s" % (port))
             stdout.flush()
@@ -46,7 +70,7 @@ class Comm():
     def command(self, cmdVal):
         if len(self.parmList) > 0:
             self.sendMulti()
-        (cmd, action) = cmdTable[cmdVal]
+        (cmd, action) = self.cmdTable[cmdVal]
         if self.SWIG and (action is not None):
             if self.importLathe:
                 import lathe
@@ -82,7 +106,7 @@ class Comm():
         return(rsp.strip("\n\r"))
 
     def queParm(self, parmIndex, val):
-        cmdInfo = parmTable[parmIndex]
+        cmdInfo = self.parmTable[parmIndex]
         parm = cmdInfo[0]
         parmType = cmdInfo[1]
         valString = "0"
@@ -130,7 +154,7 @@ class Comm():
         count = len(self.parmList)
         if count == 0:
             return
-        cmd = '\x01%x %x' %  (LOADMULTI, count)
+        cmd = '\x01%x %x' %  (self.loadMulti, count)
         for parm in self.parmList:
             cmd += parm
         cmd += ' \r';
@@ -191,7 +215,7 @@ class Comm():
                 valString = "x%x" % (int(val))
             except ValueError:
                 valString = "0"
-        cmd = '\x01%x %x %s \r' % (LOADVAL, parmIndex, valString)
+        cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
         if self.xDbgPrint:
             print("%-15s %s" % (parm, cmd.strip('\x01\r')))
             stdout.flush()
@@ -219,7 +243,7 @@ class Comm():
     def getParm(self, parmIndex, dbg=False):
         if self.ser is None:
             return(None)
-        cmd = '\x01%x %x \r' % (READVAL, parmIndex)
+        cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
         if dbg:
             print("%-15s %s" % \
                   (parmTable[parmIndex], cmd.strip('\x01\r')), end="")
