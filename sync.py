@@ -6,6 +6,7 @@ import math
 class Sync():
     def __init__(self, maxPrime=127, dbg=False):
         self.calcPrimes(maxPrime)
+        self.clockFreq = 72000000
         self.encoderPulse = 10160
         self.metricLeadscrew = True
         self.leadscrewTPI = 1
@@ -15,6 +16,9 @@ class Sync():
         self.microSteps = 8
         self.dbg = dbg
 
+    def setClockFreq(self, freq):
+        self.clockFreq = freq
+        
     def setEncoder(self, encoder):
         self.encoderPulse = encoder
 
@@ -52,7 +56,7 @@ class Sync():
     def setMicroSteps(self, steps):
         self.microSteps = steps
 
-    def calcSync(self, val, dbg=None, metric=False):
+    def calcSync(self, val, dbg=None, metric=False, rpm=None):
         dbgSave = None
         if dbg is not None:
             dbgSave = self.dbg
@@ -176,21 +180,37 @@ class Sync():
         for d in dResult:
             output *= d
 
+        result = [cycle, output]
+
+        if rpm is not None:
+            clocksMin = self.clockFreq * 60
+            pulseMinIn = self.encoderPulse * rpm
+            pulseMinOut = (pulseMinIn * output) / cycle
+            clocksPulse = int(clocksMin / pulseMinOut)
+            preScaler = clocksPulse >> 16
+            if preScaler == 0:
+                preScaler = 1
+            result.append(preScaler)
+
         if self.dbg:
             print("cycle  %4d - " % (cycle), end='')
             for n in nFactors:
                 print(n, end=' ')
             print()
 
-            print("output %4d - " % (output), end='');
+            print("output %4d - " % (output), end='')
             for d in dResult:
                 print(d, end=' ')
-            print("\n")
+            print()
+            
+            if rpm is not None:
+                print("preScaler %d" % (preScaler,))
+            print()
 
         if dbgSave is not None:
             dbgSave = self.dbg
 
-        return(cycle, output)
+        return(result)
 
     def remFactors(self, nFactors, dFactors):
         # print("remove common factors")
@@ -235,21 +255,78 @@ class Sync():
         return(factors)
 
 if __name__ == '__main__':
-    from sys import argv
+    from sys import argv, exit
 
-    argLen = len(argv)
-
-    if argLen < 2:
+    def help():
+        print("Usage: sync [options] val[mm]")
+        print(" ?        help\n" \
+              " -d       debug\n" \
+              " -e n     encoder\n" \
+              " -r n     rpm\n" \
+              " -l n[mm] leadscrew \n" \
+              " -s n     motor steps\n" \
+              " -m n     micro steps\n" \
+              " -f n     clock frequency" \
+              )
         exit()
+        
+    argLen = len(argv)
 
     sync = Sync()
 
-    if argLen >= 3:
-        sync.setEncoder(int(argv[2]))
+    thread = None
+    rpm = None
+    dbg = False
+    n = 1
+    while True:
+        if n >= argLen:
+            break
+        val = argv[n]
+        if val.startswith('-'):
+            tmp = val[1]
+            if tmp == "e":
+                n += 1
+                if n < argLen:
+                    sync.setEncoder(int(argv[n]))
+            elif tmp == "r":
+                n += 1
+                if n < argLen:
+                    rpm = int(argv[n])
+            elif tmp == "l":
+                n += 1
+                if n < argLen:
+                    sync.setLeadscrew(argv[n])
+            elif tmp == 'm':
+                n += 1
+                if n < argLen:
+                    sync.setMicroSteps(int(argv[n]))
+            elif tmp == 's':
+                n += 1
+                if n < argLen:
+                    sync.setMotorSteps(int(argv[n]))
+            elif tmp == 'f':
+                n += 1
+                if n < argLen:
+                    sync.setClockFreq(int(argv[n]))
+            elif tmp == 'd':
+                dbg = True
+            elif tmp == 'h':
+                help()
+            else:
+                help()
+        elif val == '?':
+            help()
+        else:
+            thread = val
+        n += 1
 
-    if argLen >= 4:
-        sync.setLeadscrew(argv[3])
+    if thread is None:
+        help()
+    else:
+        result = sync.calcSync(thread, dbg=dbg, rpm=rpm)
 
-    result = sync.calcSync(argv[1], dbg=True)
-
-    print("cycle %d output %d" % result)
+        print("cycle %d " % result[0], end='')
+        print("output %d " % result[1], end='')
+        if rpm is not None:
+            print("preScaler %d " % result[2], end='')
+        print()

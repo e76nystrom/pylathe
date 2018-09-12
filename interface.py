@@ -362,6 +362,7 @@ cmdList = \
     
 syncCmdList = \
 (\
+ ("SYNC_SETUP", "", "setup sync routine"),
  ("SYNC_START", "", "start sync routine"),
  ("SYNC_STOP", "", "stop sync routine"),
  ("SYNC_LOADVAL", "", "load parameters"),
@@ -608,6 +609,8 @@ syncParmList = \
 (\
  ("SYNC_CYCLE", "sync cycle length", "uint16_t"),
  ("SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
+ ("SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+ ("SYNC_ENCODER", "sync encoder pulses", "uint16_t"),
  ("SYNC_MAX_PARM", "sync maximum parameter", "int16_t")
 )
 
@@ -927,6 +930,7 @@ enumList =\
     ("M_WAIT_Z", "wait for z to complete"),
     ("M_WAIT_X", "wait for x to complete"),
     ("M_WAIT_SPINDLE", "wait for spindle start"),
+    ("M_WAIT_SYNC", "wait for sync"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),

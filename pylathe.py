@@ -2688,18 +2688,19 @@ class ScrewThread(LatheOp, UpdatePass):
         self.firstFeedBtn = th.firstFeedBtn.GetValue()
 
         val =  getFloatVal(th.thread)
+        rpm = getIntVal(th.rpm)
         if self.tpiBtn:
             self.tpi = val
             self.pitch = 1.0 / val
             if SPINDLE_ENCODER:
-                (self.cycle, self.output) = \
-                    zSync.calcSync(val, dbg=True, metric=False)
+                (self.cycle, self.output, self.preScaler) = \
+                    zSync.calcSync(val, dbg=True, metric=False, rpm=rpm)
         else:
             self.pitch = val / 25.4
             self.tpi = 1.0 / self.pitch
             if SPINDLE_ENCODER:
-                (self.cycle, self.output) = \
-                    zSync.calcSync(val, metric=True)
+                (self.cycle, self.output, self.preScaler) = \
+                    zSync.calcSync(val, metric=True, rpm=rpm)
 
         self.xStart = getFloatVal(th.xStart) / 2.0
         self.xRetract = abs(getFloatVal(th.xRetract))
@@ -2725,6 +2726,12 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
+        if SPINDLE_ENCODER:
+            syncComm.setParm(sp.SYNC_ENCODER, cfg.getInfoData(cf.cfgEncoder))
+            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
+            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
+            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+            syncComm.command(sc.SYNC_SETUP)
    
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
