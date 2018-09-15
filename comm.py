@@ -45,9 +45,9 @@ class Comm():
         self.loadVal = loadVal
         self.readVal = readVal
 
-    def setupTables(self, cmdTable, parmTable):
-        self.cmdTable = cmdTable
-        self.parmTable = parmTable
+    def setupTables(self, cmdTbl, parmTbl):
+        self.cmdTable = cmdTbl
+        self.parmTable = parmTbl
 
     def enableXilinx(self):
         from setup import xRegTable
@@ -187,7 +187,7 @@ class Comm():
         self.commLock.release()
 
     def setParm(self, parmIndex, val):
-        cmdInfo = parmTable[parmIndex]
+        cmdInfo = self.parmTable[parmIndex]
         parm = cmdInfo[0]
         parmType = cmdInfo[1]
         valString = "0"
@@ -246,7 +246,7 @@ class Comm():
         cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
         if dbg:
             print("%-15s %s" % \
-                  (parmTable[parmIndex], cmd.strip('\x01\r')), end="")
+                  (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
         self.commLock.acquire(True)
         self.ser.write(cmd)
         rsp = "";
@@ -256,7 +256,7 @@ class Comm():
                 self.commLock.release()
                 if not self.timeout:
                     self.timeout = True
-                    print("getParm timeout %s" % (parmTable[parmIndex]))
+                    print("getParm timeout %s" % (self.parmTable[parmIndex]))
                     stdout.flush()
                 raise CommTimeout()
                 break;

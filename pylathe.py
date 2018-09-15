@@ -2727,7 +2727,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         if SPINDLE_ENCODER:
-            syncComm.setParm(sp.SYNC_ENCODER, cfg.getInfoData(cf.cfgEncoder))
+            syncComm.setParm(sp.SYNC_ENCODER, cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
