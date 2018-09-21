@@ -597,7 +597,12 @@ parmList = \
 
     ("X_CFG_REG", "xilinx configuration register", "int16_t"),
  
-    
+ "sync parameters",
+   
+ ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
+ ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
+ ("L_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+
     # ("", "", ""),
 
     "max parameter number",

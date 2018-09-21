@@ -185,6 +185,9 @@ class ConfigInfo():
             except ValueError as e:
                 print("getIntInfo ValueError index %d %s %s" % \
                       (index, self.configTable[index], val))
+            except TypeError as e:
+                print("getIntInfo TypeError index %d %s %s" % \
+                      (index, self.configTable[index], val))
         except IndexError as e:
             print("getIntInfo IndexError %s" % (index))
         stdout.flush()
@@ -238,7 +241,10 @@ class ConfigInfo():
             try:
                 return(int(val))
             except ValueError as e:
-                print("getIntInfo ValueError index %d %s %s" % \
+                print("getIntInfoData ValueError index %d %s %s" % \
+                      (index, self.configTable[index], val))
+            except TypeError as e:
+                print("getIntInfoData TypeError index %d %s %s" % \
                       (index, self.configTable[index], val))
         except IndexError as e:
             print("getIntInfo IndexError %s" % (index))

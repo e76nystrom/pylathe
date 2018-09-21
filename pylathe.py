@@ -84,6 +84,7 @@ print(wx.version())
 stdout.flush()
 
 f = None
+xSync = None
 zSync = None
 syncComm = None
 mainFrame = None
@@ -991,10 +992,10 @@ def sendZData(send=False):
             zSync.setMotorSteps(motorSteps)
             zSync.setMicroSteps(microSteps)
                        
-        # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
-
         if DRO:
             jogPanel.zDROInch = cfg.getIntInfoData(cf.zDROInch)
+
+        # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
         # stdout.flush()
 
         if send or (not zDataSent):
@@ -1035,6 +1036,7 @@ def sendZData(send=False):
             comm.queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
 
             comm.command(cm.CMD_ZSETUP)
+
             zDataSent = True
     except CommTimeout:
         commTimeout()
@@ -1054,9 +1056,17 @@ def sendXData(send=False):
             motorRatio = 1
         jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
-        # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
+
+        if SPINDLE_ENCODER:
+            xSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
+            xSync.setMotorSteps(motorSteps)
+            xSync.setMicroSteps(microSteps)
+            xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+                       
         if DRO:
             jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
+
+        # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
         # stdout.flush()
 
         if send or (not xDataSent):
@@ -2716,6 +2726,12 @@ class ScrewThread(LatheOp, UpdatePass):
         self.angle = radians(getFloatVal(th.angle))
         self.runout = getFloatVal(th.runout)
 
+        if SPINDLE_ENCODER and self.runout != 0:
+            xSync.setDist(True)
+            xSync.setExitRevs(self.runout)
+            (self.xCycle, self.xOutput, self.xPreScaler) = \
+                xSync.calcSync(self.depth, rpm=rpm)
+
         self.endZ = self.zEnd
 
     def setup(self, add=False):
@@ -2732,6 +2748,11 @@ class ScrewThread(LatheOp, UpdatePass):
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
             syncComm.command(sc.SYNC_SETUP)
+
+            if self.runout != 0:
+                comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
+                comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
+                comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
    
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
@@ -3540,6 +3561,7 @@ class JogPanel(wx.Panel, FormRoutines):
         FormRoutines.__init__(self, False)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
         self.Connect(-1, -1, EVT_KEYPAD_ID, self.keypadEvent)
+        # self.Bind(wx.EVT_CHAR_HOOK, self.OnCharHook)
         self.jogCode = None
         self.repeat = 0
         self.btnRpt = buttonRepeat = ButtonRepeat()
@@ -3587,6 +3609,16 @@ class JogPanel(wx.Panel, FormRoutines):
         self.initKeyTable()
         self.initKeypadTable()
         self.initUI()
+
+    def OnCharHook(self, e):
+        code = e.GetUnicodeKey()
+        if code != wx.WXK_NONE:
+            print("code %c" % (code,))
+        else:
+            code = e.GetKeyCode()
+            print("code %c" % code)
+        stdout.flush()
+        e.Skip()
 
     def OnUpdate(self, e):
         index = e.data[0]
@@ -6171,8 +6203,9 @@ class MainFrame(wx.Frame):
             xDROPosition = 0.0
 
         if SPINDLE_ENCODER:
-            global zSync, syncComm
-            zSync = Sync()
+            global xSync, zSync, syncComm
+            xSync = Sync(dbg=True)
+            zSync = Sync(dbg=True)
             syncComm = Comm()
 
         comm = Comm()

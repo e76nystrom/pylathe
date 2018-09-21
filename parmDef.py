@@ -205,9 +205,15 @@ FREQ_MULT            = 118
 
 X_CFG_REG            = 119
 
+# sync parameters
+
+L_SYNC_CYCLE         = 120
+L_SYNC_OUTPUT        = 121
+L_SYNC_PRESCALER     = 122
+
 # max parameter number
 
-MAX_PARM             = 120
+MAX_PARM             = 123
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -330,5 +336,8 @@ parmTable = ( \
     ('X_FREQUENCY', 'int32_t', 'xFrequency'),
     ('FREQ_MULT', 'int16_t', 'freqMult'),
     ('X_CFG_REG', 'int16_t', 'xCfgReg'),
+    ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
+    ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
+    ('L_SYNC_PRESCALER', 'uint16_t', 'lSyncPrescaler'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )

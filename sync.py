@@ -14,6 +14,8 @@ class Sync():
         self.metricPitch = True
         self.motorSteps = 200
         self.microSteps = 8
+        self.exitRevs = 1
+        self.dist = False
         self.dbg = dbg
 
     def setClockFreq(self, freq):
@@ -21,6 +23,9 @@ class Sync():
         
     def setEncoder(self, encoder):
         self.encoderPulse = encoder
+
+    def setDist(self, dist):
+        self.dist = dist
 
     def setLeadscrew(self, val):
         self.metricLeadscrew = False
@@ -56,6 +61,9 @@ class Sync():
     def setMicroSteps(self, steps):
         self.microSteps = steps
 
+    def setExitRevs(self, rev):
+        self.exitRevs = rev
+
     def calcSync(self, val, dbg=None, metric=False, rpm=None):
         dbgSave = None
         if dbg is not None:
@@ -64,11 +72,11 @@ class Sync():
 
         if type(val) is str:
             val = val.lower()
-            if val.endswith("mm"):
-                metric = True
-                pitch = float(val[:-2])
+            metric =  val.endswith("mm")
+            if metric:
+                val = val[:-2]
+                pitch = float(val)
             else:
-                metric = False
                 tpi = float(val)
         else:
             if metric:
@@ -83,27 +91,6 @@ class Sync():
             else:
                 nFactor = 127
                 dFactor = 5
-
-            while int(pitch) != pitch:
-                pitch *= 10
-                nFactor *= 10
-            pitch = int(pitch)
-        
-            num = \
-                  (\
-                   (nFactor, "nfactor"), \
-                   (self.encoderPulse, "encoderPulse"), \
-                   (self.leadscrewPitch, "leadscrewPitch"), \
-                  )
-
-            denom = \
-                    ( \
-                      (dFactor, "dFactor"), \
-                      (pitch, "pitch"), \
-                      (self.motorSteps, "motorSteps"), \
-                      (self.microSteps, "microSteps"), \
-                      (self.leadscrewTPI, "leadscrewTPI"), \
-                    )
         else:
             if self.metricLeadscrew:
                 nFactor = 5
@@ -112,31 +99,80 @@ class Sync():
                 nFactor = 1
                 dFactor = 1
 
-            while int(tpi) != tpi:
-                tpi *= 10
-                dFactor *= 10
-            tpi = int(tpi)
+        if self.dist:
+            if metric:
+                exitDist = pitch
+            else:
+                exitDist = tpi
+
+            #=exitDist*motorSteps*microSteps*127/(metricPitch*5)
+            stepsInch = float(self.motorSteps * self.microSteps * \
+                                dFactor) / (self.leadscrewPitch * nFactor)
+            xSteps = exitDist * stepsInch
+            xStepsInt = int(math.ceil(xSteps / 10) * 10)
+            if self.dbg:
+                print("xSteps %0.2f %0.4f xStepsInt %d %0.4f\n" % \
+                        (xSteps, xSteps / stepsInch,
+                        xStepsInt, float(xStepsInt / stepsInch)))
+
+            encoderPulse = self.exitRevs * self.encoderPulse
 
             num = \
-                  (\
-                   (nFactor, "nfactor"), \
-                   (self.encoderPulse, "encoderPulse"), \
-                   (tpi, "tpi"), \
-                   (self.leadscrewPitch, "leadscrewPitch"), \
-                  )
-
+                    ( \
+                      (encoderPulse, "encoderPulse"), \
+                    )
             denom = \
                     ( \
-                      (dFactor, "dFactor"), \
-                      (self.motorSteps, "motorSteps"), \
-                      (self.microSteps, "microSteps"), \
+                      (xStepsInt, "xStepsInt"), \
                     )
+        else:
+            if metric:
+                while int(pitch) != pitch:
+                    pitch *= 10
+                    nFactor *= 10
+                    pitch = int(pitch)
+        
+                num = \
+                      ( \
+                        (nFactor, "nfactor"), \
+                        (self.encoderPulse, "encoderPulse"), \
+                        (self.leadscrewPitch, "leadscrewPitch"), \
+                      )
+
+                denom = \
+                        ( \
+                          (dFactor, "dFactor"), \
+                          (pitch, "pitch"), \
+                          (self.motorSteps, "motorSteps"), \
+                          (self.microSteps, "microSteps"), \
+                          (self.leadscrewTPI, "leadscrewTPI"), \
+                        )
+            else:                   # tpi lead
+                while int(tpi) != tpi:
+                    tpi *= 10
+                    dFactor *= 10
+                    tpi = int(tpi)
+
+                num = \
+                      ( \
+                        (nFactor, "nfactor"), \
+                        (self.encoderPulse, "encoderPulse"), \
+                        (tpi, "tpi"), \
+                        (self.leadscrewPitch, "leadscrewPitch"), \
+                      )
+
+                denom = \
+                        ( \
+                          (dFactor, "dFactor"), \
+                          (self.motorSteps, "motorSteps"), \
+                          (self.microSteps, "microSteps"), \
+                        )
 
         if self.dbg:
             print("numerator")
         nFactors = []
         for (n, name) in num:
-            if n == 1:
+            if n <= 1:
                 continue
             if self.dbg:
                 print("factor %-14s %5d -" % (name, n), end = " ")
@@ -266,7 +302,9 @@ if __name__ == '__main__':
               " -l n[mm] leadscrew \n" \
               " -s n     motor steps\n" \
               " -m n     micro steps\n" \
-              " -f n     clock frequency" \
+              " -f n     clock frequency\n" \
+              " -D val   distance\n" \
+              " -R val   exit revolutions\n" \
               )
         exit()
         
@@ -308,6 +346,13 @@ if __name__ == '__main__':
                 n += 1
                 if n < argLen:
                     sync.setClockFreq(int(argv[n]))
+            elif tmp == 'D':
+                n += 1
+                sync.dist = True
+            elif tmp == 'R':
+                n += 1
+                if n < argLen:
+                    sync.setExitRevs(float(argv[n]))
             elif tmp == 'd':
                 dbg = True
             elif tmp == 'h':
