@@ -970,6 +970,7 @@ def sendSpindleData(send=False, rpm=None):
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
                 zSync.setEncoder(count)
+                xSync.setEncoder(count)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
             comm.command(cm.CMD_SPSETUP)
@@ -1058,7 +1059,7 @@ def sendXData(send=False):
                                            motorRatio) / pitch
 
         if SPINDLE_ENCODER:
-            xSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
+            xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
             xSync.setMotorSteps(motorSteps)
             xSync.setMicroSteps(microSteps)
             xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
@@ -2761,8 +2762,6 @@ class ScrewThread(LatheOp, UpdatePass):
         th = self.panel
         if STEP_DRV:
             m.startSpindle(getIntVal(th.rpm))
-        else:
-            m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
 
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
@@ -2786,6 +2785,11 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.runoutDist != 0:
             flag |= ct.TH_RUNOUT
         m.saveThreadFlags(flag)
+
+        if not STEP_DRV:
+            comm.sendMulti()
+            m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
+
         m.zSynSetup(getFloatVal(th.thread))
         if (not self.rightHand) and self.runoutDist == 0.0:
             m.queFeedType(ct.FEED_PITCH)

@@ -706,13 +706,18 @@ regList =\
 
     "thread flags",
 
-    ("TH_LEFT", "(1 << 0)", "left hand thread"),
     ("TH_RUNOUT", "(1 << 0)", "runout with thread"),
+    ("TH_LEFT", "(1 << 1)", "left hand thread"),
 
     "parameters for op_done",
 
     ("PARM_START", "0", "start of operation"),
     ("PARM_DONE", "1", "done operation"),
+
+ "x isr active flags",
+
+ ("SYNC_ACTIVE_ENC", "1", "x from spindle encoder"),
+ ("SYNC_ACTIVE_TMR", "2", "x from internal timer"),
  
     # ("", "()", ""),
     # ("", "", ""),
@@ -937,6 +942,7 @@ enumList =\
     ("M_WAIT_SPINDLE", "wait for spindle start"),
     ("M_WAIT_SYNC_READY", "wait for sync"),
     ("M_WAIT_SYNC_DONE", "wait for sync done"),
+    ("M_WAIT_MEASURE_DONE", "wait for measurment done"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),

@@ -110,12 +110,16 @@ class Sync():
                                 dFactor) / (self.leadscrewPitch * nFactor)
             xSteps = exitDist * stepsInch
             xStepsInt = int(math.ceil(xSteps / 10) * 10)
-            if self.dbg:
-                print("xSteps %0.2f %0.4f xStepsInt %d %0.4f\n" % \
-                        (xSteps, xSteps / stepsInch,
-                        xStepsInt, float(xStepsInt / stepsInch)))
 
             encoderPulse = self.exitRevs * self.encoderPulse
+
+            if self.dbg:
+                print("stepsInch %d exitDist %0.4f xSteps %0.2f %0.4f "\
+                      "xStepsInt %d %0.4f" % \
+                      (int(stepsInch), exitDist, xSteps, xSteps / stepsInch,
+                       xStepsInt, float(xStepsInt / stepsInch)))
+                print("encoderRev %d exitRevs %0.2f encoderPulse %d\n" % \
+                      (self.encoderPulse, self.exitRevs, int(encoderPulse)))
 
             num = \
                     ( \
