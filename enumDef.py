@@ -85,7 +85,7 @@ SAVE_FEED_TYPE   = 18           # save feed type
 Z_FEED_SETUP     = 19           # setup z feed
 X_FEED_SETUP     = 20           # setup x feed
 SAVE_RUNOUT      = 21           # save thread runout
-SAVE_DEPTH       = 22           # save thread depth
+SAVE_RUNOUT_DEPTH = 22          # save runout depth
 SAVE_FLAGS       = 23           # save thread flags
 PROBE_Z          = 24           # probe in z direction
 PROBE_X          = 25           # probe in x direction
@@ -116,7 +116,7 @@ mCommandsList = ( \
     "Z_FEED_SETUP",
     "X_FEED_SETUP",
     "SAVE_RUNOUT",
-    "SAVE_DEPTH",
+    "SAVE_RUNOUT_DEPTH",
     "SAVE_FLAGS",
     "PROBE_Z",
     "PROBE_X",

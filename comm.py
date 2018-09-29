@@ -422,7 +422,7 @@ class Comm():
             valStr = valStr.rstrip('0')
         cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
         if self.xDbgPrint:
-            print("cmd %-14s %4x %s" % (opString, op, prtStr))
+            print("cmd %-18s %4x %s" % (opString, op, prtStr))
             stdout.flush()
         if self.ser is None:
             return

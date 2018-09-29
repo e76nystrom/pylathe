@@ -708,6 +708,7 @@ regList =\
 
     ("TH_RUNOUT", "(1 << 0)", "runout with thread"),
     ("TH_LEFT", "(1 << 1)", "left hand thread"),
+    ("TH_INTERNAL", "(1 << 2)", "internal threads"),
 
     "parameters for op_done",
 
@@ -975,7 +976,7 @@ enumList =\
     ("Z_FEED_SETUP", "setup z feed"),
     ("X_FEED_SETUP", "setup x feed"),
     ("SAVE_RUNOUT", "save thread runout"),
-    ("SAVE_DEPTH", "save thread depth"),
+    ("SAVE_RUNOUT_DEPTH", "save runout depth"),
     ("SAVE_FLAGS", "save thread flags"),
     ("PROBE_Z", "probe in z direction"),
     ("PROBE_X", "probe in x direction"),

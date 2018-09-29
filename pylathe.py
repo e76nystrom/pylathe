@@ -5,7 +5,7 @@
 from __future__ import print_function
 import wx
 import wx.lib.inspection
-from time import sleep, time
+from time import localtime, sleep, strftime, time
 import sys
 import os
 import subprocess
@@ -831,10 +831,10 @@ class MoveCommands():
         if self.dbg:
             print("saveRunout %7.4f" % (runout))
 
-    def saveDepth(self, depth):
-        self.queMove(en.SAVE_DEPTH, depth)
+    def saveRunoutDepth(self, runoutDepth):
+        self.queMove(en.SAVE_RUNOUT_DEPTH, runoutDepth)
         if self.dbg:
-            print("saveDepth %7.4f" % (depth))
+            print("saveRunDepth %7.4f" % (runoutDepth))
 
     def saveThreadFlags(self, flags):
         self.queMove(en.SAVE_FLAGS, flags)
@@ -1141,8 +1141,8 @@ class LatheOp():
 
 class UpdatePass():
     def __init__(self):
-        self.calculatePass = None    # pass calculation routine
-        self.genPass = None     # pass generation routine
+        self.calcPassN = None    # calculate values for a pass
+        self.runPassN = None     # run a pass with current values
 
         self.add = False
         self.passes = 0
@@ -1179,9 +1179,9 @@ class UpdatePass():
         self.sPassInt = getIntVal(panel.sPInt)
         self.sPasses = getIntVal(panel.spring)
 
-    def setupAction(self, calcPass, genPass):
-        self.calculatePass = calcPass
-        self.genPass = genPass
+    def setupAction(self, calcPass, runpass):
+        self.calcPassN = calcPass
+        self.runpassN = runpass
 
     def initPass(self):
         comm.setParm(pm.TOTAL_PASSES, self.passes)
@@ -1200,16 +1200,16 @@ class UpdatePass():
             if self.springFlag:
                 self.springFlag = False
                 moveCommands.nextPass(0x100 | self.passCount)
-                self.genPass()
+                self.runpassN()
             else:
                 self.passCount += 1
                 moveCommands.nextPass(self.passCount)
-                self.calculatePass(self.passCount == self.passes)
+                self.calcPassN(self.passCount == self.passes)
                 self.lastPass = self.passCount == self.passes and \
                                 self.sPasses == 0
                 # print("passCount %d lastPass %s" % \
                 #       (self.passCount, self.lastPass))
-                self.genPass()
+                self.runpassN()
                 if self.sPassInt != 0:
                     self.sPassCtr += 1
                     if self.sPassCtr >= self.sPassInt:
@@ -1226,7 +1226,7 @@ class UpdatePass():
                 self.lastPass = self.spring == self.sPasses
                 # print("spring %d lastPass %s" % \
                 #       (self.spring, self.lastPass))
-                self.genPass()
+                self.runpassN()
             else:
                 return(False)
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
@@ -2681,18 +2681,21 @@ class ScrewThread(LatheOp, UpdatePass):
         self.internal = th.internal.GetValue()
 
         self.rightHand = not th.leftHand.GetValue()
-        if self.rightHand:
+        if self.rightHand:      # right hand threads
             self.zStart = getFloatVal(th.z1)
             self.zEnd = getFloatVal(th.z0)
-        else:
+            self.safeZ = self.zStart + self.zRetract
+            self.startZ = self.safeZ 
+
+        else:                   # left and threads
             self.zStart = getFloatVal(th.z0)
             self.zEnd = getFloatVal(th.z1)
+            self.safeZ = self.zEnd - self.zRetract
+            self.startZ = self.zStart
+
         self.zRetract = abs(getFloatVal(th.zRetract))
         self.zAccelDist = 0.0
         self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
-        self.safeZ = (self.zStart if self.rightHand else self.zEnd) + \
-                     self.zRetract
-        self.startZ = self.safeZ if self.rightHand else self.zStart
 
         self.tpiBtn = th.tpi.GetValue()
         self.alternate = th.alternate.GetValue()
@@ -2765,25 +2768,17 @@ class ScrewThread(LatheOp, UpdatePass):
 
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
-        if self.rightHand:
-            depth = self.depth
-            if self.runoutDist != 0:
-                depth += 0.005
-            if self.internal:
-                depth = -depth
-        else:
-            depth = self.depth
-            if self.runoutDist != 0:
-                depth += self.xRetract
-            if not self.internal:
-                depth = -depth
-        m.saveDepth(depth)
+
+        m.saveRunoutDepth(self.runoutDepth)
         m.saveRunout(self.runoutDist)
+        
         flag = 0
-        if not self.rightHand:
+        if not self.rightHand:  # left hand threads
             flag |= ct.TH_LEFT
         if self.runoutDist != 0:
             flag |= ct.TH_RUNOUT
+        if self.internal:
+            flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
         if not STEP_DRV:
@@ -2822,31 +2817,54 @@ class ScrewThread(LatheOp, UpdatePass):
         self.tanAngle = tan(self.angle)
 
         w = halfWidth = self.depth * self.tanAngle
-        if self.rightHand:
+        if self.rightHand:      # right hand threads
             if not self.alternate:
                 w *= 2.0
             self.startZ += w
-        else:
+        else:                   # left hand threads
             self.startZ -= w
                 
         self.area = area = self.depth * halfWidth
         print("depth %6.4f halfWdith %6.4f area %8.6f startZ %6.4f" % \
               (self.depth, halfWidth, area, self.startZ))
 
-        if self.rightHand:
+        # if self.rightHand:      # right hand threads
+        #     depth = self.depth
+        #     if self.runoutDist != 0:
+        #         depth += 0.005
+        #     if self.internal:
+        #         depth = -depth
+        # else:                   # left hand threads
+        #     depth = self.depth
+        #     if self.runoutDist != 0:
+        #         depth += 0.005
+        #     if not self.internal:
+        #         depth = -depth
+        # m.saveDepth(depth)
+
+        if self.runout != 0.0:
             self.runoutDist = self.runout * self.pitch
-            self.endZ = self.zEnd - self.runoutDist
-            print("runout %4.2f runoutDist %7.4f endZ %7.4f\n" % \
-                  (self.runout, self.runoutDist, self.endZ))
+            self.runoutDepth = self.depth + 0.005
+
+            if self.rightHand:      # right hand threads
+                self.endZ = self.zEnd - self.runoutDist
+                print("runout %4.2f runoutDist %7.4f endZ %7.4f\n" % \
+                      (self.runout, self.runoutDist, self.endZ))
+            else:       		# left hand threads
+                # depth / runoutDist = runoutDepth / total
+                # total = runoutDepth / (depth / runoutDist)
+                # total = (runoutDepth / depth) * runoutDist
+                totalDist = (self.runoutDepth / self.depth) * self.runoutDist
+                print("runout %4.2f runoutDist %7.4f totalDist %7.4f\n" % \
+                      (self.runout, self.runoutDist, totalDist))
+                self.runoutDist = totalDist
+                self.runoutDepth = -self.runoutDepth
+
+            if self.internal:
+                self.runoutDepth = -self.runoutDepth
         else:
-            # depth / runoutDist = (depth + retract) / total
-            # total = (depth + retract) / (depth / runoutDist)
-            # total = ((depth + retract) * runoutDist) / depth
-            # total = (1 + xRetract / depth) * runoutDist
-            runoutDist = self.runout * self.pitch
-            self.runoutDist = (1 + self.xRetract / self.depth) * runoutDist
-            print("runout %4.2f runoutDist %7.4f totalDist %7.4f\n" % \
-                  (self.runout, runoutDist, self.runoutDist))
+            self.runoutDist = 0.0
+            self.runoutDepth = 0.0
 
         if self.firstFeedBtn:
             firstWidth = 2 * self.firstFeed * self.tanAngle
@@ -2912,7 +2930,6 @@ class ScrewThread(LatheOp, UpdatePass):
                           LEFT if self.rightHand else RIGHT, \
                           self.internal)
 
-        # self.drawClose()
         self.m.drawClose()
         if STEP_DRV:
             self.m.stopSpindle()
@@ -2941,13 +2958,15 @@ class ScrewThread(LatheOp, UpdatePass):
             self.zOffset += offset
             # print("zOffset %7.4f offset %7.4f" % (self.zOffset, offset))
 
+        if not self.rightHand:  # left hand threads
+            self.zOffset = -self.zOffset
+
         if self.internal:
             feed = -feed
         self.curX = self.xStart - feed
         self.passSize[self.passCount] = self.feed
 
-        self.startZPass = self.startZ + (-self.zOffset if self.rightHand else \
-                                         self.zOffset)
+        self.startZPass = self.startZ + self.zOffset
         startZPass = self.startZPass
 
         if not self.alternate:
@@ -2973,55 +2992,44 @@ class ScrewThread(LatheOp, UpdatePass):
             addLine(p0, pb)
             addLine(pa, pb)
 
-        # if self.d is not None:
-        #     p1 = (self.zOffset, feed)
-        #     pa = (self.zOffset - feed * self.tanAngle, 0)
-        #     pb = (self.zOffset + feed * self.tanAngle, 0)
-        #     if not self.alternate:
-        #         self.drawLine(self.p0, p1)
-        #         self.drawLine(p1, pa)
-        #         self.drawLine(p1, pb)
-        #         self.p0 = p1
-        #     else:
-        #         self.drawLine(p1, pa)
-        #         self.drawLine(pa, pb)
-        #         self.drawLine(pb, p1)
-
     def runPass(self, addPass=False):
         m = self.m
         startZPass = self.startZPass
         startZ = self.startZPass
-        if self.rightHand:
-            if self.zBackInc:
-                m.moveZ(startZPass, backlash=self.zBackInc)
-        else:
-            if self.runoutDist != 0:
-                startZPass -= self.runoutDist
-                if not self.internal:
-                    m.moveX(self.safeX + self.depth, backlash=self.zBackInc)
-                    m.moveX(self.safeX + self.depth - self.feed)
-                else:
-                    m.moveX(self.safeX - self.depth, backlash=-self.zBackInc)
-                    m.moveX(self.safeX - self.depth + self.feed)
-                if self.zBackInc:
-                        m.moveZ(startZPass, backlash=-self.zBackInc)
-            else:
-                if self.zBackInc:
-                    m.moveZ(startZPass, backlash=-self.zBackInc)
+
+        if not self.rightHand:  # left Hand threads
+            startZPass -= self.runoutDist
+
+        if self.zBackInc:
+            backInc = self.zBackInc if self.rightHand else -self.zBackInc
+            m.moveZ(startZPass, backlash=backInc)
 
         m.moveZ(startZPass)
 
-        if self.rightHand:
+        if self.rightHand:      # right hand threads
             m.moveX(self.curX, ct.CMD_JOG)
-        else:
+        else:                   # left hand threads
             if self.runoutDist != 0:
                 m.drawLine(startZ, self.curX)
+                xBackInc = 0.0
+                if self.depth > self.xRetract:
+                    xBackInc = self.zBackInc
+
+                if not self.internal:	# external threads
+                    if xBackInc != 0.0:
+                        m.moveX(self.xStart + self.depth, backlash=xBackInc)
+                    m.moveX(self.curX + self.depth)
+                else:           	# internal threads
+                    if xBackInc != 0.0:
+                        m.moveX(self.xStart - self.depth, backlash=-xBackInc)
+                    m.moveX(self.curX - self.depth)
             else:
                 m.moveX(self.xStart, ct.CMD_JOG)
                 m.moveX(self.curX, ct.CMD_SYN)
 
         if self.pause:
             m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            
         if DRO:
             m.saveXDro()
             m.saveZDro()
@@ -3597,6 +3605,9 @@ class JogPanel(wx.Panel, FormRoutines):
             # self.xDroDiam = False
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
         self.dbg = open("dbgLog.txt", "ab")
+        t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
+        self.dbg.write(t)
+        self.dbg.flush()
 
         eventTable = (\
                       (en.EV_ZLOC, self.updateZ), \

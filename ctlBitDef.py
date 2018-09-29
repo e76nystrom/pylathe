@@ -87,6 +87,7 @@ PAUSE_READ_Z     = (1 << 4)     # read z after pause
 
 TH_RUNOUT        = (1 << 0)     # runout with thread
 TH_LEFT          = (1 << 1)     # left hand thread
+TH_INTERNAL      = (1 << 2)     # internal threads
 
 # parameters for op_done
 
