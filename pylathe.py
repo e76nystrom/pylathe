@@ -1232,7 +1232,7 @@ class UpdatePass():
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
-    def fixCut(self, actual):
+    def fixCut(self, offset=0.0):
         pass
 
 class Turn(LatheOp, UpdatePass):
@@ -1373,7 +1373,7 @@ class Turn(LatheOp, UpdatePass):
                       (self.passCount, feed, self.curX, self.curX * 2.0), \
                       True, True)
 
-    def runPass(self, addPass=False):
+    def runPass(self, addPass=False): # turn
         m = self.m
         m.moveX(self.curX, ct.CMD_JOG)
         m.saveDiameter(self.curX * 2.0)
@@ -1399,6 +1399,7 @@ class Turn(LatheOp, UpdatePass):
 
     def addPass(self):
         jogPanel.dPrt("\nturn addPass\n")
+        self.pause = self.panel.pause.GetValue()
         self.add = True
         add = getFloatVal(self.panel.add) / 2.0
         self.panel.add.SetValue("0.0000")
@@ -1413,11 +1414,17 @@ class Turn(LatheOp, UpdatePass):
         self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
-    def fixCut(self, actual):
-        if self.internal:
-            self.cutAmount = actual - self.xStart
+    def fixCut(self, offset=0.0): # turn
+        passNum = jogPanel.lastPass
+        if offset == 0.0:
+            actual = float(jogPanel.xPos.GetValue())
+            control.passSize[passNum] = 2 * actual
+            if self.internal:
+                self.cutAmount = actual - self.xStart
+            else:
+                self.cutAmount = self.xStart - actual
         else:
-            self.cutAmount = self.xStart - actual
+            control.passSize[passNum] += offset
 
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -1544,10 +1551,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         control = self.control
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
-                actualX = float(jogPanel.xPos.GetValue())
-                passNum = jogPanel.lastPass
-                control.passSize[passNum] = 2 * actualX
-                control.fixCut(actualX)
+                control.fixCut()
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -1698,6 +1702,7 @@ class Face(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def addPass(self):
+        self.pause = self.panel.pause.GetValue()
         add = getFloatVal(self.panel.add)
         self.cutAmount += add
         self.setup(True)
@@ -2218,6 +2223,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def externalAddPass(self):
+        self.pause = self.panel.pause.GetValue()
         add = getFloatVal(self.panel.add) / 2
         self.cutAmount += add
         self.setup(True)
@@ -2231,12 +2237,17 @@ class Taper(LatheOp, UpdatePass):
         self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
-    def fixCut(self, actual):
-        pass
-        # if self.internal:
-        #     self.cutAmount = actual - self.xStart
-        # else:
-        #     self.cutAmount = self.xStart - actual
+    def fixCut(self, offset=0.0): # taper
+        if offset == 0:
+            actual = float(jogPanel.xPos.GetValue())
+            passNum = jogPanel.lastPass
+            control.passSize[passNum] = 2 * actual
+            # if self.internal:
+            #     self.cutAmount = actual - self.xStart
+            # else:
+            #     self.cutAmount = self.xStart - actual
+        else:
+            pass
 
     def internalRunOperation(self, taperInch):
         print("internalTaper")
@@ -2328,6 +2339,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def internalAddPass(self):
+        self.pause = self.panel.pause.GetValue()
         add = getFloatVal(self.panel.add) / 2
         self.cutAmount += add
         self.passCount += 1
@@ -2601,15 +2613,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             return(self.control.externalRunOperation(taper))
 
-    def startAction(self):
+    def startAction(self):      # taper
         comm.command(cm.CMD_RESUME)
         control = self.control
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
-                actualX = float(jogPanel.xPos.GetValue())
-                passNum = jogPanel.lastPass
-                control.passSize[passNum] = 2 * actualX
-                control.fixCut(actualX)
+                control.fixCut()
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -2786,9 +2795,10 @@ class ScrewThread(LatheOp, UpdatePass):
             m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
 
         m.zSynSetup(getFloatVal(th.thread))
-        if (not self.rightHand) and self.runoutDist == 0.0:
-            m.queFeedType(ct.FEED_PITCH)
-            m.xSynSetup(getFloatVal(th.lastFeed))
+        if not self.rightHand:  # left hand threads
+            if self.runoutDist == 0.0: # wihout runout
+                m.queFeedType(ct.FEED_PITCH)
+                m.xSynSetup(getFloatVal(th.lastFeed))
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ if self.rightHand else self.startZ)
@@ -2992,7 +3002,7 @@ class ScrewThread(LatheOp, UpdatePass):
             addLine(p0, pb)
             addLine(pa, pb)
 
-    def runPass(self, addPass=False):
+    def runPass(self, addPass=False): # thread
         m = self.m
         startZPass = self.startZPass
         startZ = self.startZPass
@@ -3028,7 +3038,8 @@ class ScrewThread(LatheOp, UpdatePass):
                 m.moveX(self.curX, ct.CMD_SYN)
 
         if self.pause:
-            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
+            m.quePause(flag)
             
         if DRO:
             m.saveXDro()
@@ -3047,23 +3058,32 @@ class ScrewThread(LatheOp, UpdatePass):
                 self.startZ)
 
     def addPass(self):
+        jogPanel.dPrt("\nthread addPass\n")
+        self.pause = self.panel.pause.GetValue()
+        self.add = True
         add = getFloatVal(self.panel.add) / 2.0
+        self.panel.add.SetValue("0.0000")
         self.feed += add
         self.setup(True)
         self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
-        if STEP_DRV:
+        if STEP_DRV or MOTOR_TEST:
             self.m.stopSpindle()
         self.m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
-    def fixCut(self, actual):
-        pass
-        # if self.internal:
-        #     self.cutAmount = actual - self.xStart
-        # else:
-        #     self.cutAmount = self.xStart - actual
+    def fixCut(self, offset=0.0): # thread
+        if offset == 0.0:
+            actual = float(jogPanel.xPos.GetValue())
+            passNum = jogPanel.lastPass
+            if self.internal:
+                self.feed = actual - self.xStart
+            else:
+                self.feed = self.xStart - actual
+            self.passSize[passNum] = self.feed
+        else:
+            pass
 
 class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -3258,15 +3278,12 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.sendData()
         return(self.control.runOperation())
 
-    def startAction(self):
+    def startAction(self):      # thread
         comm.command(cm.CMD_RESUME)
         control = self.control
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
-                actualX = float(jogPanel.xPos.GetValue())
-                passNum = jogPanel.lastPass
-                control.passSize[passNum] = 2 * actualX
-                control.fixCut(actualX)
+                control.fixCut()
         if cfg.getBoolInfoData(cf.cfgDbgSave):
             updateThread.openDebug()
 
@@ -5226,10 +5243,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             if (op == TURN) or \
                (op == TAPER) or \
                (op == THREAD):
-                passNum = jogPanel.lastPass
-                control = currentPanel.control
-                control.passSize[passNum] = actualX
-                control.fixCut(actualX / 2.0)
+                control.fixCut(offset)
             elif op == FACE:
                 pass
 
@@ -5577,8 +5591,7 @@ class UpdateThread(Thread):
             return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
-        tmp = en.xStatesList[val]
-        return("x_st %s" % (tmp + ("\n" if val == en.XIDLE else "")))
+        return("x_st %s" % (en.xStatesList[val]))
 
     def dbgXBSteps(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -5647,8 +5660,7 @@ class UpdateThread(Thread):
             return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
-        tmp = en.zStatesList[val]
-        return("z_st %s" % (tmp + ("\n" if val == en.ZIDLE else "")))
+        return("z_st %s" % (en.zStatesList[val]))
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -5697,7 +5709,8 @@ class UpdateThread(Thread):
         return("hsta %s" % (en.hStatesList[val]))
 
     def dbgMoveState(self, val):
-        return("msta %s" % (en.mStatesList[val]))
+        return("msta %s" % (en.mStatesList[val]
+                            + ("\n" if val == en.M_IDLE else "")))
 
     def dbgMoveCmd(self, val):
         if (val & 0xff00) == 0:
