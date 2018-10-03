@@ -2683,6 +2683,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.internal = th.internal.GetValue()
 
         self.rightHand = not th.leftHand.GetValue()
+        self.zRetract = abs(getFloatVal(th.zRetract))
         if self.rightHand:      # right hand threads
             self.zStart = getFloatVal(th.z1)
             self.zEnd = getFloatVal(th.z0)
@@ -2695,7 +2696,6 @@ class ScrewThread(LatheOp, UpdatePass):
             self.safeZ = self.zEnd - self.zRetract
             self.startZ = self.zStart
 
-        self.zRetract = abs(getFloatVal(th.zRetract))
         self.zAccelDist = 0.0
         self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
 
@@ -2832,20 +2832,6 @@ class ScrewThread(LatheOp, UpdatePass):
         self.area = area = self.depth * halfWidth
         print("depth %6.4f halfWdith %6.4f area %8.6f startZ %6.4f" % \
               (self.depth, halfWidth, area, self.startZ))
-
-        # if self.rightHand:      # right hand threads
-        #     depth = self.depth
-        #     if self.runoutDist != 0:
-        #         depth += 0.005
-        #     if self.internal:
-        #         depth = -depth
-        # else:                   # left hand threads
-        #     depth = self.depth
-        #     if self.runoutDist != 0:
-        #         depth += 0.005
-        #     if not self.internal:
-        #         depth = -depth
-        # m.saveDepth(depth)
 
         if self.runout != 0.0:
             self.runoutDist = self.runout * self.pitch
@@ -4331,67 +4317,6 @@ class JogPanel(wx.Panel, FormRoutines):
             print("key char %x" % (code))
             stdout.flush()
             evt.Skip()
-        # if code == ord('c'):
-        #     self.combo.SetSelection(0)
-        #     self.OnCombo(None)
-        # elif code == ord('i'):
-        #     combo = self.combo
-        #     val = combo.GetSelection()
-        #     if val == 0:
-        #         combo.SetSelection(1)
-        #     else:
-        #         combo.SetSelection(1) if val >= len(self.step) - 1 else \
-        #             combo.SetSelection(val + 1)
-        #     self.OnCombo(None)
-        # elif code == ord('I'):
-        #     combo = self.combo
-        #     val = combo.GetSelection()
-        #     if val > 0:
-        #         if val > 1:
-        #             combo.SetSelection(val - 1)
-        #     self.OnCombo(None)
-        # elif code == ord('r'):
-        #     panel = mainFrame.getCurrentPanel()
-        #     panel.OnSend(None)
-        # elif code == ord('s'):
-        #     self.OnResume(None)
-        # elif code == ord('p'):
-        #     self.OnPause(None)
-        # elif code == ord('a'):
-        #     panel = mainFrame.getCurrentPanel()
-        #     panel.OnAdd(None)
-        # elif code == ord('A'):
-        #     panel = mainFrame.getCurrentPanel()
-        #     panel.setAddFocus()
-        # elif code == wx.WXK_F9:
-        #     self.OnStartSpindle(None)
-        # elif code == wx.WXK_ESCAPE:
-        #     self.OnStop(None)
-        # elif code == ord('f'):
-        #     panel = mainFrame.getCurrentPanel()
-        #     panel.setFocus()
-        # elif code == ord('z'):
-        #     self.OnZMenu(None)
-        # elif code == ord('x'):
-        #     self.OnXMenu(None)
-        # elif code == ord('d'):
-        #     self.OnDone(None)
-        # elif code == ord('C'):
-        #     self.setStatus(st.STR_CLR)
-        # elif code == ord('P'):
-        #     panel = mainFrame.currentPanel
-        #     val = panel.pause.GetValue()
-        #     panel.pause.SetValue(not val)
-        # elif code == ord('t'):
-        #     self.axisTest(-0.025)
-        # elif code == ord('T'):
-        #     self.axisTest(0.025, passes=20)
-        # elif code == ord('S'):
-        #     self.axisTest(0.025, passes=5, retract=0.020, \
-        #                   pause=False, axis=AXIS_X)
-        # elif code == ord('U'):
-        #     self.axisTest(0.025, passes=5, retract=0.020, \
-        #                   pause=False, axis=AXIS_Z)
 
     def testPass(self, passNum, curLoc, retract=None, pause=True, axis=AXIS_X):
         m = moveCommands
