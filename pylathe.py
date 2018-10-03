@@ -714,6 +714,7 @@ class MoveCommands():
             self.d = None
 
     def queInit(self):
+        comm.sendMulti()        # send parameters first
         self.zOffset = None
         self.xOffset = None
 
@@ -775,8 +776,8 @@ class MoveCommands():
     def quePause(self, val=0):
         self.queMove(en.QUE_PAUSE, val)
 
-    def saveDiameter(self, val):
-        self.queMove(en.SAVE_DIAMETER, val)
+    def moveZOffset(self):
+        self.queMove(en.MOVE_Z_OFFSET, 0)
 
     def moveZ(self, zLocation, flag=ct.CMD_MAX, backlash=0.0):
         self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
@@ -825,16 +826,6 @@ class MoveCommands():
         self.queMove(en.SAVE_TAPER, taper)
         if self.dbg:
             print("saveTaper %s" % (taper))
-
-    def saveRunout(self, runout):
-        self.queMove(en.SAVE_RUNOUT, runout)
-        if self.dbg:
-            print("saveRunout %7.4f" % (runout))
-
-    def saveRunoutDepth(self, runoutDepth):
-        self.queMove(en.SAVE_RUNOUT_DEPTH, runoutDepth)
-        if self.dbg:
-            print("saveRunDepth %7.4f" % (runoutDepth))
 
     def saveThreadFlags(self, flags):
         self.queMove(en.SAVE_FLAGS, flags)
@@ -1552,8 +1543,9 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug()
+        else:
+            if cfg.getBoolInfoData(cf.cfgDbgSave):
+                updateThread.openDebug()
 
     def addAction(self):
         self.control.addPass()
@@ -2619,8 +2611,9 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug()
+        else:
+            if cfg.getBoolInfoData(cf.cfgDbgSave):
+                updateThread.openDebug()
 
     def addAction(self):
         self.control.internalAddPass() if self.internal.GetValue() else \
@@ -2748,6 +2741,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.endZ = self.zEnd
 
     def setup(self, add=False):
+        global zHomeOffset, xHomeOffset
         m = self.m
         if not add:
             m.setLoc(self.endZ, self.xStart)
@@ -2767,6 +2761,9 @@ class ScrewThread(LatheOp, UpdatePass):
                 comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
                 comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
    
+        comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+        comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
+
         m.queInit()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(ct.PARM_START)
@@ -2778,9 +2775,6 @@ class ScrewThread(LatheOp, UpdatePass):
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
 
-        m.saveRunoutDepth(self.runoutDepth)
-        m.saveRunout(self.runoutDist)
-        
         flag = 0
         if not self.rightHand:  # left hand threads
             flag |= ct.TH_LEFT
@@ -2958,9 +2952,9 @@ class ScrewThread(LatheOp, UpdatePass):
         feed = self.feed
         passFeed = feed - self.prevFeed
         self.prevFeed = feed
-
+ 
         if not self.alternate:
-            self.zOffset = feed * self.tanAngle
+            self.zOffset = -feed * self.tanAngle
         else:
             offset = passFeed * self.tanAngle
             if (self.passCount & 1) == 0:
@@ -3040,6 +3034,8 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
             m.quePause(flag)
+            if addPass:
+                m.moveZOffset()
             
         if DRO:
             m.saveXDro()
@@ -3065,6 +3061,13 @@ class ScrewThread(LatheOp, UpdatePass):
         self.panel.add.SetValue("0.0000")
         self.feed += add
         self.setup(True)
+
+        comm.queParm(pm.TH_Z_START, \
+                     int((self.startZ + zHomeOffset) * jogPanel.zStepsInch))
+        comm.queParm(pm.TH_X_START, \
+                     int((self.xStart + xHomeOffset) * jogPanel.xStepsInch))
+        comm.queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
+        
         self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
@@ -3284,8 +3287,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         if control.add:
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug()
+        else:
+            if cfg.getBoolInfoData(cf.cfgDbgSave):
+                updateThread.openDebug()
 
     def addAction(self):
         self.control.addPass()
@@ -3663,7 +3667,9 @@ class JogPanel(wx.Panel, FormRoutines):
                 update(val)
 
     def close(self):
-        self.dbg.close()
+        if self.dbg is not None:
+            self.dbg.close()
+            self.dbg = None
 
     def dPrt(self, text, console=False, flush=False):
         self.dbg.write(text)
@@ -4537,6 +4543,13 @@ class JogPanel(wx.Panel, FormRoutines):
                 text += 'A'
             self.statusText.SetLabel(text)
 
+            if mvStatus & ct.MV_READ_FEED:
+                try:
+                    val = comm.getParm(pm.X_FEED)
+                    comm.command(cm.ACKREAD)
+                except COMM_TIMEOUT:
+                    pass
+                
             if self.xHome:
                 if self.probeAxis == HOME_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
@@ -4615,8 +4628,11 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnDone(self, e):
-        self.clrActive()
-        self.setStatus(st.STR_CLR)
+        if self.mvStatus == 0:
+            self.clrActive()
+            self.setStatus(st.STR_CLR)
+        else:
+            self.setStatus(st.STR_OP_IN_PROGRESS)
         self.combo.SetFocus()
 
     def OnMeasure(self, e):
@@ -4628,6 +4644,7 @@ class JogPanel(wx.Panel, FormRoutines):
         return(mainFrame.panels[panel])
 
     def clrActive(self):
+        updateThread.closeDbg()
         self.currentPanel.active = False
 
     def OnStartSpindle(self, e):
@@ -5310,9 +5327,15 @@ class UpdateThread(Thread):
         self.zEncoderCount = None
         self.passVal = None
         self.dbg = None
+        self.mIdle = False
 
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(file, "wb")
+
+    def closeDbg(self):
+        if self.dbg is not None:
+            self.dbg.close()
+            self.dbg = None
 
     # def zLoc(self):
     #     val = comm.getParm(pm.Z_LOC)
@@ -5512,12 +5535,13 @@ class UpdateThread(Thread):
                                     self.dbg.flush()
                             if cmd == en.D_DONE:
                                 if val == 0:
-                                    baseTime = time()
-                                if val == 1:
-                                    baseTime = None
-                                    if self.dbg is not None:
-                                        self.dbg.close()
-                                    self.dbg = None
+                                    if not jogPanel.currentPanel.control.add:
+                                        baseTime = time()
+                                # if val == 1:
+                                    # baseTime = None
+                                    # if self.dbg is not None:
+                                    #     self.dbg.close()
+                                    #     self.dbg = None
                         except IndexError:
                             print("index error %s" % result)
                             stdout.flush()
@@ -5554,9 +5578,9 @@ class UpdateThread(Thread):
 
     def dbgDone(self, val):
         if val == ct.PARM_START:
-            return("strt")
+            return("strt\n")
         elif val == ct.PARM_DONE:
-            return("done")
+            return("done\n")
 
     def dbgTest(self, val):
         return("test %d" % (val))
@@ -5591,7 +5615,8 @@ class UpdateThread(Thread):
             return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
-        return("x_st %s" % (en.xStatesList[val]))
+        return(("x_st %s" % (en.xStatesList[val])) + \
+                ("\n" if self.mIdle and val == en.XIDLE else ""))
 
     def dbgXBSteps(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -5660,7 +5685,8 @@ class UpdateThread(Thread):
             return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
-        return("z_st %s" % (en.zStatesList[val]))
+        return(("z_st %s" % (en.zStatesList[val])) + \
+                ("\n" if self.mIdle and val == en.ZIDLE else ""))
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -5709,8 +5735,9 @@ class UpdateThread(Thread):
         return("hsta %s" % (en.hStatesList[val]))
 
     def dbgMoveState(self, val):
+        self.mIdle = val == en.M_IDLE
         return("msta %s" % (en.mStatesList[val]
-                            + ("\n" if val == en.M_IDLE else "")))
+                            + ("\n" if self.mIdle else "")))
 
     def dbgMoveCmd(self, val):
         if (val & 0xff00) == 0:

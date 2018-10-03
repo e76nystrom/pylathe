@@ -68,7 +68,7 @@ MOVE_X           =  1           # move x
 SAVE_Z           =  2           # save z
 SAVE_X           =  3           # save x
 SAVE_Z_OFFSET    =  4           # save z offset
-SAVE_X_OFFSET    =  5           # save z offset
+SAVE_X_OFFSET    =  5           # save x offset
 SAVE_TAPER       =  6           # save taper
 MOVE_ZX          =  7           # move x in sync with z
 MOVE_XZ          =  8           # move z in sync with x
@@ -80,18 +80,16 @@ Z_SYN_SETUP      = 13           # z sync setup
 X_SYN_SETUP      = 14           # x sync setup
 PASS_NUM         = 15           # set pass number
 QUE_PAUSE        = 16           # pause queue
-SAVE_DIAMETER    = 17           # save turn diameter
+MOVE_Z_OFFSET    = 17           # move z offset
 SAVE_FEED_TYPE   = 18           # save feed type
 Z_FEED_SETUP     = 19           # setup z feed
 X_FEED_SETUP     = 20           # setup x feed
-SAVE_RUNOUT      = 21           # save thread runout
-SAVE_RUNOUT_DEPTH = 22          # save runout depth
-SAVE_FLAGS       = 23           # save thread flags
-PROBE_Z          = 24           # probe in z direction
-PROBE_X          = 25           # probe in x direction
-SAVE_Z_DRO       = 26           # save z dro reading
-SAVE_X_DRO       = 27           # save x dro reading
-OP_DONE          = 28           # operation done
+SAVE_FLAGS       = 21           # save thread flags
+PROBE_Z          = 22           # probe in z direction
+PROBE_X          = 23           # probe in x direction
+SAVE_Z_DRO       = 24           # save z dro reading
+SAVE_X_DRO       = 25           # save x dro reading
+OP_DONE          = 26           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -111,12 +109,10 @@ mCommandsList = ( \
     "X_SYN_SETUP",
     "PASS_NUM",
     "QUE_PAUSE",
-    "SAVE_DIAMETER",
+    "MOVE_Z_OFFSET",
     "SAVE_FEED_TYPE",
     "Z_FEED_SETUP",
     "X_FEED_SETUP",
-    "SAVE_RUNOUT",
-    "SAVE_RUNOUT_DEPTH",
     "SAVE_FLAGS",
     "PROBE_Z",
     "PROBE_X",

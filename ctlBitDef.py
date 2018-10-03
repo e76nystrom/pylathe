@@ -74,6 +74,7 @@ MV_ACTIVE        = (1 << 3)     # movement active
 MV_HOME_ACTIVE   = (1 << 4)     # home active
 MV_XHOME         = (1 << 5)     # X home success
 MV_MEASURE       = (1 << 6)     # pause for measurement
+MV_READ_FEED     = (1 << 5)     # read feed
 
 # pause flags
 

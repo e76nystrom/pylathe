@@ -81,7 +81,7 @@ class Comm():
         if self.xDbgPrint:
             if cmd != self.lastCmd:
                 self.lastCmd = cmd
-                print("%-15s %s" % (cmd, cmdStr.strip('\x01\r')))
+                print("%-17s %s" % (cmd, cmdStr.strip('\x01\r')))
                 stdout.flush()
         if self.ser is None:
             return(None);
@@ -142,7 +142,7 @@ class Comm():
                 stdout.flush()
         cmd = ' %x %s' % (parmIndex, valString)
         if self.xDbgPrint:
-            print("%-15s %s" % (parm, cmd.strip()))
+            print("%-17s %s" % (parm, cmd.strip()))
             stdout.flush()
         length = len(cmd)
         if self.cmdLen + length > 80:
@@ -163,7 +163,7 @@ class Comm():
         self.parmList = []
         self.cmdLen = cmdOverhead
         if self.xDbgPrint:
-            print("%-15s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
+            print("%-17s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
             stdout.flush()
         if self.ser is None:
             return
@@ -217,7 +217,7 @@ class Comm():
                 valString = "0"
         cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
         if self.xDbgPrint:
-            print("%-15s %s" % (parm, cmd.strip('\x01\r')))
+            print("%-17s %s" % (parm, cmd.strip('\x01\r')))
             stdout.flush()
         if self.ser is None:
             return
@@ -245,7 +245,7 @@ class Comm():
             return(None)
         cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
         if dbg:
-            print("%-15s %s" % \
+            print("%-17s %s" % \
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
         self.commLock.acquire(True)
         self.ser.write(cmd)

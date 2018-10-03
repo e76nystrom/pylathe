@@ -211,9 +211,18 @@ L_SYNC_CYCLE         = 120
 L_SYNC_OUTPUT        = 121
 L_SYNC_PRESCALER     = 122
 
+# threading variables
+
+TH_Z_START           = 123
+TH_X_START           = 124
+TAN_THREAD_ANGLE     = 125
+X_FEED               = 126
+RUNOUT_DISTANCE      = 127
+RUNOUT_DEPTH         = 128
+
 # max parameter number
 
-MAX_PARM             = 123
+MAX_PARM             = 129
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -339,5 +348,11 @@ parmTable = ( \
     ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
     ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
     ('L_SYNC_PRESCALER', 'uint16_t', 'lSyncPrescaler'),
+    ('TH_Z_START', 'uint32_t', 'thZStart'),
+    ('TH_X_START', 'uint32_t', 'thXStart'),
+    ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),
+    ('X_FEED', 'uint16_t', 'xFeed'),
+    ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
+    ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )

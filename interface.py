@@ -358,6 +358,10 @@ cmdList = \
 
     ("ENCSTART", "", "encoder start"),
     ("ENCSTOP", "", "encoder stop"),
+
+     "ack read",
+
+    ("ACKREAD", "", "acknowledge read"),
 )
     
 syncCmdList = \
@@ -475,21 +479,6 @@ parmList = \
     ("JOG_TIME_INC", "jog time increment", "float"),
     ("JOG_TIME_MAX", "jog time max", "float"),
 
-    # "z turn/face parameters",
-    
-    # ("Z_START_LOC", "z start", "float"),
-    # ("Z_END_LOC", "z end", "float"),
-    # ("Z_RETRACT", "z retract", "float"),
-    # ("Z_FEED_PASS", "z feed per pass", "float"),
-    
-    # "x turn/face parameters",
-    
-    # ("X_START_LOC", "x start", "float"),
-    # ("X_END_LOC", "x end", "float"),
-    # ("X_RETRACT", "x retract", "float"),
-    # ("X_FEED_PASS", "x feed per pass", "float"),
-    # ("X_DIAMETER", "x diameter", "int"),
-    
     "taper parameters",
 
     ("TAPER_CYCLE_DIST", "taperCycleDist", "float"),
@@ -597,11 +586,20 @@ parmList = \
 
     ("X_CFG_REG", "xilinx configuration register", "int16_t"),
  
- "sync parameters",
+    "sync parameters",
    
- ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
- ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
- ("L_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+    ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
+    ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
+    ("L_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+
+    "threading variables",
+
+    ("TH_Z_START", "threading z start", "int32_t"),
+    ("TH_X_START", "threading x start", "int32_t"),
+    ("TAN_THREAD_ANGLE", "tangent of threading angle", "float"),
+    ("X_FEED", "x feed", "int16_t"),
+    ("RUNOUT_DISTANCE", "runout distance", "float"),
+    ("RUNOUT_DEPTH", "runout depth", "float"),
 
     # ("", "", ""),
 
@@ -695,6 +693,7 @@ regList =\
     ("MV_HOME_ACTIVE", "(1 << 4)", "home active"),
     ("MV_XHOME",       "(1 << 5)", "X home success"),
     ("MV_MEASURE",     "(1 << 6)", "pause for measurement"),
+    ("MV_READ_FEED",   "(1 << 5)", "read feed"),
 
     "pause flags",
 
@@ -715,10 +714,10 @@ regList =\
     ("PARM_START", "0", "start of operation"),
     ("PARM_DONE", "1", "done operation"),
 
- "x isr active flags",
+    "x isr active flags",
 
- ("SYNC_ACTIVE_ENC", "1", "x from spindle encoder"),
- ("SYNC_ACTIVE_TMR", "2", "x from internal timer"),
+    ("SYNC_ACTIVE_ENC", "1", "x from spindle encoder"),
+    ("SYNC_ACTIVE_TMR", "2", "x from internal timer"),
  
     # ("", "()", ""),
     # ("", "", ""),
@@ -888,7 +887,7 @@ xilinxBitList = \
     ("Dbg_Rsyn",   1, 5, "running in sync mode"),
     ("Dbg_Move",   1, 6, "used debug clock for move"),
 
- "status register",
+    "status register",
 
     ("stat",),
     ("s_Z_Done_Int", 1, 0, "z done interrrupt"),
@@ -959,7 +958,7 @@ enumList =\
     ("SAVE_Z", "save z"),
     ("SAVE_X", "save x"),
     ("SAVE_Z_OFFSET", "save z offset"),
-    ("SAVE_X_OFFSET", "save z offset"),
+    ("SAVE_X_OFFSET", "save x offset"),
     ("SAVE_TAPER", "save taper"),
     ("MOVE_ZX", "move x in sync with z"),
     ("MOVE_XZ", "move z in sync with x"),
@@ -971,12 +970,10 @@ enumList =\
     ("X_SYN_SETUP", "x sync setup"),
     ("PASS_NUM", "set pass number"),
     ("QUE_PAUSE", "pause queue"),
-    ("SAVE_DIAMETER", "save turn diameter"),
+    ("MOVE_Z_OFFSET", "move z offset"),
     ("SAVE_FEED_TYPE", "save feed type"),
     ("Z_FEED_SETUP", "setup z feed"),
     ("X_FEED_SETUP", "setup x feed"),
-    ("SAVE_RUNOUT", "save thread runout"),
-    ("SAVE_RUNOUT_DEPTH", "save runout depth"),
     ("SAVE_FLAGS", "save thread flags"),
     ("PROBE_Z", "probe in z direction"),
     ("PROBE_X", "probe in x direction"),

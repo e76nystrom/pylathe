@@ -74,6 +74,10 @@ CLRDBG               =  40
 ENCSTART             =  41
 ENCSTOP              =  42
 
+# ack read
+
+ACKREAD              =  43
+
 # command table
 
 cmdTable = ( \
@@ -120,4 +124,5 @@ cmdTable = ( \
     ("CLRDBG", "None"),                 #  40
     ("ENCSTART", "None"),               #  41
     ("ENCSTOP", "None"),                #  42
+    ("ACKREAD", "None"),                #  43
     )
