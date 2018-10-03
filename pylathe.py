@@ -2765,7 +2765,8 @@ class ScrewThread(LatheOp, UpdatePass):
         comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
 
         m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        if not add:
+            m.quePause()
         self.m.done(ct.PARM_START)
 
         th = self.panel
@@ -3058,8 +3059,11 @@ class ScrewThread(LatheOp, UpdatePass):
         self.pause = self.panel.pause.GetValue()
         self.add = True
         add = getFloatVal(self.panel.add) / 2.0
-        self.panel.add.SetValue("0.0000")
-        self.feed += add
+        if add != 0.0:
+            self.panel.add.SetValue("0.0000")
+            self.feed += add
+        else:
+            self.pause = True
         self.setup(True)
 
         comm.queParm(pm.TH_Z_START, \
