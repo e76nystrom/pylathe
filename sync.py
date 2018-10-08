@@ -7,7 +7,7 @@ class Sync():
     def __init__(self, maxPrime=127, dbg=False):
         self.calcPrimes(maxPrime)
         self.clockFreq = 72000000
-        self.encoderPulse = 10160
+        self.encoderPulse = 1600
         self.metricLeadscrew = True
         self.leadscrewTPI = 1
         self.leadscrewPitch = 5
@@ -16,6 +16,7 @@ class Sync():
         self.microSteps = 8
         self.exitRevs = 1
         self.dist = False
+        self.turn = False
         self.dbg = dbg
 
     def setClockFreq(self, freq):
@@ -26,6 +27,9 @@ class Sync():
 
     def setDist(self, dist):
         self.dist = dist
+
+    def setTurn(self, turn):
+        self.turn = turn
 
     def setLeadscrew(self, val):
         self.metricLeadscrew = False
@@ -75,16 +79,10 @@ class Sync():
             metric =  val.endswith("mm")
             if metric:
                 val = val[:-2]
-                pitch = float(val)
-            else:
-                tpi = float(val)
-        else:
-            if metric:
-                pitch = val
-            else:
-                tpi = val
+            val = float(val)
 
         if metric:
+            pitch = val
             if self.metricLeadscrew:
                 nFactor = 1
                 dFactor = 1
@@ -92,6 +90,7 @@ class Sync():
                 nFactor = 127
                 dFactor = 5
         else:
+            tpi = val
             if self.metricLeadscrew:
                 nFactor = 5
                 dFactor = 127
@@ -99,11 +98,31 @@ class Sync():
                 nFactor = 1
                 dFactor = 1
 
-        if self.dist:
-            if metric:
-                exitDist = pitch
-            else:
-                exitDist = tpi
+        if self.turn:
+            pitch = val
+            while int(pitch) != pitch:
+                pitch *= 10
+                nFactor *= 10
+            pitch = int(pitch)
+            # pitch = int(math.ceil(pitch / 10) * 10)
+        
+            num = \
+                  ( \
+                    (nFactor, "nfactor"), \
+                    (self.encoderPulse, "encoderPulse"), \
+                    (self.leadscrewPitch, "leadscrewPitch"), \
+                  )
+
+            denom = \
+                    ( \
+                      (dFactor, "dFactor"), \
+                      (pitch, "pitch"), \
+                      (self.motorSteps, "motorSteps"), \
+                      (self.microSteps, "microSteps"), \
+                      (self.leadscrewTPI, "leadscrewTPI"), \
+                    )
+        elif self.dist:
+            exitDist = val
 
             #=exitDist*motorSteps*microSteps*127/(metricPitch*5)
             stepsInch = float(self.motorSteps * self.microSteps * \
@@ -125,6 +144,7 @@ class Sync():
                     ( \
                       (encoderPulse, "encoderPulse"), \
                     )
+
             denom = \
                     ( \
                       (xStepsInt, "xStepsInt"), \
@@ -155,7 +175,7 @@ class Sync():
                 while int(tpi) != tpi:
                     tpi *= 10
                     dFactor *= 10
-                    tpi = int(tpi)
+                tpi = int(tpi)
 
                 num = \
                       ( \
@@ -307,7 +327,8 @@ if __name__ == '__main__':
               " -s n     motor steps\n" \
               " -m n     micro steps\n" \
               " -f n     clock frequency\n" \
-              " -D val   distance\n" \
+              " -t       turn\n" \
+              " -D       distance\n" \
               " -R val   exit revolutions\n" \
               )
         exit()
@@ -350,8 +371,9 @@ if __name__ == '__main__':
                 n += 1
                 if n < argLen:
                     sync.setClockFreq(int(argv[n]))
+            elif tmp == 't':
+                sync.turn = True
             elif tmp == 'D':
-                n += 1
                 sync.dist = True
             elif tmp == 'R':
                 n += 1

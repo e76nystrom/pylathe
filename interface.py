@@ -18,6 +18,8 @@ configList = \
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
     ('cfgRemDbg', 'config print remote debug info'),
+    ('cfgSpSync', 'config spindle using timer'),
+    ('cfgSpSyncBoard', 'config spindle sync board'),
     ('cfgSpEncoder', 'config spindle encoder'),
     ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
@@ -546,6 +548,10 @@ parmList = \
     ("STEPPER_DRIVE", "stepper driven spindle", "char"),
     ("MOTOR_TEST", "use stepper drive to test motor", "char"),
     ("SPINDLE_ENCODER", "motor drive with spindle encoder", "char"),
+    ("SPINDLE_SYNC_BOARD", "spindle sync board", "char"),
+    ("SPINDLE_SYNC", "spindle sync direct", "char"),
+    ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
+    ("CAP_TMR_ENABLE", "enable capture timer", "char"), 
     ("CFG_XILINX", "using xilinx", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
@@ -705,19 +711,27 @@ regList =\
 
     "thread flags",
 
-    ("TH_RUNOUT", "(1 << 0)", "runout with thread"),
-    ("TH_LEFT", "(1 << 1)", "left hand thread"),
-    ("TH_INTERNAL", "(1 << 2)", "internal threads"),
+    ("TH_THREAD", "(1 << 0)", "threading"),
+    ("TH_INTERNAL", "(1 << 1)", "internal threads"),
+    ("TH_LEFT", "(1 << 2)", "left hand thread"),
+    ("TH_RUNOUT", "(1 << 3)", "runout with thread"),
 
     "parameters for op_done",
 
     ("PARM_START", "0", "start of operation"),
     ("PARM_DONE", "1", "done operation"),
 
-    "x isr active flags",
+    "isr active flags",
 
-    ("SYNC_ACTIVE_ENC", "1", "x from spindle encoder"),
-    ("SYNC_ACTIVE_TMR", "2", "x from internal timer"),
+    ("SYNC_ACTIVE_EXT", "(1 << 0)", "active for sync board"),
+    ("SYNC_ACTIVE_TMR", "(1 << 1)", "active for internal timer"),
+    ("SYNC_ACTIVE_ENC", "(1 << 2)", "active for encoder"),
+    ("SYNC_ACTIVE_STEP", "(1 << 3)", "active for stepper"),
+
+    "encoder direct flags",
+
+    ("Z_ENCODER_DIRECT", "(1 << 0)", "z sync directly from encoder"),
+    ("X_ENCODER_DIRECT", "(1 << 1)", "x sync directly from encoder"),
  
     # ("", "()", ""),
     # ("", "", ""),
@@ -943,6 +957,7 @@ enumList =\
     ("M_WAIT_SYNC_READY", "wait for sync"),
     ("M_WAIT_SYNC_DONE", "wait for sync done"),
     ("M_WAIT_MEASURE_DONE", "wait for measurment done"),
+    ("M_START_ENCODER", "start encoder"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),

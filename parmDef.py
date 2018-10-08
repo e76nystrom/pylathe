@@ -165,64 +165,68 @@ PROBE_INV            =  98
 STEPPER_DRIVE        =  99
 MOTOR_TEST           = 100
 SPINDLE_ENCODER      = 101
-CFG_XILINX           = 102
-CFG_MPG              = 103
-CFG_DRO              = 104
-CFG_LCD              = 105
-CFG_FCY              = 106
+SPINDLE_SYNC_BOARD   = 102
+SPINDLE_SYNC         = 103
+ENCODER_DIRECT       = 104
+CAP_TMR_ENABLE       = 105
+CFG_XILINX           = 106
+CFG_MPG              = 107
+CFG_DRO              = 108
+CFG_LCD              = 109
+CFG_FCY              = 110
 
 # setup
 
-SETUP_DONE           = 107
+SETUP_DONE           = 111
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 108
+ENC_PER_REV          = 112
 
 # test encoder setup variables
 
-ENC_ENABLE           = 109
-ENC_PRE_SCALER       = 110
-ENC_TIMER            = 111
-ENC_RUN_COUNT        = 112
+ENC_ENABLE           = 113
+ENC_PRE_SCALER       = 114
+ENC_TIMER            = 115
+ENC_RUN_COUNT        = 116
 
 # test encoder status variables
 
-ENC_RUN              = 113
-ENC_COUNTER          = 114
-ENC_REV_COUNTER      = 115
+ENC_RUN              = 117
+ENC_COUNTER          = 118
+ENC_REV_COUNTER      = 119
 
 # measured spindle speed
 
-RPM                  = 116
+RPM                  = 120
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 117
-FREQ_MULT            = 118
+X_FREQUENCY          = 121
+FREQ_MULT            = 122
 
 # xilinx configuration register
 
-X_CFG_REG            = 119
+X_CFG_REG            = 123
 
 # sync parameters
 
-L_SYNC_CYCLE         = 120
-L_SYNC_OUTPUT        = 121
-L_SYNC_PRESCALER     = 122
+L_SYNC_CYCLE         = 124
+L_SYNC_OUTPUT        = 125
+L_SYNC_PRESCALER     = 126
 
 # threading variables
 
-TH_Z_START           = 123
-TH_X_START           = 124
-TAN_THREAD_ANGLE     = 125
-X_FEED               = 126
-RUNOUT_DISTANCE      = 127
-RUNOUT_DEPTH         = 128
+TH_Z_START           = 127
+TH_X_START           = 128
+TAN_THREAD_ANGLE     = 129
+X_FEED               = 130
+RUNOUT_DISTANCE      = 131
+RUNOUT_DEPTH         = 132
 
 # max parameter number
 
-MAX_PARM             = 129
+MAX_PARM             = 133
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -327,6 +331,10 @@ parmTable = ( \
     ('STEPPER_DRIVE', 'char', 'stepperDrive'),
     ('MOTOR_TEST', 'char', 'motorTest'),
     ('SPINDLE_ENCODER', 'char', 'spindleEncoder'),
+    ('SPINDLE_SYNC_BOARD', 'char', 'spindleSyncBoard'),
+    ('SPINDLE_SYNC', 'char', 'spindleSync'),
+    ('ENCODER_DIRECT', 'char', 'encoderDirect'),
+    ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
     ('CFG_XILINX', 'char', 'cfgXilinx'),
     ('CFG_MPG', 'char', 'cfgMpg'),
     ('CFG_DRO', 'char', 'cfgDro'),
@@ -348,10 +356,10 @@ parmTable = ( \
     ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
     ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
     ('L_SYNC_PRESCALER', 'uint16_t', 'lSyncPrescaler'),
-    ('TH_Z_START', 'uint32_t', 'thZStart'),
-    ('TH_X_START', 'uint32_t', 'thXStart'),
+    ('TH_Z_START', 'int32_t', 'thZStart'),
+    ('TH_X_START', 'int32_t', 'thXStart'),
     ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),
-    ('X_FEED', 'uint16_t', 'xFeed'),
+    ('X_FEED', 'int16_t', 'xFeed'),
     ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
     ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
     ('MAX_PARM', 'int16_t', 'maxParm'),

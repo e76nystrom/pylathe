@@ -86,16 +86,24 @@ PAUSE_READ_Z     = (1 << 4)     # read z after pause
 
 # thread flags
 
-TH_RUNOUT        = (1 << 0)     # runout with thread
-TH_LEFT          = (1 << 1)     # left hand thread
-TH_INTERNAL      = (1 << 2)     # internal threads
+TH_THREAD        = (1 << 0)     # threading
+TH_INTERNAL      = (1 << 1)     # internal threads
+TH_LEFT          = (1 << 2)     # left hand thread
+TH_RUNOUT        = (1 << 3)     # runout with thread
 
 # parameters for op_done
 
 PARM_START       = 0            # start of operation
 PARM_DONE        = 1            # done operation
 
-# x isr active flags
+# isr active flags
 
-SYNC_ACTIVE_ENC  = 1            # x from spindle encoder
-SYNC_ACTIVE_TMR  = 2            # x from internal timer
+SYNC_ACTIVE_EXT  = (1 << 0)     # active for sync board
+SYNC_ACTIVE_TMR  = (1 << 1)     # active for internal timer
+SYNC_ACTIVE_ENC  = (1 << 2)     # active for encoder
+SYNC_ACTIVE_STEP = (1 << 3)     # active for stepper
+
+# encoder direct flags
+
+Z_ENCODER_DIRECT = (1 << 0)     # z sync directly from encoder
+X_ENCODER_DIRECT = (1 << 1)     # x sync directly from encoder

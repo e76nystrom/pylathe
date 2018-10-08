@@ -41,6 +41,17 @@ SWIG = False
 HOME_TEST = False
 SETUP = False
 
+XILINX = False
+DRO = False
+EXT_DRO = False
+REM_DBG = False
+STEP_DRV = False
+MOTOR_TEST = False
+SPINDLE_ENCODER = False
+SPINDLE_SYNC = False
+SPINDLE_SYNC_BOARD = False
+HOME_IN_PLACE = False
+
 cLoc = "../Lathe/include/"
 fData = False
 
@@ -915,6 +926,10 @@ def sendSpindleData(send=False, rpm=None):
             comm.queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
             comm.queParm(pm.SPINDLE_ENCODER, \
                          cfg.getBoolInfoData(cf.cfgSpEncoder))
+            comm.queParm(pm.SPINDLE_SYNC, \
+                         cfg.getBoolInfoData(cf.cfgSpSync))
+            comm.queParm(pm.SPINDLE_SYNC_BOARD, \
+                         cfg.getBoolInfoData(cf.cfgSpSyncBoard))
             if STEP_DRV or MOTOR_TEST:
                 comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
@@ -979,7 +994,7 @@ def sendZData(send=False):
         jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             zSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
             zSync.setMotorSteps(motorSteps)
             zSync.setMicroSteps(microSteps)
@@ -1049,7 +1064,7 @@ def sendXData(send=False):
         jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
             xSync.setMotorSteps(motorSteps)
             xSync.setMicroSteps(microSteps)
@@ -1223,6 +1238,30 @@ class UpdatePass():
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
         return(True)
 
+    def passDone(self):
+        self.m.drawClose()
+        if STEP_DRV:
+            self.m.stopSpindle()
+        self.m.done(ct.PARM_DONE)
+        stdout.flush()
+
+    def addInit(self, label):
+        jogPanel.dPrt("\n%s addPass\n" % (label))
+        self.pause = self.panel.pause.GetValue()
+        self.add = True
+        add = getFloatVal(self.panel.add)
+        if add != 0.0:
+            self.panel.add.SetValue("0.0000")
+        else:
+            self.pause = True
+        return(add)
+
+    def addDone(self):
+        if STEP_DRV or MOTOR_TEST:
+            self.m.stopSpindle()
+        self.m.done(ct.PARM_DONE)
+        comm.command(cm.CMD_RESUME)
+
     def fixCut(self, offset=0.0):
         pass
 
@@ -1307,14 +1346,11 @@ class Turn(LatheOp, UpdatePass):
             pass
 
         self.m.moveX(self.xStart + self.xRetract)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        self.m.drawClose()
-        stdout.flush()
+
+        self.passDone()
         return(True)
 
-    def setup(self, add=False):
+    def setup(self, add=False): # turn
         m = self.m
         if not add:
             m.setLoc(self.zEnd, self.xStart)
@@ -1323,8 +1359,8 @@ class Turn(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         m.queInit()
-        if not add:
-            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        if (not add) or (add and not self.pause):
+            m.quePause()
         m.done(ct.PARM_START)
         
         if STEP_DRV:
@@ -1332,6 +1368,9 @@ class Turn(LatheOp, UpdatePass):
             m.queFeedType(ct.FEED_PITCH)
             m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
         else:
+            if SPINDLE_ENCODER:
+                m.queFeedType(ct.FEED_PITCH)
+                m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
             m. queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
             
         m.moveX(self.safeX)
@@ -1367,7 +1406,6 @@ class Turn(LatheOp, UpdatePass):
     def runPass(self, addPass=False): # turn
         m = self.m
         m.moveX(self.curX, ct.CMD_JOG)
-        m.saveDiameter(self.curX * 2.0)
         if DRO:
             m.saveXDro()
         if self.panel.pause.GetValue():
@@ -1389,21 +1427,14 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
 
     def addPass(self):
-        jogPanel.dPrt("\nturn addPass\n")
-        self.pause = self.panel.pause.GetValue()
-        self.add = True
-        add = getFloatVal(self.panel.add) / 2.0
-        self.panel.add.SetValue("0.0000")
+        add = self.addInit("turn") / 2.0
         self.cutAmount += add
-        self.calcPass(True)
         self.setup(True)
+        self.calcPass(True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
         self.m.moveX(self.xStart + self.xRetract)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
+        self.addDone()
 
     def fixCut(self, offset=0.0): # turn
         passNum = jogPanel.lastPass
@@ -1620,14 +1651,10 @@ class Face(LatheOp, UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart + self.zRetract)
 
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        self.m.drawClose()
-        stdout.flush()
+        self.passDone()
         return(True)
 
-    def setup(self, add=False):
+    def setup(self, add=False): # face
         m = self.m
         if not add:
             m.setLoc(self.zEnd, self.xStart)
@@ -1636,7 +1663,8 @@ class Face(LatheOp, UpdatePass):
             m.setLoc(self.zStart, self.safeX)
 
         m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        if (not add) or (add and not self.pause):
+            m.quePause()
         self.m.done(ct.PARM_START)
 
         if STEP_DRV:
@@ -1644,6 +1672,9 @@ class Face(LatheOp, UpdatePass):
             m.queFeedType(ct.FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(cf.faXFeed))
         else:
+            if SPINDLE_ENCODER:
+                m.queFeedType(ct.FEED_PITCH)
+                m.xSynSetup(cfg.getFloatInfoData(cf.faXFeed))
             m.queXSetup(cfg.getFloatInfoData(cf.faXFeed))
 
         m.moveX(self.safeX)
@@ -1694,8 +1725,7 @@ class Face(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def addPass(self):
-        self.pause = self.panel.pause.GetValue()
-        add = getFloatVal(self.panel.add)
+        add = self.addInit("face")
         self.cutAmount += add
         self.setup(True)
         self.calcPass(True)
@@ -1703,10 +1733,7 @@ class Face(LatheOp, UpdatePass):
         self.runPass(True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart + self.zRetract)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
+        self.addDone()
 
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -1858,23 +1885,20 @@ class Cutoff(LatheOp):
         self.setup()
 
         if self.panel.pause.GetValue():
-            self.m.quePause()
+            self.m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+            
         self.m.moveX(self.xEnd, ct.CMD_SYN)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.zStart)
 
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        self.m.drawClose()
-        stdout.flush()
+        self.passDone()
         return(True)
 
-    def setup(self):
+    def setup(self):            # cutoff
         m = self.m
 
         m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        m.quePause()
         self.m.done(ct.PARM_START)
 
         if STEP_DRV:
@@ -1882,6 +1906,9 @@ class Cutoff(LatheOp):
             m.queFeedType(ct.FEED_PITCH)
             m.xSynSetup(cfg.getFloatInfoData(cf.cuXFeed))
         else:
+            if SPINDLE_ENCODER:
+                m.queFeedType(ct.FEED_PITCH)
+                m.xSynSetup(cfg.getFloatInfoData(cf.cuXFeed))
             m.queXSetup(cfg.getFloatInfoData(cf.cuXFeed))
 
         m.moveX(self.safeX)
@@ -1991,7 +2018,6 @@ class Taper(LatheOp, UpdatePass):
 
         self.xLength = 0.0
         self.finish = 0.0
-        self.pause = False
 
         self.taperX = False
         self.taper = 0.0
@@ -2036,13 +2062,12 @@ class Taper(LatheOp, UpdatePass):
 
         self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
         self.finish = abs(getFloatVal(tp.finish))
-        self.pause = self.panel.pause.GetValue()
 
         totalTaper = taperInch * self.zLength
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
-    def setup(self, add=False):
+    def setup(self, add=False): # taper
         m = self.m
         if not add:
             m.setLoc(self.zEnd, self.xStart)
@@ -2051,7 +2076,8 @@ class Taper(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         m.queInit()
-        m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+        if (not add) or (add and not self.pause):
+            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         self.m.done(ct.PARM_START)
         
         if self.taperX:
@@ -2065,6 +2091,10 @@ class Taper(LatheOp, UpdatePass):
             m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
             m.xSynSetup(cfg.getFloatInfoData(cf.tpXInFeed))
         else:
+            if SPINDLE_ENCODER:
+                m.queFeedType(ct.FEED_PITCH)
+                m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
+                m.xSynSetup(cfg.getFloatInfoData(cf.tpXInFeed))
             m.queZSetup(cfg.getFloatInfoData(cf.tpZFeed))
             m.queXSetup(cfg.getFloatInfoData(cf.tpXInFeed))
 
@@ -2132,11 +2162,8 @@ class Taper(LatheOp, UpdatePass):
         self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
         self.m.printZText("%2d %7.4f", LEFT|MIDDLE)
         self.m.moveZ(self.safeZ)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        self.m.drawClose()
-        stdout.flush()
+
+        self.passDone()
         return(True)
 
     def externalCalcPass(self, final=False):
@@ -2215,8 +2242,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def externalAddPass(self):
-        self.pause = self.panel.pause.GetValue()
-        add = getFloatVal(self.panel.add) / 2
+        add = self.addInit("external taper") / 2.0
         self.cutAmount += add
         self.setup(True)
         self.externalCalcPass(True)
@@ -2276,11 +2302,8 @@ class Taper(LatheOp, UpdatePass):
         self.m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        self.m.drawClose()
-        stdout.flush()
+
+        self.passDone()
         return(True)
 
     def internalCalcPass(self, final=False):
@@ -2331,20 +2354,15 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def internalAddPass(self):
-        self.pause = self.panel.pause.GetValue()
-        add = getFloatVal(self.panel.add) / 2
+        add = self.addInit("internal taper") / 2.0
         self.cutAmount += add
-        self.passCount += 1
         self.setup(True)
         self.internalCalcPass(True)
         self.m.nextPass(self.passCount)
         self.internalRunPass(True)
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
+        self.addDone()
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -2708,13 +2726,13 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.tpiBtn:
             self.tpi = val
             self.pitch = 1.0 / val
-            if SPINDLE_ENCODER:
+            if SPINDLE_SYNC:
                 (self.cycle, self.output, self.preScaler) = \
                     zSync.calcSync(val, dbg=True, metric=False, rpm=rpm)
         else:
             self.pitch = val / 25.4
             self.tpi = 1.0 / self.pitch
-            if SPINDLE_ENCODER:
+            if SPINDLE_SYNC:
                 (self.cycle, self.output, self.preScaler) = \
                     zSync.calcSync(val, metric=True, rpm=rpm)
 
@@ -2732,7 +2750,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.angle = radians(getFloatVal(th.angle))
         self.runout = getFloatVal(th.runout)
 
-        if SPINDLE_ENCODER and self.runout != 0:
+        if SPINDLE_SYNC_BOARD and self.runout != 0:
             xSync.setDist(True)
             xSync.setExitRevs(self.runout)
             (self.xCycle, self.xOutput, self.xPreScaler) = \
@@ -2740,7 +2758,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         self.endZ = self.zEnd
 
-    def setup(self, add=False):
+    def setup(self, add=False): # thread
         global zHomeOffset, xHomeOffset
         m = self.m
         if not add:
@@ -2749,7 +2767,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             syncComm.setParm(sp.SYNC_ENCODER, cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
@@ -2760,12 +2778,13 @@ class ScrewThread(LatheOp, UpdatePass):
                 comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
                 comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
                 comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
+                comm.queParm(pm.CAP_TMR_ENABLE, 1)
    
         comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
         comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
 
         m.queInit()
-        if not add:
+        if (not add) or (add and not self.pause):
             m.quePause()
         self.m.done(ct.PARM_START)
 
@@ -2776,7 +2795,7 @@ class ScrewThread(LatheOp, UpdatePass):
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
 
-        flag = 0
+        flag = ct.TH_THREAD     # threading
         if not self.rightHand:  # left hand threads
             flag |= ct.TH_LEFT
         if self.runoutDist != 0:
@@ -2921,11 +2940,7 @@ class ScrewThread(LatheOp, UpdatePass):
                           LEFT if self.rightHand else RIGHT, \
                           self.internal)
 
-        self.m.drawClose()
-        if STEP_DRV:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        stdout.flush()
+        self.passDone()
         return(True)
 
     def calcPass(self, final=False, add=False):
@@ -3041,15 +3056,8 @@ class ScrewThread(LatheOp, UpdatePass):
                 self.startZ)
 
     def addPass(self):
-        jogPanel.dPrt("\nthread addPass\n")
-        self.pause = self.panel.pause.GetValue()
-        self.add = True
-        add = getFloatVal(self.panel.add) / 2.0
-        if add != 0.0:
-            self.panel.add.SetValue("0.0000")
-            self.feed += add
-        else:
-            self.pause = True
+        add = self.addInit("thread") / 2.0
+        self.feed += add
         self.setup(True)
 
         comm.queParm(pm.TH_Z_START, \
@@ -3061,10 +3069,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.calcPass(add=True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
+        self.addDone()
 
     def fixCut(self, offset=0.0): # thread
         if offset == 0.0:
@@ -5756,7 +5761,7 @@ class MainFrame(wx.Frame):
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
                                 cfg.getInfoData(cf.syncRate))
             syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
@@ -6151,7 +6156,8 @@ class MainFrame(wx.Frame):
 
     def initialConfig(self):
         global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
-            MOTOR_TEST, SPINDLE_ENCODER, HOME_IN_PLACE
+            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC, \
+            SPINDLE_SYNC_BOARD, HOME_IN_PLACE
 
         cfg = ConfigInfo(cf.configTable)
         cfg.clrInfo(len(cf.config))
@@ -6164,6 +6170,15 @@ class MainFrame(wx.Frame):
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+        if SPINDLE_ENCODER:
+            SPINDLE_SYNC = cfg.getInitialBoolInfo(cf.cfgSpSync)
+            if SPINDLE_SYNC:
+                SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
+            else:
+                SPINDLE_SYNC_BOARD = False
+        else:
+            SPINDLE_SYNC = False
+            SPINDLE_SYNC_BOARD = False
         HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
         cfg.clrInfo(len(cf.config))
@@ -6186,7 +6201,7 @@ class MainFrame(wx.Frame):
             zDROPosition = 0.0
             xDROPosition = 0.0
 
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             global xSync, zSync, syncComm
             xSync = Sync(dbg=True)
             zSync = Sync(dbg=True)
@@ -6493,6 +6508,8 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if SPINDLE_ENCODER:
             self.fields += ( \
                 ("Encoder", cf.cfgEncoder, 'd'), \
+                ("bSync", cf.cfgSpSync, None), \
+                ("bSync Board", cf.cfgSpSyncBoard, None), \
             )
         if STEP_DRV or MOTOR_TEST:
             self.fields += ( \
@@ -6579,7 +6596,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Keypad Port", cf.keypadPort, None), \
             ("Keypad Rate", cf.keypadRate, 'd'), \
         )
-        if SPINDLE_ENCODER:
+        if SPINDLE_SYNC_BOARD:
             self.fields += ( \
                 ("Sync Port", cf.syncPort, None), \
                 ("Sync Rate", cf.syncRate, 'd'), \
