@@ -1408,7 +1408,7 @@ class Turn(LatheOp, UpdatePass):
         m.moveX(self.curX, ct.CMD_JOG)
         if DRO:
             m.saveXDro()
-        if self.panel.pause.GetValue():
+        if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
             self.m.quePause(flag)
         if not addPass:
@@ -1440,13 +1440,13 @@ class Turn(LatheOp, UpdatePass):
         passNum = jogPanel.lastPass
         if offset == 0.0:
             actual = float(jogPanel.xPos.GetValue())
-            control.passSize[passNum] = 2 * actual
+            self.passSize[passNum] = 2 * actual
             if self.internal:
                 self.cutAmount = actual - self.xStart
             else:
                 self.cutAmount = self.xStart - actual
         else:
-            control.passSize[passNum] += offset
+            self.passSize[passNum] += offset
 
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -1705,7 +1705,7 @@ class Face(LatheOp, UpdatePass):
         m.moveZ(self.curZ, ct.CMD_JOG)
         if DRO:
             m.saveZDro()
-        if self.panel.pause.GetValue():
+        if self.pause:
             m.quePause(ct.PAUSE_ENA_Z_JOG if addPass else 0)
         if not addPass:
             if m.passNum & 0x300 == 0:
@@ -2259,11 +2259,11 @@ class Taper(LatheOp, UpdatePass):
         if offset == 0:
             actual = float(jogPanel.xPos.GetValue())
             passNum = jogPanel.lastPass
-            control.passSize[passNum] = 2 * actual
-            # if self.internal:
-            #     self.cutAmount = actual - self.xStart
-            # else:
-            #     self.cutAmount = self.xStart - actual
+            self.passSize[passNum] = 2 * actual
+            if self.internal:
+                self.cutAmount = actual - self.xStart
+            else:
+                self.cutAmount = self.xStart - actual
         else:
             pass
 
@@ -5261,15 +5261,20 @@ class UpdateThread(Thread):
         self.zEncoderCount = None
         self.passVal = None
         self.dbg = None
+        self.baseTime = None
         self.mIdle = False
 
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(file, "wb")
+        t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
+        self.dbg.write(t)
+        self.dbg.flush()
 
     def closeDbg(self):
         if self.dbg is not None:
             self.dbg.close()
             self.dbg = None
+            self.baseTime = None
 
     # def zLoc(self):
     #     val = comm.getParm(pm.Z_LOC)
@@ -5347,6 +5352,8 @@ class UpdateThread(Thread):
                     (en.D_XDN,  self.dbgXDone), \
                     (en.D_XEST, self.dbgXEncStart), \
                     (en.D_XEDN, self.dbgXEncDone), \
+                    (en.D_XX, self.dbgXX), \
+                    (en.D_XY, self.dbgXY), \
 
                     (en.D_ZMOV, self.dbgZMov), \
                     (en.D_ZLOC, self.dbgZLoc), \
@@ -5379,7 +5386,6 @@ class UpdateThread(Thread):
         i = 0
         op = None
         scanMax = len(self.parmList)
-        baseTime = None
         while True:
             stdout.flush()
             sleep(0.1)
@@ -5449,8 +5455,8 @@ class UpdateThread(Thread):
                 # if rLen > 0:
                 #     print("%2d (%s)" % (rLen, result))
                 index = 2
-                t = (("%8.3f " % (time() - baseTime))
-                     if baseTime is not None else "   0.000 ")
+                t = (("%8.3f " % (time() - self.baseTime))
+                     if self.baseTime is not None else "   0.000 ")
                 while index <= rLen:
                     (cmd, val) = tmp[index-2:index]
                     index += 2
@@ -5467,15 +5473,15 @@ class UpdateThread(Thread):
                                 else:
                                     self.dbg.write(t + output + "\n")
                                     self.dbg.flush()
-                            if cmd == en.D_DONE:
-                                if val == 0:
-                                    if not jogPanel.currentPanel.control.add:
-                                        baseTime = time()
-                                # if val == 1:
-                                    # baseTime = None
-                                    # if self.dbg is not None:
-                                    #     self.dbg.close()
-                                    #     self.dbg = None
+                            # if cmd == en.D_DONE:
+                            #     if val == 0:
+                            #         if not jogPanel.currentPanel.control.add:
+                            #             self.baseTime = time()
+                            #     if val == 1:
+                            #         self.baseTime = None
+                            #         if self.dbg is not None:
+                            #             self.dbg.close()
+                            #             self.dbg = None
                         except IndexError:
                             print("index error %s" % result)
                             stdout.flush()
@@ -5512,6 +5518,8 @@ class UpdateThread(Thread):
 
     def dbgDone(self, val):
         if val == ct.PARM_START:
+            if not jogPanel.currentPanel.control.add:
+                self.baseTime = time()
             return("strt\n")
         elif val == ct.PARM_DONE:
             return("done\n")
@@ -5581,6 +5589,12 @@ class UpdateThread(Thread):
     def dbgXEncStart(self, val):
         self.xEncoderStart = val
         return(None)
+
+    def dbgXX(self, val):
+        return("x_x  %7d" % (val))
+
+    def dbgXY(self, val):
+        return("x_y  %7d" % (val))
 
     def dbgXEncDone(self, val):
         if self.xEncoderStart is None:
@@ -5777,64 +5791,7 @@ class MainFrame(wx.Frame):
         else:
             self.keypad = keypad = None
         
-        if EXT_DRO:
-            port = cfg.getInfoData(cf.extDroPort)
-            print("port %s" % (port))
-            stdout.flush()
-            if port is not None:
-                dro.openSerial(cfg.getInfoData(cf.extDroPort), \
-                               cfg.getInfoData(cf.extDroRate))
-                # rsp = dro.command("system.reset()\n", True)
-                # print(rsp)
-                # dro.flush()
-
-                # automate = False
-                # try:
-                #     dro.flush()
-                #     dro.command("\n", True, eDro.delim)
-                #     print("automation off")
-                # except DroTimeout:
-                #     print("automation on")
-                #     automate = True
-
-                # if automate:
-                #     try:
-                #         rsp = dro.command("luash.automate(nil)\n", \
-                #                           True, eDro.delim)
-                #         print("automation turned on")
-                #     except DroTimeout:
-                #         print("DroTimeont exception")
-
-                try:
-                    dro.command(eDro.automateOff, True, eDro.delim)
-                    print("automation turned on")
-                    rsp = dro.command(eDro.showFunc, True, eDro.delim)
-                    rsp = re.sub(eDro.matchPrompt, "", rsp)
-                    # print(rsp)
-                    rsp = rsp.split("\n")
-                    for option in rsp:
-                        tmp = option.strip().lower().split(":")
-                        if len(tmp) == 2:
-                            if tmp[0].strip() == "diameter":
-                                if tmp[1].strip() != "on":
-                                    dro.command(eDro.diamFunc, \
-                                                True, eDro.delim)
-                                    break
-                    dro.command(eDro.inchMode, True, eDro.delim)
-                    dro.command(eDro.absMode, True, eDro.delim)
-                    for line in eDro.axisFunc:
-                        dro.command(line, True, eDro.delim)
-                    rsp = dro.command(eDro.automateOn, True)
-                    # rsp = dro.command(eDro.extReadX, True)
-                    # print(rsp, end="")
-                    # rsp = dro.command(eDro.extReadZ, True)
-                    # print(rsp, end="")
-                    # dro.command(eDro.setZ(str(3.555)), True)
-                    # dro.command("axis.zeroa(1,-2+axis.read(1))")
-                    # dro.command("axis.zeroa(2,-4+axis.read(2));"\
-                    #             "io.write('ok\\n')", True)
-                except DroTimeout:
-                    print("DroTimeont excpetion")
+        self.initDRO()
                                                                               
         if XILINX:
             comm.xRegs = xr.xRegTable
@@ -5869,6 +5826,10 @@ class MainFrame(wx.Frame):
         ID_FILE_SAVE = wx.NewId()
         menu = fileMenu.Append(ID_FILE_SAVE, 'Save')
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
+
+        ID_FILE_INIT_DEVICE = wx.NewId()
+        menu = fileMenu.Append(ID_FILE_INIT_DEVICE, 'Init Device')
+        self.Bind(wx.EVT_MENU, self.OnInit, menu)
 
         ID_FILE_SAVE_RESTART = wx.NewId()
         menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
@@ -6036,6 +5997,66 @@ class MainFrame(wx.Frame):
 
         self.showPanel()
         self.Fit()
+
+    def initDRO(self):
+        if EXT_DRO:
+            port = cfg.getInfoData(cf.extDroPort)
+            print("port %s" % (port))
+            stdout.flush()
+            if port is not None:
+                dro.openSerial(cfg.getInfoData(cf.extDroPort), \
+                               cfg.getInfoData(cf.extDroRate))
+                # rsp = dro.command("system.reset()\n", True)
+                # print(rsp)
+                # dro.flush()
+
+                # automate = False
+                # try:
+                #     dro.flush()
+                #     dro.command("\n", True, eDro.delim)
+                #     print("automation off")
+                # except DroTimeout:
+                #     print("automation on")
+                #     automate = True
+
+                # if automate:
+                #     try:
+                #         rsp = dro.command("luash.automate(nil)\n", \
+                #                           True, eDro.delim)
+                #         print("automation turned on")
+                #     except DroTimeout:
+                #         print("DroTimeont exception")
+
+                try:
+                    dro.command(eDro.automateOff, True, eDro.delim)
+                    print("automation turned on")
+                    rsp = dro.command(eDro.showFunc, True, eDro.delim)
+                    rsp = re.sub(eDro.matchPrompt, "", rsp)
+                    # print(rsp)
+                    rsp = rsp.split("\n")
+                    for option in rsp:
+                        tmp = option.strip().lower().split(":")
+                        if len(tmp) == 2:
+                            if tmp[0].strip() == "diameter":
+                                if tmp[1].strip() != "on":
+                                    dro.command(eDro.diamFunc, \
+                                                True, eDro.delim)
+                                    break
+                    dro.command(eDro.inchMode, True, eDro.delim)
+                    dro.command(eDro.absMode, True, eDro.delim)
+                    for line in eDro.axisFunc:
+                        dro.command(line, True, eDro.delim)
+                    rsp = dro.command(eDro.automateOn, True)
+                    # rsp = dro.command(eDro.extReadX, True)
+                    # print(rsp, end="")
+                    # rsp = dro.command(eDro.extReadZ, True)
+                    # print(rsp, end="")
+                    # dro.command(eDro.setZ(str(3.555)), True)
+                    # dro.command("axis.zeroa(1,-2+axis.read(1))")
+                    # dro.command("axis.zeroa(2,-4+axis.read(2));"\
+                    #             "io.write('ok\\n')", True)
+                except DroTimeout:
+                    print("DroTimeont excpetion")
 
     def initDevice(self):
         global zPosition, zHomeOffset, xPosition, xHomeOffset
@@ -6222,6 +6243,16 @@ class MainFrame(wx.Frame):
     def OnSave(self, e):
         cfg.saveInfo(self.cfgFile)
 
+    def OnInit(self, e):
+        if False:
+            self.zDialog = None
+            self.xDialog = None
+            self.SpindleDialog = None
+            self.portDialog = None
+            self.configDialog = None
+            self.initialConfig()
+        self.initDevice()
+
     def OnRestat(self, e):
         cfg.saveInfo(self.cfgFile)
         os.execl(sys.executable, sys.executable, *sys.argv)
@@ -6262,18 +6293,28 @@ class MainFrame(wx.Frame):
         dialog.SetPosition((xPos, yPos))
 
     def OnZSetup(self, e):
+        if self.zDialog is None:
+            self.zDialog = ZDialog(self, self.defaultFont)
         self.showDialog(self.zDialog)
 
     def OnXSetup(self, e):
+        if self.xDialog is None:
+            self.xDialog = XDialog(self, self.defaultFont)
         self.showDialog(self.xDialog)
 
     def OnSpindleSetup(self, e):
+        if self.spindleDialog is None:
+            self.spindleDialog = Spindleialog(self, self.defaultFont)
         self.showDialog(self.spindleDialog)
 
     def OnPortSetup(self, e):
+        if self.portDialog is None:
+            self.portDialog = Portialog(self, self.defaultFont)
         self.showDialog(self.portDialog)
-
+        
     def OnConfigSetup(self, e):
+        if self.configDialog is None:
+            self.configDialog = Configialog(self, self.defaultFont)
         self.showDialog(self.configDialog)
 
     def getCurrentPanel(self):

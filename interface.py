@@ -1031,6 +1031,8 @@ enumList =\
     ("D_XDN",   "x done"),
     ("D_XEST",  "x spindle encoder start count"),
     ("D_XEDN",  "x spindle encoder done count"),
+    ("D_XX",    "x "),
+    ("D_XY",    "x "),
 
     ("D_ZMOV",  "z move location"),
     ("D_ZLOC",  "z location"),

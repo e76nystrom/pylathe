@@ -159,24 +159,26 @@ D_XWT            = 12           # x wait
 D_XDN            = 13           # x done
 D_XEST           = 14           # x spindle encoder start count
 D_XEDN           = 15           # x spindle encoder done count
-D_ZMOV           = 16           # z move location
-D_ZLOC           = 17           # z location
-D_ZDST           = 18           # z distance
-D_ZSTP           = 19           # z steps
-D_ZST            = 20           # z state
-D_ZBSTP          = 21           # z backlash steps
-D_ZDRO           = 22           # z dro location
-D_ZPDRO          = 23           # z pass dro location
-D_ZEXP           = 24           # z expected location
-D_ZWT            = 25           # z wait
-D_ZDN            = 26           # z done
-D_ZEST           = 27           # z spindle encoder start count
-D_ZEDN           = 28           # Z spindle encoder done count
-D_ZX             = 29           # z 
-D_ZY             = 30           # z 
-D_HST            = 31           # home state
-D_MSTA           = 32           # move state
-D_MCMD           = 33           # move command
+D_XX             = 16           # x 
+D_XY             = 17           # x 
+D_ZMOV           = 18           # z move location
+D_ZLOC           = 19           # z location
+D_ZDST           = 20           # z distance
+D_ZSTP           = 21           # z steps
+D_ZST            = 22           # z state
+D_ZBSTP          = 23           # z backlash steps
+D_ZDRO           = 24           # z dro location
+D_ZPDRO          = 25           # z pass dro location
+D_ZEXP           = 26           # z expected location
+D_ZWT            = 27           # z wait
+D_ZDN            = 28           # z done
+D_ZEST           = 29           # z spindle encoder start count
+D_ZEDN           = 30           # Z spindle encoder done count
+D_ZX             = 31           # z 
+D_ZY             = 32           # z 
+D_HST            = 33           # home state
+D_MSTA           = 34           # move state
+D_MCMD           = 35           # move command
 
 dMessageList = ( \
     "D_PASS",
@@ -195,6 +197,8 @@ dMessageList = ( \
     "D_XDN",
     "D_XEST",
     "D_XEDN",
+    "D_XX",
+    "D_XY",
     "D_ZMOV",
     "D_ZLOC",
     "D_ZDST",
