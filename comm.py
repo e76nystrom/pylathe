@@ -67,6 +67,11 @@ class Comm():
             print("unable to open port %s" % (port))
             stdout.flush()
 
+    def closeSerial(self):
+        if self.ser is not None:
+            self.ser.close()
+            self.ser = None
+
     def command(self, cmdVal):
         if len(self.parmList) > 0:
             self.sendMulti()

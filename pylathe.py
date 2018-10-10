@@ -1706,7 +1706,7 @@ class Face(LatheOp, UpdatePass):
         if DRO:
             m.saveZDro()
         if self.pause:
-            m.quePause(ct.PAUSE_ENA_Z_JOG if addPass else 0)
+            m.quePause(ct.PAUSE_ENA_Z_JOG | ct.PAUSE_READ_Z if addPass else 0)
         if not addPass:
             if m.passNum & 0x300 == 0:
                 m.text("%2d %7.3f" % (m.passNum, self.curZ), \
@@ -1735,6 +1735,15 @@ class Face(LatheOp, UpdatePass):
         self.m.moveZ(self.zStart + self.zRetract)
         self.addDone()
 
+    def fixCut(self, offset=0.0): # turn
+        passNum = jogPanel.lastPass
+        if offset == 0.0:
+            actual = float(jogPanel.zPos.GetValue())
+            self.passSize[passNum] = actual
+            self.cutAmount = self.zStart - actual
+        else:
+            self.passSize[passNum] += offset
+        
 class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
         super(FacePanel, self).__init__(parent, *args, **kwargs)
@@ -1842,8 +1851,13 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug()
+        control = self.control
+        if control.add:
+            if jogPanel.mvStatus & ct.MV_READ_Z:
+                control.fixCut()
+        else:
+            if cfg.getBoolInfoData(cf.cfgDbgSave):
+                updateThread.openDebug()
 
     def addAction(self):
         self.control.addPass()
@@ -2205,7 +2219,7 @@ class Taper(LatheOp, UpdatePass):
         else:
             m.moveZ(self.startZ)
         if self.pause:
-            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X if addPass else 0)
         if self.taperX:
             if not addPass and m.passNum & 0x300 == 0:
                 if self.taperLength < self.zLength:
@@ -2331,7 +2345,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
-            m.quePause(ct.PAUSE_ENA_X_JOG if addPass else 0)
+            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X if addPass else 0)
         if not addPass and m.passNum & 0x300 == 0:
             m.saveZText((m.passNum, self.startZ, self.startX, \
                          self.startX * 2.0), (self.startZ, self.safeX))
@@ -3293,6 +3307,7 @@ class ButtonRepeat(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.threadRun = True
+        self.threadDone = False
         self.event = Event()
         self.action = None
         self.code = None
@@ -3317,6 +3332,12 @@ class ButtonRepeat(Thread):
                     self.action(self.code, self.val)
                 sleep(timeout)
                 timeout = .05
+        print("ButtonRepeat done")
+        stdout.flush()
+        self.threadDone = True
+
+    def close(self):
+        self.threadRun = False
 
 EVT_KEYPAD_ID = wx.NewId()
 
@@ -3334,6 +3355,7 @@ class Keypad(Thread):
             return
         Thread.__init__(self)
         self.threadRun = True
+        self.threadDone = False
         self.port = port
         self.rate = rate
         try:
@@ -3367,13 +3389,18 @@ class Keypad(Thread):
                     stdout.flush()
                     self.ser = None
                     sleep(5)
-        print("keypad thread done")
-                    
+        print("Keypad done")
+        stdout.flush()
+        self.threadDone = True
+
+    def close(self):
+        self.threadRun = False
 
 class JogShuttle(Thread):
     def __init__(self):
         allHids = None
         self.threadRun = True
+        self.threadDone = False
         self.device = None
         if WINDOWS:
             allHids = find_all_hid_devices()
@@ -3390,6 +3417,7 @@ class JogShuttle(Thread):
                         traceback.print_exc()
                     break
         if self.device == None:
+            self.threadDone = True
             return
 
         self.lastOuterRing = 0
@@ -3445,8 +3473,12 @@ class JogShuttle(Thread):
                             except:
                                 traceback.print_exc()
             sleep(t)
-        print("shuttle Thread done")
+        print("JogShuttle done")
         stdout.flush()
+        self.threadDone = True
+
+    def close(self):
+        self.threadRun = False
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
@@ -4477,13 +4509,6 @@ class JogPanel(wx.Panel, FormRoutines):
                 text += 'A'
             self.statusText.SetLabel(text)
 
-            if mvStatus & ct.MV_READ_FEED:
-                try:
-                    val = comm.getParm(pm.X_FEED)
-                    comm.command(cm.ACKREAD)
-                except COMM_TIMEOUT:
-                    pass
-                
             if self.xHome:
                 if self.probeAxis == HOME_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
@@ -5247,6 +5272,7 @@ class UpdateThread(Thread):
         self.readAllError = False
         self.notifyWindow = notifyWindow
         self.threadRun = True
+        self.threadDone = False
         self.parmList = (self.readAll, )
         self.encoderCount = None
         self.xLoc = None
@@ -5501,7 +5527,12 @@ class UpdateThread(Thread):
                 break
         print("UpdateThread done")
         stdout.flush()
+        self.threadDone = True
 
+    def close(self):
+        self.closeDbg()
+        self.threadRun = False
+        
     def dbgPass(self, val):
         # tmp = val >> 8
         # if tmp == 0:
@@ -5764,10 +5795,11 @@ class MainFrame(wx.Frame):
         self.testTaperDialog = None
         self.testMoveDialog = None
 
+        self.menuSetup()
         self.initUI()
 
         global updateThread
-        self.update = updateThread = UpdateThread(self.jogPanel)
+        self.updateThread = updateThread = UpdateThread(self.jogPanel)
 
         global jogShuttle
         self.jogShuttle = jogShuttle = JogShuttle()
@@ -5798,7 +5830,7 @@ class MainFrame(wx.Frame):
 
         self.initDevice()
 
-        self.update.start()
+        self.updateThread.start()
         self.delay = Delay(self)
 
     def onClose(self, e):
@@ -5811,15 +5843,14 @@ class MainFrame(wx.Frame):
         cfg.saveList(self.posFile, posList)
         done = True
         jogPanel.close()
-        print("set threadRun False")
-        stdout.flush()
-        self.update.threadRun = False
-        buttonRepeat.threadRun = False
+        self.updateThread.close()
+        buttonRepeat.close()
+        jogShuttle.close()
         if keypad is not None:
-            keypad.threadRun = False
+            keypad.close()
         self.Destroy()
 
-    def initUI(self):
+    def menuSetup(self):
         # file menu
         fileMenu = wx.Menu()
 
@@ -5921,6 +5952,7 @@ class MainFrame(wx.Frame):
 
         self.SetMenuBar(menuBar)
 
+    def initUI(self):
         # filter = KeyEventFilter()
         # self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         # self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
