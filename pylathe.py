@@ -50,6 +50,7 @@ MOTOR_TEST = False
 SPINDLE_ENCODER = False
 SPINDLE_SYNC = False
 SPINDLE_SYNC_BOARD = False
+USE_ENCODER = False
 HOME_IN_PLACE = False
 
 cLoc = "../Lathe/include/"
@@ -930,6 +931,8 @@ def sendSpindleData(send=False, rpm=None):
                          cfg.getBoolInfoData(cf.cfgSpSync))
             comm.queParm(pm.SPINDLE_SYNC_BOARD, \
                          cfg.getBoolInfoData(cf.cfgSpSyncBoard))
+            comm.queParm(pm.USE_ENCODER, \
+                         cfg.getBoolInfoData(cf.cfgSpUseEncoder))
             if STEP_DRV or MOTOR_TEST:
                 comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
@@ -975,8 +978,10 @@ def sendSpindleData(send=False, rpm=None):
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
-                zSync.setEncoder(count)
-                xSync.setEncoder(count)
+                if SPINDLE_SYNC:
+                    zSync.setEncoder(count)
+                    if SPINDLE_SYNC_BOARD:
+                        xSync.setEncoder(count)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
             comm.command(cm.CMD_SPSETUP)
@@ -994,7 +999,7 @@ def sendZData(send=False):
         jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_SYNC_BOARD:
+        if SPINDLE_SYNC:
             zSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
             zSync.setMotorSteps(motorSteps)
             zSync.setMicroSteps(microSteps)
@@ -1064,12 +1069,14 @@ def sendXData(send=False):
         jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_SYNC_BOARD:
-            xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
-            xSync.setMotorSteps(motorSteps)
-            xSync.setMicroSteps(microSteps)
-            xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
-                       
+        if SPINDLE_SYNC:
+            if SPINDLE_SYNC_BOARD:
+                xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
+                xSync.setMotorSteps(motorSteps)
+                xSync.setMicroSteps(microSteps)
+                xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            else:
+                pass
         if DRO:
             jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
 
@@ -2764,11 +2771,15 @@ class ScrewThread(LatheOp, UpdatePass):
         self.angle = radians(getFloatVal(th.angle))
         self.runout = getFloatVal(th.runout)
 
-        if SPINDLE_SYNC_BOARD and self.runout != 0:
-            xSync.setDist(True)
-            xSync.setExitRevs(self.runout)
-            (self.xCycle, self.xOutput, self.xPreScaler) = \
-                xSync.calcSync(self.depth, rpm=rpm)
+        if SPINDLE_SYNC:
+            if self.runout != 0:
+                if SPINDLE_SYNC_BOARD:
+                    xSync.setDist(True)
+                    xSync.setExitRevs(self.runout)
+                    (self.xCycle, self.xOutput, self.xPreScaler) = \
+                        xSync.calcSync(self.depth, rpm=rpm)
+                else:
+                    pass
 
         self.endZ = self.zEnd
 
@@ -2781,18 +2792,29 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if SPINDLE_SYNC_BOARD:
-            syncComm.setParm(sp.SYNC_ENCODER, cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+        if SPINDLE_SYNC:
+            if SPINDLE_SYNC_BOARD:
+                syncComm.setParm(sp.SYNC_ENCODER, \
+                                 cfg.getIntInfoData(cf.cfgEncoder))
+                syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
+                syncComm.setParm(sp.SYNC_OUTPUT, self.output)
+                syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+                syncComm.command(sc.SYNC_SETUP)
+            else:
+                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
+                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
 
-            if self.runout != 0:
-                comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
-                comm.queParm(pm.CAP_TMR_ENABLE, 1)
+        if self.runout != 0:
+            if SPINDLE_SYNC:
+                if SPINDLE_SYNC_BOARD:
+                    comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
+                    comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
+                    comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
+                else:
+                    pass
+            else:
+                pass
    
         comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
         comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
@@ -6223,8 +6245,10 @@ class MainFrame(wx.Frame):
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+
         if SPINDLE_ENCODER:
             SPINDLE_SYNC = cfg.getInitialBoolInfo(cf.cfgSpSync)
+            USE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpUseEncoder)
             if SPINDLE_SYNC:
                 SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
             else:
@@ -6232,6 +6256,38 @@ class MainFrame(wx.Frame):
         else:
             SPINDLE_SYNC = False
             SPINDLE_SYNC_BOARD = False
+
+        if True:
+            print("STEP_DRV %s SPINDLE_ENCODER %s\n"\
+                  "SPINDLE_SYNC %s SPINDLE_SYNC_BOARD %s "\
+                  "USE_ENCODDER %s" % \
+                  (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC, \
+                   SPINDLE_SYNC_BOARD, USE_ENCODER))
+            if STEP_DRV:
+                print("threading uses stepper timer")
+            elif SPINDLE_ENCODER:
+                if SPINDLE_SYNC:
+                    if SPINDLE_SYNC_BOARD:
+                        print("threading uses sync board")
+                        if USE_ENCODER:
+                            print("runout uses encoder")
+                        else:
+                            print("runout uses local sync")
+                            print("enable capture timer")
+                    else:       # not SYNC_BOARD
+                        if USE_ENCODER:
+                            print("threading uses encoder")
+                            print("runout uses encoder")
+                        else:
+                            print("threading uses local sync")
+                            print("enable capture timer")
+                            print("runout uses encoder")
+                else:           # not SYNC
+                    print("threading uses encoder")
+                    print("runout uses encoder")
+            else:               # not SPINDLE_ENCODER
+                print("threading disabled")
+            
         HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
         cfg.clrInfo(len(cf.config))
@@ -6254,11 +6310,13 @@ class MainFrame(wx.Frame):
             zDROPosition = 0.0
             xDROPosition = 0.0
 
-        if SPINDLE_SYNC_BOARD:
-            global xSync, zSync, syncComm
-            xSync = Sync(dbg=True)
+        if SPINDLE_SYNC:
+            global zSync
             zSync = Sync(dbg=True)
-            syncComm = Comm()
+            if SPINDLE_SYNC_BOARD:
+                global xSync, syncComm
+                xSync = Sync(dbg=True)
+                syncComm = Comm()
 
         comm = Comm()
         comm.SWIG = SWIG
@@ -6583,6 +6641,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Encoder", cf.cfgEncoder, 'd'), \
                 ("bSync", cf.cfgSpSync, None), \
                 ("bSync Board", cf.cfgSpSyncBoard, None), \
+                ("bUse Encoder", cf.cfgSpUseEncoder, None), \
             )
         if STEP_DRV or MOTOR_TEST:
             self.fields += ( \

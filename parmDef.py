@@ -167,66 +167,67 @@ MOTOR_TEST           = 100
 SPINDLE_ENCODER      = 101
 SPINDLE_SYNC_BOARD   = 102
 SPINDLE_SYNC         = 103
-ENCODER_DIRECT       = 104
-CAP_TMR_ENABLE       = 105
-CFG_XILINX           = 106
-CFG_MPG              = 107
-CFG_DRO              = 108
-CFG_LCD              = 109
-CFG_FCY              = 110
+USE_ENCODER          = 104
+ENCODER_DIRECT       = 105
+CAP_TMR_ENABLE       = 106
+CFG_XILINX           = 107
+CFG_MPG              = 108
+CFG_DRO              = 109
+CFG_LCD              = 110
+CFG_FCY              = 111
 
 # setup
 
-SETUP_DONE           = 111
+SETUP_DONE           = 112
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 112
+ENC_PER_REV          = 113
 
 # test encoder setup variables
 
-ENC_ENABLE           = 113
-ENC_PRE_SCALER       = 114
-ENC_TIMER            = 115
-ENC_RUN_COUNT        = 116
+ENC_ENABLE           = 114
+ENC_PRE_SCALER       = 115
+ENC_TIMER            = 116
+ENC_RUN_COUNT        = 117
 
 # test encoder status variables
 
-ENC_RUN              = 117
-ENC_COUNTER          = 118
-ENC_REV_COUNTER      = 119
+ENC_RUN              = 118
+ENC_COUNTER          = 119
+ENC_REV_COUNTER      = 120
 
 # measured spindle speed
 
-RPM                  = 120
+RPM                  = 121
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 121
-FREQ_MULT            = 122
+X_FREQUENCY          = 122
+FREQ_MULT            = 123
 
 # xilinx configuration register
 
-X_CFG_REG            = 123
+X_CFG_REG            = 124
 
 # sync parameters
 
-L_SYNC_CYCLE         = 124
-L_SYNC_OUTPUT        = 125
-L_SYNC_PRESCALER     = 126
+L_SYNC_CYCLE         = 125
+L_SYNC_OUTPUT        = 126
+L_SYNC_PRESCALER     = 127
 
 # threading variables
 
-TH_Z_START           = 127
-TH_X_START           = 128
-TAN_THREAD_ANGLE     = 129
-X_FEED               = 130
-RUNOUT_DISTANCE      = 131
-RUNOUT_DEPTH         = 132
+TH_Z_START           = 128
+TH_X_START           = 129
+TAN_THREAD_ANGLE     = 130
+X_FEED               = 131
+RUNOUT_DISTANCE      = 132
+RUNOUT_DEPTH         = 133
 
 # max parameter number
 
-MAX_PARM             = 133
+MAX_PARM             = 134
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -333,6 +334,7 @@ parmTable = ( \
     ('SPINDLE_ENCODER', 'char', 'spindleEncoder'),
     ('SPINDLE_SYNC_BOARD', 'char', 'spindleSyncBoard'),
     ('SPINDLE_SYNC', 'char', 'spindleSync'),
+    ('USE_ENCODER', 'char', 'useEncoder'),
     ('ENCODER_DIRECT', 'char', 'encoderDirect'),
     ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
     ('CFG_XILINX', 'char', 'cfgXilinx'),
