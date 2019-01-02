@@ -4602,6 +4602,7 @@ class JogPanel(wx.Panel, FormRoutines):
         spindleDataSent = False
         zDataSent = False
         xDataSent = False
+        mainFrame.initDevice()
         self.clrActive()
         self.combo.SetFocus()
 
@@ -4609,6 +4610,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.homeDone("stopped")
         moveCommands.queClear()
         comm.command(cm.CMD_STOP)
+        mainFrame.initDevice()
         self.clrActive()
         self.combo.SetFocus()
 
