@@ -50,6 +50,7 @@ MOTOR_TEST = False
 SPINDLE_ENCODER = False
 SPINDLE_SYNC = False
 SPINDLE_SYNC_BOARD = False
+SPINDLE_VAR_SPEED = False
 USE_ENCODER = False
 HOME_IN_PLACE = False
 
@@ -984,6 +985,17 @@ def sendSpindleData(send=False, rpm=None):
                         xSync.setEncoder(count)
                 comm.queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
+            if SPINDLE_VAR_SPEED:
+                range = cfg.getIntInfoData(cf.spCurRange)
+                if range >= 1: and range <= cfg.getIntInfoDat(cf.spRanges):
+                    range -= 1
+                    conm.queParm(pm.MIN_SPEED, \
+                                 cfg.getIntInfoData(cf.spRangeMin + range))
+                    conm.queParm(pm.MAX_SPEED, \
+                                 cfg.getIntInfoData(cf.spRangeMax + range))
+                else:
+                    conm.queParm(pm.MIN_SPEED, 0)
+                    conm.queParm(pm.MAX_SPEED, 0)
             comm.command(cm.CMD_SPSETUP)
             spindleDataSent = True
     except CommTimeout:
@@ -4611,7 +4623,6 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnDone(self, e):
         if self.mvStatus == 0:
             self.clrActive()
-            self.setStatus(st.STR_CLR)
         else:
             self.setStatus(st.STR_OP_IN_PROGRESS)
         self.combo.SetFocus()
@@ -4627,6 +4638,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def clrActive(self):
         updateThread.closeDbg()
         self.currentPanel.active = False
+        self.setStatus(st.STR_CLR)
 
     def OnStartSpindle(self, e):
         if STEP_DRV or MOTOR_TEST:
@@ -6126,8 +6138,11 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
+                comm.queParm(pm.CFG_SWITCH, cfg.getBoolInfoData(cf.spSwitch))
+                comm.queParm(pm.CFG_VAR_SPEED, \
+                             cfg.getBoolInfoData(cf.spVarSpeed))
                 comm.command(cm.CMD_SETUP)
-
+                
                 sendZData()
                 if EXT_DRO:
                     self.jogPanel.setZFromExt()
@@ -6231,7 +6246,7 @@ class MainFrame(wx.Frame):
 
     def initialConfig(self):
         global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
-            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC, \
+            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_VAR_SPEED, SPINDLE_SYNC, \
             SPINDLE_SYNC_BOARD, HOME_IN_PLACE
 
         cfg = ConfigInfo(cf.configTable)
@@ -6245,6 +6260,9 @@ class MainFrame(wx.Frame):
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+
+        if not STEP_DRV and not MOTOR_TEST:
+            SPINDLE_VAR_SPEED = cfg.getInitialBoolInfo(cf.spVarSpeed)
 
         if SPINDLE_ENCODER:
             SPINDLE_SYNC = cfg.getInitialBoolInfo(cf.cfgSpSync)
@@ -6414,8 +6432,12 @@ class MainFrame(wx.Frame):
         key = cf.mainPanel
         if cfg.info[key] is None:
             cfg.initInfo(key, InfoValue('turnPanel'))
-        showPanel = cfg.getInfoData(key)
 
+        if jogPanel.mvStatus != 0:
+            jogPanel.updateError(st.STR_OP_IN_PROGRESS)
+            return
+        
+        showPanel = cfg.getInfoData(key)
         for key in self.panels:
             panel = self.panels[key]
             if key == showPanel:
@@ -6660,6 +6682,23 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("bTest Index", cf.spTestIndex, None), \
                 ("bTest Encoder", cf.spTestEncoder, None), \
             )
+        else:
+            self.fields += ( \
+                ("bSwitch", cf.spSwitch, None), \
+                ("bVar Speed", cf.spVarSpeed, None), \
+            )
+        if SPINDLE_VAR_SPEED:
+            self.fields += ( \
+                ("Current Range", cf.spCurRange, None), \
+                ("Speed Ranges", cf.spRanges, None), \
+            )
+            for i in range(6):
+                index = str(i + 1)
+                tmp = (\
+                    ("Min " + index, cf.spRangeMin1 + i , None), \
+                    ("Max " + index, cf.spRangeMax1 + i , None), \
+                )
+                self.fields += tmp
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)

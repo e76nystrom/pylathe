@@ -105,6 +105,7 @@ configList = \
 
     ('spAccel', 'spindle acceleration'),
     ('spAccelTime', 'spindle accelerationtime'),
+    ('spCurRange', 'spindle current range'),
     ('spInvDir', 'spindle invert direction'),
     ('spJogAccelTime', 'spindle jog acceleration time'),
     ('spJogMax', 'spindle jog max speed'),
@@ -117,9 +118,27 @@ configList = \
     ('spMinRPM', 'spindle minimum rpm'),
     ('spMotorSteps', 'spindle motor stpes per revolution'),
     ('spMotorTest', 'use stepper drive to test motor'),
+
+    ('spRangeMin1', 'spindle speed range 1 minimum'),
+    ('spRangeMin2', 'spindle speed range 2 minimum'),
+    ('spRangeMin3', 'spindle speed range 3 minimum'),
+    ('spRangeMin4', 'spindle speed range 4 minimum'),
+    ('spRangeMin5', 'spindle speed range 5 minimum'),
+    ('spRangeMin6', 'spindle speed range 6 minimum'),
+
+    ('spRangeMax1', 'spindle speed range 1 maximum'),
+    ('spRangeMax2', 'spindle speed range 2 maximum'), 
+    ('spRangeMax3', 'spindle speed range 3 maximum'),
+    ('spRangeMax4', 'spindle speed range 4 maximum'),
+    ('spRangeMax5', 'spindle speed range 5 maximum'),
+    ('spRangeMax6', 'spindle speed range 6 maximum'),
+  
+    ('spRanges', 'spindle number of speed ranges'),
     ('spStepDrive', 'spindle stepper drive'),
+    ('spSwitch', 'spindle off on switch'),
     ('spTestEncoder', 'spindle test generate encoder test pulse'),
     ('spTestIndex', 'spindle test generate internal index pulse'),
+    ('spVarSpeed', 'spindle variable speed'),
 
   "sync communications config",
 
@@ -128,7 +147,7 @@ configList = \
 
   "threading config",
 
-    ('thAddFeed', 'thread feed to add after done'),
+    ('thAddFeed', 'thread feed to add after done')xs,
     ('thAlternate', 'thread althernate thread flanks'),
     ('thAngle', 'thread hanlf angle of thread'),
     ('thFirstFeed', 'thread first feed for thread area calc'),
@@ -557,6 +576,8 @@ parmList = \
     ("CFG_DRO", "digital readout", "char"),
     ("CFG_LCD", "lcd display", "char"),
     ("CFG_FCY", "system clock speed", "int"),
+    ("CFG_SWITCH", "spindle off on switch", "int"),
+    ("CFG_VAR_SPEED", "spindle variable speed", "int"),
 
     "setup",
 
@@ -607,6 +628,16 @@ parmList = \
     ("RUNOUT_DISTANCE", "runout distance", "float"),
     ("RUNOUT_DEPTH", "runout depth", "float"),
 
+     "jog debug",
+
+    ("JOG_DEBUG", "jog interrupt debug", "char"),
+
+    "motor and speed control",
+ 
+    ("MIN_SPEED", "minimum speed for current range", "int16_t"),
+    ("MAX_SPEED", "maximum speed for current range", "int16_t"),
+
+    # ("", "", ""),
     # ("", "", ""),
 
     "max parameter number",
@@ -731,7 +762,7 @@ regList =\
 
     ("Z_ENCODER_DIRECT", "(1 << 0)", "z sync directly from encoder"),
     ("X_ENCODER_DIRECT", "(1 << 1)", "x sync directly from encoder"),
- 
+
     # ("", "()", ""),
     # ("", "", ""),
 )
