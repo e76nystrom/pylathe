@@ -147,7 +147,7 @@ configList = \
 
   "threading config",
 
-    ('thAddFeed', 'thread feed to add after done')xs,
+    ('thAddFeed', 'thread feed to add after done'),
     ('thAlternate', 'thread althernate thread flanks'),
     ('thAngle', 'thread hanlf angle of thread'),
     ('thFirstFeed', 'thread first feed for thread area calc'),
@@ -1119,7 +1119,7 @@ if __name__ == '__main__':
     path = os.path.dirname(os.path.realpath(__file__))
 
     fData = True
-    cLoc = path + '/../Lathe/include/'
+    cLoc = path + '/../LatheCPP/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
     syncLoc = path + '/../Sync/include/'
 

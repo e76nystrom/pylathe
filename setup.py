@@ -320,7 +320,7 @@ class Setup():
                         cFile.write("%s\n" % (data))
                         if data.startswith("}"):
                             cFile.write("\n#ifdef ENUM_%s\n\n" % (var.upper()))
-                            cFile.write("char *%s[] = \n{\n" % (enum))
+                            cFile.write("const char *%s[] = \n{\n" % (enum))
                             for index, (s, comment) in enumerate(stringList):
                                 tmp =  " \"%s\", " % (s)
                                 cFile.write("%s/* %2d x%02x %s */\n" % \

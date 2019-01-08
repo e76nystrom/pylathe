@@ -231,9 +231,14 @@ RUNOUT_DEPTH         = 135
 
 JOG_DEBUG            = 136
 
+# motor and speed control
+
+MIN_SPEED            = 137
+MAX_SPEED            = 138
+
 # max parameter number
 
-MAX_PARM             = 137
+MAX_PARM             = 139
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -373,5 +378,7 @@ parmTable = ( \
     ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
     ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
     ('JOG_DEBUG', 'char', 'jogDebug'),
+    ('MIN_SPEED', 'int16_t', 'minSpeed'),
+    ('MAX_SPEED', 'int16_t', 'maxSpeed'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
