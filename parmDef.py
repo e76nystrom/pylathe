@@ -175,63 +175,70 @@ CFG_MPG              = 108
 CFG_DRO              = 109
 CFG_LCD              = 110
 CFG_FCY              = 111
+CFG_SWITCH           = 112
+CFG_VAR_SPEED        = 113
 
 # setup
 
-SETUP_DONE           = 112
+SETUP_DONE           = 114
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 113
+ENC_PER_REV          = 115
 
 # test encoder setup variables
 
-ENC_ENABLE           = 114
-ENC_PRE_SCALER       = 115
-ENC_TIMER            = 116
-ENC_RUN_COUNT        = 117
+ENC_ENABLE           = 116
+ENC_PRE_SCALER       = 117
+ENC_TIMER            = 118
+ENC_RUN_COUNT        = 119
 
 # test encoder status variables
 
-ENC_RUN              = 118
-ENC_COUNTER          = 119
-ENC_REV_COUNTER      = 120
+ENC_RUN              = 120
+ENC_COUNTER          = 121
+ENC_REV_COUNTER      = 122
 
 # measured spindle speed
 
-RPM                  = 121
+RPM                  = 123
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 122
-FREQ_MULT            = 123
+X_FREQUENCY          = 124
+FREQ_MULT            = 125
 
 # xilinx configuration register
 
-X_CFG_REG            = 124
+X_CFG_REG            = 126
 
 # sync parameters
 
-L_SYNC_CYCLE         = 125
-L_SYNC_OUTPUT        = 126
-L_SYNC_PRESCALER     = 127
+L_SYNC_CYCLE         = 127
+L_SYNC_OUTPUT        = 128
+L_SYNC_PRESCALER     = 129
 
 # threading variables
 
-TH_Z_START           = 128
-TH_X_START           = 129
-TAN_THREAD_ANGLE     = 130
-X_FEED               = 131
-RUNOUT_DISTANCE      = 132
-RUNOUT_DEPTH         = 133
+TH_Z_START           = 130
+TH_X_START           = 131
+TAN_THREAD_ANGLE     = 132
+X_FEED               = 133
+RUNOUT_DISTANCE      = 134
+RUNOUT_DEPTH         = 135
 
 # jog debug
 
-JOG_DEBUG            = 134
+JOG_DEBUG            = 136
+
+# motor and speed control
+
+MIN_SPEED            = 137
+MAX_SPEED            = 138
 
 # max parameter number
 
-MAX_PARM             = 135
+MAX_PARM             = 139
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -346,6 +353,8 @@ parmTable = ( \
     ('CFG_DRO', 'char', 'cfgDro'),
     ('CFG_LCD', 'char', 'cfgLcd'),
     ('CFG_FCY', 'int', 'cfgFcy'),
+    ('CFG_SWITCH', 'int', 'cfgSwitch'),
+    ('CFG_VAR_SPEED', 'int', 'cfgVarSpeed'),
     ('SETUP_DONE', 'char', 'setupDone'),
     ('ENC_PER_REV', 'uint16_t', 'encPerRev'),
     ('ENC_ENABLE', 'char', 'encEnable'),
@@ -369,5 +378,7 @@ parmTable = ( \
     ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
     ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
     ('JOG_DEBUG', 'char', 'jogDebug'),
+    ('MIN_SPEED', 'int16_t', 'minSpeed'),
+    ('MAX_SPEED', 'int16_t', 'maxSpeed'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
