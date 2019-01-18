@@ -607,6 +607,10 @@ parmList = \
     ("RUNOUT_DISTANCE", "runout distance", "float"),
     ("RUNOUT_DEPTH", "runout depth", "float"),
 
+    "jog debug",
+
+    ("JOG_DEBUG", "jog interrupt debug", "char"),
+
     # ("", "", ""),
 
     "max parameter number",

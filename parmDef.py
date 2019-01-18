@@ -225,9 +225,13 @@ X_FEED               = 131
 RUNOUT_DISTANCE      = 132
 RUNOUT_DEPTH         = 133
 
+# jog debug
+
+JOG_DEBUG            = 134
+
 # max parameter number
 
-MAX_PARM             = 134
+MAX_PARM             = 135
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -364,5 +368,6 @@ parmTable = ( \
     ('X_FEED', 'int16_t', 'xFeed'),
     ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
     ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
+    ('JOG_DEBUG', 'char', 'jogDebug'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
