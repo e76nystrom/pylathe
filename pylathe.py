@@ -3,39 +3,40 @@
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
 from __future__ import print_function
+
+import os
+import re
+import subprocess
+import sys
+import traceback
+from ctypes import c_uint32
+from math import atan2, ceil, cos, degrees, floor, pi, radians, sqrt, tan
+from platform import system
+from Queue import Empty, Queue
+from sys import stderr, stdout
+from threading import Event, Lock, Thread
+from time import localtime, sleep, strftime, time
+
+import serial
 import wx
 import wx.lib.inspection
-from time import localtime, sleep, strftime, time
-import sys
-import os
-import subprocess
-import traceback
-from sys import stdout, stderr
-import serial
-from threading import Thread, Lock, Event
-from math import radians, cos, tan, ceil, floor, pi, sqrt, atan2, degrees
-from ctypes import c_uint32
-from Queue import Queue, Empty
-from platform import system
 from dxfwrite import DXFEngine as dxf
+
+import cmdDef as cm
+import configDef as cf
+import ctlBitDef as ct
+import enumDef as en
+import parmDef as pm
+import stringDef as st
+import syncCmdDef as sc
+import syncParmDef as sp
+from comm import Comm, CommTimeout
+from configInfo import ConfigInfo, InfoValue
 from sync import Sync
-import re
+
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
-
-from configInfo import ConfigInfo, InfoValue
-from comm import Comm, CommTimeout
-
-import configDef as cf
-import stringDef as st
-import cmdDef as cm
-import parmDef as pm
-import enumDef as en
-import ctlBitDef as ct
-
-import syncCmdDef as sc
-import syncParmDef as sp
 
 SWIG = False
 HOME_TEST = False

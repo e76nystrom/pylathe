@@ -1,24 +1,28 @@
 #!/cygdrive/c/Python27/Python.exe
 
 import sys
-import serial
+from math import ceil, floor, log
 from sys import stdout
 from time import sleep, time
-from math import ceil, floor, log
-import lathe
-from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit, tmp
+
+import serial
+
 import comm
-from comm import openSerial, setParm, getParm, command, setXReg, getXReg, dspXReg
+import lathe
+from comm import (command, dspXReg, getParm, getXReg, openSerial, setParm,
+                  setXReg)
+from interfaceX import (cmdList, parmList, regList, stateList, xilinxBitList,
+                        xilinxList)
+from lathe import T_ACCEL, taperCalc, tmp, xTaperInit, zTaperInit
+from setup import *
+from setup import (createCommands, createCtlBits, createCtlStates,
+                   createParameters, createXilinxBits, createXilinxReg)
 
 fData = False
 # jLoc = '../../Java/Lathe/src/lathe/'
 cLoc = '../LatheX/include/'
 xLoc = '../../Xilinx/LatheCtl/'
 
-from setup import createCommands, createParameters, \
-    createXilinxReg, createXilinxBits, createCtlStates, createCtlBits
-from interfaceX import cmdList, parmList, stateList, regList,\
-    xilinxList, xilinxBitList
 
 createCommands(cmdList, cLoc, fData)
 createParameters(parmList, cLoc, fData)
@@ -26,7 +30,6 @@ createCtlStates(stateList, cLoc, fData)
 createCtlBits(regList, cLoc, fData)
 createXilinxReg(xilinxList, cLoc, xLoc, fData)
 createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
-from setup import *
 
 # zTA = T_ACCEL()
 # zPA = T_ACCEL()

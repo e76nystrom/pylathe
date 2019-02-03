@@ -1,5 +1,7 @@
 from __future__ import print_function
+
 from sys import stdout
+
 
 class InfoValue():
     def __init__(self, val):

@@ -1,7 +1,9 @@
 #!/cygdrive/c/Python27/python
 
 from __future__ import print_function
+
 import math
+
 
 class Sync():
     def __init__(self, maxPrime=127, dbg=False):

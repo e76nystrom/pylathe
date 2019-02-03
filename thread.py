@@ -3,16 +3,17 @@
 #!/usr/bin/python
 ################################################################################
 
+import re
+import sys
+from math import cos, radians, sqrt
+from sys import argv, stdout
+
 import wx
 import wx.lib.colourdb
-import sys
-import re
-from sys import stdout, argv
-from math import cos, radians, sqrt
+from dxfwrite import DXFEngine as dxf
 
 #from draw import
 
-from dxfwrite import DXFEngine as dxf
 #from svgwrite import Drawing
 #from svgwrite.path import Path
 

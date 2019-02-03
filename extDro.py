@@ -1,7 +1,10 @@
 from __future__ import print_function
+
 from sys import stdout
-from threading import Thread, Lock, Event
+from threading import Event, Lock, Thread
+
 import serial
+
 
 def setZ(val):
     return("ax(2," + val + ")")
@@ -78,4 +81,3 @@ class ExtDro():
                 break
         self.droLock.release()
         return(rsp)
-        

@@ -1,8 +1,11 @@
 from __future__ import print_function
-from sys import stdout
-from threading import Thread, Lock, Event
+
 from ctypes import c_int32
+from sys import stdout
+from threading import Event, Lock, Thread
+
 import serial
+
 SETUP = False
 
 if SETUP:

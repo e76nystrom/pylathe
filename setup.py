@@ -1,5 +1,6 @@
 from sys import stdout
 
+
 class Setup():
     def __init__(self):
         self.importList = []
