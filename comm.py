@@ -406,7 +406,7 @@ class Comm():
             rsp = rsp + tmp;
 
 
-    def dspXReg(self, reg, label=''):
+    def dspXReg(self, reg, val, label=''):
         if self.xDbgPrint:
             print ("%-12s %2x %8x %12d %s" %
                    (xRegTable[reg], reg, val & 0xffffffff, val, label))

@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python27/Python.exe
+#!/cygdrive/c/Python37/Python.exe
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
@@ -12,7 +12,8 @@ import traceback
 from ctypes import c_uint32
 from math import atan2, ceil, cos, degrees, floor, pi, radians, sqrt, tan
 from platform import system
-from Queue import Empty, Queue
+#from Queue import Empty, Queue
+from queue import Empty, Queue
 from sys import stderr, stdout
 from threading import Event, Lock, Thread
 from time import localtime, sleep, strftime, time
@@ -240,7 +241,7 @@ class FormRoutines():
     def getConfigList(self):
         if self.configList is None:
             self.configList = []
-            for i, (name) in enumerate(cf.configTable):
+            for i, name in enumerate(cf.configTable):
                 if name.startswith(self.prefix):
                     self.configList.append(i)
         return(self.configList)
@@ -3384,7 +3385,7 @@ class ButtonRepeat(Thread):
     def close(self):
         self.threadRun = False
 
-EVT_KEYPAD_ID = wx.NewId()
+EVT_KEYPAD_ID = wx.Window.NewControlId()
 
 class KeypadEvent(wx.PyEvent):
     def __init__(self, data):
@@ -3419,7 +3420,7 @@ class Keypad(Thread):
                 try:
                     tmp = str(self.ser.read(1))
                 except serial.SerialException:
-                    self.ser = none
+                    self.ser = None
                     pass
                 if len(tmp) != 0:
                     wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
@@ -3699,7 +3700,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
         self.dbg = open("dbgLog.txt", "ab")
         t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
-        self.dbg.write(t)
+        self.dbg.write(t.encode())
         self.dbg.flush()
 
         eventTable = (\
@@ -4883,39 +4884,39 @@ class PosMenu(wx.Menu):
         self.axis = axis
         active = jogPanel.currentPanel.active
         if not active:
-            item = wx.MenuItem(self, wx.NewId(), "Set")
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Set")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnSet, item)
 
-            item = wx.MenuItem(self, wx.NewId(), "Zero")
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Zero")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnZero, item)
 
             if EXT_DRO:
-                item = wx.MenuItem(self, wx.NewId(), "Ext DRO")
+                item = wx.MenuItem(self, wx.Window.NewControlId(), "Ext DRO")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnSetFromExt, item)
 
-            item = wx.MenuItem(self, wx.NewId(), "Probe")
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Probe")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnProbe, item)
 
             if self.axis == AXIS_X:
-                item = wx.MenuItem(self, wx.NewId(), "Home")
+                item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnHomeX, item)
 
-            item = wx.MenuItem(self, wx.NewId(), "Go to")
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Go to")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnGoto, item)
 
         if self.axis == AXIS_X:
-            item = wx.MenuItem(self, wx.NewId(), "Fix X")
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Fix X")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnFixX, item)
 
             if DRO:
-                item = wx.MenuItem(self, wx.NewId(), "DRO Diam")
+                item = wx.MenuItem(self, wx.Window.NewControlId(), "DRO Diam")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
 
@@ -5266,7 +5267,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             if (op == TURN) or \
                (op == TAPER) or \
                (op == THREAD):
-                control.fixCut(offset)
+                currentPanel.control.fixCut(offset)
             elif op == FACE:
                 pass
 
@@ -5291,11 +5292,11 @@ class RpmMenu(wx.Menu):
     def __init__(self, jP):
         wx.Menu.__init__(self)
         self.jP = jP
-        item = wx.MenuItem(self, wx.NewId(), "RPM")
+        item = wx.MenuItem(self, wx.Window.NewControlId(), "RPM")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnRPM, item)
 
-        item = wx.MenuItem(self, wx.NewId(), "Surface Speed")
+        item = wx.MenuItem(self, wx.Window.NewControlId(), "Surface Speed")
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnSurfaceSpeed, item)
 
@@ -5305,7 +5306,7 @@ class RpmMenu(wx.Menu):
     def OnSurfaceSpeed(self, e):
         self.jP.setSurfaceSpeed(True)
 
-EVT_UPDATE_ID = wx.NewId()
+EVT_UPDATE_ID = wx.Window.NewControlId()
 
 class UpdateEvent(wx.PyEvent):
     def __init__(self, data):
@@ -5788,7 +5789,7 @@ class UpdateThread(Thread):
 #             print("key down")
 #         event.Skip()
 
-EVT_RESIZE_ID = wx.NewId()
+EVT_RESIZE_ID = wx.Window.NewControlId()
 
 class ResizeEvent(wx.PyEvent):
     def __init__(self):
@@ -5901,93 +5902,93 @@ class MainFrame(wx.Frame):
         # file menu
         fileMenu = wx.Menu()
 
-        ID_FILE_SAVE = wx.NewId()
+        ID_FILE_SAVE = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE, 'Save')
         self.Bind(wx.EVT_MENU, self.OnSave, menu)
 
-        ID_FILE_INIT_DEVICE = wx.NewId()
+        ID_FILE_INIT_DEVICE = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_INIT_DEVICE, 'Init Device')
         self.Bind(wx.EVT_MENU, self.OnInit, menu)
 
-        ID_FILE_SAVE_RESTART = wx.NewId()
+        ID_FILE_SAVE_RESTART = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
         self.Bind(wx.EVT_MENU, self.OnRestat, menu)
 
-        ID_FILE_SAVE_PANEL = wx.NewId()
+        ID_FILE_SAVE_PANEL = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_PANEL, 'Save Panel')
         self.Bind(wx.EVT_MENU, self.OnSavePanel, menu)
 
-        ID_FILE_LOAD_PANEL = wx.NewId()
+        ID_FILE_LOAD_PANEL = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_LOAD_PANEL, 'Load Panel')
         self.Bind(wx.EVT_MENU, self.OnLoadPanel, menu)
 
-        ID_FILE_EXIT = wx.NewId()
+        ID_FILE_EXIT = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_EXIT, 'Exit')
         self.Bind(wx.EVT_MENU, self.OnExit, menu)
 
         # setup menu
         setupMenu = wx.Menu()
 
-        ID_Z_SETUP = wx.NewId()
+        ID_Z_SETUP = wx.Window.NewControlId()
         menu = setupMenu.Append(ID_Z_SETUP, 'Z')
         self.Bind(wx.EVT_MENU, self.OnZSetup, menu)
 
-        ID_X_SETUP = wx.NewId()
+        ID_X_SETUP = wx.Window.NewControlId()
         menu = setupMenu.Append(ID_X_SETUP, 'X')
         self.Bind(wx.EVT_MENU, self.OnXSetup, menu)
 
-        ID_SPINDLE_SETUP = wx.NewId()
+        ID_SPINDLE_SETUP = wx.Window.NewControlId()
         menu = setupMenu.Append(ID_SPINDLE_SETUP, 'Spindle')
         self.Bind(wx.EVT_MENU, self.OnSpindleSetup, menu)
 
-        ID_PORT_SETUP = wx.NewId()
+        ID_PORT_SETUP = wx.Window.NewControlId()
         menu = setupMenu.Append(ID_PORT_SETUP, 'Port')
         self.Bind(wx.EVT_MENU, self.OnPortSetup, menu)
 
-        ID_PORT_SETUP = wx.NewId()
+        ID_PORT_SETUP = wx.Window.NewControlId()
         menu = setupMenu.Append(ID_PORT_SETUP, 'Config')
         self.Bind(wx.EVT_MENU, self.OnConfigSetup, menu)
 
         # operation menu
         operationMenu = wx.Menu()
 
-        ID_TURN = wx.NewId()
+        ID_TURN = wx.Window.NewControlId()
         menu = operationMenu.Append(ID_TURN, 'Turn')
         self.Bind(wx.EVT_MENU, self.OnTurn, menu)
 
-        ID_FACE = wx.NewId()
+        ID_FACE = wx.Window.NewControlId()
         menu = operationMenu.Append(ID_FACE, 'Face')
         self.Bind(wx.EVT_MENU, self.OnFace, menu)
 
-        ID_CUTOFF = wx.NewId()
+        ID_CUTOFF = wx.Window.NewControlId()
         menu = operationMenu.Append(ID_CUTOFF, 'Cutoff')
         self.Bind(wx.EVT_MENU, self.OnCutoff, menu)
 
-        ID_TAPER = wx.NewId()
+        ID_TAPER = wx.Window.NewControlId()
         menu = operationMenu.Append(ID_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTaper, menu)
 
         if STEP_DRV or SPINDLE_ENCODER:
-            ID_THREAD = wx.NewId()
+            ID_THREAD = wx.Window.NewControlId()
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
 
         # test menu
         testMenu = wx.Menu()
 
-        ID_TEST_SPINDLE = wx.NewId()
+        ID_TEST_SPINDLE = wx.Window.NewControlId()
         menu = testMenu.Append(ID_TEST_SPINDLE, 'Spindle')
         self.Bind(wx.EVT_MENU, self.OnTestSpindle, menu)
 
-        ID_TEST_SYNC = wx.NewId()
+        ID_TEST_SYNC = wx.Window.NewControlId()
         menu = testMenu.Append(ID_TEST_SYNC, 'Sync')
         self.Bind(wx.EVT_MENU, self.OnTestSync, menu)
 
-        ID_TEST_TAPER = wx.NewId()
+        ID_TEST_TAPER = wx.Window.NewControlId()
         menu = testMenu.Append(ID_TEST_TAPER, 'Taper')
         self.Bind(wx.EVT_MENU, self.OnTestTaper, menu)
 
-        ID_TEST_MOVE = wx.NewId()
+        ID_TEST_MOVE = wx.Window.NewControlId()
         menu = testMenu.Append(ID_TEST_MOVE, 'Move')
         self.Bind(wx.EVT_MENU, self.OnTestMove, menu)
 
@@ -6427,17 +6428,17 @@ class MainFrame(wx.Frame):
 
     def OnSpindleSetup(self, e):
         if self.spindleDialog is None:
-            self.spindleDialog = Spindleialog(self, self.defaultFont)
+            self.spindleDialog = SpindleDialog(self, self.defaultFont)
         self.showDialog(self.spindleDialog)
 
     def OnPortSetup(self, e):
         if self.portDialog is None:
-            self.portDialog = Portialog(self, self.defaultFont)
+            self.portDialog = PortDialog(self, self.defaultFont)
         self.showDialog(self.portDialog)
         
     def OnConfigSetup(self, e):
         if self.configDialog is None:
-            self.configDialog = Configialog(self, self.defaultFont)
+            self.configDialog = ConfigDialog(self, self.defaultFont)
         self.showDialog(self.configDialog)
 
     def getCurrentPanel(self):
