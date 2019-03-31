@@ -99,6 +99,19 @@ print(sys.version)
 print(wx.version())
 stdout.flush()
 
+cfg = None
+comm = None
+fcy = None
+TEXT = None
+REF = None
+dro = None
+eDro = None
+EXT_DRO = None
+EVT_UPDATE_ID = None
+xDROOffset = None
+zDROOffset = None
+xDROPosition = None
+zDROPosition = None
 f = None
 xSync = None
 zSync = None
@@ -5453,7 +5466,7 @@ class UpdateThread(Thread):
         dbgTbl = [None for i in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
             dbgTbl[index] = action
-        for i, (val) in enumerate(dbgTbl):
+        for i, val in enumerate(dbgTbl):
             if val is None:
                 print("dbgTbl action for %s missing" % (en.dMessageList[i]))
                 stdout.flush()
@@ -6261,7 +6274,7 @@ class MainFrame(wx.Frame):
     def initialConfig(self):
         global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC, \
-            SPINDLE_SYNC_BOARD, SPINDLE_SWITch, SPINDLE_VAR_SPEED, \
+            SPINDLE_SYNC_BOARD, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE
 
         cfg = ConfigInfo(cf.configTable)

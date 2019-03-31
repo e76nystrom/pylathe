@@ -1,5 +1,13 @@
 from sys import stdout
 
+configTable = None
+config = None
+strTable = None
+cmdTable = None
+parmTable = None
+enum = None
+stringList = None
+xRegTable = None
 
 class Setup():
     def __init__(self):
