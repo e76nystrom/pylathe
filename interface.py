@@ -1119,7 +1119,7 @@ if __name__ == '__main__':
     path = os.path.dirname(os.path.realpath(__file__))
 
     fData = True
-    cLoc = path + '/../LatheCPP/include/'
+    cLoc = path + '/../../EclipseCPP/LatheCPP/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
     syncLoc = path + '/../Sync/include/'
 

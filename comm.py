@@ -94,10 +94,10 @@ class Comm():
         if self.ser is None:
             return(None);
         self.commLock.acquire(True)
-        self.ser.write(str.encode(cmdStr))
+        self.ser.write(cmdStr.encode())
         rsp = ""
         while True:
-            tmp = str(self.ser.read(1))
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -176,10 +176,10 @@ class Comm():
         if self.ser is None:
             return
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -230,10 +230,10 @@ class Comm():
         if self.ser is None:
             return
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -256,10 +256,10 @@ class Comm():
             print("%-17s %s" % \
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -296,10 +296,10 @@ class Comm():
         cmd = '\x01%x%s \r' % (command, arg)
         self.cmdLen = len(cmd) - 1
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -331,10 +331,10 @@ class Comm():
             return
         cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -358,10 +358,10 @@ class Comm():
         if self.xDbgPrint:
             pass
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -382,10 +382,10 @@ class Comm():
         if self.xDbgPrint:
             pass
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -435,10 +435,10 @@ class Comm():
         if self.ser is None:
             return
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
@@ -458,10 +458,10 @@ class Comm():
             return(None)
         cmd = '\x01%x \r' % (MOVEQUESTATUS)
         self.commLock.acquire(True)
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
         rsp = "";
         while True:
-            tmp = self.ser.read(1)
+            tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:

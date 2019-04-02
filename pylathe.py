@@ -1281,10 +1281,11 @@ class UpdatePass():
         return(True)
 
     def passDone(self):
-        self.m.drawClose()
-        if STEP_DRV:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
+        m = self.m
+        m.drawClose()
+        if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
+            m.stopSpindle()
+        m.done(ct.PARM_DONE)
         stdout.flush()
 
     def addInit(self, label):
@@ -1299,9 +1300,10 @@ class UpdatePass():
         return(add)
 
     def addDone(self):
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
+        m = self.m
+        if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
+            m.stopSpindle()
+        m.done(ct.PARM_DONE)
         comm.command(cm.CMD_RESUME)
 
     def fixCut(self, offset=0.0):
@@ -1410,7 +1412,7 @@ class Turn(LatheOp, UpdatePass):
             m.queFeedType(ct.FEED_PITCH)
             m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
         else:
-            if SPINDLE_VAR_SPEED  or SPINDLE_SWITCH:
+            if SPINDLE_VAR_SPEED or SPINDLE_SWITCH:
                 m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
             if SPINDLE_ENCODER:
                 m.queFeedType(ct.FEED_PITCH)
@@ -1454,7 +1456,7 @@ class Turn(LatheOp, UpdatePass):
             m.saveXDro()
         if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
-            self.m.quePause(flag)
+            m.quePause(flag)
         if not addPass:
             if m.passNum & 0x300 == 0:
                 m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
@@ -1682,9 +1684,10 @@ class Face(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
+        m = self.m
         if cfg.getBoolInfoData(cf.cfgDraw):
-            self.m.draw("face", self.xStart, self.xEnd)
-            self.m.setTextAngle(90)
+            m.draw("face", self.xStart, self.xEnd)
+            m.setTextAngle(90)
 
         jogPanel.dPrt("\nface runOperation\n")
         self.setup()
@@ -1692,8 +1695,8 @@ class Face(LatheOp, UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.zStart + self.zRetract)
+        m.moveX(self.safeX)
+        m.moveZ(self.zStart + self.zRetract)
 
         self.passDone()
         return(True)
@@ -1709,7 +1712,7 @@ class Face(LatheOp, UpdatePass):
         m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
-        self.m.done(ct.PARM_START)
+        m.done(ct.PARM_START)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.faRPM))
@@ -1775,8 +1778,9 @@ class Face(LatheOp, UpdatePass):
         self.calcPass(True)
         moveCommands.nextPass(self.passCount)
         self.runPass(True)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.zStart + self.zRetract)
+        m = self.m
+        m.moveX(self.safeX)
+        m.moveZ(self.zStart + self.zRetract)
         self.addDone()
 
     def fixCut(self, offset=0.0): # turn
@@ -1937,17 +1941,18 @@ class Cutoff(LatheOp):
         self.cutoffZ = self.zCutoff - self.toolWidth
 
         self.passSize[0] = self.cutoffZ
+        m = self.m
         if cfg.getBoolInfoData(cf.cfgDraw):
-            self.m.draw("cutoff", self.xStart, self.zStart)
+            m.draw("cutoff", self.xStart, self.zStart)
 
         self.setup()
 
         if self.panel.pause.GetValue():
-            self.m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
+            m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
             
-        self.m.moveX(self.xEnd, ct.CMD_SYN)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.zStart)
+        m.moveX(self.xEnd, ct.CMD_SYN)
+        m.moveX(self.safeX)
+        m.moveZ(self.zStart)
 
         self.passDone()
         return(True)
@@ -1957,7 +1962,7 @@ class Cutoff(LatheOp):
 
         m.queInit()
         m.quePause()
-        self.m.done(ct.PARM_START)
+        m.done(ct.PARM_START)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
@@ -2136,7 +2141,7 @@ class Taper(LatheOp, UpdatePass):
         m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-        self.m.done(ct.PARM_START)
+        m.done(ct.PARM_START)
         
         if self.taperX:
             m.saveTaper(self.taper)
@@ -2208,8 +2213,9 @@ class Taper(LatheOp, UpdatePass):
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
+        m = self.m
         if cfg.getBoolInfoData(cf.cfgDraw):
-            self.m.draw("taper", self.zStart, self.taper)
+            m.draw("taper", self.zStart, self.taper)
 
         jogPanel.dPrt("\ntaper nexternalRunOperation\n")
         self.setup()
@@ -2217,9 +2223,9 @@ class Taper(LatheOp, UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printXText("%2d %7.4f %7.4f", LEFT, False)
-        self.m.printZText("%2d %7.4f", LEFT|MIDDLE)
-        self.m.moveZ(self.safeZ)
+        m.printXText("%2d %7.4f %7.4f", LEFT, False)
+        m.printZText("%2d %7.4f", LEFT|MIDDLE)
+        m.moveZ(self.safeZ)
 
         self.passDone()
         return(True)
@@ -2304,15 +2310,13 @@ class Taper(LatheOp, UpdatePass):
         self.cutAmount += add
         self.setup(True)
         self.externalCalcPass(True)
-        self.m.nextPass(self.passCount)
+        m = self.m
+        m.nextPass(self.passCount)
         self.externalRunPass(True)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.startZ)
-        if STEP_DRV or MOTOR_TEST:
-            self.m.stopSpindle()
-        self.m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
-
+        m.moveX(self.safeX)
+        m.moveZ(self.startZ)
+        self.addDone()
+            
     def fixCut(self, offset=0.0): # taper
         if offset == 0:
             actual = float(jogPanel.xPos.GetValue())
@@ -2347,8 +2351,9 @@ class Taper(LatheOp, UpdatePass):
         self.safeX = self.boreRadius - self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
+        m = self.m
         if cfg.getBoolInfoData(cf.cfgDraw):
-            self.m.draw("taper", self.zStart, self.taper)
+            m.draw("taper", self.zStart, self.taper)
 
         jogPanel.dPrt("\ntaper internalRunOperation\n")
         self.setup()
@@ -2356,10 +2361,10 @@ class Taper(LatheOp, UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.printXText("%2d %7.4f %7.4f", LEFT, True)
-        self.m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.safeZ)
+        m.printXText("%2d %7.4f %7.4f", LEFT, True)
+        m.printZText("%2d %7.4f %7.4f %7.4f", RIGHT|MIDDLE)
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
 
         self.passDone()
         return(True)
@@ -2416,11 +2421,12 @@ class Taper(LatheOp, UpdatePass):
         self.cutAmount += add
         self.setup(True)
         self.internalCalcPass(True)
-        self.m.nextPass(self.passCount)
+        m = self.m
+        m.nextPass(self.passCount)
         self.internalRunPass(True)
-        self.m.moveX(self.safeX)
-        self.m.moveZ(self.safeZ)
-        self.addDone()
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+        addDone()
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -2859,7 +2865,7 @@ class ScrewThread(LatheOp, UpdatePass):
         m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
-        self.m.done(ct.PARM_START)
+        m.done(ct.PARM_START)
 
         th = self.panel
         if STEP_DRV:
@@ -3758,7 +3764,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.dbg = None
 
     def dPrt(self, text, console=False, flush=False):
-        self.dbg.write(text)
+        self.dbg.write(text.encode())
         if flush:
             self.dbg.flush()
         if console:
@@ -5354,7 +5360,7 @@ class UpdateThread(Thread):
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(file, "wb")
         t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
-        self.dbg.write(t)
+        self.dbg.write(t.encode())
         self.dbg.flush()
 
     def closeDbg(self):
@@ -5558,7 +5564,7 @@ class UpdateThread(Thread):
                                     print(t + output)
                                     stdout.flush()
                                 else:
-                                    self.dbg.write(t + output + "\n")
+                                    self.dbg.write((t + output + "\n").encode())
                                     self.dbg.flush()
                             # if cmd == en.D_DONE:
                             #     if val == 0:
