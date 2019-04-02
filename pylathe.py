@@ -938,52 +938,50 @@ def xilinxTestMode():
 
 def sendSpindleData(send=False, rpm=None):
     global spindleDataSent
+    queParm = comm.queParm
     try:
         if send or (not spindleDataSent):
-            comm.queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
-            comm.queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
-            comm.queParm(pm.SPINDLE_ENCODER, \
-                         cfg.getBoolInfoData(cf.cfgSpEncoder))
-            comm.queParm(pm.SPINDLE_SYNC, \
-                         cfg.getBoolInfoData(cf.cfgSpSync))
-            comm.queParm(pm.SPINDLE_SYNC_BOARD, \
-                         cfg.getBoolInfoData(cf.cfgSpSyncBoard))
-            comm.queParm(pm.USE_ENCODER, \
-                         cfg.getBoolInfoData(cf.cfgSpUseEncoder))
+            queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
+            queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
+            queParm(pm.SPINDLE_ENCODER, cfg.getBoolInfoData(cf.cfgSpEncoder))
+            queParm(pm.SPINDLE_SYNC, cfg.getBoolInfoData(cf.cfgSpSync))
+            queParm(pm.SPINDLE_SYNC_BOARD, \
+                    cfg.getBoolInfoData(cf.cfgSpSyncBoard))
+            queParm(pm.USE_ENCODER, cfg.getBoolInfoData(cf.cfgSpUseEncoder))
             if STEP_DRV or MOTOR_TEST:
-                comm.queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
-                comm.queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
-                comm.queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
+                queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
+                queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
+                queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
                 # if rpm is not None:
-                #     comm.queParm(pm.SP_MAX_RPM, rpm)
+                #     queParm(pm.SP_MAX_RPM, rpm)
                 # else:
-                #     comm.queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                #     queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
 
-                comm.queParm(pm.SP_ACCEL, cfg.getInfoData(cf.spAccel))
-                comm.queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
-                comm.queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
+                queParm(pm.SP_ACCEL, cfg.getInfoData(cf.spAccel))
+                queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
+                queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
 
-                comm.queParm(pm.SP_JOG_TIME_INITIAL, \
-                             cfg.getInfoData(cf.spJTimeInitial))
-                comm.queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
-                comm.queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
+                queParm(pm.SP_JOG_TIME_INITIAL, \
+                        cfg.getInfoData(cf.spJTimeInitial))
+                queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
+                queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
 
-                comm.queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
-                comm.queParm(pm.SP_TEST_INDEX, \
-                             cfg.getBoolInfoData(cf.spTestIndex))
+                queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
+                queParm(pm.SP_TEST_INDEX, \
+                        cfg.getBoolInfoData(cf.spTestIndex))
                 count = (cfg.getIntInfoData(cf.spMotorSteps) * \
                          cfg.getIntInfoData(cf.spMicroSteps))
-                comm.queParm(pm.ENC_PER_REV, count)
+                queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
                 if MOTOR_TEST and SPINDLE_ENCODER:
-                    comm.queParm(pm.SP_TEST_ENCODER, \
-                                 cfg.getBoolInfoData(cf.spTestEncoder))
+                    queParm(pm.SP_TEST_ENCODER, \
+                            cfg.getBoolInfoData(cf.spTestEncoder))
             elif XILINX:
-                comm.queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                comm.queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
-                comm.queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
+                queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
+                queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
                 xilinxTestMode()
-                comm.queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
+                queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
                 cfgReg = 0
                 if cfg.getBoolInfoData(cf.cfgInvEncDir):
                     cfgReg |= xb.ENC_POL
@@ -991,7 +989,7 @@ def sendSpindleData(send=False, rpm=None):
                     cfgReg |= xb.ZDIR_POL
                 if cfg.getBoolInfoData(cf.xInvDir):
                     cfgReg |= xb.XDIR_POL
-                comm.queParm(pm.X_CFG_REG, cfgReg)
+                queParm(pm.X_CFG_REG, cfgReg)
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
@@ -999,25 +997,26 @@ def sendSpindleData(send=False, rpm=None):
                     zSync.setEncoder(count)
                     if SPINDLE_SYNC_BOARD:
                         xSync.setEncoder(count)
-                comm.queParm(pm.ENC_PER_REV, count)
+                queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
 
             if SPINDLE_VAR_SPEED:
+                queParm(pm.PWM_FREQ, cfg.getIntInfoData(cf.spPWMFreq))
                 range = cfg.getIntInfoData(cf.spCurRange)
                 if range >= 1 and range <= cfg.getIntInfoData(cf.spRanges):
                     range -= 1
-                    comm.queParm(pm.MIN_SPEED, \
-                                 cfg.getIntInfoData(cf.spRangeMin1 + range))
-                    comm.queParm(pm.MAX_SPEED, \
-                                 cfg.getIntInfoData(cf.spRangeMax1 + range))
+                    queParm(pm.MIN_SPEED, \
+                            cfg.getIntInfoData(cf.spRangeMin1 + range))
+                    queParm(pm.MAX_SPEED, \
+                            cfg.getIntInfoData(cf.spRangeMax1 + range))
                 else:
-                    comm.queParm(pm.MIN_SPEED, 0)
-                    comm.queParm(pm.MAX_SPEED, 0)
+                    queParm(pm.MIN_SPEED, 0)
+                    queParm(pm.MAX_SPEED, 0)
             if STEP_DRV or MOTOR_TEST or SPINDLE_VAR_SPEED:
                 if rpm is not None:
-                    comm.queParm(pm.SP_MAX_RPM, rpm)
+                    queParm(pm.SP_MAX_RPM, rpm)
                 else:
-                    comm.queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                    queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
 
             comm.command(cm.CMD_SPSETUP)
             spindleDataSent = True
@@ -1026,6 +1025,7 @@ def sendSpindleData(send=False, rpm=None):
 
 def sendZData(send=False):
     global zDataSent
+    queParm = comm.queParm
     try:
         pitch = cfg.getDistInfoData(cf.zPitch)
         motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
@@ -1047,8 +1047,8 @@ def sendZData(send=False):
 
         if send or (not zDataSent):
             if DRO:
-                comm.queParm(pm.Z_DRO_INCH, jogPanel.zDROInch)
-                comm.queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
+                queParm(pm.Z_DRO_INCH, jogPanel.zDROInch)
+                queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -1057,30 +1057,30 @@ def sendZData(send=False):
                     val = 0.020
             except ValueError:
                 val = cfg.getFloatInfoData(cf.zMpgInc)
-            comm.queParm(pm.Z_MPG_INC, int(val * stepsInch))
-            comm.queParm(pm.Z_MPG_MAX, \
+            queParm(pm.Z_MPG_INC, int(val * stepsInch))
+            queParm(pm.Z_MPG_MAX, \
                          int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
-            comm.queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
-            comm.queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
-            comm.queParm(pm.Z_MICRO, cfg.getInfoData(cf.zMicroSteps))
-            comm.queParm(pm.Z_MOTOR, cfg.getInfoData(cf.zMotorSteps))
-            comm.queParm(pm.Z_ACCEL, cfg.getInfoData(cf.zAccel))
-            comm.queParm(pm.Z_BACKLASH, cfg.getInfoData(cf.zBacklash))
+            queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
+            queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
+            queParm(pm.Z_MICRO, cfg.getInfoData(cf.zMicroSteps))
+            queParm(pm.Z_MOTOR, cfg.getInfoData(cf.zMotorSteps))
+            queParm(pm.Z_ACCEL, cfg.getInfoData(cf.zAccel))
+            queParm(pm.Z_BACKLASH, cfg.getInfoData(cf.zBacklash))
 
-            comm.queParm(pm.Z_MOVE_MIN, cfg.getInfoData(cf.zMinSpeed))
-            comm.queParm(pm.Z_MOVE_MAX, cfg.getInfoData(cf.zMaxSpeed))
+            queParm(pm.Z_MOVE_MIN, cfg.getInfoData(cf.zMinSpeed))
+            queParm(pm.Z_MOVE_MAX, cfg.getInfoData(cf.zMaxSpeed))
 
-            comm.queParm(pm.Z_JOG_MIN, cfg.getInfoData(cf.zJogMin))
-            comm.queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
+            queParm(pm.Z_JOG_MIN, cfg.getInfoData(cf.zJogMin))
+            queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
 
-            comm.queParm(pm.JOG_TIME_INITIAL,\
+            queParm(pm.JOG_TIME_INITIAL,\
                          cfg.getFloatInfoData(cf.jogTimeInitial))
-            comm.queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
-            comm.queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
+            queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+            queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
 
-            comm.queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
-            comm.queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
+            queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
+            queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
 
             comm.command(cm.CMD_ZSETUP)
 
@@ -1094,6 +1094,7 @@ def sendZData(send=False):
 
 def sendXData(send=False):
     global xDataSent
+    queParm = comm.queParm
     try:
         pitch = cfg.getDistInfoData(cf.xPitch)
         motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
@@ -1120,8 +1121,8 @@ def sendXData(send=False):
 
         if send or (not xDataSent):
             if DRO:
-                comm.queParm(pm.X_DRO_INCH, jogPanel.xDROInch)
-                comm.queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
+                queParm(pm.X_DRO_INCH, jogPanel.xDROInch)
+                queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -1130,30 +1131,30 @@ def sendXData(send=False):
                     val = 0.020
             except ValueError:
                 val = cfg.getFloatInfoData(cf.xMpgInc)
-            comm.queParm(pm.X_MPG_INC, int(val * stepsInch))
-            comm.queParm(pm.X_MPG_MAX, \
+            queParm(pm.X_MPG_INC, int(val * stepsInch))
+            queParm(pm.X_MPG_MAX, \
                          int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
-            comm.queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
-            comm.queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
-            comm.queParm(pm.X_MICRO, cfg.getInfoData(cf.xMicroSteps))
-            comm.queParm(pm.X_MOTOR, cfg.getInfoData(cf.xMotorSteps))
-            comm.queParm(pm.X_ACCEL, cfg.getInfoData(cf.xAccel))
-            comm.queParm(pm.X_BACKLASH, cfg.getInfoData(cf.xBacklash))
+            queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
+            queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
+            queParm(pm.X_MICRO, cfg.getInfoData(cf.xMicroSteps))
+            queParm(pm.X_MOTOR, cfg.getInfoData(cf.xMotorSteps))
+            queParm(pm.X_ACCEL, cfg.getInfoData(cf.xAccel))
+            queParm(pm.X_BACKLASH, cfg.getInfoData(cf.xBacklash))
 
-            comm.queParm(pm.X_MOVE_MIN, cfg.getInfoData(cf.xMinSpeed))
-            comm.queParm(pm.X_MOVE_MAX, cfg.getInfoData(cf.xMaxSpeed))
+            queParm(pm.X_MOVE_MIN, cfg.getInfoData(cf.xMinSpeed))
+            queParm(pm.X_MOVE_MAX, cfg.getInfoData(cf.xMaxSpeed))
 
-            comm.queParm(pm.X_JOG_MIN, cfg.getInfoData(cf.xJogMin))
-            comm.queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
+            queParm(pm.X_JOG_MIN, cfg.getInfoData(cf.xJogMin))
+            queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
 
-            comm.queParm(pm.JOG_TIME_INITIAL,\
+            queParm(pm.JOG_TIME_INITIAL,\
                          cfg.getFloatInfoData(cf.jogTimeInitial))
-            comm.queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
-            comm.queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
+            queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+            queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
 
-            comm.queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
-            comm.queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
+            queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
+            queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
 
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
@@ -1162,8 +1163,8 @@ def sendXData(send=False):
                 end = str(int(cfg.getFloatInfoData(cf.xHomeEnd) * stepsInch))
                 if end > start:
                     (start, end) = (end, start)
-                comm.queParm(pm.X_HOME_START, start)
-                comm.queParm(pm.X_HOME_END, end)
+                queParm(pm.X_HOME_START, start)
+                queParm(pm.X_HOME_END, end)
 
             comm.command(cm.CMD_XSETUP)
             xDataSent = True
@@ -6724,6 +6725,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             )
         if SPINDLE_VAR_SPEED:
             self.fields += ( \
+                ("PWM Frequency", cf.spPWMFreq, None), \
                 ("Current Range", cf.spCurRange, None), \
                 ("Speed Ranges", cf.spRanges, None), \
             )

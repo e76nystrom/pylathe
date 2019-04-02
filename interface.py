@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python27/Python.exe
+#!/cygdrive/c/Python37/Python.exe
 
 configList = \
 ( \
@@ -118,6 +118,7 @@ configList = \
     ('spMinRPM', 'spindle minimum rpm'),
     ('spMotorSteps', 'spindle motor stpes per revolution'),
     ('spMotorTest', 'use stepper drive to test motor'),
+    ('spPWMFreq', 'spindle pwm frequency'),
 
     ('spRangeMin1', 'spindle speed range 1 minimum'),
     ('spRangeMin2', 'spindle speed range 2 minimum'),
@@ -634,6 +635,7 @@ parmList = \
 
     "motor and speed control",
  
+    ("PWM_FREQ", "spindle speed pwm frequency", "int16_t"),
     ("MIN_SPEED", "minimum speed for current range", "int16_t"),
     ("MAX_SPEED", "maximum speed for current range", "int16_t"),
 
