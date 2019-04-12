@@ -2431,7 +2431,7 @@ class Taper(LatheOp, UpdatePass):
         self.internalRunPass(True)
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        addDone()
+        self.addDone()
 
 class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
@@ -4907,15 +4907,11 @@ class PosMenu(wx.Menu):
         self.jP = jP
         self.axis = axis
  
-        entries=[]
         active = jogPanel.currentPanel.active
         if not active:
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Set")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnSet, item)
-            entry = wx.AcceleratorEntry()
-            entry.Set(wx.ACCEL_NORMAL, ord('s'), item.GetId())
-            entries.append(entry)
 
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Zero")
             self.Append(item)
@@ -4948,9 +4944,6 @@ class PosMenu(wx.Menu):
                 item = wx.MenuItem(self, wx.Window.NewControlId(), "DRO Diam")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
-        accel = wx.AcceleratorTable(entries)
-        mainFrame.SetAcceleratorTable(accel)
-
 
     def getPosCtl(self):
         ctl = self.jP.zPos if self.axis == AXIS_Z else \
