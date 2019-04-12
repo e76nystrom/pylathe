@@ -164,6 +164,7 @@ class FormRoutines():
         self.prefix = ""
         self.focusField = None
         self.formatList = None
+        self.width = 60 if WINDOWS else 75
 
     def formatData(self, formatList):
         if formatList is None:
@@ -254,14 +255,16 @@ class FormRoutines():
             if keyText is not None:
                 cfg.initInfo(keyText, txt)
 
-        tc = wx.TextCtrl(self, -1, "", size=(60, -1), \
+        tc = wx.TextCtrl(self, -1, "", size=(self.width, -1), \
                          style=wx.TE_PROCESS_ENTER)
         tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
         sizer.Add(tc, flag=wx.ALL, border=2)
         cfg.initInfo(key, tc)
         return(tc, txt)
 
-    def addField(self, sizer, label, index, size=(60, -1)):
+    def addField(self, sizer, label, index, size=None):
+        if size is None:
+            size = (self.width, -1)
         if label is not None:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
@@ -432,6 +435,7 @@ class ActionRoutines():
     def OnShow(self, e):
         if done:
             return
+        # print("OnShow %s %d" % (str(self.IsShown()), self.op))
         if self.IsShown():
             jogPanel.currentPanel = self
             jogPanel.currentControl = self.control
@@ -1507,7 +1511,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(self, -1, "Turn")
+        txt = wx.StaticText(self, -1, "Turn", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
@@ -1802,7 +1806,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(self, -1, "Face")
+        txt = wx.StaticText(self, -1, "Face", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
@@ -1984,7 +1988,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(self, -1, "Cutoff")
+        txt = wx.StaticText(self, -1, "Cutoff", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
@@ -2463,7 +2467,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(self, -1, "Taper")
+        txt = wx.StaticText(self, -1, "Taper", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
@@ -3181,7 +3185,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        txt = wx.StaticText(self, -1, "Thread")
+        txt = wx.StaticText(self, -1, "Thread", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
@@ -4882,11 +4886,16 @@ class PosMenu(wx.Menu):
         wx.Menu.__init__(self)
         self.jP = jP
         self.axis = axis
+ 
+        entries=[]
         active = jogPanel.currentPanel.active
         if not active:
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Set")
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnSet, item)
+            entry = wx.AcceleratorEntry()
+            entry.Set(wx.ACCEL_NORMAL, ord('s'), item.GetId())
+            entries.append(entry)
 
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Zero")
             self.Append(item)
@@ -4919,6 +4928,9 @@ class PosMenu(wx.Menu):
                 item = wx.MenuItem(self, wx.Window.NewControlId(), "DRO Diam")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
+        accel = wx.AcceleratorTable(entries)
+        mainFrame.SetAcceleratorTable(accel)
+
 
     def getPosCtl(self):
         ctl = self.jP.zPos if self.axis == AXIS_Z else \
