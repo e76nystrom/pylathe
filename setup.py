@@ -1,6 +1,17 @@
 from sys import stdout
 
+configTable = None
+config = None
+strTable = None
+cmdTable = None
+parmTable = None
+enum = None
+stringList = None
+xRegTable = None
 
+def fWrite(f, txt):
+    f.write(txt.encode())
+    
 class Setup():
     def __init__(self):
         self.importList = []
@@ -28,7 +39,7 @@ class Setup():
         if self.file:
             file = 'configDef'
             f = open(file + '.py', 'wb')
-            f.write("# config table\n")
+            fWrite(f, "# config table\n")
         index = 0
         for data in configList:
             if len(data) == 2:
@@ -42,20 +53,20 @@ class Setup():
                     configTable.append(name)
                     if f is not None:
                         tmp = "%s = %3d" % (name.ljust(16), index)
-                        f.write("%s# %s\n" % (tmp.ljust(32), comment))
+                        fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                 index += 1
             else:
                 if f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            f.write("\nconfig = { \\\n")
+            fWrite(f, "\nconfig = { \\\n")
             for key in config:
-                f.write("    '%s' : %d,\n" % (key, config[key]))
-            f.write("    }\n")
-            f.write("\nconfigTable = ( \\\n")
+                fWrite(f, "    '%s' : %d,\n" % (key, config[key]))
+            fWrite(f, "    }\n")
+            fWrite(f, "\nconfigTable = ( \\\n")
             for val in configTable:
-                f.write("    '%s',\n" % (val))
-            f.write("    )\n")
+                fWrite(f, "    '%s',\n" % (val))
+            fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
         self.importList += imports
@@ -73,7 +84,7 @@ class Setup():
         if self.file:
             file = 'stringDef'
             f = open(file + '.py', 'wb')
-            f.write("\n# string table\n\n")
+            fWrite(f, "\n# string table\n\n")
         for i, (name, value) in enumerate(strList):
             config[name] = i
             if name in globals():
@@ -84,12 +95,12 @@ class Setup():
                 strTable.append(value)
                 if f is not None:
                     tmp = "%s = %2d" % (name.ljust(20), i)
-                    f.write("%s# %s\n" % (tmp.ljust(32), value))
+                    fWrite(f, "%s# %s\n" % (tmp.ljust(32), value))
         if f is not None:
-            f.write("\nstrTable = ( \\\n")
+            fWrite(f, "\nstrTable = ( \\\n")
             for s in strTable:
-                f.write("    \"%s\", \\\n" % (s))
-            f.write("    )\n")
+                fWrite(f, "    \"%s\", \\\n" % (s))
+            fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
         self.strImports = imports
@@ -104,14 +115,14 @@ class Setup():
         cmdTable = []
         if fData:
             cFile = open(cLoc + 'cmdList.h', 'wb')
-            cFile.write("enum COMMANDS\n{\n");
+            fWrite(cFile, "enum COMMANDS\n{\n");
             # jFile = open(jLoc + 'Cmd.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public enum Cmd\n{\n");
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public enum Cmd\n{\n");
         f = None
         if self.file:
             f = open(file + '.py', 'wb')
-            f.write("\n# commands\n")
+            fWrite(f, "\n# commands\n")
         index = 0
         for i in range(len(cmdList)):
             data = cmdList[i]
@@ -124,9 +135,9 @@ class Setup():
                         action = None
                     if fData:
                         tmp = " %s, " % (regName)
-                        cFile.write("%s/* 0x%02x %s */\n" % 
+                        fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                     (tmp.ljust(32), index, regComment))
-                        # jFile.write("%s/* 0x%02x %s */\n" % 
+                        # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
                         #             (tmp.ljust(32), index, regComment))
                     cmdTable.append((regName, action))
                     if regName in globals():
@@ -135,31 +146,31 @@ class Setup():
                         globals()[regName] = index
                         imports.append(regName)
                         if f is not None:
-                            f.write("%s = %3d\n" % (regName.ljust(20), index))
+                            fWrite(f, "%s = %3d\n" % (regName.ljust(20), index))
                     index += 1
             else:
                 if fData:
                     if (len(data) > 0):
-                        cFile.write("\n// %s\n\n" % (data))
-                        # jFile.write("\n// %s\n\n" % (data))
+                        fWrite(cFile, "\n// %s\n\n" % (data))
+                        # fWrite(jFile, "\n// %s\n\n" % (data))
                     else:
-                        cFile.write("\n")
-                        # jFile.write("\n")
+                        fWrite(cFile, "\n")
+                        # fWrite(jFile, "\n")
                 if f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            f.write("\n# command table\n\n")
-            f.write("cmdTable = ( \\\n")
+            fWrite(f, "\n# command table\n\n")
+            fWrite(f, "cmdTable = ( \\\n")
             for index, (regName, action) in enumerate(cmdTable):
                 tmp = "    (\"%s\", \"%s\")," % (regName, action)
-                f.write("%s# %3d\n" % (tmp.ljust(40), index))
-            f.write("    )\n")
+                fWrite(f, "%s# %3d\n" % (tmp.ljust(40), index))
+            fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
         if fData:
-            cFile.write("};\n")
+            fWrite(cFile, "};\n")
             cFile.close()
-            # jFile.write("};\n")
+            # fWrite(jFile, "};\n")
             # jFile.close()
             # for key in cmds:
             #    print(key, cmds[key])
@@ -175,17 +186,17 @@ class Setup():
         imports.append("parmTable")
         if fData:
             cFile = open(cLoc + 'parmList.h', 'wb')
-            cFile.write("enum PARM\n{\n")
+            fWrite(cFile, "enum PARM\n{\n")
             c1File = open(cLoc + 'remparm.h', 'wb')
-            c1File.write("T_PARM remparm[] =\n{\n")
+            fWrite(c1File, "T_PARM remparm[] =\n{\n")
             c2File = open(cLoc + 'remvardef.h', 'wb')
             # jFile = open(jLoc + 'Parm.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public enum Parm\n{\n")
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public enum Parm\n{\n")
         f = None
         if self.file:
             f = open(file + '.py', 'wb')
-            f.write("\n# parameters\n")
+            fWrite(f, "\n# parameters\n")
         index = 0
         for i in range(len(parmList)):
             data = parmList[i]
@@ -212,17 +223,17 @@ class Setup():
                     regAct = data[3]
                 if fData:
                     tmp = " %s, " % (regName)
-                    cFile.write("%s/* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment))
                     # tmp = " PARM(%s, %s), " % (varName, regAct)
                     tmp = " PARM(%s), " % (varName)
-                    c1File.write("%s/* 0x%02x %s */\n" % 
+                    fWrite(c1File, "%s/* 0x%02x %s */\n" % 
                                  (tmp.ljust(32), index, regComment))
                     tmp = " EXT %s %s;" % (varType, varName)
-                    c2File.write("%s/* 0x%02x %s */\n" % 
+                    fWrite(c2File, "%s/* 0x%02x %s */\n" % 
                                  (tmp.ljust(32), index, regComment))
                     tmp = "  %s, " % (regName)
-                    # jFile.write("%s/* 0x%02x %s */\n" % 
+                    # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment))
                 parmTable.append((regName, varType, varName))
                 if regName in globals():
@@ -231,30 +242,30 @@ class Setup():
                     globals()[regName] = index
                     imports.append(regName)
                     if f is not None:
-                        f.write("%s = %3d\n" % (regName.ljust(20), index))
+                        fWrite(f, "%s = %3d\n" % (regName.ljust(20), index))
                 index += 1
             else:
                 if fData:
-                    cFile.write("\n// %s\n\n" % (data))
-                    c1File.write("\n// %s\n\n" % (data))
-                    c2File.write("\n// %s\n\n" % (data))
-                    # jFile.write("\n// %s\n\n" % (data))
+                    fWrite(cFile, "\n// %s\n\n" % (data))
+                    fWrite(c1File, "\n// %s\n\n" % (data))
+                    fWrite(c2File, "\n// %s\n\n" % (data))
+                    # fWrite(jFile, "\n// %s\n\n" % (data))
                 if f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            f.write("\nparmTable = ( \\\n")
+            fWrite(f, "\nparmTable = ( \\\n")
             for val in parmTable:
-                f.write("    ('%s', '%s', '%s'),\n" % (val))
-            f.write("    )\n")
+                fWrite(f, "    ('%s', '%s', '%s'),\n" % (val))
+            fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
         if fData:
-            cFile.write("};\n")
+            fWrite(cFile, "};\n")
             cFile.close()
-            c1File.write("};\n")
+            fWrite(c1File, "};\n")
             c1File.close()
             c2File.close()
-            # jFile.write("};\n")
+            # fWrite(jFile, "};\n")
             # jFile.close()
 
         #for key in parms:
@@ -269,13 +280,13 @@ class Setup():
         if fData:
             cFile = open(cLoc + 'ctlstates.h', 'wb')
             # jFile = open(jLoc + 'CtlStates.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public class CtlStates\n{\n");
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public class CtlStates\n{\n");
         f = None
         if self.file:
             file = 'enumDef'
             f = open(file + '.py', 'wb')
-            f.write("\n# enums\n")
+            fWrite(f, "\n# enums\n")
         val = 0
         for i in range(len(enumList)):
             data = enumList[i]
@@ -285,9 +296,9 @@ class Setup():
                 comment = data[1]
                 if fData:
                     tmp =  " %s, " % (state)
-                    cFile.write("%s/* %2d x%02x %s */\n" % \
+                    fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                 (tmp.ljust(32), val, val, comment));
-                    # jFile.write('  "%-10s %s", \n' % (state, comment));
+                    # fWrite(jFile, '  "%-10s %s", \n' % (state, comment));
                 if state in globals():
                     print("createCtlStates %s already defined" % state)
                 else:
@@ -297,7 +308,7 @@ class Setup():
                     stringList.append((state, comment))
                     if f is not None:
                         tmp = "%s = %2d" % (state.ljust(16), val)
-                        f.write("%s# %s\n" % (tmp.ljust(32), comment))
+                        fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                 val += 1
             else:
                 if data.startswith("enum"):
@@ -312,40 +323,41 @@ class Setup():
                     val = 0
                     stringList = []
                     if fData:
-                        cFile.write("enum %s\n" % (var.upper()))
+                        fWrite(cFile, "enum %s\n" % (var.upper()))
                         # tmp =  " public static final String[] %s = \n" % \
                         #    (var])
-                        # jFile.write(tmp)
+                        # fWrite(jFile, tmp)
                 elif data.startswith("{") or data.startswith("}"):
                     if fData:
-                        cFile.write("%s\n" % (data))
+                        fWrite(cFile, "%s\n" % (data))
                         if data.startswith("}"):
-                            cFile.write("\n#ifdef ENUM_%s\n\n" % (var.upper()))
-                            cFile.write("const char *%s[] = \n{\n" % (enum))
+                            fWrite(cFile, "\n#ifdef ENUM_%s\n\n" % \
+                                   (var.upper()))
+                            fWrite(cFile, "const char *%s[] = \n{\n" % (enum))
                             for index, (s, comment) in enumerate(stringList):
                                 tmp =  " \"%s\", " % (s)
-                                cFile.write("%s/* %2d x%02x %s */\n" % \
+                                fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                             (tmp.ljust(32), index, \
                                              index, comment))
-                            cFile.write("};\n\n#endif\n")
-                        # jFile.write(" %s\n" % (data))
+                            fWrite(cFile, "};\n\n#endif\n")
+                        # fWrite(jFile, " %s\n" % (data))
                     if data.startswith("}") and f is not None:
-                        f.write("\n%s = ( \\\n" % (enum))
+                        fWrite(f, "\n%s = ( \\\n" % (enum))
                         for s in eval(enum):
-                            f.write("    \"%s\",\n" % (s))
-                        f.write("    )\n")
+                            fWrite(f, "    \"%s\",\n" % (s))
+                        fWrite(f, "    )\n")
                 else:
                     if fData:
-                        cFile.write("\n// %s\n\n" % (data))
-                        # jFile.write("\n // %s\n\n" % (data))
+                        fWrite(cFile, "\n// %s\n\n" % (data))
+                        # fWrite(jFile, "\n // %s\n\n" % (data))
                     if f is not None:
-                        f.write("\n# %s\n\n" % (data))
+                        fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
             # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.close()
-            # jFile.write("};\n")
+            # fWrite(jFile, "};\n")
             # jFile.close()
         self.enumImports = imports
         self.importList += imports
@@ -355,13 +367,13 @@ class Setup():
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public class CtlBits\n{\n");
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public class CtlBits\n{\n");
         f = None
         if self.file:
             file ='ctlBitDef'
             f = open(file + '.py', 'wb')
-            f.write("\n# bit definitions\n")
+            fWrite(f, "\n# bit definitions\n")
         for i in range(len(regList)):
             data = regList[i]
             # if not isinstance(data, basestring):
@@ -370,10 +382,10 @@ class Setup():
                 if fData:
                     tmp =  "#define %-12s %s" % (var, val)
                     bitVal = eval(val)
-                    cFile.write("%s /* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s /* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), bitVal, comment));
                     tmp =  " public static final int %-10s = %s;" % (var, val)
-                    # jFile.write("%s /* %s */\n" % 
+                    # fWrite(jFile, "%s /* %s */\n" % 
                     #             (tmp, comment));
                 if var in globals():
                     print("createctlBits %s already defined" % var)
@@ -382,19 +394,19 @@ class Setup():
                     imports.append(var)
                     if f is not None:
                         tmp = "%s = %s" % (var.ljust(16), val)
-                        f.write("%s# %s\n" % (tmp.ljust(32), comment))
+                        fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
             else:
                 if fData:
-                    cFile.write("\n// %s\n\n" % (data))
-                    # jFile.write("\n// %s\n\n" % (data))
+                    fWrite(cFile, "\n// %s\n\n" % (data))
+                    # fWrite(jFile, "\n// %s\n\n" % (data))
                 if f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
             f.close()
         if fData:
             # self.listImports(file, imports)
             cFile.close()
-            # jFile.write("};\n")
+            # fWrite(jFile, "};\n")
             # jFile.close()
         self.enumImports = imports
         self.importList += imports
@@ -408,21 +420,21 @@ class Setup():
         imports.append(table)
         if fData:
             cFile = open(cLoc + cName + 'reg.h', 'wb')
-            cFile.write("enum " + cName.upper() + "\n{\n");
+            fWrite(cFile, "enum " + cName.upper() + "\n{\n");
             try:
                 xFile = open(xLoc + xName + '.vhd', 'wb')
             except (OSError, IOError) as e:
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
-                xFile.write("library IEEE;\n")
-                xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
-                xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
-                xFile.write("package RegDef is\n\n")
-                xFile.write("constant opb : positive := 8;\n\n")
+                fWrite(xFile, "library IEEE;\n")
+                fWrite(xFile, "use IEEE.STD_LOGIC_1164.all;\n")
+                fWrite(xFile, "use IEEE.NUMERIC_STD.ALL;\n\n")
+                fWrite(xFile, "package RegDef is\n\n")
+                fWrite(xFile, "constant opb : positive := 8;\n\n")
             # jFile = open(jLoc + 'Xilinx.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public enum Xilinx\n {\n");
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public enum Xilinx\n {\n");
             # j1File = open(jLoc + 'XilinxStr.java', 'wb')
             # j1File.write("package lathe;\n\n");
             # j1File.write("public class XilinxStr\n{\n");
@@ -430,7 +442,7 @@ class Setup():
         f = None
         if self.file:
             f = open(pName + '.py', 'wb')
-            f.write("\n# xilinx registers\n\n")
+            fWrite(f, "\n# xilinx registers\n\n")
         index = 0
         for i in range(len(xilinxList)):
             data = xilinxList[i]
@@ -439,15 +451,15 @@ class Setup():
                 (regName, regComment) = data
                 if fData:
                     tmp = " %s, " % (regName)
-                    cFile.write("%s/* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment));
                     if xFile:
-                        xFile.write(('constant %-12s : ' \
+                        fWrite(xFile, ('constant %-12s : ' \
                                      'unsigned(opb-1 downto 0) ' \
                                      ':= x"%02x"; -- %s\n') %
                                     (regName, index, regComment))
                     # tmp = "  %s, " % (regName)
-                    # jFile.write("%s/* 0x%02x %s */\n" % 
+                    # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment));
                     # tmp = "  \"%s\", " % (regName)
                     # j1File.write("%s/* 0x%02x %s */\n" % 
@@ -457,40 +469,40 @@ class Setup():
                 xRegTable.append(regName)
                 if f is not None:
                     tmp = "%s = %2d" % (regName.ljust(16), index)
-                    f.write("%s# %s\n" % (tmp.ljust(32), regComment))
+                    fWrite(f, "%s# %s\n" % (tmp.ljust(32), regComment))
                 index += 1
             else:
                 if fData:
                     if (len(data) > 0):
-                        cFile.write("\n// %s\n\n" % (data))
+                        fWrite(cFile, "\n// %s\n\n" % (data))
                         if xFile:
-                            xFile.write("\n-- %s\n\n" % (data))
-                        # jFile.write("\n// %s\n\n" % (data))
+                            fWrite(xFile, "\n-- %s\n\n" % (data))
+                        # fWrite(jFile, "\n// %s\n\n" % (data))
                     else:
-                        cFile.write("\n");
+                        fWrite(cFile, "\n");
                         if xFile:
-                            xFile.write("\n");
-                        # jFile.write("\n");
+                            fWrite(xFile, "\n");
+                        # fWrite(jFile, "\n");
                 if f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            f.write("\n# xilinx table\n\n")
-            f.write("xRegTable = ( \\\n")
+            fWrite(f, "\n# xilinx table\n\n")
+            fWrite(f, "xRegTable = ( \\\n")
             for i, regName in enumerate(xRegTable):
                 tmp = "    \"%s\"," % (regName)
-                f.write("%s# %3d\n" % (tmp.ljust(40), i))
-            f.write("    )\n")
+                fWrite(f, "%s# %3d\n" % (tmp.ljust(40), i))
+            fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
         if fData:
-            cFile.write("};\n")
+            fWrite(cFile, "};\n")
             cFile.close()
             if xFile:
-                xFile.write("\nend RegDef;\n\n")
-                xFile.write("package body RegDef is\n\n")
-                xFile.write("end RegDef;\n")
+                fWrite(xFile, "\nend RegDef;\n\n")
+                fWrite(xFile, "package body RegDef is\n\n")
+                fWrite(xFile, "end RegDef;\n")
                 xFile.close()
-            # jFile.write("};\n")
+            # fWrite(jFile, "};\n")
             # jFile.close()
             # j1File.write(" };\n\n};\n")
             # jFile.close()
@@ -514,20 +526,20 @@ class Setup():
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
-                xFile.write("library IEEE;\n")
-                xFile.write("use IEEE.STD_LOGIC_1164.all;\n")
-                xFile.write("use IEEE.NUMERIC_STD.ALL;\n\n")
-                xFile.write("package " + package + " is\n")
+                fWrite(xFile, "library IEEE;\n")
+                fWrite(xFile, "use IEEE.STD_LOGIC_1164.all;\n")
+                fWrite(xFile, "use IEEE.NUMERIC_STD.ALL;\n\n")
+                fWrite(xFile, "package " + package + " is\n")
             # jFile = open(jLoc + 'XilinxBits.java', 'wb')
-            # jFile.write("package lathe;\n\n");
-            # jFile.write("public class XilinxBits\n{\n");
+            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "public class XilinxBits\n{\n");
         regName = ""
         bitStr = []
         lastShift = -1
         f = None
         if self.file:
             f = open(pName + '.py', 'wb')
-            f.write("\n# xilinx bits\n")
+            fWrite(f, "\n# xilinx bits\n")
         for i in range(len(xilinxBitList)):
             data = xilinxBitList[i]
             if not isinstance(data, str):
@@ -542,7 +554,7 @@ class Setup():
 
                     if fData:
                         tmp =  "#define %-12s  (%s << %s)" % (cVar, bit, shift)
-                        cFile.write("%s/* 0x%03x %s */\n" % 
+                        fWrite(cFile, "%s/* 0x%03x %s */\n" % 
                                     (tmp.ljust(32), bit << shift, comment));
                         if bit != 0:
                             if (shift != lastShift):
@@ -557,7 +569,7 @@ class Setup():
                                          1 << shift, comment))
                         # tmp =  (" public static final int %-10s = " \
                         #         "(%s << %s);" % (cVar, bit, shift))
-                        # jFile.write("%s /* %s */\n" % 
+                        # fWrite(jFile, "%s /* %s */\n" % 
                         #             (tmp, comment));
                     if (shift > maxShift):
                         maxShift = shift
@@ -568,37 +580,37 @@ class Setup():
                         imports.append(cVar)
                         if f is not None:
                             tmp = "%s = 0x%02x" % (cVar.ljust(12), bit << shift)
-                            f.write("%s# %s\n" % (tmp.ljust(32), comment))
+                            fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                     lastShift = shift
             else:
                 if fData:
                     if (len(regName) > 0):
                         var = "%s_size" % (regName)
                         tmp =  "#define %-12s %d" % (var, maxShift + 1)
-                        cFile.write("%s\n" % (tmp))
+                        fWrite(cFile, "%s\n" % (tmp))
                         if xFile:
-                            xFile.write(" constant %s_size : " \
+                            fWrite(xFile, " constant %s_size : " \
                                         "integer := %d;\n" % \
                                         (regName, maxShift + 1))
-                            xFile.write(" signal %sReg : "\
+                            fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%s_size-1 downto 0);\n" %
                                         (regName, regName))
                         for i in range(len(xLst)):
                             if xFile:
-                                xFile.write(xLst[i])
+                                fWrite(xFile, xLst[i])
                         # if (len(bitStr) != 0):
-                        #     jFile.write(("\n public static final " +
+                        #     fWrite(jFile, "\n public static final " +
                         #                 "String[] %sBits =\n {\n") % \
                         #                 (regName))
                         #     for i in range(len(bitStr)):
-                        #         jFile.write(bitStr[i])
-                        #     jFile.write(" };\n");
+                        #         fWrite(jFile, bitStr[i])
+                        #     fWrite(jFile, " };\n");
                         #     bitStr = []
                     if (len(data) != 0):
-                        cFile.write("\n// %s\n\n" % (data))
+                        fWrite(cFile, "\n// %s\n\n" % (data))
                         if xFile:
-                            xFile.write("\n-- %s\n\n" % (data))
-                        # jFile.write("\n// %s\n\n" % (data))
+                            fWrite(xFile, "\n-- %s\n\n" % (data))
+                        # fWrite(jFile, "\n// %s\n\n" % (data))
                 else:
                     if (len(regName) > 0):
                         var = "%s_size" % (regName)
@@ -608,18 +620,18 @@ class Setup():
                             globals()[var] = maxShift + 1
                             imports.append(var)
                 if len(data) != 0 and f is not None:
-                    f.write("\n# %s\n\n" % (data))
+                    fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
             # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.close()
             if xFile:
-                xFile.write("\nend CtlBits;\n\n")
-                xFile.write("package body CtlBits is\n\n")
-                xFile.write("end CtlBits;\n")
+                fWrite(xFile, "\nend CtlBits;\n\n")
+                fWrite(xFile, "package body CtlBits is\n\n")
+                fWrite(xFile, "end CtlBits;\n")
                 xFile.close()
-                # jFile.write("};\n")
+                # fWrite(jFile, "};\n")
                 # jFile.close()
         self.xBitImports = imports
         self.importList += imports
