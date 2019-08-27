@@ -123,7 +123,7 @@ Z_HOME_OFFSET        =  75
 
 Z_DRO_POS            =  76
 Z_DRO_OFFSET         =  77
-Z_DRO_INCH           =  78
+Z_DRO_COUNT_INCH     =  78
 Z_DRO_INVERT         =  79
 
 # x home parameters
@@ -141,7 +141,7 @@ X_HOME_END           =  86
 X_HOME_OFFSET        =  87
 X_DRO_POS            =  88
 X_DRO_OFFSET         =  89
-X_DRO_INCH           =  90
+X_DRO_COUNT_INCH     =  90
 X_DRO_INVERT         =  91
 
 # x home or probe status
@@ -236,9 +236,6 @@ JOG_DEBUG            = 136
 PWM_FREQ             = 137
 MIN_SPEED            = 138
 MAX_SPEED            = 139
-
-# max parameter number
-
 MAX_PARM             = 140
 
 parmTable = ( \
@@ -317,10 +314,10 @@ parmTable = ( \
     ('LAST_INDEX_PERIOD', 'unsigned int', 'lastIndexPeriod'),
     ('INDEX_PERIOD', 'unsigned int', 'indexPeriod'),
     ('REV_COUNTER', 'unsigned int', 'revCounter'),
-    ('Z_HOME_OFFSET', 'float', 'zHomeOffset'),
+    ('Z_HOME_OFFSET', 'int', 'zHomeOffset'),
     ('Z_DRO_POS', 'int', 'zDroPos'),
-    ('Z_DRO_OFFSET', 'float', 'zDroOffset'),
-    ('Z_DRO_INCH', 'int', 'zDroInch'),
+    ('Z_DRO_OFFSET', 'int', 'zDroOffset'),
+    ('Z_DRO_COUNT_INCH', 'int', 'zDroCountInch'),
     ('Z_DRO_INVERT', 'int', 'zDroInvert'),
     ('X_HOME_SPEED', 'float', 'xHomeSpeed'),
     ('X_HOME_DIST', 'float', 'xHomeDist'),
@@ -329,10 +326,10 @@ parmTable = ( \
     ('X_HOME_LOC', 'int', 'xHomeLoc'),
     ('X_HOME_START', 'int', 'xHomeStart'),
     ('X_HOME_END', 'int', 'xHomeEnd'),
-    ('X_HOME_OFFSET', 'float', 'xHomeOffset'),
+    ('X_HOME_OFFSET', 'int', 'xHomeOffset'),
     ('X_DRO_POS', 'int', 'xDroPos'),
-    ('X_DRO_OFFSET', 'float', 'xDroOffset'),
-    ('X_DRO_INCH', 'int', 'xDroInch'),
+    ('X_DRO_OFFSET', 'int', 'xDroOffset'),
+    ('X_DRO_COUNT_INCH', 'int', 'xDroCountInch'),
     ('X_DRO_INVERT', 'int', 'xDroInvert'),
     ('X_HOME_DONE', 'int', 'xHomeDone'),
     ('X_HOME_STATUS', 'int', 'xHomeStatus'),
