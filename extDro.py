@@ -64,7 +64,8 @@ class ExtDro():
 
     def command(self, cmd, response=False, delimiter='\n'):
         self.droLock.acquire(True)
-        self.dro.write(cmd + '\n')
+        cmd += '/n'
+        self.dro.write(cmd.encode())
         rsp = ""
         while response:
             tmp = str(self.dro.read(1))
