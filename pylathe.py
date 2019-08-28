@@ -768,7 +768,7 @@ class MoveCommands():
     def queMoveF(self, op, flag, val):
         if self.send:
             opString = en.mCommandsList[op]
-            op |= (flag << 8)
+            op |= (flag << 16)
             self.moveQue.put((opString, op, val))
 
     def queClear(self):
@@ -1469,7 +1469,7 @@ class Turn(LatheOp, UpdatePass):
 
     def runPass(self, addPass=False): # turn
         m = self.m
-        m.moveX(self.curX, ct.CMD_JOG | ct.DRO_POS)
+        m.moveX(self.curX, ct.CMD_MOV | ct.DRO_POS)
         if DRO:
             m.saveXDro()
         if self.pause:
@@ -5225,7 +5225,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 sendXData()
                 m.dbg = True
                 m.saveXOffset()
-                m.moveX(loc / 2.0, ct.DRO_POS)
+                m.moveX(loc / 2.0, ct.CMD_JOG | ct.DRO_POS)
                 m.dbg = False
             comm.command(cm.CMD_RESUME)
             self.Show(False)

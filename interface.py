@@ -667,7 +667,6 @@ regList =\
     ("CMD_MAX", "(4 << 0)", "rapid move"),
     ("CMD_SPEED", "(5 << 0)", "jog at speed"),
     ("JOGSLOW", "(6 << 0)", "slow jog for home or probe"),
-    ("DRO_POS", "(7 << 0)", "use dro for moving"),
 
     "common definitions",
 
@@ -689,11 +688,12 @@ regList =\
     
     ("X_SYN_START", "(1 << 4)", "start on sync pulse"),
     ("Z_SYN_TAPER", "(1 << 5)", "taper on z"),
-    ("XFIND_HOME", "(1 << 6)", "find home"),
+    ("XFIND_HOME",  "(1 << 6)", "find home"),
     ("XCLEAR_HOME", "(1 << 7)", "move off of home"),
 
-    ("FIND_PROBE", "(1 << 8)", "find home"),
+    ("FIND_PROBE",  "(1 << 8)", "find home"),
     ("CLEAR_PROBE", "(1 << 9)", "move off of home"),
+    ("DRO_POS",     "(1 << 10)", "use dro for moving"),
      
     "x direction",
     
