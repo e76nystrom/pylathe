@@ -513,13 +513,13 @@ parmList = \
 
     "z home offset",
 
-    ("Z_HOME_OFFSET", "z home offset", "float"),
+    ("Z_HOME_OFFSET", "z home offset", "int"),
 
     "z dro",
 
     ("Z_DRO_POS", "z dro location", "int"),
-    ("Z_DRO_OFFSET", "z dro to zero", "float"),
-    ("Z_DRO_INCH", "z dro scale", "int"),
+    ("Z_DRO_OFFSET", "z dro to zero", "int"),
+    ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
     ("Z_DRO_INVERT", "z dro invert", "int"),
 
     "x home parameters",
@@ -537,13 +537,13 @@ parmList = \
 
     # "x home offset",
 
-    ("X_HOME_OFFSET", "x home offset", "float"),
+    ("X_HOME_OFFSET", "x home offset", "int"),
 
     # "x dro",
 
     ("X_DRO_POS", "x dro location", "int"),
-    ("X_DRO_OFFSET", "x dro to zero", "float"),
-    ("X_DRO_INCH", "x dro scale", "int"),
+    ("X_DRO_OFFSET", "x dro to zero", "int"),
+    ("X_DRO_COUNT_INCH", "x dro scale", "int"),
     ("X_DRO_INVERT", "x dro invert", "int"),
 
     "x home or probe status",
@@ -639,10 +639,10 @@ parmList = \
     ("MIN_SPEED", "minimum speed for current range", "int16_t"),
     ("MAX_SPEED", "maximum speed for current range", "int16_t"),
 
-    # ("", "", ""),
-    # ("", "", ""),
 
-    "max parameter number",
+    # ("", "", ""),
+    # ("", "", ""),
+    # ("", "", ""),
 
     ("MAX_PARM", "maximum parameter", "int16_t")
 )
@@ -667,6 +667,7 @@ regList =\
     ("CMD_MAX", "(4 << 0)", "rapid move"),
     ("CMD_SPEED", "(5 << 0)", "jog at speed"),
     ("JOGSLOW", "(6 << 0)", "slow jog for home or probe"),
+    ("DRO_POS", "(7 << 0)", "use dro for moving"),
 
     "common definitions",
 

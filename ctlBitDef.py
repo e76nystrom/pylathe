@@ -10,6 +10,7 @@ CMD_SYN          = (3 << 0)     # move dist synchronized to rotation
 CMD_MAX          = (4 << 0)     # rapid move
 CMD_SPEED        = (5 << 0)     # jog at speed
 JOGSLOW          = (6 << 0)     # slow jog for home or probe
+DRO_POS          = (7 << 0)     # use dro for moving
 
 # common definitions
 
