@@ -46,6 +46,7 @@ SETUP = False
 XILINX = False
 DRO = False
 EXT_DRO = False
+X_DRO_POS = False
 REM_DBG = False
 STEP_DRV = False
 MOTOR_TEST = False
@@ -1469,7 +1470,8 @@ class Turn(LatheOp, UpdatePass):
 
     def runPass(self, addPass=False): # turn
         m = self.m
-        m.moveX(self.curX, ct.CMD_MOV | ct.DRO_POS)
+        flag = ct.CMD_MOV | (ct.DRO_POS if X_DRO_POS else 0)
+        m.moveX(self.curX, flag)
         if DRO:
             m.saveXDro()
         if self.pause:
@@ -3110,7 +3112,8 @@ class ScrewThread(LatheOp, UpdatePass):
         m.moveZ(startZPass)
 
         if self.rightHand:      # right hand threads
-            m.moveX(self.curX, ct.CMD_JOG | ct.DRO_POS)
+            flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+            m.moveX(self.curX, flag)
         else:                   # left hand threads
             if self.runoutDist != 0:
                 m.drawLine(startZ, self.curX)
@@ -3127,7 +3130,8 @@ class ScrewThread(LatheOp, UpdatePass):
                         m.moveX(self.xStart - self.depth, backlash=-xBackInc)
                     m.moveX(self.curX - self.depth)
             else:
-                m.moveX(self.xStart, ct.CMD_JOG | ct.DRO_POS)
+                flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                m.moveX(self.xStart, flag)
                 m.moveX(self.curX, ct.CMD_SYN)
 
         if self.pause:
@@ -4580,10 +4584,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if self.currentPanel.active:
                 text += '*'
             mvStatus = int(mvStatus)
-            if mvStatus != self.mvStatus:
-                print("mvStatus %x" % (mvStatus))
-                stdout.flush()
-            self.mvStatus = mvStatus
+
             if mvStatus & ct.MV_MEASURE:
                 text += 'M'
             if mvStatus & ct.MV_PAUSE:
@@ -4591,6 +4592,11 @@ class JogPanel(wx.Panel, FormRoutines):
             if mvStatus & ct.MV_ACTIVE:
                 text += 'A'
             self.statusText.SetLabel(text)
+
+            if mvStatus != self.mvStatus:
+                print("mvStatus %x" % (mvStatus))
+                stdout.flush()
+            self.mvStatus = mvStatus
 
             if self.xHome:
                 if self.probeAxis == HOME_X:
@@ -4791,13 +4797,13 @@ class JogPanel(wx.Panel, FormRoutines):
             print("setZFromExt ValueError %s" % (val))
             stdout.flush()
             rsp = 0.0
-        zPosition = int(rsp * jogPanel.zStepsInch + 0.5)
+        zPosition = round(rsp * jogPanel.zStepsInch)
         zHomeOffset = 0.0
         self.zHomeOffset.value = zHomeOffset
         comm.queParm(pm.Z_LOC, zPosition)
         comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
         if DRO:
-            zDROPosition = int(rsp * jogPanel.zDROInch + 0.5)
+            zDROPosition = round(rsp * jogPanel.zDROInch)
             zDROOffset = 0.0
             self.zDROOffset.value = zDROOffset
             comm.queParm(pm.Z_DRO_POS, zDROPosition)
@@ -4848,13 +4854,13 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
             rsp = 0.0
         print("val %s rsp %9.6f" % (val, rsp))
-        xPosition = int(rsp * jogPanel.xStepsInch + 0.5)
+        xPosition = round(rsp * jogPanel.xStepsInch)
         xHomeOffset = 0.0
         self.xHomeOffset.value = xHomeOffset
         comm.queParm(pm.X_LOC, xPosition)
         comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
         if DRO:
-            xDROPosition = int(rsp * jogPanel.xDROInch + 0.5)
+            xDROPosition = round(rsp * jogPanel.xDROInch)
             print("xDROPosition %d" % (xDROPosition))
             xDROOffset = 0.0
             self.xDROOffset.value = xDROOffset
@@ -5225,7 +5231,8 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 sendXData()
                 m.dbg = True
                 m.saveXOffset()
-                m.moveX(loc / 2.0, ct.CMD_JOG | ct.DRO_POS)
+                flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                m.moveX(loc / 2.0, flag)
                 m.dbg = False
             comm.command(cm.CMD_RESUME)
             self.Show(False)
@@ -6306,7 +6313,7 @@ class MainFrame(wx.Frame):
         global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC, \
             SPINDLE_SYNC_BOARD, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
-            HOME_IN_PLACE
+            HOME_IN_PLACE, X_DRO_POS
 
         cfg = ConfigInfo(cf.configTable)
         cfg.clrInfo(len(cf.config))
@@ -6314,11 +6321,17 @@ class MainFrame(wx.Frame):
 
         XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
         DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
-        EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
         REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+
+        if DRO:
+            X_DRO_POS = cfg.getInitialBoolInfo(cf.xDROPos)
+            EXT_DRO = cfg.getInitialBoolInfo(cf.cfgExtDro)
+        else:
+            X_DRO_POS = False
+            EXT_DRO = False
 
         if not STEP_DRV and not MOTOR_TEST:
             SPINDLE_SWITCH = cfg.getInitialBoolInfo(cf.spSwitch)
@@ -6658,9 +6671,13 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
             ("Backoff Dist", cf.xHomeBackoffDist, 'f'), \
             ("bHome Dir", cf.xHomeDir, None), \
-            ("DRO Inch", cf.xDROInch, 'd'), \
-            ("bInv DRO", cf.xInvDRO, None), \
         )
+        if DRO:
+            self.fields += (
+                ("DRO Inch", cf.xDROInch, 'd'), \
+                ("bInv DRO", cf.xInvDRO, None), \
+                ("bDRO Position", cf.xDROPos, None), \
+            )
         if HOME_TEST:
             self.fields += (
                 ("Home Start", cf.xHomeStart, 'f'), \
@@ -7023,8 +7040,8 @@ class SpindleTest():
         dbgPrt(txt, "accelMinTime %5.5f accelMaxTime %5.2f", \
                (accelMinTime, accelMaxTime))
 
-        accelMinSteps = int((sStepsSecMin * accelMinTime) / 2.0 + 0.5)
-        accelMaxSteps = int((sStepsSecMax * accelMaxTime) / 2.0 + 0.5)
+        accelMinSteps = round((sStepsSecMin * accelMinTime) / 2.0)
+        accelMaxSteps = round((sStepsSecMax * accelMaxTime) / 2.0)
         dbgPrt(txt, "accelMinSteps %d accelMaxSteps %d ", \
                (accelMinSteps, accelMaxSteps))
 
@@ -7177,7 +7194,7 @@ class SyncTest(object):
                 inchPitch = True
 
         if inchPitch:
-            revCycle = int(1.0 / pitch + 0.5)
+            revCycle = round(1.0 / pitch)
             if revCycle > 20:
                 revCycle = 20
             cycleDist = revCycle * pitch
@@ -7206,7 +7223,7 @@ class SyncTest(object):
                "zStepsCycle %d", \
                (clocksCycle, cycleTime, spindleStepsCycle, zStepsCycle))
 
-        zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
+        zClocksStep = round(clocksCycle / zStepsCycle)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
         dbgPrt(txt, "zClocksStep %d remainder %d", \
                (zClocksStep, zRemainder))
@@ -7370,7 +7387,7 @@ class TaperTest(object):
         dbgPrt(txt, "xStepsInch %d", (xStepsInch))
 
         pitch = cfg.getFloatInfoData(cf.tpZFeed)
-        revCycle = int(1.0 / pitch + 0.5)
+        revCycle = round(1.0 / pitch)
         if revCycle > 20:
             revCycle = 20
         cycleDist = revCycle * pitch
@@ -7380,7 +7397,7 @@ class TaperTest(object):
         spindleStepsCycle = spindleStepsRev * revCycle
         zStepsCycle = zStepsInch * revCycle * pitch
 
-        zClocksStep = int(clocksCycle / zStepsCycle + 0.5)
+        zClocksStep = round(clocksCycle / zStepsCycle)
         zRemainder = (clocksCycle - zClocksStep * zStepsCycle)
         dbgPrt(txt, "spindleStepsCycle %d zStepsCycle %d " \
                "zClocksStep %d remainder %d", \
@@ -7469,8 +7486,8 @@ class MoveTest(object):
             dbgPrt(txt, "zMAccelMinTime %d zMAccelMaxTime %d", \
                    (zMAccelMinTime, zMAccelMaxTime))
 
-            zMAccelMinSteps = int((zMinStepsSec * zMAccelMinTime) / 2.0 + 0.5)
-            zMAccelMaxSteps = int((zMaxStepsSec * zMAccelMaxTime) / 2.0 + 0.5)
+            zMAccelMinSteps = round((zMinStepsSec * zMAccelMinTime) / 2.0)
+            zMAccelMaxSteps = round((zMaxStepsSec * zMAccelMaxTime) / 2.0)
             dbgPrt(txt, "zMAccelMinSteps %d zMAccelMaxSteps %d", \
                    (zMAccelMinSteps, zMAccelMaxSteps))
 

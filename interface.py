@@ -247,11 +247,12 @@ configList = \
     ('xParkLoc', 'x axis '),
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
+    ('xDROPos', 'x axis '),
 
   "x axis position config",
 
-    ('xSvPosition', 'z axis '),
-    ('xSvHomeOffset', 'z axis '),
+    ('xSvPosition', 'x axis '),
+    ('xSvHomeOffset', 'x axis '),
     ('xSvDROPosition', 'x axis '),
     ('xSvDROOffset', 'x axis '),
 
@@ -279,6 +280,7 @@ configList = \
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
+    ('zDROPos', 'x axis '),
 
   "z axis position config",
 
