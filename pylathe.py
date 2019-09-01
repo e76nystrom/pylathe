@@ -4201,7 +4201,8 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    comm.queParm(pm.X_FLAG, ct.CMD_JOG)
+                    flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                    comm.queParm(pm.X_FLAG, flag)
                     comm.queParm(pm.X_MOVE_DIST, val)
                     comm.command(cm.XMOVEREL)
                 except CommTimeout:
