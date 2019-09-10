@@ -166,77 +166,76 @@ STEPPER_DRIVE        =  99
 MOTOR_TEST           = 100
 SPINDLE_ENCODER      = 101
 SPINDLE_SYNC_BOARD   = 102
-SPINDLE_SYNC         = 103
-USE_ENCODER          = 104
-ENCODER_DIRECT       = 105
-CAP_TMR_ENABLE       = 106
-CFG_XILINX           = 107
-CFG_MPG              = 108
-CFG_DRO              = 109
-CFG_LCD              = 110
-CFG_FCY              = 111
-CFG_SWITCH           = 112
-CFG_VAR_SPEED        = 113
+TURN_SYNC            = 103
+THREAD_SYNC          = 104
+CAP_TMR_ENABLE       = 105
+CFG_XILINX           = 106
+CFG_MPG              = 107
+CFG_DRO              = 108
+CFG_LCD              = 109
+CFG_FCY              = 110
+CFG_SWITCH           = 111
+CFG_VAR_SPEED        = 112
 
 # setup
 
-SETUP_DONE           = 114
+SETUP_DONE           = 113
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 115
+ENC_PER_REV          = 114
 
 # test encoder setup variables
 
-ENC_ENABLE           = 116
-ENC_PRE_SCALER       = 117
-ENC_TIMER            = 118
-ENC_RUN_COUNT        = 119
+ENC_ENABLE           = 115
+ENC_PRE_SCALER       = 116
+ENC_TIMER            = 117
+ENC_RUN_COUNT        = 118
 
 # test encoder status variables
 
-ENC_RUN              = 120
-ENC_COUNTER          = 121
-ENC_REV_COUNTER      = 122
+ENC_RUN              = 119
+ENC_COUNTER          = 120
+ENC_REV_COUNTER      = 121
 
 # measured spindle speed
 
-RPM                  = 123
+RPM                  = 122
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 124
-FREQ_MULT            = 125
+X_FREQUENCY          = 123
+FREQ_MULT            = 124
 
 # xilinx configuration register
 
-X_CFG_REG            = 126
+X_CFG_REG            = 125
 
 # sync parameters
 
-L_SYNC_CYCLE         = 127
-L_SYNC_OUTPUT        = 128
-L_SYNC_PRESCALER     = 129
+L_SYNC_CYCLE         = 126
+L_SYNC_OUTPUT        = 127
+L_SYNC_PRESCALER     = 128
 
 # threading variables
 
-TH_Z_START           = 130
-TH_X_START           = 131
-TAN_THREAD_ANGLE     = 132
-X_FEED               = 133
-RUNOUT_DISTANCE      = 134
-RUNOUT_DEPTH         = 135
+TH_Z_START           = 129
+TH_X_START           = 130
+TAN_THREAD_ANGLE     = 131
+X_FEED               = 132
+RUNOUT_DISTANCE      = 133
+RUNOUT_DEPTH         = 134
 
 # jog debug
 
-JOG_DEBUG            = 136
+JOG_DEBUG            = 135
 
 # motor and speed control
 
-PWM_FREQ             = 137
-MIN_SPEED            = 138
-MAX_SPEED            = 139
-MAX_PARM             = 140
+PWM_FREQ             = 136
+MIN_SPEED            = 137
+MAX_SPEED            = 138
+MAX_PARM             = 139
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -342,9 +341,8 @@ parmTable = ( \
     ('MOTOR_TEST', 'char', 'motorTest'),
     ('SPINDLE_ENCODER', 'char', 'spindleEncoder'),
     ('SPINDLE_SYNC_BOARD', 'char', 'spindleSyncBoard'),
-    ('SPINDLE_SYNC', 'char', 'spindleSync'),
-    ('USE_ENCODER', 'char', 'useEncoder'),
-    ('ENCODER_DIRECT', 'char', 'encoderDirect'),
+    ('TURN_SYNC', 'char', 'turnSync'),
+    ('THREAD_SYNC', 'char', 'threadSync'),
     ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
     ('CFG_XILINX', 'char', 'cfgXilinx'),
     ('CFG_MPG', 'char', 'cfgMpg'),

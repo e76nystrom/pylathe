@@ -51,11 +51,11 @@ REM_DBG = False
 STEP_DRV = False
 MOTOR_TEST = False
 SPINDLE_ENCODER = False
-SPINDLE_SYNC = False
 SPINDLE_SYNC_BOARD = False
+TURN_SYNC = en.SEL_TU_SPEED
+THREAD_SYNC = en.SEL_TH_NO_ENC
 SPINDLE_SWITCH = False
 SPINDLE_VAR_SPEED = False
-USE_ENCODER = False
 HOME_IN_PLACE = False
 
 cLoc = "../Lathe/include/"
@@ -68,7 +68,6 @@ if SETUP:
     from setup import Setup
     setup = Setup()
     (config, configTable) = setup.createConfig(configList)
-
 
     setupCmd = "from setup import "
     for var in setup.configImports:
@@ -178,8 +177,35 @@ class Offset():
 
     def intVal(self):
         return(self.val * self.scale)
-    
 
+class ComboBox(wx.ComboBox): 
+    def __init__(self, parent, label, indexList,  choiceList, *args, **kwargs):
+        self.label = label
+        self.indexList = indexList
+        self.choiceList = choiceList
+        self.text = None
+        super(ComboBox, self).__init__(parent, *args, **kwargs)
+
+    def GetValue(self):
+        val = self.GetCurrentSelection()
+        rtnVal = self.indexList[val]
+        if self.text is not None:
+            print("%s GetValue %d %s index %d" % \
+                  (self.label, rtnVal, self.text[val], val))
+            print(self.indexList)
+        return str(rtnVal)
+
+    def SetValue(self, val):
+        if isinstance(val, str):
+            val = int(val)
+        for (n, index) in enumerate(self.indexList):
+            if val == index:
+                self.SetSelection(n)
+                if self.text is not None:
+                    print("%s SetValue %d %s index %d" % \
+                          (self.label, val, self.text[index], n))
+                    print(self.indexList)
+    
 class FormRoutines():
     def __init__(self, panel=True):
         self.emptyCell = (0, 0)
@@ -197,7 +223,7 @@ class FormRoutines():
             if len(fmt) == 2:
                 (index, fieldType) = fmt
             else:
-                (name, index, fieldType) = fmt
+                (name, index, fieldType) = fmt[:3]
             if fieldType is None:
                 continue
             ctl = cfg.info[index]
@@ -249,18 +275,23 @@ class FormRoutines():
                     success = False
                     strVal = ''
                     ctl.SetValue('')
+            elif fieldType == 'c':
+                pass
             cfg.setInfoData(index, strVal)
         return(success)
 
     def fieldList(self, sizer, fields):
-        for (label, index, fmt) in fields:
+        for field  in fields:
+            (label, index) = field[:2]
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
+            elif label.startswith('c'):
+                action = field[3]
+                self.addComboBox(sizer, label[1:], index, action) 
+            elif label.startswith('w'):
+                self.addField(sizer, label[1:], index, (80, -1))
             else:
-                if label.startswith('w'):
-                    self.addField(sizer, label[1:], index, (80, -1))
-                else:
-                    self.addField(sizer, label, index)
+                self.addField(sizer, label, index)
 
     def getConfigList(self):
         if self.configList is None:
@@ -317,6 +348,23 @@ class FormRoutines():
             cb.SetValue(val == 'True')
         cfg.initInfo(index, cb)
         return(cb)
+
+    def addComboBox(self, sizer, label, index, action, border=2,
+                    flag=wx.CENTER|wx.ALL):
+        txt = wx.StaticText(self, -1, label)
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                  wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        (indexList, choiceList, text) = action()
+        combo = ComboBox(self, label, indexList, choiceList, \
+                         id=-1, value=choiceList[0], choices=choiceList, \
+                         style=wx.CB_READONLY)
+        combo.text = text
+        if cfg.info[index] is not None:
+            val = cfg.getInfo(index)
+            combo.SetValue(val)
+        sizer.Add(combo, flag=flag, border=border)
+        cfg.initInfo(index, combo)
 
     def addButton(self, sizer, label, action, size=(60, -1), border=2, \
                   style=0, flag=wx.CENTER|wx.ALL):
@@ -563,10 +611,12 @@ class DialogActions():
         if self.IsShown():
             self.formatData(self.fields)
             self.fieldInfo = {}
-            for (label, index, fmt) in self.fields:
+            for fmt in self.fields:
+                (label, index) = fmt[:2]
                 self.fieldInfo[index] = cfg.getInfo(index)
         else:
-            for (label, index, fmt) in self.fields:
+            for fmt in self.fields:
+                (label, index) = fmt[:2]
                 val = cfg.getInfo(index)
                 if self.fieldInfo[index] != val:
                     cfg.setInfoData(index, val)
@@ -585,7 +635,8 @@ class DialogActions():
             self.Show(False)
 
     def OnCancel(self, e):
-        for (label, index, fmt) in self.fields:
+        for field in self.fields:
+            index = field[1]
             cfg.setInfo(index, self.fieldInfo[index])
         self.Show(False)
 
@@ -841,7 +892,7 @@ class MoveCommands():
             self.zOffset = zHomeOffset
             # zHomeOffset floating, zHomeOffset sent as integer
             self.queMove(en.SAVE_Z_OFFSET,
-                         round(zHomeOffset * jogPanel.stepsInch))
+                         round(zHomeOffset * jogPanel.zStepsInch))
             if self.dbg:
                 print("saveZOffset  %7.4f" % (zHomeOffset))
                 stdout.flush()
@@ -873,6 +924,11 @@ class MoveCommands():
         self.queMove(en.SAVE_TAPER, taper)
         if self.dbg:
             print("saveTaper %s" % (taper))
+
+    def saveOperation(self, operation):
+        self.queMove(en.SAVE_OPERATION, operation)
+        if self.dbg:
+            print("saveOperation %d" % (operataion))
 
     def saveThreadFlags(self, flags):
         self.queMove(en.SAVE_FLAGS, flags)
@@ -962,10 +1018,10 @@ def sendSpindleData(send=False, rpm=None):
             queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
             queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
             queParm(pm.SPINDLE_ENCODER, cfg.getBoolInfoData(cf.cfgSpEncoder))
-            queParm(pm.SPINDLE_SYNC, cfg.getBoolInfoData(cf.cfgSpSync))
             queParm(pm.SPINDLE_SYNC_BOARD, \
                     cfg.getBoolInfoData(cf.cfgSpSyncBoard))
-            queParm(pm.USE_ENCODER, cfg.getBoolInfoData(cf.cfgSpUseEncoder))
+            queParm(pm.TURN_SYNC, cfg.getInfoData(cf.cfgTurnSync))
+            queParm(pm.THREAD_SYNC, cfg.getInfoData(cf.cfgThreadSync))
             if STEP_DRV or MOTOR_TEST:
                 queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
                 queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
@@ -1011,10 +1067,10 @@ def sendSpindleData(send=False, rpm=None):
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
-                if SPINDLE_SYNC:
+                if zSync is not None:
                     zSync.setEncoder(count)
-                    if SPINDLE_SYNC_BOARD:
-                        xSync.setEncoder(count)
+                if xSync is not None:
+                    xSync.setEncoder(count)
                 queParm(pm.ENC_PER_REV, count)
                 updateThread.encoderCount = count
 
@@ -1052,7 +1108,7 @@ def sendZData(send=False):
         jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_SYNC:
+        if zSync is not None:
             zSync.setLeadscrew(cfg.getInfoData(cf.zPitch))
             zSync.setMotorSteps(motorSteps)
             zSync.setMicroSteps(microSteps)
@@ -1123,14 +1179,12 @@ def sendXData(send=False):
         jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
                                            motorRatio) / pitch
 
-        if SPINDLE_SYNC:
-            if SPINDLE_SYNC_BOARD:
-                xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
-                xSync.setMotorSteps(motorSteps)
-                xSync.setMicroSteps(microSteps)
-                xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
-            else:
-                pass
+        if xSync is not None:
+            xSync.setLeadscrew(cfg.getInfoData(cf.xPitch))
+            xSync.setMotorSteps(motorSteps)
+            xSync.setMicroSteps(microSteps)
+            xSync.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+
         if DRO:
             jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
 
@@ -1425,6 +1479,7 @@ class Turn(LatheOp, UpdatePass):
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
+        m.saveOperation(en.OP_TURN)
         
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
@@ -1733,6 +1788,7 @@ class Face(LatheOp, UpdatePass):
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
+        m.saveOperation(en.OP_FACE)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.faRPM))
@@ -1983,6 +2039,7 @@ class Cutoff(LatheOp):
         m.queInit()
         m.quePause()
         m.done(ct.PARM_START)
+        m.saveOperation(en.OP_CUTOFF)
 
         if STEP_DRV:
             m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
@@ -2162,6 +2219,7 @@ class Taper(LatheOp, UpdatePass):
         if (not add) or (add and not self.pause):
             m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         m.done(ct.PARM_START)
+        m.saveOperation(en.OP_TAPER)
         
         if self.taperX:
             m.saveTaper(self.taper)
@@ -2810,13 +2868,17 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.tpiBtn:
             self.tpi = val
             self.pitch = 1.0 / val
-            if SPINDLE_SYNC:
+            if (THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RENC or
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
                 (self.cycle, self.output, self.preScaler) = \
                     zSync.calcSync(val, dbg=True, metric=False, rpm=rpm)
         else:
             self.pitch = val / 25.4
             self.tpi = 1.0 / self.pitch
-            if SPINDLE_SYNC:
+            if (THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RENC or
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
                 (self.cycle, self.output, self.preScaler) = \
                     zSync.calcSync(val, metric=True, rpm=rpm)
 
@@ -2834,15 +2896,12 @@ class ScrewThread(LatheOp, UpdatePass):
         self.angle = radians(getFloatVal(th.angle))
         self.runout = getFloatVal(th.runout)
 
-        if SPINDLE_SYNC:
-            if self.runout != 0:
-                if SPINDLE_SYNC_BOARD:
-                    xSync.setDist(True)
-                    xSync.setExitRevs(self.runout)
-                    (self.xCycle, self.xOutput, self.xPreScaler) = \
-                        xSync.calcSync(self.depth, rpm=rpm)
-                else:
-                    pass
+        if self.runout != 0:
+            if THREAD_SYNC == en.SEL_TH_ESYN_RSYN:
+                xSync.setDist(True)
+                xSync.setExitRevs(self.runout)
+                (self.xCycle, self.xOutput, self.xPreScaler) = \
+                    xSync.calcSync(self.depth, rpm=rpm)
 
         self.endZ = self.zEnd
 
@@ -2855,29 +2914,24 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if SPINDLE_SYNC:
-            if SPINDLE_SYNC_BOARD:
+            if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
+                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
+                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
+                  THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
                 syncComm.setParm(sp.SYNC_ENCODER, \
                                  cfg.getIntInfoData(cf.cfgEncoder))
                 syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
                 syncComm.setParm(sp.SYNC_OUTPUT, self.output)
                 syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
                 syncComm.command(sc.SYNC_SETUP)
-            else:
-                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
 
         if self.runout != 0:
-            if SPINDLE_SYNC:
-                if SPINDLE_SYNC_BOARD:
-                    comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
-                    comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
-                    comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
-                else:
-                    pass
-            else:
-                pass
+            if THREAD_SYNC == en.SEL_TH_ESYN_RSYN:
+                comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
+                comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
+                comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
    
         comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
         comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
@@ -2886,10 +2940,9 @@ class ScrewThread(LatheOp, UpdatePass):
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
+        m.saveOperation(en.OP_THREAD)
 
         th = self.panel
-        if STEP_DRV:
-            m.startSpindle(getIntVal(th.rpm))
 
         m.queFeedType(ct.FEED_TPI if self.tpiBtn else ct.FEED_METRIC)
         m.saveTaper(getFloatVal(th.xTaper))
@@ -2903,15 +2956,16 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
-        if not STEP_DRV:
-            comm.sendMulti()
-            m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
+        # m.queZSetup(cfg.getFloatInfoData(cf.tuZFeed))
+        m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
 
-        m.zSynSetup(getFloatVal(th.thread))
         if not self.rightHand:  # left hand threads
             if self.runoutDist == 0.0: # wihout runout
                 m.queFeedType(ct.FEED_PITCH)
                 m.xSynSetup(getFloatVal(th.lastFeed))
+
+        # comm.sendMulti()
+        m.startSpindle(cfg.getIntInfoData(cf.thRPM))
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ if self.rightHand else self.startZ)
@@ -6312,8 +6366,8 @@ class MainFrame(wx.Frame):
 
     def initialConfig(self):
         global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
-            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC, \
-            SPINDLE_SYNC_BOARD, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
+            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
+            TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS
 
         cfg = ConfigInfo(cf.configTable)
@@ -6339,46 +6393,20 @@ class MainFrame(wx.Frame):
             SPINDLE_VAR_SPEED = cfg.getInitialBoolInfo(cf.spVarSpeed)
 
         if SPINDLE_ENCODER:
-            SPINDLE_SYNC = cfg.getInitialBoolInfo(cf.cfgSpSync)
-            USE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpUseEncoder)
-            if SPINDLE_SYNC:
-                SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
-            else:
-                SPINDLE_SYNC_BOARD = False
+            SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
         else:
-            SPINDLE_SYNC = False
             SPINDLE_SYNC_BOARD = False
 
+        TURN_SYNC = cfg.getIntInfoData(cf.cfgTurnSync)
+        THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
+        
         if True:
-            print("STEP_DRV %s SPINDLE_ENCODER %s\n"\
-                  "SPINDLE_SYNC %s SPINDLE_SYNC_BOARD %s "\
-                  "USE_ENCODDER %s" % \
-                  (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC, \
-                   SPINDLE_SYNC_BOARD, USE_ENCODER))
-            if STEP_DRV:
-                print("threading uses stepper timer")
-            elif SPINDLE_ENCODER:
-                if SPINDLE_SYNC:
-                    if SPINDLE_SYNC_BOARD:
-                        print("threading uses sync board")
-                        if USE_ENCODER:
-                            print("runout uses encoder")
-                        else:
-                            print("runout uses local sync")
-                            print("enable capture timer")
-                    else:       # not SYNC_BOARD
-                        if USE_ENCODER:
-                            print("threading uses encoder")
-                            print("runout uses encoder")
-                        else:
-                            print("threading uses local sync")
-                            print("enable capture timer")
-                            print("runout uses encoder")
-                else:           # not SYNC
-                    print("threading uses encoder")
-                    print("runout uses encoder")
-            else:               # not SPINDLE_ENCODER
-                print("threading disabled")
+            print("STEP_DRV %s SPINDLE_ENCODER %s "\
+                  "SPINDLE_SYNC_BOARD %s" % \
+                  (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD))
+            print("TURN_SYNC %d %s THREAD_SYNC %d %s" % \
+                  (TURN_SYNC, en.selTurnText[TURN_SYNC], \
+                   THREAD_SYNC, en.selThreadText[THREAD_SYNC]))
             
         HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
@@ -6402,13 +6430,25 @@ class MainFrame(wx.Frame):
             zDROPosition = 0.0
             xDROPosition = 0.0
 
-        if SPINDLE_SYNC:
+        if SPINDLE_SYNC_BOARD:
+            global syncComm
+            syncComm = Comm()
+
+        if (TURN_SYNC == en.SEL_TU_ISYN or \
+            TURN_SYNC == en.SEL_TU_ESYN or \
+            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
             global zSync
             zSync = Sync(dbg=True)
-            if SPINDLE_SYNC_BOARD:
-                global xSync, syncComm
-                xSync = Sync(dbg=True)
-                syncComm = Comm()
+
+                  
+        if (TURN_SYNC == en.SEL_TU_ISYN or \
+            TURN_SYNC == en.SEL_TU_ESYN or \
+            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            global xSync
+            xSync = Sync(dbg=True)
 
         comm = Comm()
         comm.SWIG = SWIG
@@ -6739,10 +6779,12 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if SPINDLE_ENCODER:
             self.fields += ( \
                 ("Encoder", cf.cfgEncoder, 'd'), \
-                ("bSync", cf.cfgSpSync, None), \
                 ("bSync Board", cf.cfgSpSyncBoard, None), \
-                ("bUse Encoder", cf.cfgSpUseEncoder, None), \
             )
+        self.fields += ( \
+            ("cTurn Sync", cf.cfgTurnSync, 'c', self.turnSync), \
+            ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync), \
+        )
         if STEP_DRV or MOTOR_TEST:
             self.fields += ( \
                 ("Motor Steps", cf.spMotorSteps, 'd'), \
@@ -6805,6 +6847,36 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
+
+    def turnSync(self):
+        if STEP_DRV:
+            indexList = (en.SEL_TU_STEP,)
+        elif SPINDLE_ENCODER:
+            indexList = (en.SEL_TU_ENC,)
+            if SPINDLE_SYNC_BOARD:
+                indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+        else:
+            indexList = (SEL_TU_SPEED,)
+
+        choiceList = []
+        for i in indexList:
+            choiceList.append(en.selTurnText[i])
+        return(indexList, choiceList, en.selTurnText)
+
+    def threadSync(self):
+        if STEP_DRV:
+            indexList = (en.SEL_TH_STEP,)
+        elif SPINDLE_ENCODER:
+            indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
+            if SPINDLE_SYNC_BOARD:
+                indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+        else:
+            indexList = (en.SEL_TH_NO_ENC,)
+            
+        choiceList = []
+        for i in indexList:
+            choiceList.append(en.selThreadText[i])
+        return(indexList, choiceList, en.selThreadText)
 
     def OnStart(self, e):
         global spindleDataSent

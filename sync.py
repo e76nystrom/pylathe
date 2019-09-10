@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python27/python
+#!/cygdrive/c/Python37/python
 
 from __future__ import print_function
 

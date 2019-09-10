@@ -312,12 +312,16 @@ class Setup():
                 val += 1
             else:
                 if data.startswith("enum"):
+                    commentList = None
                     tmp = data.split()
-                    if len(tmp) != 2:
+                    if len(tmp) < 2:
                         print("enum failure")
                         stdout.flush()
                     var = tmp[1]
                     enum = tmp[1].replace('_', "") + "List"
+                    if len(tmp) >= 3:
+                        if tmp[2][0] == 'c':
+                            commentList = []
                     globals()[enum] = []
                     imports.append(enum)
                     val = 0
@@ -336,6 +340,8 @@ class Setup():
                             fWrite(cFile, "const char *%s[] = \n{\n" % (enum))
                             for index, (s, comment) in enumerate(stringList):
                                 tmp =  " \"%s\", " % (s)
+                                if commentList is not None:
+                                    commentList.append(comment)
                                 fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                             (tmp.ljust(32), index, \
                                              index, comment))
@@ -346,6 +352,12 @@ class Setup():
                         for s in eval(enum):
                             fWrite(f, "    \"%s\",\n" % (s))
                         fWrite(f, "    )\n")
+                        if commentList is not None:
+                            fWrite(f, "\n%s = ( \\\n" % \
+                                   (enum.replace('List', 'Text')))
+                            for c in commentList:
+                                   fWrite(f, "    \"%s\",\n" % (c))
+                            fWrite(f, "    )\n")
                 else:
                     if fData:
                         fWrite(cFile, "\n// %s\n\n" % (data))
