@@ -351,6 +351,8 @@ cmdList = \
     ("CMD_SETUP", "setup", "setup everything"),
     ("CMD_SPSETUP", "spindleSetup", "setup spindle"),
 
+    ("CMD_SYNCSETUP", "syncSetup", "setup z and x axis synchronization"),
+
     ("CMD_ZSETUP", "zSetup", "setup z axis"),
     ("CMD_ZSYNSETUP", "zSynSetup", "setup z axis sync"),
 
@@ -645,6 +647,9 @@ parmList = \
     ("MIN_SPEED", "minimum speed for current range", "int16_t"),
     ("MAX_SPEED", "maximum speed for current range", "int16_t"),
 
+    "current operation",
+
+    ("CURRENT_OP", "current operation", "char"),
 
     # ("", "", ""),
     # ("", "", ""),
@@ -1014,7 +1019,6 @@ enumList =\
     ("SAVE_Z_OFFSET", "save z offset"),
     ("SAVE_X_OFFSET", "save x offset"),
     ("SAVE_TAPER", "save taper"),
-    ("SAVE_OPERATION", "save operation type"),
     ("MOVE_ZX", "move x in sync with z"),
     ("MOVE_XZ", "move z in sync with x"),
     ("TAPER_ZX", "taper x"),

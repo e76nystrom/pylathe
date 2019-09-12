@@ -72,27 +72,26 @@ SAVE_X           =  3           # save x
 SAVE_Z_OFFSET    =  4           # save z offset
 SAVE_X_OFFSET    =  5           # save x offset
 SAVE_TAPER       =  6           # save taper
-SAVE_OPERATION   =  7           # save operation type
-MOVE_ZX          =  8           # move x in sync with z
-MOVE_XZ          =  9           # move z in sync with x
-TAPER_ZX         = 10           # taper x
-TAPER_XZ         = 11           # taper z
-START_SPINDLE    = 12           # spindle start
-STOP_SPINDLE     = 13           # spindle stop
-Z_SYN_SETUP      = 14           # z sync setup
-X_SYN_SETUP      = 15           # x sync setup
-PASS_NUM         = 16           # set pass number
-QUE_PAUSE        = 17           # pause queue
-MOVE_Z_OFFSET    = 18           # move z offset
-SAVE_FEED_TYPE   = 19           # save feed type
-Z_FEED_SETUP     = 20           # setup z feed
-X_FEED_SETUP     = 21           # setup x feed
-SAVE_FLAGS       = 22           # save thread flags
-PROBE_Z          = 23           # probe in z direction
-PROBE_X          = 24           # probe in x direction
-SAVE_Z_DRO       = 25           # save z dro reading
-SAVE_X_DRO       = 26           # save x dro reading
-OP_DONE          = 27           # operation done
+MOVE_ZX          =  7           # move x in sync with z
+MOVE_XZ          =  8           # move z in sync with x
+TAPER_ZX         =  9           # taper x
+TAPER_XZ         = 10           # taper z
+START_SPINDLE    = 11           # spindle start
+STOP_SPINDLE     = 12           # spindle stop
+Z_SYN_SETUP      = 13           # z sync setup
+X_SYN_SETUP      = 14           # x sync setup
+PASS_NUM         = 15           # set pass number
+QUE_PAUSE        = 16           # pause queue
+MOVE_Z_OFFSET    = 17           # move z offset
+SAVE_FEED_TYPE   = 18           # save feed type
+Z_FEED_SETUP     = 19           # setup z feed
+X_FEED_SETUP     = 20           # setup x feed
+SAVE_FLAGS       = 21           # save thread flags
+PROBE_Z          = 22           # probe in z direction
+PROBE_X          = 23           # probe in x direction
+SAVE_Z_DRO       = 24           # save z dro reading
+SAVE_X_DRO       = 25           # save x dro reading
+OP_DONE          = 26           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -102,7 +101,6 @@ mCommandsList = ( \
     "SAVE_Z_OFFSET",
     "SAVE_X_OFFSET",
     "SAVE_TAPER",
-    "SAVE_OPERATION",
     "MOVE_ZX",
     "MOVE_XZ",
     "TAPER_ZX",

@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import math
+from sys import stdout
 
 
 class Sync():
@@ -11,7 +12,7 @@ class Sync():
         self.clockFreq = 72000000
         self.encoderPulse = 1600
         self.metricLeadscrew = True
-        self.leadscrewTPI = 1
+        self.leadscrewTPI = 8
         self.leadscrewPitch = 5
         self.metricPitch = True
         self.motorSteps = 200
@@ -70,11 +71,20 @@ class Sync():
     def setExitRevs(self, rev):
         self.exitRevs = rev
 
-    def calcSync(self, val, dbg=None, metric=False, rpm=None):
+    def calcSync(self, val, dbg=None, metric=False, rpm=None, \
+                 dist=None, turn=None):
         dbgSave = None
+        distSave = None
+        turnSave = None
         if dbg is not None:
             dbgSave = self.dbg
             self.dbg = dbg
+        if dist is not None:
+            distSave = self.dist
+            self.dist = dist
+        if turn is not None:
+            turnSave = self.turn
+            self.turn = turn
 
         if type(val) is str:
             val = val.lower()
@@ -95,7 +105,10 @@ class Sync():
             tpi = val
             if self.metricLeadscrew:
                 nFactor = 5
-                dFactor = 127
+                if not self.turn:
+                    dFactor = 127
+                else:
+                    dFactor = 128
             else:
                 nFactor = 1
                 dFactor = 1
@@ -141,6 +154,7 @@ class Sync():
                        xStepsInt, float(xStepsInt / stepsInch)))
                 print("encoderRev %d exitRevs %0.2f encoderPulse %d\n" % \
                       (self.encoderPulse, self.exitRevs, int(encoderPulse)))
+                stdout.flush()
 
             num = \
                     ( \
@@ -231,6 +245,7 @@ class Sync():
                 print()
         if self.dbg:
             print()
+            stdout.flush()
 
         (nFactors, dResult) = self.remFactors(nFactors, dFactors)
 
@@ -268,9 +283,14 @@ class Sync():
             if rpm is not None:
                 print("preScaler %d" % (preScaler,))
             print()
+            stdout.flush()
 
         if dbgSave is not None:
-            dbgSave = self.dbg
+            self.dbg = dbgSave
+        if distSave is not None:
+            self.dist = distSave
+        if turnSave is not None:
+            self.turn = turnSave
 
         return(result)
 

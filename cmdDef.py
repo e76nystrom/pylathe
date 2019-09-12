@@ -39,40 +39,41 @@ CMD_MEASURE          =  20
 CMD_CLEAR            =  21
 CMD_SETUP            =  22
 CMD_SPSETUP          =  23
-CMD_ZSETUP           =  24
-CMD_ZSYNSETUP        =  25
-CMD_XSETUP           =  26
-CMD_XSYNSETUP        =  27
+CMD_SYNCSETUP        =  24
+CMD_ZSETUP           =  25
+CMD_ZSYNSETUP        =  26
+CMD_XSETUP           =  27
+CMD_XSYNSETUP        =  28
 
 # state information
 
-READSTAT             =  28
-READISTATE           =  29
+READSTAT             =  29
+READISTATE           =  30
 
 # load processor and xilinx parameters
 
-LOADVAL              =  30
-LOADMULTI            =  31
-READVAL              =  32
-LOADXREG             =  33
-READXREG             =  34
+LOADVAL              =  31
+LOADMULTI            =  32
+READVAL              =  33
+LOADXREG             =  34
+READXREG             =  35
 
 # move command operations
 
-CLEARQUE             =  35
-QUEMOVE              =  36
-MOVEQUESTATUS        =  37
+CLEARQUE             =  36
+QUEMOVE              =  37
+MOVEQUESTATUS        =  38
 
 # location and debug info
 
-READALL              =  38
-READDBG              =  39
-CLRDBG               =  40
+READALL              =  39
+READDBG              =  40
+CLRDBG               =  41
 
 # encoder commands
 
-ENCSTART             =  41
-ENCSTOP              =  42
+ENCSTART             =  42
+ENCSTOP              =  43
 
 # command table
 
@@ -101,23 +102,24 @@ cmdTable = ( \
     ("CMD_CLEAR", "clearCmd"),          #  21
     ("CMD_SETUP", "setup"),             #  22
     ("CMD_SPSETUP", "spindleSetup"),    #  23
-    ("CMD_ZSETUP", "zSetup"),           #  24
-    ("CMD_ZSYNSETUP", "zSynSetup"),     #  25
-    ("CMD_XSETUP", "xSetup"),           #  26
-    ("CMD_XSYNSETUP", "xSynSetup"),     #  27
-    ("READSTAT", "None"),               #  28
-    ("READISTATE", "None"),             #  29
-    ("LOADVAL", "None"),                #  30
-    ("LOADMULTI", "None"),              #  31
-    ("READVAL", "None"),                #  32
-    ("LOADXREG", "None"),               #  33
-    ("READXREG", "None"),               #  34
-    ("CLEARQUE", "None"),               #  35
-    ("QUEMOVE", "None"),                #  36
-    ("MOVEQUESTATUS", "None"),          #  37
-    ("READALL", "None"),                #  38
-    ("READDBG", "None"),                #  39
-    ("CLRDBG", "None"),                 #  40
-    ("ENCSTART", "None"),               #  41
-    ("ENCSTOP", "None"),                #  42
+    ("CMD_SYNCSETUP", "syncSetup"),     #  24
+    ("CMD_ZSETUP", "zSetup"),           #  25
+    ("CMD_ZSYNSETUP", "zSynSetup"),     #  26
+    ("CMD_XSETUP", "xSetup"),           #  27
+    ("CMD_XSYNSETUP", "xSynSetup"),     #  28
+    ("READSTAT", "None"),               #  29
+    ("READISTATE", "None"),             #  30
+    ("LOADVAL", "None"),                #  31
+    ("LOADMULTI", "None"),              #  32
+    ("READVAL", "None"),                #  33
+    ("LOADXREG", "None"),               #  34
+    ("READXREG", "None"),               #  35
+    ("CLEARQUE", "None"),               #  36
+    ("QUEMOVE", "None"),                #  37
+    ("MOVEQUESTATUS", "None"),          #  38
+    ("READALL", "None"),                #  39
+    ("READDBG", "None"),                #  40
+    ("CLRDBG", "None"),                 #  41
+    ("ENCSTART", "None"),               #  42
+    ("ENCSTOP", "None"),                #  43
     )

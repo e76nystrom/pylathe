@@ -235,7 +235,11 @@ JOG_DEBUG            = 135
 PWM_FREQ             = 136
 MIN_SPEED            = 137
 MAX_SPEED            = 138
-MAX_PARM             = 139
+
+# current operation
+
+CURRENT_OP           = 139
+MAX_PARM             = 140
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -377,5 +381,6 @@ parmTable = ( \
     ('PWM_FREQ', 'int16_t', 'pwmFreq'),
     ('MIN_SPEED', 'int16_t', 'minSpeed'),
     ('MAX_SPEED', 'int16_t', 'maxSpeed'),
+    ('CURRENT_OP', 'char', 'currentOp'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
