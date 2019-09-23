@@ -2949,7 +2949,7 @@ class ScrewThread(LatheOp, UpdatePass):
         rpm = getIntVal(th.rpm)
         if self.tpiBtn:
             self.tpi = val
-            self.pitch = val
+            self.pitch = 1.0 / val
             metric = False
         else:
             self.pitch = val / 25.4
