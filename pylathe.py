@@ -2951,7 +2951,7 @@ class ScrewThread(LatheOp, UpdatePass):
         rpm = getIntVal(th.rpm)
         if self.tpiBtn:
             self.tpi = val
-            self.pitch = val
+            self.pitch = 1.0 / val
             metric = False
         else:
             self.pitch = val / 25.4
@@ -5413,12 +5413,15 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         if done:
             return
         if self.IsShown():
-            try:
-                xDiameter = float(comm.getParm(pm.X_DIAMETER)) / \
-                            jogPanel.xStepsInch
-            except (ValueError, TypeError):
-                xDiameter = 0.0
-            self.curXPos.SetValue("%0.4f" % (xDiameter))
+            xDiameter = jogPanel.passSize.GetValue()
+            # try:
+            #     xDiameter = float(comm.getParm(pm.X_DIAMETER)) / \
+            #                 jogPanel.xStepsInch
+            # except (ValueError, TypeError):
+            #     xDiameter = 0.0
+            # self.curXPos.SetValue("%0.4f" % (xDiameter))
+            self.curXPos.SetValue(xDiameter)
+            self.actualXPos.SetValue(xDiameter)
             self.actualXPos.SetFocus()
             self.actualXPos.SetSelection(-1, -1)
 
