@@ -36,6 +36,7 @@ XCLEAR_HOME      = (1 << 7)     # move off of home
 FIND_PROBE       = (1 << 8)     # find home
 CLEAR_PROBE      = (1 << 9)     # move off of home
 DRO_POS          = (1 << 10)    # use dro for moving
+DRO_UPD          = (1 << 11)    # update internal position from dro
 
 # x direction
 

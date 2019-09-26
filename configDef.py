@@ -244,7 +244,7 @@ xMotorSteps      = 190          # x axis
 xParkLoc         = 191          # x axis 
 xPitch           = 192          # x axis 
 xProbeDist       = 193          # x axis 
-xDROPos          = 194          # x axis 
+xDROPos          = 194          # x axis use dro to go to correct position
 
 # x axis position config
 
@@ -277,7 +277,7 @@ zParkLoc         = 217          # z axis
 zPitch           = 218          # z axis 
 zProbeDist       = 219          # z axis 
 zProbeSpeed      = 220          # z axis 
-zDROPos          = 221          # x axis 
+zDROPos          = 221          # z axis use dro to go to correct position
 
 # z axis position config
 

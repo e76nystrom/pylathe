@@ -125,121 +125,123 @@ Z_DRO_POS            =  76
 Z_DRO_OFFSET         =  77
 Z_DRO_COUNT_INCH     =  78
 Z_DRO_INVERT         =  79
+Z_USE_DRO            =  80
 
 # x home parameters
 
-X_HOME_SPEED         =  80
-X_HOME_DIST          =  81
-X_HOME_BACKOFF_DIST  =  82
-X_HOME_DIR           =  83
+X_HOME_SPEED         =  81
+X_HOME_DIST          =  82
+X_HOME_BACKOFF_DIST  =  83
+X_HOME_DIR           =  84
 
 # x home test parameters
 
-X_HOME_LOC           =  84
-X_HOME_START         =  85
-X_HOME_END           =  86
-X_HOME_OFFSET        =  87
-X_DRO_POS            =  88
-X_DRO_OFFSET         =  89
-X_DRO_COUNT_INCH     =  90
-X_DRO_INVERT         =  91
+X_HOME_LOC           =  85
+X_HOME_START         =  86
+X_HOME_END           =  87
+X_HOME_OFFSET        =  88
+X_DRO_POS            =  89
+X_DRO_OFFSET         =  90
+X_DRO_COUNT_INCH     =  91
+X_DRO_INVERT         =  92
+X_USE_DRO            =  93
 
 # x home or probe status
 
-X_HOME_DONE          =  92
-X_HOME_STATUS        =  93
+X_HOME_DONE          =  94
+X_HOME_STATUS        =  95
 
 # Z home or probe status
 
-Z_HOME_DONE          =  94
-Z_HOME_STATUS        =  95
+Z_HOME_DONE          =  96
+Z_HOME_STATUS        =  97
 
 # probe configuration
 
-PROBE_SPEED          =  96
-PROBE_DIST           =  97
-PROBE_INV            =  98
+PROBE_SPEED          =  98
+PROBE_DIST           =  99
+PROBE_INV            = 100
 
 # configuration
 
-STEPPER_DRIVE        =  99
-MOTOR_TEST           = 100
-SPINDLE_ENCODER      = 101
-SPINDLE_SYNC_BOARD   = 102
-TURN_SYNC            = 103
-THREAD_SYNC          = 104
-CAP_TMR_ENABLE       = 105
-CFG_XILINX           = 106
-CFG_MPG              = 107
-CFG_DRO              = 108
-CFG_LCD              = 109
-CFG_FCY              = 110
-CFG_SWITCH           = 111
-CFG_VAR_SPEED        = 112
+STEPPER_DRIVE        = 101
+MOTOR_TEST           = 102
+SPINDLE_ENCODER      = 103
+SPINDLE_SYNC_BOARD   = 104
+TURN_SYNC            = 105
+THREAD_SYNC          = 106
+CAP_TMR_ENABLE       = 107
+CFG_XILINX           = 108
+CFG_MPG              = 109
+CFG_DRO              = 110
+CFG_LCD              = 111
+CFG_FCY              = 112
+CFG_SWITCH           = 113
+CFG_VAR_SPEED        = 114
 
 # setup
 
-SETUP_DONE           = 113
+SETUP_DONE           = 115
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 114
+ENC_PER_REV          = 116
 
 # test encoder setup variables
 
-ENC_ENABLE           = 115
-ENC_PRE_SCALER       = 116
-ENC_TIMER            = 117
-ENC_RUN_COUNT        = 118
+ENC_ENABLE           = 117
+ENC_PRE_SCALER       = 118
+ENC_TIMER            = 119
+ENC_RUN_COUNT        = 120
 
 # test encoder status variables
 
-ENC_RUN              = 119
-ENC_COUNTER          = 120
-ENC_REV_COUNTER      = 121
+ENC_RUN              = 121
+ENC_COUNTER          = 122
+ENC_REV_COUNTER      = 123
 
 # measured spindle speed
 
-RPM                  = 122
+RPM                  = 124
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 123
-FREQ_MULT            = 124
+X_FREQUENCY          = 125
+FREQ_MULT            = 126
 
 # xilinx configuration register
 
-X_CFG_REG            = 125
+X_CFG_REG            = 127
 
 # sync parameters
 
-L_SYNC_CYCLE         = 126
-L_SYNC_OUTPUT        = 127
-L_SYNC_PRESCALER     = 128
+L_SYNC_CYCLE         = 128
+L_SYNC_OUTPUT        = 129
+L_SYNC_PRESCALER     = 130
 
 # threading variables
 
-TH_Z_START           = 129
-TH_X_START           = 130
-TAN_THREAD_ANGLE     = 131
-X_FEED               = 132
-RUNOUT_DISTANCE      = 133
-RUNOUT_DEPTH         = 134
+TH_Z_START           = 131
+TH_X_START           = 132
+TAN_THREAD_ANGLE     = 133
+X_FEED               = 134
+RUNOUT_DISTANCE      = 135
+RUNOUT_DEPTH         = 136
 
 # jog debug
 
-JOG_DEBUG            = 135
+JOG_DEBUG            = 137
 
 # motor and speed control
 
-PWM_FREQ             = 136
-MIN_SPEED            = 137
-MAX_SPEED            = 138
+PWM_FREQ             = 138
+MIN_SPEED            = 139
+MAX_SPEED            = 140
 
 # current operation
 
-CURRENT_OP           = 139
-MAX_PARM             = 140
+CURRENT_OP           = 141
+MAX_PARM             = 142
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -322,6 +324,7 @@ parmTable = ( \
     ('Z_DRO_OFFSET', 'int', 'zDroOffset'),
     ('Z_DRO_COUNT_INCH', 'int', 'zDroCountInch'),
     ('Z_DRO_INVERT', 'int', 'zDroInvert'),
+    ('Z_USE_DRO', 'char', 'zUseDro'),
     ('X_HOME_SPEED', 'float', 'xHomeSpeed'),
     ('X_HOME_DIST', 'float', 'xHomeDist'),
     ('X_HOME_BACKOFF_DIST', 'float', 'xHomeBackoffDist'),
@@ -334,6 +337,7 @@ parmTable = ( \
     ('X_DRO_OFFSET', 'int', 'xDroOffset'),
     ('X_DRO_COUNT_INCH', 'int', 'xDroCountInch'),
     ('X_DRO_INVERT', 'int', 'xDroInvert'),
+    ('X_USE_DRO', 'char', 'xUseDro'),
     ('X_HOME_DONE', 'int', 'xHomeDone'),
     ('X_HOME_STATUS', 'int', 'xHomeStatus'),
     ('Z_HOME_DONE', 'int', 'zHomeDone'),

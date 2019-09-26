@@ -249,7 +249,7 @@ configList = \
     ('xParkLoc', 'x axis '),
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
-    ('xDROPos', 'x axis '),
+    ('xDROPos', 'x axis use dro to go to correct position'),
 
   "x axis position config",
 
@@ -282,7 +282,7 @@ configList = \
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
-    ('zDROPos', 'x axis '),
+    ('zDROPos', 'z axis use dro to go to correct position'),
 
   "z axis position config",
 
@@ -527,6 +527,7 @@ parmList = \
     ("Z_DRO_OFFSET", "z dro to zero", "int"),
     ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
     ("Z_DRO_INVERT", "z dro invert", "int"),
+    ("Z_USE_DRO", "z use dro for position", "char"),
 
     "x home parameters",
 
@@ -551,6 +552,7 @@ parmList = \
     ("X_DRO_OFFSET", "x dro to zero", "int"),
     ("X_DRO_COUNT_INCH", "x dro scale", "int"),
     ("X_DRO_INVERT", "x dro invert", "int"),
+    ("X_USE_DRO", "x use dro for position", "char"),
 
     "x home or probe status",
 
@@ -705,6 +707,7 @@ regList =\
     ("FIND_PROBE",  "(1 << 8)", "find home"),
     ("CLEAR_PROBE", "(1 << 9)", "move off of home"),
     ("DRO_POS",     "(1 << 10)", "use dro for moving"),
+    ("DRO_UPD",     "(1 << 11)", "update internal position from dro"),
      
     "x direction",
     

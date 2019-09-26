@@ -1124,6 +1124,7 @@ def sendZData(send=False):
             if DRO:
                 queParm(pm.Z_DRO_COUNT_INCH, jogPanel.zDROInch)
                 queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
+                queParm(pm.Z_USE_DRO, cfg.getBoolInfoData(cf.zDROPos))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -1201,6 +1202,7 @@ def sendXData(send=False):
             if DRO:
                 queParm(pm.X_DRO_COUNT_INCH, jogPanel.xDROInch)
                 queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
+                queParm(pm.X_USE_DRO, cfg.getBoolInfoData(cf.xDROPos))
 
             val = jogPanel.combo.GetValue()
             try:
@@ -1548,7 +1550,7 @@ class Turn(LatheOp, UpdatePass):
 
     def runPass(self, addPass=False): # turn
         m = self.m
-        flag = ct.CMD_MOV | (ct.DRO_POS if X_DRO_POS else 0)
+        flag = ct.CMD_MOV | ((ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else 0)
         m.moveX(self.curX, flag)
         if DRO:
             m.saveXDro()
@@ -3247,7 +3249,7 @@ class ScrewThread(LatheOp, UpdatePass):
         m.moveZ(startZPass)
 
         if self.rightHand:      # right hand threads
-            flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+            flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else 0)
             m.moveX(self.curX, flag)
         else:                   # left hand threads
             if self.runoutDist != 0:
@@ -3265,7 +3267,8 @@ class ScrewThread(LatheOp, UpdatePass):
                         m.moveX(self.xStart - self.depth, backlash=-xBackInc)
                     m.moveX(self.curX - self.depth)
             else:
-                flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
+                                     if X_DRO_POS else 0)
                 m.moveX(self.xStart, flag)
                 m.moveX(self.curX, ct.CMD_SYN)
 
@@ -4336,7 +4339,8 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("xJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                    flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
+                                         if X_DRO_POS else 0)
                     comm.queParm(pm.X_FLAG, flag)
                     comm.queParm(pm.X_MOVE_DIST, val)
                     comm.command(cm.XMOVEREL)
@@ -5367,7 +5371,8 @@ class GotoDialog(wx.Dialog, FormRoutines):
                 sendXData()
                 m.dbg = True
                 m.saveXOffset()
-                flag = ct.CMD_JOG | (ct.DRO_POS if X_DRO_POS else 0)
+                flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
+                                     if X_DRO_POS else 0)
                 m.moveX(loc / 2.0, flag)
                 m.dbg = False
             comm.command(cm.CMD_RESUME)
