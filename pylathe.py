@@ -877,7 +877,11 @@ class MoveCommands():
             stdout.flush()
 
     def moveX(self, xLocation, flag=ct.CMD_MAX, backlash=0.0):
-        self.queMoveF(en.MOVE_X, flag, xLocation + backlash)
+        if (flag & DRO_POS) == 0:
+            val = round((xLocation + backlash) * jogPanel.xStepsInch))
+        else:
+            val = round((xLocation + backlash) * jogPanel.xDROInch))
+        self.queMoveF(en.MOVE_X, flag, val)
         self.drawLineX(xLocation)
         if self.dbg:
             print("moveX  %7.4f" % (xLocation))
