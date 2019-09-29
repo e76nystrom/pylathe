@@ -23,13 +23,15 @@ XIDLE            =  0           # idle
 XWAITBKLS        =  1           # wait for backlash move complete
 XSTARTMOVE       =  2           # start x move
 XWAITMOVE        =  3           # wait for move complete
-XDONE            =  4           # clean up state
+XDELAY           =  4           # wait for position to settle
+XDONE            =  5           # clean up state
 
 xStatesList = ( \
     "XIDLE",
     "XWAITBKLS",
     "XSTARTMOVE",
     "XWAITMOVE",
+    "XDELAY",
     "XDONE",
     )
 
