@@ -4,6 +4,7 @@
 ################################################################################
 from __future__ import print_function
 
+import math
 import os
 import re
 import subprocess
@@ -137,6 +138,9 @@ xHomeOffset = 0.0
 xHomed = False
 done = False
 
+MAX_PRIME = 127
+factor = None
+
 AL_LEFT   = 0x001
 AL_RIGHT  = 0x002
 AL_CENTER = 0x004
@@ -165,6 +169,58 @@ def getIntVal(tc):
         return(int(tc.GetValue()))
     except ValueError:
         return(0)
+
+class Factor:
+    def __init__(self, maxPrime):
+        self.primes = self.calcPrimes(maxPrime)
+        
+    def remFactors(self, nFactors, dFactors):
+        # print("remove common factors")
+        dResult = []
+        for d in dFactors:
+            found = False
+            # print("d %d" % (d))
+            for (i, n) in enumerate(nFactors):
+                if d == n:
+                    # print("found %d at %d\n" % (d, i))
+                    del nFactors[i]
+                    found = True
+                    break
+            if not found:
+                dResult.append(d)
+        return(nFactors, dResult)
+
+    def combineFactors(self, factors):
+        result = 1
+        for val in factors:
+            result *= val
+        return result
+
+    def calcPrimes(self, maxPrime):
+        maxPrime += 1
+        sieve = [True] * maxPrime
+        sieve[0] = False
+        sieve[1] = False
+
+        for i in range(2, int(math.sqrt(maxPrime)) + 1):
+            index = i * 2
+            while index < maxPrime:
+                sieve[index] = False
+                index += i
+
+        primes = []
+        for i in range(maxPrime):
+            if sieve[i] == True:
+                primes.append(i)
+        return(primes)
+
+    def factor(self, n):
+        factors = []
+        for i in self.primes:
+            while n % i == 0:
+                factors.append(i)
+                n /= i
+        return(factors)
 
 class Offset():
     def __init__(self, scale):
@@ -1197,7 +1253,7 @@ def sendXData(send=False):
             xSyncExt.setMicroSteps(microSteps)
 
         if DRO:
-            jogPanel.xDROInch = cfg.getIntInfoData(cf.xDROInch)
+            jogPanel.xDROInch = droInch = cfg.getIntInfoData(cf.xDROInch)
 
         # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
         # stdout.flush()
@@ -1207,6 +1263,16 @@ def sendXData(send=False):
                 queParm(pm.X_DRO_COUNT_INCH, jogPanel.xDROInch)
                 queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
                 queParm(pm.X_USE_DRO, cfg.getBoolInfoData(cf.xDROPos))
+                queParm(pm.X_DONE_DELAY, cfg.getIntInfoData(cf.xDoneDelay))
+                stepF = factor.factor(stepsInch)
+                droF = factor.factor(droInch)
+                (stepF, droF) = factor.remFactors(stepF, droF)
+                stepFactor = factor.combineFactors(stepF)
+                droFactor = factor.combineFactors(droF)
+                queParm(pm.X_STEP_FACTOR, stepFactor)
+                queParm(pm.X_DRO_FACTOR, droFactor)
+            else:
+                queParm(pm.X_DONE_DELAY, 0)
 
             val = jogPanel.combo.GetValue()
             try:
@@ -3004,7 +3070,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+            comm.queParm(pm.L_SYNC_CYCLE, self.secycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
         elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
@@ -6814,6 +6880,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("DRO Inch", cf.xDROInch, 'd'), \
                 ("bInv DRO", cf.xInvDRO, None), \
                 ("bDRO Position", cf.xDROPos, None), \
+                ("DRO Read Delay ms", cf.xDoneDelay, None), \
             )
         if HOME_TEST:
             self.fields += (
@@ -7759,6 +7826,8 @@ class MainApp(wx.App):
         if evt.EventType == wx.EVT_KEY_DOWN:
             print(evt)
         return(-1)
+
+factor = Factor(MAX_PRIME)
 
 app = MainApp(redirect=False)
 # app.SetCallFilterEvent(True)

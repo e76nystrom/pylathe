@@ -224,7 +224,9 @@ configList = \
 
     ('xAccel', 'x axis '),
     ('xBacklash', 'x axis '),
+    ('xDoneDelay', 'x axis done to read dro delay'),
     ('xDROInch', 'x axis '),
+    ('xDROPos', 'x axis use dro to go to correct position'),
     ('xHomeBackoffDist', 'x axis '),
     ('xHomeDir', 'x axis '),
     ('xHomeDist', 'x axis '),
@@ -249,7 +251,6 @@ configList = \
     ('xParkLoc', 'x axis '),
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
-    ('xDROPos', 'x axis use dro to go to correct position'),
 
   "x axis position config",
 
@@ -432,6 +433,7 @@ parmList = \
     ("Z_ACCEL_TIME", "z axis acceleration", "float"),
     ("Z_ACCEL", "z accel rpm/sec^2", "float"),
     ("Z_BACKLASH", "z axis backlash", "float"),
+    ("X_STEP_FACTOR", "x steps inch factored", "int"),
     ("Z_DIR_FLAG", "z invert direction", "char"),
     ("Z_MPG_FLAG", "z invert mpg", "char"),
     
@@ -551,8 +553,10 @@ parmList = \
     ("X_DRO_POS", "x dro location", "int"),
     ("X_DRO_OFFSET", "x dro to zero", "int"),
     ("X_DRO_COUNT_INCH", "x dro scale", "int"),
+    ("X_DRO_FACTOR", "x dro counts inch factored", "int"),
     ("X_DRO_INVERT", "x dro invert", "int"),
     ("X_USE_DRO", "x use dro for position", "char"),
+    ("X_DONE_DELAY", "x done to read dro delay", "int"),
 
     "x home or probe status",
 
@@ -991,6 +995,7 @@ enumList =\
     ("XWAITBKLS", "wait for backlash move complete"),
     ("XSTARTMOVE", "start x move"),
     ("XWAITMOVE", "wait for move complete"),
+    ("XDELAY", "wait for position to settle"),
     ("XDONE", "clean up state"),
     "};",
     
