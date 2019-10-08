@@ -1,8 +1,8 @@
-zSvPosition=163
+zSvPosition=0
 zSvHomeOffset=0.0000
-xSvPosition=19088
+xSvPosition=0
 xSvHomeOffset=1.9752
 zSvDROPosition=0
 zSvDROOffset=0
-xSvDROPosition=0
+xSvDROPosition=20068
 xSvDROOffset=0

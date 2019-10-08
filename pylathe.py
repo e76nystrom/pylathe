@@ -40,6 +40,10 @@ WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
 
+DBG_DIR = os.path.join(os.getcwd(), "dbg")
+DXF_DIR = os.path.join(os.getcwd(), "dxf")
+DBG_LOG = os.path.join(DBG_DIR, "dbgLot.txt")
+
 SWIG = False
 HOME_TEST = False
 SETUP = False
@@ -717,7 +721,9 @@ class MoveCommands():
         tmp = "%s%0.3f-%0.3f" % (cmd, diam, parm)
         tmp = tmp.replace(".", "-")
         tmp = re.sub("-0$", "", tmp) + ".dxf"
-        self.fileName = os.path.join(os.getcwd(), tmp)
+        self.fileName = os.path.join(DXF_DIR, tmp)
+        if not os.path.exists(DXF_DIR):
+            os.makedirs(DXF_DIR)
         d = dxf.drawing(self.fileName)
         self.style = dxf.style("CONSOLAS", font="Consolas.ttf")
         d.add_layer(TEXT, color=0)
@@ -3950,7 +3956,10 @@ class JogPanel(wx.Panel, FormRoutines):
             self.xDROOffset = None
             # self.xDroDiam = False
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
-        self.dbg = open("dbgLog.txt", "ab")
+
+        if not os.path.exists(DBG_DIR):
+            ps.makedirs(DBG_DIR)
+        self.dbg = open(DBG_LOG, "ab")
         t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
         self.dbg.write(t.encode())
         self.dbg.flush()
@@ -5603,7 +5612,7 @@ class UpdateThread(Thread):
         self.mIdle = False
 
     def openDebug(self, file="dbg.txt"):
-        self.dbg = open(file, "wb")
+        self.dbg = open(os.path.join(DBG_DIR, file, "wb"))
         t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
         self.dbg.write(t.encode())
         self.dbg.flush()
@@ -7241,7 +7250,7 @@ class SpindleTest():
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         accel = cfg.getFloatInfoData(cf.spAccel)   # accel rpm per sec
 
-        f = open('spindle.txt', 'w')
+        f = open(os.path_join(DBG_DIR, 'spindle.txt'), 'w')
 
         dbgPrt(txt, "minRPM %d maxRPM %d", (minRPM, maxRPM))
 
@@ -7376,7 +7385,7 @@ class SyncTest(object):
         txt = self.txt
         txt.SetValue("")
         print("")
-        f = open('zsync.txt', 'w')
+        f = open(os.path_join(DBG_DIR, 'zsync.txt'), 'w')
 
         zAxis = True
         panel = cfg.getInfoData(cf.mainPanel)
@@ -7594,7 +7603,7 @@ class TaperTest(object):
         global f
         txt = self.txt
         txt.SetValue("")
-        f = open('taper.txt', 'w')
+        f = open(os.path_join(DBG_DIR, 'taper.txt'), 'w')
 
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
@@ -7689,7 +7698,7 @@ class MoveTest(object):
         txt = self.txt
         txt.SetValue("")
 
-        f = open('move.txt', 'w')
+        f = open(os.path_join(DBG_DIR, 'move.txt'), 'w')
 
         pitch = cfg.getFloatInfoData(cf.zPitch)
         microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
