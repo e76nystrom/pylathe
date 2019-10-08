@@ -148,103 +148,104 @@ X_DRO_FACTOR         =  93
 X_DRO_INVERT         =  94
 X_USE_DRO            =  95
 X_DONE_DELAY         =  96
+X_DRO_FINAL_DIST     =  97
 
 # x home or probe status
 
-X_HOME_DONE          =  97
-X_HOME_STATUS        =  98
+X_HOME_DONE          =  98
+X_HOME_STATUS        =  99
 
 # Z home or probe status
 
-Z_HOME_DONE          =  99
-Z_HOME_STATUS        = 100
+Z_HOME_DONE          = 100
+Z_HOME_STATUS        = 101
 
 # probe configuration
 
-PROBE_SPEED          = 101
-PROBE_DIST           = 102
-PROBE_INV            = 103
+PROBE_SPEED          = 102
+PROBE_DIST           = 103
+PROBE_INV            = 104
 
 # configuration
 
-STEPPER_DRIVE        = 104
-MOTOR_TEST           = 105
-SPINDLE_ENCODER      = 106
-SPINDLE_SYNC_BOARD   = 107
-TURN_SYNC            = 108
-THREAD_SYNC          = 109
-CAP_TMR_ENABLE       = 110
-CFG_XILINX           = 111
-CFG_MPG              = 112
-CFG_DRO              = 113
-CFG_LCD              = 114
-CFG_FCY              = 115
-CFG_SWITCH           = 116
-CFG_VAR_SPEED        = 117
+STEPPER_DRIVE        = 105
+MOTOR_TEST           = 106
+SPINDLE_ENCODER      = 107
+SPINDLE_SYNC_BOARD   = 108
+TURN_SYNC            = 109
+THREAD_SYNC          = 110
+CAP_TMR_ENABLE       = 111
+CFG_XILINX           = 112
+CFG_MPG              = 113
+CFG_DRO              = 114
+CFG_LCD              = 115
+CFG_FCY              = 116
+CFG_SWITCH           = 117
+CFG_VAR_SPEED        = 118
 
 # setup
 
-SETUP_DONE           = 118
+SETUP_DONE           = 119
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 119
+ENC_PER_REV          = 120
 
 # test encoder setup variables
 
-ENC_ENABLE           = 120
-ENC_PRE_SCALER       = 121
-ENC_TIMER            = 122
-ENC_RUN_COUNT        = 123
+ENC_ENABLE           = 121
+ENC_PRE_SCALER       = 122
+ENC_TIMER            = 123
+ENC_RUN_COUNT        = 124
 
 # test encoder status variables
 
-ENC_RUN              = 124
-ENC_COUNTER          = 125
-ENC_REV_COUNTER      = 126
+ENC_RUN              = 125
+ENC_COUNTER          = 126
+ENC_REV_COUNTER      = 127
 
 # measured spindle speed
 
-RPM                  = 127
+RPM                  = 128
 
 # xilinx frequency variables
 
-X_FREQUENCY          = 128
-FREQ_MULT            = 129
+X_FREQUENCY          = 129
+FREQ_MULT            = 130
 
 # xilinx configuration register
 
-X_CFG_REG            = 130
+X_CFG_REG            = 131
 
 # sync parameters
 
-L_SYNC_CYCLE         = 131
-L_SYNC_OUTPUT        = 132
-L_SYNC_PRESCALER     = 133
+L_SYNC_CYCLE         = 132
+L_SYNC_OUTPUT        = 133
+L_SYNC_PRESCALER     = 134
 
 # threading variables
 
-TH_Z_START           = 134
-TH_X_START           = 135
-TAN_THREAD_ANGLE     = 136
-X_FEED               = 137
-RUNOUT_DISTANCE      = 138
-RUNOUT_DEPTH         = 139
+TH_Z_START           = 135
+TH_X_START           = 136
+TAN_THREAD_ANGLE     = 137
+X_FEED               = 138
+RUNOUT_DISTANCE      = 139
+RUNOUT_DEPTH         = 140
 
 # jog debug
 
-JOG_DEBUG            = 140
+JOG_DEBUG            = 141
 
 # motor and speed control
 
-PWM_FREQ             = 141
-MIN_SPEED            = 142
-MAX_SPEED            = 143
+PWM_FREQ             = 142
+MIN_SPEED            = 143
+MAX_SPEED            = 144
 
 # current operation
 
-CURRENT_OP           = 144
-MAX_PARM             = 145
+CURRENT_OP           = 145
+MAX_PARM             = 146
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -344,6 +345,7 @@ parmTable = ( \
     ('X_DRO_INVERT', 'int', 'xDroInvert'),
     ('X_USE_DRO', 'char', 'xUseDro'),
     ('X_DONE_DELAY', 'int', 'xDoneDelay'),
+    ('X_DRO_FINAL_DIST', 'int', 'xDroFinalDist'),
     ('X_HOME_DONE', 'int', 'xHomeDone'),
     ('X_HOME_STATUS', 'int', 'xHomeStatus'),
     ('Z_HOME_DONE', 'int', 'zHomeDone'),

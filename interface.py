@@ -225,6 +225,7 @@ configList = \
     ('xAccel', 'x axis '),
     ('xBacklash', 'x axis '),
     ('xDoneDelay', 'x axis done to read dro delay'),
+    ('xDroFinalDist', 'x dro final approach dist'),
     ('xDROInch', 'x axis '),
     ('xDROPos', 'x axis use dro to go to correct position'),
     ('xHomeBackoffDist', 'x axis '),
@@ -557,6 +558,7 @@ parmList = \
     ("X_DRO_INVERT", "x dro invert", "int"),
     ("X_USE_DRO", "x use dro for position", "char"),
     ("X_DONE_DELAY", "x done to read dro delay", "int"),
+    ("X_DRO_FINAL_DIST", "x final approach distance", "int"),
 
     "x home or probe status",
 

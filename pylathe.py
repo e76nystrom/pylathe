@@ -1264,6 +1264,9 @@ def sendXData(send=False):
                 queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
                 queParm(pm.X_USE_DRO, cfg.getBoolInfoData(cf.xDROPos))
                 queParm(pm.X_DONE_DELAY, cfg.getIntInfoData(cf.xDoneDelay))
+                queParm(pm.X_DRO_FINAL_DIST,
+                        round(cfg.getFloatInfoData(cf.xDroFinalDist) * \
+                              droInch))
                 stepF = factor.factor(stepsInch)
                 droF = factor.factor(droInch)
                 (stepF, droF) = factor.remFactors(stepF, droF)
@@ -6880,6 +6883,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("DRO Inch", cf.xDROInch, 'd'), \
                 ("bInv DRO", cf.xInvDRO, None), \
                 ("bDRO Position", cf.xDROPos, None), \
+                ("DRO Final Dist", cf.xDroFinalDist, 'f'), \
                 ("DRO Read Delay ms", cf.xDoneDelay, None), \
             )
         if HOME_TEST:
