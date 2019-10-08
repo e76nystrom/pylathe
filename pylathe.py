@@ -3958,7 +3958,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
 
         if not os.path.exists(DBG_DIR):
-            ps.makedirs(DBG_DIR)
+            os.makedirs(DBG_DIR)
         self.dbg = open(DBG_LOG, "ab")
         t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
         self.dbg.write(t.encode())
