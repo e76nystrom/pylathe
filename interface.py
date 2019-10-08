@@ -1178,9 +1178,9 @@ if __name__ == '__main__':
     path = os.path.dirname(os.path.realpath(__file__))
 
     fData = True
-    cLoc = path + '/../../EclipseCPP/LatheCPP/include/'
+    cLoc = path + '/../LatheCPP/include/'
     xLoc = path + '/../../Xilinx/LatheCtl/'
-    syncLoc = path + '/../Sync/include/'
+    syncLoc = path + '/../SyncCPP/include/'
 
     print("creating interface files")
     setup = Setup()
