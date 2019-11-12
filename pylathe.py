@@ -6339,7 +6339,7 @@ class MainFrame(wx.Frame):
 
         dw, dh = wx.DisplaySize()
         w, h = self.GetSize()
-        self.SetPosition(((3 * dw) / 4 - w, 0))
+        self.SetPosition((int((3 * dw) / 4 - w), 0))
 
         self.turnPanel.update()
         self.facePanel.update()
