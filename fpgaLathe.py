@@ -4,9 +4,9 @@
 # status register
 
 zAxisEna     = 0x01             # z axis enable flag
-zAxisDone    = 0x01             # z axis done
-xAxisEna     = 0x01             # x axis enable flag
-xAxisDone    = 0x02             # x axis done
+zAxisDone    = 0x02             # z axis done
+xAxisEna     = 0x04             # x axis enable flag
+xAxisDone    = 0x08             # x axis done
 
 # axis control register
 

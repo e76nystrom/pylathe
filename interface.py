@@ -1110,9 +1110,9 @@ fpgaLatheBitList = \
 
  ("status",),
  ("zAxisEna",   1, 0, "z axis enable flag"),
- ("zAxisDone",  1, 0, "z axis done"),
- ("xAxisEna",   1, 0, "x axis enable flag"),
- ("xAxisDone",  1, 1, "x axis done"),
+ ("zAxisDone",  1, 1, "z axis done"),
+ ("xAxisEna",   1, 2, "x axis enable flag"),
+ ("xAxisDone",  1, 3, "x axis done"),
 # ("",  , , ""),
 
  "axis control register",
