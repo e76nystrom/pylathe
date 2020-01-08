@@ -10,10 +10,10 @@ SYNC_READVAL         =   5
 # command table
 
 cmdTable = ( \
-    ("SYNC_SETUP", "None"),             #   0
-    ("SYNC_START", "None"),             #   1
-    ("SYNC_STOP", "None"),              #   2
-    ("SYNC_LOADVAL", "None"),           #   3
-    ("SYNC_LOADMULTI", "None"),         #   4
-    ("SYNC_READVAL", "None"),           #   5
+    ("SYNC_SETUP", None),               #   0
+    ("SYNC_START", None),               #   1
+    ("SYNC_STOP", None),                #   2
+    ("SYNC_LOADVAL", None),             #   3
+    ("SYNC_LOADMULTI", None),           #   4
+    ("SYNC_READVAL", None),             #   5
     )

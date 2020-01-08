@@ -32,13 +32,22 @@ import parmDef as pm
 import stringDef as st
 import syncCmdDef as sc
 import syncParmDef as sp
-from comm import Comm, CommTimeout
 from configInfo import ConfigInfo, InfoValue
 from sync import Sync
 
+R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
+    # from comm import Comm, CommTimeout
+    from commPi import Comm, CommTimeout
+    R_PI = True
+else:
+    if os.uname().nodename != 'raspberrypi':
+        from comm import Comm, CommTimeout
+    else:
+        from commPi import comm, CommTimeout
+        R_PI = True
 
 DBG_DIR = os.path.join(os.getcwd(), "dbg")
 DXF_DIR = os.path.join(os.getcwd(), "dxf")
@@ -698,7 +707,10 @@ class DialogActions():
 
 class MoveCommands():
     def __init__(self):
-        self.moveQue = Queue()
+        if not R_PI:
+            self.moveQue = Queue()
+        else:
+            self.moveQue = comm.rpi.moveQue
         self.passNum = 0
         self.send = False
         self.dbg = False
@@ -1110,17 +1122,21 @@ def sendSpindleData(send=False, rpm=None):
             elif XILINX:
                 queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
                 queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
-                queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                queParm(pm.FREQ_MULT, 8)
                 xilinxTestMode()
                 queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
-                cfgReg = 0
-                if cfg.getBoolInfoData(cf.cfgInvEncDir):
-                    cfgReg |= xb.ENC_POL
-                if cfg.getBoolInfoData(cf.zInvDir):
-                    cfgReg |= xb.ZDIR_POL
-                if cfg.getBoolInfoData(cf.xInvDir):
-                    cfgReg |= xb.XDIR_POL
-                queParm(pm.X_CFG_REG, cfgReg)
+                if not R_PI:
+                    cfgReg = 0
+                    if cfg.getBoolInfoData(cf.cfgInvEncDir):
+                        cfgReg |= xb.ENC_POL
+                    if cfg.getBoolInfoData(cf.zInvDir):
+                        cfgReg |= xb.ZDIR_POL
+                    if cfg.getBoolInfoData(cf.xInvDir):
+                        cfgReg |= xb.XDIR_POL
+                    queParm(pm.X_CFG_REG, cfgReg)
+                else:
+                    pass
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
@@ -3990,6 +4006,9 @@ class JogPanel(wx.Panel, FormRoutines):
         stdout.flush()
         e.Skip()
 
+    def postUpdate(self, result):
+        wx.PostEvent(self, UpdateEvent(result))
+        
     def OnUpdate(self, e):
         index = e.data[0]
         if index < len(self.procUpdate):
@@ -5612,7 +5631,7 @@ class UpdateThread(Thread):
         self.mIdle = False
 
     def openDebug(self, file="dbg.txt"):
-        self.dbg = open(os.path.join(DBG_DIR, file, "wb"))
+        self.dbg = open(os.path.join(DBG_DIR, file), "wb")
         t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
         self.dbg.write(t.encode())
         self.dbg.flush()
@@ -6151,7 +6170,10 @@ class MainFrame(wx.Frame):
 
         self.initDevice()
 
-        self.updateThread.start()
+        if not R_PI:
+            updateThread.start()
+        else:
+            comm.rpi.setPostUpdate(self.jogPanel.postUpdate)
         self.delay = Delay(self)
 
     def onClose(self, e):
@@ -6167,6 +6189,8 @@ class MainFrame(wx.Frame):
         self.updateThread.close()
         buttonRepeat.close()
         jogShuttle.close()
+        if R_PI:
+            comm.rpi.close()
         if keypad is not None:
             keypad.close()
         self.Destroy()
@@ -6430,6 +6454,8 @@ class MainFrame(wx.Frame):
                              cfg.getBoolInfoData(cf.spVarSpeed))
                 comm.command(cm.CMD_SETUP)
                 
+                sendSpindleData()
+
                 sendZData()
                 if EXT_DRO:
                     self.jogPanel.setZFromExt()
@@ -6488,8 +6514,6 @@ class MainFrame(wx.Frame):
                     comm.queParm(pm.X_HOME_STATUS, \
                                  ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
                 comm.sendMulti()
-
-                sendSpindleData()
 
             except CommTimeout:
                 commTimeout()
@@ -6585,8 +6609,12 @@ class MainFrame(wx.Frame):
 
         if XILINX:
             global xb, xr
-            import xBitDef as xb
-            import xRegDef as xr
+            if not R_PI:
+                import xBitDef as xb
+                import xRegDef as xr
+            else:
+                import fpgaLathe as xb
+                import lRegDef as xr
 
         if EXT_DRO:
             global dro, eDro

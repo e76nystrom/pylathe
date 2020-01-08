@@ -35,6 +35,26 @@ xStatesList = ( \
     "XDONE",
     )
 
+# axis control states
+
+AXIS_IDLE        =  0           # idle
+AXIS_WAIT_BACKLASH =  1         # wait for backlash move complete
+AXIS_START_MOVE  =  2           # start axis move
+AXIS_WAIT_MOVE   =  3           # wait for move complete
+AXIS_DELAY       =  4           # wait for position to settle
+AXIS_DONE        =  5           # clean up state
+AXIS_STATES      =  6           # number of states
+
+axisStatesList = ( \
+    "AXIS_IDLE",
+    "AXIS_WAIT_BACKLASH",
+    "AXIS_START_MOVE",
+    "AXIS_WAIT_MOVE",
+    "AXIS_DELAY",
+    "AXIS_DONE",
+    "AXIS_STATES",
+    )
+
 # move control states
 
 M_IDLE           =  0           # idle state

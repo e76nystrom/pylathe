@@ -1,5 +1,5 @@
 
-# xilinx registers
+# fpga registers
 
 
 # skip register zero
@@ -155,3 +155,59 @@ xRegTable = ( \
     "XRDZCTL",                          #  50
     "XRDXCTL",                          #  51
     )
+
+importList = ( \
+ xRegTable, \
+ XNOOP, \
+ XLDZCTL, \
+ XLDXCTL, \
+ XLDTCTL, \
+ XLDPCTL, \
+ XLDCFG, \
+ XLDDCTL, \
+ XLDDREG, \
+ XREADREG, \
+ XRDSR, \
+ XLDPHASE, \
+ XLDZFREQ, \
+ XLDZD, \
+ XLDZINCR1, \
+ XLDZINCR2, \
+ XLDZACCEL, \
+ XLDZACLCNT, \
+ XLDZDIST, \
+ XLDZLOC, \
+ XLDXFREQ, \
+ XLDXD, \
+ XLDXINCR1, \
+ XLDXINCR2, \
+ XLDXACCEL, \
+ XLDXACLCNT, \
+ XLDXDIST, \
+ XLDXLOC, \
+ XRDZSUM, \
+ XRDZXPOS, \
+ XRDZYPOS, \
+ XRDZACLSUM, \
+ XRDZASTP, \
+ XRDXSUM, \
+ XRDXXPOS, \
+ XRDXYPOS, \
+ XRDXACLSUM, \
+ XRDXASTP, \
+ XRDZDIST, \
+ XRDXDIST, \
+ XRDZLOC, \
+ XRDXLOC, \
+ XRDFREQ, \
+ XCLRFREQ, \
+ XRDSTATE, \
+ XRDPSYN, \
+ XRDTPHS, \
+ XLDZLIM, \
+ XRDZPOS, \
+ XLDTFREQ, \
+ XLDTCOUNT, \
+ XRDZCTL, \
+ XRDXCTL, \
+)

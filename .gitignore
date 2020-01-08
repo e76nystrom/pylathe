@@ -3,6 +3,7 @@
 *.bak
 *.db
 *.dxf
+*.hex
 *.i
 *.jar
 *.lst
@@ -15,6 +16,8 @@
 *.xlsx
 *_wrap.c
 *~
+accel.txt
+newTest.py
 .vs/
 .vscode/
 Backup/
