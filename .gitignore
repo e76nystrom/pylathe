@@ -17,6 +17,7 @@
 *_wrap.c
 *~
 accel.txt
+dbgLog.txt
 newTest.py
 .vs/
 .vscode/

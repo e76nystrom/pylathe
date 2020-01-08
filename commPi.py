@@ -3,6 +3,8 @@ from threading import Event, Lock, Thread
 from queue import Empty, Queue
 from sys import stderr, stdout
 from time import sleep
+from platform import system
+import os
 import re
 
 from parmDef import parmTable
@@ -11,6 +13,8 @@ import enumDef as en
 import lRegDef as rg
 import fpgaLathe as bt
 import ctlBitDef as ct
+
+WINDOWS = system() == 'Windows'
 
 spi = None
 
@@ -59,6 +63,16 @@ class Comm():
     def __init__(self):
         self.ser = Serial()
         self.rpi = PiLathe()
+        if system() == 'linux':
+            if os.uname().nodename != 'raspberrypi':
+                global spi
+                import spidev
+                bus = 0
+                device = 0
+                spi = spidev.SpiDev()
+                spi.open(bus, device)
+                spi.max_speed_hz = 500000
+                spi.mode = 0
         print(self.rpi.spSteps)
     
     def setupCmds(self, loadMulti, loadVal, readVal):
@@ -303,12 +317,14 @@ class PiLathe(Thread):
         self.move[en.SAVE_X_DRO] = self.saveXDro
         self.move[en.OP_DONE] = self.opDone
 
+        axisDbg = WINDOWS
+        
         while True:
             stdout.flush()
             sleep(0.1)
             if not self.threadRun:
                 break
-            self.axisCtl()
+            self.axisCtl(axisDbg)
             self.procMove()
             self.update()
             
