@@ -46,7 +46,7 @@ else:
     if os.uname().nodename != 'raspberrypi':
         from comm import Comm, CommTimeout
     else:
-        from commPi import comm, CommTimeout
+        from commPi import Comm, CommTimeout
         R_PI = True
 
 DBG_DIR = os.path.join(os.getcwd(), "dbg")
