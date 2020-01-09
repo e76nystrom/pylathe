@@ -417,7 +417,7 @@ class PiLathe(Thread):
         self.zAxis.move(dest, self.cmdFlag)
 
     def moveX(self, val):
-        dest = intRound(val * self.xAxis.stepsInch) + self.xHomeOffset
+        dest = val + self.xHomeOffset
         self.mvState = en.M_WAIT_X
         self.xAxis.move(dest, self.cmdFlag)
 
@@ -577,7 +577,7 @@ class Accel():
         ld(bSyn + rg.F_Ld_Incr2, self.incr2, 4)	# load incr2 value
 
         ld(bSyn + rg.F_Ld_Accel_Val, self.intAccel, 4)   # load accel
-        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClks-1, 4) # load accel coun
+        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClks, 4) # load accel coun
 
         ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
         ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
@@ -854,10 +854,14 @@ class Axis():
             self.turnAccel.load(self.axisCtl, self.dist)
         elif cmd == ct.CMD_JOG:
             self.moveAccel.load(self.axisCtl, self.dist)
-        elif cmd == ct.CMD_MAX:
+        elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
             self.moveAccel.load(self.axisCtl, self.dist)
+        elif cmd == ct.CMD_SPEED:
+            pass
+        elif cmd == ct.JOGSLOW:
+            pass
         else:
-            self.turnAccel.load(self.axisCtl, self.dist)
+            pass
         self.wait = True
         self.state = en.AXIS_WAIT_MOVE
 

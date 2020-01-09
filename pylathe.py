@@ -7181,8 +7181,8 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
         )
         if XILINX:
+                # ("Encoder", cf.cfgEncoder, 'd'), \
             self.fields += (
-                ("Encoder", cf.cfgEncoder, 'd'), \
                 ("Xilinx Freq", cf.cfgXFreq, 'd'), \
                 ("Freq Mult", cf.cfgFreqMult, 'd'), \
                 ("bTest Mode", cf.cfgTestMode, None), \
