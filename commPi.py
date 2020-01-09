@@ -34,7 +34,7 @@ def rd(cmd, dbg=True):
         return(0)
     msg = [cmd]
     spi.xfer2(msg)
-    val = spi.readbytes(rg.fpgaSizeTable[cmd])
+    val = spi.readbytes(int(rg.fpgaSizeTable[cmd]))
     result = int.from_bytes(val, byteorder='big')
     if result & 0x80000000:
         result |= -1 & ~0xffffffff
@@ -63,8 +63,9 @@ class Comm():
     def __init__(self):
         self.ser = Serial()
         self.rpi = PiLathe()
-        if system() == 'linux':
-            if os.uname().nodename != 'raspberrypi':
+        print(system(), os.uname().nodename)
+        if system() == 'Linux':
+            if os.uname().nodename == 'raspberrypi':
                 global spi
                 import spidev
                 bus = 0
@@ -193,7 +194,7 @@ class PiLathe(Thread):
     def resumeCmd(self):
         self.cmdPause = False
         # if jogPause & DISABLE_JOG:
-        #     jogPause &= ~(PAUSE_ENA_X_JOG | PAUSE_ENA_Z_JOG);
+        #     jogPause &= ~(PAUSE_ENA_X_JOG | PAUSE_ENA_Z_JOG)
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_MEASURE | \
                            ct.MV_READ_X | ct.MV_READ_Z)
 
@@ -357,7 +358,7 @@ class PiLathe(Thread):
             if (status & bt.zAxisDone) != 0:
                 axis.done = True
                 axis.wait = False
-                ld(rg.F_ZAxis_Base + rg.F_Ld_Axis_Ctl, 0, 1);
+                ld(rg.F_ZAxis_Base + rg.F_Ld_Axis_Ctl, 0, 1)
 
             axis.control()
 
@@ -590,7 +591,7 @@ class Accel():
         stepsSecMax = intRound((self.maxFeed / 60.0) * self.stepsInch)
         self.clockFreq = stepsSecMax * rpi.freqMult
         self.clocksPerInch = self.stepsInch * rpi.freqMult
-        self.freqDivider = (rpi.xFrequency / self.clockFreq) - 1;
+        self.freqDivider = int((rpi.xFrequency / self.clockFreq) - 1)
         if DBG_SETUP:
             print("stepsInch %d freqMult %d xFrequency %d" % \
                   (self.stepsInch, rpi.freqMult, rpi.xFrequency))
@@ -632,7 +633,7 @@ class Accel():
                 break
             val >>= 1
             bits += 1
-        return(bits);
+        return(bits)
 
     def accelSetup(self):
         if DBG_SETUP:
