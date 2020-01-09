@@ -575,7 +575,7 @@ class Setup():
                 fWrite(f, "\nfpgaSizeTable = ( \\\n")
                 (name, table) = regTables[-1]
                 for (tRegName, tIndex, tSize, tByteLen) in table:
-                    tmp = "    \"%d\"," % (tByteLen)
+                    tmp = "    %d," % (tByteLen)
                     fWrite(f, "%s# %3d %-s\n" % \
                            (tmp.ljust(20), tIndex, tRegName))
                 fWrite(f, "    )\n")

@@ -34,7 +34,7 @@ def rd(cmd, dbg=True):
         return(0)
     msg = [cmd]
     spi.xfer2(msg)
-    val = spi.readbytes(int(rg.fpgaSizeTable[cmd]))
+    val = spi.readbytes(rg.fpgaSizeTable[cmd])
     result = int.from_bytes(val, byteorder='big')
     if result & 0x80000000:
         result |= -1 & ~0xffffffff
@@ -63,7 +63,6 @@ class Comm():
     def __init__(self):
         self.ser = Serial()
         self.rpi = PiLathe()
-        print(system(), os.uname().nodename)
         if system() == 'Linux':
             if os.uname().nodename == 'raspberrypi':
                 global spi
@@ -159,6 +158,9 @@ class PiLathe(Thread):
         
         self.zAxis = Axis(self, Z_AXIS)
         self.xAxis = Axis(self, X_AXIS)
+
+        self.zAxis.slvAxis = self.xAxis
+        self.xAxis.slvAxis = self.zAxis
 
         self.moveQue = Queue()
 
@@ -757,6 +759,7 @@ class Axis():
         self.done = False
         self.wait = False
         self.loc = 0
+        self.slvAxis = None
         
     def init(self):
         rpi = self.rpi
@@ -778,6 +781,9 @@ class Axis():
                 rpi.cfgCtl |= bt.cfgZDir
             else:
                 rpi.cfgCtl &= ~bt.cfgZDir
+            self.clkSel = \
+                (bt.zClkNone, bt.zClkZFreq, bt.zClkCh, bt.zClkIntClk, \
+                 bt.zClkXStep, bt.zClkXFreq, bt.zClkSpare, bt.zClkDbgFreq)
         else:
             self.name = 'x'
             self.base = base = rg.F_XAxis_Base
@@ -796,6 +802,12 @@ class Axis():
                 rpi.cfgCtl |= bt.cfgXDir
             else:
                 rpi.cfgCtl &= ~bt.cfgXDir
+            self.clkSel = \
+                (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
+                 bt.xClkZStep, bt.xClkZFreq, bt.xClkSpare, bt.xClkDbgFreq)
+
+    def loadClock(self, clkCtl):
+        ld(rg.F_Ld_Clk_Ctl, clkCtl, 1);
 
     def move(self, pos, cmd):
         if self.state != en.AXIS_IDLE:
@@ -852,10 +864,13 @@ class Axis():
         if cmd == ct.CMD_SYN:
             if (self.cmd & ct.SYN_START) != 0:
                 self.axisCtl |= bt.ctlWaitSync
+            self.loadClock(self.clkSel[bt.clkCh])
             self.turnAccel.load(self.axisCtl, self.dist)
         elif cmd == ct.CMD_JOG:
+            self.loadClock(self.clkSel[bt.clkFreq])
             self.moveAccel.load(self.axisCtl, self.dist)
         elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
+            self.loadClock(self.clkSel[bt.clkFreq])
             self.moveAccel.load(self.axisCtl, self.dist)
         elif cmd == ct.CMD_SPEED:
             pass
@@ -882,4 +897,3 @@ class Axis():
         if self.loc != self.expLoc:
             pass
         self.state = en.AXIS_IDLE
-

@@ -32,19 +32,31 @@ cfgGenSync   = 0x20             # no encoder generate sync pulse
 
 # clock control register
 
+clkNone      = 0x00             # 
+clkFreq      = 0x01             # 
+clkCh        = 0x02             # 
+clkIntClk    = 0x03             # 
+clkSlvStep   = 0x04             # 
+clkslvFreq   = 0x05             # 
+clkSpare     = 0x06             # 
+clkDbgFreq   = 0x07             # 
 zFreqSel     = 0x07             # z Frequency select
+zClkNone     = 0x00             # 
 zClkZFreq    = 0x01             # 
 zClkCh       = 0x02             # 
 zClkIntClk   = 0x03             # 
 zClkXStep    = 0x04             # 
 zClkXFreq    = 0x05             # 
+zClkSpare    = 0x06             # 
 zClkDbgFreq  = 0x07             # 
 xFreqSel     = 0x38             # x Frequency select
+xClkNone     = 0x00             # 
 xClkXFreq    = 0x08             # 
 xClkCh       = 0x10             # 
 xClkIntClk   = 0x18             # 
 xClkZStep    = 0x20             # 
 xClkZFreq    = 0x28             # 
+xClkSpare    = 0x06             # 
 xClkDbgFreq  = 0x38             # 
 clkDbgFreqEna = 0x40            # enable debug frequency
 
@@ -75,19 +87,31 @@ importList = ( \
  cfgEncDir, \
  cfgEnaEncDir, \
  cfgGenSync, \
+ clkNone, \
+ clkFreq, \
+ clkCh, \
+ clkIntClk, \
+ clkSlvStep, \
+ clkslvFreq, \
+ clkSpare, \
+ clkDbgFreq, \
  zFreqSel, \
+ zClkNone, \
  zClkZFreq, \
  zClkCh, \
  zClkIntClk, \
  zClkXStep, \
  zClkXFreq, \
+ zClkSpare, \
  zClkDbgFreq, \
  xFreqSel, \
+ xClkNone, \
  xClkXFreq, \
  xClkCh, \
  xClkIntClk, \
  xClkZStep, \
  xClkZFreq, \
+ xClkSpare, \
  xClkDbgFreq, \
  clkDbgFreqEna, \
  synPhaseInit, \
