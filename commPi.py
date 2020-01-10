@@ -27,7 +27,7 @@ def ld(cmd, data, size):
     msg = [cmd] + val
     spi.xfer2(msg)
 
-def rd(cmd, dbg=True):
+def rd(cmd, dbg=False):
     if dbg:
         print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
     if spi is None:
@@ -345,7 +345,28 @@ class PiLathe(Thread):
                   self.passVal, self.droZ, self.droX, self.mvStatus)
         self.postUpdate(result)
 
-    def axisCtl(self, dbg=True):
+    def readData(self, base, prt=True):
+        global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curDist
+        bSyn = base + rg.F_Sync_Base
+        xPos = rd(bSyn + rg.F_Rd_XPos)
+        yPos = rd(bSyn + rg.F_Rd_YPos)
+        zSum = rd(bSyn + rg.F_Rd_Sum)
+        zAclSum = rd(bSyn + rg.F_Rd_Accel_Sum)
+        aclCtr = rd(bSyn + rg.F_Rd_Accel_Ctr)
+        if prt:
+            print("xPos %7d yPos %6d zSum %12d" % (xPos, yPos, zSum), end=" ")
+            print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
+
+        bDist = base + rg.F_Dist_Base
+        curDist = rd(bDist + rg.F_Rd_Dist) # read z location
+        curAcl = rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
+
+        curLoc = rd(base + rg.F_Loc_Base + rg.F_Rd_Loc)  # read z location
+
+        if prt:
+            print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
+
+    def axisCtl(self, dbg=False):
         axis = self.zAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
@@ -367,7 +388,11 @@ class PiLathe(Thread):
         axis = self.xAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
-            axis.loc =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            self.readData(rg.F_XAxis_Base)
+            tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            if axis.loc != tmp:
+                axis.loc = tmp
+                # print(tmp)
             if axis.wait:
                 if dbg:
                     status |= bt.xAxisDone
@@ -554,7 +579,7 @@ class Accel():
     def __init__(self, rpi):
         self.rpi = rpi
         self.freqDivider = self.d = self.incr1 =  self.incr2 = \
-        self.intAccel =  self.accelClks =  self.minFeed = \
+        self.intAccel =  self.accelClocks =  self.minFeed = \
         self.maxFeed = self.accel = 0
 
     def update(self, label, base, stepsInch, minFeed=0, maxFeed=0, \
@@ -565,7 +590,7 @@ class Accel():
         self.maxFeed = maxFeed
         self.accel = accel
         self.stepsInch = stepsInch
-        self.accelCalc()
+        self.accelCalc1()
 
     def load(self, axisCtl, dist):
         print("\n%s load" % (self.label))
@@ -580,7 +605,7 @@ class Accel():
         ld(bSyn + rg.F_Ld_Incr2, self.incr2, 4)	# load incr2 value
 
         ld(bSyn + rg.F_Ld_Accel_Val, self.intAccel, 4)   # load accel
-        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClks, 4) # load accel coun
+        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClockks, 4) # load accel coun
 
         ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
         ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
@@ -628,6 +653,32 @@ class Accel():
             self.clockFreq = intRound((rpi.rpm * rpi.encPerRev) / 60.0)
             self.accelSetup()
 
+    def accelCalc1(self):
+        print("\n%s accelCalc" % (self.label))
+        if self.accel == 0:
+            return
+        rpi = self.rpi
+        stepsSecMax = intRound((self.maxFeed * self.stepsInch) / 60)
+        freqGenMax = stepsSecMax * rpi.freqMult
+        print("stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax))
+
+        stepsSecMin = intRound((self.minFeed * self.stepsInch) / 60)
+        freqGenMin = stepsSecMin * rpi.freqMult
+        print("stepsSecMin %6.0f freqGenMin %7.0f" % (stepsSecMin, freqGenMin))
+
+        self.freqDivider = int(self.clockFreq / freqGenMax) - 1
+        print("freqDivider %3.0f" % self.freqDivider)
+
+        accelTime = (self.maxFeed - self.minFeed) / (60.0 * self.accel)
+        self.accelClocks = intRound(accelTime * freqGenMax)
+        print("accelTime %8.6f clocks %d" % (accelTime, self.accelClocks))
+
+        self.dxBase = int(freqGenMax)
+        self.dyMinBase = int(stepsSecMin)
+        self.dyMaxBase = int(stepsSecMax)
+
+        self.accelSetup1()
+
     def bitSize(self, val):
         bits = 0
         while bits < 32:
@@ -636,6 +687,55 @@ class Accel():
             val >>= 1
             bits += 1
         return(bits)
+
+    def accelSetup1(self):
+        accelClocks = self.accelClocks
+        scalePrt = False
+        for scale in range(0, 10):
+            dx =  self.dxBase << scale
+            dyMin =  self.dyMinBase << scale
+            dyMax =  self.dyMaxBase << scale
+            dyDelta = dyMax - dyMin
+            if scalePrt:
+                print("\ndx %d dyMin %d dyMax %d dyDelta %d" % \
+                      (dx, dyMin, dyMax, dyDelta))
+
+            incPerClock = dyDelta / float(accelClocks)
+            intIncPerClock = int(incPerClock)
+            dyDeltaC = intIncPerClock * accelClocks
+            dyIni = dyMax - dyDeltaC
+            err = int(dyDelta - dyDeltaC) >> scale
+            bits = int(floor(log(2*dx, 2))) + 1
+            if scalePrt:
+                print(("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f "\
+                       "err %d bits %d" %
+                       (dyIni, dyMax, dyDeltaC, incPerClock, err, bits)))
+            if (err == 0):
+                break
+
+        incr1 = 2 * dyIni
+        incr2 = incr1 - 2 * dx
+        d = incr1 - dx
+
+        bits = int(floor(log(abs(incr2), 2))) + 1
+        print(("dx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d" %
+               (dx, dyIni, incr1, incr2, d, bits, scale)))
+
+        synAccel = 2 * intIncPerClock
+
+        totalSum = (accelClocks * incr1) + d
+        totalInc = (accelClocks * (accelClocks - 1) * synAccel) / 2
+        accelSteps = ((totalSum + totalInc) / (2 * dx))
+
+        print(("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
+               (accelClocks, totalSum, totalInc, accelSteps)))
+
+        self.freqDivider = freqDivider
+        self.scale = scale
+        self.incr1 = incr1
+        self.incr2 = incr2
+        self.initlSum = d
+        self.intAccel = synAccel
 
     def accelSetup(self):
         if DBG_SETUP:
@@ -864,14 +964,15 @@ class Axis():
         if cmd == ct.CMD_SYN:
             if (self.cmd & ct.SYN_START) != 0:
                 self.axisCtl |= bt.ctlWaitSync
-            self.loadClock(self.clkSel[bt.clkCh])
             self.turnAccel.load(self.axisCtl, self.dist)
+            self.loadClock(self.clkSel[bt.clkCh])
         elif cmd == ct.CMD_JOG:
-            self.loadClock(self.clkSel[bt.clkFreq])
             self.moveAccel.load(self.axisCtl, self.dist)
+            self.loadClock(self.clkSel[bt.clkFreq])
         elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
-            self.loadClock(self.clkSel[bt.clkFreq])
             self.moveAccel.load(self.axisCtl, self.dist)
+            self.rpi.readData(self.base)
+            self.loadClock(self.clkSel[bt.clkFreq])
         elif cmd == ct.CMD_SPEED:
             pass
         elif cmd == ct.JOGSLOW:
