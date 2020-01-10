@@ -4,6 +4,7 @@ from queue import Empty, Queue
 from sys import stderr, stdout
 from time import sleep
 from platform import system
+from math import floor, log
 import os
 import re
 
@@ -34,7 +35,7 @@ def rd(cmd, dbg=False):
         return(0)
     msg = [cmd]
     spi.xfer2(msg)
-    val = spi.readbytes(rg.fpgaSizeTable[cmd])
+    val = spi.readbytes(4)
     result = int.from_bytes(val, byteorder='big')
     if result & 0x80000000:
         result |= -1 & ~0xffffffff
@@ -388,6 +389,7 @@ class PiLathe(Thread):
         axis = self.xAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
+            print("{0:04b}".format(status), end=' ')
             self.readData(rg.F_XAxis_Base)
             tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
             if axis.loc != tmp:
@@ -398,7 +400,7 @@ class PiLathe(Thread):
                     status |= bt.xAxisDone
                 elif (status & bt.xAxisEna) == 0:
                     axis.wait = False
-                    print("z wating no enable")
+                    print("x wating no enable")
 
             if (status & bt.xAxisDone) != 0:
                 axis.done = True
@@ -590,6 +592,7 @@ class Accel():
         self.maxFeed = maxFeed
         self.accel = accel
         self.stepsInch = stepsInch
+        self.clockFreq = self.rpi.xFrequency
         self.accelCalc1()
 
     def load(self, axisCtl, dist):
@@ -605,7 +608,7 @@ class Accel():
         ld(bSyn + rg.F_Ld_Incr2, self.incr2, 4)	# load incr2 value
 
         ld(bSyn + rg.F_Ld_Accel_Val, self.intAccel, 4)   # load accel
-        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClockks, 4) # load accel coun
+        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClocks, 4) # load accel coun
 
         ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
         ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
@@ -730,7 +733,6 @@ class Accel():
         print(("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
                (accelClocks, totalSum, totalInc, accelSteps)))
 
-        self.freqDivider = freqDivider
         self.scale = scale
         self.incr1 = incr1
         self.incr2 = incr2
