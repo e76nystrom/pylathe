@@ -868,9 +868,9 @@ class MoveCommands():
                 if WINDOWS:
                     fileName = fileName.replace("\\", "/")
                     fileName = fileName.replace("C:", "/cygdrive/c")
-                subprocess.call(["sed", "-i", "-e", \
-                                 "'s/arial/consolas/g'", \
-                                 fileName])
+                    subprocess.call(["sed", "-i", "-e", \
+                                     "'s/arial/consolas/g'", \
+                                     fileName])
             except IOError:
                 print("dxf file save error")
                 # traceback.print_exc()
@@ -4771,7 +4771,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xPos.SetValue("%0.4f" % (xLocation))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
             if not self.surfaceSpeed.value:
-                self.rpm.SetValue(rpm)
+                self.rpm.SetValue(str(rpm))
             else:
                 fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
                 self.rpm.SetValue("%1.0f" % (fpm))
