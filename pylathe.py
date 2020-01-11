@@ -5878,12 +5878,12 @@ class UpdateThread(Thread):
             stdout.flush()
             return(True)
 
-    def dbgDispatch(self, cmd, val):
+    def dbgDispatch(self, t0, cmd, val):
         try:
             action = self.dbgTbl[cmd]
             output = action(val)
             if output is not None:
-                t = (("%8.3f " % (time() - self.baseTime))
+                t = (("%8.3f " % (t0 - self.baseTime))
                      if self.baseTime is not None else "   0.000 ")
                 if self.dbg is None:
                     print(t + output)
@@ -5892,11 +5892,11 @@ class UpdateThread(Thread):
                     self.dbg.write((t + output + "\n").encode())
                     self.dbg.flush()
         except IndexError:
-            print("index error %s" % result)
+            print("index error %d" % cmd)
             stdout.flush()
         except TypeError:
             print("type error %s %s" % \
-                  (en.dMessageList[cmd], result))
+                  (en.dMessageList[cmd], str(val)))
             stdout.flush()
 
     def dbgPass(self, val):

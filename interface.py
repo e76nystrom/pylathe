@@ -1199,6 +1199,7 @@ enumList =\
     ("ZWAITBKLS", "wait for backlash move complete"),
     ("ZSTARTMOVE", "start z move"),
     ("ZWAITMOVE", "wait for move complete"),
+    ("ZDELAY", "wait for position to settle"),
     ("ZDONE", "clean up state"),
     "};",
     

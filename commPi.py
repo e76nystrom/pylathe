@@ -2,7 +2,7 @@
 from threading import Event, Lock, Thread
 from queue import Empty, Queue
 from sys import stderr, stdout
-from time import sleep
+from time import sleep, time
 from platform import system
 from math import floor, log
 import os
@@ -174,6 +174,7 @@ class PiLathe(Thread):
         self.mvStatus = 0
         self.postUpdate = None
         self.dbgDispatch = None
+        self.dbgQue = Queue()
 
         self.start()
 
@@ -277,11 +278,16 @@ class PiLathe(Thread):
     def zStop(self):
         pass
 
+    def dbgMsg(self, cmd, val):
+        # self.dbgQue.put((time(), cmd, val))
+        self.dbgDispatch(time(), cmd, val)
+        
     # move queue
 
     def run(self):
         self.cmdPause = False
         self.mvState = en.M_IDLE
+        self.mvLastState = en.M_IDLE
         self.mvCtl = [None] * len(en.mStatesList)
         self.mvCtl[en.M_IDLE] = self.mvIdle
         self.mvCtl[en.M_WAIT_Z] = self.mvWaitZ
@@ -417,12 +423,16 @@ class PiLathe(Thread):
         if self.cmdPause and self.mvState == en.M_IDLE:
             return
         self.mvCtl[self.mvState]()
+        if self.mvState != self.mvLastState:
+            self.mvLastState = self.mvState
+            self.dbgMsg(en.D_MSTA, self.mvState)
 
     def mvIdle(self):
         while True:
             try:
                 (opString, op, val) = self.moveQue.get(False)
                 self.cmdFlag = op >> 16
+                op &= 0xff
                 if True:
                     if type(val) == 'float':
                         valString = "%13.6f" % val
@@ -432,9 +442,10 @@ class PiLathe(Thread):
                     else:
                         valString = "%6d" % val
                     print("%16s %2d %2d %-7s" % \
-                          (opString, op&0xff, self.cmdFlag, valString))
+                          (opString, op, self.cmdFlag, valString))
                     stdout.flush()
-                self.move[op & 0xff](val)
+                self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
+                self.move[op](val)
             except IndexError:
                 pass
             except Empty:
@@ -452,6 +463,8 @@ class PiLathe(Thread):
 
     def moveX(self, val):
         dest = val + self.xHomeOffset
+        self.dbgMsg(en.D_XMOV, dest);
+
         self.mvState = en.M_WAIT_X
         self.xAxis.move(dest, self.cmdFlag)
 
@@ -502,6 +515,7 @@ class PiLathe(Thread):
             self.currentPass = val & 0xff
         else:
             self.springInfo = val
+        self.dbgMsg(en.D_PASS, val)
 
     def quePause(self, val):
         self.cmdPause = True
@@ -535,6 +549,7 @@ class PiLathe(Thread):
         pass
 
     def opDone(self, val):
+        self.dbgMsg(en.D_DONE, val)
         if val == ct.PARM_START:
             self.mvStatus |= ct.MV_ACTIVE
             pass
@@ -839,6 +854,22 @@ class Accel():
         else:
             self.accelSteps = 0
     
+D_MOV  = en.D_XMOV  - en.D_XMOV
+D_LOC  = en.D_XLOC  - en.D_XMOV
+D_DST  = en.D_XDST  - en.D_XMOV
+D_STP  = en.D_XSTP  - en.D_XMOV
+D_ST   = en.D_XST   - en.D_XMOV
+D_BSTP = en.D_XBSTP - en.D_XMOV
+D_DRO  = en.D_XDRO  - en.D_XMOV
+D_PDRO = en.D_XPDRO - en.D_XMOV
+D_EXP  = en.D_XEXP  - en.D_XMOV
+D_WT   = en.D_XWT   - en.D_XMOV
+D_DN   = en.D_XDN   - en.D_XMOV
+D_EST  = en.D_XEST  - en.D_XMOV
+D_EDN  = en.D_XEDN  - en.D_XMOV
+D_X    = en.D_XX    - en.D_XMOV
+D_Y    = en.D_XY    - en.D_XMOV
+
 class Axis():
     def __init__(self, rpi, axis):
         self.rpi = rpi
@@ -890,6 +921,7 @@ class Axis():
             self.clkSel = \
                 (bt.zClkNone, bt.zClkZFreq, bt.zClkCh, bt.zClkIntClk, \
                  bt.zClkXStep, bt.zClkXFreq, bt.zClkSpare, bt.zClkDbgFreq)
+            self.dbgBase = en.D_ZMOV
         else:
             self.name = 'x'
             self.base = base = rg.F_XAxis_Base
@@ -911,6 +943,7 @@ class Axis():
             self.clkSel = \
                 (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
                  bt.xClkZStep, bt.xClkZFreq, bt.xClkSpare, bt.xClkDbgFreq)
+            self.dbgBase = en.D_ZMOV
 
     def loadClock(self, clkCtl):
         ld(rg.F_Ld_Clk_Ctl, clkCtl, 1);
@@ -920,11 +953,13 @@ class Axis():
             return
         self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
         self.expLoc = pos
+        self.rpi.dbgMsg(self.dbgBase + D_MOV, pos)
         self.moveRel(pos - self.loc, cmd)
 
     def moveRel(self, dist, cmd):
         if self.state != en.AXIS_IDLE:
             return
+        self.rpi.dbgMsg(self.dbgBase + D_DST, dist)
         self.cmd = cmd
         if dist != 0:
             if dist > 0:
@@ -952,6 +987,7 @@ class Axis():
     def control(self):
         if self.state != self.lastState:
             self.lastState = self.state
+            self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)
             print("%s control %s" % (self.name, en.axisStatesList[self.state]))
         if self.state != en.AXIS_IDLE:
             self.stateDisp[self.state]()
@@ -1001,6 +1037,8 @@ class Axis():
         self.done = False
         self.cmd = 0
         self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
+        self.rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
         if self.loc != self.expLoc:
             pass
         self.state = en.AXIS_IDLE
+        self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)

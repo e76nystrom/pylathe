@@ -7,13 +7,15 @@ ZIDLE            =  0           # idle
 ZWAITBKLS        =  1           # wait for backlash move complete
 ZSTARTMOVE       =  2           # start z move
 ZWAITMOVE        =  3           # wait for move complete
-ZDONE            =  4           # clean up state
+ZDELAY           =  4           # wait for position to settle
+ZDONE            =  5           # clean up state
 
 zStatesList = ( \
     "ZIDLE",
     "ZWAITBKLS",
     "ZSTARTMOVE",
     "ZWAITMOVE",
+    "ZDELAY",
     "ZDONE",
     )
 
