@@ -5629,6 +5629,55 @@ class UpdateThread(Thread):
         self.dbg = None
         self.baseTime = None
         self.mIdle = False
+        dbgSetup = (\
+                    (en.D_PASS, self.dbgPass), \
+                    (en.D_DONE, self.dbgDone), \
+                    (en.D_TEST, self.dbgTest), \
+
+                    (en.D_XMOV, self.dbgXMov), \
+                    (en.D_XLOC, self.dbgXLoc), \
+                    (en.D_XDST, self.dbgXDst), \
+                    (en.D_XSTP, self.dbgXStp),
+                    (en.D_XST,  self.dbgXState), \
+                    (en.D_XBSTP, self.dbgXBSteps), \
+                    (en.D_XDRO, self.dbgXDro), \
+                    (en.D_XPDRO, self.dbgXPDro), \
+                    (en.D_XEXP, self.dbgXExp), \
+                    (en.D_XWT,  self.dbgXWait), \
+                    (en.D_XDN,  self.dbgXDone), \
+                    (en.D_XEST, self.dbgXEncStart), \
+                    (en.D_XEDN, self.dbgXEncDone), \
+                    (en.D_XX, self.dbgXX), \
+                    (en.D_XY, self.dbgXY), \
+
+                    (en.D_ZMOV, self.dbgZMov), \
+                    (en.D_ZLOC, self.dbgZLoc), \
+                    (en.D_ZDST, self.dbgZDst), \
+                    (en.D_ZSTP, self.dbgZStp),
+                    (en.D_ZST, self.dbgZState), \
+                    (en.D_ZBSTP, self.dbgZBSteps), \
+                    (en.D_ZDRO, self.dbgZDro), \
+                    (en.D_ZPDRO, self.dbgZPDro), \
+                    (en.D_ZEXP, self.dbgZExp), \
+                    (en.D_ZWT, self.dbgZWait), \
+                    (en.D_ZDN, self.dbgZDone), \
+                    (en.D_ZEST, self.dbgZEncStart), \
+                    (en.D_ZEDN, self.dbgZEncDone), \
+                    (en.D_ZX, self.dbgZX), \
+                    (en.D_ZY, self.dbgZY), \
+
+                    (en.D_HST, self.dbgHome), \
+
+                    (en.D_MSTA, self.dbgMoveState), \
+                    (en.D_MCMD, self.dbgMoveCmd), \
+        )
+        self.dbgTbl = dbgTbl = [None for i in range(len(dbgSetup))]
+        for (index, action) in dbgSetup:
+            dbgTbl[index] = action
+        for i, val in enumerate(dbgTbl):
+            if val is None:
+                print("dbgTbl action for %s missing" % (en.dMessageList[i]))
+                stdout.flush()
 
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(os.path.join(DBG_DIR, file), "wb")
@@ -5700,55 +5749,6 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
-        dbgSetup = (\
-                    (en.D_PASS, self.dbgPass), \
-                    (en.D_DONE, self.dbgDone), \
-                    (en.D_TEST, self.dbgTest), \
-
-                    (en.D_XMOV, self.dbgXMov), \
-                    (en.D_XLOC, self.dbgXLoc), \
-                    (en.D_XDST, self.dbgXDst), \
-                    (en.D_XSTP, self.dbgXStp),
-                    (en.D_XST,  self.dbgXState), \
-                    (en.D_XBSTP, self.dbgXBSteps), \
-                    (en.D_XDRO, self.dbgXDro), \
-                    (en.D_XPDRO, self.dbgXPDro), \
-                    (en.D_XEXP, self.dbgXExp), \
-                    (en.D_XWT,  self.dbgXWait), \
-                    (en.D_XDN,  self.dbgXDone), \
-                    (en.D_XEST, self.dbgXEncStart), \
-                    (en.D_XEDN, self.dbgXEncDone), \
-                    (en.D_XX, self.dbgXX), \
-                    (en.D_XY, self.dbgXY), \
-
-                    (en.D_ZMOV, self.dbgZMov), \
-                    (en.D_ZLOC, self.dbgZLoc), \
-                    (en.D_ZDST, self.dbgZDst), \
-                    (en.D_ZSTP, self.dbgZStp),
-                    (en.D_ZST, self.dbgZState), \
-                    (en.D_ZBSTP, self.dbgZBSteps), \
-                    (en.D_ZDRO, self.dbgZDro), \
-                    (en.D_ZPDRO, self.dbgZPDro), \
-                    (en.D_ZEXP, self.dbgZExp), \
-                    (en.D_ZWT, self.dbgZWait), \
-                    (en.D_ZDN, self.dbgZDone), \
-                    (en.D_ZEST, self.dbgZEncStart), \
-                    (en.D_ZEDN, self.dbgZEncDone), \
-                    (en.D_ZX, self.dbgZX), \
-                    (en.D_ZY, self.dbgZY), \
-
-                    (en.D_HST, self.dbgHome), \
-
-                    (en.D_MSTA, self.dbgMoveState), \
-                    (en.D_MCMD, self.dbgMoveCmd), \
-        )
-        dbgTbl = [None for i in range(len(dbgSetup))]
-        for (index, action) in dbgSetup:
-            dbgTbl[index] = action
-        for i, val in enumerate(dbgTbl):
-            if val is None:
-                print("dbgTbl action for %s missing" % (en.dMessageList[i]))
-                stdout.flush()
         i = 0
         op = None
         scanMax = len(self.parmList)
@@ -5808,63 +5808,9 @@ class UpdateThread(Thread):
 
             # get debug data
 
-            try:
-                result = comm.getString(cm.READDBG, 10)
-                if not self.threadRun:
-                    break
-                if result is None:
-                    continue
-                if not REM_DBG:
-                    continue
-                tmp = result.split()
-                rLen = len(tmp)
-                # if rLen > 0:
-                #     print("%2d (%s)" % (rLen, result))
-                index = 2
-                t = (("%8.3f " % (time() - self.baseTime))
-                     if self.baseTime is not None else "   0.000 ")
-                while index <= rLen:
-                    (cmd, val) = tmp[index-2:index]
-                    index += 2
-                    try:
-                        cmd = int(cmd, 16)
-                        val = int(val, 16)
-                        try:
-                            action = dbgTbl[cmd]
-                            output = action(val)
-                            if output is not None:
-                                if self.dbg is None:
-                                    print(t + output)
-                                    stdout.flush()
-                                else:
-                                    self.dbg.write((t + output + "\n").encode())
-                                    self.dbg.flush()
-                            # if cmd == en.D_DONE:
-                            #     if val == 0:
-                            #         if not jogPanel.currentPanel.control.add:
-                            #             self.baseTime = time()
-                            #     if val == 1:
-                            #         self.baseTime = None
-                            #         if self.dbg is not None:
-                            #             self.dbg.close()
-                            #             self.dbg = None
-                        except IndexError:
-                            print("index error %s" % result)
-                            stdout.flush()
-                        except TypeError:
-                            print("type error %s %s" % \
-                                  (en.dMessageList[cmd], result))
-                            stdout.flush()
-                    except ValueError:
-                        print("value error cmd %s val %s" % (cmd, val))
-                        stdout.flush()
-            except CommTimeout:
-                print("getString CommTimeout")
-                stdout.flush()
-            except serial.SerialException:
-                print("getString SerialException")
-                stdout.flush()
+            if self.procDebug():
                 break
+            
         print("UpdateThread done")
         stdout.flush()
         self.threadDone = True
@@ -5873,6 +5819,86 @@ class UpdateThread(Thread):
         self.closeDbg()
         self.threadRun = False
         
+    def procDebug(self):
+        try:
+            result = comm.getString(cm.READDBG, 10)
+            if not self.threadRun:
+                return(True)
+            if result is None:
+                return(False)
+            if not REM_DBG:
+                return(False)
+            tmp = result.split()
+            rLen = len(tmp)
+            # if rLen > 0:
+            #     print("%2d (%s)" % (rLen, result))
+            index = 2
+            t = (("%8.3f " % (time() - self.baseTime))
+                 if self.baseTime is not None else "   0.000 ")
+            while index <= rLen:
+                (cmd, val) = tmp[index-2:index]
+                index += 2
+                try:
+                    cmd = int(cmd, 16)
+                    val = int(val, 16)
+                    try:
+                        action = self.dbgTbl[cmd]
+                        output = action(val)
+                        if output is not None:
+                            if self.dbg is None:
+                                print(t + output)
+                                stdout.flush()
+                            else:
+                                self.dbg.write((t + output + "\n").encode())
+                                self.dbg.flush()
+                        # if cmd == en.D_DONE:
+                        #     if val == 0:
+                        #         if not jogPanel.currentPanel.control.add:
+                        #             self.baseTime = time()
+                        #     if val == 1:
+                        #         self.baseTime = None
+                        #         if self.dbg is not None:
+                        #             self.dbg.close()
+                        #             self.dbg = None
+                    except IndexError:
+                        print("index error %s" % result)
+                        stdout.flush()
+                    except TypeError:
+                        print("type error %s %s" % \
+                              (en.dMessageList[cmd], result))
+                        stdout.flush()
+                except ValueError:
+                    print("value error cmd %s val %s" % (cmd, val))
+                    stdout.flush()
+        except CommTimeout:
+            print("getString CommTimeout")
+            stdout.flush()
+        except serial.SerialException:
+            print("getString SerialException")
+            stdout.flush()
+            return(True)
+
+    def dbgDispatch(self, cmd, val):
+        try:
+            action = self.dbgTbl[cmd]
+            output = action(val)
+            if output is not None:
+                t = (("%8.3f " % (time() - self.baseTime))
+                     if self.baseTime is not None else "   0.000 ")
+                if self.dbg is None:
+                    print(t + output)
+                    stdout.flush()
+                else:
+                    self.dbg.write((t + output + "\n").encode())
+                    self.dbg.flush()
+        except IndexError:
+            print("index error %s" % result)
+            stdout.flush()
+        except TypeError:
+            print("type error %s %s" % \
+                  (en.dMessageList[cmd], result))
+            stdout.flush()
+
     def dbgPass(self, val):
         # tmp = val >> 8
         # if tmp == 0:
@@ -6174,6 +6200,7 @@ class MainFrame(wx.Frame):
             updateThread.start()
         else:
             comm.rpi.setPostUpdate(self.jogPanel.postUpdate)
+            comm.rpi.setDbgDispatch(updateThread.dbgDispatch)
         self.delay = Delay(self)
 
     def onClose(self, e):

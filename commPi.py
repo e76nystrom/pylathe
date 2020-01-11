@@ -173,11 +173,15 @@ class PiLathe(Thread):
         self.droX = 0
         self.mvStatus = 0
         self.postUpdate = None
+        self.dbgDispatch = None
 
         self.start()
 
     def setPostUpdate(self, postUpdate):
         self.postUpdate = postUpdate
+
+    def setDbgDispatch(self, dbgDispatch):
+        self.dbgDispatch = dbgDispatch
 
     def clearQue(self):
         pass
