@@ -1,4 +1,3 @@
-
 from threading import Event, Lock, Thread
 from queue import Empty, Queue
 from sys import stderr, stdout
@@ -381,7 +380,10 @@ class PiLathe(Thread):
         axis = self.zAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
-            axis.loc =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            if axis.loc != tmp:
+                rpi.zLoc = axis.loc = tmp
+                print(tmp)
             if axis.wait:
                 if dbg:
                     status |= bt.zAxisDone
@@ -403,8 +405,8 @@ class PiLathe(Thread):
             self.readData(rg.F_XAxis_Base)
             tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
             if axis.loc != tmp:
-                axis.loc = tmp
-                # print(tmp)
+                rpi.xLoc = axis.loc = tmp
+                print(tmp)
             if axis.wait:
                 if dbg:
                     status |= bt.xAxisDone
