@@ -27,7 +27,7 @@ def ld(cmd, data, size):
     msg = [cmd] + val
     spi.xfer2(msg)
 
-def rd(cmd, dbg=False):
+def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     if dbg:
         print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
     if spi is None:
@@ -36,8 +36,8 @@ def rd(cmd, dbg=False):
     spi.xfer2(msg)
     val = spi.readbytes(4)
     result = int.from_bytes(val, byteorder='big')
-    if result & 0x80000000:
-        result |= -1 & ~0xffffffff
+    if result & ext:
+        result |= -1 & ~mask
     return(result)
 
 class Serial:
@@ -371,7 +371,8 @@ class PiLathe(Thread):
         curDist = rd(bDist + rg.F_Rd_Dist) # read z location
         curAcl = rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
 
-        curLoc = rd(base + rg.F_Loc_Base + rg.F_Rd_Loc)  # read z location
+        curLoc = rd(base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                    False, 0x20000, 0x3ffff)
 
         if prt:
             print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
@@ -380,21 +381,23 @@ class PiLathe(Thread):
         axis = self.zAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
-            tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                      False, 0x20000, 0x3ffff)
             if axis.loc != tmp:
                 self.zLoc = axis.loc = tmp
-                print(tmp)
-            if axis.wait:
-                if dbg:
-                    status |= bt.zAxisDone
-                elif (status & bt.zAxisEna) == 0:
-                    axis.wait = False
-                    print("z wating no enable")
+                # print(tmp)
 
             if (status & bt.zAxisDone) != 0:
                 axis.done = True
                 axis.wait = False
                 ld(rg.F_ZAxis_Base + rg.F_Ld_Axis_Ctl, 0, 1)
+
+            if axis.wait:
+                if dbg:
+                    status |= bt.zAxisDone
+                elif (status & bt.zAxisEna) == 0:
+                    # axis.wait = False
+                    print("z waiting no enable")
 
             axis.control()
 
@@ -403,21 +406,23 @@ class PiLathe(Thread):
         if axis.state != en.AXIS_IDLE:
             print("{0:04b}".format(status), end=' ')
             self.readData(rg.F_XAxis_Base)
-            tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
+            tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                      False, 0x20000, 0x3ffff)
             if axis.loc != tmp:
                 self.xLoc = axis.loc = tmp
-                print(tmp)
-            if axis.wait:
-                if dbg:
-                    status |= bt.xAxisDone
-                elif (status & bt.xAxisEna) == 0:
-                    axis.wait = False
-                    print("x wating no enable")
+                # print(tmp)
 
             if (status & bt.xAxisDone) != 0:
                 axis.done = True
                 axis.wait = False
                 ld(rg.F_XAxis_Base + rg.F_Ld_Axis_Ctl, 0, 1)
+
+            if axis.wait:
+                if dbg:
+                    status |= bt.xAxisDone
+                elif (status & bt.xAxisEna) == 0:
+                    # axis.wait = False
+                    print("x waiting no enable")
 
             axis.control()
     
@@ -460,6 +465,8 @@ class PiLathe(Thread):
 
     def moveZ(self, val):
         dest = intRound(val * self.zAxis.stepsInch) + self.zHomeOffset
+        print("moveZ dest %d val %d zStepsInch %d zHomeOffset %d" % \
+              (dest, val, self.zAxis.stepsInch, self.zHomeOffset))
         self.mvState = en.M_WAIT_Z
         self.zAxis.move(dest, self.cmdFlag)
 
@@ -946,6 +953,11 @@ class Axis():
                 (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
                  bt.xClkZStep, bt.xClkZFreq, bt.xClkSpare, bt.xClkDbgFreq)
             self.dbgBase = en.D_ZMOV
+        ld(self.base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
+        axisCtl = bt.ctlInit | bt.ctlSetLoc
+        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+        self.axisCtl = 0
+        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
 
     def loadClock(self, clkCtl):
         ld(rg.F_Ld_Clk_Ctl, clkCtl, 1);
@@ -953,8 +965,10 @@ class Axis():
     def move(self, pos, cmd):
         if self.state != en.AXIS_IDLE:
             return
-        self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
+        self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                      True, 0x20000, 0x3ffff)
         self.expLoc = pos
+        print("%sAxis loc %d pos %d" % (self.name, self.loc, pos))
         self.rpi.dbgMsg(self.dbgBase + D_MOV, pos)
         self.moveRel(pos - self.loc, cmd)
 
@@ -1038,7 +1052,8 @@ class Axis():
     def doneMove(self):
         self.done = False
         self.cmd = 0
-        self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
+        self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                      True, 0x20000, 0x3ffff)
         self.rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
         if self.loc != self.expLoc:
             self.rpi.dbgMsg(D_EXP, self.expLoc)
