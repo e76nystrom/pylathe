@@ -382,7 +382,7 @@ class PiLathe(Thread):
         if axis.state != en.AXIS_IDLE:
             tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
             if axis.loc != tmp:
-                rpi.zLoc = axis.loc = tmp
+                self.zLoc = axis.loc = tmp
                 print(tmp)
             if axis.wait:
                 if dbg:
@@ -405,7 +405,7 @@ class PiLathe(Thread):
             self.readData(rg.F_XAxis_Base)
             tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, False)
             if axis.loc != tmp:
-                rpi.xLoc = axis.loc = tmp
+                self.xLoc = axis.loc = tmp
                 print(tmp)
             if axis.wait:
                 if dbg:
