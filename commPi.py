@@ -167,7 +167,7 @@ class PiLathe(Thread):
 
         self.zLoc = 0
         self.xLoc = 0
-        self.curRpm = '0.0'
+        self.curRpm = 0
         self.passVal = 0
         self.droZ = 0
         self.droX = 0
@@ -1013,7 +1013,7 @@ class Axis():
             self.loadClock(self.clkSel[bt.clkFreq])
         elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
             self.moveAccel.load(self.axisCtl, self.dist)
-            self.rpi.readData(self.base)
+            # self.rpi.readData(self.base)
             self.loadClock(self.clkSel[bt.clkFreq])
         elif cmd == ct.CMD_SPEED:
             pass
@@ -1039,6 +1039,6 @@ class Axis():
         self.loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
         self.rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
         if self.loc != self.expLoc:
-            pass
+            self.rpi.dbgMsg(D_EXP, self.expLoc)
         self.state = en.AXIS_IDLE
         self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)
