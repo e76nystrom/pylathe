@@ -332,6 +332,9 @@ class PiLathe(Thread):
 
         axisDbg = WINDOWS
         
+        while self.xFrequency is None:
+            sleep(0.1)
+            
         while True:
             stdout.flush()
             sleep(0.1)
@@ -378,10 +381,11 @@ class PiLathe(Thread):
             print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
 
     def axisCtl(self, dbg=False):
-        indexClks = rd(rg.Rd_Idx_Clks) + 1
+        indexClks = rd(rg.F_Rd_Idx_Clks)
         if indexClks != 0:
             # rpm = (clocks * sec / clocks / rev) * sec / minute
-            self.curRPM = intRound((float(self.xFrequency) / indexClks) * 60)
+            self.curRPM = intRound((float(self.xFrequency) / \
+                                    (indexClks + 1)) * 60)
         else:
             self.curRPM = 0
 
