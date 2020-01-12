@@ -584,6 +584,15 @@ class PiLathe(Thread):
             self.mvState = en.M_IDLE
 
     def mvWaitSpindle(self):
+        indexClks = rd(rg.Rd_Idx_Clks)
+        if indexClks != self.lastIdxClks:
+            self.lastIdxClks = indexClks
+            if indexClks != 0:
+            delta = abs(indexClks - self.lastIdxClks)
+            percent = float(delta) * 100.0 / indexClks
+            indexClks += 1
+            rpm = intRound((float(self.xFrequency) / indexClks) * 60)
+
         pass
 
     def mvSyncReady(self):
