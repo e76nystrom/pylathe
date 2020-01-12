@@ -351,7 +351,7 @@ class PiLathe(Thread):
     def update(self):
         if self.postUpdate is None:
             return
-        result = (en.EV_READ_ALL, self.zLoc, self.xLoc, self.curRpm, \
+        result = (en.EV_READ_ALL, self.zLoc, self.xLoc, self.curRPM, \
                   self.passVal, self.droZ, self.droX, self.mvStatus)
         self.postUpdate(result)
 
@@ -378,8 +378,15 @@ class PiLathe(Thread):
             print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
 
     def axisCtl(self, dbg=False):
-        axis = self.zAxis
+        indexClks = rd(rg.Rd_Idx_Clks) + 1
+        if indexClks != 0:
+            # rpm = (clocks * sec / clocks / rev) * sec / minute
+            self.curRPM = intRound((float(self.xFrequency) / indexClks) * 60)
+        else:
+            self.curRPM = 0
+
         status = rd(rg.F_Rd_Status, False)
+        axis = self.zAxis
         if axis.state != en.AXIS_IDLE:
             tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
                       False, 0x20000, 0x3ffff)
