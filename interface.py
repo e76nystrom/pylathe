@@ -898,6 +898,10 @@ fpgaLatheList = \
 
   ("F_Dbg_Freq_Base", None, "dbgFreq", None, "dbg frequency"),
 
+  "spindle speed",
+
+  ("F_Rd_Idx_Clks", None, 1, 1, "read clocks between index pulses"),
+
   "base for modules",
 
   ("F_Enc_Base",   None, "encoder", None,  "encoder registers"),
