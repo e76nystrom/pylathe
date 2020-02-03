@@ -57,7 +57,7 @@ SWIG = False
 HOME_TEST = False
 SETUP = False
 
-XILINX = False
+FPGA = False
 DRO = False
 EXT_DRO = False
 X_DRO_POS = False
@@ -93,7 +93,7 @@ if SETUP:
     setup.createParameters(parmList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
     setup.createEnums(enumList, cLoc, fData)
-    if XILINX:
+    if FPGA:
         xLoc = '../../Xilinx/LatheCtl/'
         from interface import xilinxList, xilinxBitList
         setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
@@ -1119,9 +1119,9 @@ def sendSpindleData(send=False, rpm=None):
                 if MOTOR_TEST and SPINDLE_ENCODER:
                     queParm(pm.SP_TEST_ENCODER, \
                             cfg.getBoolInfoData(cf.spTestEncoder))
-            elif XILINX:
+            elif FPGA:
                 queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
+                queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
                 # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
                 queParm(pm.FREQ_MULT, 8)
                 xilinxTestMode()
@@ -3136,7 +3136,7 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
-        m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
+        m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
 
         if not self.rightHand:  # left hand threads
             if self.runoutDist == 0.0: # wihout runout
@@ -6191,7 +6191,7 @@ class MainFrame(wx.Frame):
         
         self.initDRO()
                                                                               
-        if XILINX:
+        if FPGA:
             comm.xRegs = xr.xRegTable
 
         self.initDevice()
@@ -6471,7 +6471,7 @@ class MainFrame(wx.Frame):
 
         if comm.ser is not None:
             try:
-                comm.queParm(pm.CFG_XILINX, cfg.getBoolInfoData(cf.cfgXilinx))
+                comm.queParm(pm.CFG_FPGA, cfg.getBoolInfoData(cf.cfgFpga))
                 # comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
@@ -6587,7 +6587,7 @@ class MainFrame(wx.Frame):
             self.cfgFile = "config.txt"
 
     def initialConfig(self):
-        global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
+        global cfg, comm, FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
             TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS
@@ -6596,7 +6596,7 @@ class MainFrame(wx.Frame):
         cfg.clrInfo(len(cf.config))
         cfg.readInfo(self.cfgFile, cf.config)
 
-        XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
+        FPGA = cfg.getInitialBoolInfo(cf.cfgFpga)
         DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
         REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
@@ -6634,7 +6634,7 @@ class MainFrame(wx.Frame):
 
         cfg.clrInfo(len(cf.config))
 
-        if XILINX:
+        if FPGA:
             global xb, xr
             if not R_PI:
                 import xBitDef as xb
@@ -6682,7 +6682,7 @@ class MainFrame(wx.Frame):
         comm = Comm()
         comm.SWIG = SWIG
 
-        if XILINX:
+        if FPGA:
             comm.enableXilinx()
 
     def OnResize(self, e):
@@ -7008,10 +7008,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bSpindle Encoder", cf.cfgSpEncoder, None), \
         )
         if SPINDLE_ENCODER:
-            self.fields += ( \
-                ("Encoder", cf.cfgEncoder, 'd'), \
-                ("bSync Board", cf.cfgSpSyncBoard, None), \
-            )
+            self.fields += (("Encoder", cf.cfgEncoder, 'd'),)
+            if not FPGA:
+                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None),)
         self.fields += ( \
             ("cTurn Sync", cf.cfgTurnSync, 'c', self.turnSync), \
             ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync), \
@@ -7084,8 +7083,11 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             indexList = (en.SEL_TU_STEP,)
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TU_ENC,)
-            if SPINDLE_SYNC_BOARD:
-                indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+            if not FPGA:
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+            else:
+                indexList += (en.SEL_TU_ISYN,)
         else:
             indexList = (en.SEL_TU_SPEED,)
 
@@ -7099,8 +7101,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             indexList = (en.SEL_TH_STEP,)
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
-            if SPINDLE_SYNC_BOARD:
-                indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+            if not FPGA:
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
         else:
             indexList = (en.SEL_TH_NO_ENC,)
             
@@ -7190,7 +7193,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
-            ("bHW Control", cf.cfgXilinx, None), \
+            ("bFPGA Control", cf.cfgFpga, None), \
             ("bMPG", cf.cfgMPG, None), \
             ("bDRO", cf.cfgDRO, None), \
             ("bExternal DRO", cf.cfgExtDro, None), \
@@ -7207,10 +7210,10 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
         )
-        if XILINX:
+        if FPGA:
                 # ("Encoder", cf.cfgEncoder, 'd'), \
             self.fields += (
-                ("Xilinx Freq", cf.cfgXFreq, 'd'), \
+                ("wFPGA Freq", cf.cfgXFreq, 'd'), \
                 ("Freq Mult", cf.cfgFreqMult, 'd'), \
                 ("bTest Mode", cf.cfgTestMode, None), \
                 ("Test RPM", cf.cfgTestRPM, 'd'), \

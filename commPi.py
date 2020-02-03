@@ -196,6 +196,9 @@ class PiLathe(Thread):
         pass
 
     def pauseCmd(self):
+        self.cmdPause = True
+        self.mvStatus |= ct.MV_PAUSE
+
         pass
 
     def resumeCmd(self):
@@ -212,7 +215,11 @@ class PiLathe(Thread):
         pass
 
     def stopCmd(self):
-        pass
+        self.spindleStop()
+        self.zStop()
+        self.xStop()
+        self.cmdPause = False
+        self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_HOME_ACTIVE)
 
     def syncSetup(self):
         pass
@@ -239,9 +246,24 @@ class PiLathe(Thread):
         pass
 
     def spindleStart(self):
-        pass
+        if self.stepperDrive:
+            pass
+        else:
+            if self.cfgSwitch:
+                pass
+
+            if self.cfgVarSpeed:
+                pass
 
     def spindleStop(self):
+        if self.stepperDrive:
+            pass
+        else:
+            if self.cfgSwitch:
+                pass
+
+            if self.cfgVarSpeed:
+                pass
         pass
 
     def xHomeAxis(self):
@@ -332,7 +354,7 @@ class PiLathe(Thread):
 
         axisDbg = WINDOWS
         
-        while self.xFrequency is None:
+        while self.fpgaFrequency is None:
             sleep(0.1)
             
         while True:
@@ -384,7 +406,7 @@ class PiLathe(Thread):
         indexClks = rd(rg.F_Rd_Idx_Clks)
         if indexClks != 0:
             # rpm = (clocks * sec / clocks / rev) * sec / minute
-            self.curRPM = intRound((float(self.xFrequency) / \
+            self.curRPM = intRound((float(self.fpgaFrequency) / \
                                     (indexClks + 1)) * 60)
         else:
             self.curRPM = 0
@@ -483,7 +505,7 @@ class PiLathe(Thread):
 
     def moveX(self, val):
         dest = val + self.xHomeOffset
-        self.dbgMsg(en.D_XMOV, dest);
+        self.dbgMsg(en.D_XMOV, dest)
 
         self.mvState = en.M_WAIT_X
         self.xAxis.move(dest, self.cmdFlag)
@@ -516,17 +538,38 @@ class PiLathe(Thread):
         pass
     
     def startSpindle(self, val):
-        pass
-
+        self.mvSpindleCmd = self.cmd
+        self.spindleStart()
+        self.mvState = en.M_WAIT_SPINDLE
+        
     def stopSpindle(self, val):
-        pass
+        self.mvSpindleCmd = self.cmd
+        self.spindleStop()
+        self.mvState = en.M_WAIT_SPINDLE
 
     def zSynSetup(self, val):
         self.zFeed = val
+        currentOp = self.currentOp
+        if currentOp = en.OP_TURN:
+            pass
+        elif currentOp = en.OP_TAPER:
+            pass
+        elif currentOp == en.OP_THREAD:
+            pass
+        
         self.zAxis.turnAccel.syncAccelCalc(self.feedType, val)
 
     def xSynSetup(self, val):
         self.xFeed = val
+        currentOp = self.currentOp
+        if currentOp = en.OP_FACE:
+            pass
+        elif currentOp = en.OP_CUTOFF:
+            pass
+        elif currentOp = en.TAPER:
+            pass
+        elif currentOp = en.THREAD:
+            pass
         self.xAxis.turnAccel.syncAccelCalc(self.feedType, val)
 
     def passNum(self, val):
@@ -592,11 +635,15 @@ class PiLathe(Thread):
         if indexClks != self.lastIdxClks:
             self.lastIdxClks = indexClks
             if indexClks != 0:
-            delta = abs(indexClks - self.lastIdxClks)
-            percent = float(delta) * 100.0 / indexClks
-            indexClks += 1
-            rpm = intRound((float(self.xFrequency) / indexClks) * 60)
-
+                delta = abs(indexClks - self.lastIdxClks)
+                percent = float(delta) * 100.0 / indexClks
+                indexClks += 1
+                rpm = intRound((float(self.fpgaFrequency) / indexClks) * 60)
+                if percent < 1.0:
+                    if self.mvSpindleCmd == en.STOP_SPINDLE:
+                        pass
+                    elif self.mvSpindleCmd == en.START_SPINDLE:
+                        pass
         pass
 
     def mvSyncReady(self):
@@ -640,7 +687,7 @@ class Accel():
         self.maxFeed = maxFeed
         self.accel = accel
         self.stepsInch = stepsInch
-        self.clockFreq = self.rpi.xFrequency
+        self.clockFreq = self.rpi.fpgaFrequency
         self.accelCalc1()
 
     def load(self, axisCtl, dist):
@@ -669,10 +716,10 @@ class Accel():
         stepsSecMax = intRound((self.maxFeed / 60.0) * self.stepsInch)
         self.clockFreq = stepsSecMax * rpi.freqMult
         self.clocksPerInch = self.stepsInch * rpi.freqMult
-        self.freqDivider = int((rpi.xFrequency / self.clockFreq) - 1)
+        self.freqDivider = int((rpi.fpgaFrequency / self.clockFreq) - 1)
         if DBG_SETUP:
-            print("stepsInch %d freqMult %d xFrequency %d" % \
-                  (self.stepsInch, rpi.freqMult, rpi.xFrequency))
+            print("stepsInch %d freqMult %d fpgaFrequency %d" % \
+                  (self.stepsInch, rpi.freqMult, rpi.fpgaFrequency))
             print("freqGenMax %d freqDivider %d" % \
                   (self.clockFreq, self.freqDivider))
         self.accelSetup()
@@ -975,12 +1022,12 @@ class Axis():
             self.dbgBase = en.D_ZMOV
         ld(self.base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
         axisCtl = bt.ctlInit | bt.ctlSetLoc
-        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1)
         self.axisCtl = 0
-        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+        ld(self.base + rg.F_Ld_Axis_Ctl, axisCtl, 1)
 
     def loadClock(self, clkCtl):
-        ld(rg.F_Ld_Clk_Ctl, clkCtl, 1);
+        ld(rg.F_Ld_Clk_Ctl, clkCtl, 1)
 
     def move(self, pos, cmd):
         if self.state != en.AXIS_IDLE:

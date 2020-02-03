@@ -670,8 +670,14 @@ class Setup():
                     xLst = []
                     regName = data[0]
                     maxShift = 0
+                    rec = [regName,]
                 else:
-                    (var, bit, shift, comment) = data
+                    if len(data) == 4:
+                        (var, bit, shift, comment) = data
+                        dType = "sl"
+                    elif len(data) == 5:
+                        (var, bit, shift, dType, comment) = data
+                    rec.append((var, bit, shift, dType, comment))
                     cVar = var.upper()
                     xVar = var.replace("_", "")
 

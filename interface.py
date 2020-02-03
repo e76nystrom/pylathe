@@ -11,9 +11,9 @@ configList = \
     ('cfgEncoder', 'config encoder counts per revolution'),
     ('cfgExtDro', 'config external digital readout'),
     ('cfgFcy', 'config microprocesssor clock frequency'),
-    ('cfgFreqMult', 'config xilinx frequency multiplier'),
+    ('cfgFreqMult', 'config fpga frequency multiplier'),
     ('cfgHomeInPlace', 'config home in place'),
-    ('cfgInvEncDir', 'config xilinx invert encoder direction'),
+    ('cfgInvEncDir', 'config fpga invert encoder direction'),
     ('cfgLCD', 'config enable lcd'),
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
@@ -25,11 +25,11 @@ configList = \
     ('cfgSpUseEncoder', 'config use spindle encoder for threading'),
     ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
-    ('cfgTestRPM', 'config xilinx test rpm value'),
+    ('cfgTestRPM', 'config fpga test rpm value'),
     ('cfgTurnSync', 'config for turning synchronization'),
     ('cfgThreadSync', 'config for threading synchronization'),
-    ('cfgXFreq', 'config xilinx frequency'),
-    ('cfgXilinx', 'config xilinx interface present'),
+    ('cfgXFreq', 'config fpga frequency'),
+    ('cfgFpga', 'config fpga interface present'),
 
   "communications config",
 
@@ -588,7 +588,7 @@ parmList = \
     # ("USE_ENCODER", "config for use encoder interrupt directly", "char"),
     # ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
     ("CAP_TMR_ENABLE", "enable capture timer", "char"), 
-    ("CFG_XILINX", "using xilinx", "char"),
+    ("CFG_FPGA", "using fpga", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
     ("CFG_LCD", "lcd display", "char"),
@@ -621,9 +621,9 @@ parmList = \
 
     ("RPM", "current rpm", "int16_t"),
 
-    "xilinx frequency variables",
+    "fpga frequency variables",
 
-    ("X_FREQUENCY", "xilinx clock frequency", "int32_t"),
+    ("FPGA_FREQUENCY", "fpga clock frequency", "int32_t"),
     ("FREQ_MULT", "frequency multiplier", "int16_t"),
 
     "xilinx configuration register",
@@ -823,6 +823,20 @@ fpgaLatheList = \
   ("F_Rd_Phase_Syn",    None, 1, 4,    "read phase at sync pulse"),
   ("F_Phase_Max",       None, None, 0, "number of phase registers"),
 
+  "controller",
+
+  ("controller",),
+  ("F_Ld_Ctrl_Data",    0,    1, 0,    "load controller data"),
+  ("F_Ctrl_Cmd",        None, 1, 4,    "controller command"),
+  ("F_Ctrl_Max",        None, None, 0, "number of controller registers"),  
+
+  "PWM",
+  
+  ("pwmCtl",),
+  ("F_Ld_PWM_Max",      0,    1, 4,    "pwm counter maximum"),
+  ("F_Ld_PWM_Trig",     0,    1, 4,    "pwm trigger"),
+  ("F_PWM_Max",         None, None, 0, "number of pwm registers"),
+
   "encoder",
 
   ("encoder",),
@@ -885,14 +899,19 @@ fpgaLatheList = \
 
   "status registers",
 
-  ("F_Rd_Status",   None, 1, 1,         "status register"),
+  ("F_Rd_Status",   None, 1, 4,         "status register"),
 
   "control registers",
 
+  ("F_Ld_Run_Ctl",  None, 1, 1,         "run control register"),
   ("F_Ld_Sync_Ctl", None, 1, 1,         "sync control register"),
   ("F_Ld_Cfg_Ctl",  None, 1, 1,         "config control register"),
   ("F_Ld_Clk_Ctl",  None, 1, 1,         "clock control register"),
   ("F_Ld_Dsp_Reg",  None, 1, 1,         "display register"),
+
+  "controller",
+
+  ("F_Ctrl_Base", None, "controller", None, "controller"),  
 
   "debug frequency control",
 
@@ -900,7 +919,11 @@ fpgaLatheList = \
 
   "spindle speed",
 
-  ("F_Rd_Idx_Clks", None, 1, 1, "read clocks between index pulses"),
+  ("F_Rd_Idx_Clks", None, 1, 4, "read clocks between index pulses"),
+
+  "pwm",
+
+  ("F_PWM_Base",    None, "pwmCtl", None, "pwm control"),
 
   "base for modules",
 
@@ -1113,25 +1136,38 @@ fpgaLatheBitList = \
  "status register",
 
  ("status",),
- ("zAxisEna",   1, 0, "z axis enable flag"),
- ("zAxisDone",  1, 1, "z axis done"),
- ("xAxisEna",   1, 2, "x axis enable flag"),
- ("xAxisDone",  1, 3, "x axis done"),
+ ("zAxisEna",    1, 0, "z axis enable flag"),
+ ("zAxisDone",   1, 1, "z axis done"),
+ ("xAxisEna",    1, 2, "x axis enable flag"),
+ ("xAxisDone",   1, 3, "x axis done"),
+ ("queEmpty",    1, 4, "controller queue empty"),
+ ("ctlIdle",     1, 5, "controller idle"),
+
 # ("",  , , ""),
+
+ "run control register",
+ ("run",),
+ ("runEna",      1, 0, "run from controller data"),
+ ("runInit",     1, 1, "initialize controller"),
+
+ # "command register",
+ # ("cmd",),
+ # ("cmdWaitZ",    1, 0, "wait for z done"),
+ # ("cmdWaitX",    1, 1, "wait for x done"),
 
  "axis control register",
 
  ("axisCtl",),
- ("ctlInit",       1, 0, "reset flag"),
- ("ctlStart",      1, 1, "start"),
- ("ctlBacklash",   1, 2, "backlash move no pos upd"),
- ("ctlWaitSync",   1, 3, "wait for sync to start"),
- ("ctlDir",        1, 4, "direction"),
- ("ctlDirPos",     1, 4, "move in positive dir"),
- ("ctlDirNeg",     0, 4, "move in negative dir"),
- ("ctlSetLoc",     1, 5, "set location"),
- ("ctlChDirect",   1, 6, "ch input direct"),
- ("ctlSlave",      1, 7, "slave controlled by other axis"),
+ ("ctlInit",     1, 0, "reset flag"),
+ ("ctlStart",    1, 1, "start"),
+ ("ctlBacklash", 1, 2, "backlash move no pos upd"),
+ ("ctlWaitSync", 1, 3, "wait for sync to start"),
+ ("ctlDir",      1, 4, "direction"),
+ ("ctlDirPos",   1, 4, "move in positive dir"),
+ ("ctlDirNeg",   0, 4, "move in negative dir"),
+ ("ctlSetLoc",   1, 5, "set location"),
+ ("ctlChDirect", 1, 6, "ch input direct"),
+ ("ctlSlave",    1, 7, "slave controlled by other axis"),
 
  "configuration control register",
 

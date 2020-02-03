@@ -175,7 +175,7 @@ SPINDLE_SYNC_BOARD   = 108
 TURN_SYNC            = 109
 THREAD_SYNC          = 110
 CAP_TMR_ENABLE       = 111
-CFG_XILINX           = 112
+CFG_FPGA             = 112
 CFG_MPG              = 113
 CFG_DRO              = 114
 CFG_LCD              = 115
@@ -208,9 +208,9 @@ ENC_REV_COUNTER      = 127
 
 RPM                  = 128
 
-# xilinx frequency variables
+# fpga frequency variables
 
-X_FREQUENCY          = 129
+FPGA_FREQUENCY       = 129
 FREQ_MULT            = 130
 
 # xilinx configuration register
@@ -360,7 +360,7 @@ parmTable = ( \
     ('TURN_SYNC', 'char', 'turnSync'),
     ('THREAD_SYNC', 'char', 'threadSync'),
     ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
-    ('CFG_XILINX', 'char', 'cfgXilinx'),
+    ('CFG_FPGA', 'char', 'cfgFpga'),
     ('CFG_MPG', 'char', 'cfgMpg'),
     ('CFG_DRO', 'char', 'cfgDro'),
     ('CFG_LCD', 'char', 'cfgLcd'),
@@ -377,7 +377,7 @@ parmTable = ( \
     ('ENC_COUNTER', 'int16_t', 'encCounter'),
     ('ENC_REV_COUNTER', 'int32_t', 'encRevCounter'),
     ('RPM', 'int16_t', 'rpm'),
-    ('X_FREQUENCY', 'int32_t', 'xFrequency'),
+    ('FPGA_FREQUENCY', 'int32_t', 'fpgaFrequency'),
     ('FREQ_MULT', 'int16_t', 'freqMult'),
     ('X_CFG_REG', 'int16_t', 'xCfgReg'),
     ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),

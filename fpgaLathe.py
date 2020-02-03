@@ -7,6 +7,13 @@ zAxisEna     = 0x01             # z axis enable flag
 zAxisDone    = 0x02             # z axis done
 xAxisEna     = 0x04             # x axis enable flag
 xAxisDone    = 0x08             # x axis done
+queEmpty     = 0x10             # controller queue empty
+ctlIdle      = 0x20             # controller idle
+
+# run control register
+
+runEna       = 0x01             # run from controller data
+runInit      = 0x02             # initialize controller
 
 # axis control register
 
@@ -71,6 +78,10 @@ importList = ( \
  zAxisDone, \
  xAxisEna, \
  xAxisDone, \
+ queEmpty, \
+ ctlIdle, \
+ runEna, \
+ runInit, \
  ctlInit, \
  ctlStart, \
  ctlBacklash, \
