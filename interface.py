@@ -828,6 +828,9 @@ fpgaLatheList = \
   ("controller",),
   ("F_Ld_Ctrl_Data",    0,    1, 0,    "load controller data"),
   ("F_Ctrl_Cmd",        None, 1, 4,    "controller command"),
+  ("F_Ld_Seq",          None, 1, 1,    "load sequence"),
+  ("F_Rd_Seq",          None, 1, 1,    "read sequence"),
+  ("F_Rd_Ctr",          None, 1, 1,    "read counter"),  
   ("F_Ctrl_Max",        None, None, 0, "number of controller registers"),  
 
   "PWM",
