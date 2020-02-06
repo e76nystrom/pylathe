@@ -537,7 +537,7 @@ class Setup():
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
 
-        if False and len(regTables) != 0:
+        if True and len(regTables) != 0:
             for (name, table) in regTables:
                 print(name)
                 for (tRegName, tIndex, tSize, tByteLen) in table:
@@ -548,7 +548,8 @@ class Setup():
             opLenTable = []
             for (tRegName, tIndex, tSize, tByteLen) in table:
                 opLenTable.append(tByteLen)
-            self.hexFile("tmp.hex", opLenTable)
+            print(xLoc, xName)
+            self.hexFile(os.path.join(xLoc, xName + ".hex"), opLenTable)
 
         if f is not None:
             fWrite(f, "\n# xilinx table\n\n")

@@ -194,12 +194,12 @@ fpgaSizeTable = ( \
     1,              #   5 F_Ld_Clk_Ctl
     1,              #   6 F_Ld_Dsp_Reg
     0,              #   7 F_Ctrl_Base, F_Ld_Ctrl_Data
-    4,              #   8 F_Ctrl_Base, F_Ctrl_Cmd
+    1,              #   8 F_Ctrl_Base, F_Ctrl_Cmd
     1,              #   9 F_Ctrl_Base, F_Ld_Seq
     1,              #  10 F_Ctrl_Base, F_Rd_Seq
     1,              #  11 F_Ctrl_Base, F_Rd_Ctr
     0,              #  12 F_Read_Base, F_Ld_Read_Data
-    4,              #  13 F_Read_Base, F_Read
+    0,              #  13 F_Read_Base, F_Read
     2,              #  14 F_Dbg_Freq_Base, F_Ld_Dbg_Freq
     4,              #  15 F_Dbg_Freq_Base, F_Ld_Dbg_Count
     4,              #  16 F_Rd_Idx_Clks
