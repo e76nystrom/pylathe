@@ -833,6 +833,13 @@ fpgaLatheList = \
   ("F_Rd_Ctr",          None, 1, 1,    "read counter"),  
   ("F_Ctrl_Max",        None, None, 0, "number of controller registers"),  
 
+  "reader",
+
+  ("reader",),
+  ("F_Ld_Read_Data",    0,    1, 0,    "load reader data"),
+  ("F_Read",            None, 1, 4,    "read data"),
+  ("F_Read_Max",        None, None, 0, "number of reader registers"),  
+
   "PWM",
   
   ("pwmCtl",),
@@ -915,6 +922,10 @@ fpgaLatheList = \
   "controller",
 
   ("F_Ctrl_Base", None, "controller", None, "controller"),  
+
+  "reader",
+
+  ("F_Read_Base", None, "reader", None, "reader"),  
 
   "debug frequency control",
 
@@ -1152,6 +1163,7 @@ fpgaLatheBitList = \
  ("run",),
  ("runEna",      1, 0, "run from controller data"),
  ("runInit",     1, 1, "initialize controller"),
+ ("readerInit",   1, 2, "initialize reader"),
 
  # "command register",
  # ("cmd",),

@@ -14,6 +14,7 @@ ctlIdle      = 0x20             # controller idle
 
 runEna       = 0x01             # run from controller data
 runInit      = 0x02             # initialize controller
+readerInit   = 0x04             # initialize reader
 
 # axis control register
 
@@ -82,6 +83,7 @@ importList = ( \
  ctlIdle, \
  runEna, \
  runInit, \
+ readerInit, \
  ctlInit, \
  ctlStart, \
  ctlBacklash, \
