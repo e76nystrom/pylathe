@@ -22,8 +22,12 @@ else:
     spi.max_speed_hz = 500000
     spi.mode = 0
 
-ctlEna = True
+ctlEna = False
 ldBuf = []
+rdBuf = []
+
+cmdWaitZ = 1
+cmdWaitX = 2
 
 Z_AXIS = False
 
@@ -43,6 +47,16 @@ def ldStart():
     ldBuf += [rg.F_Ctrl_Base + rg.F_Ld_Ctrl_Data]
     cmdBuf = True
 
+def ldSeq(seq):
+    global ldBuf
+    ldBuf += [rg.F_Ctrl_Base + rg.F_Ld_Seq]
+    ldBuf += [seq]
+
+def ldCmd(cmd):
+    global ldBuf
+    ldBuf += [rg.F_Ctrl_Base + rg.F_Ctrl_Cmd]
+    ldBuf += [cmd]
+
 def ldSend():
     global cmdBuf, ldBuf
     cmdBuf = False
@@ -53,17 +67,72 @@ def ldSend():
 def ld(cmd, data, size, dbg=True):
     global cmdBuf, ldBuf
     if dbg:
-        print("ld %2d %10d %s" % (cmd, data, rg.xRegTable[cmd]))
+        print("ld %2d %10d %08x %s" % \
+              (cmd, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
     data &= 0xffffffff
     val = list(data.to_bytes(size, byteorder='big'))
     if cmdBuf:
         ldBuf += [cmd]
         ldBuf += [size]
         ldBuf += val
+        if dbg:
+            t = "b"
     else:
         msg = [cmd] + val
         if spi is not None: 
             spi.xfer2(msg)
+            if dbg:
+                t = "s"
+    if dbg:
+        print(t)
+
+def rdInit():
+    global rdBuf
+    rdBuf = [rg.F_Read_Base + rg.F_Ld_Read_Data]
+
+def rdAdd(val):
+    global rdBuf
+    rdBuf += [val]
+
+def rdSend():
+    global rdBuf
+    if spi is not None:
+        print(rdBuf)
+        spi.xfer2(rdBuf)
+    
+def rdSetup():
+    global rdBuf, rdLength
+    rdInit()
+    rdAdd(bSyn + rg.F_Rd_XPos)
+    rdAdd(bSyn + rg.F_Rd_YPos)
+    rdAdd(bSyn + rg.F_Rd_Sum)
+    rdAdd(bSyn + rg.F_Rd_Accel_Sum)
+    rdAdd(bSyn + rg.F_Rd_Accel_Ctr)
+    rdAdd(bDist + rg.F_Rd_Dist)
+    rdAdd(bDist + rg.F_Rd_Acl_Steps)
+    rdAdd(bLoc + rg.F_Rd_Loc)
+    rdLength = (len(rdBuf) - 1) * 4
+    rdSend()
+
+def rdTest():
+    global rdLength
+    if spi is None:
+        return None
+    spi.xfer2([rg.F_Read_Base + rg.F_Read])
+    val = spi.readbytes(rdLength)
+    print(len(val), val)
+    count = int(len(val) / 4)
+    result = [0] * count
+    for i in range(count):
+        j = i * 4
+        tmp = val[j:j+4]
+        print(i, j, tmp)
+        r = int.from_bytes(tmp, byteorder='big')
+        if r & 0x80000000:
+            r |= -1 & ~0xffffffff
+        result[i] = r
+    print(result)
+    return result
 
 def rd(cmd, size):
     if spi is None:
@@ -101,6 +170,7 @@ def readData(index=None, prt=True):
 
 def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
           dbg=False, pData=False):
+    global ctlEna
     global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curDist
     if pData:
         from pylab import plot, grid, show
@@ -111,12 +181,12 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         data.append(0)
 
     cFreq = 50000000            # clock frequency
-    mult = 8                   # freq gen multiplier
+    mult = 8                    # freq gen multiplier
     stepsRev = 1600             # steps per revolution
     pitch = .1                  # leadscrew pitch
     scale = 8                   # scale factor
 
-    minFeed = 0               # min feed ipm
+    minFeed = 1                 # min feed ipm
     maxFeed = 40                # max feed ipm
     accelRate = 20              # acceleration rate in per sec^2
 
@@ -225,8 +295,21 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     print("\n")
 
     if ctlEna:
+        runCtl = bt.runInit
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+
+        runCtl = 0
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+
         ldStart()
-        ld(rg.F_Ctrl_Base + rg.F_Ld_Seq, 1, 1)
+        ldSeq(1)
+    else:
+        runCtl = bt.runInit
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+        runCtl = 0
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+        status = rd(rg.F_Rd_Status, 4)
+        print("status {0:04b}".format(status))
 
     clkReg = 0
     ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
@@ -244,6 +327,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 1);
 
     ld(bSyn + rg.F_Ld_D, d, 4)		# load d value
+
     ld(bSyn + rg.F_Ld_Incr1, incr1, 4)	# load incr1 value
     ld(bSyn + rg.F_Ld_Incr2, incr2, 4)	# load incr2 value
 
@@ -259,23 +343,41 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     axisCtl = 0
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
 
-    if ctlEna:
-        ldSend()
-        status = rd(rg.F_Rd_Status, 4)
-        seq = rd(rg.F_Ctrl_Base + rg.F_Rd_Seq, 4)
-        count = rd(rg.F_Ctrl_Base + rg.F_Rd_Ctr, 4)
-        print("status {0:04b} ".format(status), end="")
-        print("seq %d count %d" % (seq, count))
+    # if ctlEna:
+    #     ldSend()
+    #     status = rd(rg.F_Rd_Status, 4)
+    #     seq = rd(rg.F_Ctrl_Base + rg.F_Rd_Seq, 4)
+    #     count = rd(rg.F_Ctrl_Base + rg.F_Rd_Ctr, 4)
+    #     print("status {0:04b} ".format(status), end="")
+    #     print("seq %d count %d" % (seq, count))
+    #     runCtl = bt.runEna
+    #     ld(rg.F_Ld_Run_Ctl, runCtl, 1)
 
-    readData()
+    if not ctlEna:
+        readData()
 
     axisCtl = bt.ctlStart | bt.ctlDir
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
 
+    if ctlEna and runClocks != 0:
+        ldSend()
+        runCtl = bt.runEna
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+        while True:
+            status = rd(rg.F_Rd_Status, 4)
+            if (status & bt.queEmpty) != 0:
+                break
+            print("status {0:04b}".format(status))
+        runCtl = 0
+        ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+
     status = rd(rg.F_Rd_Status, 4)
     print("status {0:04b}".format(status))
-
+              
     readData()
+    if ctlEna and runClocks != 0:
+        rdSetup()
+        rdTest()
 
     indexClks = rd(rg.F_Rd_Idx_Clks, 4)
     if indexClks != 0:
@@ -283,8 +385,9 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         print("indexClks %d curRPM %d" % (indexClks, curRPM))
     
     doneFlag = bt.zAxisDone if Z_AXIS else bt.xAxisDone
+    print("doneFlag %x" % (doneFlag))
     stepData = []
-    if stepClocks != 0:
+    if runClocks != 0:
         if runClocks == 0:
             runClocks = 1
 
@@ -321,12 +424,30 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
             ld(base + rg.F_Ld_Freq, freqDivider, 2)
             clkReg = bt.zClkZFreq if Z_AXIS else bt.xClkXFreq
         ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
-        while True:
-            status = rd(rg.F_Rd_Status, 4) 
-            if (status & doneFlag) != 0:
-                print("status {0:04b}".format(status))
-                break
-            sleep(0.1)
+
+        if ctlEna:
+            cmd = cmdWaitZ if Z_AXIS else cmdWaitX
+            ldCmd(cmd)
+            axisCtl = 0
+            ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+            ldSend()
+            runCtl = bt.runEna
+            ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+            while True:
+                status = rd(rg.F_Rd_Status, 4)
+                if (status & bt.queEmpty) != 0:
+                    break
+                sleep(0.1)
+            print("status {0:04b}".format(status))
+            runCtl = 0
+            ld(rg.F_Ld_Run_Ctl, runCtl, 1)
+        else:
+            while True:
+                status = rd(rg.F_Rd_Status, 4) 
+                if (status & doneFlag) != 0:
+                    break
+                sleep(0.1)
+            print("status {0:04b}".format(status))
         readData()
 
     status = rd(rg.F_Rd_Status, 4)
@@ -357,74 +478,154 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     index = 0
     decel = False
     delayDecel = False
-    while (clocks < xPos):
-        clocks += 1
-        x += 1
-        if aclCtr > 0:
-            aclCtr -= 1
-        if (synSum < 0):
-            synSum += incr1
-        else:
-            y += 1
-            synSum += incr2
-            distCtr -= 1
-            if (not decel) and (aclCtr > 0):
-                aclStep += 1
-            if aclStep >= distCtr:
-                aclCtr = accelClocks-1
-                decel = True
-        synSum += accelAccum
+    if False:
+        while (clocks < xPos):
+            clocks += 1
+            x += 1
+            if aclCtr > 0:
+                aclCtr -= 1
+            if (synSum < 0):
+                synSum += incr1
+            else:
+                y += 1
+                synSum += incr2
+                distCtr -= 1
+                if (not decel) and (aclCtr > 0):
+                    aclStep += 1
+                if aclStep >= distCtr:
+                    aclCtr = accelClocks-1
+                    decel = True
+            synSum += accelAccum
 
-        if (not delayDecel) and (clocks <= accelClocks):
-            accelAccum += zSynAccel
+            if (not delayDecel) and (clocks <= accelClocks):
+                accelAccum += zSynAccel
 
-        if delayDecel:
-            if (accelAccum > 0):
-                accelAccum -= zSynAccel
+            if delayDecel:
+                if (accelAccum > 0):
+                    accelAccum -= zSynAccel
 
-        if clocks >= tracePos:
-            print("%4d" % (index), end=" ")
-            print("xPos %7d yPos %5d zSum %10d" % (x, y, synSum), end=" ")
-            print("aclSum %8d aclCtr %8d" % (accelAccum, aclCtr), end=" ")
-            print("dist %5d aclStp %6d" % (distCtr, aclStep), end=" ")
-            (pos, zSum, zAclSum) = stepData[index]
-            print("sDiff %6d aDiff %6d" % \
-                  (synSum - zSum, accelAccum - zAclSum))
-            index += 1
+            if clocks >= tracePos:
+                print("%4d" % (index), end=" ")
+                print("xPos %7d yPos %5d zSum %10d" % (x, y, synSum), end=" ")
+                print("aclSum %8d aclCtr %8d" % (accelAccum, aclCtr), end=" ")
+                print("dist %5d aclStp %6d" % (distCtr, aclStep), end=" ")
+                (pos, zSum, zAclSum) = stepData[index]
+                print("sDiff %6d aDiff %6d" % \
+                      (synSum - zSum, accelAccum - zAclSum))
+                index += 1
 
-        if (distCtr == 0):
-            break
+            if (distCtr == 0):
+                break
 
-        delayDecel = decel
+            delayDecel = decel
+    else:
+        f = open("run.txt", "w")
+        header = "     x    y       zSum   aclsum aCtr dist aStp\n"
+        if f is not None:
+            f.write(header)
+            f.write("%6d %4d %10d " % (x, y, synSum))
+            f.write("%8d %4d " % (accelAccum, aclCtr))
+            f.write("%4d %4d *\n" % (distCtr, aclStep))
+            hdrCount = 0
+        lastY = 0
+        lastX = 0
+        while (clocks < xPos):
+            clocks += 1
+            x += 1
+            if not decel:
+                if aclCtr != 0:
+                    aclCtr -= 1
+            else:
+                if aclCtr != accelClocks-1:
+                    aclCtr += 1
+            if (synSum < 0):
+                synSum += incr1
+            else:
+                y += 1
+                synSum += incr2
+                distCtr -= 1
+                if (not decel) and (aclCtr > 0):
+                    aclStep += 1
+                if decel:
+                    aclStep -= 1
+                if not decel and aclStep >= distCtr:
+                    decel = True
+            synSum += accelAccum
+
+            if (not delayDecel) and (clocks <= accelClocks):
+                accelAccum += zSynAccel
+
+            if delayDecel:
+                if (accelAccum > zSynAccel):
+                    accelAccum -= zSynAccel
+
+            if f is not None:
+                hdrCount += 1
+                if hdrCount == 40:
+                    f.write(header)
+                    hdrCount = 0
+                f.write("%6d %4d %10d " % (x, y, synSum))
+                f.write("%8d %4d " % (accelAccum, aclCtr))
+                f.write("%4d %4d" % (distCtr, aclStep))
+                if y != lastY:
+                    f.write(" *%s%4d" % ("-+"[decel], x - lastX))
+                    lastX = x
+                    lastY = y
+                f.write("\n")
+
+            if clocks >= tracePos:
+                print("%4d" % (index), end=" ")
+                print("xPos %7d yPos %5d zSum %10d" % (x, y, synSum), end=" ")
+                print("aclSum %8d aclCtr %8d" % (accelAccum, aclCtr), end=" ")
+                print("dist %5d aclStp %6d" % (distCtr, aclStep), end=" ")
+                (pos, zSum, zAclSum) = stepData[index]
+                print("sDiff %6d aDiff %6d" % \
+                      (synSum - zSum, accelAccum - zAclSum))
+                index += 1
+
+            if (distCtr == 0):
+                break
+
+            delayDecel = decel
 
     print(("\nx %d y %d sum %d delta %d accelAccum %d delta %d" %
            (x, y, synSum, synSum - zSum, accelAccum, accelAccum - zAclSum)))
+    if f is not None:
+        f.close()
 
     if pData:
         plot(time, data, 'b', aa="true")
         grid(True)
         show()
 
+print("starting")
+
 arg1 = None
 arg2 = None
 arg3 = None
 if len(sys.argv) > 1:
-    try:
-        arg1 = int(sys.argv[1])
-    except ValueError:
-        arg1 = sys.argv[1]
-
+    if sys.argv[1] == '1':
+        ctlEna = True
+    
 if len(sys.argv) > 2:
     try:
-        arg2 = int(sys.argv[2])
+        arg1 = int(sys.argv[2])
     except ValueError:
-        arg2 = sys.argv[2]
+        arg1 = sys.argv[2]
 
 if len(sys.argv) > 3:
     try:
-        arg3 = int(sys.argv[3])
+        arg2 = int(sys.argv[3])
     except ValueError:
-        arg3 = sys.argv[3]
+        arg2 = sys.argv[3]
+
+if len(sys.argv) > 4:
+    try:
+        arg3 = int(sys.argv[4])
+    except ValueError:
+        arg3 = sys.argv[4]
+
+print("ctlEna %s" % (ctlEna))
 
 if arg1 is None:
     test3()
