@@ -186,7 +186,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     pitch = .1                  # leadscrew pitch
     scale = 8                   # scale factor
 
-    minFeed = 1                 # min feed ipm
+    minFeed = 0			# min feed ipm
     maxFeed = 40                # max feed ipm
     accelRate = 20              # acceleration rate in per sec^2
 
@@ -233,7 +233,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
     incr1 = 2 * dyIni
     incr2 = incr1 - 2 * dx
-    d = incr1 - dx
+    # d = incr1 - dx
+    d = 0
 
     bits = int(floor(log(abs(incr2), 2))) + 1
     print(("\ndx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d" %
@@ -469,7 +470,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         tracePos = stepData[0][0]
     else:
         tracePos = xPos + 1
-    synSum = d
+    # synSum = d
+    synSum = 0
     accelAccum = 0
     distCtr = dist
     l0 = dist
@@ -520,8 +522,24 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
             delayDecel = decel
     else:
         f = open("run.txt", "w")
-        header = "     x    y       zSum   aclsum aCtr dist aStp\n"
         if f is not None:
+            f.write("cFreq %d mult %d stepsRev %d pitch %d\n" % \
+                    (cFreq, mult, stepsRev, pitch))
+            f.write("minFeed %4.1f maxFeed %4.1f accelRate %4.1f\n" % \
+                    (minFeed, maxFeed, accelRate))
+            f.write("\nstepsSecMax %6.0f freqGenMax %7.0f\n" % \
+                    (stepsSecMax, freqGenMax))
+            f.write("stepsSecMin %6.0f freqGenMin %7.0f\n" % \
+                    (stepsSecMin, freqGenMin))
+            f.write("freqDivider %3.0f\n" % freqDivider)
+            f.write("accelTime %8.6f clocks %d\n" % (accelTime, accelClocks))
+            f.write(("\ndx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d\n" %
+                     (dx, dyIni, incr1, incr2, d, bits, scale)))
+            f.write(("accelClocks %d totalSum %d totalInc %d accelSteps %d\n" % 
+                     (accelClocks, totalSum, totalInc, accelSteps)))
+            f.write("\n")
+
+            header = "     x    y       zSum   aclsum aCtr dist aStp\n"
             f.write(header)
             f.write("%6d %4d %10d " % (x, y, synSum))
             f.write("%8d %4d " % (accelAccum, aclCtr))
@@ -548,7 +566,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                     aclStep += 1
                 if decel:
                     aclStep -= 1
-                if not decel and aclStep >= distCtr:
+                if not decel and aclStep > distCtr:
                     decel = True
             synSum += accelAccum
 
@@ -568,7 +586,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                 f.write("%8d %4d " % (accelAccum, aclCtr))
                 f.write("%4d %4d" % (distCtr, aclStep))
                 if y != lastY:
-                    f.write(" *%s%4d" % ("-+"[decel], x - lastX))
+                    f.write(" *%s%4d" % ("><"[decel], x - lastX))
                     lastX = x
                     lastY = y
                 f.write("\n")
