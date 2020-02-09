@@ -246,6 +246,7 @@ class PiLathe(Thread):
         pass
 
     def spindleStart(self):
+        self.lastIdxClks = 0
         if self.stepperDrive:
             pass
         else:
@@ -473,6 +474,7 @@ class PiLathe(Thread):
                 (opString, op, val) = self.moveQue.get(False)
                 self.cmdFlag = op >> 16
                 op &= 0xff
+                self.cmd = op
                 if True:
                     if type(val) == 'float':
                         valString = "%13.6f" % val
@@ -550,25 +552,24 @@ class PiLathe(Thread):
     def zSynSetup(self, val):
         self.zFeed = val
         currentOp = self.currentOp
-        if currentOp = en.OP_TURN:
+        if currentOp == en.OP_TURN:
             pass
-        elif currentOp = en.OP_TAPER:
+        elif currentOp == en.OP_TAPER:
             pass
         elif currentOp == en.OP_THREAD:
             pass
-        
         self.zAxis.turnAccel.syncAccelCalc(self.feedType, val)
 
     def xSynSetup(self, val):
         self.xFeed = val
         currentOp = self.currentOp
-        if currentOp = en.OP_FACE:
+        if currentOp == en.OP_FACE:
             pass
-        elif currentOp = en.OP_CUTOFF:
+        elif currentOp == en.OP_CUTOFF:
             pass
-        elif currentOp = en.TAPER:
+        elif currentOp == en.TAPER:
             pass
-        elif currentOp = en.THREAD:
+        elif currentOp == en.THREAD:
             pass
         self.xAxis.turnAccel.syncAccelCalc(self.feedType, val)
 
@@ -631,7 +632,8 @@ class PiLathe(Thread):
             self.mvState = en.M_IDLE
 
     def mvWaitSpindle(self):
-        indexClks = rd(rg.Rd_Idx_Clks)
+        indexClks = rd(rg.F_Rd_Idx_Clks)
+        print("indexClks %d", (indexClks))
         if indexClks != self.lastIdxClks:
             self.lastIdxClks = indexClks
             if indexClks != 0:
@@ -639,11 +641,12 @@ class PiLathe(Thread):
                 percent = float(delta) * 100.0 / indexClks
                 indexClks += 1
                 rpm = intRound((float(self.fpgaFrequency) / indexClks) * 60)
+                print("delta %d percent %7.2f rpm %d" % (delta, percent, rpm))
                 if percent < 1.0:
                     if self.mvSpindleCmd == en.STOP_SPINDLE:
-                        pass
+                        self.mvState = en.M_IDLE
                     elif self.mvSpindleCmd == en.START_SPINDLE:
-                        pass
+                        self.mvState = en.M_IDLE
         pass
 
     def mvSyncReady(self):
