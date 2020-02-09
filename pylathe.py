@@ -51,7 +51,7 @@ else:
 
 DBG_DIR = os.path.join(os.getcwd(), "dbg")
 DXF_DIR = os.path.join(os.getcwd(), "dxf")
-DBG_LOG = os.path.join(DBG_DIR, "dbgLot.txt")
+DBG_LOG = os.path.join(DBG_DIR, "dbgLog.txt")
 
 SWIG = False
 HOME_TEST = False

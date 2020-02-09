@@ -438,8 +438,8 @@ class PiLathe(Thread):
         axis = self.xAxis
         status = rd(rg.F_Rd_Status, False)
         if axis.state != en.AXIS_IDLE:
-            print("{0:04b}".format(status), end=' ')
-            self.readData(rg.F_XAxis_Base)
+            # print("{0:04b}".format(status), end=' ')
+            # self.readData(rg.F_XAxis_Base)
             tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
                       False, 0x20000, 0x3ffff)
             if axis.loc != tmp:
