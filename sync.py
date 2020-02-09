@@ -7,7 +7,7 @@ from sys import stdout
 
 
 class Sync():
-    def __init__(self, maxPrime=127, dbg=False):
+    def __init__(self, maxPrime=127, dbg=False, fpga=False):
         self.calcPrimes(maxPrime)
         self.clockFreq = 72000000
         self.encoderPulse = 1600
@@ -264,9 +264,12 @@ class Sync():
             pulseMinIn = self.encoderPulse * rpm
             pulseMinOut = (pulseMinIn * output) / cycle
             clocksPulse = int(clocksMin / pulseMinOut)
-            preScaler = clocksPulse >> 16
-            if preScaler == 0:
-                preScaler = 1
+            if not fpga:
+                preScaler = clocksPulse >> 16
+                if preScaler == 0:
+                    preScaler = 1
+            else:
+                prescaler = 1
             result.append(preScaler)
 
         if self.dbg:

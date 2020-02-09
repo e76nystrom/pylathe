@@ -26,7 +26,7 @@ cfgTestMode      =  20          # conifg test mode
 cfgTestRPM       =  21          # config fpga test rpm value
 cfgTurnSync      =  22          # config for turning synchronization
 cfgThreadSync    =  23          # config for threading synchronization
-cfgXFreq         =  24          # config fpga frequency
+cfgFpgaFreq      =  24          # config fpga frequency
 cfgFpga          =  25          # config fpga interface present
 
 # communications config
@@ -313,7 +313,7 @@ config = { \
     'cfgTestRPM' : 21,
     'cfgTurnSync' : 22,
     'cfgThreadSync' : 23,
-    'cfgXFreq' : 24,
+    'cfgFpgaFreq' : 24,
     'cfgFpga' : 25,
     'commPort' : 26,
     'commRate' : 27,
@@ -544,7 +544,7 @@ configTable = ( \
     'cfgTestRPM',
     'cfgTurnSync',
     'cfgThreadSync',
-    'cfgXFreq',
+    'cfgFpgaFreq',
     'cfgFpga',
     'commPort',
     'commRate',

@@ -558,7 +558,13 @@ class PiLathe(Thread):
             pass
         elif currentOp == en.OP_THREAD:
             pass
-        self.zAxis.turnAccel.syncAccelCalc(self.feedType, val)
+
+        if self.turnSync == en.SEL_TU_ENC:
+            self.zAxis.encParm = True
+            self.zAxis.turnAccel.syncAccelCalc(self.feedType, val)
+        elif self.turnSync == en.SEL_TU_SYN:
+            self.zAxis.encParm = False
+            pass
 
     def xSynSetup(self, val):
         self.xFeed = val
@@ -571,7 +577,13 @@ class PiLathe(Thread):
             pass
         elif currentOp == en.THREAD:
             pass
-        self.xAxis.turnAccel.syncAccelCalc(self.feedType, val)
+
+        if self.turnSync == en.SEL_TU_ENC:
+            self.xAxis.encParm = True
+            self.xAxis.turnAccel.syncAccelCalc(self.feedType, val)
+        else:
+            self.xAxis.encParm = False
+            pass
 
     def passNum(self, val):
         self.passVal = val
@@ -695,21 +707,24 @@ class Accel():
 
     def load(self, axisCtl, dist):
         print("\n%s load" % (self.label))
-        ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlInit, 1)
+        if self.encParm:
+            ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlInit, 1)
 
-        if self.freqDivider != 0:
-            ld(self.base + rg.F_Ld_Freq, self.freqDivider, 4)
+            if self.freqDivider != 0:
+                ld(self.base + rg.F_Ld_Freq, self.freqDivider, 4)
 
-        bSyn = self.base + rg.F_Sync_Base
-        ld(bSyn + rg.F_Ld_D, self.d, 4)		# load d value
-        ld(bSyn + rg.F_Ld_Incr1, self.incr1, 4)	# load incr1 value
-        ld(bSyn + rg.F_Ld_Incr2, self.incr2, 4)	# load incr2 value
+            bSyn = self.base + rg.F_Sync_Base
+            ld(bSyn + rg.F_Ld_D, self.d, 4)		# load d value
+            ld(bSyn + rg.F_Ld_Incr1, self.incr1, 4)	# load incr1 value
+            ld(bSyn + rg.F_Ld_Incr2, self.incr2, 4)	# load incr2 value
 
-        ld(bSyn + rg.F_Ld_Accel_Val, self.intAccel, 4)   # load accel
-        ld(bSyn + rg.F_Ld_Accel_Count, self.accelClocks, 4) # load accel coun
+            ld(bSyn + rg.F_Ld_Accel_Val, self.intAccel, 4)   # load accel
+            ld(bSyn + rg.F_Ld_Accel_Count, self.accelClocks, 4) # load acl ctr
 
-        ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
-        ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
+            ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
+            ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
+        else:
+            pass
 
     def accelCalc(self):
         print("\n%s accelCalc" % (self.label))
@@ -976,6 +991,7 @@ class Axis():
         self.wait = False
         self.loc = 0
         self.slvAxis = None
+        self.encParm = None
         
     def init(self):
         rpi = self.rpi

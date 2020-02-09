@@ -284,6 +284,7 @@ SEL_TU_STEP      =  1           # Stepper
 SEL_TU_ENC       =  2           # Encoder
 SEL_TU_ISYN      =  3           # Int Syn
 SEL_TU_ESYN      =  4           # Ext Syn
+SEL_TU_SYN       =  5           # Sync
 
 selTurnList = ( \
     "SEL_TU_SPEED",
@@ -291,6 +292,7 @@ selTurnList = ( \
     "SEL_TU_ENC",
     "SEL_TU_ISYN",
     "SEL_TU_ESYN",
+    "SEL_TU_SYN",
     )
 
 selTurnText = ( \
@@ -299,6 +301,7 @@ selTurnText = ( \
     "Encoder",
     "Int Syn",
     "Ext Syn",
+    "Sync",
     )
 
 # threading sync selector
@@ -309,6 +312,7 @@ SEL_TH_ENC       =  2           # Encoder Direct
 SEL_TH_ISYN_RENC =  3           # Int Syn, Runout Enc
 SEL_TH_ESYN_RENC =  4           # Ext Syn, Runout Enc
 SEL_TH_ESYN_RSYN =  5           # Ext Syn, Runout Syn
+SEL_TH_SYN       =  6           # Syn, Runout Syn
 
 selThreadList = ( \
     "SEL_TH_NO_ENC",
@@ -317,6 +321,7 @@ selThreadList = ( \
     "SEL_TH_ISYN_RENC",
     "SEL_TH_ESYN_RENC",
     "SEL_TH_ESYN_RSYN",
+    "SEL_TH_SYN",
     )
 
 selThreadText = ( \
@@ -326,4 +331,5 @@ selThreadText = ( \
     "Int Syn, Runout Enc",
     "Ext Syn, Runout Enc",
     "Ext Syn, Runout Syn",
+    "Syn, Runout Syn",
     )

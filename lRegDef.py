@@ -187,7 +187,7 @@ xRegTable = ( \
 
 fpgaSizeTable = ( \
     1,              #   0 F_Noop
-    4,              #   1 F_Rd_Status
+    1,              #   1 F_Rd_Status
     1,              #   2 F_Ld_Run_Ctl
     1,              #   3 F_Ld_Sync_Ctl
     1,              #   4 F_Ld_Cfg_Ctl

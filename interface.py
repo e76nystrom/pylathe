@@ -28,7 +28,7 @@ configList = \
     ('cfgTestRPM', 'config fpga test rpm value'),
     ('cfgTurnSync', 'config for turning synchronization'),
     ('cfgThreadSync', 'config for threading synchronization'),
-    ('cfgXFreq', 'config fpga frequency'),
+    ('cfgFpgaFreq', 'config fpga frequency'),
     ('cfgFpga', 'config fpga interface present'),
 
   "communications config",
@@ -1426,6 +1426,7 @@ enumList =\
       ("SEL_TU_ENC",   "Encoder"),
       ("SEL_TU_ISYN",  "Int Syn"),
       ("SEL_TU_ESYN",  "Ext Syn"),
+      ("SEL_TU_SYN",   "Sync"),
     "};",
 
     "threading sync selector",
@@ -1438,6 +1439,7 @@ enumList =\
       ("SEL_TH_ISYN_RENC", "Int Syn, Runout Enc"),
       ("SEL_TH_ESYN_RENC", "Ext Syn, Runout Enc"),
       ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),
+      ("SEL_TH_SYN",       "Syn, Runout Syn"),
     "};",
 )
     

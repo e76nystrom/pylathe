@@ -1121,7 +1121,7 @@ def sendSpindleData(send=False, rpm=None):
                             cfg.getBoolInfoData(cf.spTestEncoder))
             elif FPGA:
                 queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
+                queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
                 # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
                 queParm(pm.FREQ_MULT, 8)
                 xilinxTestMode()
@@ -1189,7 +1189,10 @@ def sendZData(send=False):
             zSyncInt.setLeadscrew(cfg.getInfoData(cf.zPitch))
             zSyncInt.setMotorSteps(motorSteps)
             zSyncInt.setMicroSteps(microSteps)
-            zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            if not FPGA:
+                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            else:
+                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
         if zSyncExt is not None:
             zSyncExt.setLeadscrew(cfg.getInfoData(cf.zPitch))
@@ -1267,7 +1270,10 @@ def sendXData(send=False):
             xSyncInt.setLeadscrew(cfg.getInfoData(cf.xPitch))
             xSyncInt.setMotorSteps(motorSteps)
             xSyncInt.setMicroSteps(microSteps)
-            xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            if not FPGA:
+                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            else:
+                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
         if xSyncExt is not None:
             xSyncExt.setLeadscrew(cfg.getInfoData(cf.xPitch))
@@ -1513,11 +1519,10 @@ class Turn(LatheOp, UpdatePass):
 
         val = getFloatVal(tu.zFeed)
         rpm = getIntVal(tu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -1589,7 +1594,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN:
+            if TURN_SYNC == en.SEL_TU_ISYN or en.SEL_TU_SYN:
                 comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
                 comm.queParm(pm.L_SYNC_OUTPUT, self.output)
                 comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -1862,11 +1867,10 @@ class Face(LatheOp, UpdatePass):
 
         val = getFloatVal(fa.xFeed)
         rpm = getIntVal(fa.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -1915,7 +1919,7 @@ class Face(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.zStart, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -2152,11 +2156,11 @@ class Cutoff(LatheOp):
 
         val = getFloatVal(cu.xFeed)
         rpm = getIntVal(cu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -2190,7 +2194,7 @@ class Cutoff(LatheOp):
         comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
         m = self.m
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -2367,11 +2371,10 @@ class Taper(LatheOp, UpdatePass):
 
         val = getFloatVal(tp.zFeed)
         rpm = getIntVal(tp.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -2388,7 +2391,7 @@ class Taper(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -3053,12 +3056,11 @@ class ScrewThread(LatheOp, UpdatePass):
             self.tpi = 1.0 / self.pitch
             metric = True
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == SEL_TH_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
-
-        if (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
+              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
 
@@ -3094,7 +3096,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == SEL_TH_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.secycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -6662,22 +6664,25 @@ class MainFrame(wx.Frame):
 
         syncDbg = True
 
-        if (TURN_SYNC == en.SEL_TU_ISYN or \
-            TURN_SYNC == en.SEL_TU_ESYN or \
-            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-            global zSyncExt, zSyncInt
-            zSyncInt = Sync(dbg=syncDbg)
-            zSyncExt = Sync(dbg=syncDbg)
-                  
-        if (TURN_SYNC == en.SEL_TU_ISYN or \
-            TURN_SYNC == en.SEL_TU_ESYN or \
-            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-            global xSyncExt, xSyncInt
-            xSyncExt = Sync(dbg=syncDbg)
-            xSyncInt = Sync(dbg=syncDbg)
+        global zSyncInt, zSyncExt, xSyncInt, xSyncExt
+        if not FPGA:
+            if (TURN_SYNC == en.SEL_TU_ISYN or \
+                TURN_SYNC == en.SEL_TU_ESYN or \
+                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+                zSyncInt = Sync(dbg=syncDbg)
+                zSyncExt = Sync(dbg=syncDbg)
+
+            if (TURN_SYNC == en.SEL_TU_ISYN or \
+                TURN_SYNC == en.SEL_TU_ESYN or \
+                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+                xSyncExt = Sync(dbg=syncDbg)
+                xSyncInt = Sync(dbg=syncDbg)
+        else:
+            zSyncInt = Sync(dbg=syncDbg, fpga=True)
+            xSyncInt = Sync(dbg=syncDbg, fpga=True)
 
         comm = Comm()
         comm.SWIG = SWIG
@@ -7087,7 +7092,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 if SPINDLE_SYNC_BOARD:
                     indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
             else:
-                indexList += (en.SEL_TU_ISYN,)
+                indexList += (en.SEL_TU_SYN,)
         else:
             indexList = (en.SEL_TU_SPEED,)
 
@@ -7102,10 +7107,13 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
             if not FPGA:
+                indexList += (en.SEL_TH_ISYN_RENC,)
                 if SPINDLE_SYNC_BOARD:
                     indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+            else:
+                indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
         else:
-            indexList = (en.SEL_TH_NO_ENC,)
+            indexList += (en.SEL_TH_NO_ENC,)
             
         choiceList = []
         for i in indexList:
@@ -7213,7 +7221,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         if FPGA:
                 # ("Encoder", cf.cfgEncoder, 'd'), \
             self.fields += (
-                ("wFPGA Freq", cf.cfgXFreq, 'd'), \
+                ("wFPGA Freq", cf.cfgFpgaFreq, 'd'), \
                 ("Freq Mult", cf.cfgFreqMult, 'd'), \
                 ("bTest Mode", cf.cfgTestMode, None), \
                 ("Test RPM", cf.cfgTestRPM, 'd'), \
