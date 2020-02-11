@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from math import floor, log
+from math import floor, log, sqrt
 from sys import stdout
 from time import sleep
 from platform import system
@@ -26,9 +26,14 @@ ctlEna = False
 ldBuf = []
 rdBuf = []
 
+encCycle = 16-1
+intCycle = 4
+
 cmdWaitZ = 1
 cmdWaitX = 2
 
+sync = True
+syncEnc = True
 Z_AXIS = False
 
 base = rg.F_ZAxis_Base if Z_AXIS else rg.F_XAxis_Base
@@ -67,7 +72,7 @@ def ldSend():
 def ld(cmd, data, size, dbg=True):
     global cmdBuf, ldBuf
     if dbg:
-        print("ld %2d %10d %08x %s" % \
+        print("ld 0x%02x %10d %08x %s" % \
               (cmd, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
     data &= 0xffffffff
     val = list(data.to_bytes(size, byteorder='big'))
@@ -192,8 +197,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
     stepsInch = stepsRev / pitch      # steps per inch
     stepsMinMax = maxFeed * stepsInch # max steps per min
-    stepsSecMax = stepsMinMax / 60.0  # max steps per second
-    freqGenMax = int(stepsSecMax) * mult # frequency generator maximum
+    stepsSecMax = int(stepsMinMax / 60.0)  # max steps per second
+    freqGenMax = int(stepsSecMax * mult) # frequency generator maximum
     print("stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax))
 
     stepsMinMin = minFeed * stepsInch # max steps per min
@@ -233,8 +238,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
     incr1 = 2 * dyIni
     incr2 = incr1 - 2 * dx
-    # d = incr1 - dx
-    d = 0
+    d = incr1 - dx
+    # d = 0
 
     bits = int(floor(log(abs(incr2), 2))) + 1
     print(("\ndx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d" %
@@ -244,11 +249,37 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     zSynAclCnt = accelClocks
     
     totalSum = (accelClocks * incr1) + d
-    totalInc = (accelClocks * (accelClocks - 1) * zSynAccel) / 2
+    totalInc = zSynAccel * (accelClocks * (accelClocks + 1) / 2)
     accelSteps = ((totalSum + totalInc) / (2 * dx))
 
     print(("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
            (accelClocks, totalSum, totalInc, accelSteps)))
+
+    if True:
+        if dist < 2 * accelSteps:
+            aSteps = int(dist / 2)
+        else:
+            aSteps = accelSteps
+
+        #aSteps = (accelClocks * incr1) + d + zSynAccel * (accelClocks * (accelClocks + 1) / 2)
+        #aSteps * (2 * dx) = accelClocks * incr1 + d + (zSynAccel / 2) * (accelClocks * accelClocks + 2 * accelClocks + 1)
+
+        c0 = zSynAccel / 2
+
+        #aSteps * (2 * dx) = accelClocks * incr1 + d + c0 * (accelClocks * accelClocks + 2 * accelClocks + 1)
+        #aSteps * (2 * dx) = accelClocks * incr1 + d + c0 * accelClocks * accelClocks + c0 * 2 * accelClocks + c0
+        #aSteps * (2 * dx) = c0 * accelClocks * accelClocks + accelClocks * (c0 * 2 + incr1) + (c0 + d)
+        #c0 * accelClocks * accelClocks + (c0 * 2 + incr1) * accelClocks + (c0 + d) - (aSteps * (2 * dx)) = 0
+
+        a = c0
+        b = c0 * 2 + incr1
+        c = c0 + d - aSteps * (2 * dx)
+        term = sqrt(b * b - 4 * a * c)
+        denom = 2 * a
+
+        print("\naSteps %d c0 %d a %d b %d c %d" % (aSteps, c0, a, b, c))
+        print("term %d denom %d" % (term , denom))
+        print("%7.4f %7.4f" % ((-b + term) / denom, (-b - term) / denom))
 
     f = open('accel.txt', 'wb')
     clocks = 0
@@ -327,16 +358,17 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     cfgCtl = 0
     ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 1);
 
-    ld(bSyn + rg.F_Ld_D, d, 4)		# load d value
+    if syncEnc:
+        ld(bSyn + rg.F_Ld_D, d, 4) # load d value
 
-    ld(bSyn + rg.F_Ld_Incr1, incr1, 4)	# load incr1 value
-    ld(bSyn + rg.F_Ld_Incr2, incr2, 4)	# load incr2 value
+        ld(bSyn + rg.F_Ld_Incr1, incr1, 4) # load incr1 value
+        ld(bSyn + rg.F_Ld_Incr2, incr2, 4) # load incr2 value
 
-    ld(bSyn + rg.F_Ld_Accel_Val, zSynAccel, 4)   # load z accel
-    ld(bSyn + rg.F_Ld_Accel_Count, zSynAclCnt, 4) # load z accel count
+        ld(bSyn + rg.F_Ld_Accel_Val, zSynAccel, 4) # load accel
+        ld(bSyn + rg.F_Ld_Accel_Count, zSynAclCnt, 4) # load accel count
 
-    ld(bLoc + rg.F_Ld_Loc, 5, 4)       # set z location
-    ld(bDist + rg.F_Ld_Dist, dist, 4)  # load z distance
+    ld(bLoc + rg.F_Ld_Loc, 5, 4)      # set location
+    ld(bDist + rg.F_Ld_Dist, dist, 4) # load distance
 
     axisCtl = bt.ctlInit | bt.ctlSetLoc
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
@@ -357,8 +389,12 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     if not ctlEna:
         readData()
 
-    axisCtl = bt.ctlStart | bt.ctlDir
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+    if syncEnc:
+        axisCtl = bt.ctlStart | bt.ctlDir
+        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
+    else:
+        axisCtl = bt.ctlStart | bt.ctlChDirect | bt.ctlDir
+        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1);
 
     if ctlEna and runClocks != 0:
         ldSend()
@@ -418,9 +454,29 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                 ld(rg.F_Dbg_Freq_Base + rg.F_Ld_Dbg_Count, 1, 4, False)
             print()
     else:
-        sync = False
+        print("sync %s syncEnc %s" % (str(sync), str(syncEnc)))
         if sync:
-            clkReg = bt.zClkCh if Z_AXIS else bt.xClkCh
+            if syncEnc:
+                clkReg = bt.zClkCh if Z_AXIS else bt.xClkCh
+            else:
+                print("using sync")
+                clkReg = (bt.zClkIntClk | bt.xClkCh) if Z_AXIS else \
+                    (bt.xClkIntClk | bt.zClkCh)
+                ld(rg.F_Enc_Base + rg.F_Ld_Enc_Cycle, encCycle ,2)
+                ld(rg.F_Enc_Base + rg.F_Ld_Int_Cycle, intCycle ,2)
+                ld(rg.F_Ld_Sync_Ctl, bt.synEncInit, 1)
+                status = rd(rg.F_Rd_Status, 4)
+                print("status {0:07b}".format(status))
+                ld(rg.F_Ld_Sync_Ctl, bt.synEncEna, 1)
+                while True:
+                    status = rd(rg.F_Rd_Status, 4)
+                    # print("status {0:07b}".format(status))
+                    if (status & bt.syncActive) != 0:
+                        print("status {0:07b}".format(status))
+                        break
+                    sleep(0.1)
+                clks = rd(rg.F_Enc_Base + rg.F_Rd_Cmp_Cyc_Clks, 4)
+                print("cycleClocks %d", clks)
         else:
             ld(base + rg.F_Ld_Freq, freqDivider, 2)
             clkReg = bt.zClkZFreq if Z_AXIS else bt.xClkXFreq
@@ -523,16 +579,19 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     else:
         f = open("run.txt", "w")
         if f is not None:
-            f.write("cFreq %d mult %d stepsRev %d pitch %d\n" % \
+            f.write("cFreq %d mult %d stepsRev %d pitch %5.2f\n" % \
                     (cFreq, mult, stepsRev, pitch))
             f.write("minFeed %4.1f maxFeed %4.1f accelRate %4.1f\n" % \
                     (minFeed, maxFeed, accelRate))
-            f.write("\nstepsSecMax %6.0f freqGenMax %7.0f\n" % \
-                    (stepsSecMax, freqGenMax))
-            f.write("stepsSecMin %6.0f freqGenMin %7.0f\n" % \
+            f.write("\nstepsSecMin %6.0f freqGenMin %7.0f\n" % \
                     (stepsSecMin, freqGenMin))
+            f.write("stepsSecMax %6.0f freqGenMax %7.0f\n" % \
+                    (stepsSecMax, freqGenMax))
             f.write("freqDivider %3.0f\n" % freqDivider)
             f.write("accelTime %8.6f clocks %d\n" % (accelTime, accelClocks))
+            f.write("\ndyIni %d dyMax %d dyDelta %d incPerClock %4.2f "
+                    "zSynAccel %d\n" %\
+                    (dyIni, dyMax, dyDeltaC, incPerClock, zSynAccel))
             f.write(("\ndx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d\n" %
                      (dx, dyIni, incr1, incr2, d, bits, scale)))
             f.write(("accelClocks %d totalSum %d totalInc %d accelSteps %d\n" % 
