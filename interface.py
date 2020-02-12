@@ -1156,6 +1156,7 @@ fpgaLatheBitList = \
  ("xAxisDone",   1, 3, "x axis done"),
  ("queEmpty",    1, 4, "controller queue empty"),
  ("ctlIdle",     1, 5, "controller idle"),
+ ("syncActive",  1, 6, "sync active"),
 
 # ("",  , , ""),
 
@@ -1291,10 +1292,10 @@ enumList =\
     ("M_WAIT_Z", "wait for z to complete"),
     ("M_WAIT_X", "wait for x to complete"),
     ("M_WAIT_SPINDLE", "wait for spindle start"),
+    ("M_START_SYNC", "start sync"),
     ("M_WAIT_SYNC_READY", "wait for sync"),
     ("M_WAIT_SYNC_DONE", "wait for sync done"),
     ("M_WAIT_MEASURE_DONE", "wait for measurment done"),
-    ("M_START_SYNC", "start sync"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),
@@ -1456,19 +1457,44 @@ if __name__ == '__main__':
     import os
     from setup import Setup
     from sys import stderr, stdout
+    from platform import system
 
     # print os.path.realpath(__file__)
     # print os.getcwd()
 
-    path = os.path.dirname(os.path.realpath(__file__))
+    R_PI = False
+    WINDOWS = system() == 'Windows'
+    if WINDOWS:
+        from pywinusb.hid import find_all_hid_devices
+        # from comm import Comm, CommTimeout
+        from commPi import Comm, CommTimeout
+        R_PI = True
+    else:
+        if os.uname().nodename != 'raspberrypi':
+            from comm import Comm, CommTimeout
+        else:
+            from commPi import Comm, CommTimeout
+            R_PI = True
 
     fData = True
-    cLoc = path + '/../LatheCPP/include/'
-    syncLoc = path + '/../SyncCPP/include/'
+    if WINDOWS:
+        path = os.path.dirname(os.path.realpath(__file__))
 
-    xLoc = path + '/../../Xilinx/LatheCtl/'
-    fEncLoc = path + '/../../Altera/Encoder/VHDL/'
-    fLatheLoc = path + '/../../Altera/LatheNew/VHDL/'
+        cLoc = path + '/../LatheCPP/include/'
+        syncLoc = path + '/../SyncCPP/include/'
+
+        xLoc = path + '/../../Xilinx/LatheCtl/'
+        fEncLoc = path + '/../../Altera/Encoder/VHDL/'
+        fLatheLoc = path + '/../../Altera/LatheNew/VHDL/'
+    else:
+        path = os.path.dirname(os.path.realpath(__file__))
+
+        cLoc = path + '/../LatheCPP/include/'
+        syncLoc = path + '/../SyncCPP/include/'
+
+        xLoc = path + '/../Xilinx/LatheCtl/'
+        fEncLoc = path + '/../Altera/Encoder/VHDL/'
+        fLatheLoc = path + '/../Altera/LatheNew/VHDL/'
 
     print("creating interface files")
     setup = Setup()

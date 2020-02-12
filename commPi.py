@@ -18,8 +18,10 @@ WINDOWS = system() == 'Windows'
 
 spi = None
 
-def ld(cmd, data, size):
-    print("ld %2d %10d %s" % (cmd, data, rg.xRegTable[cmd]))
+def ld(cmd, data, size, dbg=True):
+    if dbg:
+        print("ld 0x%02x %10d %08x %s" % \
+              (cmd, data, data&0xffffffff, rg.xRegTable[cmd]))
     if spi is None:
         return
     data &= 0xffffffff
@@ -174,6 +176,7 @@ class PiLathe(Thread):
         self.postUpdate = None
         self.dbgDispatch = None
         self.dbgQue = Queue()
+        self.startEncoder = False
 
         self.start()
 
@@ -315,10 +318,10 @@ class PiLathe(Thread):
         self.mvCtl[en.M_WAIT_Z] = self.mvWaitZ
         self.mvCtl[en.M_WAIT_X] = self.mvWaitX
         self.mvCtl[en.M_WAIT_SPINDLE] = self.mvWaitSpindle
+        self.mvCtl[en.M_START_SYNC] = self.mvStartSync
         self.mvCtl[en.M_WAIT_SYNC_READY] = self.mvSyncReady
         self.mvCtl[en.M_WAIT_SYNC_DONE] = self.mvSyncDone
         self.mvCtl[en.M_WAIT_MEASURE_DONE] = self.mvMeasureDone
-        self.mvCtl[en.M_START_SYNC] = self.mvStartSync
         self.mvCtl[en.M_WAIT_PROBE] = self.mvProbe
         self.mvCtl[en.M_WAIT_MEASURE] = self.mvMeasure
         self.mvCtl[en.M_WAIT_SAFE_X] = self.mvSafeX
@@ -564,7 +567,7 @@ class PiLathe(Thread):
             self.zAxis.turnAccel.syncAccelCalc(self.feedType, val)
         elif self.turnSync == en.SEL_TU_SYN:
             self.zAxis.encParm = False
-            pass
+            self.mvState = en.M_START_SYNC
 
     def xSynSetup(self, val):
         self.xFeed = val
@@ -583,7 +586,7 @@ class PiLathe(Thread):
             self.xAxis.turnAccel.syncAccelCalc(self.feedType, val)
         else:
             self.xAxis.encParm = False
-            pass
+            self.mvState = en.M_START_SYNC
 
     def passNum(self, val):
         self.passVal = val
@@ -659,18 +662,23 @@ class PiLathe(Thread):
                         self.mvState = en.M_IDLE
                     elif self.mvSpindleCmd == en.START_SPINDLE:
                         self.mvState = en.M_IDLE
-        pass
+
+    def mvStartSync(self):
+        ld(rg.F_Enc_Base + rg.F_Ld_Enc_Cycle, self.lSyncCycle ,2)
+        ld(rg.F_Enc_Base + rg.F_Ld_Int_Cycle, self.lSyncOutput ,2)
+        ld(rg.F_Ld_Sync_Ctl, bt.synEncInit, 1)
+        ld(rg.F_Ld_Sync_Ctl, bt.synEncEna, 1)
+        self.mvState = en.M_WAIT_SYNC_READY
 
     def mvSyncReady(self):
-        pass
+        status = rd(rg.F_Rd_Status, 4)
+        if (status & bt.syncActive) != 0:
+            self.mvState = en.M_IDLE
 
     def mvSyncDone(self):
         pass
 
     def mvMeasureDone(self):
-        pass
-
-    def mvStartSync(self):
         pass
 
     def mvProbe(self):
@@ -705,9 +713,9 @@ class Accel():
         self.clockFreq = self.rpi.fpgaFrequency
         self.accelCalc1()
 
-    def load(self, axisCtl, dist):
+    def load(self, axisCtl, dist, encParm=True):
         print("\n%s load" % (self.label))
-        if self.encParm:
+        if encParm:
             ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlInit, 1)
 
             if self.freqDivider != 0:
@@ -724,7 +732,9 @@ class Accel():
             ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
             ld(self.base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
         else:
-            pass
+            ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
+            ld(self.base + rg.F_Ld_Axis_Ctl, \
+               bt.ctlStart | bt.ctlChDirect | axisCtl, 1)
 
     def accelCalc(self):
         print("\n%s accelCalc" % (self.label))
@@ -1108,8 +1118,11 @@ class Axis():
         if cmd == ct.CMD_SYN:
             if (self.cmd & ct.SYN_START) != 0:
                 self.axisCtl |= bt.ctlWaitSync
-            self.turnAccel.load(self.axisCtl, self.dist)
-            self.loadClock(self.clkSel[bt.clkCh])
+            self.turnAccel.load(self.axisCtl, self.dist, self.encParm)
+            if self.encParm:
+                self.loadClock(self.clkSel[bt.clkCh])
+            else:
+                self.loadClock(self.clkSel[bt.clkIntClk])
         elif cmd == ct.CMD_JOG:
             self.moveAccel.load(self.axisCtl, self.dist)
             self.loadClock(self.clkSel[bt.clkFreq])

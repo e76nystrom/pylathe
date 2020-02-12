@@ -21,6 +21,7 @@ class Sync():
         self.dist = False
         self.turn = False
         self.dbg = dbg
+        self.fpga = fpga
 
     def setClockFreq(self, freq):
         self.clockFreq = freq
@@ -264,12 +265,12 @@ class Sync():
             pulseMinIn = self.encoderPulse * rpm
             pulseMinOut = (pulseMinIn * output) / cycle
             clocksPulse = int(clocksMin / pulseMinOut)
-            if not fpga:
+            if not self.fpga:
                 preScaler = clocksPulse >> 16
                 if preScaler == 0:
                     preScaler = 1
             else:
-                prescaler = 1
+                preScaler = 1
             result.append(preScaler)
 
         if self.dbg:

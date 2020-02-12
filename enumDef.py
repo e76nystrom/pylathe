@@ -63,10 +63,10 @@ M_IDLE           =  0           # idle state
 M_WAIT_Z         =  1           # wait for z to complete
 M_WAIT_X         =  2           # wait for x to complete
 M_WAIT_SPINDLE   =  3           # wait for spindle start
-M_WAIT_SYNC_READY =  4          # wait for sync
-M_WAIT_SYNC_DONE =  5           # wait for sync done
-M_WAIT_MEASURE_DONE =  6        # wait for measurment done
-M_START_SYNC     =  7           # start sync
+M_START_SYNC     =  4           # start sync
+M_WAIT_SYNC_READY =  5          # wait for sync
+M_WAIT_SYNC_DONE =  6           # wait for sync done
+M_WAIT_MEASURE_DONE =  7        # wait for measurment done
 M_WAIT_PROBE     =  8           # wait for probe to complete
 M_WAIT_MEASURE   =  9           # wait for measurement to complete
 M_WAIT_SAFE_X    = 10           # wait for move to safe x to complete
@@ -77,10 +77,10 @@ mStatesList = ( \
     "M_WAIT_Z",
     "M_WAIT_X",
     "M_WAIT_SPINDLE",
+    "M_START_SYNC",
     "M_WAIT_SYNC_READY",
     "M_WAIT_SYNC_DONE",
     "M_WAIT_MEASURE_DONE",
-    "M_START_SYNC",
     "M_WAIT_PROBE",
     "M_WAIT_MEASURE",
     "M_WAIT_SAFE_X",

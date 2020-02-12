@@ -33,7 +33,7 @@ cmdWaitZ = 1
 cmdWaitX = 2
 
 sync = True
-syncEnc = True
+syncEnc = False
 Z_AXIS = False
 
 base = rg.F_ZAxis_Base if Z_AXIS else rg.F_XAxis_Base

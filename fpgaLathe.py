@@ -9,6 +9,7 @@ xAxisEna     = 0x04             # x axis enable flag
 xAxisDone    = 0x08             # x axis done
 queEmpty     = 0x10             # controller queue empty
 ctlIdle      = 0x20             # controller idle
+syncActive   = 0x40             # sync active
 
 # run control register
 
@@ -81,6 +82,7 @@ importList = ( \
  xAxisDone, \
  queEmpty, \
  ctlIdle, \
+ syncActive, \
  runEna, \
  runInit, \
  readerInit, \
