@@ -45,8 +45,8 @@ clkNone      = 0x00             #
 clkFreq      = 0x01             # 
 clkCh        = 0x02             # 
 clkIntClk    = 0x03             # 
-clkSlvStep   = 0x04             # 
-clkSlvFreq   = 0x05             # 
+clkSlvFreq   = 0x04             # 
+clkSlvch     = 0x05             # 
 clkSpare     = 0x06             # 
 clkDbgFreq   = 0x07             # 
 zFreqSel     = 0x07             # z Frequency select
@@ -54,7 +54,7 @@ zClkNone     = 0x00             #
 zClkZFreq    = 0x01             # 
 zClkCh       = 0x02             # 
 zClkIntClk   = 0x03             # 
-zClkXStep    = 0x04             # 
+zClkXFreq    = 0x04             # 
 zClkXCh      = 0x05             # 
 zClkSpare    = 0x06             # 
 zClkDbgFreq  = 0x07             # 
@@ -63,7 +63,7 @@ xClkNone     = 0x00             #
 xClkXFreq    = 0x08             # 
 xClkCh       = 0x10             # 
 xClkIntClk   = 0x18             # 
-xClkZStep    = 0x20             # 
+xClkZFreq    = 0x20             # 
 xClkZCh      = 0x28             # 
 xClkSpare    = 0x06             # 
 xClkDbgFreq  = 0x38             # 
@@ -106,8 +106,8 @@ importList = ( \
  clkFreq, \
  clkCh, \
  clkIntClk, \
- clkSlvStep, \
  clkSlvFreq, \
+ clkSlvch, \
  clkSpare, \
  clkDbgFreq, \
  zFreqSel, \
@@ -115,7 +115,7 @@ importList = ( \
  zClkZFreq, \
  zClkCh, \
  zClkIntClk, \
- zClkXStep, \
+ zClkXFreq, \
  zClkXCh, \
  zClkSpare, \
  zClkDbgFreq, \
@@ -124,7 +124,7 @@ importList = ( \
  xClkXFreq, \
  xClkCh, \
  xClkIntClk, \
- xClkZStep, \
+ xClkZFreq, \
  xClkZCh, \
  xClkSpare, \
  xClkDbgFreq, \
