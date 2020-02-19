@@ -66,7 +66,7 @@ class Comm():
         self.ser = Serial()
         self.rpi = PiLathe()
         if system() == 'Linux':
-            if os.uname().nodename == 'raspberrypi':
+            if os.uname().machine.startswith('arm'):
                 global spi
                 import spidev
                 bus = 0
@@ -361,6 +361,7 @@ class PiLathe(Thread):
         while self.fpgaFrequency is None:
             sleep(0.1)
             
+        print("starting loop")
         while True:
             stdout.flush()
             sleep(0.1)
