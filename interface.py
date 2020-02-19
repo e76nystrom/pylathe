@@ -1204,7 +1204,7 @@ fpgaLatheBitList = \
  ("clkCh",       2, 0, ""),
  ("clkIntClk",   3, 0, ""),
  ("clkSlvFreq",  4, 0, ""),
- ("clkSlvch"  ,  5, 0, ""),
+ ("clkSlvCh"  ,  5, 0, ""),
  ("clkSpare",    6, 0, ""),
  ("clkDbgFreq",  7, 0, ""),
  

@@ -441,6 +441,15 @@ class PiLathe(Thread):
                     print("z waiting no enable")
 
             axis.control()
+            if not dbg:
+                tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                          False, 0x20000, 0x3ffff)
+
+            if not dbg:
+                tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                          False, 0x20000, 0x3ffff)
+                self.xLoc = self.xAxis.loc = tmp
+
 
         axis = self.xAxis
         status = rd(rg.F_Rd_Status, False)
@@ -467,6 +476,11 @@ class PiLathe(Thread):
                 elif (status & bt.xAxisEna) == 0:
                     # axis.wait = False
                     print("x waiting no enable")
+
+            if not dbg:
+                tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                          False, 0x20000, 0x3ffff)
+                self.zLoc = self.zAxis.loc = tmp
 
             axis.control()
     
@@ -1108,7 +1122,7 @@ class Axis():
                 rpi.cfgCtl &= ~bt.cfgZDir
             self.clkSel = \
                 (bt.zClkNone, bt.zClkZFreq, bt.zClkCh, bt.zClkIntClk, \
-                 bt.zClkXStep, bt.zClkXCh, bt.zClkSpare, bt.zClkDbgFreq)
+                 bt.zClkXFreq, bt.zClkXCh, bt.zClkSpare, bt.zClkDbgFreq)
             self.dbgBase = en.D_ZMOV
         else:
             self.name = 'x'
@@ -1128,7 +1142,7 @@ class Axis():
                 rpi.cfgCtl &= ~bt.cfgXDir
             self.clkSel = \
                 (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
-                 bt.xClkZStep, bt.xClkZCh, bt.xClkSpare, bt.xClkDbgFreq)
+                 bt.xClkZFreq, bt.xClkZCh, bt.xClkSpare, bt.xClkDbgFreq)
             self.dbgBase = en.D_ZMOV
         ld(base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
         axisCtl = bt.ctlInit | bt.ctlSetLoc
@@ -1204,7 +1218,7 @@ class Axis():
             if self.cmd & ct.SYN_TAPER:
                 slvAxis = self.slvAxis
                 slvAxis.taperAccel.load(slvAxis.taperDist, slvAxis.encParm)
-                clkCtl |= slvAxis.clkSel[bt.clkSlvFreq]
+                clkCtl |= slvAxis.clkSel[bt.clkSlvCh]
                 ld(slvAxis.base + rg.F_Ld_Axis_Ctl,
                    slvAxis.axisCtl | bt.ctlSlave, 1)
             self.loadClock(clkCtl)

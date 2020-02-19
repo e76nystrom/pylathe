@@ -46,7 +46,7 @@ clkFreq      = 0x01             #
 clkCh        = 0x02             # 
 clkIntClk    = 0x03             # 
 clkSlvFreq   = 0x04             # 
-clkSlvch     = 0x05             # 
+clkSlvCh     = 0x05             # 
 clkSpare     = 0x06             # 
 clkDbgFreq   = 0x07             # 
 zFreqSel     = 0x07             # z Frequency select
@@ -107,7 +107,7 @@ importList = ( \
  clkCh, \
  clkIntClk, \
  clkSlvFreq, \
- clkSlvch, \
+ clkSlvCh, \
  clkSpare, \
  clkDbgFreq, \
  zFreqSel, \
