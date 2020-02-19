@@ -12,11 +12,11 @@ CMD_SPEED        = (5 << 0)     # jog at speed
 JOGSLOW          = (6 << 0)     # slow jog for home or probe
 SYN_START        = (1 << 4)     # start on sync pulse
 SYN_LEFT         = (1 << 5)     # start sync left
-SYN_TAPER        = (1 << 6)     # taper on x
+SYN_TAPER        = (1 << 6)     # taper on other axis
 AX_FIND_HOME     = (1 << 7)     # find home
 AX_CLEAR_HOME    = (1 << 8)     # move off of home
-FIND_PROBE       = (1 << 9)     # find home
-CLEAR_PROBE      = (1 << 10)    # move off of home
+FIND_PROBE       = (1 << 9)     # find probe
+CLEAR_PROBE      = (1 << 10)    # move off of probe
 DRO_POS          = (1 << 11)    # use dro for moving
 DRO_UPD          = (1 << 12)    # update internal position from dro
 

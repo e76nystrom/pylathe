@@ -39,9 +39,11 @@ R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
-    # from comm import Comm, CommTimeout
-    from commPi import Comm, CommTimeout
-    R_PI = True
+    from comm import Comm, CommTimeout
+    if os.path.isfile("rpi.txt"):
+        from commPi import Comm, CommTimeout
+        R_PI = True
+        print("rpi test mode")
 else:
     if os.uname().nodename != 'raspberrypi':
         from comm import Comm, CommTimeout
@@ -713,7 +715,7 @@ class MoveCommands():
             self.moveQue = comm.rpi.moveQue
         self.passNum = 0
         self.send = False
-        self.dbg = False
+        self.dbg = True
         self.zOffset = 0.0
         self.xOffset = 0.0
 
@@ -935,7 +937,7 @@ class MoveCommands():
             elif passNum & 0x200:
                 print("spring %d" % (passNum & 0xff))
             else:
-                print("pass %d]" % (passNum))
+                print("pass %d" % (passNum))
 
     def quePause(self, val=0):
         self.queMove(en.QUE_PAUSE, val)
@@ -947,7 +949,7 @@ class MoveCommands():
         self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
         self.drawLineZ(zLocation)
         if self.dbg:
-            print("moveZ  %7.4f" % (zLocation))
+            print("moveZ   %7.4f" % (zLocation))
             stdout.flush()
 
     def moveX(self, xLocation, flag=ct.CMD_MAX, backlash=0.0):
@@ -958,7 +960,7 @@ class MoveCommands():
         self.queMoveF(en.MOVE_X, flag, val)
         self.drawLineX(xLocation)
         if self.dbg:
-            print("moveX  %7.4f" % (xLocation))
+            print("moveX   %7.4f" % (xLocation))
             stdout.flush()
 
     def saveZOffset(self):
@@ -994,7 +996,8 @@ class MoveCommands():
             print("moveXZ %7.4f %7.4f" % (zLocation, xLocation))
 
     def saveTaper(self, taper):
-        taper = "%0.6f" % (taper)
+        if not R_PI:
+            taper = "%0.6f" % (taper)
         self.queMove(en.SAVE_TAPER, taper)
         if self.dbg:
             print("saveTaper %s" % (taper))
@@ -1594,7 +1597,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN or en.SEL_TU_SYN:
+            if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
                 comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
                 comm.queParm(pm.L_SYNC_OUTPUT, self.output)
                 comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -3056,7 +3059,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.tpi = 1.0 / self.pitch
             metric = True
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == SEL_TH_SYN:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
         elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
@@ -3096,7 +3099,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == SEL_TH_SYN:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.secycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)

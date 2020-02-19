@@ -46,7 +46,7 @@ clkFreq      = 0x01             #
 clkCh        = 0x02             # 
 clkIntClk    = 0x03             # 
 clkSlvStep   = 0x04             # 
-clkslvFreq   = 0x05             # 
+clkSlvFreq   = 0x05             # 
 clkSpare     = 0x06             # 
 clkDbgFreq   = 0x07             # 
 zFreqSel     = 0x07             # z Frequency select
@@ -55,7 +55,7 @@ zClkZFreq    = 0x01             #
 zClkCh       = 0x02             # 
 zClkIntClk   = 0x03             # 
 zClkXStep    = 0x04             # 
-zClkXFreq    = 0x05             # 
+zClkXCh      = 0x05             # 
 zClkSpare    = 0x06             # 
 zClkDbgFreq  = 0x07             # 
 xFreqSel     = 0x38             # x Frequency select
@@ -64,7 +64,7 @@ xClkXFreq    = 0x08             #
 xClkCh       = 0x10             # 
 xClkIntClk   = 0x18             # 
 xClkZStep    = 0x20             # 
-xClkZFreq    = 0x28             # 
+xClkZCh      = 0x28             # 
 xClkSpare    = 0x06             # 
 xClkDbgFreq  = 0x38             # 
 clkDbgFreqEna = 0x40            # enable debug frequency
@@ -107,7 +107,7 @@ importList = ( \
  clkCh, \
  clkIntClk, \
  clkSlvStep, \
- clkslvFreq, \
+ clkSlvFreq, \
  clkSpare, \
  clkDbgFreq, \
  zFreqSel, \
@@ -116,7 +116,7 @@ importList = ( \
  zClkCh, \
  zClkIntClk, \
  zClkXStep, \
- zClkXFreq, \
+ zClkXCh, \
  zClkSpare, \
  zClkDbgFreq, \
  xFreqSel, \
@@ -125,7 +125,7 @@ importList = ( \
  xClkCh, \
  xClkIntClk, \
  xClkZStep, \
- xClkZFreq, \
+ xClkZCh, \
  xClkSpare, \
  xClkDbgFreq, \
  clkDbgFreqEna, \

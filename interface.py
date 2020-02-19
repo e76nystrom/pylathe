@@ -689,12 +689,12 @@ regList =\
 
     ("SYN_START",  "(1 << 4)", "start on sync pulse"),
     ("SYN_LEFT",   "(1 << 5)", "start sync left"),
-    ("SYN_TAPER",  "(1 << 6)", "taper on x"),
+    ("SYN_TAPER",  "(1 << 6)", "taper on other axis"),
     ("AX_FIND_HOME",  "(1 << 7)", "find home"),
     ("AX_CLEAR_HOME", "(1 << 8)", "move off of home"),
 
-    ("FIND_PROBE",  "(1 << 9)", "find home"),
-    ("CLEAR_PROBE", "(1 << 10)", "move off of home"),
+    ("FIND_PROBE",  "(1 << 9)", "find probe"),
+    ("CLEAR_PROBE", "(1 << 10)", "move off of probe"),
     ("DRO_POS",     "(1 << 11)", "use dro for moving"),
     ("DRO_UPD",     "(1 << 12)", "update internal position from dro"),
     
@@ -1204,7 +1204,7 @@ fpgaLatheBitList = \
  ("clkCh",       2, 0, ""),
  ("clkIntClk",   3, 0, ""),
  ("clkSlvStep",  4, 0, ""),
- ("clkslvFreq",  5, 0, ""),
+ ("clkSlvFreq",  5, 0, ""),
  ("clkSpare",    6, 0, ""),
  ("clkDbgFreq",  7, 0, ""),
  
@@ -1214,7 +1214,7 @@ fpgaLatheBitList = \
  ("zClkCh",      2, 0, ""),
  ("zClkIntClk",  3, 0, ""),
  ("zClkXStep",   4, 0, ""),
- ("zClkXFreq",   5, 0, ""),
+ ("zClkXCh",     5, 0, ""),
  ("zClkSpare",   6, 0, ""),
  ("zClkDbgFreq", 7, 0, ""),
 
@@ -1224,7 +1224,7 @@ fpgaLatheBitList = \
  ("xClkCh",      2, 3, ""),
  ("xClkIntClk",  3, 3, ""),
  ("xClkZStep",   4, 3, ""),
- ("xClkZFreq",   5, 3, ""),
+ ("xClkZCh",     5, 3, ""),
  ("xClkSpare",   6, 0, ""),
  ("xClkDbgFreq", 7, 3, ""),
  ("clkDbgFreqEna",  1, 6, "enable debug frequency"),
