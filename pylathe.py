@@ -18,6 +18,9 @@ from queue import Empty, Queue
 from sys import stderr, stdout
 from threading import Event, Lock, Thread
 from time import localtime, sleep, strftime, time
+# from contextlib import redirect_stderr
+#     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
+#          redirect_stderr(stderr):
 
 import serial
 import wx
@@ -35,6 +38,14 @@ import syncParmDef as sp
 from configInfo import ConfigInfo, InfoValue
 from sync import Sync
 
+DBG_DIR = os.path.join(os.getcwd(), "dbg")
+DXF_DIR = os.path.join(os.getcwd(), "dxf")
+DBG_LOG = os.path.join(DBG_DIR, "dbgLog.txt")
+
+stdError = stderr
+stderr = open(os.path.join(DBG_DIR, "err.log"), 'w')
+stderr.write("testing\n")
+
 R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
@@ -43,15 +54,12 @@ if WINDOWS:
     from commPi import Comm, CommTimeout
     R_PI = True
 else:
-    if os.uname().nodename != 'raspberrypi':
+    print(os.uname())
+    if not os.uname().machine.startswith('arm'):
         from comm import Comm, CommTimeout
     else:
         from commPi import Comm, CommTimeout
         R_PI = True
-
-DBG_DIR = os.path.join(os.getcwd(), "dbg")
-DXF_DIR = os.path.join(os.getcwd(), "dxf")
-DBG_LOG = os.path.join(DBG_DIR, "dbgLog.txt")
 
 SWIG = False
 HOME_TEST = False
@@ -1126,6 +1134,7 @@ def sendSpindleData(send=False, rpm=None):
                 queParm(pm.FREQ_MULT, 8)
                 xilinxTestMode()
                 queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
+                print(R_PI)
                 if not R_PI:
                     cfgReg = 0
                     if cfg.getBoolInfoData(cf.cfgInvEncDir):
@@ -4051,7 +4060,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.zPos = \
             self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False, index=cf.jogZPos)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -4059,7 +4068,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.xPos = \
             self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False, index=cf.jogXPos)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -4077,13 +4086,13 @@ class JogPanel(wx.Panel, FormRoutines):
         
         (self.passSize, self.passText) = \
             self.addDialogField(sizerG, "Size", "0.000", txtFont, \
-                                posFont, (120, -1), border=(10,2), \
+                                posFont, (130, -1), border=(10,2), \
                                 edit=False, text=True)
         # x diameter
 
         self.xPosDiam = \
             self.addDialogField(sizerG, "X D", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -4100,7 +4109,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.zDROPos = \
                 self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                    posFont, (120, -1), border=(10, 2), \
+                                    posFont, (130, -1), border=(10, 2), \
                                     edit=False, index=cf.droZPos)
             self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -4108,7 +4117,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.xDROPos = \
                 self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                    posFont, (120, -1), border=(10, 2), \
+                                    posFont, (130, -1), border=(10, 2), \
                                     edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
