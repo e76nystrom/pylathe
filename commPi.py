@@ -566,10 +566,14 @@ class PiLathe(Thread):
         tpAxis.taper = taper = self.taper
         loc = intRound(val * mvAxis.stepsInch) + mvAxis.homeOffset
         dist = tpAxis.savedLoc - tpAxis.loc
+        print("tpAxis.savedLoc %d tpAxis.loc %d dist %d" %
+              (tpAxis.savedLoc, tpAxis.loc, dist))
         tpAxis.axisCtl = (bt.ctlSlave | \
                           (bt.ctlDirPos if dist > 0 else bt.ctlDirPos))
-        mvDist = float(dist) / mvAxis.stepsInch
+        mvDist = abs(float(dist) / mvAxis.stepsInch)
         tpAxis.taperDist = intRound(mvDist * taper * tpAxis.stepsInch)
+        print("mvDist %7.4f taper %0.6f tpAxis.taperDist %d" % \
+              (mvDist, taper, tpAxis.taperDist))
         tpAxis.taperAccel.taperCalc(mvAxis.turnAccel, taper)
         mvAxis.move(loc, ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
 
@@ -750,7 +754,7 @@ class Accel():
         self.clockFreq = self.rpi.fpgaFrequency
         self.accelCalc1()
 
-    def load(self, dist, encParm=False):
+    def load(self, dist, encParm=True):
         print("\n%s load" % (self.label))
         axis = self.axis
         axisCtl = axis.axisCtl
@@ -770,11 +774,10 @@ class Accel():
             ld(bSyn + rg.F_Ld_Accel_Count, self.accelClocks, 4) # load acl ctr
 
             ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
-            # ld(base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
         else:
             ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
-            # ld(base + rg.F_Ld_Axis_Ctl, \
-            #    bt.ctlStart | bt.ctlChDirect | axisCtl, 1)
+            axisCtl |=  bt.ctlChDirect
+        ld(base + rg.F_Ld_Axis_Ctl, bt.ctlStart | axisCtl, 1)
 
     def start(self, axisCtl=0):
         axisCtl |= self.axis.axisCtl | bt.ctlStart
