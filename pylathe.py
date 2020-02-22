@@ -3109,7 +3109,7 @@ class ScrewThread(LatheOp, UpdatePass):
             m.setLoc(self.safeZ, self.safeX)
 
         if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.secycle)
+            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
         elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
@@ -3150,7 +3150,7 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
-        m.zSynSetup(cfg.getFloatInfoData(cf.tpZFeed))
+        m.zSynSetup(cfg.getFloatInfoData(cf.thThread))
 
         if not self.rightHand:  # left hand threads
             if self.runoutDist == 0.0: # wihout runout
