@@ -1243,6 +1243,7 @@ class Axis():
         if self.done:
             self.done = False
             self.wait = False
+            self.loadClock(0)
             self.state = en.AXIS_DONE
 
     def delay(self):

@@ -1225,7 +1225,7 @@ fpgaLatheBitList = \
  ("xClkIntClk",  3, 3, ""),
  ("xClkZFreq",   4, 3, ""),
  ("xClkZCh",     5, 3, ""),
- ("xClkSpare",   6, 0, ""),
+ ("xClkSpare",   6, 3, ""),
  ("xClkDbgFreq", 7, 3, ""),
  ("clkDbgFreqEna",  1, 6, "enable debug frequency"),
 
@@ -1470,7 +1470,7 @@ if __name__ == '__main__':
         from commPi import Comm, CommTimeout
         R_PI = True
     else:
-        if os.uname().nodename != 'raspberrypi':
+        if not os.uname().machine.startswith('arm'):
             from comm import Comm, CommTimeout
         else:
             from commPi import Comm, CommTimeout

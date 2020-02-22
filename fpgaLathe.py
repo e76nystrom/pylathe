@@ -65,7 +65,7 @@ xClkCh       = 0x10             #
 xClkIntClk   = 0x18             # 
 xClkZFreq    = 0x20             # 
 xClkZCh      = 0x28             # 
-xClkSpare    = 0x06             # 
+xClkSpare    = 0x30             # 
 xClkDbgFreq  = 0x38             # 
 clkDbgFreqEna = 0x40            # enable debug frequency
 
