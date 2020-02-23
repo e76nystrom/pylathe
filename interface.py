@@ -11,9 +11,9 @@ configList = \
     ('cfgEncoder', 'config encoder counts per revolution'),
     ('cfgExtDro', 'config external digital readout'),
     ('cfgFcy', 'config microprocesssor clock frequency'),
-    ('cfgFreqMult', 'config xilinx frequency multiplier'),
+    ('cfgFreqMult', 'config fpga frequency multiplier'),
     ('cfgHomeInPlace', 'config home in place'),
-    ('cfgInvEncDir', 'config xilinx invert encoder direction'),
+    ('cfgInvEncDir', 'config fpga invert encoder direction'),
     ('cfgLCD', 'config enable lcd'),
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
@@ -25,11 +25,11 @@ configList = \
     ('cfgSpUseEncoder', 'config use spindle encoder for threading'),
     ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
-    ('cfgTestRPM', 'config xilinx test rpm value'),
+    ('cfgTestRPM', 'config fpga test rpm value'),
     ('cfgTurnSync', 'config for turning synchronization'),
     ('cfgThreadSync', 'config for threading synchronization'),
-    ('cfgXFreq', 'config xilinx frequency'),
-    ('cfgXilinx', 'config xilinx interface present'),
+    ('cfgFpgaFreq', 'config fpga frequency'),
+    ('cfgFpga', 'config fpga interface present'),
 
   "communications config",
 
@@ -316,28 +316,28 @@ cmdList = \
 (\
     "z motion commands",
     
-    ("ZMOVEABS", "", "start z movement"),
-    ("ZMOVEREL", "", "move z relative"),
-    ("ZJMOV", "", "start z jog"),
-    ("ZJSPEED", "", "start z jog at speed"),
-    ("ZSTOP", "", "stop z movement"),
+    ("ZMOVEABS", "zMoveAbs", "start z movement"),
+    ("ZMOVEREL", "zMoveRel", "move z relative"),
+    ("ZJMOV", "zJogMove", "start z jog"),
+    ("ZJSPEED", "zJogSpeed", "start z jog at speed"),
+    ("ZSTOP", "zStop", "stop z movement"),
     ("ZSETLOC", "", ""),
     
     "x motion commands",
     
-    ("XMOVEABS", "", "start x movement"),
-    ("XMOVEREL", "", "move x relative"),
-    ("XJMOV", "", "start z jog"),
-    ("XJSPEED", "", "start x jog at speed"),
-    ("XSTOP", "", "stop x movement"),
+    ("XMOVEABS", "xMoveAbs", "start x movement"),
+    ("XMOVEREL", "xMoveRel", "move x relative"),
+    ("XJMOV", "xJogMove", "start z jog"),
+    ("XJSPEED", "xJogSpeed", "start x jog at speed"),
+    ("XSTOP", "xStop", "stop x movement"),
     ("XSETLOC", "", ""),
-    ("XHOMEAXIS", "", "x home axis"),
+    ("XHOMEAXIS", "xHomeAxis", "x home axis"),
     
     "spindle operations",
     
     ("SPINDLE_START", "spindleStart", "start spindle"),
-    ("SPINDLE_JOG", "", "spindle jog"),
-    ("SPINDLE_JOG_SPEED", "", "spindle jog at speed"),
+    ("SPINDLE_JOG", "spindleJog", "spindle jog"),
+    ("SPINDLE_JOG_SPEED", "spindleJogSpeed", "spindle jog at speed"),
     ("SPINDLE_STOP", "spindleStop", "stop spindle"),
     
     "end operations",
@@ -356,10 +356,10 @@ cmdList = \
     ("CMD_SYNCSETUP", "syncSetup", "setup z and x axis synchronization"),
 
     ("CMD_ZSETUP", "zSetup", "setup z axis"),
-    ("CMD_ZSYNSETUP", "zSynSetup", "setup z axis sync"),
+    ("CMD_ZSYNSETUP", "", "setup z axis sync"),
 
     ("CMD_XSETUP", "xSetup", "setup x axis"),
-    ("CMD_XSYNSETUP", "xSynSetup", "setup z axis sync"),
+    ("CMD_XSYNSETUP", "", "setup z axis sync"),
     
     "state information",
     
@@ -376,15 +376,15 @@ cmdList = \
 
     "move command operations",
 
-    ("CLEARQUE", "", "clear move que"),
+    ("CLEARQUE", "clearQue", "clear move que"),
     ("QUEMOVE", "", "que move command"),
     ("MOVEQUESTATUS", "", "read move queue status"),
     
     "location and debug info",
     
-    ("READALL", "", "read all status info"),
-    ("READDBG", "", "read debug message"),
-    ("CLRDBG", "", "clear debug message buffer"),
+    ("READALL", "readAll", "read all status info"),
+    ("READDBG", "readDbg", "read debug message"),
+    ("CLRDBG", "clearDbg", "clear debug message buffer"),
 
     "encoder commands",
 
@@ -588,7 +588,7 @@ parmList = \
     # ("USE_ENCODER", "config for use encoder interrupt directly", "char"),
     # ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
     ("CAP_TMR_ENABLE", "enable capture timer", "char"), 
-    ("CFG_XILINX", "using xilinx", "char"),
+    ("CFG_FPGA", "using fpga", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
     ("CFG_LCD", "lcd display", "char"),
@@ -621,9 +621,9 @@ parmList = \
 
     ("RPM", "current rpm", "int16_t"),
 
-    "xilinx frequency variables",
+    "fpga frequency variables",
 
-    ("X_FREQUENCY", "xilinx clock frequency", "int32_t"),
+    ("FPGA_FREQUENCY", "fpga clock frequency", "int32_t"),
     ("FREQ_MULT", "frequency multiplier", "int16_t"),
 
     "xilinx configuration register",
@@ -679,14 +679,25 @@ regList =\
 (\
     "common move command bits",
     
-    ("CMD_MSK", "(7 << 0)", "move mask"),
-    ("CMD_MOV", "(1 << 0)", "move a set distance"),
-    ("CMD_JOG", "(2 << 0)", "move while cmd are present"),
-    ("CMD_SYN", "(3 << 0)", "move dist synchronized to rotation"),
-    ("CMD_MAX", "(4 << 0)", "rapid move"),
-    ("CMD_SPEED", "(5 << 0)", "jog at speed"),
-    ("JOGSLOW", "(6 << 0)", "slow jog for home or probe"),
+    ("CMD_MSK",    "(7 << 0)", "move mask"),
+    ("CMD_MOV",    "(1 << 0)", "move a set distance"),
+    ("CMD_JOG",    "(2 << 0)", "move while cmd are present"),
+    ("CMD_SYN",    "(3 << 0)", "move dist synchronized to rotation"),
+    ("CMD_MAX",    "(4 << 0)", "rapid move"),
+    ("CMD_SPEED",  "(5 << 0)", "jog at speed"),
+    ("JOGSLOW",    "(6 << 0)", "slow jog for home or probe"),
 
+    ("SYN_START",  "(1 << 4)", "start on sync pulse"),
+    ("SYN_LEFT",   "(1 << 5)", "start sync left"),
+    ("SYN_TAPER",  "(1 << 6)", "taper on other axis"),
+    ("AX_FIND_HOME",  "(1 << 7)", "find home"),
+    ("AX_CLEAR_HOME", "(1 << 8)", "move off of home"),
+
+    ("FIND_PROBE",  "(1 << 9)", "find probe"),
+    ("CLEAR_PROBE", "(1 << 10)", "move off of probe"),
+    ("DRO_POS",     "(1 << 11)", "use dro for moving"),
+    ("DRO_UPD",     "(1 << 12)", "update internal position from dro"),
+    
     "common definitions",
 
     ("DIR_POS", "1", "positive direction"),
@@ -695,9 +706,9 @@ regList =\
     "z move command bits",
     
     ("Z_SYN_START", "(1 << 4)", "start on sync pulse"),
-    ("Z_SYN_LEFT", "(1 << 5)", "start sync left"),
+    ("Z_SYN_LEFT",  "(1 << 5)", "start sync left"),
     ("X_SYN_TAPER", "(1 << 6)", "taper on x"),
-    
+
     "z direction",
     
     ("ZPOS", "1", "z in positive direction"),
@@ -706,38 +717,33 @@ regList =\
     "x move command bits",
     
     ("X_SYN_START", "(1 << 4)", "start on sync pulse"),
-    ("Z_SYN_TAPER", "(1 << 5)", "taper on z"),
-    ("XFIND_HOME",  "(1 << 6)", "find home"),
-    ("XCLEAR_HOME", "(1 << 7)", "move off of home"),
-
-    ("FIND_PROBE",  "(1 << 8)", "find home"),
-    ("CLEAR_PROBE", "(1 << 9)", "move off of home"),
-    ("DRO_POS",     "(1 << 10)", "use dro for moving"),
-    ("DRO_UPD",     "(1 << 11)", "update internal position from dro"),
+    ("Z_SYN_TAPER", "(1 << 6)", "taper on z"),
+    ("XFIND_HOME",  "(1 << 7)", "find home"),
+    ("XCLEAR_HOME", "(1 << 8)", "move off of home"),
      
     "x direction",
     
-    ("XPOS", "1", "x in positive direction"),
+    ("XPOS", "1",  "x in positive direction"),
     ("XNEG", "-1", "x in negative direction"),
-    
+ 
     "feed types",
     
-    ("FEED_PITCH", "0", "feed inch per rev"),
-    ("FEED_TPI", "1", "feed threads per inch"),
+    ("FEED_PITCH",  "0", "feed inch per rev"),
+    ("FEED_TPI",    "1", "feed threads per inch"),
     ("FEED_METRIC", "2", "feed mm per rev"),
 
     "home flag",
 
-    ("FIND_HOME", "(1 << 0)", ""),
+    ("FIND_HOME",  "(1 << 0)", ""),
     ("CLEAR_HOME", "(1 << 1)", ""),
-    ("PROBE_SET", "(1 << 2)", ""),
-    ("PROBE_CLR", "(1 << 3)", ""),
+    ("PROBE_SET",  "(1 << 2)", ""),
+    ("PROBE_CLR",  "(1 << 3)", ""),
  
     "home status",
  
-    ("HOME_ACTIVE", "0", ""),
+    ("HOME_ACTIVE",  "0", ""),
     ("HOME_SUCCESS", "1", ""),
-    ("HOME_FAIL", "2", ""),
+    ("HOME_FAIL",    "2", ""),
 
     "probe status",
 
@@ -789,6 +795,157 @@ regList =\
 
     # ("", "()", ""),
     # ("", "", ""),
+)
+
+# ("", 0, 0, ""),
+fpgaEncList = \
+( \
+  ("F_Noop",               0,    1, 0, "register 0"),
+
+  ("F_Ld_Run_Ctl",         None, 1, 1, "load run control register"),
+  ("F_Ld_Dbg_Ctl",         None, 1, 1, "load debug control register"),
+
+  ("F_Ld_Enc_Cycle",       None, 1, 2, "load encoder cycle"),
+  ("F_Ld_Int_Cycle",       None, 1, 2, "load internal cycle"),
+
+  ("F_Rd_Cmp_Cyc_Clks",    None, 1, 4, "read cmp cycle clocks"),
+
+  ("F_Ld_Dbg_Freq",        None, 1, 2, "load debug frequency"),
+  ("F_Ld_Dbg_Count",       None, 1, 2, "load debug clocks"),
+)
+
+fpgaLatheList = \
+( \
+  "phase control",
+  
+  ("phaseCtl",),
+  ("F_Ld_Phase_Len",    0,    1, 2,    "phase length"),
+  ("F_Rd_Phase_Syn",    None, 1, 4,    "read phase at sync pulse"),
+  ("F_Phase_Max",       None, None, 0, "number of phase registers"),
+
+  "controller",
+
+  ("controller",),
+  ("F_Ld_Ctrl_Data",    0,    1, 0,    "load controller data"),
+  ("F_Ctrl_Cmd",        None, 1, 1,    "controller command"),
+  ("F_Ld_Seq",          None, 1, 1,    "load sequence"),
+  ("F_Rd_Seq",          None, 1, 1,    "read sequence"),
+  ("F_Rd_Ctr",          None, 1, 1,    "read counter"),  
+  ("F_Ctrl_Max",        None, None, 0, "number of controller registers"),  
+
+  "reader",
+
+  ("reader",),
+  ("F_Ld_Read_Data",    0,    1, 0,    "load reader data"),
+  ("F_Read",            None, 1, 0,    "read data"),
+  ("F_Read_Max",        None, None, 0, "number of reader registers"),  
+
+  "PWM",
+  
+  ("pwmCtl",),
+  ("F_Ld_PWM_Max",      0,    1, 4,    "pwm counter maximum"),
+  ("F_Ld_PWM_Trig",     0,    1, 4,    "pwm trigger"),
+  ("F_PWM_Max",         None, None, 0, "number of pwm registers"),
+
+  "encoder",
+
+  ("encoder",),
+  ("F_Ld_Enc_Cycle",    0,    1, 2,    "load encoder cycle"),
+  ("F_Ld_Int_Cycle",    None, 1, 2,    "load internal cycle"),
+  ("F_Rd_Cmp_Cyc_Clks", None, 1, 4,    "read cmp cycle clocks"),
+  ("F_Enc_Max",         None, None, 0, "number of encoder registers"),
+
+  "debug frequency",
+
+  ("dbgFreq",),
+  ("F_Ld_Dbg_Freq",     0,    1, 2,    "debug frequency"),
+  ("F_Ld_Dbg_Count",    None, 1, 4,    "debug count"),
+  ("F_Dbg_Freq_Max",    None, None, 0, "number of debug frequency regs"),
+
+  "sync accel",
+
+  ("syncAccel",),
+  ("F_Ld_D",           0,    1, 4,    "axis d"),
+  ("F_Ld_Incr1",       None, 1, 4,    "axis incr1"),
+  ("F_Ld_Incr2",       None, 1, 4,    "axis incr2"),
+  ("F_Ld_Accel_Val",   None, 1, 4,    "axis accel value"),
+  ("F_Ld_Accel_Count", None, 1, 4,    "axis accel count"),
+  ("F_Rd_XPos",        None, 1, 4,    "axis x pos"),
+  ("F_Rd_YPos",        None, 1, 4,    "axis y pos"),
+  ("F_Rd_Sum",         None, 1, 4,    "axis sum"),
+  ("F_Rd_Accel_Sum",   None, 1, 4,    "axis accel sum"),
+  ("F_Rd_Accel_Ctr",   None, 1, 4,    "axis accel counter"),
+  ("F_Sync_Max",       None, None, 0, "number of sync registers"),
+  
+  "distance registers",
+
+  ("distCtr",),
+  ("F_Ld_Dist",       0,    1, 4,    "axis distance"),
+  ("F_Rd_Dist",       None, 1, 4,    "read axis distance"),
+  ("F_Rd_Acl_Steps",  None, 1, 4,    "read accel steps"),
+  ("F_Dist_Max",      None, None, 0, "number of distance registers"),
+
+  "location registers",
+
+  ("locCtr",),
+  ("F_Ld_Loc",        0,    1, 4,    "axis location"),
+  ("F_Rd_Loc",        None, 1, 4,    "read axis location"),
+  ("F_Loc_Max",       None, None, 0, "number of location registers"),
+
+  "axis",
+
+  ("axisCtl",),
+  ("F_Ld_Axis_Ctl",   0,    1, 1,              "axis control register"),
+  ("F_Ld_Freq",       None, 1, 4,              "frequency"),
+  ("F_Sync_Base",     None, "syncAccel", None, "sync registers"),
+  ("F_Dist_Base",     None, "distCtr",   None, "distance registers"),
+  ("F_Loc_Base",      None, "locCtr",    None, "location registers"),
+  ("F_Axis_Max",      None, None, 0,           "number of axis registers"),
+
+  "register definitions",
+
+  ("regDef", ),
+  ("F_Noop",        0,    1, 1,         "register 0"),
+
+  "status registers",
+
+  ("F_Rd_Status",   None, 1, 1,         "status register"),
+
+  "control registers",
+
+  ("F_Ld_Run_Ctl",  None, 1, 1,         "run control register"),
+  ("F_Ld_Sync_Ctl", None, 1, 1,         "sync control register"),
+  ("F_Ld_Cfg_Ctl",  None, 1, 1,         "config control register"),
+  ("F_Ld_Clk_Ctl",  None, 1, 1,         "clock control register"),
+  ("F_Ld_Dsp_Reg",  None, 1, 1,         "display register"),
+
+  "controller",
+
+  ("F_Ctrl_Base", None, "controller", None, "controller"),  
+
+  "reader",
+
+  ("F_Read_Base", None, "reader", None, "reader"),  
+
+  "debug frequency control",
+
+  ("F_Dbg_Freq_Base", None, "dbgFreq", None, "dbg frequency"),
+
+  "spindle speed",
+
+  ("F_Rd_Idx_Clks", None, 1, 4, "read clocks between index pulses"),
+
+  "pwm",
+
+  ("F_PWM_Base",    None, "pwmCtl", None, "pwm control"),
+
+  "base for modules",
+
+  ("F_Enc_Base",   None, "encoder", None,  "encoder registers"),
+  ("F_Phase_Base", None, "phaseCtl", None, "phase registers"),
+  ("F_ZAxis_Base", None, "axisCtl", None,  "z axis registers"),
+  ("F_XAxis_Base", None, "axisCtl", None,  "x axis registers"),
+  ("F_Cmd_Max",    None, None, None,       "number of commands"),
 )
 
 xilinxList = \
@@ -968,12 +1125,124 @@ xilinxBitList = \
     ""
 )
     
-xilinxEncBitList = \
+fpgaEncBitList = \
+(\
+ "run control register",
+
+ ("rCtl",),
+ ("ctlReset", 1, 0, "reset"),
+ ("ctlTestClock", 1, 1, "testclock"),
+ ("ctlSpare", 1, 2, "spare"),
+
+ "debug control register",
+
+ ("dCtl",),
+ ("DbgEna",    1, 0, "enable debugging"),
+ ("DbgSel",    1, 1, "select dbg encoder"),
+ ("DbgDir",    1, 2, "debug direction"),
+ ("DbgCount",  1, 3, "gen count num dbg clks"),
+
+ ""
+)
+
+fpgaLatheBitList = \
 (\
  "status register",
 
-    ("stat",),
-    ("done_Int", 1, 0, "z done interrrupt"),
+ ("status",),
+ ("zAxisEna",    1, 0, "z axis enable flag"),
+ ("zAxisDone",   1, 1, "z axis done"),
+ ("xAxisEna",    1, 2, "x axis enable flag"),
+ ("xAxisDone",   1, 3, "x axis done"),
+ ("queEmpty",    1, 4, "controller queue empty"),
+ ("ctlIdle",     1, 5, "controller idle"),
+ ("syncActive",  1, 6, "sync active"),
+
+# ("",  , , ""),
+
+ "run control register",
+ ("run",),
+ ("runEna",      1, 0, "run from controller data"),
+ ("runInit",     1, 1, "initialize controller"),
+ ("readerInit",  1, 2, "initialize reader"),
+
+ # "command register",
+ # ("cmd",),
+ # ("cmdWaitZ",    1, 0, "wait for z done"),
+ # ("cmdWaitX",    1, 1, "wait for x done"),
+
+ "axis control register",
+
+ ("axisCtl",),
+ ("ctlInit",     1, 0, "reset flag"),
+ ("ctlStart",    1, 1, "start"),
+ ("ctlBacklash", 1, 2, "backlash move no pos upd"),
+ ("ctlWaitSync", 1, 3, "wait for sync to start"),
+ ("ctlDir",      1, 4, "direction"),
+ ("ctlDirPos",   1, 4, "move in positive dir"),
+ ("ctlDirNeg",   0, 4, "move in negative dir"),
+ ("ctlSetLoc",   1, 5, "set location"),
+ ("ctlChDirect", 1, 6, "ch input direct"),
+ ("ctlSlave",    1, 7, "slave controlled by other axis"),
+
+ "configuration control register",
+
+ ("cfgCtl",),
+ ("cfgZDir",     1, 0, "z direction inverted"),
+ ("cfgXDir",     1, 1, "x direction inverted"),
+ ("cfgSpDir",    1, 2, "spindle directiion inverted"),
+ ("cfgEncDir",   1, 3, "invert encoder direction"),
+ ("cfgEnaEncDir", 1, 4, "enable encoder direction"),
+ ("cfgGenSync",  1, 5, "no encoder generate sync pulse"),
+ 
+ "clock control register",
+
+ ("clkCtl",),
+ # ("FreqSel",     7, 0, "Frequency select"),
+ ("clkNone",     0, 0, ""),
+ ("clkFreq",     1, 0, ""),
+ ("clkCh",       2, 0, ""),
+ ("clkIntClk",   3, 0, ""),
+ ("clkSlvFreq",  4, 0, ""),
+ ("clkSlvCh"  ,  5, 0, ""),
+ ("clkSpare",    6, 0, ""),
+ ("clkDbgFreq",  7, 0, ""),
+ 
+ ("zFreqSel",    7, 0, "z Frequency select"),
+ ("zClkNone",    0, 0, ""),
+ ("zClkZFreq",   1, 0, ""),
+ ("zClkCh",      2, 0, ""),
+ ("zClkIntClk",  3, 0, ""),
+ ("zClkXFreq",   4, 0, ""),
+ ("zClkXCh",     5, 0, ""),
+ ("zClkSpare",   6, 0, ""),
+ ("zClkDbgFreq", 7, 0, ""),
+
+ ("xFreqSel",    7, 3, "x Frequency select"),
+ ("xClkNone",    0, 0, ""),
+ ("xClkXFreq",   1, 3, ""),
+ ("xClkCh",      2, 3, ""),
+ ("xClkIntClk",  3, 3, ""),
+ ("xClkZFreq",   4, 3, ""),
+ ("xClkZCh",     5, 3, ""),
+ ("xClkSpare",   6, 3, ""),
+ ("xClkDbgFreq", 7, 3, ""),
+ ("clkDbgFreqEna",  1, 6, "enable debug frequency"),
+
+ "sync control register",
+
+ ("synCtl",),
+ ("synPhaseInit",  1, 0, "init phase counter"),
+ ("synEncInit",    1, 1, "init encoder"),
+ ("synEncEna",     1, 2, "enable encoder"),
+
+ "",
+ # ("",),
+ # ("",  , , ""),
+
+ # "",
+ # ("",),
+ # ("",  , , ""),
 )
 
 enumList =\
@@ -986,6 +1255,7 @@ enumList =\
     ("ZWAITBKLS", "wait for backlash move complete"),
     ("ZSTARTMOVE", "start z move"),
     ("ZWAITMOVE", "wait for move complete"),
+    ("ZDELAY", "wait for position to settle"),
     ("ZDONE", "clean up state"),
     "};",
     
@@ -1001,6 +1271,19 @@ enumList =\
     ("XDONE", "clean up state"),
     "};",
     
+    "axis control states",
+    
+    "enum axis_States",
+    "{",
+    ("AXIS_IDLE", "idle"),
+    ("AXIS_WAIT_BACKLASH", "wait for backlash move complete"),
+    ("AXIS_START_MOVE", "start axis move"),
+    ("AXIS_WAIT_MOVE", "wait for move complete"),
+    ("AXIS_DELAY", "wait for position to settle"),
+    ("AXIS_DONE", "clean up state"),
+    ("AXIS_STATES", "number of states"),
+    "};",
+    
     "move control states",
     
     "enum m_States",
@@ -1009,10 +1292,10 @@ enumList =\
     ("M_WAIT_Z", "wait for z to complete"),
     ("M_WAIT_X", "wait for x to complete"),
     ("M_WAIT_SPINDLE", "wait for spindle start"),
+    ("M_START_SYNC", "start sync"),
     ("M_WAIT_SYNC_READY", "wait for sync"),
     ("M_WAIT_SYNC_DONE", "wait for sync done"),
     ("M_WAIT_MEASURE_DONE", "wait for measurment done"),
-    ("M_START_SYNC", "start sync"),
     ("M_WAIT_PROBE", "wait for probe to complete"),
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),
@@ -1144,6 +1427,7 @@ enumList =\
       ("SEL_TU_ENC",   "Encoder"),
       ("SEL_TU_ISYN",  "Int Syn"),
       ("SEL_TU_ESYN",  "Ext Syn"),
+      ("SEL_TU_SYN",   "Sync"),
     "};",
 
     "threading sync selector",
@@ -1156,6 +1440,7 @@ enumList =\
       ("SEL_TH_ISYN_RENC", "Int Syn, Runout Enc"),
       ("SEL_TH_ESYN_RENC", "Ext Syn, Runout Enc"),
       ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),
+      ("SEL_TH_SYN",       "Syn, Runout Syn"),
     "};",
 )
     
@@ -1171,16 +1456,45 @@ xilinxEncList = \
 if __name__ == '__main__':
     import os
     from setup import Setup
+    from sys import stderr, stdout
+    from platform import system
 
     # print os.path.realpath(__file__)
     # print os.getcwd()
 
-    path = os.path.dirname(os.path.realpath(__file__))
+    R_PI = False
+    WINDOWS = system() == 'Windows'
+    if WINDOWS:
+        from pywinusb.hid import find_all_hid_devices
+        # from comm import Comm, CommTimeout
+        from commPi import Comm, CommTimeout
+        R_PI = True
+    else:
+        if not os.uname().machine.startswith('arm'):
+            from comm import Comm, CommTimeout
+        else:
+            from commPi import Comm, CommTimeout
+            R_PI = True
 
     fData = True
-    cLoc = path + '/../LatheCPP/include/'
-    xLoc = path + '/../../Xilinx/LatheCtl/'
-    syncLoc = path + '/../SyncCPP/include/'
+    if WINDOWS:
+        path = os.path.dirname(os.path.realpath(__file__))
+
+        cLoc = path + '/../LatheCPP/include/'
+        syncLoc = path + '/../SyncCPP/include/'
+
+        xLoc = path + '/../../Xilinx/LatheCtl/'
+        fEncLoc = path + '/../../Altera/Encoder/VHDL/'
+        fLatheLoc = path + '/../../Altera/LatheNew/VHDL/'
+    else:
+        path = os.path.dirname(os.path.realpath(__file__))
+
+        cLoc = path + '/../LatheCPP/include/'
+        syncLoc = path + '/../SyncCPP/include/'
+
+        xLoc = path + '/../Xilinx/LatheCtl/'
+        fEncLoc = path + '/../Altera/Encoder/VHDL/'
+        fLatheLoc = path + '/../Altera/LatheNew/VHDL/'
 
     print("creating interface files")
     setup = Setup()
@@ -1193,18 +1507,33 @@ if __name__ == '__main__':
     setup.createParameters(syncParmList, syncLoc, fData, 'syncParmDef')
     setup.createEnums(enumList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
-    setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
-    setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
 
+    setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
+    setup.createFpgaBits(xilinxBitList, cLoc, xLoc, fData)
+
+    setup.createFpgaReg(fpgaEncList, cLoc, fEncLoc, fData, \
+                          pName="eRegDef", cName="fpgaEnc")
+    setup.createFpgaBits(fpgaEncBitList, cLoc, fEncLoc, fData, \
+                           pName="fpgaEnc", cName="fpgaEnc", \
+                           package="FpgaEncBits", xName="FpgaEnc")
+
+    setup.createFpgaReg(fpgaLatheList, cLoc, fLatheLoc, fData, \
+                          pName="lRegDef", cName="fpgaLatheReg")
+    setup.createFpgaBits(fpgaLatheBitList, cLoc, fLatheLoc, fData, \
+                           pName="fpgaLathe", cName="fpgaLatheBits", \
+                           package="FpgaLatheBits", xName="FpgaLathe")
+    stdout.flush()
+    stderr.flush()
+    
     # xLoc = path + '/../../Xilinx/Spartan6LedTest/'
 
-    # setup.createXilinxReg(xilinxEncList, cLoc, xLoc, fData, \
+    # setup.createFpgaReg(xilinxEncList, cLoc, xLoc, fData, \
     #                       pName="xEncRegDef", \
     #                       table="encRegTable", \
     #                       cName="Enc", \
     #                       xName="encRegDef" )
     
-    # setup.createXilinxBits(xilinxEncBitList, cLoc, xLoc, fData, \
+    # setup.createFpgaBits(xilinxEncBitList, cLoc, xLoc, fData, \
     #                        pName="xEncBitDef", \
     #                        xName="xEnc", \
     #                        package="xEncBits", \

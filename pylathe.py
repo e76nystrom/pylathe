@@ -18,6 +18,9 @@ from queue import Empty, Queue
 from sys import stderr, stdout
 from threading import Event, Lock, Thread
 from time import localtime, sleep, strftime, time
+# from contextlib import redirect_stderr
+#     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
+#          redirect_stderr(stderr):
 
 import serial
 import wx
@@ -32,23 +35,39 @@ import parmDef as pm
 import stringDef as st
 import syncCmdDef as sc
 import syncParmDef as sp
-from comm import Comm, CommTimeout
 from configInfo import ConfigInfo, InfoValue
 from sync import Sync
 
+DBG_DIR = os.path.join(os.getcwd(), "dbg")
+DXF_DIR = os.path.join(os.getcwd(), "dxf")
+DBG_LOG = os.path.join(DBG_DIR, "dbgLog.txt")
+
+stdError = stderr
+stderr = open(os.path.join(DBG_DIR, "err.log"), 'w')
+stderr.write("testing\n")
+
+R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices
-
-DBG_DIR = os.path.join(os.getcwd(), "dbg")
-DXF_DIR = os.path.join(os.getcwd(), "dxf")
-DBG_LOG = os.path.join(DBG_DIR, "dbgLot.txt")
+    from comm import Comm, CommTimeout
+    if os.path.isfile("rpi.txt"):
+        from commPi import Comm, CommTimeout
+        R_PI = True
+        print("rpi test mode")
+else:
+    print(os.uname())
+    if not os.uname().machine.startswith('arm'):
+        from comm import Comm, CommTimeout
+    else:
+        from commPi import Comm, CommTimeout
+        R_PI = True
 
 SWIG = False
 HOME_TEST = False
 SETUP = False
 
-XILINX = False
+FPGA = False
 DRO = False
 EXT_DRO = False
 X_DRO_POS = False
@@ -84,7 +103,7 @@ if SETUP:
     setup.createParameters(parmList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
     setup.createEnums(enumList, cLoc, fData)
-    if XILINX:
+    if FPGA:
         xLoc = '../../Xilinx/LatheCtl/'
         from interface import xilinxList, xilinxBitList
         setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
@@ -698,10 +717,13 @@ class DialogActions():
 
 class MoveCommands():
     def __init__(self):
-        self.moveQue = Queue()
+        if not R_PI:
+            self.moveQue = Queue()
+        else:
+            self.moveQue = comm.rpi.moveQue
         self.passNum = 0
         self.send = False
-        self.dbg = False
+        self.dbg = True
         self.zOffset = 0.0
         self.xOffset = 0.0
 
@@ -856,9 +878,9 @@ class MoveCommands():
                 if WINDOWS:
                     fileName = fileName.replace("\\", "/")
                     fileName = fileName.replace("C:", "/cygdrive/c")
-                subprocess.call(["sed", "-i", "-e", \
-                                 "'s/arial/consolas/g'", \
-                                 fileName])
+                    subprocess.call(["sed", "-i", "-e", \
+                                     "'s/arial/consolas/g'", \
+                                     fileName])
             except IOError:
                 print("dxf file save error")
                 # traceback.print_exc()
@@ -923,7 +945,7 @@ class MoveCommands():
             elif passNum & 0x200:
                 print("spring %d" % (passNum & 0xff))
             else:
-                print("pass %d]" % (passNum))
+                print("pass %d" % (passNum))
 
     def quePause(self, val=0):
         self.queMove(en.QUE_PAUSE, val)
@@ -935,7 +957,7 @@ class MoveCommands():
         self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
         self.drawLineZ(zLocation)
         if self.dbg:
-            print("moveZ  %7.4f" % (zLocation))
+            print("moveZ   %7.4f" % (zLocation))
             stdout.flush()
 
     def moveX(self, xLocation, flag=ct.CMD_MAX, backlash=0.0):
@@ -946,7 +968,7 @@ class MoveCommands():
         self.queMoveF(en.MOVE_X, flag, val)
         self.drawLineX(xLocation)
         if self.dbg:
-            print("moveX  %7.4f" % (xLocation))
+            print("moveX   %7.4f" % (xLocation))
             stdout.flush()
 
     def saveZOffset(self):
@@ -982,7 +1004,8 @@ class MoveCommands():
             print("moveXZ %7.4f %7.4f" % (zLocation, xLocation))
 
     def saveTaper(self, taper):
-        taper = "%0.6f" % (taper)
+        if not R_PI:
+            taper = "%0.6f" % (taper)
         self.queMove(en.SAVE_TAPER, taper)
         if self.dbg:
             print("saveTaper %s" % (taper))
@@ -1107,20 +1130,25 @@ def sendSpindleData(send=False, rpm=None):
                 if MOTOR_TEST and SPINDLE_ENCODER:
                     queParm(pm.SP_TEST_ENCODER, \
                             cfg.getBoolInfoData(cf.spTestEncoder))
-            elif XILINX:
+            elif FPGA:
                 queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                queParm(pm.X_FREQUENCY, cfg.getInfoData(cf.cfgXFreq))
-                queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
+                # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                queParm(pm.FREQ_MULT, 8)
                 xilinxTestMode()
                 queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
-                cfgReg = 0
-                if cfg.getBoolInfoData(cf.cfgInvEncDir):
-                    cfgReg |= xb.ENC_POL
-                if cfg.getBoolInfoData(cf.zInvDir):
-                    cfgReg |= xb.ZDIR_POL
-                if cfg.getBoolInfoData(cf.xInvDir):
-                    cfgReg |= xb.XDIR_POL
-                queParm(pm.X_CFG_REG, cfgReg)
+                print(R_PI)
+                if not R_PI:
+                    cfgReg = 0
+                    if cfg.getBoolInfoData(cf.cfgInvEncDir):
+                        cfgReg |= xb.ENC_POL
+                    if cfg.getBoolInfoData(cf.zInvDir):
+                        cfgReg |= xb.ZDIR_POL
+                    if cfg.getBoolInfoData(cf.xInvDir):
+                        cfgReg |= xb.XDIR_POL
+                    queParm(pm.X_CFG_REG, cfgReg)
+                else:
+                    pass
                 comm.sendMulti()
             elif SPINDLE_ENCODER:
                 count = cfg.getIntInfoData(cf.cfgEncoder)
@@ -1173,7 +1201,10 @@ def sendZData(send=False):
             zSyncInt.setLeadscrew(cfg.getInfoData(cf.zPitch))
             zSyncInt.setMotorSteps(motorSteps)
             zSyncInt.setMicroSteps(microSteps)
-            zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            if not FPGA:
+                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            else:
+                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
         if zSyncExt is not None:
             zSyncExt.setLeadscrew(cfg.getInfoData(cf.zPitch))
@@ -1251,7 +1282,10 @@ def sendXData(send=False):
             xSyncInt.setLeadscrew(cfg.getInfoData(cf.xPitch))
             xSyncInt.setMotorSteps(motorSteps)
             xSyncInt.setMicroSteps(microSteps)
-            xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            if not FPGA:
+                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
+            else:
+                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
         if xSyncExt is not None:
             xSyncExt.setLeadscrew(cfg.getInfoData(cf.xPitch))
@@ -1497,11 +1531,10 @@ class Turn(LatheOp, UpdatePass):
 
         val = getFloatVal(tu.zFeed)
         rpm = getIntVal(tu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -1573,7 +1606,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN:
+            if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
                 comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
                 comm.queParm(pm.L_SYNC_OUTPUT, self.output)
                 comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -1846,11 +1879,10 @@ class Face(LatheOp, UpdatePass):
 
         val = getFloatVal(fa.xFeed)
         rpm = getIntVal(fa.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -1899,7 +1931,7 @@ class Face(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.zStart, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -2136,11 +2168,11 @@ class Cutoff(LatheOp):
 
         val = getFloatVal(cu.xFeed)
         rpm = getIntVal(cu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -2174,7 +2206,7 @@ class Cutoff(LatheOp):
         comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
         m = self.m
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -2351,11 +2383,10 @@ class Taper(LatheOp, UpdatePass):
 
         val = getFloatVal(tp.zFeed)
         rpm = getIntVal(tp.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-
-        if TURN_SYNC == en.SEL_TU_ESYN:
+        elif TURN_SYNC == en.SEL_TU_ESYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
 
@@ -2372,7 +2403,7 @@ class Taper(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
@@ -3037,12 +3068,11 @@ class ScrewThread(LatheOp, UpdatePass):
             self.tpi = 1.0 / self.pitch
             metric = True
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
-
-        if (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
+              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
             (self.cycle, self.output, self.preScaler) = \
                 zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
 
@@ -3078,8 +3108,8 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC:
-            comm.queParm(pm.L_SYNC_CYCLE, self.secycle)
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
+            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
         elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
@@ -3120,7 +3150,7 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
-        m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
+        m.zSynSetup(cfg.getFloatInfoData(cf.thThread))
 
         if not self.rightHand:  # left hand threads
             if self.runoutDist == 0.0: # wihout runout
@@ -3990,6 +4020,9 @@ class JogPanel(wx.Panel, FormRoutines):
         stdout.flush()
         e.Skip()
 
+    def postUpdate(self, result):
+        wx.PostEvent(self, UpdateEvent(result))
+        
     def OnUpdate(self, e):
         index = e.data[0]
         if index < len(self.procUpdate):
@@ -4030,7 +4063,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.zPos = \
             self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False, index=cf.jogZPos)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -4038,7 +4071,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.xPos = \
             self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False, index=cf.jogXPos)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -4056,13 +4089,13 @@ class JogPanel(wx.Panel, FormRoutines):
         
         (self.passSize, self.passText) = \
             self.addDialogField(sizerG, "Size", "0.000", txtFont, \
-                                posFont, (120, -1), border=(10,2), \
+                                posFont, (130, -1), border=(10,2), \
                                 edit=False, text=True)
         # x diameter
 
         self.xPosDiam = \
             self.addDialogField(sizerG, "X D", "0.0000", txtFont, \
-                                posFont, (120, -1), border=(10, 2), \
+                                posFont, (130, -1), border=(10, 2), \
                                 edit=False)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -4079,7 +4112,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.zDROPos = \
                 self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                    posFont, (120, -1), border=(10, 2), \
+                                    posFont, (130, -1), border=(10, 2), \
                                     edit=False, index=cf.droZPos)
             self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -4087,7 +4120,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.xDROPos = \
                 self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                    posFont, (120, -1), border=(10, 2), \
+                                    posFont, (130, -1), border=(10, 2), \
                                     edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -4752,7 +4785,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xPos.SetValue("%0.4f" % (xLocation))
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
             if not self.surfaceSpeed.value:
-                self.rpm.SetValue(rpm)
+                self.rpm.SetValue(str(rpm))
             else:
                 fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
                 self.rpm.SetValue("%1.0f" % (fpm))
@@ -5610,9 +5643,58 @@ class UpdateThread(Thread):
         self.dbg = None
         self.baseTime = None
         self.mIdle = False
+        dbgSetup = (\
+                    (en.D_PASS, self.dbgPass), \
+                    (en.D_DONE, self.dbgDone), \
+                    (en.D_TEST, self.dbgTest), \
+
+                    (en.D_XMOV, self.dbgXMov), \
+                    (en.D_XLOC, self.dbgXLoc), \
+                    (en.D_XDST, self.dbgXDst), \
+                    (en.D_XSTP, self.dbgXStp),
+                    (en.D_XST,  self.dbgXState), \
+                    (en.D_XBSTP, self.dbgXBSteps), \
+                    (en.D_XDRO, self.dbgXDro), \
+                    (en.D_XPDRO, self.dbgXPDro), \
+                    (en.D_XEXP, self.dbgXExp), \
+                    (en.D_XWT,  self.dbgXWait), \
+                    (en.D_XDN,  self.dbgXDone), \
+                    (en.D_XEST, self.dbgXEncStart), \
+                    (en.D_XEDN, self.dbgXEncDone), \
+                    (en.D_XX, self.dbgXX), \
+                    (en.D_XY, self.dbgXY), \
+
+                    (en.D_ZMOV, self.dbgZMov), \
+                    (en.D_ZLOC, self.dbgZLoc), \
+                    (en.D_ZDST, self.dbgZDst), \
+                    (en.D_ZSTP, self.dbgZStp),
+                    (en.D_ZST, self.dbgZState), \
+                    (en.D_ZBSTP, self.dbgZBSteps), \
+                    (en.D_ZDRO, self.dbgZDro), \
+                    (en.D_ZPDRO, self.dbgZPDro), \
+                    (en.D_ZEXP, self.dbgZExp), \
+                    (en.D_ZWT, self.dbgZWait), \
+                    (en.D_ZDN, self.dbgZDone), \
+                    (en.D_ZEST, self.dbgZEncStart), \
+                    (en.D_ZEDN, self.dbgZEncDone), \
+                    (en.D_ZX, self.dbgZX), \
+                    (en.D_ZY, self.dbgZY), \
+
+                    (en.D_HST, self.dbgHome), \
+
+                    (en.D_MSTA, self.dbgMoveState), \
+                    (en.D_MCMD, self.dbgMoveCmd), \
+        )
+        self.dbgTbl = dbgTbl = [None for i in range(len(dbgSetup))]
+        for (index, action) in dbgSetup:
+            dbgTbl[index] = action
+        for i, val in enumerate(dbgTbl):
+            if val is None:
+                print("dbgTbl action for %s missing" % (en.dMessageList[i]))
+                stdout.flush()
 
     def openDebug(self, file="dbg.txt"):
-        self.dbg = open(os.path.join(DBG_DIR, file, "wb"))
+        self.dbg = open(os.path.join(DBG_DIR, file), "wb")
         t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
         self.dbg.write(t.encode())
         self.dbg.flush()
@@ -5681,55 +5763,6 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
-        dbgSetup = (\
-                    (en.D_PASS, self.dbgPass), \
-                    (en.D_DONE, self.dbgDone), \
-                    (en.D_TEST, self.dbgTest), \
-
-                    (en.D_XMOV, self.dbgXMov), \
-                    (en.D_XLOC, self.dbgXLoc), \
-                    (en.D_XDST, self.dbgXDst), \
-                    (en.D_XSTP, self.dbgXStp),
-                    (en.D_XST,  self.dbgXState), \
-                    (en.D_XBSTP, self.dbgXBSteps), \
-                    (en.D_XDRO, self.dbgXDro), \
-                    (en.D_XPDRO, self.dbgXPDro), \
-                    (en.D_XEXP, self.dbgXExp), \
-                    (en.D_XWT,  self.dbgXWait), \
-                    (en.D_XDN,  self.dbgXDone), \
-                    (en.D_XEST, self.dbgXEncStart), \
-                    (en.D_XEDN, self.dbgXEncDone), \
-                    (en.D_XX, self.dbgXX), \
-                    (en.D_XY, self.dbgXY), \
-
-                    (en.D_ZMOV, self.dbgZMov), \
-                    (en.D_ZLOC, self.dbgZLoc), \
-                    (en.D_ZDST, self.dbgZDst), \
-                    (en.D_ZSTP, self.dbgZStp),
-                    (en.D_ZST, self.dbgZState), \
-                    (en.D_ZBSTP, self.dbgZBSteps), \
-                    (en.D_ZDRO, self.dbgZDro), \
-                    (en.D_ZPDRO, self.dbgZPDro), \
-                    (en.D_ZEXP, self.dbgZExp), \
-                    (en.D_ZWT, self.dbgZWait), \
-                    (en.D_ZDN, self.dbgZDone), \
-                    (en.D_ZEST, self.dbgZEncStart), \
-                    (en.D_ZEDN, self.dbgZEncDone), \
-                    (en.D_ZX, self.dbgZX), \
-                    (en.D_ZY, self.dbgZY), \
-
-                    (en.D_HST, self.dbgHome), \
-
-                    (en.D_MSTA, self.dbgMoveState), \
-                    (en.D_MCMD, self.dbgMoveCmd), \
-        )
-        dbgTbl = [None for i in range(len(dbgSetup))]
-        for (index, action) in dbgSetup:
-            dbgTbl[index] = action
-        for i, val in enumerate(dbgTbl):
-            if val is None:
-                print("dbgTbl action for %s missing" % (en.dMessageList[i]))
-                stdout.flush()
         i = 0
         op = None
         scanMax = len(self.parmList)
@@ -5789,63 +5822,9 @@ class UpdateThread(Thread):
 
             # get debug data
 
-            try:
-                result = comm.getString(cm.READDBG, 10)
-                if not self.threadRun:
-                    break
-                if result is None:
-                    continue
-                if not REM_DBG:
-                    continue
-                tmp = result.split()
-                rLen = len(tmp)
-                # if rLen > 0:
-                #     print("%2d (%s)" % (rLen, result))
-                index = 2
-                t = (("%8.3f " % (time() - self.baseTime))
-                     if self.baseTime is not None else "   0.000 ")
-                while index <= rLen:
-                    (cmd, val) = tmp[index-2:index]
-                    index += 2
-                    try:
-                        cmd = int(cmd, 16)
-                        val = int(val, 16)
-                        try:
-                            action = dbgTbl[cmd]
-                            output = action(val)
-                            if output is not None:
-                                if self.dbg is None:
-                                    print(t + output)
-                                    stdout.flush()
-                                else:
-                                    self.dbg.write((t + output + "\n").encode())
-                                    self.dbg.flush()
-                            # if cmd == en.D_DONE:
-                            #     if val == 0:
-                            #         if not jogPanel.currentPanel.control.add:
-                            #             self.baseTime = time()
-                            #     if val == 1:
-                            #         self.baseTime = None
-                            #         if self.dbg is not None:
-                            #             self.dbg.close()
-                            #             self.dbg = None
-                        except IndexError:
-                            print("index error %s" % result)
-                            stdout.flush()
-                        except TypeError:
-                            print("type error %s %s" % \
-                                  (en.dMessageList[cmd], result))
-                            stdout.flush()
-                    except ValueError:
-                        print("value error cmd %s val %s" % (cmd, val))
-                        stdout.flush()
-            except CommTimeout:
-                print("getString CommTimeout")
-                stdout.flush()
-            except serial.SerialException:
-                print("getString SerialException")
-                stdout.flush()
+            if self.procDebug():
                 break
+            
         print("UpdateThread done")
         stdout.flush()
         self.threadDone = True
@@ -5854,6 +5833,86 @@ class UpdateThread(Thread):
         self.closeDbg()
         self.threadRun = False
         
+    def procDebug(self):
+        try:
+            result = comm.getString(cm.READDBG, 10)
+            if not self.threadRun:
+                return(True)
+            if result is None:
+                return(False)
+            if not REM_DBG:
+                return(False)
+            tmp = result.split()
+            rLen = len(tmp)
+            # if rLen > 0:
+            #     print("%2d (%s)" % (rLen, result))
+            index = 2
+            t = (("%8.3f " % (time() - self.baseTime))
+                 if self.baseTime is not None else "   0.000 ")
+            while index <= rLen:
+                (cmd, val) = tmp[index-2:index]
+                index += 2
+                try:
+                    cmd = int(cmd, 16)
+                    val = int(val, 16)
+                    try:
+                        action = self.dbgTbl[cmd]
+                        output = action(val)
+                        if output is not None:
+                            if self.dbg is None:
+                                print(t + output)
+                                stdout.flush()
+                            else:
+                                self.dbg.write((t + output + "\n").encode())
+                                self.dbg.flush()
+                        # if cmd == en.D_DONE:
+                        #     if val == 0:
+                        #         if not jogPanel.currentPanel.control.add:
+                        #             self.baseTime = time()
+                        #     if val == 1:
+                        #         self.baseTime = None
+                        #         if self.dbg is not None:
+                        #             self.dbg.close()
+                        #             self.dbg = None
+                    except IndexError:
+                        print("index error %s" % result)
+                        stdout.flush()
+                    except TypeError:
+                        print("type error %s %s" % \
+                              (en.dMessageList[cmd], result))
+                        stdout.flush()
+                except ValueError:
+                    print("value error cmd %s val %s" % (cmd, val))
+                    stdout.flush()
+        except CommTimeout:
+            print("getString CommTimeout")
+            stdout.flush()
+        except serial.SerialException:
+            print("getString SerialException")
+            stdout.flush()
+            return(True)
+
+    def dbgDispatch(self, t0, cmd, val):
+        try:
+            action = self.dbgTbl[cmd]
+            output = action(val)
+            if output is not None:
+                t = (("%8.3f " % (t0 - self.baseTime))
+                     if self.baseTime is not None else "   0.000 ")
+                if self.dbg is None:
+                    print(t + output)
+                    stdout.flush()
+                else:
+                    self.dbg.write((t + output + "\n").encode())
+                    self.dbg.flush()
+        except IndexError:
+            print("index error %d" % cmd)
+            stdout.flush()
+        except TypeError:
+            print("type error %s %s" % \
+                  (en.dMessageList[cmd], str(val)))
+            stdout.flush()
+
     def dbgPass(self, val):
         # tmp = val >> 8
         # if tmp == 0:
@@ -6146,12 +6205,16 @@ class MainFrame(wx.Frame):
         
         self.initDRO()
                                                                               
-        if XILINX:
+        if FPGA:
             comm.xRegs = xr.xRegTable
 
         self.initDevice()
 
-        self.updateThread.start()
+        if not R_PI:
+            updateThread.start()
+        else:
+            comm.rpi.setPostUpdate(self.jogPanel.postUpdate)
+            comm.rpi.setDbgDispatch(updateThread.dbgDispatch)
         self.delay = Delay(self)
 
     def onClose(self, e):
@@ -6167,6 +6230,8 @@ class MainFrame(wx.Frame):
         self.updateThread.close()
         buttonRepeat.close()
         jogShuttle.close()
+        if R_PI:
+            comm.rpi.close()
         if keypad is not None:
             keypad.close()
         self.Destroy()
@@ -6420,7 +6485,7 @@ class MainFrame(wx.Frame):
 
         if comm.ser is not None:
             try:
-                comm.queParm(pm.CFG_XILINX, cfg.getBoolInfoData(cf.cfgXilinx))
+                comm.queParm(pm.CFG_FPGA, cfg.getBoolInfoData(cf.cfgFpga))
                 # comm.queParm(pm.CFG_FCY, cfg.getInfoData(cf.cfgFcy))
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
@@ -6430,6 +6495,8 @@ class MainFrame(wx.Frame):
                              cfg.getBoolInfoData(cf.spVarSpeed))
                 comm.command(cm.CMD_SETUP)
                 
+                sendSpindleData()
+
                 sendZData()
                 if EXT_DRO:
                     self.jogPanel.setZFromExt()
@@ -6489,8 +6556,6 @@ class MainFrame(wx.Frame):
                                  ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
                 comm.sendMulti()
 
-                sendSpindleData()
-
             except CommTimeout:
                 commTimeout()
         else:
@@ -6536,7 +6601,7 @@ class MainFrame(wx.Frame):
             self.cfgFile = "config.txt"
 
     def initialConfig(self):
-        global cfg, comm, XILINX, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
+        global cfg, comm, FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
             TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS
@@ -6545,7 +6610,7 @@ class MainFrame(wx.Frame):
         cfg.clrInfo(len(cf.config))
         cfg.readInfo(self.cfgFile, cf.config)
 
-        XILINX = cfg.getInitialBoolInfo(cf.cfgXilinx)
+        FPGA = cfg.getInitialBoolInfo(cf.cfgFpga)
         DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
         REM_DBG = cfg.getInitialBoolInfo(cf.cfgRemDbg)
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
@@ -6583,10 +6648,14 @@ class MainFrame(wx.Frame):
 
         cfg.clrInfo(len(cf.config))
 
-        if XILINX:
+        if FPGA:
             global xb, xr
-            import xBitDef as xb
-            import xRegDef as xr
+            if not R_PI:
+                import xBitDef as xb
+                import xRegDef as xr
+            else:
+                import fpgaLathe as xb
+                import lRegDef as xr
 
         if EXT_DRO:
             global dro, eDro
@@ -6607,27 +6676,30 @@ class MainFrame(wx.Frame):
 
         syncDbg = True
 
-        if (TURN_SYNC == en.SEL_TU_ISYN or \
-            TURN_SYNC == en.SEL_TU_ESYN or \
-            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-            global zSyncExt, zSyncInt
-            zSyncInt = Sync(dbg=syncDbg)
-            zSyncExt = Sync(dbg=syncDbg)
-                  
-        if (TURN_SYNC == en.SEL_TU_ISYN or \
-            TURN_SYNC == en.SEL_TU_ESYN or \
-            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-            global xSyncExt, xSyncInt
-            xSyncExt = Sync(dbg=syncDbg)
-            xSyncInt = Sync(dbg=syncDbg)
+        global zSyncInt, zSyncExt, xSyncInt, xSyncExt
+        if not FPGA:
+            if (TURN_SYNC == en.SEL_TU_ISYN or \
+                TURN_SYNC == en.SEL_TU_ESYN or \
+                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+                zSyncInt = Sync(dbg=syncDbg)
+                zSyncExt = Sync(dbg=syncDbg)
+
+            if (TURN_SYNC == en.SEL_TU_ISYN or \
+                TURN_SYNC == en.SEL_TU_ESYN or \
+                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+                xSyncExt = Sync(dbg=syncDbg)
+                xSyncInt = Sync(dbg=syncDbg)
+        else:
+            zSyncInt = Sync(dbg=syncDbg, fpga=True)
+            xSyncInt = Sync(dbg=syncDbg, fpga=True)
 
         comm = Comm()
         comm.SWIG = SWIG
 
-        if XILINX:
+        if FPGA:
             comm.enableXilinx()
 
     def OnResize(self, e):
@@ -6953,10 +7025,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bSpindle Encoder", cf.cfgSpEncoder, None), \
         )
         if SPINDLE_ENCODER:
-            self.fields += ( \
-                ("Encoder", cf.cfgEncoder, 'd'), \
-                ("bSync Board", cf.cfgSpSyncBoard, None), \
-            )
+            self.fields += (("Encoder", cf.cfgEncoder, 'd'),)
+            if not FPGA:
+                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None),)
         self.fields += ( \
             ("cTurn Sync", cf.cfgTurnSync, 'c', self.turnSync), \
             ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync), \
@@ -7029,8 +7100,11 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             indexList = (en.SEL_TU_STEP,)
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TU_ENC,)
-            if SPINDLE_SYNC_BOARD:
-                indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+            if not FPGA:
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+            else:
+                indexList += (en.SEL_TU_SYN,)
         else:
             indexList = (en.SEL_TU_SPEED,)
 
@@ -7044,10 +7118,14 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             indexList = (en.SEL_TH_STEP,)
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
-            if SPINDLE_SYNC_BOARD:
-                indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+            if not FPGA:
+                indexList += (en.SEL_TH_ISYN_RENC,)
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+            else:
+                indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
         else:
-            indexList = (en.SEL_TH_NO_ENC,)
+            indexList += (en.SEL_TH_NO_ENC,)
             
         choiceList = []
         for i in indexList:
@@ -7135,7 +7213,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
-            ("bHW Control", cf.cfgXilinx, None), \
+            ("bFPGA Control", cf.cfgFpga, None), \
             ("bMPG", cf.cfgMPG, None), \
             ("bDRO", cf.cfgDRO, None), \
             ("bExternal DRO", cf.cfgExtDro, None), \
@@ -7152,10 +7230,10 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
         )
-        if XILINX:
+        if FPGA:
+                # ("Encoder", cf.cfgEncoder, 'd'), \
             self.fields += (
-                ("Encoder", cf.cfgEncoder, 'd'), \
-                ("Xilinx Freq", cf.cfgXFreq, 'd'), \
+                ("wFPGA Freq", cf.cfgFpgaFreq, 'd'), \
                 ("Freq Mult", cf.cfgFreqMult, 'd'), \
                 ("bTest Mode", cf.cfgTestMode, None), \
                 ("Test RPM", cf.cfgTestRPM, 'd'), \

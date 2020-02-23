@@ -1,3 +1,4 @@
+import os
 from sys import stdout
 
 configTable = None
@@ -162,7 +163,10 @@ class Setup():
             fWrite(f, "\n# command table\n\n")
             fWrite(f, "cmdTable = ( \\\n")
             for index, (regName, action) in enumerate(cmdTable):
-                tmp = "    (\"%s\", \"%s\")," % (regName, action)
+                if action is not None:
+                    tmp = "    (\"%s\", \"%s\")," % (regName, action)
+                else:
+                    tmp = "    (\"%s\", %s)," % (regName, action)
                 fWrite(f, "%s# %3d\n" % (tmp.ljust(40), index))
             fWrite(f, "    )\n")
             # self.listImports(file, imports)
@@ -423,7 +427,7 @@ class Setup():
         self.enumImports = imports
         self.importList += imports
 
-    def createXilinxReg(self, xilinxList, cLoc, xLoc, fData=False, \
+    def createFpgaReg(self, fpgaList, cLoc, xLoc, fData=False, \
                         pName="xRegDef", table="xRegTable", cName="xilinx", \
                         xName="RegDef"):
         global xRegTable
@@ -431,10 +435,12 @@ class Setup():
         imports = []
         imports.append(table)
         if fData:
-            cFile = open(cLoc + cName + 'reg.h', 'wb')
+            path = os.path.join(cLoc, cName + 'Reg.h')
+            cFile = open(path, 'wb')
             fWrite(cFile, "enum " + cName.upper() + "\n{\n");
             try:
-                xFile = open(xLoc + xName + '.vhd', 'wb')
+                xPath = os.path.join(xLoc, xName + '.vhd')
+                xFile = open(xPath , 'wb')
             except (OSError, IOError) as e:
                 print("unable to open %s" % (xLoc,))
                 xFile = None
@@ -454,19 +460,35 @@ class Setup():
         f = None
         if self.file:
             f = open(pName + '.py', 'wb')
-            fWrite(f, "\n# xilinx registers\n\n")
+            fWrite(f, "\n# fpga registers\n\n")
         index = 0
-        for i in range(len(xilinxList)):
-            data = xilinxList[i]
+        table = None
+        regTables = []
+        for i in range(len(fpgaList)):
+            data = fpgaList[i]
+            # print(data)
             # if not isinstance(data, basestring):
             if not isinstance(data, str):
-                (regName, regComment) = data
+                if len(data) == 1:
+                    (tblName,) = data
+                    cmd = "%s = []" % (tblName)
+                    exec(cmd)
+                    table = eval(tblName)
+                    regTables.append((tblName, table))
+                    continue
+                if len(data) == 2:
+                    (regName, regComment) = data
+                    size = 1
+                else:
+                    (regName, base, size, byteLen, regComment) = data
+                    if base is not None:
+                        index = 0
                 if fData:
                     tmp = " %s, " % (regName)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment));
                     if xFile:
-                        fWrite(xFile, ('constant %-12s : ' \
+                        fWrite(xFile, ('constant %-18s : ' \
                                      'unsigned(opb-1 downto 0) ' \
                                      ':= x"%02x"; -- %s\n') %
                                     (regName, index, regComment))
@@ -482,7 +504,24 @@ class Setup():
                 if f is not None:
                     tmp = "%s = %2d" % (regName.ljust(16), index)
                     fWrite(f, "%s# %s\n" % (tmp.ljust(32), regComment))
-                index += 1
+                if size is None:
+                    cmd = "%s = %d" % (regName, index)
+                    exec(cmd)
+                    table = None
+                else:
+                    stdout.flush()
+                    if isinstance(size, str):
+                        incTable = eval(size)
+                        total = 0
+                        for (tRegName, tIndex, tSize, tByteLen) in incTable:
+                            table.append((regName + ", " + tRegName,
+                                          index + tIndex, tSize, tByteLen))
+                            total += 1
+                        index += total
+                    else:
+                        if table is not None:
+                            table.append((regName, index, size, byteLen))
+                        index += size
             else:
                 if fData:
                     if (len(data) > 0):
@@ -497,15 +536,58 @@ class Setup():
                         # fWrite(jFile, "\n");
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
+
+        if True and len(regTables) != 0:
+            for (name, table) in regTables:
+                print(name)
+                for (tRegName, tIndex, tSize, tByteLen) in table:
+                    print("%-48s %2d %2d %2d" % (
+                        tRegName, tIndex, tSize, tByteLen))
+                print()
+            (name, table) = regTables[-1]
+            opLenTable = []
+            for (tRegName, tIndex, tSize, tByteLen) in table:
+                opLenTable.append(tByteLen)
+            print(xLoc, xName)
+            self.hexFile(os.path.join(xLoc, xName + ".hex"), opLenTable)
+
         if f is not None:
             fWrite(f, "\n# xilinx table\n\n")
-            fWrite(f, "xRegTable = ( \\\n")
-            for i, regName in enumerate(xRegTable):
-                tmp = "    \"%s\"," % (regName)
-                fWrite(f, "%s# %3d\n" % (tmp.ljust(40), i))
-            fWrite(f, "    )\n")
-            # self.listImports(file, imports)
+
+            if len(regTables) == 0:
+                fWrite(f, "xRegTable = ( \\\n")
+                for i, regName in enumerate(xRegTable):
+                    tmp = "    \"%s\"," % (regName)
+                    fWrite(f, "%s# %3d\n" % (tmp.ljust(40), i))
+                fWrite(f, "    )\n")
+            else:
+                fWrite(f, "xRegTable = ( \\\n")
+                (name, table) = regTables[-1]
+                for (tRegName, tIndex, tSize, tByteLen) in table:
+                    regs = tRegName.split(',')
+                    if len(regs) == 1:
+                        tmp = "    \"%s\"," % (regs[0])
+                    else:
+                        tmp = "    \"%s-%s\"," % (regs[0].strip(), \
+                                                  regs[-1].strip())
+                    fWrite(f, "%s# %3d\n" % (tmp.ljust(40), tIndex))
+                fWrite(f, "    )\n")
+
+                fWrite(f, "\nfpgaSizeTable = ( \\\n")
+                (name, table) = regTables[-1]
+                for (tRegName, tIndex, tSize, tByteLen) in table:
+                    tmp = "    %d," % (tByteLen)
+                    fWrite(f, "%s# %3d %-s\n" % \
+                           (tmp.ljust(20), tIndex, tRegName))
+                fWrite(f, "    )\n")
+
+            fWrite(f, "\nimportList = ( \\\n")
+            for val in imports:
+                fWrite(f, " %s, \\\n" % val)
+            fWrite(f, ")\n")
+
             f.close()
+
         if fData:
             fWrite(cFile, "};\n")
             cFile.close()
@@ -514,6 +596,7 @@ class Setup():
                 fWrite(xFile, "package body RegDef is\n\n")
                 fWrite(xFile, "end RegDef;\n")
                 xFile.close()
+            # print("%s closed" % (xPath))
             # fWrite(jFile, "};\n")
             # jFile.close()
             # j1File.write(" };\n\n};\n")
@@ -526,21 +609,50 @@ class Setup():
         self.xRegTable = xRegTable
         return(xRegTable)
 
-    def createXilinxBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
-                         pName="xBitDef", xName="xilinx", \
-                         package="CtlBits", cName="xilinx"):
+    def hexRecord(self, address, record):
+        recType = 0
+        outRec = ":%02x%04x%02x" % (len(record), address, recType)
+        chkSum = len(record)
+        chkSum += (address >> 8) & 0xff
+        chkSum += address * 0xff
+        for val in record:
+            outRec += "%02x" % val
+            chkSum += val
+        outRec += "%02x" % ((~chkSum + 1) & 0xff)
+        return outRec
+
+    def hexFile(self, name, data):
+        f = open(name, "wb")
+        record = []
+        address = 0
+        for i in range(len(data)):
+            record.append(int(data[i]))
+            if len(record) == 16:
+                outRec = self.hexRecord(address, record)
+                fWrite(f, outRec + '\n')
+                address += len(record)
+                record = []
+        if len(record) != 0:
+            outRec = self.hexRecord(address, record)
+            fWrite(f, outRec + '\n')
+
+    def createFpgaBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
+                       pName="xBitDef", xName="xilinx", \
+                       package="CtlBits", cName="xilinx"):
         imports = []
         if fData:
-            cFile = open(cLoc + cName + 'bits.h', 'wb')
+            path = os.path.join(cLoc, cName + 'Bits.h')
+            cFile = open(path, 'wb')
             try:
-                xFile = open(xLoc + xName + 'Bits.vhd', 'wb')
+                path = os.path.join(xLoc, xName + 'Bits.vhd')
+                xFile = open(path , 'wb')
             except IOError as e:
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
-                fWrite(xFile, "library IEEE;\n")
-                fWrite(xFile, "use IEEE.STD_LOGIC_1164.all;\n")
-                fWrite(xFile, "use IEEE.NUMERIC_STD.ALL;\n\n")
+                fWrite(xFile, "library ieee;\n"
+                "use ieee.std_logic_1164.all;\n"
+                "use ieee.numeric_std.all;\n\n")
                 fWrite(xFile, "package " + package + " is\n")
             # jFile = open(jLoc + 'XilinxBits.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n");
@@ -559,8 +671,14 @@ class Setup():
                     xLst = []
                     regName = data[0]
                     maxShift = 0
+                    rec = [regName,]
                 else:
-                    (var, bit, shift, comment) = data
+                    if len(data) == 4:
+                        (var, bit, shift, comment) = data
+                        dType = "sl"
+                    elif len(data) == 5:
+                        (var, bit, shift, dType, comment) = data
+                    rec.append((var, bit, shift, dType, comment))
                     cVar = var.upper()
                     xVar = var.replace("_", "")
 
@@ -579,6 +697,11 @@ class Setup():
                                          "-- x%02x %s\n") %
                                         (xVar, regName, shift, \
                                          1 << shift, comment))
+                            # xLst.append((" constant c_%-10s : " \
+                            #              "integer := %2d; " \
+                            #              "-- x%02x %s\n") %
+                            #             (xVar, shift, \
+                            #              1 << shift, comment))
                         # tmp =  (" public static final int %-10s = " \
                         #         "(%s << %s);" % (cVar, bit, shift))
                         # fWrite(jFile, "%s /* %s */\n" % 
@@ -586,26 +709,26 @@ class Setup():
                     if (shift > maxShift):
                         maxShift = shift
                     if cVar in globals():
-                        print("createXilinxBits %s already defined" % cVar)
+                        print("createFpgaBits %s already defined" % cVar)
                     else:
                         globals()[cVar] = bit << shift
-                        imports.append(cVar)
+                        imports.append(var)
                         if f is not None:
-                            tmp = "%s = 0x%02x" % (cVar.ljust(12), bit << shift)
+                            tmp = "%s = 0x%02x" % (var.ljust(12), bit << shift)
                             fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                     lastShift = shift
             else:
                 if fData:
                     if (len(regName) > 0):
-                        var = "%s_size" % (regName)
+                        var = "%sSize" % (regName)
                         tmp =  "#define %-12s %d" % (var, maxShift + 1)
                         fWrite(cFile, "%s\n" % (tmp))
                         if xFile:
-                            fWrite(xFile, " constant %s_size : " \
+                            fWrite(xFile, " constant %sSize : " \
                                         "integer := %d;\n" % \
                                         (regName, maxShift + 1))
                             fWrite(xFile, " signal %sReg : "\
-                                        "unsigned(%s_size-1 downto 0);\n" %
+                                        "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
                         for i in range(len(xLst)):
                             if xFile:
@@ -625,9 +748,9 @@ class Setup():
                         # fWrite(jFile, "\n// %s\n\n" % (data))
                 else:
                     if (len(regName) > 0):
-                        var = "%s_size" % (regName)
+                        var = "%sSize" % (regName)
                         if var in globals():
-                            print("createXilinxBits %s already defined" % var)
+                            print("createFpgaBits %s already defined" % var)
                         else:
                             globals()[var] = maxShift + 1
                             imports.append(var)
@@ -635,13 +758,18 @@ class Setup():
                     fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
             # self.listImports(file, imports)
+            fWrite(f, "\nimportList = ( \\\n")
+            for val in imports:
+                fWrite(f, " %s, \\\n" % val)
+            fWrite(f, ")\n")
             f.close()
+            # print("%s closed" % (pName))
         if fData:
             cFile.close()
             if xFile:
-                fWrite(xFile, "\nend CtlBits;\n\n")
-                fWrite(xFile, "package body CtlBits is\n\n")
-                fWrite(xFile, "end CtlBits;\n")
+                fWrite(xFile, "\nend %s;\n\n" % (package))
+                fWrite(xFile, "package body %s is\n\n" % (package))
+                fWrite(xFile, "end %s;\n" % (package))
                 xFile.close()
                 # fWrite(jFile, "};\n")
                 # jFile.close()

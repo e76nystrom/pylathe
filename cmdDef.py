@@ -78,22 +78,22 @@ ENCSTOP              =  43
 # command table
 
 cmdTable = ( \
-    ("ZMOVEABS", "None"),               #   0
-    ("ZMOVEREL", "None"),               #   1
-    ("ZJMOV", "None"),                  #   2
-    ("ZJSPEED", "None"),                #   3
-    ("ZSTOP", "None"),                  #   4
-    ("ZSETLOC", "None"),                #   5
-    ("XMOVEABS", "None"),               #   6
-    ("XMOVEREL", "None"),               #   7
-    ("XJMOV", "None"),                  #   8
-    ("XJSPEED", "None"),                #   9
-    ("XSTOP", "None"),                  #  10
-    ("XSETLOC", "None"),                #  11
-    ("XHOMEAXIS", "None"),              #  12
+    ("ZMOVEABS", "zMoveAbs"),           #   0
+    ("ZMOVEREL", "zMoveRel"),           #   1
+    ("ZJMOV", "zJogMove"),              #   2
+    ("ZJSPEED", "zJogSpeed"),           #   3
+    ("ZSTOP", "zStop"),                 #   4
+    ("ZSETLOC", None),                  #   5
+    ("XMOVEABS", "xMoveAbs"),           #   6
+    ("XMOVEREL", "xMoveRel"),           #   7
+    ("XJMOV", "xJogMove"),              #   8
+    ("XJSPEED", "xJogSpeed"),           #   9
+    ("XSTOP", "xStop"),                 #  10
+    ("XSETLOC", None),                  #  11
+    ("XHOMEAXIS", "xHomeAxis"),         #  12
     ("SPINDLE_START", "spindleStart"),  #  13
-    ("SPINDLE_JOG", "None"),            #  14
-    ("SPINDLE_JOG_SPEED", "None"),      #  15
+    ("SPINDLE_JOG", "spindleJog"),      #  14
+    ("SPINDLE_JOG_SPEED", "spindleJogSpeed"),#  15
     ("SPINDLE_STOP", "spindleStop"),    #  16
     ("CMD_PAUSE", "pauseCmd"),          #  17
     ("CMD_RESUME", "resumeCmd"),        #  18
@@ -104,22 +104,22 @@ cmdTable = ( \
     ("CMD_SPSETUP", "spindleSetup"),    #  23
     ("CMD_SYNCSETUP", "syncSetup"),     #  24
     ("CMD_ZSETUP", "zSetup"),           #  25
-    ("CMD_ZSYNSETUP", "zSynSetup"),     #  26
+    ("CMD_ZSYNSETUP", None),            #  26
     ("CMD_XSETUP", "xSetup"),           #  27
-    ("CMD_XSYNSETUP", "xSynSetup"),     #  28
-    ("READSTAT", "None"),               #  29
-    ("READISTATE", "None"),             #  30
-    ("LOADVAL", "None"),                #  31
-    ("LOADMULTI", "None"),              #  32
-    ("READVAL", "None"),                #  33
-    ("LOADXREG", "None"),               #  34
-    ("READXREG", "None"),               #  35
-    ("CLEARQUE", "None"),               #  36
-    ("QUEMOVE", "None"),                #  37
-    ("MOVEQUESTATUS", "None"),          #  38
-    ("READALL", "None"),                #  39
-    ("READDBG", "None"),                #  40
-    ("CLRDBG", "None"),                 #  41
-    ("ENCSTART", "None"),               #  42
-    ("ENCSTOP", "None"),                #  43
+    ("CMD_XSYNSETUP", None),            #  28
+    ("READSTAT", None),                 #  29
+    ("READISTATE", None),               #  30
+    ("LOADVAL", None),                  #  31
+    ("LOADMULTI", None),                #  32
+    ("READVAL", None),                  #  33
+    ("LOADXREG", None),                 #  34
+    ("READXREG", None),                 #  35
+    ("CLEARQUE", "clearQue"),           #  36
+    ("QUEMOVE", None),                  #  37
+    ("MOVEQUESTATUS", None),            #  38
+    ("READALL", "readAll"),             #  39
+    ("READDBG", "readDbg"),             #  40
+    ("CLRDBG", "clearDbg"),             #  41
+    ("ENCSTART", None),                 #  42
+    ("ENCSTOP", None),                  #  43
     )

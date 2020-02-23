@@ -4,5 +4,5 @@ xSvPosition=0
 xSvHomeOffset=1.9752
 zSvDROPosition=0
 zSvDROOffset=0
-xSvDROPosition=20068
+xSvDROPosition=0
 xSvDROOffset=0

@@ -9,11 +9,11 @@ import serial
 SETUP = False
 
 if SETUP:
-    from setup import cmdTable, parmTable, cfgXilinx, LOADMULTI, \
+    from setup import cmdTable, parmTable, cfgFpga, LOADMULTI, \
         LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 else:
     from parmDef import parmTable
-    from configDef import cfgXilinx
+    from configDef import cfgFpga
     from cmdDef import cmdTable,  LOADMULTI, \
         LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 

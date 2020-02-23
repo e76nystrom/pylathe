@@ -7,13 +7,15 @@ ZIDLE            =  0           # idle
 ZWAITBKLS        =  1           # wait for backlash move complete
 ZSTARTMOVE       =  2           # start z move
 ZWAITMOVE        =  3           # wait for move complete
-ZDONE            =  4           # clean up state
+ZDELAY           =  4           # wait for position to settle
+ZDONE            =  5           # clean up state
 
 zStatesList = ( \
     "ZIDLE",
     "ZWAITBKLS",
     "ZSTARTMOVE",
     "ZWAITMOVE",
+    "ZDELAY",
     "ZDONE",
     )
 
@@ -35,16 +37,36 @@ xStatesList = ( \
     "XDONE",
     )
 
+# axis control states
+
+AXIS_IDLE        =  0           # idle
+AXIS_WAIT_BACKLASH =  1         # wait for backlash move complete
+AXIS_START_MOVE  =  2           # start axis move
+AXIS_WAIT_MOVE   =  3           # wait for move complete
+AXIS_DELAY       =  4           # wait for position to settle
+AXIS_DONE        =  5           # clean up state
+AXIS_STATES      =  6           # number of states
+
+axisStatesList = ( \
+    "AXIS_IDLE",
+    "AXIS_WAIT_BACKLASH",
+    "AXIS_START_MOVE",
+    "AXIS_WAIT_MOVE",
+    "AXIS_DELAY",
+    "AXIS_DONE",
+    "AXIS_STATES",
+    )
+
 # move control states
 
 M_IDLE           =  0           # idle state
 M_WAIT_Z         =  1           # wait for z to complete
 M_WAIT_X         =  2           # wait for x to complete
 M_WAIT_SPINDLE   =  3           # wait for spindle start
-M_WAIT_SYNC_READY =  4          # wait for sync
-M_WAIT_SYNC_DONE =  5           # wait for sync done
-M_WAIT_MEASURE_DONE =  6        # wait for measurment done
-M_START_SYNC     =  7           # start sync
+M_START_SYNC     =  4           # start sync
+M_WAIT_SYNC_READY =  5          # wait for sync
+M_WAIT_SYNC_DONE =  6           # wait for sync done
+M_WAIT_MEASURE_DONE =  7        # wait for measurment done
 M_WAIT_PROBE     =  8           # wait for probe to complete
 M_WAIT_MEASURE   =  9           # wait for measurement to complete
 M_WAIT_SAFE_X    = 10           # wait for move to safe x to complete
@@ -55,10 +77,10 @@ mStatesList = ( \
     "M_WAIT_Z",
     "M_WAIT_X",
     "M_WAIT_SPINDLE",
+    "M_START_SYNC",
     "M_WAIT_SYNC_READY",
     "M_WAIT_SYNC_DONE",
     "M_WAIT_MEASURE_DONE",
-    "M_START_SYNC",
     "M_WAIT_PROBE",
     "M_WAIT_MEASURE",
     "M_WAIT_SAFE_X",
@@ -262,6 +284,7 @@ SEL_TU_STEP      =  1           # Stepper
 SEL_TU_ENC       =  2           # Encoder
 SEL_TU_ISYN      =  3           # Int Syn
 SEL_TU_ESYN      =  4           # Ext Syn
+SEL_TU_SYN       =  5           # Sync
 
 selTurnList = ( \
     "SEL_TU_SPEED",
@@ -269,6 +292,7 @@ selTurnList = ( \
     "SEL_TU_ENC",
     "SEL_TU_ISYN",
     "SEL_TU_ESYN",
+    "SEL_TU_SYN",
     )
 
 selTurnText = ( \
@@ -277,6 +301,7 @@ selTurnText = ( \
     "Encoder",
     "Int Syn",
     "Ext Syn",
+    "Sync",
     )
 
 # threading sync selector
@@ -287,6 +312,7 @@ SEL_TH_ENC       =  2           # Encoder Direct
 SEL_TH_ISYN_RENC =  3           # Int Syn, Runout Enc
 SEL_TH_ESYN_RENC =  4           # Ext Syn, Runout Enc
 SEL_TH_ESYN_RSYN =  5           # Ext Syn, Runout Syn
+SEL_TH_SYN       =  6           # Syn, Runout Syn
 
 selThreadList = ( \
     "SEL_TH_NO_ENC",
@@ -295,6 +321,7 @@ selThreadList = ( \
     "SEL_TH_ISYN_RENC",
     "SEL_TH_ESYN_RENC",
     "SEL_TH_ESYN_RSYN",
+    "SEL_TH_SYN",
     )
 
 selThreadText = ( \
@@ -304,4 +331,5 @@ selThreadText = ( \
     "Int Syn, Runout Enc",
     "Ext Syn, Runout Enc",
     "Ext Syn, Runout Syn",
+    "Syn, Runout Syn",
     )

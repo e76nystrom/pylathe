@@ -9,9 +9,9 @@ cfgDraw          =   3          # config draw paths
 cfgEncoder       =   4          # config encoder counts per revolution
 cfgExtDro        =   5          # config external digital readout
 cfgFcy           =   6          # config microprocesssor clock frequency
-cfgFreqMult      =   7          # config xilinx frequency multiplier
+cfgFreqMult      =   7          # config fpga frequency multiplier
 cfgHomeInPlace   =   8          # config home in place
-cfgInvEncDir     =   9          # config xilinx invert encoder direction
+cfgInvEncDir     =   9          # config fpga invert encoder direction
 cfgLCD           =  10          # config enable lcd
 cfgMPG           =  11          # config enable manual pulse generator
 cfgPrbInv        =  12          # config invert probe signal
@@ -23,11 +23,11 @@ cfgSpSyncBoard   =  17          # config spindle sync board
 cfgSpUseEncoder  =  18          # config use spindle encoder for threading
 cfgTaperCycleDist =  19         # config taper cycle distance
 cfgTestMode      =  20          # conifg test mode
-cfgTestRPM       =  21          # config xilinx test rpm value
+cfgTestRPM       =  21          # config fpga test rpm value
 cfgTurnSync      =  22          # config for turning synchronization
 cfgThreadSync    =  23          # config for threading synchronization
-cfgXFreq         =  24          # config xilinx frequency
-cfgXilinx        =  25          # config xilinx interface present
+cfgFpgaFreq      =  24          # config fpga frequency
+cfgFpga          =  25          # config fpga interface present
 
 # communications config
 
@@ -313,8 +313,8 @@ config = { \
     'cfgTestRPM' : 21,
     'cfgTurnSync' : 22,
     'cfgThreadSync' : 23,
-    'cfgXFreq' : 24,
-    'cfgXilinx' : 25,
+    'cfgFpgaFreq' : 24,
+    'cfgFpga' : 25,
     'commPort' : 26,
     'commRate' : 27,
     'cuPause' : 28,
@@ -544,8 +544,8 @@ configTable = ( \
     'cfgTestRPM',
     'cfgTurnSync',
     'cfgThreadSync',
-    'cfgXFreq',
-    'cfgXilinx',
+    'cfgFpgaFreq',
+    'cfgFpga',
     'commPort',
     'commRate',
     'cuPause',
