@@ -3986,6 +3986,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.xDROOffset = None
             # self.xDroDiam = False
             self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
+        self.overrideSet = False
 
         if not os.path.exists(DBG_DIR):
             os.makedirs(DBG_DIR)
@@ -4137,10 +4138,19 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
 
-        self.statusLine = txt = wx.StaticText(self, -1, "")
+        self.statusLine = txt = wx.StaticText(self, -1, "", size=(300, -1))
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
                    wx.ALIGN_CENTER_VERTICAL, border=2)
+
+        txt = wx.StaticText(self, -1, "Limit Override ")
+        sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+                   border=2)
+
+        self.limitOverride = cb = wx.CheckBox(self, -1)
+        self.Bind(wx.EVT_CHECKBOX, self.OnOverride, cb)
+        sizerH.Add(cb, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+                   border=2)
 
         sizerV.Add(sizerH)
 
@@ -4846,6 +4856,12 @@ class JogPanel(wx.Panel, FormRoutines):
                 text  += 'P'
             if mvStatus & ct.MV_ACTIVE:
                 text += 'A'
+            if mvStatus & ct.MV_LIMIT:
+                text += 'L'
+            else:
+                if self.overrideSet:
+                    self.overrideSet = False
+                    self.limitOverride.SetValue(False)
             self.statusText.SetLabel(text)
 
             if mvStatus != self.mvStatus:
@@ -5001,6 +5017,16 @@ class JogPanel(wx.Panel, FormRoutines):
             commTimeout()
         self.combo.SetFocus()
 
+    def OnOverride(self, e):
+        val = self.limitOverride.GetValue()
+        print("override %s" % (val))
+        stdout.flush()
+        if val and ((self.mvStatus & ct.MV_LIMIT) == 0):
+            self.limitOverride.SetValue(False)
+            return
+        self.overrideSet = val
+        comm.setParm(pm.LIMIT_OVERRIDE, (0, 1)[val]);
+
     def setStatus(self, text):
         if done:
             return
@@ -5019,7 +5045,8 @@ class JogPanel(wx.Panel, FormRoutines):
             zLocation = float(zLocation) / self.zStepsInch
             zHomeOffset = zLocation - val
             self.zHomeOffset.value = zHomeOffset
-            comm.setParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
+            comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(zHomeOffset * jogPanel.zStepsInch))
             print("pos %0.4f zLocation %0.4f zHomeOffset %0.4f" % \
                   (val, zLocation, zHomeOffset))
             stdout.flush()

@@ -245,7 +245,11 @@ MAX_SPEED            = 144
 # current operation
 
 CURRENT_OP           = 145
-MAX_PARM             = 146
+
+# limit override
+
+LIMIT_OVERRIDE       = 146
+MAX_PARM             = 147
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -394,5 +398,6 @@ parmTable = ( \
     ('MIN_SPEED', 'int16_t', 'minSpeed'),
     ('MAX_SPEED', 'int16_t', 'maxSpeed'),
     ('CURRENT_OP', 'char', 'currentOp'),
+    ('LIMIT_OVERRIDE', 'char', 'limitOverride'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )

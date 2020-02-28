@@ -828,6 +828,8 @@ class Accel():
         rpi = self.rpi
         self.freqDivider = 0
         if self.maxFeed == 0:
+            # (pulse / rev) / (in / rev) = pulse / in 
+            # (pulse / in) / (steps / in) = pulse / step
             encPerInch = intRound(rpi.encPerRev / self.pitch)
             self.dx = encPerInch
             self.dy = self.axis.stepsInch
