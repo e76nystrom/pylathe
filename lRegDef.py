@@ -69,6 +69,12 @@ F_Ld_Loc         =  0           # axis location
 F_Rd_Loc         =  1           # read axis location
 F_Loc_Max        =  2           # number of location registers
 
+# dro registers
+
+F_Ld_Dro         =  0           # axis dro
+F_Rd_Dro         =  1           # read axis dro
+F_Dro_Max        =  2           # number of dro registers
+
 # axis
 
 F_Ld_Axis_Ctl    =  0           # axis control register
@@ -76,7 +82,8 @@ F_Ld_Freq        =  1           # frequency
 F_Sync_Base      =  2           # sync registers
 F_Dist_Base      = 12           # distance registers
 F_Loc_Base       = 15           # location registers
-F_Axis_Max       = 17           # number of axis registers
+F_Dro_Base       = 17           # dro registers
+F_Axis_Max       = 19           # number of axis registers
 
 # register definitions
 
@@ -119,8 +126,8 @@ F_PWM_Base       = 17           # pwm control
 F_Enc_Base       = 19           # encoder registers
 F_Phase_Base     = 22           # phase registers
 F_ZAxis_Base     = 24           # z axis registers
-F_XAxis_Base     = 41           # x axis registers
-F_Cmd_Max        = 58           # number of commands
+F_XAxis_Base     = 43           # x axis registers
+F_Cmd_Max        = 62           # number of commands
 
 # xilinx table
 
@@ -166,23 +173,27 @@ xRegTable = ( \
     "F_ZAxis_Base-F_Rd_Acl_Steps",      #  38
     "F_ZAxis_Base-F_Ld_Loc",            #  39
     "F_ZAxis_Base-F_Rd_Loc",            #  40
-    "F_XAxis_Base-F_Ld_Axis_Ctl",       #  41
-    "F_XAxis_Base-F_Ld_Freq",           #  42
-    "F_XAxis_Base-F_Ld_D",              #  43
-    "F_XAxis_Base-F_Ld_Incr1",          #  44
-    "F_XAxis_Base-F_Ld_Incr2",          #  45
-    "F_XAxis_Base-F_Ld_Accel_Val",      #  46
-    "F_XAxis_Base-F_Ld_Accel_Count",    #  47
-    "F_XAxis_Base-F_Rd_XPos",           #  48
-    "F_XAxis_Base-F_Rd_YPos",           #  49
-    "F_XAxis_Base-F_Rd_Sum",            #  50
-    "F_XAxis_Base-F_Rd_Accel_Sum",      #  51
-    "F_XAxis_Base-F_Rd_Accel_Ctr",      #  52
-    "F_XAxis_Base-F_Ld_Dist",           #  53
-    "F_XAxis_Base-F_Rd_Dist",           #  54
-    "F_XAxis_Base-F_Rd_Acl_Steps",      #  55
-    "F_XAxis_Base-F_Ld_Loc",            #  56
-    "F_XAxis_Base-F_Rd_Loc",            #  57
+    "F_ZAxis_Base-F_Ld_Dro",            #  41
+    "F_ZAxis_Base-F_Rd_Dro",            #  42
+    "F_XAxis_Base-F_Ld_Axis_Ctl",       #  43
+    "F_XAxis_Base-F_Ld_Freq",           #  44
+    "F_XAxis_Base-F_Ld_D",              #  45
+    "F_XAxis_Base-F_Ld_Incr1",          #  46
+    "F_XAxis_Base-F_Ld_Incr2",          #  47
+    "F_XAxis_Base-F_Ld_Accel_Val",      #  48
+    "F_XAxis_Base-F_Ld_Accel_Count",    #  49
+    "F_XAxis_Base-F_Rd_XPos",           #  50
+    "F_XAxis_Base-F_Rd_YPos",           #  51
+    "F_XAxis_Base-F_Rd_Sum",            #  52
+    "F_XAxis_Base-F_Rd_Accel_Sum",      #  53
+    "F_XAxis_Base-F_Rd_Accel_Ctr",      #  54
+    "F_XAxis_Base-F_Ld_Dist",           #  55
+    "F_XAxis_Base-F_Rd_Dist",           #  56
+    "F_XAxis_Base-F_Rd_Acl_Steps",      #  57
+    "F_XAxis_Base-F_Ld_Loc",            #  58
+    "F_XAxis_Base-F_Rd_Loc",            #  59
+    "F_XAxis_Base-F_Ld_Dro",            #  60
+    "F_XAxis_Base-F_Rd_Dro",            #  61
     )
 
 fpgaSizeTable = ( \
@@ -227,23 +238,27 @@ fpgaSizeTable = ( \
     4,              #  38 F_ZAxis_Base, F_Dist_Base, F_Rd_Acl_Steps
     4,              #  39 F_ZAxis_Base, F_Loc_Base, F_Ld_Loc
     4,              #  40 F_ZAxis_Base, F_Loc_Base, F_Rd_Loc
-    1,              #  41 F_XAxis_Base, F_Ld_Axis_Ctl
-    4,              #  42 F_XAxis_Base, F_Ld_Freq
-    4,              #  43 F_XAxis_Base, F_Sync_Base, F_Ld_D
-    4,              #  44 F_XAxis_Base, F_Sync_Base, F_Ld_Incr1
-    4,              #  45 F_XAxis_Base, F_Sync_Base, F_Ld_Incr2
-    4,              #  46 F_XAxis_Base, F_Sync_Base, F_Ld_Accel_Val
-    4,              #  47 F_XAxis_Base, F_Sync_Base, F_Ld_Accel_Count
-    4,              #  48 F_XAxis_Base, F_Sync_Base, F_Rd_XPos
-    4,              #  49 F_XAxis_Base, F_Sync_Base, F_Rd_YPos
-    4,              #  50 F_XAxis_Base, F_Sync_Base, F_Rd_Sum
-    4,              #  51 F_XAxis_Base, F_Sync_Base, F_Rd_Accel_Sum
-    4,              #  52 F_XAxis_Base, F_Sync_Base, F_Rd_Accel_Ctr
-    4,              #  53 F_XAxis_Base, F_Dist_Base, F_Ld_Dist
-    4,              #  54 F_XAxis_Base, F_Dist_Base, F_Rd_Dist
-    4,              #  55 F_XAxis_Base, F_Dist_Base, F_Rd_Acl_Steps
-    4,              #  56 F_XAxis_Base, F_Loc_Base, F_Ld_Loc
-    4,              #  57 F_XAxis_Base, F_Loc_Base, F_Rd_Loc
+    4,              #  41 F_ZAxis_Base, F_Dro_Base, F_Ld_Dro
+    4,              #  42 F_ZAxis_Base, F_Dro_Base, F_Rd_Dro
+    1,              #  43 F_XAxis_Base, F_Ld_Axis_Ctl
+    4,              #  44 F_XAxis_Base, F_Ld_Freq
+    4,              #  45 F_XAxis_Base, F_Sync_Base, F_Ld_D
+    4,              #  46 F_XAxis_Base, F_Sync_Base, F_Ld_Incr1
+    4,              #  47 F_XAxis_Base, F_Sync_Base, F_Ld_Incr2
+    4,              #  48 F_XAxis_Base, F_Sync_Base, F_Ld_Accel_Val
+    4,              #  49 F_XAxis_Base, F_Sync_Base, F_Ld_Accel_Count
+    4,              #  50 F_XAxis_Base, F_Sync_Base, F_Rd_XPos
+    4,              #  51 F_XAxis_Base, F_Sync_Base, F_Rd_YPos
+    4,              #  52 F_XAxis_Base, F_Sync_Base, F_Rd_Sum
+    4,              #  53 F_XAxis_Base, F_Sync_Base, F_Rd_Accel_Sum
+    4,              #  54 F_XAxis_Base, F_Sync_Base, F_Rd_Accel_Ctr
+    4,              #  55 F_XAxis_Base, F_Dist_Base, F_Ld_Dist
+    4,              #  56 F_XAxis_Base, F_Dist_Base, F_Rd_Dist
+    4,              #  57 F_XAxis_Base, F_Dist_Base, F_Rd_Acl_Steps
+    4,              #  58 F_XAxis_Base, F_Loc_Base, F_Ld_Loc
+    4,              #  59 F_XAxis_Base, F_Loc_Base, F_Rd_Loc
+    4,              #  60 F_XAxis_Base, F_Dro_Base, F_Ld_Dro
+    4,              #  61 F_XAxis_Base, F_Dro_Base, F_Rd_Dro
     )
 
 importList = ( \
@@ -288,11 +303,15 @@ importList = ( \
  F_Ld_Loc, \
  F_Rd_Loc, \
  F_Loc_Max, \
+ F_Ld_Dro, \
+ F_Rd_Dro, \
+ F_Dro_Max, \
  F_Ld_Axis_Ctl, \
  F_Ld_Freq, \
  F_Sync_Base, \
  F_Dist_Base, \
  F_Loc_Base, \
+ F_Dro_Base, \
  F_Axis_Max, \
  F_Noop, \
  F_Rd_Status, \

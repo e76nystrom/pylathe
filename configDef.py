@@ -287,6 +287,7 @@ zSvPosition      = 224          # z axis
 zSvHomeOffset    = 225          # z axis 
 zSvDROPosition   = 226          # z axis 
 zSvDROOffset     = 227          # z axis 
+cfgJogDebug      = 228          # debug jogging
 
 config = { \
     'cfgCmdDis' : 0,
@@ -517,6 +518,7 @@ config = { \
     'zSvHomeOffset' : 225,
     'zSvDROPosition' : 226,
     'zSvDROOffset' : 227,
+    'cfgJogDebug' : 228,
     }
 
 configTable = ( \
@@ -748,4 +750,5 @@ configTable = ( \
     'zSvHomeOffset',
     'zSvDROPosition',
     'zSvDROOffset',
+    'cfgJogDebug',
     )

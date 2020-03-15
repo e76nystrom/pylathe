@@ -1255,6 +1255,8 @@ def sendZData(send=False):
             queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
             queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
 
+            queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
+
             comm.command(cm.CMD_ZSETUP)
 
             zDataSent = True
@@ -1348,6 +1350,8 @@ def sendXData(send=False):
 
             queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
             queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
+
+            queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
 
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
@@ -6593,7 +6597,7 @@ class MainFrame(wx.Frame):
         global xHomed
         n = 1
         self.cfgFile = None
-        self.posFile = "posInfo.txt"
+        self.posFile = None
         while True:
             if n >= len(sys.argv):
                 break
@@ -6626,6 +6630,8 @@ class MainFrame(wx.Frame):
             n += 1
         if self.cfgFile is None:
             self.cfgFile = "config.txt"
+        if self.posFile is None:
+            self.posFile = "posInfo.txt"
 
     def initialConfig(self):
         global cfg, comm, FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
@@ -7256,6 +7262,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Initial", cf.jogTimeInitial, 'f2'), \
             ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
+            ("bMpg Jog Debug", cf.cfgJogDebug, None), \
         )
         if FPGA:
                 # ("Encoder", cf.cfgEncoder, 'd'), \

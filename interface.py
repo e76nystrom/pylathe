@@ -292,6 +292,8 @@ configList = \
     ('zSvHomeOffset', 'z axis '),
     ('zSvDROPosition', 'z axis '),
     ('zSvDROOffset', 'z axis '),
+
+    ('cfgJogDebug', 'debug jogging'),
 )
 
 strList = \
@@ -897,6 +899,13 @@ fpgaLatheList = \
   ("F_Rd_Loc",        None, 1, 4,    "read axis location"),
   ("F_Loc_Max",       None, None, 0, "number of location registers"),
 
+  "dro registers",
+
+  ("dro",),
+  ("F_Ld_Dro",        0,    1, 4,    "axis dro"),
+  ("F_Rd_Dro",        None, 1, 4,    "read axis dro"),
+  ("F_Dro_Max",       None, None, 0, "number of dro registers"),
+
   "axis",
 
   ("axisCtl",),
@@ -905,6 +914,7 @@ fpgaLatheList = \
   ("F_Sync_Base",     None, "syncAccel", None, "sync registers"),
   ("F_Dist_Base",     None, "distCtr",   None, "distance registers"),
   ("F_Loc_Base",      None, "locCtr",    None, "location registers"),
+  ("F_Dro_Base",      None, "dro",       None, "dro registers"),
   ("F_Axis_Max",      None, None, 0,           "number of axis registers"),
 
   "register definitions",
