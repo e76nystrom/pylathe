@@ -1229,10 +1229,11 @@ def sendZData(send=False):
                 if val > 0.020:
                     val = 0.020
             except ValueError:
-                val = cfg.getFloatInfoData(cf.zMpgInc)
-            queParm(pm.Z_MPG_INC, int(val * stepsInch))
+                # val = cfg.getFloatInfoData(cf.zMpgInc)
+                val = 0
+            queParm(pm.Z_MPG_INC, round(val * stepsInch))
             queParm(pm.Z_MPG_MAX, \
-                         int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
+                    round(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
 
             queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
             queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
@@ -1325,10 +1326,11 @@ def sendXData(send=False):
                 if val > 0.020:
                     val = 0.020
             except ValueError:
-                val = cfg.getFloatInfoData(cf.xMpgInc)
-            queParm(pm.X_MPG_INC, int(val * stepsInch))
+                # val = cfg.getFloatInfoData(cf.xMpgInc)
+                val = 0
+            queParm(pm.X_MPG_INC, round(val * stepsInch))
             queParm(pm.X_MPG_MAX, \
-                         int(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
+                    round(cfg.getFloatInfoData(cf.xMpgMax) * stepsInch))
 
             queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
             queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
@@ -3413,9 +3415,9 @@ class ScrewThread(LatheOp, UpdatePass):
         self.setup(True)
 
         comm.queParm(pm.TH_Z_START, \
-                     int((self.startZ + zHomeOffset) * jogPanel.zStepsInch))
+                     round((self.startZ + zHomeOffset) * jogPanel.zStepsInch))
         comm.queParm(pm.TH_X_START, \
-                     int((self.xStart + xHomeOffset) * jogPanel.xStepsInch))
+                     round((self.xStart + xHomeOffset) * jogPanel.xStepsInch))
         comm.queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
         
         self.calcPass(add=True)
@@ -4511,9 +4513,9 @@ class JogPanel(wx.Panel, FormRoutines):
             if val > 0.020:
                 val = 0.020
         except ValueError:
-            val = 0.001
-        comm.queParm(pm.Z_MPG_INC, val * self.zStepsInch)
-        comm.queParm(pm.X_MPG_INC, val * self.xStepsInch)
+            val = 0.0
+        comm.queParm(pm.Z_MPG_INC, round(val * self.zStepsInch))
+        comm.queParm(pm.X_MPG_INC, round(val * self.xStepsInch))
         comm.sendMulti()
 
     def OnMouseEvent(self, evt):
