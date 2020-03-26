@@ -669,6 +669,7 @@ class Setup():
             if not isinstance(data, str):
                 if len(data) == 1:
                     xLst = []
+                    cLst = []
                     regName = data[0]
                     maxShift = 0
                     rec = [regName,]
@@ -692,16 +693,16 @@ class Setup():
                                 bitStr.append("%s/* 0x%02x %s */\n" % 
                                               (tmp.ljust(32), bit << shift,
                                                comment))
-                            xLst.append((" alias %-10s : " \
+                            xLst.append((" alias %-12s : " \
                                          "std_logic is %sreg(%d); " \
                                          "-- x%02x %s\n") %
                                         (xVar, regName, shift, \
                                          1 << shift, comment))
-                            # xLst.append((" constant c_%-10s : " \
-                            #              "integer := %2d; " \
-                            #              "-- x%02x %s\n") %
-                            #             (xVar, shift, \
-                            #              1 << shift, comment))
+                            cLst.append((" constant c_%-12s : " \
+                                         "integer := %2d; " \
+                                         "-- x%02x %s\n") %
+                                        (xVar, shift, \
+                                         1 << shift, comment))
                         # tmp =  (" public static final int %-10s = " \
                         #         "(%s << %s);" % (cVar, bit, shift))
                         # fWrite(jFile, "%s /* %s */\n" % 
@@ -733,6 +734,11 @@ class Setup():
                         for i in range(len(xLst)):
                             if xFile:
                                 fWrite(xFile, xLst[i])
+                        if xFile:
+                            fWrite(xFile, "\n")
+                        for i in range(len(cLst)):
+                            if xFile:
+                                fWrite(xFile, cLst[i])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +
                         #                 "String[] %sBits =\n {\n") % \

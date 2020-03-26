@@ -17,6 +17,11 @@ runEna       = 0x01             # run from controller data
 runInit      = 0x02             # initialize controller
 readerInit   = 0x04             # initialize reader
 
+# jog control register
+
+jogContinuous = 0x01            # jog continuous mode
+jogBacklash  = 0x02             # jog backlash present
+
 # axis control register
 
 ctlInit      = 0x01             # reset flag
@@ -29,15 +34,18 @@ ctlDirNeg    = 0x00             # move in negative dir
 ctlSetLoc    = 0x20             # set location
 ctlChDirect  = 0x40             # ch input direct
 ctlSlave     = 0x80             # slave controlled by other axis
+ctlDroEnd    = 0x100            # use dro to end move
 
 # configuration control register
 
 cfgZDir      = 0x01             # z direction inverted
 cfgXDir      = 0x02             # x direction inverted
-cfgSpDir     = 0x04             # spindle directiion inverted
-cfgEncDir    = 0x08             # invert encoder direction
-cfgEnaEncDir = 0x10             # enable encoder direction
-cfgGenSync   = 0x20             # no encoder generate sync pulse
+cfgZDro      = 0x04             # z dro direction inverted
+cfgXDro      = 0x08             # x dro direction inverted
+cfgSpDir     = 0x10             # spindle directiion inverted
+cfgEncDir    = 0x20             # invert encoder direction
+cfgEnaEncDir = 0x40             # enable encoder direction
+cfgGenSync   = 0x80             # no encoder generate sync pulse
 
 # clock control register
 
@@ -86,6 +94,8 @@ importList = ( \
  runEna, \
  runInit, \
  readerInit, \
+ jogContinuous, \
+ jogBacklash, \
  ctlInit, \
  ctlStart, \
  ctlBacklash, \
@@ -96,8 +106,11 @@ importList = ( \
  ctlSetLoc, \
  ctlChDirect, \
  ctlSlave, \
+ ctlDroEnd, \
  cfgZDir, \
  cfgXDir, \
+ cfgZDro, \
+ cfgXDro, \
  cfgSpDir, \
  cfgEncDir, \
  cfgEnaEncDir, \

@@ -903,8 +903,17 @@ fpgaLatheList = \
 
   ("dro",),
   ("F_Ld_Dro",        0,    1, 4,    "axis dro"),
+  ("F_Ld_Dro_End",    0,    1, 4,    "axis dro end"),
   ("F_Rd_Dro",        None, 1, 4,    "read axis dro"),
   ("F_Dro_Max",       None, None, 0, "number of dro registers"),
+
+  "jog registers",
+
+  ("jog",),
+  ("F_Ld_Jog_Ctl",    0,    1, 4,    "jog control"),
+  ("F_Ld_Jog_Inc",    None, 1, 4,    "jog increment"),
+  ("F_Ld_Jog_Back",   None, 1, 4,    "jog backlash increment"),
+  ("F_Jog_Max",       None, None, 0, "number of jog registers"),
 
   "axis",
 
@@ -915,6 +924,7 @@ fpgaLatheList = \
   ("F_Dist_Base",     None, "distCtr",   None, "distance registers"),
   ("F_Loc_Base",      None, "locCtr",    None, "location registers"),
   ("F_Dro_Base",      None, "dro",       None, "dro registers"),
+  ("F_Jog_Base",      None, "jog",       None, "jog registers"),
   ("F_Axis_Max",      None, None, 0,           "number of axis registers"),
 
   "register definitions",
@@ -1186,6 +1196,11 @@ fpgaLatheBitList = \
  # ("cmdWaitZ",    1, 0, "wait for z done"),
  # ("cmdWaitX",    1, 1, "wait for x done"),
 
+ "jog control register",
+ ("jog",),
+ ("jogContinuous", 1, 0, "jog continuous mode"),
+ ("jogBacklash",   1, 1, "jog backlash present"),
+
  "axis control register",
 
  ("axisCtl",),
@@ -1199,16 +1214,19 @@ fpgaLatheBitList = \
  ("ctlSetLoc",   1, 5, "set location"),
  ("ctlChDirect", 1, 6, "ch input direct"),
  ("ctlSlave",    1, 7, "slave controlled by other axis"),
+ ("ctlDroEnd",   1, 8, "use dro to end move"),
 
  "configuration control register",
 
  ("cfgCtl",),
  ("cfgZDir",     1, 0, "z direction inverted"),
  ("cfgXDir",     1, 1, "x direction inverted"),
- ("cfgSpDir",    1, 2, "spindle directiion inverted"),
- ("cfgEncDir",   1, 3, "invert encoder direction"),
- ("cfgEnaEncDir", 1, 4, "enable encoder direction"),
- ("cfgGenSync",  1, 5, "no encoder generate sync pulse"),
+ ("cfgZDro",     1, 2, "z dro direction inverted"),
+ ("cfgXDro",     1, 3, "x dro direction inverted"),
+ ("cfgSpDir",    1, 4, "spindle directiion inverted"),
+ ("cfgEncDir",   1, 5, "invert encoder direction"),
+ ("cfgEnaEncDir", 1, 6, "enable encoder direction"),
+ ("cfgGenSync",  1, 7, "no encoder generate sync pulse"),
  
  "clock control register",
 
