@@ -886,45 +886,54 @@ class Accel():
 
     def accelSetup1(self):
         accelClocks = self.accelClocks
-        scalePrt = False
-        for scale in range(0, 10):
-            dx =  self.dxBase << scale
-            dyMin =  self.dyMinBase << scale
-            dyMax =  self.dyMaxBase << scale
-            dyDelta = dyMax - dyMin
-            if scalePrt:
-                print("\ndx %d dyMin %d dyMax %d dyDelta %d" % \
-                      (dx, dyMin, dyMax, dyDelta))
+        if accelClocks == 0:
+            dyIni = self.dyMinBase
+            dx = self.dxBase
+            scale = 0
+            incr1 = 2 * dyIni
+            incr2 = incr1 - 2 * dx
+            d = incr1 - dx
+            synAccel = 0
+        else:
+            scalePrt = False
+            for scale in range(0, 10):
+                dx =  self.dxBase << scale
+                dyMin =  self.dyMinBase << scale
+                dyMax =  self.dyMaxBase << scale
+                dyDelta = dyMax - dyMin
+                if scalePrt:
+                    print("\ndx %d dyMin %d dyMax %d dyDelta %d" % \
+                          (dx, dyMin, dyMax, dyDelta))
 
-            incPerClock = dyDelta / float(accelClocks)
-            intIncPerClock = int(incPerClock)
-            dyDeltaC = intIncPerClock * accelClocks
-            dyIni = dyMax - dyDeltaC
-            err = int(dyDelta - dyDeltaC) >> scale
-            bits = int(floor(log(2*dx, 2))) + 1
-            if scalePrt:
-                print(("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f "\
-                       "err %d bits %d" %
-                       (dyIni, dyMax, dyDeltaC, incPerClock, err, bits)))
-            if (err == 0):
-                break
+                incPerClock = dyDelta / float(accelClocks)
+                intIncPerClock = int(incPerClock)
+                dyDeltaC = intIncPerClock * accelClocks
+                dyIni = dyMax - dyDeltaC
+                err = int(dyDelta - dyDeltaC) >> scale
+                bits = int(floor(log(2*dx, 2))) + 1
+                if scalePrt:
+                    print(("dyIni %d dyMax %d dyDelta %d incPerClock %4.2f "\
+                           "err %d bits %d" %
+                           (dyIni, dyMax, dyDeltaC, incPerClock, err, bits)))
+                if (err == 0):
+                    break
 
-        incr1 = 2 * dyIni
-        incr2 = incr1 - 2 * dx
-        d = incr1 - dx
+            incr1 = 2 * dyIni
+            incr2 = incr1 - 2 * dx
+            d = incr1 - dx
 
-        bits = int(floor(log(abs(incr2), 2))) + 1
-        print(("dx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d" %
-               (dx, dyIni, incr1, incr2, d, bits, scale)))
+            bits = int(floor(log(abs(incr2), 2))) + 1
+            print(("dx %d dy %d incr1 %d incr2 %d d %d bits %d scale %d" %
+                   (dx, dyIni, incr1, incr2, d, bits, scale)))
 
-        synAccel = 2 * intIncPerClock
+            synAccel = 2 * intIncPerClock
 
-        totalSum = (accelClocks * incr1) + d
-        totalInc = (accelClocks * (accelClocks - 1) * synAccel) / 2
-        accelSteps = ((totalSum + totalInc) / (2 * dx))
+            totalSum = (accelClocks * incr1) + d
+            totalInc = (accelClocks * (accelClocks - 1) * synAccel) / 2
+            accelSteps = ((totalSum + totalInc) / (2 * dx))
 
-        print(("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
-               (accelClocks, totalSum, totalInc, accelSteps)))
+            print(("accelClocks %d totalSum %d totalInc %d accelSteps %d" % 
+                   (accelClocks, totalSum, totalInc, accelSteps)))
 
         self.scale = scale
         self.incr1 = incr1

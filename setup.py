@@ -665,6 +665,7 @@ class Setup():
             f = open(pName + '.py', 'wb')
             fWrite(f, "\n# xilinx bits\n")
         for i in range(len(xilinxBitList)):
+            shiftType = None
             data = xilinxBitList[i]
             if not isinstance(data, str):
                 if len(data) == 1:
@@ -672,22 +673,23 @@ class Setup():
                     cLst = []
                     regName = data[0]
                     maxShift = 0
-                    rec = [regName,]
+                    # rec = [regName,]
                 else:
                     if len(data) == 4:
                         (var, bit, shift, comment) = data
-                        dType = "sl"
-                    elif len(data) == 5:
-                        (var, bit, shift, dType, comment) = data
-                    rec.append((var, bit, shift, dType, comment))
+                        # dType = "sl"
+                    # elif len(data) == 5:
+                    #     (var, bit, shift, dType, comment) = data
+                    # rec.append((var, bit, shift, dType, comment))
                     cVar = var.upper()
                     xVar = var.replace("_", "")
 
+                    shiftType = type(shift)
                     if fData:
                         tmp =  "#define %-12s  (%s << %s)" % (cVar, bit, shift)
-                        fWrite(cFile, "%s/* 0x%03x %s */\n" % 
-                                    (tmp.ljust(32), bit << shift, comment));
-                        if bit != 0:
+                        if shiftType != tuple:
+                            fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                                   (tmp.ljust(32), bit << shift, comment));
                             if (shift != lastShift):
                                 tmp =  "  \"%s\", " % (cVar)
                                 bitStr.append("%s/* 0x%02x %s */\n" % 
@@ -703,21 +705,48 @@ class Setup():
                                          "-- x%02x %s\n") %
                                         (xVar, shift, \
                                          1 << shift, comment))
-                        # tmp =  (" public static final int %-10s = " \
-                        #         "(%s << %s);" % (cVar, bit, shift))
-                        # fWrite(jFile, "%s /* %s */\n" % 
-                        #             (tmp, comment));
+                            # tmp =  (" public static final int %-10s = " \
+                            #         "(%s << %s);" % (cVar, bit, shift))
+                            # fWrite(jFile, "%s /* %s */\n" % 
+                            #             (tmp, comment));
+                        else:
+                            (shift, start) = shift
+                            if bit is None:
+                                xLst.append(" alias %-12s : unsigned is " \
+                                            "%sreg(%d downto %d); " \
+                                            "-- x%02x %s\n" %
+                                            (xVar, regName, shift, start, \
+                                             1 << shift, comment))
+                            else:
+                                xLst.append(" constant %-12s : unsigned " \
+                                            "(%d downto %d) " \
+                                            ":= \"%s\"; -- %s\n" % \
+                                            (xVar, shift, start, \
+                                             '{0:03b}'.format(bit), comment))
                     if (shift > maxShift):
                         maxShift = shift
                     if cVar in globals():
                         print("createFpgaBits %s already defined" % cVar)
                     else:
-                        globals()[cVar] = bit << shift
-                        imports.append(var)
-                        if f is not None:
-                            tmp = "%s = 0x%02x" % (var.ljust(12), bit << shift)
-                            fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
-                    lastShift = shift
+                        if shiftType != tuple:
+                            if bit is not None:
+                                globals()[cVar] = bit << shift
+                                imports.append(var)
+                                if f is not None:
+                                    tmp = "%s = 0x%02x" % \
+                                        (var.ljust(12), bit << shift)
+                                    fWrite(f, "%s# %s\n" % \
+                                           (tmp.ljust(32), comment))
+                        else:
+                            if bit is not None:
+                                globals()[cVar] = bit << start
+                                imports.append(var)
+                                if f is not None:
+                                    tmp = "%s = 0x%02x" % \
+                                        (var.ljust(12), bit << start)
+                                    fWrite(f, "%s# %s\n" % \
+                                           (tmp.ljust(32), comment))
+                        lastShift = shift
             else:
                 if fData:
                     if (len(regName) > 0):
@@ -731,13 +760,10 @@ class Setup():
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
-                        for i in range(len(xLst)):
-                            if xFile:
+                            for i in range(len(xLst)):
                                 fWrite(xFile, xLst[i])
-                        if xFile:
                             fWrite(xFile, "\n")
-                        for i in range(len(cLst)):
-                            if xFile:
+                            for i in range(len(cLst)):
                                 fWrite(xFile, cLst[i])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +

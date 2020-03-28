@@ -1231,6 +1231,9 @@ def sendZData(send=False):
             except ValueError:
                 # val = cfg.getFloatInfoData(cf.zMpgInc)
                 val = 0
+            if FPGA:
+                queParm(pm.FREQ_MULT, 8)
+                
             queParm(pm.Z_MPG_INC, round(val * stepsInch))
             queParm(pm.Z_MPG_MAX, \
                     round(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
@@ -6526,6 +6529,8 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_SWITCH, cfg.getBoolInfoData(cf.spSwitch))
                 comm.queParm(pm.CFG_VAR_SPEED, \
                              cfg.getBoolInfoData(cf.spVarSpeed))
+                comm.queParm(pm.FPGA_FREQUENCY, \
+                             cfg.getIntInfoData(cf.cfgFpgaFreq))
                 comm.command(cm.CMD_SETUP)
                 
                 sendSpindleData()
@@ -6672,6 +6677,7 @@ class MainFrame(wx.Frame):
         THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
         
         if True:
+            print("FPGA %s" % (FPGA))
             print("STEP_DRV %s SPINDLE_ENCODER %s "\
                   "SPINDLE_SYNC_BOARD %s" % \
                   (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD))
