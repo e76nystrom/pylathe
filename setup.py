@@ -445,9 +445,9 @@ class Setup():
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
-                fWrite(xFile, "library IEEE;\n")
-                fWrite(xFile, "use IEEE.STD_LOGIC_1164.all;\n")
-                fWrite(xFile, "use IEEE.NUMERIC_STD.ALL;\n\n")
+                fWrite(xFile, "library ieee;\n")
+                fWrite(xFile, "use ieee.std_logic_1164.all;\n")
+                fWrite(xFile, "use ieee.numeric_std.all;\n\n")
                 fWrite(xFile, "package RegDef is\n\n")
                 fWrite(xFile, "constant opb : positive := 8;\n\n")
             # jFile = open(jLoc + 'Xilinx.java', 'wb')
@@ -460,7 +460,7 @@ class Setup():
         f = None
         if self.file:
             f = open(pName + '.py', 'wb')
-            fWrite(f, "\n# fpga registers\n\n")
+            fWrite(f, "# fpga registers\n\n")
         index = 0
         table = None
         regTables = []
@@ -552,7 +552,7 @@ class Setup():
             self.hexFile(os.path.join(xLoc, xName + ".hex"), opLenTable)
 
         if f is not None:
-            fWrite(f, "\n# xilinx table\n\n")
+            fWrite(f, "# fpga table\n\n")
 
             if len(regTables) == 0:
                 fWrite(f, "xRegTable = ( \\\n")
@@ -663,7 +663,7 @@ class Setup():
         f = None
         if self.file:
             f = open(pName + '.py', 'wb')
-            fWrite(f, "\n# xilinx bits\n")
+            fWrite(f, "# fpga bits\n")
         for i in range(len(xilinxBitList)):
             shiftType = None
             data = xilinxBitList[i]
@@ -677,10 +677,6 @@ class Setup():
                 else:
                     if len(data) == 4:
                         (var, bit, shift, comment) = data
-                        # dType = "sl"
-                    # elif len(data) == 5:
-                    #     (var, bit, shift, dType, comment) = data
-                    # rec.append((var, bit, shift, dType, comment))
                     cVar = var.upper()
                     xVar = var.replace("_", "")
 

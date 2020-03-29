@@ -1,4 +1,3 @@
-
 # fpga registers
 
 F_Noop           =  0           # register 0
@@ -9,8 +8,7 @@ F_Ld_Int_Cycle   =  4           # load internal cycle
 F_Rd_Cmp_Cyc_Clks =  5          # read cmp cycle clocks
 F_Ld_Dbg_Freq    =  6           # load debug frequency
 F_Ld_Dbg_Count   =  7           # load debug clocks
-
-# xilinx table
+# fpga table
 
 xRegTable = ( \
     "F_Noop",                           #   0

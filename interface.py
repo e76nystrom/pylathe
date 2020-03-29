@@ -836,8 +836,8 @@ fpgaLatheList = \
   ("F_Ld_Ctrl_Data",    0,    1, 0,    "load controller data"),
   ("F_Ctrl_Cmd",        None, 1, 1,    "controller command"),
   ("F_Ld_Seq",          None, 1, 1,    "load sequence"),
-  ("F_Rd_Seq",          None, 1, 1,    "read sequence"),
-  ("F_Rd_Ctr",          None, 1, 1,    "read counter"),  
+  ("F_Rd_Seq",          None, 1, 4,    "read sequence"),
+  ("F_Rd_Ctr",          None, 1, 4,    "read counter"),  
   ("F_Ctrl_Max",        None, None, 0, "number of controller registers"),  
 
   "reader",
@@ -919,7 +919,7 @@ fpgaLatheList = \
   "axis",
 
   ("axisCtl",),
-  ("F_Ld_Axis_Ctl",   0,    1, 1,              "axis control register"),
+  ("F_Ld_Axis_Ctl",   0,    1, 2,              "axis control register"),
   ("F_Ld_Freq",       None, 1, 4,              "frequency"),
   ("F_Sync_Base",     None, "syncAccel", None, "sync registers"),
   ("F_Dist_Base",     None, "distCtr",   None, "distance registers"),
@@ -935,7 +935,7 @@ fpgaLatheList = \
 
   "status registers",
 
-  ("F_Rd_Status",   None, 1, 1,         "status register"),
+  ("F_Rd_Status",   None, 1, 4,         "status register"),
 
   "control registers",
 
@@ -1178,11 +1178,13 @@ fpgaLatheBitList = \
  ("status",),
  ("zAxisEna",    1, 0, "z axis enable flag"),
  ("zAxisDone",   1, 1, "z axis done"),
- ("xAxisEna",    1, 2, "x axis enable flag"),
+ ("zAxisCurDir", 1, 2, "z axis current dir"),
  ("xAxisDone",   1, 3, "x axis done"),
- ("queEmpty",    1, 4, "controller queue empty"),
- ("ctlIdle",     1, 5, "controller idle"),
- ("syncActive",  1, 6, "sync active"),
+ ("xAxisEna",    1, 4, "x axis enable flag"),
+ ("xAxisCurDir", 1, 5, "x axis current dir"),
+ ("queEmpty",    1, 6, "controller queue empty"),
+ ("ctlIdle",     1, 7, "controller idle"),
+ ("syncActive",  1, 8, "sync active"),
 
 # ("",  , , ""),
 

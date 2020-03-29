@@ -1,15 +1,16 @@
-
-# xilinx bits
+# fpga bits
 
 # status register
 
 zAxisEna     = 0x01             # z axis enable flag
 zAxisDone    = 0x02             # z axis done
-xAxisEna     = 0x04             # x axis enable flag
+zAxisCurDir  = 0x04             # z axis current dir
 xAxisDone    = 0x08             # x axis done
-queEmpty     = 0x10             # controller queue empty
-ctlIdle      = 0x20             # controller idle
-syncActive   = 0x40             # sync active
+xAxisEna     = 0x10             # x axis enable flag
+xAxisCurDir  = 0x20             # x axis current dir
+queEmpty     = 0x40             # controller queue empty
+ctlIdle      = 0x80             # controller idle
+syncActive   = 0x100            # sync active
 
 # run control register
 
@@ -84,8 +85,10 @@ synEncEna    = 0x04             # enable encoder
 importList = ( \
  zAxisEna, \
  zAxisDone, \
- xAxisEna, \
+ zAxisCurDir, \
  xAxisDone, \
+ xAxisEna, \
+ xAxisCurDir, \
  queEmpty, \
  ctlIdle, \
  syncActive, \

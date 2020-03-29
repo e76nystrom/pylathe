@@ -1,4 +1,3 @@
-
 # fpga registers
 
 
@@ -138,8 +137,7 @@ F_Phase_Base     = 22           # phase registers
 F_ZAxis_Base     = 24           # z axis registers
 F_XAxis_Base     = 48           # x axis registers
 F_Cmd_Max        = 72           # number of commands
-
-# xilinx table
+# fpga table
 
 xRegTable = ( \
     "F_Noop",                           #   0
@@ -218,7 +216,7 @@ xRegTable = ( \
 
 fpgaSizeTable = ( \
     1,              #   0 F_Noop
-    1,              #   1 F_Rd_Status
+    4,              #   1 F_Rd_Status
     1,              #   2 F_Ld_Run_Ctl
     1,              #   3 F_Ld_Sync_Ctl
     1,              #   4 F_Ld_Cfg_Ctl
@@ -227,8 +225,8 @@ fpgaSizeTable = ( \
     0,              #   7 F_Ctrl_Base, F_Ld_Ctrl_Data
     1,              #   8 F_Ctrl_Base, F_Ctrl_Cmd
     1,              #   9 F_Ctrl_Base, F_Ld_Seq
-    1,              #  10 F_Ctrl_Base, F_Rd_Seq
-    1,              #  11 F_Ctrl_Base, F_Rd_Ctr
+    4,              #  10 F_Ctrl_Base, F_Rd_Seq
+    4,              #  11 F_Ctrl_Base, F_Rd_Ctr
     0,              #  12 F_Read_Base, F_Ld_Read_Data
     0,              #  13 F_Read_Base, F_Read
     2,              #  14 F_Dbg_Freq_Base, F_Ld_Dbg_Freq
@@ -241,7 +239,7 @@ fpgaSizeTable = ( \
     4,              #  21 F_Enc_Base, F_Rd_Cmp_Cyc_Clks
     2,              #  22 F_Phase_Base, F_Ld_Phase_Len
     4,              #  23 F_Phase_Base, F_Rd_Phase_Syn
-    1,              #  24 F_ZAxis_Base, F_Ld_Axis_Ctl
+    2,              #  24 F_ZAxis_Base, F_Ld_Axis_Ctl
     4,              #  25 F_ZAxis_Base, F_Ld_Freq
     4,              #  26 F_ZAxis_Base, F_Sync_Base, F_Ld_D
     4,              #  27 F_ZAxis_Base, F_Sync_Base, F_Ld_Incr1
@@ -265,7 +263,7 @@ fpgaSizeTable = ( \
     4,              #  45 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Ctl
     4,              #  46 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Inc
     4,              #  47 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Back
-    1,              #  48 F_XAxis_Base, F_Ld_Axis_Ctl
+    2,              #  48 F_XAxis_Base, F_Ld_Axis_Ctl
     4,              #  49 F_XAxis_Base, F_Ld_Freq
     4,              #  50 F_XAxis_Base, F_Sync_Base, F_Ld_D
     4,              #  51 F_XAxis_Base, F_Sync_Base, F_Ld_Incr1

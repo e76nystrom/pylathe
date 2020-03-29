@@ -71,9 +71,12 @@ def ldSend():
 
 def ld(cmd, data, size, dbg=True):
     global cmdBuf, ldBuf
+    s0 = rg.fpgaSizeTable[cmd]
     if dbg:
-        print("ld 0x%02x %10d %08x %s" % \
-              (cmd, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
+        print("ld 0x%02x %d %10d %08x %s" % \
+              (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
+    if s0 != size:
+        print("size %d s0 %d" % (size, s0))
     data &= 0xffffffff
     val = list(data.to_bytes(size, byteorder='big'))
     if cmdBuf:

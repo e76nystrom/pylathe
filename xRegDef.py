@@ -1,4 +1,3 @@
-
 # fpga registers
 
 
@@ -98,8 +97,7 @@ XLDTCOUNT        = 49           # load test count
 
 XRDZCTL          = 50           # read control regiisters
 XRDXCTL          = 51           # read control regiisters
-
-# xilinx table
+# fpga table
 
 xRegTable = ( \
     "XNOOP",                            #   0

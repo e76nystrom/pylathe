@@ -1,5 +1,4 @@
-
-# xilinx bits
+# fpga bits
 
 # z control register
 
