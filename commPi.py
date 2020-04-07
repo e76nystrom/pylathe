@@ -416,7 +416,7 @@ class PiLathe(Thread):
         else:
             self.curRPM = 0
 
-        status = rd(rg.F_Rd_Status, False)
+        status = rd(rg.F_Rd_Status, True)
         axis = self.zAxis
         if axis.state != en.AXIS_IDLE:
             if not dbg:
@@ -706,7 +706,7 @@ class PiLathe(Thread):
             self.mvState = en.M_IDLE
             return
         indexClks = rd(rg.F_Rd_Idx_Clks)
-        print("indexClks %d", (indexClks))
+        print("indexClks %d" % (indexClks))
         if indexClks != self.lastIdxClks:
             self.lastIdxClks = indexClks
             if indexClks != 0:
@@ -1128,12 +1128,12 @@ class Axis():
             self.jogSlowAccel.update("zJogSlow", rpi.zJogMin, rpi.zJogMax)
             self.backlashSteps = intRound(rpi.zBacklash * stepsInch)
             if rpi.zDirFlag:
-                rpi.cfgCtl |= bt.cfgZDir
+                rpi.cfgCtl |= bt.cfgZDirInv
             else:
-                rpi.cfgCtl &= ~bt.cfgZDir
+                rpi.cfgCtl &= ~bt.cfgZDirInv
             self.clkSel = \
                 (bt.zClkNone, bt.zClkZFreq, bt.zClkCh, bt.zClkIntClk, \
-                 bt.zClkXFreq, bt.zClkXCh, bt.zClkSpare, bt.zClkDbgFreq)
+                 bt.zClkXFreq, bt.zClkXCh, bt.zClkSpindle, bt.zClkDbgFreq)
             self.dbgBase = en.D_ZMOV
         else:
             self.name = 'x'
@@ -1148,12 +1148,12 @@ class Axis():
             self.jogAccel.update("xJog", rpi.xJogMin, rpi.xJogMax)
             self.jogSlowAccel.update("xJogSlow", rpi.xJogMin, rpi.xJogMax)
             if rpi.xDirFlag:
-                rpi.cfgCtl |= bt.cfgXDir
+                rpi.cfgCtl |= bt.cfgXDirInv
             else:
-                rpi.cfgCtl &= ~bt.cfgXDir
+                rpi.cfgCtl &= ~bt.cfgXDirInv
             self.clkSel = \
                 (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
-                 bt.xClkZFreq, bt.xClkZCh, bt.xClkSpare, bt.xClkDbgFreq)
+                 bt.xClkZFreq, bt.xClkZCh, bt.xClkSpindle, bt.xClkDbgFreq)
             self.dbgBase = en.D_ZMOV
         ld(base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
         axisCtl = bt.ctlInit | bt.ctlSetLoc

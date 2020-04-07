@@ -142,7 +142,7 @@ def rdTest():
     print(result)
     return result
 
-def rd(cmd, size):
+def rd(cmd, size, dbg=False):
     if spi is None:
         return(0)
     msg = [cmd]
@@ -151,6 +151,9 @@ def rd(cmd, size):
     result = int.from_bytes(val, byteorder='big')
     if result & 0x80000000:
         result |= -1 & ~0xffffffff
+    if dbg:
+        print("rd 0x%02x   %10d %08x %s" % \
+              (cmd, result, result&0xffffffff, rg.xRegTable[cmd]))
     return(result)
 
 def readData(index=None, prt=True):
@@ -345,8 +348,9 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
         runCtl = 0
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
-        status = rd(rg.F_Rd_Status, 4)
-        print("status {0:04b}".format(status))
+        status = rd(rg.F_Rd_Status, 4, True)
+        inputs = rd(rg.F_Rd_Inputs, 4)
+        print("status {0:04b}".format(status) + " inputs {0:04b}".format(inputs))
 
     ld(base + rg.F_Dro_Base + rg.F_Ld_Dro, 100, 4)
     ld(base + rg.F_Dro_Base + rg.F_Ld_Dro_End, 0, 4)
@@ -365,7 +369,9 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     ld(rg.F_Ld_Sync_Ctl, syncCtl, 1);
 
     cfgCtl = 0
-    ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 1);
+    cfgCtl = (bt.cfgXPlusInv | bt.cfgXMinusInv | \
+              bt.cfgZPlusInv | bt.cfgZMinusInv)
+    ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 3);
 
     if syncEnc:
         ld(bSyn + rg.F_Ld_D, d, 4) # load d value
@@ -520,6 +526,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
     status = rd(rg.F_Rd_Status, 4)
     print("status {0:04b}".format(status))
+    axisStatus = rd(base + rg.F_Rd_Axis_Status, 4)
+    print("status {0:04b}".format(axisStatus))
 
     axisCtl = bt.ctlInit
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);

@@ -538,17 +538,17 @@ class Setup():
                     fWrite(f, "\n# %s\n\n" % (data))
 
         if True and len(regTables) != 0:
-            for (name, table) in regTables:
-                print(name)
-                for (tRegName, tIndex, tSize, tByteLen) in table:
-                    print("%-48s %2d %2d %2d" % (
-                        tRegName, tIndex, tSize, tByteLen))
-                print()
+            # for (name, table) in regTables:
+            #     print(name)
+            #     for (tRegName, tIndex, tSize, tByteLen) in table:
+            #         print("%-48s %2d %2d %2d" % (
+            #             tRegName, tIndex, tSize, tByteLen))
+            #     print()
             (name, table) = regTables[-1]
             opLenTable = []
             for (tRegName, tIndex, tSize, tByteLen) in table:
                 opLenTable.append(tByteLen)
-            print(xLoc, xName)
+            # print(xLoc, xName)
             self.hexFile(os.path.join(xLoc, xName + ".hex"), opLenTable)
 
         if f is not None:
@@ -570,7 +570,8 @@ class Setup():
                     else:
                         tmp = "    \"%s-%s\"," % (regs[0].strip(), \
                                                   regs[-1].strip())
-                    fWrite(f, "%s# %3d\n" % (tmp.ljust(40), tIndex))
+                    fWrite(f, "%s# %3d x%02x\n" % \
+                           (tmp.ljust(40), tIndex, tIndex))
                 fWrite(f, "    )\n")
 
                 fWrite(f, "\nfpgaSizeTable = ( \\\n")
