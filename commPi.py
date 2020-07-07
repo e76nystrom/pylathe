@@ -19,9 +19,10 @@ WINDOWS = system() == 'Windows'
 spi = None
 
 def ld(cmd, data, size, dbg=True):
+    s0 = rg.fpgaSizeTable[cmd]
     if dbg:
-        print("ld 0x%02x %10d %08x %s" % \
-              (cmd, data, data&0xffffffff, rg.xRegTable[cmd]))
+        print("ld 0x%02x %d %10d %08x %s" % \
+              (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]))
     if spi is None:
         return
     data &= 0xffffffff
@@ -30,8 +31,6 @@ def ld(cmd, data, size, dbg=True):
     spi.xfer2(msg)
 
 def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
-    if dbg:
-        print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
     if spi is None:
         return(0)
     msg = [cmd]
@@ -40,6 +39,10 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     result = int.from_bytes(val, byteorder='big')
     if result & ext:
         result |= -1 & ~mask
+    s0 = rg.fpgaSizeTable[cmd]
+    if dbg:
+        print("ld 0x%02x %d %10d %08x %s" % \
+              (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
     return(result)
 
 class Serial:
@@ -416,7 +419,7 @@ class PiLathe(Thread):
         else:
             self.curRPM = 0
 
-        status = rd(rg.F_Rd_Status, True)
+        status = rd(rg.F_Rd_Status)
         axis = self.zAxis
         if axis.state != en.AXIS_IDLE:
             if not dbg:

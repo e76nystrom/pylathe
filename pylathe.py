@@ -4,6 +4,8 @@
 ################################################################################
 from __future__ import print_function
 
+#--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt
+
 import math
 import os
 import re
@@ -6922,8 +6924,10 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Motor Steps", cf.zMotorSteps, 'd'), \
             ("Micro Steps", cf.zMicroSteps, 'd'), \
             ("Motor Ratio", cf.zMotorRatio, 'fs'), \
+
             ("Backlash", cf.zBacklash, 'f'), \
             ("Backlash Incrment", cf.zBackInc, 'f'), \
+
             ("Accel Unit/Sec2", cf.zAccel, 'fs'), \
             ("Min Speed U/Min", cf.zMinSpeed, 'fs'), \
             ("Max Speed U/Min", cf.zMaxSpeed, 'fs'), \
@@ -6938,6 +6942,12 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bInvert MPG", cf.zInvMpg, None), \
             ("DRO Inch", cf.zDROInch, 'd'), \
             ("bInv DRO", cf.zInvDRO, None), \
+
+            ("bLimits Enable", cf.zLimEna, None), \
+            ("bNeg Limit Invert", cf.zLimNegInv, None), \
+            ("bPos Limit Invert", cf.zLimPosInv, None), \
+            ("bHome Enable", cf.zHomeEna, None), \
+            ("bHome Invert", cf.zHomeInv, None), \
         )
         self.fieldList(sizerG, self.fields)
 
@@ -6995,10 +7005,17 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bInvert Dir", cf.xInvDir, None), \
             ("bInvert MPG", cf.xInvMpg, None), \
             ("Probe Dist", cf.xProbeDist, 'f'), \
+
+            ("bHome Enable", cf.xHomeEna, None), \
+            ("bHome Invert", cf.xHomeInv, None), \
             ("Home Dist", cf.xHomeDist, 'f'), \
             ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
             ("Backoff Dist", cf.xHomeBackoffDist, 'f'), \
             ("bHome Dir", cf.xHomeDir, None), \
+
+            ("bLimits Enable", cf.xLimEna, None), \
+            ("bNeg Limit Invert", cf.xLimNegInv, None), \
+            ("bPos Limit Invert", cf.xLimPosInv, None), \
         )
         if DRO:
             self.fields += (
@@ -7271,6 +7288,9 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
             ("bMpg Jog Debug", cf.cfgJogDebug, None), \
+
+            ("bEnable EStop", cf.cfgEStop, None), \
+            ("bInvert EStop", cf.cfgEStopInv, None), \
         )
         if FPGA:
                 # ("Encoder", cf.cfgEncoder, 'd'), \

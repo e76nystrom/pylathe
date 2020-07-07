@@ -249,7 +249,19 @@ CURRENT_OP           = 145
 # limit override
 
 LIMIT_OVERRIDE       = 146
-MAX_PARM             = 147
+Z_LIM_ENA            = 147
+Z_LIM_NEG_INV        = 148
+Z_LIM_POS_INV        = 149
+Z_HOME_ENA           = 150
+Z_HOME_INV           = 151
+X_LIM_ENA            = 152
+X_LIM_NEG_INV        = 153
+X_LIM_POS_INV        = 154
+X_HOME_ENA           = 155
+X_HOME_INV           = 156
+E_STOP_ENA           = 157
+E_STOP_INV           = 158
+MAX_PARM             = 159
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -399,5 +411,17 @@ parmTable = ( \
     ('MAX_SPEED', 'int16_t', 'maxSpeed'),
     ('CURRENT_OP', 'char', 'currentOp'),
     ('LIMIT_OVERRIDE', 'char', 'limitOverride'),
+    ('Z_LIM_ENA', 'char', 'zLimEna'),
+    ('Z_LIM_NEG_INV', 'char', 'zLimNegInv'),
+    ('Z_LIM_POS_INV', 'char', 'zLimPosInv'),
+    ('Z_HOME_ENA', 'char', 'zHomeEna'),
+    ('Z_HOME_INV', 'char', 'zHomeInv'),
+    ('X_LIM_ENA', 'char', 'xLimEna'),
+    ('X_LIM_NEG_INV', 'char', 'xLimNegInv'),
+    ('X_LIM_POS_INV', 'char', 'xLimPosInv'),
+    ('X_HOME_ENA', 'char', 'xHomeEna'),
+    ('X_HOME_INV', 'char', 'xHomeInv'),
+    ('E_STOP_ENA', 'char', 'eStopEna'),
+    ('E_STOP_INV', 'char', 'eStopInv'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
