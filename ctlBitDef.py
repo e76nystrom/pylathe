@@ -13,8 +13,8 @@ JOGSLOW          = (6 << 0)     # slow jog for home or probe
 SYN_START        = (1 << 4)     # start on sync pulse
 SYN_LEFT         = (1 << 5)     # start sync left
 SYN_TAPER        = (1 << 6)     # taper on other axis
-AX_FIND_HOME     = (1 << 7)     # find home
-AX_CLEAR_HOME    = (1 << 8)     # move off of home
+FIND_HOME        = (1 << 7)     # find home
+CLEAR_HOME       = (1 << 8)     # move off of home
 FIND_PROBE       = (1 << 9)     # find probe
 CLEAR_PROBE      = (1 << 10)    # move off of probe
 DRO_POS          = (1 << 11)    # use dro for moving
@@ -40,8 +40,6 @@ ZNEG             = -1           # z in negative direction
 
 X_SYN_START      = (1 << 4)     # start on sync pulse
 Z_SYN_TAPER      = (1 << 6)     # taper on z
-XFIND_HOME       = (1 << 7)     # find home
-XCLEAR_HOME      = (1 << 8)     # move off of home
 
 # x direction
 
@@ -56,8 +54,8 @@ FEED_METRIC      = 2            # feed mm per rev
 
 # home flag
 
-FIND_HOME        = (1 << 0)     # 
-CLEAR_HOME       = (1 << 1)     # 
+HOME_SET         = (1 << 0)     # 
+HOME_CLR         = (1 << 1)     # 
 PROBE_SET        = (1 << 2)     # 
 PROBE_CLR        = (1 << 3)     # 
 
@@ -79,9 +77,11 @@ MV_READ_X        = (1 << 1)     # pause x may change
 MV_READ_Z        = (1 << 2)     # pause z may change
 MV_ACTIVE        = (1 << 3)     # movement active
 MV_LIMIT         = (1 << 4)     # at limit switch
-MV_HOME_ACTIVE   = (1 << 5)     # home active
+MV_XHOME_ACTIVE  = (1 << 5)     # home active
 MV_XHOME         = (1 << 6)     # X home success
-MV_MEASURE       = (1 << 7)     # pause for measurement
+MV_ZHOME_ACTIVE  = (1 << 7)     # home active
+MV_ZHOME         = (1 << 8)     # X home success
+MV_MEASURE       = (1 << 9)     # pause for measurement
 
 # pause flags
 

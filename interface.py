@@ -5,6 +5,9 @@ configList = \
   "system config",
   
     ('cfgCmdDis', 'config disable sending commands'),
+    ('cfgCommonLimits', 'config all limit switches on one pin'),
+    ('cfgLimitsEnabled', 'config limits enabled'),
+    ('cfgCommonHome', 'config all switches on one pin'),
     ('cfgDbgSave', 'config save debug info'),
     ('cfgDRO', 'config dro present'),
     ('cfgDraw', 'config draw paths'),
@@ -225,6 +228,7 @@ configList = \
   "x axis config",
 
     ('xAccel', 'x axis '),
+    ('xBackInc', 'z axis distance to go past for taking out backlash'),
     ('xBacklash', 'x axis '),
     ('xDoneDelay', 'x axis done to read dro delay'),
     ('xDroFinalDist', 'x dro final approach dist'),
@@ -272,9 +276,19 @@ configList = \
     ('zAccel', 'z axis '),
     ('zBackInc', 'z axis distance to go past for taking out backlash'),
     ('zBacklash', 'z axis '),
+    ('zDoneDelay', 'z axis done to read dro delay'),
+    ('zDroFinalDist', 'z dro final approach dist'),
+    ('zDROPos', 'z axis use dro to go to correct position'),
     ('zDROInch', 'z axis '),
+    ('zHomeBackoffDist', 'z axis '),
+    ('zHomeDir', 'z axis '),
+    ('zHomeDist', 'z axis '),
     ('zHomeEna', 'z axis '),
+    ('zHomeEnd', 'z axis '),
     ('zHomeInv', 'z axis '),
+    ('zHomeLoc', 'z axis '),
+    ('zHomeSpeed', 'z axis '),
+    ('zHomeStart', 'z axis '),
     ('zInvDRO', 'z axis '),
     ('zInvDir', 'z axis '),
     ('zInvEnc', 'z axis '),
@@ -296,7 +310,6 @@ configList = \
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),
-    ('zDROPos', 'z axis use dro to go to correct position'),
 
   "z axis position config",
 
@@ -336,6 +349,7 @@ cmdList = \
     ("ZJSPEED", "zJogSpeed", "start z jog at speed"),
     ("ZSTOP", "zStop", "stop z movement"),
     ("ZSETLOC", "", ""),
+    ("ZHOMEAXIS", "zHomeAxis", "z home axis"),
     
     "x motion commands",
     
@@ -538,13 +552,16 @@ parmList = \
 
     ("Z_HOME_OFFSET", "z home offset", "int"),
 
-    "z dro",
+    "x home offset",
 
-    ("Z_DRO_POS", "z dro location", "int"),
-    ("Z_DRO_OFFSET", "z dro to zero", "int"),
-    ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
-    ("Z_DRO_INVERT", "z dro invert", "int"),
-    ("Z_USE_DRO", "z use dro for position", "char"),
+    ("X_HOME_OFFSET", "x home offset", "int"),
+
+    "z home parameters",
+
+    ("Z_HOME_SPEED", "z final homing speed", "float"),
+    ("Z_HOME_DIST", "z max homing distance", "float"),
+    ("Z_HOME_BACKOFF_DIST", "z home backoff dist", "float"),
+    ("Z_HOME_DIR", "z homing direction", "int"),
 
     "x home parameters",
 
@@ -559,11 +576,17 @@ parmList = \
     ("X_HOME_START", "x start of home signal", "int"),
     ("X_HOME_END", "x end of home signal", "int"),
 
-    # "x home offset",
+    "z dro",
 
-    ("X_HOME_OFFSET", "x home offset", "int"),
+    ("Z_DRO_POS", "z dro location", "int"),
+    ("Z_DRO_OFFSET", "z dro to zero", "int"),
+    ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
+    ("Z_DRO_INVERT", "z dro invert", "int"),
+    ("Z_USE_DRO", "z use dro for position", "char"),
+    ("Z_DONE_DELAY", "z done to read dro delay", "int"),
+    ("Z_DRO_FINAL_DIST", "z final approach distance", "int"),
 
-    # "x dro",
+    "x dro",
 
     ("X_DRO_POS", "x dro location", "int"),
     ("X_DRO_OFFSET", "x dro to zero", "int"),
@@ -673,9 +696,14 @@ parmList = \
 
     ("CURRENT_OP", "current operation", "char"),
 
-    "limit override",
+    "global limits and home",
 
     ("LIMIT_OVERRIDE", "override limit switches", "char"),
+    ("COMMON_LIMITS", "all limit switches on one pin", "char"),
+    ("LIMITS_ENABLED", "limits enabled", "char"),
+    ("COMMON_HOME", "all home switches on one pin", "char"),
+
+    "z limits and home",
 
     ("Z_LIM_ENA", "z limit enable", "char"),
     ("Z_LIM_NEG_INV", "z negative limit invert", "char"),
@@ -684,12 +712,16 @@ parmList = \
     ("Z_HOME_ENA", "z home enable", "char"),
     ("Z_HOME_INV", "z home invert", "char"),
 
+    "x limits and home",
+
     ("X_LIM_ENA", "x limit enable", "char"),
     ("X_LIM_NEG_INV", "x negative limit invert", "char"),
     ("X_LIM_POS_INV", "x Positive limit Invert", "char"),
 
     ("X_HOME_ENA", "x home enable", "char"),
     ("X_HOME_INV", "x home invert", "char"),
+
+    "e stop",
 
     ("E_STOP_ENA", "enable estop", "char"),
     ("E_STOP_INV", "invert estop siganl", "char"),
@@ -725,8 +757,8 @@ regList =\
     ("SYN_START",  "(1 << 4)", "start on sync pulse"),
     ("SYN_LEFT",   "(1 << 5)", "start sync left"),
     ("SYN_TAPER",  "(1 << 6)", "taper on other axis"),
-    ("AX_FIND_HOME",  "(1 << 7)", "find home"),
-    ("AX_CLEAR_HOME", "(1 << 8)", "move off of home"),
+    ("FIND_HOME",  "(1 << 7)", "find home"),
+    ("CLEAR_HOME", "(1 << 8)", "move off of home"),
 
     ("FIND_PROBE",  "(1 << 9)", "find probe"),
     ("CLEAR_PROBE", "(1 << 10)", "move off of probe"),
@@ -753,8 +785,6 @@ regList =\
     
     ("X_SYN_START", "(1 << 4)", "start on sync pulse"),
     ("Z_SYN_TAPER", "(1 << 6)", "taper on z"),
-    ("XFIND_HOME",  "(1 << 7)", "find home"),
-    ("XCLEAR_HOME", "(1 << 8)", "move off of home"),
      
     "x direction",
     
@@ -769,8 +799,8 @@ regList =\
 
     "home flag",
 
-    ("FIND_HOME",  "(1 << 0)", ""),
-    ("CLEAR_HOME", "(1 << 1)", ""),
+    ("HOME_SET",   "(1 << 0)", ""),
+    ("HOME_CLR",   "(1 << 1)", ""),
     ("PROBE_SET",  "(1 << 2)", ""),
     ("PROBE_CLR",  "(1 << 3)", ""),
  
@@ -792,9 +822,11 @@ regList =\
     ("MV_READ_Z",      "(1 << 2)", "pause z may change"),
     ("MV_ACTIVE",      "(1 << 3)", "movement active"),
     ("MV_LIMIT",       "(1 << 4)", "at limit switch"),
-    ("MV_HOME_ACTIVE", "(1 << 5)", "home active"),
+    ("MV_XHOME_ACTIVE", "(1 << 5)", "home active"),
     ("MV_XHOME",       "(1 << 6)", "X home success"),
-    ("MV_MEASURE",     "(1 << 7)", "pause for measurement"),
+    ("MV_ZHOME_ACTIVE", "(1 << 7)", "home active"),
+    ("MV_ZHOME",       "(1 << 8)", "X home success"),
+    ("MV_MEASURE",     "(1 << 9)", "pause for measurement"),
 
     "pause flags",
 

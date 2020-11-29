@@ -40,22 +40,22 @@ class ConfigInfo():
         self.infoData = [None for i in range(size)]
 
     def saveList(self, file, varList):
-        f = open(file, 'w')
+        f = open(file, 'wb')
         for index in varList:
             name = self.configTable[index]
             val = self.info[index]
             str = self.formatConfig(name, val)
             if str is not None:
-                f.write(str)
+                f.write(str.encode())
         f.close()
 
     def saveInfo(self, file):
-        f = open(file, 'w')
+        f = open(file, 'wb')
         for index, (val) in enumerate(self.info):
             name = self.configTable[index]
             str = self.formatConfig(name, val)
             if str is not None:
-                f.write(str)
+                f.write(str.encode())
         f.close()
 
     def updateFieldInfoData(self, fields):

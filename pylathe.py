@@ -161,6 +161,7 @@ xPosition = 0.0
 xHomeOffset = 0.0
 
 xHomed = False
+zHomed = False
 done = False
 
 MAX_PRIME = 127
@@ -3972,7 +3973,6 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt = buttonRepeat = ButtonRepeat()
         self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
-        self.xHome = False
         self.probeAxis = 0
         self.probeLoc = 0.0
         self.probeStatus = 0
@@ -3980,19 +3980,24 @@ class JogPanel(wx.Panel, FormRoutines):
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
-        self.lastZOffset = 0.0
-        self.lastXOffset = 0.0
+
         self.zStepsInch = 0
-        self.xStepsInch = 0
+        self.zHome = False
         self.zPosition = None
+        self.lastZOffset = 0.0
         self.zHomeOffset = None
+
+        self.xStepsInch = 0
+        self.xHome = False
         self.xPosition = None
+        self.lastXOffset = 0.0
         self.xHomeOffset = None
         if DRO:
             self.zDROInch = 0
-            self.xDROInch = 0
             self.zDROPostition = None
             self.zDROOffset = None
+
+            self.xDROInch = 0
             self.xDROPostition = None
             self.xDROOffset = None
             # self.xDroDiam = False
@@ -4786,8 +4791,11 @@ class JogPanel(wx.Panel, FormRoutines):
         if probeLoc is not None:
             self.probeLoc = probeLoc
 
-    def homeDone(self, status):
-        self.xHome = False
+    def homeDone(self, axis, status):
+        if axis == AXIS_X:
+            self.xHome = False
+        elif axis == AXIS_Z:
+            self.zHome = False
         self.probeStatus = 0
         print(status)
         stdout.flush()
@@ -4880,6 +4888,9 @@ class JogPanel(wx.Panel, FormRoutines):
                 stdout.flush()
             self.mvStatus = mvStatus
 
+            if self.zHome:
+                pass
+            
             if self.xHome:
                 if self.probeAxis == HOME_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
@@ -5239,10 +5250,12 @@ class PosMenu(wx.Menu):
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnProbe, item)
 
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
+            self.Append(item)
             if self.axis == AXIS_X:
-                item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
-                self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+            elif self.axis == AXIS_Z:
+                self.Bind(wx.EVT_MENU, self.OnHomeZ, item)
 
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Go to")
             self.Append(item)
@@ -5301,8 +5314,33 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.X_DRO_POS, 0)
                 self.jP.updateXDroPos(xLocation)
-            self.jP.homeDone("home success")
+            self.jP.homeDone("x home success")
             xHomed = True
+        self.jP.focus()
+
+    def OnHomeZ(self, e):
+        global zHomeOffset, zHomed
+        if not HOME_IN_PLACE:
+            comm.queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
+            comm.queParm(pm.Z_HOME_BACKOFF_DIST, \
+                         cfg.getInfoData(cf.zHomeBackoffDist))
+            comm.queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
+            comm.queParm(pm.Z_HOME_DIR, 1 if cfg.getBoolInfoData(cf.zHomeDir) \
+                         else -1)
+            comm.command(cm.ZHOMEAXIS)
+            self.jP.probe(HOME_Z)
+        else: 
+            zLocation = float(jogPanel.zPos.GetValue())
+            zHomeOffset = 0 - zLocation
+            jogPanel.zHomeOffset.value = zHomeOffset
+            comm.setParm(pm.Z_LOC, 0)
+            comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(zHomeOffset * jogPanel.zStepsInch))
+            if DRO:
+                comm.setParm(pm.Z_DRO_POS, 0)
+                self.jP.updateZDroPos(zLocation)
+            self.jP.homeDone("Z home success")
+            zHomed = True
         self.jP.focus()
 
     def OnGoto(self, e):
@@ -6533,6 +6571,12 @@ class MainFrame(wx.Frame):
                              cfg.getBoolInfoData(cf.spVarSpeed))
                 comm.queParm(pm.FPGA_FREQUENCY, \
                              cfg.getIntInfoData(cf.cfgFpgaFreq))
+                comm.queParm(pm.COMMON_LIMITS, \
+                             cfg.getBoolInfoData(cf.cfgCommonLimits))
+                comm.queParm(pm.LIMITS_ENABLED, \
+                             cfg.getBoolInfoData(cf.cfgLimitsEnabled))
+                comm.queParm(pm.COMMON_HOME, \
+                             cfg.getBoolInfoData(cf.cfgCommonHome))
                 comm.command(cm.CMD_SETUP)
                 
                 sendSpindleData()
@@ -6935,19 +6979,32 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Max U/Min", cf.zJogMax, 'fs'), \
             ("MPG Jog Increment", cf.zMpgInc, 'fs'), \
             ("MPG Jog Max Dist", cf.zMpgMax, 'fs'), \
-            ("Park Loc", cf.zParkLoc, 'f'), \
-            ("Probe Dist", cf.zProbeDist, 'f'), \
-            ("Probe Speed", cf.zProbeSpeed, 'fs'), \
+
             ("bInvert Dir", cf.zInvDir, None), \
             ("bInvert MPG", cf.zInvMpg, None), \
-            ("DRO Inch", cf.zDROInch, 'd'), \
-            ("bInv DRO", cf.zInvDRO, None), \
+
+            ("Park Loc", cf.zParkLoc, 'f'), \
+            ("Probe Dist", cf.zProbeDist, 'f'), \
+            ("Home/Probe Speed", cf.zProbeSpeed, 'fs'), \
+
+            ("bHome Enable", cf.zHomeEna, None), \
+            ("bHome Invert", cf.zHomeInv, None), \
+            ("Home Dist", cf.zHomeDist, 'f'), \
+            ("Backoff Dist", cf.zHomeBackoffDist, 'f'), \
+            ("bHome Dir", cf.zHomeDir, None), \
 
             ("bLimits Enable", cf.zLimEna, None), \
             ("bNeg Limit Invert", cf.zLimNegInv, None), \
             ("bPos Limit Invert", cf.zLimPosInv, None), \
-            ("bHome Enable", cf.zHomeEna, None), \
-            ("bHome Invert", cf.zHomeInv, None), \
+        )
+
+        if DRO:
+            self.fields += (
+                ("DRO Inch", cf.zDROInch, 'd'), \
+                ("bInv DRO", cf.zInvDRO, None), \
+                ("bDRO Position", cf.zDROPos, None), \
+                ("DRO Final Dist", cf.zDroFinalDist, 'f'), \
+                ("DRO Read Delay ms", cf.zDoneDelay, None), \
         )
         self.fieldList(sizerG, self.fields)
 
@@ -6993,7 +7050,10 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Motor Steps", cf.xMotorSteps, 'd'), \
             ("Micro Steps", cf.xMicroSteps, 'd'), \
             ("Motor Ratio", cf.xMotorRatio, 'fs'), \
+
             ("Backlash", cf.xBacklash, 'f'), \
+            ("Backlash Incrment", cf.xBackInc, 'f'), \
+
             ("Accel Unit/Sec2", cf.xAccel, 'fs'), \
             ("Min Speed U/Min", cf.xMinSpeed, 'fs'), \
             ("Max Speed U/Min", cf.xMaxSpeed, 'fs'), \
@@ -7001,15 +7061,17 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Max U/Min", cf.xJogMax, 'fs'), \
             ("MPG Jog Increment", cf.xMpgInc, 'fs'), \
             ("MPG Jog Max Dist", cf.xMpgMax, 'fs'), \
-            ("Park Loc", cf.xParkLoc, 'f'), \
+
             ("bInvert Dir", cf.xInvDir, None), \
             ("bInvert MPG", cf.xInvMpg, None), \
+
+            ("Park Loc", cf.xParkLoc, 'f'), \
             ("Probe Dist", cf.xProbeDist, 'f'), \
+            ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
 
             ("bHome Enable", cf.xHomeEna, None), \
             ("bHome Invert", cf.xHomeInv, None), \
             ("Home Dist", cf.xHomeDist, 'f'), \
-            ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
             ("Backoff Dist", cf.xHomeBackoffDist, 'f'), \
             ("bHome Dir", cf.xHomeDir, None), \
 
@@ -7288,6 +7350,10 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
             ("bMpg Jog Debug", cf.cfgJogDebug, None), \
+
+            ("bCommon Limits", cf.cfgCommonLimits, None), \
+            ("bLimits Enabled", cf.cfgLimitsEnabled, None), \
+            ("bCommon Home", cf.cfgCommonHome, None), \
 
             ("bEnable EStop", cf.cfgEStop, None), \
             ("bInvert EStop", cf.cfgEStopInv, None), \
