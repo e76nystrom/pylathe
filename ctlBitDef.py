@@ -76,12 +76,13 @@ MV_PAUSE         = (1 << 0)     # movement paused
 MV_READ_X        = (1 << 1)     # pause x may change
 MV_READ_Z        = (1 << 2)     # pause z may change
 MV_ACTIVE        = (1 << 3)     # movement active
-MV_LIMIT         = (1 << 4)     # at limit switch
-MV_XHOME_ACTIVE  = (1 << 5)     # home active
-MV_XHOME         = (1 << 6)     # X home success
-MV_ZHOME_ACTIVE  = (1 << 7)     # home active
-MV_ZHOME         = (1 << 8)     # X home success
-MV_MEASURE       = (1 << 9)     # pause for measurement
+MV_XLIMIT        = (1 << 4)     # at limit switch
+MV_ZLIMIT        = (1 << 5)     # at limit switch
+MV_XHOME_ACTIVE  = (1 << 6)     # x home active
+MV_XHOME         = (1 << 7)     # x home success
+MV_ZHOME_ACTIVE  = (1 << 8)     # z home active
+MV_ZHOME         = (1 << 9)     # z home success
+MV_MEASURE       = (1 << 10)    # pause for measurement
 
 # pause flags
 

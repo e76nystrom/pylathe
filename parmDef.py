@@ -261,22 +261,31 @@ MAX_SPEED            = 150
 
 CURRENT_OP           = 151
 
-# limit override
+# global limits and home
 
 LIMIT_OVERRIDE       = 152
 COMMON_LIMITS        = 153
 LIMITS_ENABLED       = 154
 COMMON_HOME          = 155
+
+# z limits and home
+
 Z_LIM_ENA            = 156
 Z_LIM_NEG_INV        = 157
 Z_LIM_POS_INV        = 158
 Z_HOME_ENA           = 159
 Z_HOME_INV           = 160
+
+# x limits and home
+
 X_LIM_ENA            = 161
 X_LIM_NEG_INV        = 162
 X_LIM_POS_INV        = 163
 X_HOME_ENA           = 164
 X_HOME_INV           = 165
+
+# e stop
+
 E_STOP_ENA           = 166
 E_STOP_INV           = 167
 MAX_PARM             = 168

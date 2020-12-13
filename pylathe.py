@@ -4875,7 +4875,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 text  += 'P'
             if mvStatus & ct.MV_ACTIVE:
                 text += 'A'
-            if mvStatus & ct.MV_LIMIT:
+            if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
                 text += 'L'
             else:
                 if self.overrideSet:
@@ -5043,7 +5043,7 @@ class JogPanel(wx.Panel, FormRoutines):
         val = self.limitOverride.GetValue()
         print("override %s" % (val))
         stdout.flush()
-        if val and ((self.mvStatus & ct.MV_LIMIT) == 0):
+        if val and ((self.mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT)) == 0):
             self.limitOverride.SetValue(False)
             return
         self.overrideSet = val
