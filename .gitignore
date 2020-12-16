@@ -10,9 +10,7 @@
 *.opendb
 *.pyc
 *.pyd
-*.pyproj
 *.save*
-*.sln
 *.xls*
 *_wrap.c
 *~
@@ -37,6 +35,8 @@ posInfo.txt
 .vs/
 .vscode/
 Backup/
+Backup1/
+cfg/
 Debug/
 dbg/
 doc/
