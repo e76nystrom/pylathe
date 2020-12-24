@@ -4896,7 +4896,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val is not None:
                         if val & ct.HOME_SUCCESS:
-                            self.homeDone("home success")
+                            self.homeDone(AXIS_X, "home success")
                             xHomed = True
                             if not EXT_DRO:
                                 comm.setParm(pm.X_LOC, 0)
@@ -4906,7 +4906,22 @@ class JogPanel(wx.Panel, FormRoutines):
                             else:
                                 self.setXFromExt()
                         elif val & ct.HOME_FAIL:
-                            self.homeDone("home success")
+                            self.homeDone(AXIS_X, "home fail")
+                elif self.probeAxis == HOME_Z:
+                    val = comm.getParm(pm.Z_HOME_STATUS)
+                    if val is not None:
+                        if val & ct.HOME_SUCCESS:
+                            self.homeDone(AXIS_Z, "home success")
+                            zHomed = True
+                            if not EXT_DRO:
+                                comm.setParm(pm.Z_LOC, 0)
+                                if DRO:
+                                    comm.setParm(pm.Z_DRO_POS, 0)
+                                    self.updateZDroPos(zLocation)
+                            else:
+                                self.setZFromExt()
+                        elif val & ct.HOME_FAIL:
+                            self.homeDone(AXIS_Z, "home fail")
                 elif self.probeAxis == AXIS_Z:
                     val = comm.getParm(pm.Z_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
@@ -4920,9 +4935,9 @@ class JogPanel(wx.Panel, FormRoutines):
                               (z, zLocation, self.probeLoc, zHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone("z probe success")
+                        self.homeDone(AXIS_Z, "z probe success")
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone("z probe failure")
+                        self.homeDone(AXIS_Z, "z probe failure")
                 elif self.probeAxis == AXIS_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
@@ -4936,9 +4951,9 @@ class JogPanel(wx.Panel, FormRoutines):
                               (x, xLocation, self.probeLoc, xHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone("x probe success")
+                        self.homeDone(AXIS_X, "x probe success")
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone("x probe failure")
+                        self.homeDone(AXIS_X, "x probe failure")
 
     def updateError(self, text):
         self.setStatus(text)
@@ -5314,7 +5329,7 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.X_DRO_POS, 0)
                 self.jP.updateXDroPos(xLocation)
-            self.jP.homeDone("x home success")
+            self.jP.homeDone(AXIS_X, "x home success")
             xHomed = True
         self.jP.focus()
 
@@ -5339,7 +5354,7 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.Z_DRO_POS, 0)
                 self.jP.updateZDroPos(zLocation)
-            self.jP.homeDone("Z home success")
+            self.jP.homeDone(AXIS_Z, "Z home success")
             zHomed = True
         self.jP.focus()
 
