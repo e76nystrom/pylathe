@@ -349,7 +349,9 @@ class Setup():
                                 fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                             (tmp.ljust(32), index, \
                                              index, comment))
-                            fWrite(cFile, "};\n\n#endif\n")
+                            fWrite(cFile, "};\n\n#else\n\n")
+                            fWrite(cFile, "extern const char *%s[];\n" % (enum))
+                            fWrite(cFile, "\n#endif\n")
                         # fWrite(jFile, " %s\n" % (data))
                     if data.startswith("}") and f is not None:
                         fWrite(f, "\n%s = ( \\\n" % (enum))
