@@ -177,6 +177,7 @@ LEFT      = 0x040
 RIGHT     = 0x080
 CENTER    = 0x100
 
+HOME_Z = -2
 HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
@@ -957,7 +958,11 @@ class MoveCommands():
         self.queMove(en.MOVE_Z_OFFSET, 0)
 
     def moveZ(self, zLocation, flag=ct.CMD_MAX, backlash=0.0):
-        self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
+        if (flag & ct.DRO_POS) == 0:
+            val = round((zLocation + backlash) * jogPanel.zStepsInch)
+        else:
+            val = round((zLocation + backlash) * jogPanel.zDROInch)
+        self.queMoveF(en.MOVE_Z, flag, val)
         self.drawLineZ(zLocation)
         if self.dbg:
             print("moveZ   %7.4f" % (zLocation))
@@ -1215,7 +1220,7 @@ def sendZData(send=False):
             zSyncExt.setMicroSteps(microSteps)
                        
         if DRO:
-            jogPanel.zDROInch = cfg.getIntInfoData(cf.zDROInch)
+            jogPanel.zDROInch = droInch = cfg.getIntInfoData(cf.zDROInch)
 
         # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
         # stdout.flush()
@@ -1225,6 +1230,19 @@ def sendZData(send=False):
                 queParm(pm.Z_DRO_COUNT_INCH, jogPanel.zDROInch)
                 queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
                 queParm(pm.Z_USE_DRO, cfg.getBoolInfoData(cf.zDROPos))
+                queParm(pm.Z_DONE_DELAY, cfg.getIntInfoData(cf.zDoneDelay))
+                queParm(pm.Z_DRO_FINAL_DIST,
+                        round(cfg.getFloatInfoData(cf.zDroFinalDist) * \
+                              droInch))
+                stepF = factor.factor(stepsInch)
+                droF = factor.factor(droInch)
+                (stepF, droF) = factor.remFactors(stepF, droF)
+                stepFactor = factor.combineFactors(stepF)
+                droFactor = factor.combineFactors(droF)
+                queParm(pm.Z_STEP_FACTOR, stepFactor)
+                queParm(pm.Z_DRO_FACTOR, droFactor)
+            else:
+                queParm(pm.Z_DONE_DELAY, 0)
 
             val = jogPanel.combo.GetValue()
             try:
@@ -3973,7 +3991,6 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt = buttonRepeat = ButtonRepeat()
         self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
-        self.probeAxis = 0
         self.probeLoc = 0.0
         self.probeStatus = 0
         self.mvStatus = 0
@@ -3981,14 +3998,14 @@ class JogPanel(wx.Panel, FormRoutines):
         self.currentPanel = None
         self.currentControl = None
 
+        self.homeOrProbe = None
+
         self.zStepsInch = 0
-        self.zHome = False
         self.zPosition = None
         self.lastZOffset = 0.0
         self.zHomeOffset = None
 
         self.xStepsInch = 0
-        self.xHome = False
         self.xPosition = None
         self.lastXOffset = 0.0
         self.xHomeOffset = None
@@ -4786,18 +4803,21 @@ class JogPanel(wx.Panel, FormRoutines):
         stdout.flush()
 
     def probe(self, axis, probeLoc=None):
-        self.xHome = True
-        self.probeAxis = axis
+        self.homeOrProbe = axis
         if probeLoc is not None:
             self.probeLoc = probeLoc
 
-    def homeDone(self, axis, status):
-        if axis == AXIS_X:
-            self.xHome = False
-        elif axis == AXIS_Z:
-            self.zHome = False
+    def homeDone(self, status):
+        if self.homeOrProbe is not None:
+            homeOrProbe = self.homeOrProbe
+            self.homeOrProbe = None
+            axis = ""
+            if homeOrProbe == HOME_X or homeOrProbe == AXIS_X:
+                axis = 'x '
+            elif homeOrProbe == HOME_Z or homeOrProbe == AXIS_Z:
+                axis = 'z '
+            print(axis + status)
         self.probeStatus = 0
-        print(status)
         stdout.flush()
 
     def updateAll(self, val):
@@ -4888,15 +4908,12 @@ class JogPanel(wx.Panel, FormRoutines):
                 stdout.flush()
             self.mvStatus = mvStatus
 
-            if self.zHome:
-                pass
-            
-            if self.xHome:
-                if self.probeAxis == HOME_X:
+            if self.homeOrProbe is not None:
+                if self.homeOrProbe == HOME_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val is not None:
                         if val & ct.HOME_SUCCESS:
-                            self.homeDone(AXIS_X, "home success")
+                            self.homeDone("home success")
                             xHomed = True
                             if not EXT_DRO:
                                 comm.setParm(pm.X_LOC, 0)
@@ -4906,12 +4923,12 @@ class JogPanel(wx.Panel, FormRoutines):
                             else:
                                 self.setXFromExt()
                         elif val & ct.HOME_FAIL:
-                            self.homeDone(AXIS_X, "home fail")
-                elif self.probeAxis == HOME_Z:
+                            self.homeDone("home fail")
+                elif self.homeOrProbe == HOME_Z:
                     val = comm.getParm(pm.Z_HOME_STATUS)
                     if val is not None:
                         if val & ct.HOME_SUCCESS:
-                            self.homeDone(AXIS_Z, "home success")
+                            self.homeDone("home success")
                             zHomed = True
                             if not EXT_DRO:
                                 comm.setParm(pm.Z_LOC, 0)
@@ -4921,8 +4938,8 @@ class JogPanel(wx.Panel, FormRoutines):
                             else:
                                 self.setZFromExt()
                         elif val & ct.HOME_FAIL:
-                            self.homeDone(AXIS_Z, "home fail")
-                elif self.probeAxis == AXIS_Z:
+                            self.homeDone("home fail")
+                elif self.homeOrProbe == AXIS_Z:
                     val = comm.getParm(pm.Z_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
                         zHomeOffset = zLocation - self.probeLoc
@@ -4935,10 +4952,10 @@ class JogPanel(wx.Panel, FormRoutines):
                               (z, zLocation, self.probeLoc, zHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone(AXIS_Z, "z probe success")
+                        self.homeDone("probe success")
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_Z, "z probe failure")
-                elif self.probeAxis == AXIS_X:
+                        self.homeDone("probe failure")
+                elif self.homeOrProbe == AXIS_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
                         xHomeOffset = xLocation - self.probeLoc
@@ -4951,9 +4968,9 @@ class JogPanel(wx.Panel, FormRoutines):
                               (x, xLocation, self.probeLoc, xHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone(AXIS_X, "x probe success")
+                        self.homeDone("probe success")
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_X, "x probe failure")
+                        self.homeDone("probe failure")
 
     def updateError(self, text):
         self.setStatus(text)
@@ -4970,10 +4987,10 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnStop(self, e):
-        self.homeDone("stopped")
         moveCommands.queClear()
         comm.command(cm.CMD_STOP)
         mainFrame.initDevice()
+        self.homeDone("stopped")
         self.clrActive()
         self.combo.SetFocus()
 
@@ -5329,7 +5346,7 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.X_DRO_POS, 0)
                 self.jP.updateXDroPos(xLocation)
-            self.jP.homeDone(AXIS_X, "x home success")
+            self.jP.homeDone("home success")
             xHomed = True
         self.jP.focus()
 
@@ -5354,7 +5371,7 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.Z_DRO_POS, 0)
                 self.jP.updateZDroPos(zLocation)
-            self.jP.homeDone(AXIS_Z, "Z home success")
+            self.jP.homeDone("home success")
             zHomed = True
         self.jP.focus()
 
@@ -5572,7 +5589,9 @@ class GotoDialog(wx.Dialog, FormRoutines):
             if self.axis == AXIS_Z:
                 sendZData()
                 m.saveZOffset()
-                m.moveZ(loc)
+                flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
+                                     if X_DRO_POS else 0)
+                m.moveZ(loc, flag)
             else:
                 sendXData()
                 m.dbg = True
@@ -7000,7 +7019,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
 
             ("Park Loc", cf.zParkLoc, 'f'), \
             ("Probe Dist", cf.zProbeDist, 'f'), \
-            ("Home/Probe Speed", cf.zProbeSpeed, 'fs'), \
+            ("Home/Probe Speed", cf.zHomeSpeed, 'fs'), \
 
             ("bHome Enable", cf.zHomeEna, None), \
             ("bHome Invert", cf.zHomeInv, None), \
