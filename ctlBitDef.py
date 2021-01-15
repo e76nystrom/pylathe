@@ -111,6 +111,7 @@ SYNC_ACTIVE_TMR  = (1 << 1)     # active for internal timer
 SYNC_ACTIVE_ENC  = (1 << 2)     # active for encoder
 SYNC_ACTIVE_STEP = (1 << 3)     # active for stepper
 SYNC_ACTIVE_TAPER = (1 << 4)    # active for taper
+SYNC_ACTIVE_THREAD = (1 << 5)   # active for threading
 
 # encoder direct flags
 

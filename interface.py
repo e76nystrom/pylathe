@@ -853,11 +853,12 @@ regList =\
 
     "isr active flags",
 
-    ("SYNC_ACTIVE_EXT",   "(1 << 0)", "active for sync board"),
-    ("SYNC_ACTIVE_TMR",   "(1 << 1)", "active for internal timer"),
-    ("SYNC_ACTIVE_ENC",   "(1 << 2)", "active for encoder"),
-    ("SYNC_ACTIVE_STEP",  "(1 << 3)", "active for stepper"),
-    ("SYNC_ACTIVE_TAPER", "(1 << 4)", "active for taper"),
+    ("SYNC_ACTIVE_EXT",    "(1 << 0)", "active for sync board"),
+    ("SYNC_ACTIVE_TMR",    "(1 << 1)", "active for internal timer"),
+    ("SYNC_ACTIVE_ENC",    "(1 << 2)", "active for encoder"),
+    ("SYNC_ACTIVE_STEP",   "(1 << 3)", "active for stepper"),
+    ("SYNC_ACTIVE_TAPER",  "(1 << 4)", "active for taper"),
+    ("SYNC_ACTIVE_THREAD", "(1 << 5)", "active for threading"),
 
     "encoder direct flags",
 
@@ -1551,6 +1552,7 @@ enumList =\
     ("D_XDRO",  "x dro location"),
     ("D_XPDRO", "x pass dro location"),
     ("D_XEXP",  "x expected location"),
+    ("D_XERR",  "x error with respect to dro"),
     ("D_XWT",   "x wait"),
     ("D_XDN",   "x done"),
     ("D_XEST",  "x spindle encoder start count"),
@@ -1567,13 +1569,16 @@ enumList =\
     ("D_ZDRO",  "z dro location"),
     ("D_ZPDRO", "z pass dro location"),
     ("D_ZEXP",  "z expected location"),
+    ("D_ZERR",  "z error with respect to dro"),
     ("D_ZWT",   "z wait"),
     ("D_ZDN",   "z done"),
     ("D_ZEST",  "z spindle encoder start count"),
     ("D_ZEDN",  "Z spindle encoder done count"),
     ("D_ZX",    "z "),
     ("D_ZY",    "z "),
- 
+
+    ("D_ZIDX",  "z dro at index pulse "),
+
     ("D_HST", "home state"),
 
     ("D_MSTA", "move state"),

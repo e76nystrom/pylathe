@@ -19,7 +19,9 @@ from platform import system
 from queue import Empty, Queue
 from sys import stderr, stdout
 from threading import Event, Lock, Thread
-from time import localtime, sleep, strftime, time
+from time import sleep, time
+from datetime import datetime
+from pytz import timezone
 # from contextlib import redirect_stderr
 #     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
 #          redirect_stderr(stderr):
@@ -181,6 +183,12 @@ HOME_Z = -2
 HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
+
+tz = timezone("America/New_York")
+
+def timeStr():
+    now = datetime.now(tz=tz)
+    return(now.strftime("%a %b %d %Y %H:%M:%S\n"))
 
 def commTimeout():
     jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
@@ -1514,6 +1522,7 @@ class UpdatePass():
 
     def addInit(self, label):
         jogPanel.dPrt("\n%s addPass\n" % (label))
+        jogPanel.dPrt(timeStr() + "\n")
         self.pause = self.panel.pause.GetValue()
         self.add = True
         add = getFloatVal(self.panel.add)
@@ -1617,6 +1626,7 @@ class Turn(LatheOp, UpdatePass):
             self.m.draw("turn", self.zStart, self.zEnd)
 
         jogPanel.dPrt("\nturn runOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
         self.setup()
 
         while self.updatePass():
@@ -1686,13 +1696,15 @@ class Turn(LatheOp, UpdatePass):
         self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
         self.passSize[self.passCount] = self.curX * 2.0
-        jogPanel.dPrt("pass %2d feed %5.3f x %5.3f diameter %5.3f\n" % \
-                      (self.passCount, feed, self.curX, self.curX * 2.0), \
+        jogPanel.dPrt("pass %2d feed %5.3f x %5.3f diameter %5.3f %s\n" % \
+                      (self.passCount, feed, self.curX, self.curX * 2.0, \
+                       ("", "final")[final]), \
                       True, True)
 
     def runPass(self, addPass=False): # turn
         m = self.m
-        flag = ct.CMD_MOV | ((ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else 0)
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
         m.moveX(self.curX, flag)
         if DRO:
             m.saveXDro()
@@ -1941,6 +1953,7 @@ class Face(LatheOp, UpdatePass):
             m.setTextAngle(90)
 
         jogPanel.dPrt("\nface runOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
         self.setup()
 
         while self.updatePass():
@@ -2217,6 +2230,8 @@ class Cutoff(LatheOp):
         if cfg.getBoolInfoData(cf.cfgDraw):
             m.draw("cutoff", self.xStart, self.zStart)
 
+        jogPanel.dPrt("\ncutoff runOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
         self.setup()
 
         if self.panel.pause.GetValue():
@@ -3296,6 +3311,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
 
         jogPanel.dPrt("\nthread runOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
         self.setup()
 
         self.curArea = 0.0
@@ -4024,7 +4040,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if not os.path.exists(DBG_DIR):
             os.makedirs(DBG_DIR)
         self.dbg = open(DBG_LOG, "ab")
-        t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
+        t = timeStr();
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -5023,7 +5039,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.setStatus(st.STR_CLR)
 
     def OnStartSpindle(self, e):
-        if STEP_DRV or MOTOR_TEST:
+        if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
             panel = self.getPanel()
             rpm = panel.rpm.GetValue()
             sendSpindleData(True, rpm)
@@ -5767,6 +5783,7 @@ class UpdateThread(Thread):
                     (en.D_XDRO, self.dbgXDro), \
                     (en.D_XPDRO, self.dbgXPDro), \
                     (en.D_XEXP, self.dbgXExp), \
+                    (en.D_XERR, self.dbgXErr), \
                     (en.D_XWT,  self.dbgXWait), \
                     (en.D_XDN,  self.dbgXDone), \
                     (en.D_XEST, self.dbgXEncStart), \
@@ -5783,12 +5800,15 @@ class UpdateThread(Thread):
                     (en.D_ZDRO, self.dbgZDro), \
                     (en.D_ZPDRO, self.dbgZPDro), \
                     (en.D_ZEXP, self.dbgZExp), \
+                    (en.D_ZERR, self.dbgZErr), \
                     (en.D_ZWT, self.dbgZWait), \
                     (en.D_ZDN, self.dbgZDone), \
                     (en.D_ZEST, self.dbgZEncStart), \
                     (en.D_ZEDN, self.dbgZEncDone), \
                     (en.D_ZX, self.dbgZX), \
                     (en.D_ZY, self.dbgZY), \
+
+                    (en.D_ZIDX, self.dbgZIdx), \
 
                     (en.D_HST, self.dbgHome), \
 
@@ -5804,8 +5824,8 @@ class UpdateThread(Thread):
                 stdout.flush()
 
     def openDebug(self, file="dbg.txt"):
-        self.dbg = open(os.path.join(DBG_DIR, file), "wb")
-        t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
+        self.dbg = open(os.path.join(DBG_DIR, file), "ab")
+        t = timeStr()
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -6032,6 +6052,7 @@ class UpdateThread(Thread):
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
         self.passVal = val
+        self.lastZIdx = None
         result = "spring\n" if val & 0x100 else \
                  "spring %d\n" % (val & 0xff) if val & 0x200 else \
                  "pass %d\n" % (val)
@@ -6041,7 +6062,7 @@ class UpdateThread(Thread):
         if val == ct.PARM_START:
             if not jogPanel.currentPanel.control.add:
                 self.baseTime = time()
-            return("strt\n")
+            return("strt " + timeStr())
         elif val == ct.PARM_DONE:
             return("done\n")
 
@@ -6062,7 +6083,7 @@ class UpdateThread(Thread):
             self.xDro = None
         else:
             diff = ""
-        return("xloc %7d %7.4f %7.4f%s" % (iTmp, tmp, tmp * 2.0, diff))
+        return("xloc %7.4f %7.4f %7d%s" % (tmp, tmp * 2.0, iTmp, diff))
 
     def dbgXDst(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -6101,6 +6122,10 @@ class UpdateThread(Thread):
         tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
         return("xexp %7.4f" % (tmp))
 
+    def dbgXErr(self, val):
+        tmp = float(val) / jogPanel.xStepsInch
+        return("xerr %7.4f" % (tmp))
+        
     def dbgXWait(self, val):
         return("xwt  %2x" % (val))
 
@@ -6138,7 +6163,7 @@ class UpdateThread(Thread):
             self.zDro = None
         else:
             diff = ""
-        return("zloc %7d %7.4f%s" % (iTmp, tmp, diff))
+        return("zloc %7.4f %7d %s" % (tmp, iTmp, diff))
 
     def dbgZDst(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -6177,6 +6202,10 @@ class UpdateThread(Thread):
         tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
         return("zexp %7.4f" % (tmp))
 
+    def dbgZErr(self, val):
+        tmp = float(val) / jogPanel.zStepsInch
+        return("zerr %7.4f" % (tmp))
+        
     def dbgZWait(self, val):
         return("zwt  %2x" % (val))
 
@@ -6200,6 +6229,15 @@ class UpdateThread(Thread):
     def dbgZY(self, val):
         return("z_y  %7d" % (val))
 
+    def dbgZIdx(self, val):
+        result = "zidx %7.4f" % (float(val) / jogPanel.zDROInch - zDROOffset)
+
+        if self.lastZIdx is not None:
+            delta = abs(self.lastZIdx - val)
+            result += " %7.4f %5d %5d" % (delta / jogPanel.zDROInch, val, delta)
+        self.lastZIdx = val
+        return(result)
+    
     def dbgHome(self, val):
         return("hsta %s" % (en.hStatesList[val]))
 

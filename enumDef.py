@@ -195,30 +195,33 @@ D_XBSTP          =  8           # x backlash steps
 D_XDRO           =  9           # x dro location
 D_XPDRO          = 10           # x pass dro location
 D_XEXP           = 11           # x expected location
-D_XWT            = 12           # x wait
-D_XDN            = 13           # x done
-D_XEST           = 14           # x spindle encoder start count
-D_XEDN           = 15           # x spindle encoder done count
-D_XX             = 16           # x 
-D_XY             = 17           # x 
-D_ZMOV           = 18           # z move location
-D_ZLOC           = 19           # z location
-D_ZDST           = 20           # z distance
-D_ZSTP           = 21           # z steps
-D_ZST            = 22           # z state
-D_ZBSTP          = 23           # z backlash steps
-D_ZDRO           = 24           # z dro location
-D_ZPDRO          = 25           # z pass dro location
-D_ZEXP           = 26           # z expected location
-D_ZWT            = 27           # z wait
-D_ZDN            = 28           # z done
-D_ZEST           = 29           # z spindle encoder start count
-D_ZEDN           = 30           # Z spindle encoder done count
-D_ZX             = 31           # z 
-D_ZY             = 32           # z 
-D_HST            = 33           # home state
-D_MSTA           = 34           # move state
-D_MCMD           = 35           # move command
+D_XERR           = 12           # x error with respect to dro
+D_XWT            = 13           # x wait
+D_XDN            = 14           # x done
+D_XEST           = 15           # x spindle encoder start count
+D_XEDN           = 16           # x spindle encoder done count
+D_XX             = 17           # x 
+D_XY             = 18           # x 
+D_ZMOV           = 19           # z move location
+D_ZLOC           = 20           # z location
+D_ZDST           = 21           # z distance
+D_ZSTP           = 22           # z steps
+D_ZST            = 23           # z state
+D_ZBSTP          = 24           # z backlash steps
+D_ZDRO           = 25           # z dro location
+D_ZPDRO          = 26           # z pass dro location
+D_ZEXP           = 27           # z expected location
+D_ZERR           = 28           # z error with respect to dro
+D_ZWT            = 29           # z wait
+D_ZDN            = 30           # z done
+D_ZEST           = 31           # z spindle encoder start count
+D_ZEDN           = 32           # Z spindle encoder done count
+D_ZX             = 33           # z 
+D_ZY             = 34           # z 
+D_ZIDX           = 35           # z dro at index pulse 
+D_HST            = 36           # home state
+D_MSTA           = 37           # move state
+D_MCMD           = 38           # move command
 
 dMessageList = ( \
     "D_PASS",
@@ -233,6 +236,7 @@ dMessageList = ( \
     "D_XDRO",
     "D_XPDRO",
     "D_XEXP",
+    "D_XERR",
     "D_XWT",
     "D_XDN",
     "D_XEST",
@@ -248,12 +252,14 @@ dMessageList = ( \
     "D_ZDRO",
     "D_ZPDRO",
     "D_ZEXP",
+    "D_ZERR",
     "D_ZWT",
     "D_ZDN",
     "D_ZEST",
     "D_ZEDN",
     "D_ZX",
     "D_ZY",
+    "D_ZIDX",
     "D_HST",
     "D_MSTA",
     "D_MCMD",
