@@ -75,6 +75,7 @@ FPGA = False
 DRO = False
 EXT_DRO = False
 X_DRO_POS = False
+Z_DRO_POS = False
 REM_DBG = False
 STEP_DRV = False
 MOTOR_TEST = False
@@ -4934,7 +4935,7 @@ class JogPanel(wx.Panel, FormRoutines):
                             if not EXT_DRO:
                                 comm.setParm(pm.X_LOC, 0)
                                 if DRO:
-                                    comm.setParm(pm.X_DRO_POS, 0)
+                                    comm.setParm(pm.X_DRO_LOC, 0)
                                     self.updateXDroPos(xLocation)
                             else:
                                 self.setXFromExt()
@@ -4949,7 +4950,7 @@ class JogPanel(wx.Panel, FormRoutines):
                             if not EXT_DRO:
                                 comm.setParm(pm.Z_LOC, 0)
                                 if DRO:
-                                    comm.setParm(pm.Z_DRO_POS, 0)
+                                    comm.setParm(pm.Z_DRO_LOC, 0)
                                     self.updateZDroPos(zLocation)
                             else:
                                 self.setZFromExt()
@@ -5019,7 +5020,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
 
     def OnDone(self, e):
-        if self.mvStatus == 0:
+        if (self.mvStatus & (ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_MEASURE)) == 0:
             self.clrActive()
         else:
             self.setStatus(st.STR_OP_IN_PROGRESS)
@@ -5128,7 +5129,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def updateZDroPos(self, val, zDROPos=None):
         global zDROOffset
         if zDROPos is None:
-            zDROPos = comm.getParm(pm.Z_DRO_POS, True)
+            zDROPos = comm.getParm(pm.Z_DRO_LOC, True)
         if zDROPos is not None:
             droPos = float(zDROPos) / self.zDROInch
             print("pos %0.4f zDROPos %d %0.4f" % \
@@ -5158,7 +5159,7 @@ class JogPanel(wx.Panel, FormRoutines):
             zDROPosition = round(rsp * jogPanel.zDROInch)
             zDROOffset = 0.0
             self.zDROOffset.value = zDROOffset
-            comm.queParm(pm.Z_DRO_POS, zDROPosition)
+            comm.queParm(pm.Z_DRO_LOC, zDROPosition)
             comm.queParm(pm.Z_DRO_OFFSET, round(zDROOffset * jogPanel.zDROInch))
         comm.sendMulti()
 
@@ -5184,7 +5185,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def updateXDroPos(self, val, xDROPos=None):
         global xDROOffset
         if xDROPos is None:
-            xDROPos = comm.getParm(pm.X_DRO_POS)
+            xDROPos = comm.getParm(pm.X_DRO_LOC)
         if xDROPos is not None:
             droPos = float(xDROPos) / self.xDROInch
             print("pos %0.4f xDROPos %d %0.4f" % \
@@ -5216,7 +5217,7 @@ class JogPanel(wx.Panel, FormRoutines):
             print("xDROPosition %d" % (xDROPosition))
             xDROOffset = 0.0
             self.xDROOffset.value = xDROOffset
-            comm.queParm(pm.X_DRO_POS, xDROPosition)
+            comm.queParm(pm.X_DRO_LOC, xDROPosition)
             comm.queParm(pm.X_DRO_OFFSET, round(xDROOffset * jogPanel.xDROInch))
         comm.sendMulti()
 
@@ -5360,7 +5361,7 @@ class PosMenu(wx.Menu):
             comm.setParm(pm.X_HOME_OFFSET, \
                          round(xHomeOffset * jogPanel.xStepsInch))
             if DRO:
-                comm.setParm(pm.X_DRO_POS, 0)
+                comm.setParm(pm.X_DRO_LOC, 0)
                 self.jP.updateXDroPos(xLocation)
             self.jP.homeDone("home success")
             xHomed = True
@@ -5385,7 +5386,7 @@ class PosMenu(wx.Menu):
             comm.setParm(pm.Z_HOME_OFFSET, \
                          round(zHomeOffset * jogPanel.zStepsInch))
             if DRO:
-                comm.setParm(pm.Z_DRO_POS, 0)
+                comm.setParm(pm.Z_DRO_LOC, 0)
                 self.jP.updateZDroPos(zLocation)
             self.jP.homeDone("home success")
             zHomed = True
@@ -6668,7 +6669,7 @@ class MainFrame(wx.Frame):
                     stdout.flush()
                     if DRO:
                         zDROPosition = cfg.getIntInfo(cf.zSvDROPosition)
-                        comm.queParm(pm.Z_DRO_POS, zDROPosition)
+                        comm.queParm(pm.Z_DRO_LOC, zDROPosition)
                         zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
                         comm.queParm(pm.Z_DRO_OFFSET, \
                                      round(zDROOffset, jogPanel.zDROInch))
@@ -6694,7 +6695,7 @@ class MainFrame(wx.Frame):
                     stdout.flush()
                     if DRO:
                         xDROPosition = cfg.getIntInfo(cf.xSvDROPosition)
-                        comm.queParm(pm.X_DRO_POS, xDROPosition)
+                        comm.queParm(pm.X_DRO_LOC, xDROPosition)
                         xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
                         comm.queParm(pm.X_DRO_OFFSET, \
                                      round(xDROOffset * jogPanel.xDROInch))

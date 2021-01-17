@@ -412,7 +412,8 @@ class Setup():
                     imports.append(var)
                     if f is not None:
                         tmp = "%s = %s" % (var.ljust(16), val)
-                        fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
+                        fWrite(f, "%s# 0x%02x %s\n" % \
+                               (tmp.ljust(32), bitVal, comment))
             else:
                 if fData:
                     fWrite(cFile, "\n// %s\n\n" % (data))

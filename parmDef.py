@@ -147,7 +147,7 @@ X_HOME_END           =  89
 
 # z dro
 
-Z_DRO_POS            =  90
+Z_DRO_LOC            =  90
 Z_DRO_OFFSET         =  91
 Z_DRO_COUNT_INCH     =  92
 Z_DRO_FACTOR         =  93
@@ -158,7 +158,7 @@ Z_DRO_FINAL_DIST     =  97
 
 # x dro
 
-X_DRO_POS            =  98
+X_DRO_LOC            =  98
 X_DRO_OFFSET         =  99
 X_DRO_COUNT_INCH     = 100
 X_DRO_FACTOR         = 101
@@ -383,7 +383,7 @@ parmTable = ( \
     ('X_HOME_LOC', 'int', 'xHomeLoc'),
     ('X_HOME_START', 'int', 'xHomeStart'),
     ('X_HOME_END', 'int', 'xHomeEnd'),
-    ('Z_DRO_POS', 'int', 'zDroPos'),
+    ('Z_DRO_LOC', 'int', 'zDroLoc'),
     ('Z_DRO_OFFSET', 'int', 'zDroOffset'),
     ('Z_DRO_COUNT_INCH', 'int', 'zDroCountInch'),
     ('Z_DRO_FACTOR', 'int', 'zDroFactor'),
@@ -391,7 +391,7 @@ parmTable = ( \
     ('Z_USE_DRO', 'char', 'zUseDro'),
     ('Z_DONE_DELAY', 'int', 'zDoneDelay'),
     ('Z_DRO_FINAL_DIST', 'int', 'zDroFinalDist'),
-    ('X_DRO_POS', 'int', 'xDroPos'),
+    ('X_DRO_LOC', 'int', 'xDroLoc'),
     ('X_DRO_OFFSET', 'int', 'xDroOffset'),
     ('X_DRO_COUNT_INCH', 'int', 'xDroCountInch'),
     ('X_DRO_FACTOR', 'int', 'xDroFactor'),

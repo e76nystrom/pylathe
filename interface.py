@@ -579,7 +579,7 @@ parmList = \
 
     "z dro",
 
-    ("Z_DRO_POS", "z dro location", "int"),
+    ("Z_DRO_LOC", "z dro location", "int"),
     ("Z_DRO_OFFSET", "z dro to zero", "int"),
     ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
     ("Z_DRO_FACTOR", "x dro counts inch factored", "int"),
@@ -590,7 +590,7 @@ parmList = \
 
     "x dro",
 
-    ("X_DRO_POS", "x dro location", "int"),
+    ("X_DRO_LOC", "x dro location", "int"),
     ("X_DRO_OFFSET", "x dro to zero", "int"),
     ("X_DRO_COUNT_INCH", "x dro scale", "int"),
     ("X_DRO_FACTOR", "x dro counts inch factored", "int"),
