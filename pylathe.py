@@ -1291,6 +1291,14 @@ def sendZData(send=False):
 
             queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
 
+            comm.queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDistRev))
+            comm.queParm(pm.Z_HOME_DIST_REV, cfg.getInfoData(cf.zHomeDistRev))
+            comm.queParm(pm.Z_HOME_DIST_BACKOFF, \
+                         cfg.getInfoData(cf.zHomeDistBackoff))
+            comm.queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
+            comm.queParm(pm.Z_HOME_DIR, 1 if cfg.getBoolInfoData(cf.zHomeDir) \
+                         else -1)
+
             comm.command(cm.CMD_ZSETUP)
 
             zDataSent = True
@@ -1387,6 +1395,14 @@ def sendXData(send=False):
             queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
 
             queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
+
+            comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
+            comm.queParm(pm.X_HOME_DIST_REV, cfg.getInfoData(cf.xHomeDistRev))
+            comm.queParm(pm.X_HOME_DIST_BACKOFF, \
+                         cfg.getInfoData(cf.xHomeDistBackoff))
+            comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
+            comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
+                         else -1)
 
             if HOME_TEST:
                 stepsInch = jogPanel.xStepsInch
@@ -4824,17 +4840,17 @@ class JogPanel(wx.Panel, FormRoutines):
         if probeLoc is not None:
             self.probeLoc = probeLoc
 
-    def homeDone(self, status):
-        if self.homeOrProbe is not None:
-            homeOrProbe = self.homeOrProbe
-            self.homeOrProbe = None
-            axis = ""
-            if homeOrProbe == HOME_X or homeOrProbe == AXIS_X:
-                axis = 'x '
-            elif homeOrProbe == HOME_Z or homeOrProbe == AXIS_Z:
-                axis = 'z '
-            print(axis + status)
+    def homeDone(self, axis, status, msg):
+        if axis == AXIS_X:
+            axisStr = 'X'
+        elif axis == AXIS_Z:
+            axisStr = 'Z'
+        else:
+            axis = ''
+        self.homeOrProbe = None
         self.probeStatus = 0
+        self.setStatus(msg)
+        print(axisStr + st.strTable[msg])
         stdout.flush()
 
     def updateAll(self, val):
@@ -4909,7 +4925,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if mvStatus & ct.MV_MEASURE:
                 text += 'M'
             if mvStatus & ct.MV_PAUSE:
-                text  += 'P'
+                text += 'P'
             if mvStatus & ct.MV_ACTIVE:
                 text += 'A'
             if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
@@ -4930,7 +4946,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val is not None:
                         if val & ct.HOME_SUCCESS:
-                            self.homeDone("home success")
+                            self.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
                             xHomed = True
                             if not EXT_DRO:
                                 comm.setParm(pm.X_LOC, 0)
@@ -4940,12 +4956,12 @@ class JogPanel(wx.Panel, FormRoutines):
                             else:
                                 self.setXFromExt()
                         elif val & ct.HOME_FAIL:
-                            self.homeDone("home fail")
+                            self.homeDone(AXIS_X, False, st.STR_HOME_FAIL)
                 elif self.homeOrProbe == HOME_Z:
                     val = comm.getParm(pm.Z_HOME_STATUS)
                     if val is not None:
                         if val & ct.HOME_SUCCESS:
-                            self.homeDone("home success")
+                            self.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
                             zHomed = True
                             if not EXT_DRO:
                                 comm.setParm(pm.Z_LOC, 0)
@@ -4955,23 +4971,7 @@ class JogPanel(wx.Panel, FormRoutines):
                             else:
                                 self.setZFromExt()
                         elif val & ct.HOME_FAIL:
-                            self.homeDone("home fail")
-                elif self.homeOrProbe == AXIS_Z:
-                    val = comm.getParm(pm.Z_HOME_STATUS)
-                    if val & ct.PROBE_SUCCESS:
-                        zHomeOffset = zLocation - self.probeLoc
-                        self.zHomeOffset.value = zHomeOffset
-                        # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % (zHomeOffset))
-                        if DRO:
-                            self.updateZDroPos(self.probeLoc, zDROPos)
-                        print("z %s zLocation %7.4f probeLoc %7.4f "\
-                              "zHomeOffset %7.4f" % \
-                              (z, zLocation, self.probeLoc, zHomeOffset))
-                        stdout.flush()
-                        self.probeLoc = 0.0
-                        self.homeDone("probe success")
-                    elif val & ct.PROBE_FAIL:
-                        self.homeDone("probe failure")
+                            self.homeDone(AXIS_Z, False, st.STR_HOME_FAIL)
                 elif self.homeOrProbe == AXIS_X:
                     val = comm.getParm(pm.X_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
@@ -4985,9 +4985,25 @@ class JogPanel(wx.Panel, FormRoutines):
                               (x, xLocation, self.probeLoc, xHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone("probe success")
+                        self.homeDone(AXIS_X, True, STR_PROBE_SUCCESS)
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone("probe failure")
+                        self.homeDone(AXIS_X, False, STR_PROBE_FAIL)
+                elif self.homeOrProbe == AXIS_Z:
+                    val = comm.getParm(pm.Z_HOME_STATUS)
+                    if val & ct.PROBE_SUCCESS:
+                        zHomeOffset = zLocation - self.probeLoc
+                        self.zHomeOffset.value = zHomeOffset
+                        # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % (zHomeOffset))
+                        if DRO:
+                            self.updateZDroPos(self.probeLoc, zDROPos)
+                        print("z %s zLocation %7.4f probeLoc %7.4f "\
+                              "zHomeOffset %7.4f" % \
+                              (z, zLocation, self.probeLoc, zHomeOffset))
+                        stdout.flush()
+                        self.probeLoc = 0.0
+                        self.homeDone(AXIS_Z, True, STR_PROBE_SUCCESS)
+                    elif val & ct.PROBE_FAIL:
+                        self.homeDone(AXIS_Z, False, STR_PROBE_FAIL)
 
     def updateError(self, text):
         self.setStatus(text)
@@ -5007,7 +5023,7 @@ class JogPanel(wx.Panel, FormRoutines):
         moveCommands.queClear()
         comm.command(cm.CMD_STOP)
         mainFrame.initDevice()
-        self.homeDone("stopped")
+        self.setStatus(st.STR_STOPPED)
         self.clrActive()
         self.combo.SetFocus()
 
@@ -5302,9 +5318,16 @@ class PosMenu(wx.Menu):
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
             self.Append(item)
             if self.axis == AXIS_X:
-                self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+                self.Bind(wx.EVT_MENU, self.OnHomeXFwd, item)
             elif self.axis == AXIS_Z:
-                self.Bind(wx.EVT_MENU, self.OnHomeZ, item)
+                self.Bind(wx.EVT_MENU, self.OnHomeZFwd, item)
+
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Rev Home")
+            self.Append(item)
+            if self.axis == AXIS_X:
+                self.Bind(wx.EVT_MENU, self.OnHomeXRev, item)
+            elif self.axis == AXIS_Z:
+                self.Bind(wx.EVT_MENU, self.OnHomeZRev, item)
 
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Go to")
             self.Append(item)
@@ -5342,16 +5365,10 @@ class PosMenu(wx.Menu):
         dialog.Raise()
         dialog.Show(True)
 
-    def OnHomeX(self, e):
+    def OnHomeXFwd(self, e):
         global xHomeOffset, xHomed
         if not HOME_IN_PLACE:
-            comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
-            comm.queParm(pm.X_HOME_BACKOFF_DIST, \
-                         cfg.getInfoData(cf.xHomeBackoffDist))
-            comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-            comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
-                         else -1)
-            comm.command(cm.XHOMEAXIS)
+            comm.command(cm.XHOMEFWD)
             self.jP.probe(HOME_X)
         else: 
             xLocation = float(jogPanel.xPos.GetValue())
@@ -5363,20 +5380,14 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.X_DRO_LOC, 0)
                 self.jP.updateXDroPos(xLocation)
-            self.jP.homeDone("home success")
+            self.jP.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
             xHomed = True
         self.jP.focus()
 
-    def OnHomeZ(self, e):
+    def OnHomeZFwd(self, e):
         global zHomeOffset, zHomed
         if not HOME_IN_PLACE:
-            comm.queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
-            comm.queParm(pm.Z_HOME_BACKOFF_DIST, \
-                         cfg.getInfoData(cf.zHomeBackoffDist))
-            comm.queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
-            comm.queParm(pm.Z_HOME_DIR, 1 if cfg.getBoolInfoData(cf.zHomeDir) \
-                         else -1)
-            comm.command(cm.ZHOMEAXIS)
+            comm.command(cm.ZHOMEFWD)
             self.jP.probe(HOME_Z)
         else: 
             zLocation = float(jogPanel.zPos.GetValue())
@@ -5388,7 +5399,45 @@ class PosMenu(wx.Menu):
             if DRO:
                 comm.setParm(pm.Z_DRO_LOC, 0)
                 self.jP.updateZDroPos(zLocation)
-            self.jP.homeDone("home success")
+            self.jP.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
+            zHomed = True
+        self.jP.focus()
+
+    def OnHomeXRev(self, e):
+        global xHomeOffset, xHomed
+        if not HOME_IN_PLACE:
+            comm.command(cm.XHOMEREV)
+            self.jP.probe(HOME_X)
+        else: 
+            xLocation = float(jogPanel.xPos.GetValue())
+            xHomeOffset = 0 - xLocation
+            jogPanel.xHomeOffset.value = xHomeOffset
+            comm.setParm(pm.X_LOC, 0)
+            comm.setParm(pm.X_HOME_OFFSET, \
+                         round(xHomeOffset * jogPanel.xStepsInch))
+            if DRO:
+                comm.setParm(pm.X_DRO_LOC, 0)
+                self.jP.updateXDroPos(xLocation)
+            self.jP.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
+            xHomed = True
+        self.jP.focus()
+
+    def OnHomeZRev(self, e):
+        global zHomeOffset, zHomed
+        if not HOME_IN_PLACE:
+            comm.command(cm.ZHOMEREV)
+            self.jP.probe(HOME_Z)
+        else: 
+            zLocation = float(jogPanel.zPos.GetValue())
+            zHomeOffset = 0 - zLocation
+            jogPanel.zHomeOffset.value = zHomeOffset
+            comm.setParm(pm.Z_LOC, 0)
+            comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(zHomeOffset * jogPanel.zStepsInch))
+            if DRO:
+                comm.setParm(pm.Z_DRO_LOC, 0)
+                self.jP.updateZDroPos(zLocation)
+            self.jP.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
             zHomed = True
         self.jP.focus()
 
@@ -6100,7 +6149,7 @@ class UpdateThread(Thread):
             return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
-        return(("x_st %s" % (en.xStatesList[val])) + \
+        return(("x_st %s" % (en.axisStatesList[val])) + \
                 ("\n" if self.mIdle and val == en.XIDLE else ""))
 
     def dbgXBSteps(self, val):
@@ -6180,7 +6229,7 @@ class UpdateThread(Thread):
             return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
-        return(("z_st %s" % (en.zStatesList[val])) + \
+        return(("z_st %s" % (en.axisStatesList[val])) + \
                 ("\n" if self.mIdle and val == en.ZIDLE else ""))
 
     def dbgZBSteps(self, val):
@@ -7034,8 +7083,6 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
-
         self.fields = (
             ("Pitch", cf.zPitch, 'f'), \
             ("Motor Steps", cf.zMotorSteps, 'd'), \
@@ -7063,7 +7110,8 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHome Enable", cf.zHomeEna, None), \
             ("bHome Invert", cf.zHomeInv, None), \
             ("Home Dist", cf.zHomeDist, 'f'), \
-            ("Backoff Dist", cf.zHomeBackoffDist, 'f'), \
+            ("Home Rev Dist", cf.zHomeDistRev, 'f'), \
+            ("Backoff Dist", cf.zHomeDistBackoff, 'f'), \
             ("bHome Dir", cf.zHomeDir, None), \
 
             ("bLimits Enable", cf.zLimEna, None), \
@@ -7079,6 +7127,9 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("DRO Final Dist", cf.zDroFinalDist, 'f'), \
                 ("DRO Read Delay ms", cf.zDoneDelay, None), \
         )
+
+        sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
+
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
@@ -7116,8 +7167,6 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         DialogActions.__init__(self)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
-        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
-
         self.fields = (
             ("Pitch", cf.xPitch, 'f'), \
             ("Motor Steps", cf.xMotorSteps, 'd'), \
@@ -7145,7 +7194,8 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHome Enable", cf.xHomeEna, None), \
             ("bHome Invert", cf.xHomeInv, None), \
             ("Home Dist", cf.xHomeDist, 'f'), \
-            ("Backoff Dist", cf.xHomeBackoffDist, 'f'), \
+            ("Home Rev Dist", cf.xHomeDistRev, 'f'), \
+            ("Backoff Dist", cf.xHomeDistBackoff, 'f'), \
             ("bHome Dir", cf.xHomeDir, None), \
 
             ("bLimits Enable", cf.xLimEna, None), \
@@ -7166,6 +7216,9 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Home End", cf.xHomeEnd, 'f'), \
                 ("Home Loc", cf.xHomeLoc, 'f'), \
             )
+
+        sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
+
         self.fieldList(sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)

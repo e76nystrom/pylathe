@@ -234,9 +234,10 @@ configList = \
     ('xDroFinalDist', 'x dro final approach dist'),
     ('xDROInch', 'x axis '),
     ('xDROPos', 'x axis use dro to go to correct position'),
-    ('xHomeBackoffDist', 'x axis '),
     ('xHomeDir', 'x axis '),
     ('xHomeDist', 'x axis '),
+    ('xHomeDistBackoff', 'x axis '),
+    ('xHomeDistRev', 'x axis '),
     ('xHomeEna', 'x axis '),
     ('xHomeEnd', 'x axis '),
     ('xHomeInv', 'x axis '),
@@ -280,9 +281,10 @@ configList = \
     ('zDroFinalDist', 'z dro final approach dist'),
     ('zDROPos', 'z axis use dro to go to correct position'),
     ('zDROInch', 'z axis '),
-    ('zHomeBackoffDist', 'z axis '),
     ('zHomeDir', 'z axis '),
     ('zHomeDist', 'z axis '),
+    ('zHomeDistRev', 'z axis '),
+    ('zHomeDistBackoff', 'z axis '),
     ('zHomeEna', 'z axis '),
     ('zHomeEnd', 'z axis '),
     ('zHomeInv', 'z axis '),
@@ -336,6 +338,11 @@ strList = \
  ("STR_SIGN_ERROR", "X End and X Start do not have same sign"),
  ("STR_INTERNAL_ERROR", "X End < X Start"),
  ("STR_EXTERNAL_ERROR", "X End > X Start"),
+ ("STR_HOME_SUCCESS", "Home Success"),
+ ("STR_HOME_FAIL", "Home Fail"),
+ ("STR_PROBE_SUCCESS", "Probe Success"),
+ ("STR_PROBE_FAIL", "Probe Fail"),
+ ("STR_STOPPED", "Stopped"),
  ("STR_CLR", ""),
 )
 
@@ -349,7 +356,8 @@ cmdList = \
     ("ZJSPEED", "zJogSpeed", "start z jog at speed"),
     ("ZSTOP", "zStop", "stop z movement"),
     ("ZSETLOC", "", ""),
-    ("ZHOMEAXIS", "zHomeAxis", "z home axis"),
+    ("ZHOMEFWD", "zHomeFwd", "z home from positive side"),
+    ("ZHOMEREV", "zHomeRev", "z home from negative side"),
     
     "x motion commands",
     
@@ -359,7 +367,8 @@ cmdList = \
     ("XJSPEED", "xJogSpeed", "start x jog at speed"),
     ("XSTOP", "xStop", "stop x movement"),
     ("XSETLOC", "", ""),
-    ("XHOMEAXIS", "xHomeAxis", "x home axis"),
+    ("XHOMEFWD", "xHomeFwd", "x home from positive side"),
+    ("XHOMEREV", "xHomeRev", "x home from negative side"),
     
     "spindle operations",
     
@@ -561,14 +570,16 @@ parmList = \
 
     ("Z_HOME_SPEED", "z final homing speed", "float"),
     ("Z_HOME_DIST", "z max homing distance", "float"),
-    ("Z_HOME_BACKOFF_DIST", "z home backoff dist", "float"),
+    ("Z_HOME_DIST_REV", "z max reverse homing distance", "float"),
+    ("Z_HOME_DIST_BACKOFF", "z home backoff dist", "float"),
     ("Z_HOME_DIR", "z homing direction", "int"),
 
     "x home parameters",
 
     ("X_HOME_SPEED", "x final homing speed", "float"),
     ("X_HOME_DIST", "x max homing distance", "float"),
-    ("X_HOME_BACKOFF_DIST", "x home backoff dist", "float"),
+    ("X_HOME_DIST_REV", "x max reverse homing distance", "float"),
+    ("X_HOME_DIST_BACKOFF", "x home backoff dist", "float"),
     ("X_HOME_DIR", "x homing direction", "int"),
 
     "x home test parameters",
@@ -601,12 +612,12 @@ parmList = \
 
     "x home or probe status",
 
-    ("X_HOME_DONE", "x home done", "int"),
+    # ("X_HOME_DONE", "x home done", "int"),
     ("X_HOME_STATUS", "x home status", "int"),
 
     "Z home or probe status",
 
-    ("Z_HOME_DONE", "z home done", "int"),
+    # ("Z_HOME_DONE", "z home done", "int"),
     ("Z_HOME_STATUS", "z home status", "int"),
 
     "probe configuration",
@@ -806,6 +817,11 @@ regList =\
     ("PROBE_SET",  "(1 << 2)", ""),
     ("PROBE_CLR",  "(1 << 3)", ""),
  
+    "home direction",
+ 
+    ("HOME_FWD",  "0", ""),
+    ("HOME_REV",  "1", ""),
+
     "home status",
  
     ("HOME_ACTIVE",  "0", ""),
@@ -819,17 +835,18 @@ regList =\
 
     "movement status",
 
-    ("MV_PAUSE",        "(1 << 0)", "movement paused"),
-    ("MV_READ_X",       "(1 << 1)", "pause x may change"),
-    ("MV_READ_Z",       "(1 << 2)", "pause z may change"),
-    ("MV_ACTIVE",       "(1 << 3)", "movement active"),
-    ("MV_XLIMIT",       "(1 << 4)", "at limit switch"),
-    ("MV_ZLIMIT",       "(1 << 5)", "at limit switch"),
-    ("MV_XHOME_ACTIVE", "(1 << 6)", "x home active"),
-    ("MV_XHOME",        "(1 << 7)", "x home success"),
-    ("MV_ZHOME_ACTIVE", "(1 << 8)", "z home active"),
-    ("MV_ZHOME",        "(1 << 9)", "z home success"),
-    ("MV_MEASURE",      "(1 << 10)","pause for measurement"),
+    ("MV_PAUSE",        "(1 << 0)",  "movement paused"),
+    ("MV_READ_X",       "(1 << 1)",  "pause x may change"),
+    ("MV_READ_Z",       "(1 << 2)",  "pause z may change"),
+    ("MV_ACTIVE",       "(1 << 3)",  "movement active"),
+    ("MV_XLIMIT",       "(1 << 4)",  "at limit switch"),
+    ("MV_ZLIMIT",       "(1 << 5)",  "at limit switch"),
+    ("MV_XHOME_ACTIVE", "(1 << 6)",  "x home active"),
+    ("MV_XHOME",        "(1 << 7)",  "x home success"),
+    ("MV_ZHOME_ACTIVE", "(1 << 8)",  "z home active"),
+    ("MV_ZHOME",        "(1 << 9)",  "z home success"),
+    ("MV_MEASURE",      "(1 << 10)", "pause for measurement"),
+    ("MV_ESTOP",        "(1 << 11)", "estop"),
 
     "pause flags",
 
@@ -1423,29 +1440,29 @@ fpgaLatheBitList = \
 
 enumList =\
 (\
-    "z control states",
+    # "z control states",
 
-    "enum z_States",
-    "{",
-    ("ZIDLE", "idle"),
-    ("ZWAITBKLS", "wait for backlash move complete"),
-    ("ZSTARTMOVE", "start z move"),
-    ("ZWAITMOVE", "wait for move complete"),
-    ("ZDELAY", "wait for position to settle"),
-    ("ZDONE", "clean up state"),
-    "};",
+    # "enum z_States",
+    # "{",
+    # ("ZIDLE", "idle"),
+    # ("ZWAITBKLS", "wait for backlash move complete"),
+    # ("ZSTARTMOVE", "start z move"),
+    # ("ZWAITMOVE", "wait for move complete"),
+    # ("ZDELAY", "wait for position to settle"),
+    # ("ZDONE", "clean up state"),
+    # "};",
     
-    "x control states",
+    # "x control states",
     
-    "enum x_States",
-    "{",
-    ("XIDLE", "idle"),
-    ("XWAITBKLS", "wait for backlash move complete"),
-    ("XSTARTMOVE", "start x move"),
-    ("XWAITMOVE", "wait for move complete"),
-    ("XDELAY", "wait for position to settle"),
-    ("XDONE", "clean up state"),
-    "};",
+    # "enum x_States",
+    # "{",
+    # ("XIDLE", "idle"),
+    # ("XWAITBKLS", "wait for backlash move complete"),
+    # ("XSTARTMOVE", "start x move"),
+    # ("XWAITMOVE", "wait for move complete"),
+    # ("XDELAY", "wait for position to settle"),
+    # ("XDONE", "clean up state"),
+    # "};",
     
     "axis control states",
     
@@ -1526,12 +1543,11 @@ enumList =\
     
     "enum h_States",
     "{",
-    ("H_IDLE", "idle state"),
-    ("H_CHECK_ONHOME", ""),
-    ("H_WAIT_FINDHOME", ""),
-    ("H_BACKOFF_HOME", ""),
-    ("H_WAIT_BACKOFF", ""),
-    ("H_WAIT_SLOWFIND", ""),
+    ("H_IDLE",     "idle state"),
+    ("H_HOME",     "found home switch"),
+    ("H_OFF_HOME", "off home switch"),
+    ("H_BACKOFF",  "backoff dist from switch"),
+    ("H_SLOW",     "found home slowly"),
     # ("H_", ""),
     "};",
 

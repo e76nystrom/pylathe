@@ -1,42 +1,6 @@
 
 # enums
 
-# z control states
-
-ZIDLE            =  0           # idle
-ZWAITBKLS        =  1           # wait for backlash move complete
-ZSTARTMOVE       =  2           # start z move
-ZWAITMOVE        =  3           # wait for move complete
-ZDELAY           =  4           # wait for position to settle
-ZDONE            =  5           # clean up state
-
-zStatesList = ( \
-    "ZIDLE",
-    "ZWAITBKLS",
-    "ZSTARTMOVE",
-    "ZWAITMOVE",
-    "ZDELAY",
-    "ZDONE",
-    )
-
-# x control states
-
-XIDLE            =  0           # idle
-XWAITBKLS        =  1           # wait for backlash move complete
-XSTARTMOVE       =  2           # start x move
-XWAITMOVE        =  3           # wait for move complete
-XDELAY           =  4           # wait for position to settle
-XDONE            =  5           # clean up state
-
-xStatesList = ( \
-    "XIDLE",
-    "XWAITBKLS",
-    "XSTARTMOVE",
-    "XWAITMOVE",
-    "XDELAY",
-    "XDONE",
-    )
-
 # axis control states
 
 AXIS_IDLE        =  0           # idle
@@ -166,19 +130,17 @@ operationsList = ( \
 # home control states
 
 H_IDLE           =  0           # idle state
-H_CHECK_ONHOME   =  1           # 
-H_WAIT_FINDHOME  =  2           # 
-H_BACKOFF_HOME   =  3           # 
-H_WAIT_BACKOFF   =  4           # 
-H_WAIT_SLOWFIND  =  5           # 
+H_HOME           =  1           # found home switch
+H_OFF_HOME       =  2           # off home switch
+H_BACKOFF        =  3           # backoff dist from switch
+H_SLOW           =  4           # found home slowly
 
 hStatesList = ( \
     "H_IDLE",
-    "H_CHECK_ONHOME",
-    "H_WAIT_FINDHOME",
-    "H_BACKOFF_HOME",
-    "H_WAIT_BACKOFF",
-    "H_WAIT_SLOWFIND",
+    "H_HOME",
+    "H_OFF_HOME",
+    "H_BACKOFF",
+    "H_SLOW",
     )
 
 # debug message types

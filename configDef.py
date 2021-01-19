@@ -229,90 +229,92 @@ xDoneDelay       = 175          # x axis done to read dro delay
 xDroFinalDist    = 176          # x dro final approach dist
 xDROInch         = 177          # x axis 
 xDROPos          = 178          # x axis use dro to go to correct position
-xHomeBackoffDist = 179          # x axis 
-xHomeDir         = 180          # x axis 
-xHomeDist        = 181          # x axis 
-xHomeEna         = 182          # x axis 
-xHomeEnd         = 183          # x axis 
-xHomeInv         = 184          # x axis 
-xHomeLoc         = 185          # x axis 
-xHomeSpeed       = 186          # x axis 
-xHomeStart       = 187          # x axis 
-xInvDRO          = 188          # x axis invert dro
-xInvDir          = 189          # x axis invert stepper direction
-xInvEnc          = 190          # x axis 
-xInvMpg          = 191          # x axis invert mpg direction
-xJogMax          = 192          # x axis 
-xJogMin          = 193          # x axis 
-xLimEna          = 194          # x axis limits enable
-xLimNegInv       = 195          # x axis negative limit invert
-xLimPosInv       = 196          # x axis positive limit invert
-xMpgInc          = 197          # x axis jog increment
-xMpgMax          = 198          # x axis jog maximum
-xJogSpeed        = 199          # x axis 
-xMaxSpeed        = 200          # x axis 
-xMicroSteps      = 201          # x axis 
-xMinSpeed        = 202          # x axis 
-xMotorRatio      = 203          # x axis 
-xMotorSteps      = 204          # x axis 
-xParkLoc         = 205          # x axis 
-xPitch           = 206          # x axis 
-xProbeDist       = 207          # x axis 
+xHomeDir         = 179          # x axis 
+xHomeDist        = 180          # x axis 
+xHomeDistBackoff = 181          # x axis 
+xHomeDistRev     = 182          # x axis 
+xHomeEna         = 183          # x axis 
+xHomeEnd         = 184          # x axis 
+xHomeInv         = 185          # x axis 
+xHomeLoc         = 186          # x axis 
+xHomeSpeed       = 187          # x axis 
+xHomeStart       = 188          # x axis 
+xInvDRO          = 189          # x axis invert dro
+xInvDir          = 190          # x axis invert stepper direction
+xInvEnc          = 191          # x axis 
+xInvMpg          = 192          # x axis invert mpg direction
+xJogMax          = 193          # x axis 
+xJogMin          = 194          # x axis 
+xLimEna          = 195          # x axis limits enable
+xLimNegInv       = 196          # x axis negative limit invert
+xLimPosInv       = 197          # x axis positive limit invert
+xMpgInc          = 198          # x axis jog increment
+xMpgMax          = 199          # x axis jog maximum
+xJogSpeed        = 200          # x axis 
+xMaxSpeed        = 201          # x axis 
+xMicroSteps      = 202          # x axis 
+xMinSpeed        = 203          # x axis 
+xMotorRatio      = 204          # x axis 
+xMotorSteps      = 205          # x axis 
+xParkLoc         = 206          # x axis 
+xPitch           = 207          # x axis 
+xProbeDist       = 208          # x axis 
 
 # x axis position config
 
-xSvPosition      = 208          # x axis 
-xSvHomeOffset    = 209          # x axis 
-xSvDROPosition   = 210          # x axis 
-xSvDROOffset     = 211          # x axis 
+xSvPosition      = 209          # x axis 
+xSvHomeOffset    = 210          # x axis 
+xSvDROPosition   = 211          # x axis 
+xSvDROOffset     = 212          # x axis 
 
 # z axis config
 
-zAccel           = 212          # z axis 
-zBackInc         = 213          # z axis distance to go past for taking out backlash
-zBacklash        = 214          # z axis 
-zDoneDelay       = 215          # z axis done to read dro delay
-zDroFinalDist    = 216          # z dro final approach dist
-zDROPos          = 217          # z axis use dro to go to correct position
-zDROInch         = 218          # z axis 
-zHomeBackoffDist = 219          # z axis 
+zAccel           = 213          # z axis 
+zBackInc         = 214          # z axis distance to go past for taking out backlash
+zBacklash        = 215          # z axis 
+zDoneDelay       = 216          # z axis done to read dro delay
+zDroFinalDist    = 217          # z dro final approach dist
+zDROPos          = 218          # z axis use dro to go to correct position
+zDROInch         = 219          # z axis 
 zHomeDir         = 220          # z axis 
 zHomeDist        = 221          # z axis 
-zHomeEna         = 222          # z axis 
-zHomeEnd         = 223          # z axis 
-zHomeInv         = 224          # z axis 
-zHomeLoc         = 225          # z axis 
-zHomeSpeed       = 226          # z axis 
-zHomeStart       = 227          # z axis 
-zInvDRO          = 228          # z axis 
-zInvDir          = 229          # z axis 
-zInvEnc          = 230          # z axis 
-zInvMpg          = 231          # z axis 
-zJogMax          = 232          # z axis 
-zJogMin          = 233          # z axis 
-zMpgInc          = 234          # z axis jog increment
-zMpgMax          = 235          # z axis jog maximum
-zJogSpeed        = 236          # z axis 
-zLimEna          = 237          # z axis limits enable
-zLimNegInv       = 238          # z axis negative limit invert
-zLimPosInv       = 239          # z axis positive limit invert
-zMaxSpeed        = 240          # z axis 
-zMicroSteps      = 241          # z axis 
-zMinSpeed        = 242          # z axis 
-zMotorRatio      = 243          # z axis 
-zMotorSteps      = 244          # z axis 
-zParkLoc         = 245          # z axis 
-zPitch           = 246          # z axis 
-zProbeDist       = 247          # z axis 
-zProbeSpeed      = 248          # z axis 
+zHomeDistRev     = 222          # z axis 
+zHomeDistBackoff = 223          # z axis 
+zHomeEna         = 224          # z axis 
+zHomeEnd         = 225          # z axis 
+zHomeInv         = 226          # z axis 
+zHomeLoc         = 227          # z axis 
+zHomeSpeed       = 228          # z axis 
+zHomeStart       = 229          # z axis 
+zInvDRO          = 230          # z axis 
+zInvDir          = 231          # z axis 
+zInvEnc          = 232          # z axis 
+zInvMpg          = 233          # z axis 
+zJogMax          = 234          # z axis 
+zJogMin          = 235          # z axis 
+zMpgInc          = 236          # z axis jog increment
+zMpgMax          = 237          # z axis jog maximum
+zJogSpeed        = 238          # z axis 
+zLimEna          = 239          # z axis limits enable
+zLimNegInv       = 240          # z axis negative limit invert
+zLimPosInv       = 241          # z axis positive limit invert
+zMaxSpeed        = 242          # z axis 
+zMicroSteps      = 243          # z axis 
+zMinSpeed        = 244          # z axis 
+zMotorRatio      = 245          # z axis 
+zMotorSteps      = 246          # z axis 
+zParkLoc         = 247          # z axis 
+zPitch           = 248          # z axis 
+zProbeDist       = 249          # z axis 
+zProbeSpeed      = 250          # z axis 
 
 # z axis position config
 
-zSvPosition      = 249          # z axis 
-zSvHomeOffset    = 250          # z axis 
-zSvDROPosition   = 251          # z axis 
-zSvDROOffset     = 252          # z axis 
-cfgJogDebug      = 253          # debug jogging
+zSvPosition      = 251          # z axis 
+zSvHomeOffset    = 252          # z axis 
+zSvDROPosition   = 253          # z axis 
+zSvDROOffset     = 254          # z axis 
+cfgJogDebug      = 255          # debug jogging
 
 config = { \
     'cfgCmdDis' : 0,
@@ -494,81 +496,83 @@ config = { \
     'xDroFinalDist' : 176,
     'xDROInch' : 177,
     'xDROPos' : 178,
-    'xHomeBackoffDist' : 179,
-    'xHomeDir' : 180,
-    'xHomeDist' : 181,
-    'xHomeEna' : 182,
-    'xHomeEnd' : 183,
-    'xHomeInv' : 184,
-    'xHomeLoc' : 185,
-    'xHomeSpeed' : 186,
-    'xHomeStart' : 187,
-    'xInvDRO' : 188,
-    'xInvDir' : 189,
-    'xInvEnc' : 190,
-    'xInvMpg' : 191,
-    'xJogMax' : 192,
-    'xJogMin' : 193,
-    'xLimEna' : 194,
-    'xLimNegInv' : 195,
-    'xLimPosInv' : 196,
-    'xMpgInc' : 197,
-    'xMpgMax' : 198,
-    'xJogSpeed' : 199,
-    'xMaxSpeed' : 200,
-    'xMicroSteps' : 201,
-    'xMinSpeed' : 202,
-    'xMotorRatio' : 203,
-    'xMotorSteps' : 204,
-    'xParkLoc' : 205,
-    'xPitch' : 206,
-    'xProbeDist' : 207,
-    'xSvPosition' : 208,
-    'xSvHomeOffset' : 209,
-    'xSvDROPosition' : 210,
-    'xSvDROOffset' : 211,
-    'zAccel' : 212,
-    'zBackInc' : 213,
-    'zBacklash' : 214,
-    'zDoneDelay' : 215,
-    'zDroFinalDist' : 216,
-    'zDROPos' : 217,
-    'zDROInch' : 218,
-    'zHomeBackoffDist' : 219,
+    'xHomeDir' : 179,
+    'xHomeDist' : 180,
+    'xHomeDistBackoff' : 181,
+    'xHomeDistRev' : 182,
+    'xHomeEna' : 183,
+    'xHomeEnd' : 184,
+    'xHomeInv' : 185,
+    'xHomeLoc' : 186,
+    'xHomeSpeed' : 187,
+    'xHomeStart' : 188,
+    'xInvDRO' : 189,
+    'xInvDir' : 190,
+    'xInvEnc' : 191,
+    'xInvMpg' : 192,
+    'xJogMax' : 193,
+    'xJogMin' : 194,
+    'xLimEna' : 195,
+    'xLimNegInv' : 196,
+    'xLimPosInv' : 197,
+    'xMpgInc' : 198,
+    'xMpgMax' : 199,
+    'xJogSpeed' : 200,
+    'xMaxSpeed' : 201,
+    'xMicroSteps' : 202,
+    'xMinSpeed' : 203,
+    'xMotorRatio' : 204,
+    'xMotorSteps' : 205,
+    'xParkLoc' : 206,
+    'xPitch' : 207,
+    'xProbeDist' : 208,
+    'xSvPosition' : 209,
+    'xSvHomeOffset' : 210,
+    'xSvDROPosition' : 211,
+    'xSvDROOffset' : 212,
+    'zAccel' : 213,
+    'zBackInc' : 214,
+    'zBacklash' : 215,
+    'zDoneDelay' : 216,
+    'zDroFinalDist' : 217,
+    'zDROPos' : 218,
+    'zDROInch' : 219,
     'zHomeDir' : 220,
     'zHomeDist' : 221,
-    'zHomeEna' : 222,
-    'zHomeEnd' : 223,
-    'zHomeInv' : 224,
-    'zHomeLoc' : 225,
-    'zHomeSpeed' : 226,
-    'zHomeStart' : 227,
-    'zInvDRO' : 228,
-    'zInvDir' : 229,
-    'zInvEnc' : 230,
-    'zInvMpg' : 231,
-    'zJogMax' : 232,
-    'zJogMin' : 233,
-    'zMpgInc' : 234,
-    'zMpgMax' : 235,
-    'zJogSpeed' : 236,
-    'zLimEna' : 237,
-    'zLimNegInv' : 238,
-    'zLimPosInv' : 239,
-    'zMaxSpeed' : 240,
-    'zMicroSteps' : 241,
-    'zMinSpeed' : 242,
-    'zMotorRatio' : 243,
-    'zMotorSteps' : 244,
-    'zParkLoc' : 245,
-    'zPitch' : 246,
-    'zProbeDist' : 247,
-    'zProbeSpeed' : 248,
-    'zSvPosition' : 249,
-    'zSvHomeOffset' : 250,
-    'zSvDROPosition' : 251,
-    'zSvDROOffset' : 252,
-    'cfgJogDebug' : 253,
+    'zHomeDistRev' : 222,
+    'zHomeDistBackoff' : 223,
+    'zHomeEna' : 224,
+    'zHomeEnd' : 225,
+    'zHomeInv' : 226,
+    'zHomeLoc' : 227,
+    'zHomeSpeed' : 228,
+    'zHomeStart' : 229,
+    'zInvDRO' : 230,
+    'zInvDir' : 231,
+    'zInvEnc' : 232,
+    'zInvMpg' : 233,
+    'zJogMax' : 234,
+    'zJogMin' : 235,
+    'zMpgInc' : 236,
+    'zMpgMax' : 237,
+    'zJogSpeed' : 238,
+    'zLimEna' : 239,
+    'zLimNegInv' : 240,
+    'zLimPosInv' : 241,
+    'zMaxSpeed' : 242,
+    'zMicroSteps' : 243,
+    'zMinSpeed' : 244,
+    'zMotorRatio' : 245,
+    'zMotorSteps' : 246,
+    'zParkLoc' : 247,
+    'zPitch' : 248,
+    'zProbeDist' : 249,
+    'zProbeSpeed' : 250,
+    'zSvPosition' : 251,
+    'zSvHomeOffset' : 252,
+    'zSvDROPosition' : 253,
+    'zSvDROOffset' : 254,
+    'cfgJogDebug' : 255,
     }
 
 configTable = ( \
@@ -751,9 +755,10 @@ configTable = ( \
     'xDroFinalDist',
     'xDROInch',
     'xDROPos',
-    'xHomeBackoffDist',
     'xHomeDir',
     'xHomeDist',
+    'xHomeDistBackoff',
+    'xHomeDistRev',
     'xHomeEna',
     'xHomeEnd',
     'xHomeInv',
@@ -791,9 +796,10 @@ configTable = ( \
     'zDroFinalDist',
     'zDROPos',
     'zDROInch',
-    'zHomeBackoffDist',
     'zHomeDir',
     'zHomeDist',
+    'zHomeDistRev',
+    'zHomeDistBackoff',
     'zHomeEna',
     'zHomeEnd',
     'zHomeInv',

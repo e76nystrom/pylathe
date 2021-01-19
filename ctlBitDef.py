@@ -59,6 +59,11 @@ HOME_CLR         = (1 << 1)     # 0x02
 PROBE_SET        = (1 << 2)     # 0x04 
 PROBE_CLR        = (1 << 3)     # 0x08 
 
+# home direction
+
+HOME_FWD         = 0            # 0x00 
+HOME_REV         = 1            # 0x01 
+
 # home status
 
 HOME_ACTIVE      = 0            # 0x00 
@@ -83,6 +88,7 @@ MV_XHOME         = (1 << 7)     # 0x80 x home success
 MV_ZHOME_ACTIVE  = (1 << 8)     # 0x100 z home active
 MV_ZHOME         = (1 << 9)     # 0x200 z home success
 MV_MEASURE       = (1 << 10)    # 0x400 pause for measurement
+MV_ESTOP         = (1 << 11)    # 0x800 estop
 
 # pause flags
 

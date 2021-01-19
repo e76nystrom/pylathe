@@ -129,52 +129,52 @@ X_HOME_OFFSET        =  78
 
 Z_HOME_SPEED         =  79
 Z_HOME_DIST          =  80
-Z_HOME_BACKOFF_DIST  =  81
-Z_HOME_DIR           =  82
+Z_HOME_DIST_REV      =  81
+Z_HOME_DIST_BACKOFF  =  82
+Z_HOME_DIR           =  83
 
 # x home parameters
 
-X_HOME_SPEED         =  83
-X_HOME_DIST          =  84
-X_HOME_BACKOFF_DIST  =  85
-X_HOME_DIR           =  86
+X_HOME_SPEED         =  84
+X_HOME_DIST          =  85
+X_HOME_DIST_REV      =  86
+X_HOME_DIST_BACKOFF  =  87
+X_HOME_DIR           =  88
 
 # x home test parameters
 
-X_HOME_LOC           =  87
-X_HOME_START         =  88
-X_HOME_END           =  89
+X_HOME_LOC           =  89
+X_HOME_START         =  90
+X_HOME_END           =  91
 
 # z dro
 
-Z_DRO_LOC            =  90
-Z_DRO_OFFSET         =  91
-Z_DRO_COUNT_INCH     =  92
-Z_DRO_FACTOR         =  93
-Z_DRO_INVERT         =  94
-Z_USE_DRO            =  95
-Z_DONE_DELAY         =  96
-Z_DRO_FINAL_DIST     =  97
+Z_DRO_LOC            =  92
+Z_DRO_OFFSET         =  93
+Z_DRO_COUNT_INCH     =  94
+Z_DRO_FACTOR         =  95
+Z_DRO_INVERT         =  96
+Z_USE_DRO            =  97
+Z_DONE_DELAY         =  98
+Z_DRO_FINAL_DIST     =  99
 
 # x dro
 
-X_DRO_LOC            =  98
-X_DRO_OFFSET         =  99
-X_DRO_COUNT_INCH     = 100
-X_DRO_FACTOR         = 101
-X_DRO_INVERT         = 102
-X_USE_DRO            = 103
-X_DONE_DELAY         = 104
-X_DRO_FINAL_DIST     = 105
+X_DRO_LOC            = 100
+X_DRO_OFFSET         = 101
+X_DRO_COUNT_INCH     = 102
+X_DRO_FACTOR         = 103
+X_DRO_INVERT         = 104
+X_USE_DRO            = 105
+X_DONE_DELAY         = 106
+X_DRO_FINAL_DIST     = 107
 
 # x home or probe status
 
-X_HOME_DONE          = 106
-X_HOME_STATUS        = 107
+X_HOME_STATUS        = 108
 
 # Z home or probe status
 
-Z_HOME_DONE          = 108
 Z_HOME_STATUS        = 109
 
 # probe configuration
@@ -374,11 +374,13 @@ parmTable = ( \
     ('X_HOME_OFFSET', 'int', 'xHomeOffset'),
     ('Z_HOME_SPEED', 'float', 'zHomeSpeed'),
     ('Z_HOME_DIST', 'float', 'zHomeDist'),
-    ('Z_HOME_BACKOFF_DIST', 'float', 'zHomeBackoffDist'),
+    ('Z_HOME_DIST_REV', 'float', 'zHomeDistRev'),
+    ('Z_HOME_DIST_BACKOFF', 'float', 'zHomeDistBackoff'),
     ('Z_HOME_DIR', 'int', 'zHomeDir'),
     ('X_HOME_SPEED', 'float', 'xHomeSpeed'),
     ('X_HOME_DIST', 'float', 'xHomeDist'),
-    ('X_HOME_BACKOFF_DIST', 'float', 'xHomeBackoffDist'),
+    ('X_HOME_DIST_REV', 'float', 'xHomeDistRev'),
+    ('X_HOME_DIST_BACKOFF', 'float', 'xHomeDistBackoff'),
     ('X_HOME_DIR', 'int', 'xHomeDir'),
     ('X_HOME_LOC', 'int', 'xHomeLoc'),
     ('X_HOME_START', 'int', 'xHomeStart'),
@@ -399,9 +401,7 @@ parmTable = ( \
     ('X_USE_DRO', 'char', 'xUseDro'),
     ('X_DONE_DELAY', 'int', 'xDoneDelay'),
     ('X_DRO_FINAL_DIST', 'int', 'xDroFinalDist'),
-    ('X_HOME_DONE', 'int', 'xHomeDone'),
     ('X_HOME_STATUS', 'int', 'xHomeStatus'),
-    ('Z_HOME_DONE', 'int', 'zHomeDone'),
     ('Z_HOME_STATUS', 'int', 'zHomeStatus'),
     ('PROBE_SPEED', 'float', 'probeSpeed'),
     ('PROBE_DIST', 'int', 'probeDist'),
