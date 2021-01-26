@@ -206,6 +206,16 @@ def getIntVal(tc):
     except ValueError:
         return(0)
 
+def buttonDisable(btn):
+    btn.Disable()
+    btn.SetBackgroundColour(None)
+
+def buttonEnable(btn):
+    # print("buttonEnable %s" % (btn.GetLabel()))
+    stdout.flush()
+    btn.Enable()
+    btn.SetBackgroundColour('Green')
+
 class Factor:
     def __init__(self, maxPrime):
         self.primes = self.calcPrimes(maxPrime)
@@ -432,7 +442,6 @@ class FormRoutines():
         txt = wx.StaticText(self, -1, label)
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
-
         cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
         if action is not None:
             self.Bind(wx.EVT_CHECKBOX, action, cb)
@@ -562,6 +571,27 @@ class FormRoutines():
         else:
             jogPanel.setStatus(st.STR_FIELD_ERROR)
             
+EVT_PANEL_DELAY_ID = wx.Window.NewControlId()
+
+class PanelDelayEvent(wx.PyEvent):
+    def __init__(self):
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_PANEL_DELAY_ID)
+
+class PanelDelay(Thread):
+    def __init__(self, panel):
+        Thread.__init__(self)
+        print("PanelDelay start")
+        stdout.flush()
+        self.panel = panel
+        self.start()
+
+    def run(self):
+        sleep(2)
+        wx.PostEvent(self.panel, PanelDelayEvent())
+        print("send PanelDelayEvent")
+        stdout.flush()
+
 class ActionRoutines():
     def __init__(self, control, op):
         self.control = control
@@ -571,11 +601,40 @@ class ActionRoutines():
         self.safeX = None
         self.safeZ = None
         self.formatList = None
+        self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
+
+    def delayEvent(self, e):
+        self.sendButton.SetBackgroundColour(None)
+        self.sendButton.SetBackgroundColour('Green')
 
     def formatData(self, formatList):
         print("ActionRoutines formatData stub called")
         stdout.flush()
         return(True)
+
+    def addButtons(self, sizerG, add, rpm, pause, combine=False):
+        self.sendButton = self.addButton(sizerG, 'Send', self.OnSend)
+        # self.sendButton.SetBackgroundColour('Green')
+
+        self.startButton = self.addButton(sizerG, 'Start', self.OnStart)
+        self.startButton.Disable()
+
+        if add is not None:
+            self.addButton = self.addButton(sizerG, 'Add', self.OnAdd)
+            self.addButton.Disable()
+            self.add = self.addField(sizerG, None, add)
+        else:
+            sizerG.Add(self.emptyCell)
+            sizerG.Add(self.emptyCell)
+
+        self.rpm = self.addField(sizerG, "RPM", rpm)
+
+        if combine:
+            sizerH = wx.BoxSizer(wx.HORIZONTAL)
+            self.pause = self.addCheckBox(sizerH, "Pause", pause)
+            sizerG.Add(sizerH)
+        else:
+            self.pause = self.addCheckBox(sizerG, "Pause", pause)
 
     def sendAction(self):
         print("ActionRoutines sendAction stub called")
@@ -612,6 +671,7 @@ class ActionRoutines():
             jogPanel.currentPanel = self
             jogPanel.currentControl = self.control
             self.update()
+            # PanelDelay(self)
         else:
             self.active = False
 
@@ -628,12 +688,9 @@ class ActionRoutines():
                     if callable(self.sendAction):
                         if self.sendAction():
                             self.active = True
-                            btn = self.sendButton
-                            btn.Disable()
-                            btn.SetBackgroundColour(self.background)
-                            btn = self.startButton
-                            btn.Enable()
-                            btn.SetBackgroundColour('Green')
+                            self.sendButton.Disable()
+                            buttonEnable(self.startButton)
+                            buttonDisable(jogPanel.spindleButton)
                 except CommTimeout:
                     commTimeout()
                 except:
@@ -652,8 +709,7 @@ class ActionRoutines():
             try:
                 if callable(self.startAction):
                     self.startAction()
-                    self.startButton.Disable()
-                    self.startButton.SetBackgroundColour(self.background)
+                    buttonDisable(self.startButton)
             except CommTimeout:
                 commTimeout()
             except AttributeError:
@@ -1858,21 +1914,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         
         # buttons
 
-        self.sendButton = self.addButton(sizerG, 'Send', self.OnSend)
-        self.background = self.sendButton.GetBackgroundColour()
-        self.sendButton.SetBackgroundColour('Green')
-
-        self.startButton = self.addButton(sizerG, 'Start', self.OnStart)
-        self.startButton.Disable()
-
-        self.addButton = self.addButton(sizerG, 'Add', self.OnAdd)
-        self.addButton.Disable()
-
-        self.add = self.addField(sizerG, None, cf.tuAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.tuRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.tuPause)
+        self.addButtons(sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2176,17 +2218,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.faAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.faRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.faPause)
+        self.addButtons(sizerG, cf.faAddFeed, cf.faRPM, cf.faPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2373,16 +2405,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.cuRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.cuPause)
+        self.addButtons(sizerG, None, cf.cuRPM, cf.cuPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -2919,26 +2942,12 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # control buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.tpAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.tpRPM)
+        self.addButtons(sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         self.internal = self.addCheckBox(sizerH, "Internal", cf.tpInternal, \
                                          self.OnInternal)
-
-        sizerG.Add(sizerH)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.pause = self.addCheckBox(sizerH, "Pause", cf.tpPause)
 
         sizerG.Add(sizerH)
 
@@ -3645,17 +3654,7 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.thAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.thRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.thPause)
+        self.addButtons(sizerG, cf.thAddFeed, cf.thRPM, cf.thPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -4259,7 +4258,9 @@ class JogPanel(wx.Panel, FormRoutines):
         btn = self.addButton(sizerG, 'E Stop', self.OnEStop, btnSize)
         btn.SetBackgroundColour('Red')
 
-        self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
+        self.pauseButton = \
+            self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
+        self.pauseButton.Disable()
 
         if STEP_DRV:
             self.addControlButton(sizerG, 'Jog Spindle +', \
@@ -4270,9 +4271,11 @@ class JogPanel(wx.Panel, FormRoutines):
         # second line
 
         btn = self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
-        btn.SetBackgroundColour('Orange')
+        btn.SetBackgroundColour(wx.Colour(255, 160, 0))
 
-        self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
+        self.measureButton = \
+            self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
+        self.measureButton.Disable()
 
         if STEP_DRV:
             self.addControlButton(sizerG, 'Jog Spindle -', \
@@ -4282,14 +4285,19 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # third line
 
-        self.addButton(sizerG, 'Done', self.OnDone, btnSize)
+        self.doneButton = self.addButton(sizerG, 'Done', self.OnDone, btnSize)
+        self.doneButton.Disable()
 
-        self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
+        self.resumeButton = \
+            self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
+        self.resumeButton.Disable()
+
 
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
-            btn = self.addToggleButton(sizerG, 'Start Spindle', \
-                                       self.OnStartSpindle, btnSize)
-            btn.SetBackgroundColour('Green')
+            self.spindleButton = \
+                self.addToggleButton(sizerG, 'Start Spindle', \
+                                     self.OnStartSpindle, btnSize)
+            self.spindleButton.SetBackgroundColour('Green')
         else:
             sizerG.Add(self.emptyCell)
 
@@ -4945,23 +4953,18 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
 
             text = ''
-            addEna = False
             if xHomed:
                 text = 'H'
             if self.currentPanel.active:
                 text += '*'
-                addEna = True
             mvStatus = int(mvStatus)
 
             if mvStatus & ct.MV_MEASURE:
                 text += 'M'
-                addEna = False
             if mvStatus & ct.MV_PAUSE:
                 text += 'P'
-                addEna = False
             if mvStatus & ct.MV_ACTIVE:
                 text += 'A'
-                addEna = False
             if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
                 text += 'L'
             else:
@@ -4970,20 +4973,36 @@ class JogPanel(wx.Panel, FormRoutines):
                     self.limitOverride.SetValue(False)
             self.statusText.SetLabel(text)
 
+            addEna = (mvStatus & ct.MV_DONE) != 0
+            
             if addEna != self.addEna:
                 panel = self.currentPanel
                 if addEna:
-                    panel.addButton.Enable()
-                    panel.addButton.SetBackgroundColour('Green')
+                    buttonEnable(panel.addButton)
+                    buttonEnable(self.doneButton)
+                    buttonDisable(self.pauseButton)
+                    buttonDisable(self.measureButton)
                 else:
-                    panel.addButton.Dnable()
-                    panel.addButton.SetBackgroundColour(panel.background)
+                    buttonDisable(panel.addButton)
+                    buttonDisable(self.doneButton)
                 self.addEna = addEna
                 
             if mvStatus != self.mvStatus:
+                changed = mvStatus ^ self.mvStatus
+                if (changed & ct.MV_PAUSE) != 0:
+                    if (mvStatus & ct.MV_PAUSE) != 0:
+                        buttonEnable(self.resumeButton)
+                        buttonDisable(self.pauseButton)
+                        buttonDisable(self.measureButton)
+                    else:
+                        buttonDisable(self.resumeButton)
+                        if self.currentPanel.active:
+                            buttonEnable(self.pauseButton)
+                            buttonEnable(self.measureButton)
+
+                self.mvStatus = mvStatus
                 print("mvStatus %x" % (mvStatus))
                 stdout.flush()
-            self.mvStatus = mvStatus
 
             if self.homeOrProbe is not None:
                 if self.homeOrProbe == HOME_X:
@@ -5084,6 +5103,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnDone(self, e):
         if (self.mvStatus & (ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_MEASURE)) == 0:
             self.clrActive()
+            comm.command(cm.CMD_DONE)
         else:
             self.setStatus(st.STR_OP_IN_PROGRESS)
         self.combo.SetFocus()
@@ -5101,9 +5121,12 @@ class JogPanel(wx.Panel, FormRoutines):
         panel = self.currentPanel
         panel.active = False
         panel.sendButton.Enable()
-        panel.sendButton.SetBackgroundColour('Green')
-        panel.startButton.Disable()
-        panel.startButton.SetBackgroundColour(panel.background)
+        buttonDisable(panel.startButton)
+        btn = self.spindleButton
+        if btn.GetValue():
+            btn.SetLabel('Start Spindle')
+            btn.SetValue(False)
+        buttonEnable(btn)
         self.setStatus(st.STR_CLR)
 
     def OnStartSpindle(self, e):
@@ -5113,13 +5136,15 @@ class JogPanel(wx.Panel, FormRoutines):
             if state: 
                 btn.SetLabel('Stop Spindle')
                 btn.SetBackgroundColour('Red')
-                panel = self.getPanel()
+                panel = self.currentPanel
+                panel.sendButton.Disable()
                 rpm = panel.rpm.GetValue()
                 sendSpindleData(True, rpm)
                 comm.command(cm.SPINDLE_START)
             else: 
                 btn.SetLabel('Start Spindle')
                 btn.SetBackgroundColour('Green')
+                self.currentPanel.sendButton.Enable()
                 comm.command(cm.SPINDLE_STOP)
         self.combo.SetFocus()
 
@@ -6210,7 +6235,7 @@ class UpdateThread(Thread):
 
     def dbgXState(self, val):
         return(("x_st %s" % (en.axisStatesList[val])) + \
-                ("\n" if self.mIdle and val == en.XIDLE else ""))
+                ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
 
     def dbgXBSteps(self, val):
         tmp = float(val) / jogPanel.xStepsInch
@@ -6290,7 +6315,7 @@ class UpdateThread(Thread):
 
     def dbgZState(self, val):
         return(("z_st %s" % (en.axisStatesList[val])) + \
-                ("\n" if self.mIdle and val == en.ZIDLE else ""))
+                ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
