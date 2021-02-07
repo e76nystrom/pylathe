@@ -7,296 +7,298 @@ SP_STEPS             =   0
 SP_MICRO             =   1
 SP_MIN_RPM           =   2
 SP_MAX_RPM           =   3
-SP_ACCEL_TIME        =   4
-SP_ACCEL             =   5
-SP_JOG_MIN_RPM       =   6
-SP_JOG_MAX_RPM       =   7
-SP_JOG_RPM           =   8
-SP_JOG_ACCEL_TIME    =   9
-SP_JOG_TIME_INITIAL  =  10
-SP_JOG_TIME_INC      =  11
-SP_JOG_TIME_MAX      =  12
-SP_JOG_DIR           =  13
-SP_DIR_FLAG          =  14
-SP_TEST_INDEX        =  15
-SP_TEST_ENCODER      =  16
+SP_RPM               =   4
+SP_ACCEL_TIME        =   5
+SP_ACCEL             =   6
+SP_JOG_MIN_RPM       =   7
+SP_JOG_MAX_RPM       =   8
+SP_JOG_RPM           =   9
+SP_JOG_ACCEL_TIME    =  10
+SP_JOG_TIME_INITIAL  =  11
+SP_JOG_TIME_INC      =  12
+SP_JOG_TIME_MAX      =  13
+SP_JOG_DIR           =  14
+SP_DIR_FLAG          =  15
+SP_TEST_INDEX        =  16
+SP_TEST_ENCODER      =  17
 
 # z axis parameters
 
-Z_PITCH              =  17
-Z_RATIO              =  18
-Z_MICRO              =  19
-Z_MOTOR              =  20
-Z_ACCEL_TIME         =  21
-Z_ACCEL              =  22
-Z_BACKLASH           =  23
-Z_STEP_FACTOR        =  24
-Z_DIR_FLAG           =  25
-Z_MPG_FLAG           =  26
+Z_PITCH              =  18
+Z_RATIO              =  19
+Z_MICRO              =  20
+Z_MOTOR              =  21
+Z_ACCEL_TIME         =  22
+Z_ACCEL              =  23
+Z_BACKLASH           =  24
+Z_STEP_FACTOR        =  25
+Z_DIR_FLAG           =  26
+Z_MPG_FLAG           =  27
 
 # x axis parameters
 
-X_PITCH              =  27
-X_RATIO              =  28
-X_MICRO              =  29
-X_MOTOR              =  30
-X_ACCEL_TIME         =  31
-X_ACCEL              =  32
-X_BACKLASH           =  33
-X_STEP_FACTOR        =  34
-X_DIR_FLAG           =  35
-X_MPG_FLAG           =  36
-X_DIAMETER           =  37
+X_PITCH              =  28
+X_RATIO              =  29
+X_MICRO              =  30
+X_MOTOR              =  31
+X_ACCEL_TIME         =  32
+X_ACCEL              =  33
+X_BACKLASH           =  34
+X_STEP_FACTOR        =  35
+X_DIR_FLAG           =  36
+X_MPG_FLAG           =  37
+X_DIAMETER           =  38
 
 # z move parameters
 
-Z_MOVE_MIN           =  38
-Z_MOVE_MAX           =  39
+Z_MOVE_MIN           =  39
+Z_MOVE_MAX           =  40
 
 # z jog parameters
 
-Z_JOG_MIN            =  40
-Z_JOG_MAX            =  41
-Z_JOG_SPEED          =  42
+Z_JOG_MIN            =  41
+Z_JOG_MAX            =  42
+Z_JOG_SPEED          =  43
 
 # x move parameters
 
-X_MOVE_MIN           =  43
-X_MOVE_MAX           =  44
+X_MOVE_MIN           =  44
+X_MOVE_MAX           =  45
 
 # x jog parameters
 
-X_JOG_MIN            =  45
-X_JOG_MAX            =  46
-X_JOG_SPEED          =  47
+X_JOG_MIN            =  46
+X_JOG_MAX            =  47
+X_JOG_SPEED          =  48
 
 # pass information
 
-TOTAL_PASSES         =  48
-CURRENT_PASS         =  49
-MV_STATUS            =  50
+TOTAL_PASSES         =  49
+CURRENT_PASS         =  50
+MV_STATUS            =  51
 
 # z axis move values
 
-Z_MOVE_DIST          =  51
-Z_MOVE_POS           =  52
-Z_JOG_DIR            =  53
-Z_SET_LOC            =  54
-Z_LOC                =  55
-Z_FLAG               =  56
-Z_ABS_LOC            =  57
-Z_MPG_INC            =  58
-Z_MPG_MAX            =  59
+Z_MOVE_DIST          =  52
+Z_MOVE_POS           =  53
+Z_JOG_DIR            =  54
+Z_SET_LOC            =  55
+Z_LOC                =  56
+Z_FLAG               =  57
+Z_ABS_LOC            =  58
+Z_MPG_INC            =  59
+Z_MPG_MAX            =  60
 
 # x axis move values
 
-X_MOVE_DIST          =  60
-X_MOVE_POS           =  61
-X_JOG_DIR            =  62
-X_SET_LOC            =  63
-X_LOC                =  64
-X_FLAG               =  65
-X_ABS_LOC            =  66
-X_MPG_INC            =  67
-X_MPG_MAX            =  68
+X_MOVE_DIST          =  61
+X_MOVE_POS           =  62
+X_JOG_DIR            =  63
+X_SET_LOC            =  64
+X_LOC                =  65
+X_FLAG               =  66
+X_ABS_LOC            =  67
+X_MPG_INC            =  68
+X_MPG_MAX            =  69
 
 # common jog parameters
 
-JOG_TIME_INITIAL     =  69
-JOG_TIME_INC         =  70
-JOG_TIME_MAX         =  71
+JOG_TIME_INITIAL     =  70
+JOG_TIME_INC         =  71
+JOG_TIME_MAX         =  72
 
 # taper parameters
 
-TAPER_CYCLE_DIST     =  72
+TAPER_CYCLE_DIST     =  73
 
 # index pulse variables
 
-INDEX_PRE_SCALER     =  73
-LAST_INDEX_PERIOD    =  74
-INDEX_PERIOD         =  75
-REV_COUNTER          =  76
+INDEX_PRE_SCALER     =  74
+LAST_INDEX_PERIOD    =  75
+INDEX_PERIOD         =  76
+REV_COUNTER          =  77
 
 # z home offset
 
-Z_HOME_OFFSET        =  77
+Z_HOME_OFFSET        =  78
 
 # x home offset
 
-X_HOME_OFFSET        =  78
+X_HOME_OFFSET        =  79
 
 # z home parameters
 
-Z_HOME_SPEED         =  79
-Z_HOME_DIST          =  80
-Z_HOME_DIST_REV      =  81
-Z_HOME_DIST_BACKOFF  =  82
-Z_HOME_DIR           =  83
+Z_HOME_SPEED         =  80
+Z_HOME_DIST          =  81
+Z_HOME_DIST_REV      =  82
+Z_HOME_DIST_BACKOFF  =  83
+Z_HOME_DIR           =  84
 
 # x home parameters
 
-X_HOME_SPEED         =  84
-X_HOME_DIST          =  85
-X_HOME_DIST_REV      =  86
-X_HOME_DIST_BACKOFF  =  87
-X_HOME_DIR           =  88
+X_HOME_SPEED         =  85
+X_HOME_DIST          =  86
+X_HOME_DIST_REV      =  87
+X_HOME_DIST_BACKOFF  =  88
+X_HOME_DIR           =  89
 
 # x home test parameters
 
-X_HOME_LOC           =  89
-X_HOME_START         =  90
-X_HOME_END           =  91
+X_HOME_LOC           =  90
+X_HOME_START         =  91
+X_HOME_END           =  92
 
 # z dro
 
-Z_DRO_LOC            =  92
-Z_DRO_OFFSET         =  93
-Z_DRO_COUNT_INCH     =  94
-Z_DRO_FACTOR         =  95
-Z_DRO_INVERT         =  96
-Z_USE_DRO            =  97
-Z_DONE_DELAY         =  98
-Z_DRO_FINAL_DIST     =  99
+Z_DRO_LOC            =  93
+Z_DRO_OFFSET         =  94
+Z_DRO_COUNT_INCH     =  95
+Z_DRO_FACTOR         =  96
+Z_DRO_INVERT         =  97
+Z_USE_DRO            =  98
+Z_DONE_DELAY         =  99
+Z_DRO_FINAL_DIST     = 100
 
 # x dro
 
-X_DRO_LOC            = 100
-X_DRO_OFFSET         = 101
-X_DRO_COUNT_INCH     = 102
-X_DRO_FACTOR         = 103
-X_DRO_INVERT         = 104
-X_USE_DRO            = 105
-X_DONE_DELAY         = 106
-X_DRO_FINAL_DIST     = 107
+X_DRO_LOC            = 101
+X_DRO_OFFSET         = 102
+X_DRO_COUNT_INCH     = 103
+X_DRO_FACTOR         = 104
+X_DRO_INVERT         = 105
+X_USE_DRO            = 106
+X_DONE_DELAY         = 107
+X_DRO_FINAL_DIST     = 108
 
 # x home or probe status
 
-X_HOME_STATUS        = 108
+X_HOME_STATUS        = 109
 
 # Z home or probe status
 
-Z_HOME_STATUS        = 109
+Z_HOME_STATUS        = 110
 
 # probe configuration
 
-PROBE_SPEED          = 110
-PROBE_DIST           = 111
-PROBE_INV            = 112
+PROBE_SPEED          = 111
+PROBE_DIST           = 112
+PROBE_INV            = 113
 
 # configuration
 
-STEPPER_DRIVE        = 113
-MOTOR_TEST           = 114
-SPINDLE_ENCODER      = 115
-SPINDLE_SYNC_BOARD   = 116
-TURN_SYNC            = 117
-THREAD_SYNC          = 118
-CAP_TMR_ENABLE       = 119
-CFG_FPGA             = 120
-CFG_MPG              = 121
-CFG_DRO              = 122
-CFG_LCD              = 123
-CFG_FCY              = 124
-CFG_SWITCH           = 125
-CFG_VAR_SPEED        = 126
+STEPPER_DRIVE        = 114
+MOTOR_TEST           = 115
+SPINDLE_ENCODER      = 116
+SPINDLE_SYNC_BOARD   = 117
+TURN_SYNC            = 118
+THREAD_SYNC          = 119
+CAP_TMR_ENABLE       = 120
+CFG_FPGA             = 121
+CFG_MPG              = 122
+CFG_DRO              = 123
+CFG_LCD              = 124
+CFG_FCY              = 125
+CFG_SWITCH           = 126
+CFG_VAR_SPEED        = 127
 
 # setup
 
-SETUP_DONE           = 127
+SETUP_DONE           = 128
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 128
+ENC_PER_REV          = 129
 
 # test encoder setup variables
 
-ENC_ENABLE           = 129
-ENC_PRE_SCALER       = 130
-ENC_TIMER            = 131
-ENC_RUN_COUNT        = 132
+ENC_ENABLE           = 130
+ENC_PRE_SCALER       = 131
+ENC_TIMER            = 132
+ENC_RUN_COUNT        = 133
 
 # test encoder status variables
 
-ENC_RUN              = 133
-ENC_COUNTER          = 134
-ENC_REV_COUNTER      = 135
+ENC_RUN              = 134
+ENC_COUNTER          = 135
+ENC_REV_COUNTER      = 136
 
 # measured spindle speed
 
-RPM                  = 136
+RPM                  = 137
 
 # fpga frequency variables
 
-FPGA_FREQUENCY       = 137
-FREQ_MULT            = 138
+FPGA_FREQUENCY       = 138
+FREQ_MULT            = 139
 
 # xilinx configuration register
 
-X_CFG_REG            = 139
+X_CFG_REG            = 140
 
 # sync parameters
 
-L_SYNC_CYCLE         = 140
-L_SYNC_OUTPUT        = 141
-L_SYNC_PRESCALER     = 142
+L_SYNC_CYCLE         = 141
+L_SYNC_OUTPUT        = 142
+L_SYNC_PRESCALER     = 143
 
 # threading variables
 
-TH_Z_START           = 143
-TH_X_START           = 144
-TAN_THREAD_ANGLE     = 145
-X_FEED               = 146
-RUNOUT_DISTANCE      = 147
-RUNOUT_DEPTH         = 148
+TH_Z_START           = 144
+TH_X_START           = 145
+TAN_THREAD_ANGLE     = 146
+X_FEED               = 147
+RUNOUT_DISTANCE      = 148
+RUNOUT_DEPTH         = 149
 
 # jog debug
 
-JOG_DEBUG            = 149
+JOG_DEBUG            = 150
 
 # motor and speed control
 
-PWM_FREQ             = 150
-MIN_SPEED            = 151
-MAX_SPEED            = 152
+PWM_FREQ             = 151
+MIN_SPEED            = 152
+MAX_SPEED            = 153
 
 # current operation
 
-CURRENT_OP           = 153
+CURRENT_OP           = 154
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 154
-COMMON_LIMITS        = 155
-LIMITS_ENABLED       = 156
-COMMON_HOME          = 157
+LIMIT_OVERRIDE       = 155
+COMMON_LIMITS        = 156
+LIMITS_ENABLED       = 157
+COMMON_HOME          = 158
 
 # z limits and home
 
-Z_LIM_ENA            = 158
-Z_LIM_NEG_INV        = 159
-Z_LIM_POS_INV        = 160
-Z_HOME_ENA           = 161
-Z_HOME_INV           = 162
+Z_LIM_ENA            = 159
+Z_LIM_NEG_INV        = 160
+Z_LIM_POS_INV        = 161
+Z_HOME_ENA           = 162
+Z_HOME_INV           = 163
 
 # x limits and home
 
-X_LIM_ENA            = 163
-X_LIM_NEG_INV        = 164
-X_LIM_POS_INV        = 165
-X_HOME_ENA           = 166
-X_HOME_INV           = 167
+X_LIM_ENA            = 164
+X_LIM_NEG_INV        = 165
+X_LIM_POS_INV        = 166
+X_HOME_ENA           = 167
+X_HOME_INV           = 168
 
 # e stop
 
-E_STOP_ENA           = 168
-E_STOP_INV           = 169
-MAX_PARM             = 170
+E_STOP_ENA           = 169
+E_STOP_INV           = 170
+MAX_PARM             = 171
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
     ('SP_MICRO', 'int16_t', 'spMicro'),
     ('SP_MIN_RPM', 'float', 'spMinRpm'),
     ('SP_MAX_RPM', 'float', 'spMaxRpm'),
+    ('SP_RPM', 'float', 'spRpm'),
     ('SP_ACCEL_TIME', 'float', 'spAccelTime'),
     ('SP_ACCEL', 'float', 'spAccel'),
     ('SP_JOG_MIN_RPM', 'float', 'spJogMinRpm'),

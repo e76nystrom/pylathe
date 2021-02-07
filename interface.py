@@ -211,6 +211,7 @@ configList = \
   
     ('tuAddFeed', 'turn '),
     ('tuInternal', 'turn internal'),
+    ('tuManual', 'turn manual mode'),
     ('tuPasses', 'turn '),
     ('tuPause', 'turn '),
     ('tuRPM', 'turn '),
@@ -373,9 +374,10 @@ cmdList = \
     "spindle operations",
     
     ("SPINDLE_START", "spindleStart", "start spindle"),
+    ("SPINDLE_STOP", "spindleStop", "stop spindle"),
+    ("SPINDLE_UPDATE", "spindleUpdate", "update spindle speed"),
     ("SPINDLE_JOG", "spindleJog", "spindle jog"),
     ("SPINDLE_JOG_SPEED", "spindleJogSpeed", "spindle jog at speed"),
-    ("SPINDLE_STOP", "spindleStop", "stop spindle"),
     
     "end operations",
     
@@ -449,6 +451,7 @@ parmList = \
     ("SP_MICRO", "spindle micro steps", "int16_t"),
     ("SP_MIN_RPM", "spindle minimum rpm", "float"),
     ("SP_MAX_RPM", "spindle maxmum rpm", "float"),
+    ("SP_RPM", "spindle rpm", "float"), # 
     ("SP_ACCEL_TIME", "spindle accel time", "float"),
     ("SP_ACCEL", "spindle accel rpm/sec^2", "float"),
     ("SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"),
@@ -670,7 +673,7 @@ parmList = \
  
     "measured spindle speed",
 
-    ("RPM", "current rpm", "int16_t"),
+    ("RPM", "current measured rpm", "int16_t"),
 
     "fpga frequency variables",
 

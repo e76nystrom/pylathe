@@ -277,7 +277,8 @@ class Offset():
         return(self.val * self.scale)
 
 class ComboBox(wx.ComboBox): 
-    def __init__(self, parent, label, indexList,  choiceList, *args, **kwargs):
+    def __init__(self, parent, label, indexList,  choiceList, \
+                 *args, **kwargs):
         self.label = label
         self.indexList = indexList
         self.choiceList = choiceList
@@ -378,14 +379,17 @@ class FormRoutines():
             cfg.setInfoData(index, strVal)
         return(success)
 
-    def fieldList(self, sizer, fields):
+    def fieldList(self, sizer, fields, col=1):
         total = len(fields)
         offset = total // 2
         for i in range(total):
-            j = i // 2
-            if (i & 1) != 0:
-                j += offset
-            field = fields[j]
+            if col == 1:
+                field = fields[i]
+            else:
+                j = i // 2
+                if (i & 1) != 0:
+                    j += offset
+                field = fields[j]
             (label, index) = field[:2]
             if label.startswith('b'):
                 self.addCheckBox(sizer, label[1:], index)
@@ -438,18 +442,24 @@ class FormRoutines():
         cfg.initInfo(index, tc)
         return(tc)
 
-    def addCheckBox(self, sizer, label, index, action=None):
+    def addCheckBox(self, sizer, label, index, action=None, box=False):
+        if box:
+            sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        else:
+            sizerH = sizer
         txt = wx.StaticText(self, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
         cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
         if action is not None:
             self.Bind(wx.EVT_CHECKBOX, action, cb)
-        sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+        sizerH.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
         if cfg.info[index] is not None:
             val = cfg.getInfo(index)
             cb.SetValue(val == 'True')
         cfg.initInfo(index, cb)
+        if box:
+            sizer.Add(sizerH)
         return(cb)
 
     def addComboBox(self, sizer, label, index, action, border=2,
@@ -602,6 +612,7 @@ class ActionRoutines():
         self.safeZ = None
         self.formatList = None
         self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
+        self.manualMode = False
 
     def delayEvent(self, e):
         self.sendButton.SetBackgroundColour(None)
@@ -628,13 +639,9 @@ class ActionRoutines():
             sizerG.Add(self.emptyCell)
 
         self.rpm = self.addField(sizerG, "RPM", rpm)
-
-        if combine:
-            sizerH = wx.BoxSizer(wx.HORIZONTAL)
-            self.pause = self.addCheckBox(sizerH, "Pause", pause)
-            sizerG.Add(sizerH)
-        else:
-            self.pause = self.addCheckBox(sizerG, "Pause", pause)
+        self.rpm.Bind(wx.EVT_KILL_FOCUS, self.OnRPMKillFocus)
+        
+        self.pause = self.addCheckBox(sizerG, "Pause", pause, box=combine)
 
     def sendAction(self):
         print("ActionRoutines sendAction stub called")
@@ -670,6 +677,7 @@ class ActionRoutines():
         if self.IsShown():
             jogPanel.currentPanel = self
             jogPanel.currentControl = self.control
+            jogPanel.setRPMSlider(int(self.rpm.GetValue()))
             self.update()
             # PanelDelay(self)
         else:
@@ -737,6 +745,10 @@ class ActionRoutines():
                 print("ActionRoutines OnAdd AttributeError")
                 stdout.flush()
         jogPanel.focus()
+
+    def OnRPMKillFocus(self, e):
+        jogPanel.setRPMSlider(int(self.rpm.GetValue()))
+        e.Skip()
 
 class DialogActions():
     def __init__(self):
@@ -1139,6 +1151,9 @@ class MoveCommands():
 
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
+        if parm == ct.PARM_START:
+            self.saveZOffset()
+            self.saveXOffset()
 
 def sendClear():
     global spindleDataSent, zDataSent, xDataSent
@@ -1647,15 +1662,17 @@ class Turn(LatheOp, UpdatePass):
 
     def getParameters(self):
         tu = self.panel
+        self.manual = tu.manual.GetValue
         self.internal = tu.internal.GetValue()
 
-        if self.internal:
-            self.xStart = getFloatVal(tu.xDiam1) / 2.0
-            self.xEnd = getFloatVal(tu.xDiam0) / 2.0
-        else:
-            self.xStart = getFloatVal(tu.xDiam0) / 2.0
-            self.xEnd = getFloatVal(tu.xDiam1) / 2.0
-        self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
+        if not self.manual:
+            if self.internal:
+                self.xStart = getFloatVal(tu.xDiam1) / 2.0
+                self.xEnd = getFloatVal(tu.xDiam0) / 2.0
+            else:
+                self.xStart = getFloatVal(tu.xDiam0) / 2.0
+                self.xEnd = getFloatVal(tu.xDiam1) / 2.0
+            self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
         self.zStart = getFloatVal(tu.zStart)
@@ -1726,10 +1743,23 @@ class Turn(LatheOp, UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.moveX(self.xStart + self.xRetract)
+        self.m.moveX(self.saveX)
 
         self.passDone()
         return(True)
+
+    def setupSync(self):
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
+            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+        elif TURN_SYNC == en.SEL_TU_ESYN:
+            syncComm.setParm(sp.SYNC_ENCODER, \
+                             cfg.getIntInfoData(cf.cfgEncoder))
+            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
+            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
+            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+            syncComm.command(sc.SYNC_SETUP)
 
     def setup(self, add=False): # turn
         comm.queParm(pm.CURRENT_OP, en.OP_TURN)
@@ -1740,17 +1770,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            elif TURN_SYNC == en.SEL_TU_ESYN:
-                syncComm.setParm(sp.SYNC_ENCODER, \
-                                 cfg.getIntInfoData(cf.cfgEncoder))
-                syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-                syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-                syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-                syncComm.command(sc.SYNC_SETUP)
+            self.setupSync()
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -1842,6 +1862,60 @@ class Turn(LatheOp, UpdatePass):
         else:
             self.passSize[passNum] += offset
 
+    def manualOperation(self):
+        self.getParameters()
+
+        startSpindle = not jogPanel.spindleButton.GetValue()
+
+        xLocation = float(comm.getParm(pm.X_LOC)) / jogPanel.xStepsInch - \
+            xHomeOffset
+
+        if self.internal:
+            self.xRetract = -self.xRetract
+
+        self.safeX = xLocation + self.xRetract
+        self.safeZ = self.zStart + self.zRetract
+
+        self.passSize = [0.0, 2 * xLocation]
+        self.passNum = 1
+
+        jogPanel.dPrt("\nturn manualOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
+
+        comm.queParm(pm.CURRENT_OP, en.OP_TURN)
+
+        self.setupSync()
+        m = moveCommands
+        m.queInit()
+        m.done(ct.PARM_START)
+
+        comm.command(cm.CMD_SYNCSETUP)
+        
+        if startSpindle:
+            m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
+
+        m.queFeedType(ct.FEED_PITCH)
+        m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
+            
+        self.passCount = 1
+        m.nextPass(self.passCount)
+
+        m.moveZ(self.zStart)
+        m.moveZ(self.zEnd, ct.CMD_SYN)
+
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
+        m.moveX(xLocation, flag)
+
+        if startSpindle:
+            if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
+                m.stopSpindle()
+        m.done(ct.PARM_DONE)
+        stdout.flush()
+
 class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, parent, hdrFont, *args, **kwargs):
         super(TurnPanel, self).__init__(parent, *args, **kwargs)
@@ -1868,6 +1942,7 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
                            (cf.tuZStart, 'f'))
 
     def InitUI(self):
+        fields0 = self.fields0 = []
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Turn", size=(120, 30))
@@ -1882,11 +1957,14 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         (self.xDiam0, self.diam0Txt) = \
             self.addFieldText(sizerG, "X Start D", cf.tuXDiam0)
         self.focusField = self.xDiam0
+        fields0.append(self.xDiam0)
 
         (self.xDiam1, self.diam1Txt) = \
             self.addFieldText(sizerG, "X End D", cf.tuXDiam1)
+        fields0.append(self.xDiam1)
 
         self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
+        fields0.append(self.xFeed)
 
         self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract)
 
@@ -1906,32 +1984,56 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.passes.SetEditable(False)
 
         self.sPInt = self.addField(sizerG, "SP Int", cf.tuSPInt)
+        fields0.append(self.sPInt)
 
         self.spring = self.addField(sizerG, "Spring", cf.tuSpring)
+        fields0.append(self.spring)
 
-        self.internal = self.addCheckBox(sizerG, "Internal", cf.tuInternal, \
-                                         self.OnInternal)
+        self.manual = self.addCheckBox(sizerG, "Manual", cf.tuManual, \
+                                         self.OnManual)
         
         # buttons
 
-        self.addButtons(sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause)
+        self.addButtons(sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause, True)
+        fields0.append(self.sendButton)
+        fields0.append(self.add)
+        fields0.append(self.pause)
+
+        self.internal = self.addCheckBox(sizerG, "Internal", cf.tuInternal, \
+                                         self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
+    def OnManual(self, e):
+        self.updateUI()
+
     def OnInternal(self, e):
         self.updateUI()
             
     def updateUI(self):
-        if self.internal.GetValue():
-            self.diam0Txt.SetLabel("X End D")
-            self.diam1Txt.SetLabel("X Start D")
-        else:
-            self.diam0Txt.SetLabel("X Start D")
-            self.diam1Txt.SetLabel("X End D")
-        self.sizerV.Layout()
+        if not self.active:
+            if self.internal.GetValue():
+                self.diam0Txt.SetLabel("X End D")
+                self.diam1Txt.SetLabel("X Start D")
+            else:
+                self.diam0Txt.SetLabel("X Start D")
+                self.diam1Txt.SetLabel("X End D")
+            btn = self.startButton
+            self.manualMode = self.manual.GetValue()
+            if self.manualMode:
+                for f in self.fields0:
+                    f.Disable();
+                btn.Enable();
+                btn.Bind(wx.EVT_BUTTON, self.OnManualStart)
+            else:
+                for f in self.fields0:
+                    f.Enable();
+                btn.Disable();
+                btn.Bind(wx.EVT_BUTTON, self.OnStart)
+            self.sizerV.Layout()
 
     def update(self):
         self.updateUI()
@@ -1961,6 +2063,12 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         else:
             if cfg.getBoolInfoData(cf.cfgDbgSave):
                 updateThread.openDebug()
+
+    def OnManualStart(self, e):
+        self.sendData()
+        if cfg.getBoolInfoData(cf.cfgDbgSave):
+            updateThread.openDebug()
+        self.control.manualOperation()
 
     def addAction(self):
         self.control.addPass()
@@ -2944,12 +3052,8 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButtons(sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
 
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
         self.internal = self.addCheckBox(sizerH, "Internal", cf.tpInternal, \
-                                         self.OnInternal)
-
-        sizerG.Add(sizerH)
+                                         self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -4054,6 +4158,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
+        self.spindleActive = False
 
         self.homeOrProbe = None
 
@@ -4371,11 +4476,53 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
                    border=2)
 
+
+        self.sliderMax = 1000
+        self.spindleSlider = slider = wx.Slider(self, size=(500, -1),
+                                                maxValue=self.sliderMax)
+        slider.Bind(wx.EVT_SCROLL_THUMBTRACK, self.OnSliderThumbtrack)
+        slider.Bind(wx.EVT_SCROLL_THUMBRELEASE, self.OnSliderRelease)
+
+        sizerV.Add(slider)
+
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
+    def spindleRangeSetup(self):
+        print("spindleRangeSetup")
+        range = cfg.getIntInfoData(cf.spCurRange)
+        if range >= 1 and range <= cfg.getIntInfoData(cf.spRanges):
+            range -= 1
+            self.minSpeed = cfg.getIntInfoData(cf.spRangeMin1 + range)
+            self.maxSpeed = cfg.getIntInfoData(cf.spRangeMax1 + range)
+            self.speedRange = self.maxSpeed - self.minSpeed
+
+    def setRPMSlider(self, rpm):
+        if rpm > self.minSpeed:
+            pos = int((float(rpm - self.minSpeed) / self.speedRange) * \
+                      self.sliderMax)
+            self.spindleSlider.SetValue(pos)
+        else:
+            self.spindleSlider.SetValue(0)
+
+    def OnSliderThumbtrack(self, e):
+        pos = e.GetPosition()
+        rpm = int(self.minSpeed + \
+                  (float(pos) / self.sliderMax) * self.speedRange)
+        self.currentPanel.rpm.SetValue(str(rpm))
+        # print(pos, rpm)
+        # stdout.flush()
+
+    def OnSliderRelease(self, e):
+        if self.spindleActive:
+            rpm = int(self.currentPanel.rpm.GetValue())
+            comm.setParm(pm.SP_RPM, rpm)
+            comm.command(cm.SPINDLE_UPDATE)
+        self.focus()
+
     def update(self):
         self.setSurfaceSpeed()
+        self.spindleRangeSetup()
 
     def setPassText(self, txt):
         self.passText.SetLabel(txt)
@@ -4978,10 +5125,11 @@ class JogPanel(wx.Panel, FormRoutines):
             if addEna != self.addEna:
                 panel = self.currentPanel
                 if addEna:
-                    buttonEnable(panel.addButton)
-                    buttonEnable(self.doneButton)
-                    buttonDisable(self.pauseButton)
+                    if not panel.manualMode:
+                        buttonEnable(panel.addButton)
+                        buttonEnable(self.doneButton)
                     buttonDisable(self.measureButton)
+                    buttonDisable(self.pauseButton)
                 else:
                     buttonDisable(panel.addButton)
                     buttonDisable(self.doneButton)
@@ -4998,7 +5146,8 @@ class JogPanel(wx.Panel, FormRoutines):
                         buttonDisable(self.resumeButton)
                         if self.currentPanel.active:
                             buttonEnable(self.pauseButton)
-                            buttonEnable(self.measureButton)
+                            if not panel.manualMode:
+                                buttonEnable(self.measureButton)
 
                 self.mvStatus = mvStatus
                 print("mvStatus %x" % (mvStatus))
@@ -5120,8 +5269,12 @@ class JogPanel(wx.Panel, FormRoutines):
         updateThread.closeDbg()
         panel = self.currentPanel
         panel.active = False
-        panel.sendButton.Enable()
-        buttonDisable(panel.startButton)
+        if not panel.manualMode:
+            panel.sendButton.Enable()
+            buttonDisable(panel.startButton)
+        else:
+            panel.sendButton.Disable()
+            buttonEnable(panel.startButton)
         btn = self.spindleButton
         if btn.GetValue():
             btn.SetLabel('Start Spindle')
@@ -5132,7 +5285,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnStartSpindle(self, e):
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
             btn = e.GetEventObject()
-            state = btn.GetValue() 
+            self.spindleActive = state = btn.GetValue() 
             if state: 
                 btn.SetLabel('Stop Spindle')
                 btn.SetBackgroundColour('Red')
@@ -7215,7 +7368,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
 
-        self.fieldList(sizerG, self.fields)
+        self.fieldList(sizerG, self.fields, 2)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -7304,7 +7457,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
 
-        self.fieldList(sizerG, self.fields)
+        self.fieldList(sizerG, self.fields, 2)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -7484,6 +7637,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
     def showAction(self, changed):
         global spindleDataSent
         if changed:
+            jogPanel.spindleRangeSetup()
             spindleDataSent = False
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
