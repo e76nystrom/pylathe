@@ -137,6 +137,10 @@ class Comm():
                 valString = "0.0"
                 print("ValueError float queParm %s %s" % (parm, val))
                 stdout.flush()
+            except TypeError:
+                valString = "0.0"
+                print("TypeError float queParm %s %s" % (parm, val))
+                stdout.flush()
         else:
             try:
                 val = int(val)
