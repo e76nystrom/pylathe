@@ -448,7 +448,9 @@ class FormRoutines():
         else:
             sizerH = sizer
         txt = wx.StaticText(self, -1, label)
-        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+        # sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+        #           wx.ALIGN_CENTER_VERTICAL, border=2)
+        sizerH.Add(txt, flag=wx.ALL|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
         cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
         if action is not None:
@@ -4321,7 +4323,9 @@ class JogPanel(wx.Panel, FormRoutines):
                                     edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        # sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        #            border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, \
                    border=2)
 
         # status line
@@ -4340,12 +4344,14 @@ class JogPanel(wx.Panel, FormRoutines):
                    wx.ALIGN_CENTER_VERTICAL, border=2)
 
         txt = wx.StaticText(self, -1, "Limit Override ")
-        sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=2)
+        sizerH.Add(txt, flag=wx.ALIGN_CENTER_VERTICAL, \
                    border=2)
 
         self.limitOverride = cb = wx.CheckBox(self, -1)
         self.Bind(wx.EVT_CHECKBOX, self.OnOverride, cb)
-        sizerH.Add(cb, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL, \
                    border=2)
 
         sizerV.Add(sizerH)
@@ -4473,7 +4479,9 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerH.Add(sizerG)
 
-        sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        # sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        #            border=2)
+        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, \
                    border=2)
 
 
