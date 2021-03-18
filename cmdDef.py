@@ -26,57 +26,59 @@ XHOMEREV             =  15
 # spindle operations
 
 SPINDLE_START        =  16
-SPINDLE_JOG          =  17
-SPINDLE_JOG_SPEED    =  18
-SPINDLE_STOP         =  19
+SPINDLE_STOP         =  17
+SPINDLE_UPDATE       =  18
+SPINDLE_JOG          =  19
+SPINDLE_JOG_SPEED    =  20
 
 # end operations
 
-CMD_PAUSE            =  20
-CMD_RESUME           =  21
-CMD_STOP             =  22
-CMD_MEASURE          =  23
+CMD_PAUSE            =  21
+CMD_RESUME           =  22
+CMD_STOP             =  23
+CMD_DONE             =  24
+CMD_MEASURE          =  25
 
 # setup operations
 
-CMD_CLEAR            =  24
-CMD_SETUP            =  25
-CMD_SPSETUP          =  26
-CMD_SYNCSETUP        =  27
-CMD_ZSETUP           =  28
-CMD_ZSYNSETUP        =  29
-CMD_XSETUP           =  30
-CMD_XSYNSETUP        =  31
+CMD_CLEAR            =  26
+CMD_SETUP            =  27
+CMD_SPSETUP          =  28
+CMD_SYNCSETUP        =  29
+CMD_ZSETUP           =  30
+CMD_ZSYNSETUP        =  31
+CMD_XSETUP           =  32
+CMD_XSYNSETUP        =  33
 
 # state information
 
-READSTAT             =  32
-READISTATE           =  33
+READSTAT             =  34
+READISTATE           =  35
 
 # load processor and xilinx parameters
 
-LOADVAL              =  34
-LOADMULTI            =  35
-READVAL              =  36
-LOADXREG             =  37
-READXREG             =  38
+LOADVAL              =  36
+LOADMULTI            =  37
+READVAL              =  38
+LOADXREG             =  39
+READXREG             =  40
 
 # move command operations
 
-CLEARQUE             =  39
-QUEMOVE              =  40
-MOVEQUESTATUS        =  41
+CLEARQUE             =  41
+QUEMOVE              =  42
+MOVEQUESTATUS        =  43
 
 # location and debug info
 
-READALL              =  42
-READDBG              =  43
-CLRDBG               =  44
+READALL              =  44
+READDBG              =  45
+CLRDBG               =  46
 
 # encoder commands
 
-ENCSTART             =  45
-ENCSTOP              =  46
+ENCSTART             =  47
+ENCSTOP              =  48
 
 # command table
 
@@ -98,34 +100,36 @@ cmdTable = ( \
     ("XHOMEFWD", "xHomeFwd"),           #  14
     ("XHOMEREV", "xHomeRev"),           #  15
     ("SPINDLE_START", "spindleStart"),  #  16
-    ("SPINDLE_JOG", "spindleJog"),      #  17
-    ("SPINDLE_JOG_SPEED", "spindleJogSpeed"),#  18
-    ("SPINDLE_STOP", "spindleStop"),    #  19
-    ("CMD_PAUSE", "pauseCmd"),          #  20
-    ("CMD_RESUME", "resumeCmd"),        #  21
-    ("CMD_STOP", "stopCmd"),            #  22
-    ("CMD_MEASURE", "measureCmd"),      #  23
-    ("CMD_CLEAR", "clearCmd"),          #  24
-    ("CMD_SETUP", "setup"),             #  25
-    ("CMD_SPSETUP", "spindleSetup"),    #  26
-    ("CMD_SYNCSETUP", "syncSetup"),     #  27
-    ("CMD_ZSETUP", "zSetup"),           #  28
-    ("CMD_ZSYNSETUP", None),            #  29
-    ("CMD_XSETUP", "xSetup"),           #  30
-    ("CMD_XSYNSETUP", None),            #  31
-    ("READSTAT", None),                 #  32
-    ("READISTATE", None),               #  33
-    ("LOADVAL", None),                  #  34
-    ("LOADMULTI", None),                #  35
-    ("READVAL", None),                  #  36
-    ("LOADXREG", None),                 #  37
-    ("READXREG", None),                 #  38
-    ("CLEARQUE", "clearQue"),           #  39
-    ("QUEMOVE", None),                  #  40
-    ("MOVEQUESTATUS", None),            #  41
-    ("READALL", "readAll"),             #  42
-    ("READDBG", "readDbg"),             #  43
-    ("CLRDBG", "clearDbg"),             #  44
-    ("ENCSTART", None),                 #  45
-    ("ENCSTOP", None),                  #  46
+    ("SPINDLE_STOP", "spindleStop"),    #  17
+    ("SPINDLE_UPDATE", "spindleUpdate"),#  18
+    ("SPINDLE_JOG", "spindleJog"),      #  19
+    ("SPINDLE_JOG_SPEED", "spindleJogSpeed"),#  20
+    ("CMD_PAUSE", "pauseCmd"),          #  21
+    ("CMD_RESUME", "resumeCmd"),        #  22
+    ("CMD_STOP", "stopCmd"),            #  23
+    ("CMD_DONE", "doneCmd"),            #  24
+    ("CMD_MEASURE", "measureCmd"),      #  25
+    ("CMD_CLEAR", "clearCmd"),          #  26
+    ("CMD_SETUP", "setup"),             #  27
+    ("CMD_SPSETUP", "spindleSetup"),    #  28
+    ("CMD_SYNCSETUP", "syncSetup"),     #  29
+    ("CMD_ZSETUP", "zSetup"),           #  30
+    ("CMD_ZSYNSETUP", None),            #  31
+    ("CMD_XSETUP", "xSetup"),           #  32
+    ("CMD_XSYNSETUP", None),            #  33
+    ("READSTAT", None),                 #  34
+    ("READISTATE", None),               #  35
+    ("LOADVAL", None),                  #  36
+    ("LOADMULTI", None),                #  37
+    ("READVAL", None),                  #  38
+    ("LOADXREG", None),                 #  39
+    ("READXREG", None),                 #  40
+    ("CLEARQUE", "clearQue"),           #  41
+    ("QUEMOVE", None),                  #  42
+    ("MOVEQUESTATUS", None),            #  43
+    ("READALL", "readAll"),             #  44
+    ("READDBG", "readDbg"),             #  45
+    ("CLRDBG", "clearDbg"),             #  46
+    ("ENCSTART", None),                 #  47
+    ("ENCSTOP", None),                  #  48
     )

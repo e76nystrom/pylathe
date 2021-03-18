@@ -211,6 +211,7 @@ configList = \
   
     ('tuAddFeed', 'turn '),
     ('tuInternal', 'turn internal'),
+    ('tuManual', 'turn manual mode'),
     ('tuPasses', 'turn '),
     ('tuPause', 'turn '),
     ('tuRPM', 'turn '),
@@ -373,15 +374,17 @@ cmdList = \
     "spindle operations",
     
     ("SPINDLE_START", "spindleStart", "start spindle"),
+    ("SPINDLE_STOP", "spindleStop", "stop spindle"),
+    ("SPINDLE_UPDATE", "spindleUpdate", "update spindle speed"),
     ("SPINDLE_JOG", "spindleJog", "spindle jog"),
     ("SPINDLE_JOG_SPEED", "spindleJogSpeed", "spindle jog at speed"),
-    ("SPINDLE_STOP", "spindleStop", "stop spindle"),
     
     "end operations",
     
-    ("CMD_PAUSE", "pauseCmd", "pause current operation"),
-    ("CMD_RESUME", "resumeCmd", "resume current operation"),
-    ("CMD_STOP", "stopCmd", "stop current operation"),
+    ("CMD_PAUSE",   "pauseCmd",   "pause current operation"),
+    ("CMD_RESUME",  "resumeCmd",  "resume current operation"),
+    ("CMD_STOP",    "stopCmd",    "stop current operation"),
+    ("CMD_DONE",    "doneCmd",    "done current operation"),
     ("CMD_MEASURE", "measureCmd", "stop at end of current pass"),
     
     "setup operations",
@@ -448,6 +451,7 @@ parmList = \
     ("SP_MICRO", "spindle micro steps", "int16_t"),
     ("SP_MIN_RPM", "spindle minimum rpm", "float"),
     ("SP_MAX_RPM", "spindle maxmum rpm", "float"),
+    ("SP_RPM", "spindle rpm", "float"), # 
     ("SP_ACCEL_TIME", "spindle accel time", "float"),
     ("SP_ACCEL", "spindle accel rpm/sec^2", "float"),
     ("SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"),
@@ -669,7 +673,7 @@ parmList = \
  
     "measured spindle speed",
 
-    ("RPM", "current rpm", "int16_t"),
+    ("RPM", "current measured rpm", "int16_t"),
 
     "fpga frequency variables",
 
@@ -839,14 +843,15 @@ regList =\
     ("MV_READ_X",       "(1 << 1)",  "pause x may change"),
     ("MV_READ_Z",       "(1 << 2)",  "pause z may change"),
     ("MV_ACTIVE",       "(1 << 3)",  "movement active"),
-    ("MV_XLIMIT",       "(1 << 4)",  "at limit switch"),
-    ("MV_ZLIMIT",       "(1 << 5)",  "at limit switch"),
-    ("MV_XHOME_ACTIVE", "(1 << 6)",  "x home active"),
-    ("MV_XHOME",        "(1 << 7)",  "x home success"),
-    ("MV_ZHOME_ACTIVE", "(1 << 8)",  "z home active"),
-    ("MV_ZHOME",        "(1 << 9)",  "z home success"),
-    ("MV_MEASURE",      "(1 << 10)", "pause for measurement"),
-    ("MV_ESTOP",        "(1 << 11)", "estop"),
+    ("MV_DONE",         "(1 << 4)",  "movement active"),
+    ("MV_XLIMIT",       "(1 << 5)",  "at limit switch"),
+    ("MV_ZLIMIT",       "(1 << 6)",  "at limit switch"),
+    ("MV_XHOME_ACTIVE", "(1 << 7)",  "x home active"),
+    ("MV_XHOME",        "(1 << 8)",  "x home success"),
+    ("MV_ZHOME_ACTIVE", "(1 << 9)",  "z home active"),
+    ("MV_ZHOME",        "(1 << 10)", "z home success"),
+    ("MV_MEASURE",      "(1 << 11)", "pause for measurement"),
+    ("MV_ESTOP",        "(1 << 12)", "estop"),
 
     "pause flags",
 
