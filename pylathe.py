@@ -443,15 +443,15 @@ class FormRoutines():
         return(tc)
 
     def addCheckBox(self, sizer, label, index, action=None, box=False):
+        txt = wx.StaticText(self, -1, label)
         if box:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
+            sizerH.Add(txt, flag=wx.ALL|\
+                       wx.ALIGN_CENTER_VERTICAL, border=2)
         else:
             sizerH = sizer
-        txt = wx.StaticText(self, -1, label)
-        # sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-        #           wx.ALIGN_CENTER_VERTICAL, border=2)
-        sizerH.Add(txt, flag=wx.ALL|\
-                  wx.ALIGN_CENTER_VERTICAL, border=2)
+            sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                       wx.ALIGN_CENTER_VERTICAL, border=2)
         cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
         if action is not None:
             self.Bind(wx.EVT_CHECKBOX, action, cb)
@@ -461,7 +461,7 @@ class FormRoutines():
             cb.SetValue(val == 'True')
         cfg.initInfo(index, cb)
         if box:
-            sizer.Add(sizerH)
+            sizer.Add(sizerH, flag=wx.ALIGN_RIGHT)
         return(cb)
 
     def addComboBox(self, sizer, label, index, action, border=2,
@@ -3054,7 +3054,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.addButtons(sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
 
-        self.internal = self.addCheckBox(sizerH, "Internal", cf.tpInternal, \
+        self.internal = self.addCheckBox(sizerG, "Internal", cf.tpInternal, \
                                          self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
@@ -3755,13 +3755,16 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         self.spring = self.addField(sizerG, "Spring", cf.thSpring)
 
-        self.internal = self.addCheckBox(sizerG, "Internal", cf.thInternal, \
-                                         action=self.OnInternal)
+        sizerG.Add(self.emptyCell)
+        sizerG.Add(self.emptyCell)
 
         # buttons
 
-        self.addButtons(sizerG, cf.thAddFeed, cf.thRPM, cf.thPause)
+        self.addButtons(sizerG, cf.thAddFeed, cf.thRPM, cf.thPause, True)
 
+        self.internal = self.addCheckBox(sizerG, "Internal", cf.thInternal, \
+                                         action=self.OnInternal, box=True)
+        
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
