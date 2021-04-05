@@ -759,7 +759,7 @@ syncParmList = \
  ("SYNC_MAX_PARM", "sync maximum parameter", "int16_t")
 )
 
-regList =\
+regList = \
 (\
     "common move command bits",
     
@@ -886,6 +886,27 @@ regList =\
 
     ("Z_ENCODER_DIRECT", "(1 << 0)", "z sync directly from encoder"),
     ("X_ENCODER_DIRECT", "(1 << 1)", "x sync directly from encoder"),
+
+    "point by point movement commands",
+
+    ("PCMD_INCX_HLDZ_S1", "(0 << 0)", "step x hold z then step 1"),
+    ("PCMD_INCX_HLDZ_SN", "(1 << 0)", "step x hold z 1 then step z"),
+    ("PCMD_HLDX_S1_INCZ", "(2 << 0)", "step x hold z then step 1"),
+    ("PCMD_HLDX_SN_INCZ", "(3 << 0)", "hold x 1 then step x increment z"),
+    ("PCMD_INCX2_INCZ",   "(4 << 0)", "step x 2 step z"),
+    ("PCMD_SPARE_0",      "(5 << 0)", "spare 0"),
+    ("PCMD_SPARE_1",      "(6 << 0)", "spare 1"),
+    ("PCMD_SET_DIR",      "(7 << 0)", "set direction"),
+
+    ("PCMD_X_NEG",        "(1 << 0)", "mov x negative"),
+    ("PCMD_Z_NEG",        "(1 << 1)", "mov z negative"),
+    ("PCMD_DIR_FLAG",     "(1 << 2)", "direction flag"),
+
+    ("PCMD_CMD_MASK",     "(7 << 0)", "command mask"),
+
+    ("PCMD_RPT_SHIFT",    "(3)",      "repeat mask"),
+    ("PCMD_RPT_SHORT",    "(32)",     "repeat short"), 
+    ("PCMD_RPT_MASK",     "(0x1f << PCMD_RPT_SHIFT)", "repeat shift"),
 
     # ("", "()", ""),
     # ("", "", ""),

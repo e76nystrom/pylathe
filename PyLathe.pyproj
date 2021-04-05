@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{07046536-49c2-404b-a8fa-2dcfeb3a88bd}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>pylathe.py</StartupFile>
+    <StartupFile>circle.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -26,6 +26,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="circle.py" />
     <Compile Include="cmdDef.py" />
     <Compile Include="comm.py" />
     <Compile Include="commPi.py" />
@@ -50,7 +51,6 @@
     <Compile Include="xRegDef.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.7" />
     <InterpreterReference Include="Global|VisualStudio|Python37" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

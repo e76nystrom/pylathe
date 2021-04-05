@@ -124,3 +124,21 @@ SYNC_ACTIVE_THREAD = (1 << 5)   # 0x20 active for threading
 
 Z_ENCODER_DIRECT = (1 << 0)     # 0x01 z sync directly from encoder
 X_ENCODER_DIRECT = (1 << 1)     # 0x02 x sync directly from encoder
+
+# point by point movement commands
+
+PCMD_INCX_HLDZ_S1 = (0 << 0)    # 0x00 step x hold z then step 1
+PCMD_INCX_HLDZ_SN = (1 << 0)    # 0x01 step x hold z 1 then step z
+PCMD_HLDX_S1_INCZ = (2 << 0)    # 0x02 step x hold z then step 1
+PCMD_HLDX_SN_INCZ = (3 << 0)    # 0x03 hold x 1 then step x increment z
+PCMD_INCX2_INCZ  = (4 << 0)     # 0x04 step x 2 step z
+PCMD_SPARE_0     = (5 << 0)     # 0x05 spare 0
+PCMD_SPARE_1     = (6 << 0)     # 0x06 spare 1
+PCMD_SET_DIR     = (7 << 0)     # 0x07 set direction
+PCMD_X_NEG       = (1 << 0)     # 0x01 mov x negative
+PCMD_Z_NEG       = (1 << 1)     # 0x02 mov z negative
+PCMD_DIR_FLAG    = (1 << 2)     # 0x04 direction flag
+PCMD_CMD_MASK    = (7 << 0)     # 0x07 command mask
+PCMD_RPT_SHIFT   = (3)          # 0x03 repeat mask
+PCMD_RPT_SHORT   = (32)         # 0x20 repeat short
+PCMD_RPT_MASK    = (0x1f << PCMD_RPT_SHIFT)# 0xf8 repeat shift
