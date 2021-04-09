@@ -418,6 +418,7 @@ cmdList = \
 
     ("CLEARQUE", "clearQue", "clear move que"),
     ("QUEMOVE", "", "que move command"),
+    ("QUEPARM", "", "que move parameter"),
     ("MOVEQUESTATUS", "", "read move queue status"),
     
     "location and debug info",
@@ -742,6 +743,16 @@ parmList = \
 
     ("E_STOP_ENA", "enable estop", "char"),
     ("E_STOP_INV", "invert estop siganl", "char"),
+
+    "arc parameters",
+ 
+    ("ARC_RADIUS", "arc radius", "int"),
+    ("ARC_X_CENTER", "arc x center", "int"),
+    ("ARC_Z_CENTER", "arc z center", "int"),
+    ("ARC_X_START", "arc x start", "int"),
+    ("ARC_Z_START", "arc z start", "int"),
+    ("ARC_X_END", "arc x center", "int"),
+    ("ARC_Z_END", "arc z center", "int"),
 
     # ("", "", ""),
     # ("", "", ""),
@@ -1551,6 +1562,7 @@ enumList =\
     ("PROBE_X", "probe in x direction"),
     ("SAVE_Z_DRO", "save z dro reading"),
     ("SAVE_X_DRO", "save x dro reading"),
+    ("QUE_PARM", "save parameter in queue"),
     ("OP_DONE", "operation done"),
     "};",
 
@@ -1558,11 +1570,12 @@ enumList =\
 
     "enum operations",
     "{",
-     ("OP_TURN", "turn"),
-     ("OP_FACE", "face"),
+     ("OP_TURN",   "turn"),
+     ("OP_FACE",   "face"),
      ("OP_CUTOFF", "cutoff"),
-     ("OP_TAPER", "taper"),
+     ("OP_TAPER",  "taper"),
      ("OP_THREAD", "thread"),
+     ("OP_ARC",    "arc"),
     "};",
 
     "home control states",

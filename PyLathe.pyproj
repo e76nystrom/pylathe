@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{07046536-49c2-404b-a8fa-2dcfeb3a88bd}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>circle.py</StartupFile>
+    <StartupFile>pylathe.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -14,7 +14,7 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterArguments>
     </InterpreterArguments>
-    <CommandLineArguments>--xhomed -p cfg/posinfo.txt cfg/config.txt</CommandLineArguments>
+    <CommandLineArguments>--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>
