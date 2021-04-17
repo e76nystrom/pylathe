@@ -13,7 +13,8 @@ import subprocess
 import sys
 import traceback
 from ctypes import c_uint32
-from math import atan2, ceil, cos, degrees, floor, pi, radians, sqrt, tan
+from math import atan2, ceil, cos, degrees, floor, hypot, pi, \
+    radians, sqrt, tan
 from platform import system
 #from Queue import Empty, Queue
 from queue import Empty, Queue
@@ -187,6 +188,9 @@ AXIS_X = 1
 
 tz = timezone("America/New_York")
 
+def intRound(val):
+    return(int(round(val)))
+
 def timeStr():
     now = datetime.now(tz=tz)
     return(now.strftime("%a %b %d %Y %H:%M:%S\n"))
@@ -289,9 +293,9 @@ class ComboBox(wx.ComboBox):
         val = self.GetCurrentSelection()
         rtnVal = self.indexList[val]
         if self.text is not None:
-            print("%s GetValue %d %s index %d" % \
+            print("label \"%s\" GetValue %d text \"%s\" index %d" % \
                   (self.label, rtnVal, self.text[val], val))
-            print(self.indexList)
+            print("indexList", self.indexList)
         return str(rtnVal)
 
     def SetValue(self, val):
@@ -301,9 +305,9 @@ class ComboBox(wx.ComboBox):
             if val == index:
                 self.SetSelection(n)
                 if self.text is not None:
-                    print("%s SetValue %d %s index %d" % \
+                    print("label \"%s\" SetValue %d text \"%s\" index %d" % \
                           (self.label, val, self.text[index], n))
-                    print(self.indexList)
+                    print("indexList", self.indexList)
     
 class FormRoutines():
     def __init__(self, panel=True):
@@ -311,7 +315,7 @@ class FormRoutines():
         self.configList = None
         self.prefix = ""
         self.focusField = None
-        self.formatList = None
+        self.formatList = []
         self.width = 60 if WINDOWS else 75
 
     def formatData(self, formatList):
@@ -409,7 +413,10 @@ class FormRoutines():
                     self.configList.append(i)
         return(self.configList)
 
-    def addFieldText(self, sizer, label, key, keyText=None):
+    def addFieldText(self, sizer, label, key, fmt=None, keyText=None):
+        if fmt is not None:
+            self.formatList.append((key, fmt))
+
         if len(label) != 0:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
@@ -424,9 +431,11 @@ class FormRoutines():
         cfg.initInfo(key, tc)
         return(tc, txt)
 
-    def addField(self, sizer, label, index, size=None):
+    def addField(self, sizer, label, index, fmt=None, size=None):
         if size is None:
             size = (self.width, -1)
+        if fmt is not None:
+            self.formatList.append((index, fmt))
         if label is not None:
             txt = wx.StaticText(self, -1, label)
             sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
@@ -529,6 +538,10 @@ class FormRoutines():
         cfg.initInfo(key, btn)
         return(btn)
 
+    def placeHolder(self, sizerG, count=2):
+        for i in range(count):
+            sizerG.Add(self.emptyCell)
+
     def addDialogField(self, sizer, label=None, tcDefault="", textFont=None, \
                        tcFont=None, size=wx.DefaultSize, action=None, \
                        border=None, index=None, edit=True, text=False):
@@ -612,7 +625,7 @@ class ActionRoutines():
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.safeX = None
         self.safeZ = None
-        self.formatList = None
+        self.formatList = []
         self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
         self.manualMode = False
 
@@ -635,12 +648,11 @@ class ActionRoutines():
         if add is not None:
             self.addButton = self.addButton(sizerG, 'Add', self.OnAdd)
             self.addButton.Disable()
-            self.add = self.addField(sizerG, None, add)
+            self.add = self.addField(sizerG, None, add, 'f')
         else:
-            sizerG.Add(self.emptyCell)
-            sizerG.Add(self.emptyCell)
+            self.placeHolder(sizerG)
 
-        self.rpm = self.addField(sizerG, "RPM", rpm)
+        self.rpm = self.addField(sizerG, "RPM", rpm, 'd')
         self.rpm.Bind(wx.EVT_KILL_FOCUS, self.OnRPMKillFocus)
         
         self.pause = self.addCheckBox(sizerG, "Pause", pause, box=combine)
@@ -1150,6 +1162,15 @@ class MoveCommands():
 
     def saveXDro(self):
         self.queMove(en.SAVE_X_DRO, 0)
+
+    def queParm(self, parm, val):
+        op = en.QUE_PARM
+        opString = en.mCommandsList[op]
+        op |= parm << 16
+        self.moveQue.put((opString, op, val))
+
+    def moveArc(self):
+        self.queMove(en.MOVE_ARC, 0)
 
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
@@ -1664,7 +1685,7 @@ class Turn(LatheOp, UpdatePass):
 
     def getParameters(self):
         tu = self.panel
-        self.manual = tu.manual.GetValue
+        self.manual = tu.manual.GetValue()
         self.internal = tu.internal.GetValue()
 
         if not self.manual:
@@ -1745,7 +1766,7 @@ class Turn(LatheOp, UpdatePass):
         while self.updatePass():
             pass
 
-        self.m.moveX(self.saveX)
+        self.m.moveX(self.safeX)
 
         self.passDone()
         return(True)
@@ -1927,21 +1948,21 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.prefix = 'tu'
-        self.formatList = ((cf.tuAddFeed, 'f'), \
-                           (cf.tuInternal, None), \
-                           (cf.tuPasses, 'd'), \
-                           (cf.tuPause, None), \
-                           (cf.tuRPM, 'd'), \
-                           (cf.tuSPInt, 'd'), \
-                           (cf.tuSpring, 'd'), \
-                           (cf.tuXDiam0, 'f'), \
-                           (cf.tuXDiam1, 'f'), \
-                           (cf.tuXFeed, 'f'), \
-                           (cf.tuXRetract, 'f'), \
-                           (cf.tuZEnd, 'f'), \
-                           (cf.tuZFeed, 'f'), \
-                           (cf.tuZRetract, 'f'), \
-                           (cf.tuZStart, 'f'))
+        # self.formatList = ((cf.tuAddFeed, 'f'), \
+        #                    (cf.tuInternal, None), \
+        #                    (cf.tuPasses, 'd'), \
+        #                    (cf.tuPause, None), \
+        #                    (cf.tuRPM, 'd'), \
+        #                    (cf.tuSPInt, 'd'), \
+        #                    (cf.tuSpring, 'd'), \
+        #                    (cf.tuXDiam0, 'f'), \
+        #                    (cf.tuXDiam1, 'f'), \
+        #                    (cf.tuXFeed, 'f'), \
+        #                    (cf.tuXRetract, 'f'), \
+        #                    (cf.tuZEnd, 'f'), \
+        #                    (cf.tuZFeed, 'f'), \
+        #                    (cf.tuZRetract, 'f'), \
+        #                    (cf.tuZStart, 'f'))
 
     def InitUI(self):
         fields0 = self.fields0 = []
@@ -1957,38 +1978,38 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         # x parameters
 
         (self.xDiam0, self.diam0Txt) = \
-            self.addFieldText(sizerG, "X Start D", cf.tuXDiam0)
+            self.addFieldText(sizerG, "X Start D", cf.tuXDiam0, 'f')
         self.focusField = self.xDiam0
         fields0.append(self.xDiam0)
 
         (self.xDiam1, self.diam1Txt) = \
-            self.addFieldText(sizerG, "X End D", cf.tuXDiam1)
+            self.addFieldText(sizerG, "X End D", cf.tuXDiam1, 'f')
         fields0.append(self.xDiam1)
 
-        self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed, 'f')
         fields0.append(self.xFeed)
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract, 'f')
 
         # z parameters
 
-        self.zEnd = self.addField(sizerG, "Z End", cf.tuZEnd)
+        self.zEnd = self.addField(sizerG, "Z End", cf.tuZEnd, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.tuZStart)
+        self.zStart = self.addField(sizerG, "Z Start", cf.tuZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.tuZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", cf.tuZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.tuZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", cf.tuZRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.tuPasses)
+        self.passes = self.addField(sizerG, "Passes", cf.tuPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.tuSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", cf.tuSPInt, 'd')
         fields0.append(self.sPInt)
 
-        self.spring = self.addField(sizerG, "Spring", cf.tuSpring)
+        self.spring = self.addField(sizerG, "Spring", cf.tuSpring, 'd')
         fields0.append(self.spring)
 
         self.manual = self.addCheckBox(sizerG, "Manual", cf.tuManual, \
@@ -2091,6 +2112,348 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         dNxt.SetSelection(-1, -1)
         self.active = False
         jogPanel.setStatus(st.STR_CLR)
+
+class Arc(LatheOp, UpdatePass):
+    def __init__(self, arcPanel):
+        LatheOp.__init__(self, arcPanel)
+        UpdatePass.__init__(self)
+        self.cut = 0.0
+        self.curX = 0.0
+        self.neg = False
+        self.internal = False
+
+    def getParameters(self):
+        arc = self.panel
+
+        self.arcRadius = getFloatVal(arc.arcRadius)
+        self.materialRadius = getFloatVal(arc.diameter) / 2
+        self.feed = abs(getFloatVal(arc.feed) / 2.0)
+
+        self.angStart = getFloatVal(arc.angStart)
+        self.angEnd = getFloatVal(arc.angEnd)
+        self.stemDiam = getFloatVal(arc.stemDiam)
+        self.retract = abs(getFloatVal(arc.retract))
+
+        self.toolRadius = getFloatVal(arc.toolRadius)
+        self.center = (getFloatVal(arc.centerX), getFloatVal(arc.centerZ))
+
+        self.radiusStart = hypot(self.materialRadius, \
+                                 self.arcRadius + self.center[0])
+        self.cut = abs(self.radiusStart) - abs(self.arcRadius)
+
+        self.center = (0, -self.arcRadius)
+
+        self.arcRadiusSqrd = self.arcRadius * self.arcRadius
+        self.materialRadiusSqrd = self.materialRadius * self.materialRadius
+
+        jogPanel.dPrt("radiusStart %5.3f" % (self.radiusStart))
+
+        val = getFloatVal(arc.zFeed)
+        rpm = getIntVal(arc.rpm)
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+            (self.cycle, self.output, self.preScaler) = \
+                zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        elif TURN_SYNC == en.SEL_TU_ESYN:
+            (self.cycle, self.output, self.preScaler) = \
+                zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+
+    def runOperation(self):
+        self.getParameters()
+
+        comm.queParm(pm.ARC_X_CENTER, \
+                     intRound(self.center[0] * jogPanel.xStepsInch))
+        comm.queParm(pm.ARC_Z_CENTER, \
+                     intRound(self.center[1] * jogPanel.zStepsInch))
+        comm.sendMulti()
+
+        self.calcFeed(self.feed, self.cut)
+        self.setupSpringPasses(self.panel)
+        self.setupAction(self.calcPass, self.runPass)
+
+        self.panel.passes.SetValue("%d" % (self.passes))
+        print("cut %5.3f passes %d" % \
+              (self.cut, self.passes))
+
+        self.safeX = self.materialRadius + self.retract
+        self.safeZ = self.zStart + self.zRetract
+
+        if cfg.getBoolInfoData(cf.cfgDraw):
+            self.m.draw("arc", self.zStart, self.zEnd)
+
+        jogPanel.dPrt("\narc runOperation\n")
+        jogPanel.dPrt(timeStr() + "\n")
+        self.setup()
+
+        while self.updatePass():
+            pass
+
+        self.m.moveX(self.safeX)
+
+        self.passDone()
+        return(True)
+
+    def setupSync(self):
+        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
+            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+        elif TURN_SYNC == en.SEL_TU_ESYN:
+            syncComm.setParm(sp.SYNC_ENCODER, \
+                             cfg.getIntInfoData(cf.cfgEncoder))
+            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
+            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
+            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+            syncComm.command(sc.SYNC_SETUP)
+
+    def setup(self, add=False): # turn
+        comm.queParm(pm.CURRENT_OP, en.OP_ARC)
+        m = self.m
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
+
+            self.setupSync()
+
+        m.queInit()
+        if (not add) or (add and not self.pause):
+            m.quePause()
+        m.done(ct.PARM_START)
+
+        comm.command(cm.CMD_SYNCSETUP)
+        
+        m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
+
+        m.queFeedType(ct.FEED_PITCH)
+        m.zSynSetup(cfg.getFloatInfoData(cf.arcZFeed))
+            
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+        
+        if not add:
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.safeZ, self.xStart))
+            m.text("%7.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+                   (self.safeZ, self.safeX))
+            m.text("%7.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), CENTER)
+
+    def calcPass(self, final=False):
+        feed = self.cutAmount if final else self.passCount * self.actualFeed
+        self.feed = feed
+        curRadius = self.radiusStart - feed
+        self.curRadius = curRadius
+        curRadiusSqrd = curRadius * curRadius
+
+        self.xStart = sqrt(curRadiusSqrd - self.arcRadiusSqrd)
+        self.zStart = 0.0
+
+        if curRadius < self.materialRadius:
+            self.xEnd = self.curRadius
+            self.zEnd = self.center[1]
+        else:
+            self.xEnd = self.materialRadius
+            self.zEnd = self.center[1] + \
+                sqrt(curRadiusSqrd - self.materialRadiusSqrd)
+
+        self.curX = self.xStart
+        self.safeX = self.curX + self.xRetract
+        self.passSize[self.passCount] = self.curX * 2.0
+        jogPanel.dPrt("pass %2d feed %5.3f xStart %5.3f zStart %5.3f " \
+                      " xEnd %5.3f zEnd %5.3f curRadius %5.3f %s\n" % \
+                      (self.passCount, feed, self.xStart, self.zStart, \
+                       self.xEnd, self.zEnd, \
+                       curRadius, ("", "final")[final]), \
+                      True, True)
+
+    def runPass(self, addPass=False): # arc
+        m = self.m
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
+        m.moveX(self.curX, flag)
+        if DRO:
+            m.saveXDro()
+        if self.pause:
+            flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
+            m.quePause(flag)
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.curX * 2.0), \
+                       (self.safeZ, self.curX))
+
+        m.moveZ(self.zStart)
+        if DRO:
+            m.saveZDro()
+        m.queParm(pm.ARC_RADIUS, self.curRadius)
+        m.queParm(pm.ARC_X_START, intRound(self.xStart * jogPanel.xStepsInch))
+        m.queParm(pm.ARC_Z_START, intRound(self.zStart * jogPanel.zStepsInch))
+        m.queParm(pm.ARC_X_END, intRound(self.xEnd * jogPanel.xStepsInch))
+        m.queParm(pm.ARC_Z_END, intRound(self.zEnd * jogPanel.zStepsInch))
+        m.moveArc()
+        
+        if DRO:
+            m.saveZDro()
+            m.saveXDro()
+        if not addPass:
+            if m.passNum & 0x300 == 0:
+                m.text("%2d %7.3f" % (m.passNum, self.safeX * 2.0), \
+                       (self.zEnd, self.safeX), RIGHT)
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+
+    def addPass(self):
+        add = self.addInit("turn") / 2.0
+        self.cutAmount += add
+        self.setup(True)
+        self.calcPass(True)
+        moveCommands.nextPass(self.passCount)
+        self.runPass(True)
+        self.m.moveX(self.xStart + self.xRetract)
+        self.addDone()
+
+    def fixCut(self, offset=0.0): # arc
+        passNum = jogPanel.lastPass
+        if offset == 0.0:
+            actual = float(jogPanel.xPos.GetValue())
+            self.passSize[passNum] = 2 * actual
+            if self.internal:
+                self.cutAmount = actual - self.xStart
+            else:
+                self.cutAmount = self.xStart - actual
+        else:
+            self.passSize[passNum] += offset
+
+class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
+    def __init__(self, parent, hdrFont, *args, **kwargs):
+        super(ArcPanel, self).__init__(parent, *args, **kwargs)
+        self.hdrFont = hdrFont
+        FormRoutines.__init__(self)
+        ActionRoutines.__init__(self, Arc(self), en.OP_ARC)
+        self.InitUI()
+        self.configList = None
+        self.prefix = 'arc'
+
+    def InitUI(self):
+        fields0 = self.fields0 = []
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        txt = wx.StaticText(self, -1, "Arc", size=(120, 30))
+        txt.SetFont(self.hdrFont)
+
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
+
+        # line 1 radius parameters
+
+        self.arcRadius = self.addField(sizerG, "Radius", cf.arcRadius, 'f')
+
+        self.diameter = self.addField(sizerG, "Diam", cf.arcDiam, 'f')
+
+        self.feed = self.addField(sizerG, "Radius Feed", cf.arcFeed, 'f')
+
+        self.zFeed = self.addField(sizerG, "Z Feed", cf.arcZFeed, 'f')
+        
+
+        # line 2 diameter and angle
+
+        self.angStart = self.addField(sizerG, "Ang Start", cf.arcAStart, 'f')
+
+        self.angEnd = self.addField(sizerG, "Ang End", cf.arcAEnd, 'f')
+
+        self.stemDiam = self.addField(sizerG, "Stem Diam", cf.arcStemDiam, 'f')
+
+        self.retract = self.addField(sizerG, "Retract", cf.arcRetract, 'f')
+
+        # line 3 z parameters
+
+        self.centerX = self.addField(sizerG, "x Center", cf.arcCX, 'f')
+
+        self.centerZ = self.addField(sizerG, "Z Center", cf.arcCZ, 'f')
+
+        self.toolRadius = self.addField(sizerG, "Tool Radius", \
+                                        cf.arcToolRad, 'f')
+
+        self.placeHolder(sizerG)
+
+        # line 4 pass info
+
+        self.passes = self.addField(sizerG, "Passes", cf.arcPasses, 'd')
+        self.passes.SetEditable(False)
+
+        self.sPInt = self.addField(sizerG, "SP Int", cf.arcSPInt, 'd')
+        fields0.append(self.sPInt)
+
+        self.spring = self.addField(sizerG, "Spring", cf.arcSpring, 'd')
+        fields0.append(self.spring)
+
+        self.placeHolder(sizerG)
+        
+        # line 5 buttons
+
+        self.addButtons(sizerG, cf.arcAddFeed, cf.arcRPM, cf.arcPause, True)
+        fields0.append(self.sendButton)
+        fields0.append(self.add)
+        fields0.append(self.pause)
+
+        # self.internal = self.addCheckBox(sizerG, "Internal", cf.arcInternal, \
+        #                                  self.OnInternal, box=True)
+
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+
+        self.SetSizer(sizerV)
+        sizerV.Fit(self)
+
+    # def OnInternal(self, e):
+    #     self.updateUI()
+            
+    def updateUI(self):
+        if not self.active:
+            self.sizerV.Layout()
+
+    def update(self):
+        self.updateUI()
+        self.formatData(self.formatList)
+        jogPanel.setPassText("Radius")
+
+    def sendData(self):
+        try:
+            moveCommands.queClear()
+            sendClear()
+            sendSpindleData()
+            sendZData()
+            sendXData()
+        except CommTimeout:
+            commTimeout()
+
+    def sendAction(self):
+        self.sendData()
+        return(self.control.runOperation())
+
+    def startAction(self):
+        comm.command(cm.CMD_RESUME)
+        control = self.control
+        if control.add:
+            if jogPanel.mvStatus & ct.MV_READ_X:
+                control.fixCut()
+        else:
+            if cfg.getBoolInfoData(cf.cfgDbgSave):
+                updateThread.openDebug()
+
+    def addAction(self):
+        self.control.addPass()
+
+    def nextOperation(self):
+        if not self.active:
+            jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
+            return
+        
+        # self.active = False
+        # jogPanel.setStatus(st.STR_CLR)
 
 class Face(LatheOp, UpdatePass):
     def __init__(self, facePanel):
@@ -2269,20 +2632,20 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.prefix = 'fa'
-        self.formatList = ((cf.faAddFeed, 'f'), \
-                           (cf.faPasses, 'd'), \
-                           (cf.faPause, None), \
-                           (cf.faRPM, 'd'), \
-                           (cf.faSPInt, 'd'), \
-                           (cf.faSpring, 'd'), \
-                           (cf.faXEnd, 'f'), \
-                           (cf.faXFeed, 'f'), \
-                           (cf.faXRetract, 'f'), \
-                           (cf.faXStart, 'f'), \
-                           (cf.faZEnd, 'f'), \
-                           (cf.faZFeed, 'f'), \
-                           (cf.faZRetract, 'f'), \
-                           (cf.faZStart, 'f'))
+        # self.formatList = ((cf.faAddFeed, 'f'), \
+        #                    (cf.faPasses, 'd'), \
+        #                    (cf.faPause, None), \
+        #                    (cf.faRPM, 'd'), \
+        #                    (cf.faSPInt, 'd'), \
+        #                    (cf.faSpring, 'd'), \
+        #                    (cf.faXEnd, 'f'), \
+        #                    (cf.faXFeed, 'f'), \
+        #                    (cf.faXRetract, 'f'), \
+        #                    (cf.faXStart, 'f'), \
+        #                    (cf.faZEnd, 'f'), \
+        #                    (cf.faZFeed, 'f'), \
+        #                    (cf.faZRetract, 'f'), \
+        #                    (cf.faZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2296,35 +2659,34 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zEnd = self.addField(sizerG, "Z End", cf.faZEnd)
+        self.zEnd = self.addField(sizerG, "Z End", cf.faZEnd, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.faZStart)
+        self.zStart = self.addField(sizerG, "Z Start", cf.faZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.faZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", cf.faZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.faZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", cf.faZRetract, 'f')
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.faXStart)
+        self.xStart = self.addField(sizerG, "X Start D", cf.faXStart, 'f')
 
-        self.xEnd = self.addField(sizerG, "X End D", cf.faXEnd)
+        self.xEnd = self.addField(sizerG, "X End D", cf.faXEnd, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Feed", cf.faXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed", cf.faXFeed, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.faXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cf.faXRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.faPasses)
+        self.passes = self.addField(sizerG, "Passes", cf.faPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.faSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", cf.faSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.faSpring)
+        self.spring = self.addField(sizerG, "Spring", cf.faSpring, 'd')
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG)
 
         # buttons
 
@@ -2471,17 +2833,17 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.prefix = 'cf'
-        self.formatList = ((cf.cuPause, None), \
-                           (cf.cuRPM, 'd'), \
-                           (cf.cuToolWidth, 'f'), \
-                           (cf.cuXEnd, 'f'), \
-                           (cf.cuXFeed, 'f'), \
-                           (cf.cuXRetract, 'f'), \
-                           (cf.cuXStart, 'f'), \
-                           (cf.cuZCutoff, 'f'), \
-                           (cf.cuZStart, 'f'), \
-                           (cf.cuZRetract, 'f'), \
-        )
+        # self.formatList = ((cf.cuPause, None), \
+        #                    (cf.cuRPM, 'd'), \
+        #                    (cf.cuToolWidth, 'f'), \
+        #                    (cf.cuXEnd, 'f'), \
+        #                    (cf.cuXFeed, 'f'), \
+        #                    (cf.cuXRetract, 'f'), \
+        #                    (cf.cuXStart, 'f'), \
+        #                    (cf.cuZCutoff, 'f'), \
+        #                    (cf.cuZStart, 'f'), \
+        #                    (cf.cuZRetract, 'f'), \
+        # )
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2495,23 +2857,24 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zCutoff = self.addField(sizerG, "Z Cutoff", cf.cuZCutoff)
+        self.zCutoff = self.addField(sizerG, "Z Cutoff", cf.cuZCutoff, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.cuZStart)
+        self.zStart = self.addField(sizerG, "Z Start", cf.cuZStart, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.cuZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", cf.cuZRetract, 'f')
 
-        self.toolWidth = self.addField(sizerG, "Tool Width", cf.cuToolWidth)
+        self.toolWidth = self.addField(sizerG, "Tool Width", \
+                                       cf.cuToolWidth, 'f')
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.cuXStart)
+        self.xStart = self.addField(sizerG, "X Start D", cf.cuXStart, 'f')
 
-        self.xEnd = self.addField(sizerG, "X End D", cf.cuXEnd)
+        self.xEnd = self.addField(sizerG, "X End D", cf.cuXEnd, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Feed", cf.cuXFeed)
+        self.xFeed = self.addField(sizerG, "X Feed", cf.cuXFeed, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.cuXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cf.cuXRetract, 'f')
 
         # buttons
 
@@ -2947,29 +3310,29 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.configList = None
         self.m = moveCommands
         self.prefix = 'tp'
-        self.formatList = ((cf.tpAddFeed, 'f'), \
-                           (cf.tpAngle, 'fs'), \
-                           (cf.tpAngleBtn, None), \
-                           (cf.tpDeltaBtn, None), \
-                           (cf.tpInternal, None), \
-                           (cf.tpLargeDiam, 'f'), \
-                           (cf.tpPasses, 'd'), \
-                           (cf.tpPause, None), \
-                           (cf.tpRPM, 'd'), \
-                           (cf.tpSPInt, 'd'), \
-                           (cf.tpSmallDiam, 'f'), \
-                           (cf.tpSpring, 'd'), \
-                           (cf.tpTaperSel, None), \
-                           (cf.tpXDelta, 'f5'), \
-                           (cf.tpXFeed, 'f'), \
-                           (cf.tpXFinish, 'f'), \
-                           (cf.tpXInFeed, 'f'), \
-                           (cf.tpXRetract, 'f'), \
-                           (cf.tpZDelta, 'f'), \
-                           (cf.tpZFeed, 'f'), \
-                           (cf.tpZLength, 'f'), \
-                           (cf.tpZRetract, 'f'), \
-                           (cf.tpZStart, 'f'))
+        # self.formatList = ((cf.tpAddFeed, 'f'), \
+        #                    (cf.tpAngle, 'fs'), \
+        #                    (cf.tpAngleBtn, None), \
+        #                    (cf.tpDeltaBtn, None), \
+        #                    (cf.tpInternal, None), \
+        #                    (cf.tpLargeDiam, 'f'), \
+        #                    (cf.tpPasses, 'd'), \
+        #                    (cf.tpPause, None), \
+        #                    (cf.tpRPM, 'd'), \
+        #                    (cf.tpSPInt, 'd'), \
+        #                    (cf.tpSmallDiam, 'f'), \
+        #                    (cf.tpSpring, 'd'), \
+        #                    (cf.tpTaperSel, None), \
+        #                    (cf.tpXDelta, 'f5'), \
+        #                    (cf.tpXFeed, 'f'), \
+        #                    (cf.tpXFinish, 'f'), \
+        #                    (cf.tpXInFeed, 'f'), \
+        #                    (cf.tpXRetract, 'f'), \
+        #                    (cf.tpZDelta, 'f'), \
+        #                    (cf.tpZFeed, 'f'), \
+        #                    (cf.tpZLength, 'f'), \
+        #                    (cf.tpZRetract, 'f'), \
+        #                    (cf.tpZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2999,25 +3362,25 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zLength = self.addField(sizerG, "Z Length", cf.tpZLength)
+        self.zLength = self.addField(sizerG, "Z Length", cf.tpZLength, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.tpZStart)
+        self.zStart = self.addField(sizerG, "Z Start", cf.tpZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.tpZFeed)
+        self.zFeed = self.addField(sizerG, "Z Feed", cf.tpZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.tpZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", cf.tpZRetract, 'f')
 
         # x parameters
 
         (self.largeDiam, self.largeDiamTxt) = \
-            self.addFieldText(sizerG, "Large Diam", cf.tpLargeDiam)
+            self.addFieldText(sizerG, "Large Diam", cf.tpLargeDiam, 'f')
 
         (self.smallDiam, self.smallDiamTxt) = \
-            self.addFieldText(sizerG, "Small Diam", cf.tpSmallDiam)
+            self.addFieldText(sizerG, "Small Diam", cf.tpSmallDiam, 'f')
 
-        self.xInFeed = self.addField(sizerG, "X In Feed R", cf.tpXInFeed)
+        self.xInFeed = self.addField(sizerG, "X In Feed R", cf.tpXInFeed, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Pass D", cf.tpXFeed)
+        self.xFeed = self.addField(sizerG, "X Pass D", cf.tpXFeed, 'f')
 
         # taper parameters
 
@@ -3025,30 +3388,30 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                                             style=wx.RB_GROUP, \
                                             action=self.OnDelta)
 
-        self.zDelta = self.addField(sizerG, None, cf.tpZDelta)
+        self.zDelta = self.addField(sizerG, None, cf.tpZDelta, 'f')
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.xDelta = self.addField(sizerG, "Delta X", cf.tpXDelta)
+        self.xDelta = self.addField(sizerG, "Delta X", cf.tpXDelta, 'f5')
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
         self.angleBtn = self.addRadioButton(sizerG, "Angle", cf.tpAngleBtn, \
                                             action=self.OnAngle)
 
-        self.angle = self.addField(sizerG, None, cf.tpAngle)
+        self.angle = self.addField(sizerG, None, cf.tpAngle, 'fs')
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.tpXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cf.tpXRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.tpPasses)
+        self.passes = self.addField(sizerG, "Passes", cf.tpPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.tpSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", cf.tpSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.tpSpring)
+        self.spring = self.addField(sizerG, "Spring", cf.tpSpring, 'd')
 
-        self.finish = self.addField(sizerG, "Finish", cf.tpXFinish)
+        self.finish = self.addField(sizerG, "Finish", cf.tpXFinish, 'f')
 
         # control buttons
 
@@ -3643,31 +4006,31 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.InitUI()
         self.configList = None
         self.prefix = 'th'
-        self.formatList = ((cf.thAddFeed, 'f'), \
-                           (cf.thAlternate, None), \
-                           (cf.thAngle, 'fs'), \
-                           (cf.thFirstFeed, 'f'), \
-                           (cf.thFirstFeedBtn, None), \
-                           (cf.thInternal, None), \
-                           (cf.thLastFeed, 'f'), \
-                           (cf.thLastFeedBtn, None), \
-                           (cf.thLeftHand, None), \
-                           (cf.thMM, None), \
-                           (cf.thPasses, 'd'), \
-                           (cf.thPause, None), \
-                           (cf.thRPM, 'd'), \
-                           (cf.thSPInt, 'n'), \
-                           (cf.thSpring, 'n'), \
-                           (cf.thTPI, None), \
-                           (cf.thThread, 'fs'), \
-                           (cf.thXDepth, 'f'), \
-                           (cf.thXRetract, 'f'), \
-                           (cf.thRunout, 'fs'), \
-                           (cf.thXStart, 'f'), \
-                           (cf.thXTaper, 'f'), \
-                           (cf.thZ0, 'f'), \
-                           (cf.thZ1, 'f'), \
-                           (cf.thZRetract, 'f'))
+        # self.formatList = ((cf.thAddFeed, 'f'), \
+        #                    (cf.thAlternate, None), \
+        #                    (cf.thAngle, 'fs'), \
+        #                    (cf.thFirstFeed, 'f'), \
+        #                    (cf.thFirstFeedBtn, None), \
+        #                    (cf.thInternal, None), \
+        #                    (cf.thLastFeed, 'f'), \
+        #                    (cf.thLastFeedBtn, None), \
+        #                    (cf.thLeftHand, None), \
+        #                    (cf.thMM, None), \
+        #                    (cf.thPasses, 'd'), \
+        #                    (cf.thPause, None), \
+        #                    (cf.thRPM, 'd'), \
+        #                    (cf.thSPInt, 'n'), \
+        #                    (cf.thSpring, 'n'), \
+        #                    (cf.thTPI, None), \
+        #                    (cf.thThread, 'fs'), \
+        #                    (cf.thXDepth, 'f'), \
+        #                    (cf.thXRetract, 'f'), \
+        #                    (cf.thRunout, 'fs'), \
+        #                    (cf.thXStart, 'f'), \
+        #                    (cf.thXTaper, 'f'), \
+        #                    (cf.thZ0, 'f'), \
+        #                    (cf.thZ1, 'f'), \
+        #                    (cf.thZRetract, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -3682,23 +4045,23 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
         # z parameters
 
         (self.z0, self.z0Txt) = \
-            self.addFieldText(sizerG, "Z End", cf.thZ0)
+            self.addFieldText(sizerG, "Z End", cf.thZ0, 'f')
 
         (self.z1, self.z1Txt) = \
-            self.addFieldText(sizerG, "Z Start", cf.thZ1)
+            self.addFieldText(sizerG, "Z Start", cf.thZ1, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract)
+        self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract, 'f')
 
         self.leftHand = self.addCheckBox(sizerG, "Left Hand", cf.thLeftHand, \
                                          action=self.OnLeftHand)
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.thXStart)
+        self.xStart = self.addField(sizerG, "X Start D", cf.thXStart, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.thXRetract)
+        self.xRetract = self.addField(sizerG, "X Retract", cf.thXRetract, 'f')
 
-        self.depth = self.addField(sizerG, "Depth", cf.thXDepth)
+        self.depth = self.addField(sizerG, "Depth", cf.thXDepth, 'f')
 
         self.alternate = self.addCheckBox(sizerG, "Alternate", cf.thAlternate)
 
@@ -3714,14 +4077,14 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # thread parameters
 
-        self.thread = self.addField(sizerG, "Thread", cf.thThread)
+        self.thread = self.addField(sizerG, "Thread", cf.thThread, 'fs')
 
         self.tpi = self.addRadioButton(sizerG, "TPI", cf.thTPI, \
                                        style=wx.RB_GROUP)
 
         self.mm = self.addRadioButton(sizerG, "mm", cf.thMM)
 
-        self.angle = self.addField(sizerG, "Angle", cf.thAngle)
+        self.angle = self.addField(sizerG, "Angle", cf.thAngle, 'fs')
 
 
         self.firstFeedBtn = self.addRadioButton(sizerG, "First Feed", \
@@ -3729,34 +4092,32 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
                                                 style=wx.RB_GROUP, \
                                                 action=self.OnFirstFeed)
 
-        self.firstFeed = self.addField(sizerG, None, cf.thFirstFeed)
+        self.firstFeed = self.addField(sizerG, None, cf.thFirstFeed, 'f')
 
         # special thread parameters
 
-        self.xTaper = self.addField(sizerG, "Taper", cf.thXTaper)
+        self.xTaper = self.addField(sizerG, "Taper", cf.thXTaper, 'f')
 
-        self.runout = self.addField(sizerG, "Exit Rev", cf.thRunout)
+        self.runout = self.addField(sizerG, "Exit Rev", cf.thRunout, 'fs')
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG)
 
         self.lastFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
                                                cf.thLastFeedBtn, \
                                                action=self.OnLastFeed)
 
-        self.lastFeed = self.addField(sizerG, None, cf.thLastFeed)
+        self.lastFeed = self.addField(sizerG, None, cf.thLastFeed, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.thPasses)
+        self.passes = self.addField(sizerG, "Passes", cf.thPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.thSPInt)
+        self.sPInt = self.addField(sizerG, "SP Int", cf.thSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.thSpring)
+        self.spring = self.addField(sizerG, "Spring", cf.thSpring, 'd')
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG)
 
         # buttons
 
@@ -4192,7 +4553,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if not os.path.exists(DBG_DIR):
             os.makedirs(DBG_DIR)
         self.dbg = open(DBG_LOG, "ab")
-        t = timeStr();
+        t = "\n" + timeStr() + "\n";
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -4380,7 +4741,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addControlButton(sizerG, 'Jog Spindle +', \
                                   self.OnJogSpindleFwd, self.OnJogUp)
         else:
-            sizerG.Add(self.emptyCell)
+            self.placeHolder(sizerG, 1)
 
         # second line
 
@@ -4395,7 +4756,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addControlButton(sizerG, 'Jog Spindle -', \
                                   self.OnJogSpindleRev, self.OnJogUp)
         else:
-            sizerG.Add(self.emptyCell)
+            self.placeHolder(sizerG, 1)
 
         # third line
 
@@ -4413,7 +4774,7 @@ class JogPanel(wx.Panel, FormRoutines):
                                      self.OnStartSpindle, btnSize)
             self.spindleButton.SetBackgroundColour('Green')
         else:
-            sizerG.Add(self.emptyCell)
+            self.placeHolder(sizerG, 1)
 
         sizerH.Add(sizerG)
 
@@ -4422,14 +4783,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # first row
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG, 3)
 
         self.xNegButton = \
             self.addBitmapButton(sizerG, "north.gif", self.OnXNegDown, \
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
-        sizerG.Add(self.emptyCell)
+
+        self.placeHolder(sizerG, 1)
 
         # second row
 
@@ -4466,12 +4826,12 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # third row
 
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG, 1)
 
         self.addButton(sizerG, 'P', self.OnZPark, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
-        sizerG.Add(self.emptyCell)
+        self.placeHolder(sizerG, 1)
 
         self.xPosButton = \
             self.addBitmapButton(sizerG, "south.gif", self.OnXPosDown,
@@ -5157,7 +5517,7 @@ class JogPanel(wx.Panel, FormRoutines):
                         buttonDisable(self.resumeButton)
                         if self.currentPanel.active:
                             buttonEnable(self.pauseButton)
-                            if not panel.manualMode:
+                            if not self.currentPanel.manualMode:
                                 buttonEnable(self.measureButton)
 
                 self.mvStatus = mvStatus
@@ -6758,6 +7118,10 @@ class MainFrame(wx.Frame):
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
 
+        ID_ARC = wx.Window.NewControlId()
+        menu = operationMenu.Append(ID_ARC, 'arc')
+        self.Bind(wx.EVT_MENU, self.OnArc, menu)
+
         # test menu
         testMenu = wx.Menu()
 
@@ -6820,6 +7184,11 @@ class MainFrame(wx.Frame):
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
 
+        self.arcPanel = panel = ArcPanel(self, self.hdrFont)
+        self.panels['arcPanel'] = panel
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        panel.Hide()
+
         print("MainFrame JogPanel")
         global jogPanel
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
@@ -6859,6 +7228,7 @@ class MainFrame(wx.Frame):
         self.taperPanel.update()
         if STEP_DRV:
             self.threadPanel.update()
+        self.arcPanel.update()
 
         self.showPanel()
         self.Fit()
@@ -7288,6 +7658,10 @@ class MainFrame(wx.Frame):
 
     def OnThread(self, e):
         cfg.setInfo(cf.mainPanel, 'threadPanel')
+        self.showPanel()
+
+    def OnArc(self, e):
+        cfg.setInfo(cf.mainPanel, 'arcPanel')
         self.showPanel()
 
     def OnTestSpindle(self, e):

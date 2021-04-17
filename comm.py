@@ -89,7 +89,7 @@ class Comm():
         if self.xDbgPrint:
             if cmd != self.lastCmd:
                 self.lastCmd = cmd
-                print("%-17s %s" % (cmd, cmdStr.strip('\x01\r')))
+                print("%-20s %s" % (cmd, cmdStr.strip('\x01\r')))
                 stdout.flush()
         if self.ser is None:
             return(None);
@@ -154,7 +154,7 @@ class Comm():
                 stdout.flush()
         cmd = ' %x %s' % (parmIndex, valString)
         if self.xDbgPrint:
-            print("%-17s %s" % (parm, cmd.strip()))
+            print("%-20s %s" % (parm, cmd.strip()))
             stdout.flush()
         length = len(cmd)
         if self.cmdLen + length > 80:
@@ -175,7 +175,7 @@ class Comm():
         self.parmList = []
         self.cmdLen = cmdOverhead
         if self.xDbgPrint:
-            print("%-17s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
+            print("%-20s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
             stdout.flush()
         if self.ser is None:
             return
@@ -229,7 +229,7 @@ class Comm():
                 valString = "0"
         cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
         if self.xDbgPrint:
-            print("%-17s %s" % (parm, cmd.strip('\x01\r')))
+            print("%-20s %s" % (parm, cmd.strip('\x01\r')))
             stdout.flush()
         if self.ser is None:
             return
@@ -257,7 +257,7 @@ class Comm():
             return(None)
         cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
         if dbg:
-            print("%-17s %s" % \
+            print("%-20s %s" % \
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
@@ -434,7 +434,7 @@ class Comm():
             valStr = valStr.rstrip('0')
         cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
         if self.xDbgPrint:
-            print("cmd %-18s %4x %s" % (opString, op, prtStr))
+            print("cmd %-18s %6x %s" % (opString, op, prtStr))
             stdout.flush()
         if self.ser is None:
             return

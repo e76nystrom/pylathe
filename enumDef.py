@@ -35,6 +35,7 @@ M_WAIT_PROBE     =  8           # wait for probe to complete
 M_WAIT_MEASURE   =  9           # wait for measurement to complete
 M_WAIT_SAFE_X    = 10           # wait for move to safe x to complete
 M_WAIT_SAFE_Z    = 11           # wait for move to safe z to complete
+M_WAIT_ARC       = 12           # wait for arc move to complete
 
 mStatesList = ( \
     "M_IDLE",
@@ -49,6 +50,7 @@ mStatesList = ( \
     "M_WAIT_MEASURE",
     "M_WAIT_SAFE_X",
     "M_WAIT_SAFE_Z",
+    "M_WAIT_ARC",
     )
 
 # move control commands
@@ -79,7 +81,9 @@ PROBE_Z          = 22           # probe in z direction
 PROBE_X          = 23           # probe in x direction
 SAVE_Z_DRO       = 24           # save z dro reading
 SAVE_X_DRO       = 25           # save x dro reading
-OP_DONE          = 26           # operation done
+QUE_PARM         = 26           # save parameter in queue
+MOVE_ARC         = 27           # move in an arc
+OP_DONE          = 28           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -108,6 +112,8 @@ mCommandsList = ( \
     "PROBE_X",
     "SAVE_Z_DRO",
     "SAVE_X_DRO",
+    "QUE_PARM",
+    "MOVE_ARC",
     "OP_DONE",
     )
 
@@ -118,6 +124,7 @@ OP_FACE          =  1           # face
 OP_CUTOFF        =  2           # cutoff
 OP_TAPER         =  3           # taper
 OP_THREAD        =  4           # thread
+OP_ARC           =  5           # arc
 
 operationsList = ( \
     "OP_TURN",
@@ -125,6 +132,7 @@ operationsList = ( \
     "OP_CUTOFF",
     "OP_TAPER",
     "OP_THREAD",
+    "OP_ARC",
     )
 
 # home control states

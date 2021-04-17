@@ -291,7 +291,21 @@ X_HOME_INV           = 168
 
 E_STOP_ENA           = 169
 E_STOP_INV           = 170
-MAX_PARM             = 171
+
+# command pause
+
+CMD_PAUSED           = 171
+
+# arc parameters
+
+ARC_RADIUS           = 172
+ARC_X_CENTER         = 173
+ARC_Z_CENTER         = 174
+ARC_X_START          = 175
+ARC_Z_START          = 176
+ARC_X_END            = 177
+ARC_Z_END            = 178
+MAX_PARM             = 179
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -465,5 +479,13 @@ parmTable = ( \
     ('X_HOME_INV', 'char', 'xHomeInv'),
     ('E_STOP_ENA', 'char', 'eStopEna'),
     ('E_STOP_INV', 'char', 'eStopInv'),
+    ('CMD_PAUSED', 'char', 'cmdPaused'),
+    ('ARC_RADIUS', 'float', 'arcRadius'),
+    ('ARC_X_CENTER', 'int', 'arcXCenter'),
+    ('ARC_Z_CENTER', 'int', 'arcZCenter'),
+    ('ARC_X_START', 'int', 'arcXStart'),
+    ('ARC_Z_START', 'int', 'arcZStart'),
+    ('ARC_X_END', 'int', 'arcXEnd'),
+    ('ARC_Z_END', 'int', 'arcZEnd'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )

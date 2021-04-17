@@ -14,7 +14,7 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterArguments>
     </InterpreterArguments>
-    <CommandLineArguments>--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt</CommandLineArguments>
+    <CommandLineArguments>--xhomed cfg/config.txt -p cfg/posInfo.txt</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>

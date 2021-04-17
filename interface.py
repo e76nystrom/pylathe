@@ -2,6 +2,26 @@
 
 configList = \
 ( \
+  "arc panel",
+
+    ('arcAddFeed', 'arc '),
+    ('arcAEnd', 'arc '),
+    ('arcAStart', 'arc '),
+    ('arcCX', 'arc '),
+    ('arcCZ', 'arc '),
+    ('arcDiam', 'arc '),
+    ('arcFeed', 'arc '),
+    ('arcPasses', 'arc '),
+    ('arcPause', 'arc '),
+    ('arcRetract', 'arc '),
+    ('arcRadius', 'arc '),
+    ('arcRPM', 'arc '),
+    ('arcSPInt', 'arc '),
+    ('arcSpring', 'arc '),
+    ('arcStemDiam', 'arc '),
+    ('arcToolRad', 'arc '),
+    ('arcZFeed', 'arc '),
+
   "system config",
   
     ('cfgCmdDis', 'config disable sending commands'),
@@ -418,7 +438,6 @@ cmdList = \
 
     ("CLEARQUE", "clearQue", "clear move que"),
     ("QUEMOVE", "", "que move command"),
-    ("QUEPARM", "", "que move parameter"),
     ("MOVEQUESTATUS", "", "read move queue status"),
     
     "location and debug info",
@@ -451,21 +470,21 @@ parmList = \
     ("SP_STEPS", "spindle motor steps", "int16_t"),
     ("SP_MICRO", "spindle micro steps", "int16_t"),
     ("SP_MIN_RPM", "spindle minimum rpm", "float"),
-    ("SP_MAX_RPM", "spindle maxmum rpm", "float"),
+    ("SP_MAX_RPM", "spindle maximum rpm", "float"),
     ("SP_RPM", "spindle rpm", "float"), # 
     ("SP_ACCEL_TIME", "spindle accel time", "float"),
     ("SP_ACCEL", "spindle accel rpm/sec^2", "float"),
     ("SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"),
-    ("SP_JOG_MAX_RPM", "spindle jog maxmum rpm", "float"),
+    ("SP_JOG_MAX_RPM", "spindle jog maximum rpm", "float"),
     ("SP_JOG_RPM", "spindle jog rpm", "float"),
     ("SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"),
-    ("SP_JOG_TIME_INITIAL", "spindle jog time initial", "float"),
+    ("SP_JOG_TIME_INITIAL", "spindle jog time initl", "float"),
     ("SP_JOG_TIME_INC", "spindle jog time increment", "float"),
     ("SP_JOG_TIME_MAX", "spindle jog timemax", "float"),
     ("SP_JOG_DIR", "spindle direction", "char"),
     ("SP_DIR_FLAG", "spindle invert direction", "char"),
     ("SP_TEST_INDEX", "generate test index pulse", "char"),
-    ("SP_TEST_ENCODER", "generate encoder test pulse", "char"),
+    ("SP_TEST_ENCODER", "generate enc test pulse", "char"),
     
     "z axis parameters",
     
@@ -575,7 +594,7 @@ parmList = \
 
     ("Z_HOME_SPEED", "z final homing speed", "float"),
     ("Z_HOME_DIST", "z max homing distance", "float"),
-    ("Z_HOME_DIST_REV", "z max reverse homing distance", "float"),
+    ("Z_HOME_DIST_REV", "z max rev homing distance", "float"),
     ("Z_HOME_DIST_BACKOFF", "z home backoff dist", "float"),
     ("Z_HOME_DIR", "z homing direction", "int"),
 
@@ -583,7 +602,7 @@ parmList = \
 
     ("X_HOME_SPEED", "x final homing speed", "float"),
     ("X_HOME_DIST", "x max homing distance", "float"),
-    ("X_HOME_DIST_REV", "x max reverse homing distance", "float"),
+    ("X_HOME_DIST_REV", "x max rev homing distance", "float"),
     ("X_HOME_DIST_BACKOFF", "x home backoff dist", "float"),
     ("X_HOME_DIR", "x homing direction", "int"),
 
@@ -634,11 +653,11 @@ parmList = \
     "configuration",
 
     ("STEPPER_DRIVE", "stepper driven spindle", "char"),
-    ("MOTOR_TEST", "use stepper drive to test motor", "char"),
-    ("SPINDLE_ENCODER", "motor drive with spindle encoder", "char"),
+    ("MOTOR_TEST", "use stepper to test motor", "char"),
+    ("SPINDLE_ENCODER", "motor with spindle enc", "char"),
     ("SPINDLE_SYNC_BOARD", "spindle sync board", "char"),
-    ("TURN_SYNC", "synchronization type for turning", "char"),
-    ("THREAD_SYNC", "synchronization type for threading", "char"),
+    ("TURN_SYNC", "sync type for turning", "char"),
+    ("THREAD_SYNC", "sync type for threading", "char"),
     # ("SPINDLE_SYNC", "spindle sync direct", "char"),
     # ("USE_ENCODER", "config for use encoder interrupt directly", "char"),
     # ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
@@ -657,7 +676,7 @@ parmList = \
 
     "encoder counts per revolution",
 
-    ("ENC_PER_REV", "spindle encoder counts per revolution", "uint16_t"),
+    ("ENC_PER_REV", "spindle enc counts per rev", "uint16_t"),
 
     "test encoder setup variables",
 
@@ -683,7 +702,7 @@ parmList = \
 
     "xilinx configuration register",
 
-    ("X_CFG_REG", "xilinx configuration register", "int16_t"),
+    ("X_CFG_REG", "xilinx cfg register", "int16_t"),
  
     "sync parameters",
    
@@ -695,7 +714,7 @@ parmList = \
 
     ("TH_Z_START", "threading z start", "int32_t"),
     ("TH_X_START", "threading x start", "int32_t"),
-    ("TAN_THREAD_ANGLE", "tangent of threading angle", "float"),
+    ("TAN_THREAD_ANGLE", "tan of threading angle", "float"),
     ("X_FEED", "x feed", "int16_t"),
     ("RUNOUT_DISTANCE", "runout distance", "float"),
     ("RUNOUT_DEPTH", "runout depth", "float"),
@@ -707,8 +726,8 @@ parmList = \
     "motor and speed control",
  
     ("PWM_FREQ", "spindle speed pwm frequency", "int16_t"),
-    ("MIN_SPEED", "minimum speed for current range", "int16_t"),
-    ("MAX_SPEED", "maximum speed for current range", "int16_t"),
+    ("MIN_SPEED", "min speed for current range", "int16_t"),
+    ("MAX_SPEED", "max speed for current range", "int16_t"),
 
     "current operation",
 
@@ -717,9 +736,9 @@ parmList = \
     "global limits and home",
 
     ("LIMIT_OVERRIDE", "override limit switches", "char"),
-    ("COMMON_LIMITS", "all limit switches on one pin", "char"),
+    ("COMMON_LIMITS", "all limit switches one pin", "char"),
     ("LIMITS_ENABLED", "limits enabled", "char"),
-    ("COMMON_HOME", "all home switches on one pin", "char"),
+    ("COMMON_HOME", "all home switches one pin", "char"),
 
     "z limits and home",
 
@@ -744,9 +763,13 @@ parmList = \
     ("E_STOP_ENA", "enable estop", "char"),
     ("E_STOP_INV", "invert estop siganl", "char"),
 
+    "command pause",
+
+    ("CMD_PAUSED", "move commands paused", "char"),
+
     "arc parameters",
  
-    ("ARC_RADIUS", "arc radius", "int"),
+    ("ARC_RADIUS", "arc radius", "float"),
     ("ARC_X_CENTER", "arc x center", "int"),
     ("ARC_Z_CENTER", "arc z center", "int"),
     ("ARC_X_START", "arc x start", "int"),
@@ -886,12 +909,18 @@ regList = \
 
     "isr active flags",
 
+    ("ARC_SHIFT", (6), "shift for arc syn"),
+
     ("SYNC_ACTIVE_EXT",    "(1 << 0)", "active for sync board"),
     ("SYNC_ACTIVE_TMR",    "(1 << 1)", "active for internal timer"),
     ("SYNC_ACTIVE_ENC",    "(1 << 2)", "active for encoder"),
     ("SYNC_ACTIVE_STEP",   "(1 << 3)", "active for stepper"),
     ("SYNC_ACTIVE_TAPER",  "(1 << 4)", "active for taper"),
     ("SYNC_ACTIVE_THREAD", "(1 << 5)", "active for threading"),
+    ("ARC_ACTIVE_EXT",     "(SYNC_ACTIVE_EXT << ARC_SHIFT)", "arc sync board"),
+    ("ARC_ACTIVE_TMR",     "(SYNC_ACTIVE_TMR << ARC_SHIFT)", "arc int tmr"),
+    ("ARC_ACTIVE_ENC",     "(SYNC_ACTIVE_ENC << ARC_SHIFT)", "arc encoder"),
+    ("ARC_ACTIVE_STEP",    "(SYNC_ACTIVE_STEP << ARC_SHIFT)", "arc stepper"),
 
     "encoder direct flags",
 
@@ -1530,6 +1559,7 @@ enumList =\
     ("M_WAIT_MEASURE", "wait for measurement to complete"),
     ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),
     ("M_WAIT_SAFE_Z", "wait for move to safe z to complete"),
+    ("M_WAIT_ARC", "wait for arc move to complete"),
     "};",
 
     "move control commands",
@@ -1563,6 +1593,7 @@ enumList =\
     ("SAVE_Z_DRO", "save z dro reading"),
     ("SAVE_X_DRO", "save x dro reading"),
     ("QUE_PARM", "save parameter in queue"),
+    ("MOVE_ARC", "move in an arc"),
     ("OP_DONE", "operation done"),
     "};",
 
