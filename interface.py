@@ -5,22 +5,25 @@ configList = \
   "arc panel",
 
     ('arcAddFeed', 'arc '),
-    ('arcAEnd', 'arc '),
-    ('arcAStart', 'arc '),
-    ('arcCX', 'arc '),
-    ('arcCZ', 'arc '),
+    ('arcBallDist', 'arc '),
+    ('arcCCW', 'arc '),
     ('arcDiam', 'arc '),
     ('arcFeed', 'arc '),
+    ('arcLargeEnd', 'arc '),
+    ('arcLargeStem', 'arc '),
     ('arcPasses', 'arc '),
     ('arcPause', 'arc '),
     ('arcRetract', 'arc '),
     ('arcRadius', 'arc '),
     ('arcRPM', 'arc '),
+    ('arcSmallEnd', 'arc '),
+    ('arcSmallStem', 'arc '),
     ('arcSPInt', 'arc '),
     ('arcSpring', 'arc '),
-    ('arcStemDiam', 'arc '),
     ('arcToolRad', 'arc '),
+    ('arcType', 'arc '),
     ('arcZFeed', 'arc '),
+    ('arcZStart', 'arc '),
 
   "system config",
   
@@ -56,7 +59,7 @@ configList = \
     ('cfgFpgaFreq', 'config fpga frequency'),
     ('cfgFpga', 'config fpga interface present'),
 
-  "communications config",
+  "communications cxonfig",
 
     ('commPort', 'comm port'),
     ('commRate', 'comm baud rate'),
@@ -1707,6 +1710,16 @@ enumList =\
       ("SEL_TH_ESYN_RENC", "Ext Syn, Runout Enc"),
       ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),
       ("SEL_TH_SYN",       "Syn, Runout Syn"),
+    "};",
+
+    "arc config selector",
+    
+    "enum sel_Arc_Type c",
+    "{",
+      ("SEL_ARC_END",    "End"),
+      ("SEL_ARC_CORNER", "Corner"),
+      ("SEL_ARC_SMALL",  "Small"),
+      ("SEL_ARC_LARGE",  "Large"),
     "};",
 )
     

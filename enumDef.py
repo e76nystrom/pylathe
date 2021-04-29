@@ -309,3 +309,24 @@ selThreadText = ( \
     "Ext Syn, Runout Syn",
     "Syn, Runout Syn",
     )
+
+# arc config selector
+
+SEL_ARC_END      =  0           # End
+SEL_ARC_CORNER   =  1           # Corner
+SEL_ARC_SMALL    =  2           # Small
+SEL_ARC_LARGE    =  3           # Large
+
+selArcTypeList = ( \
+    "SEL_ARC_END",
+    "SEL_ARC_CORNER",
+    "SEL_ARC_SMALL",
+    "SEL_ARC_LARGE",
+    )
+
+selArcTypeText = ( \
+    "End",
+    "Corner",
+    "Small",
+    "Large",
+    )
