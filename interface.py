@@ -9,6 +9,7 @@ configList = \
     ('arcCCW', 'arc '),
     ('arcDiam', 'arc '),
     ('arcFeed', 'arc '),
+    ('arcFinish', 'arc '),
     ('arcLargeEnd', 'arc '),
     ('arcLargeStem', 'arc '),
     ('arcPasses', 'arc '),
@@ -20,8 +21,10 @@ configList = \
     ('arcSmallStem', 'arc '),
     ('arcSPInt', 'arc '),
     ('arcSpring', 'arc '),
+    ('arcToolAngle', 'arc '),
     ('arcToolRad', 'arc '),
     ('arcType', 'arc '),
+    ('arcXFeed', 'arc '),
     ('arcZFeed', 'arc '),
     ('arcZStart', 'arc '),
 
@@ -1716,10 +1719,12 @@ enumList =\
     
     "enum sel_Arc_Type c",
     "{",
-      ("SEL_ARC_END",    "End"),
-      ("SEL_ARC_CORNER", "Corner"),
-      ("SEL_ARC_SMALL",  "Small"),
-      ("SEL_ARC_LARGE",  "Large"),
+      ("SEL_ARC_END",        "End"),
+      ("SEL_ARC_CORNER",     "Corner"),
+      ("SEL_ARC_SMALL",      "Small Ball"),
+      ("SEL_ARC_LARGE",      "Large Ball"),
+      ("SEL_ARC_SMALL_STEM", "Small Stem"),
+      ("SEL_ARC_LARGE_STEM", "Large Stem"),
     "};",
 )
     
