@@ -2512,8 +2512,8 @@ class Arc(LatheOp, UpdatePass):
         if self.arc:
             feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
-            curRadius = self.radiusStart - feed
-            self.curRadius = curRadius + self.toolRadius
+            curRadius = self.radiusStart - feed + self.toolRadius
+            self.curRadius = curRadius
             self.curRadiusSqrd = curRadius * curRadius
             self.calcArcEnd(final)
         else:
@@ -2543,6 +2543,7 @@ class Arc(LatheOp, UpdatePass):
             z1 = sqrt(self.curRadiusSqrd - self.cutRadiusSqrd) + \
                 self.center.z
             self.endLabel = True
+        toolRadius = self.toolRadius
         z0 += toolRadius
         x1 += toolRadius
 
