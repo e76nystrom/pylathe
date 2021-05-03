@@ -2825,7 +2825,6 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def updateUI(self):
         if not self.active:
-            self.sizerV.Layout()
             arcType = self.arcType.GetSelection()
             if (arcType == en.SEL_ARC_END or \
                 arcType == en.SEL_ARC_CORNER):
@@ -2836,6 +2835,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
                 self.arcRadius.Disable()
                 for f in self.ballList:
                     f.Enable()
+            self.sizerV.Layout()
 
     def update(self):
         self.updateUI()
