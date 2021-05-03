@@ -2776,7 +2776,9 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
                                                  cf.arcFinish, 'f')
         self.ballList.append(f)
 
-        self.placeHolder(sizerG)
+        self.endDist = f =self.addField(sizerG, "Ball Dist", \
+                                        cf.arcBallDist, 'f')
+        self.ballList.append(f)
 
         # line 5 pass info
 
@@ -2789,7 +2791,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.spring = self.addField(sizerG, "Spring", cf.arcSpring, 'd')
         fields0.append(self.spring)
 
-        self.endDist = self.addField(sizerG, "Ball Dist", cf.arcBallDist, 'f')
+        self.placeHolder(sizerG)
 
         # line 6 buttons
 
