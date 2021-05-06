@@ -968,6 +968,12 @@ class MoveCommands():
                 (a0, a1) = (a1, a0)
             self.d.add(dxf.arc(radius, (xc, yc), a0, a1, layer=layer))
 
+    def drawDXFArc(self, center, radius, a0, a1, layer=0):
+        if self.d is not None:
+            (yc, xc) = center
+            yc *= self.flip
+            self.d.add(dxf.arc(radius, (xc, yc), a0, a1, layer=layer))
+
     def drawL(self, l, layer=0):
         if l.type == LINE:
             self.setLoc(l.p0.x, l.p0.y)
@@ -2202,9 +2208,9 @@ class Arc(LatheOp, UpdatePass):
         self.feed = abs(getFloatVal(panel.feed) / 2.0)
         self.retract = abs(getFloatVal(panel.retract))
 
-        self.zStart = getFloatVal(panel.zStart)
+        self.startZ = getFloatVal(panel.zStart)
 
-        self.toolRadius = getFloatVal(panel.toolRadius)
+        self.toolRadius = getFloatVal(panel.toolRadius) # ***
 
         self.largeRadius = getFloatVal(panel.largeEnd) / 2
         self.largeStem = getFloatVal(panel.largeStem) / 2
@@ -2223,16 +2229,16 @@ class Arc(LatheOp, UpdatePass):
         arcType = self.arcType
         if arcType == en.SEL_ARC_END:
             self.cutRadius = self.materialRadius
-            self.center = LathePt(0, self.zStart - self.arcRadius)
+            self.center = LathePt(0, self.startZ - self.arcRadius)
             self.setupActions()
         elif arcType == en.SEL_ARC_CORNER:
             self.cutRadius = self.arcRadius
             self.center = LathePt(self.materialRadius - self.arcRadius, \
-                                  self.zStart - self.arcRadius)
+                                  self.startZ - self.arcRadius)
             self.setupActions()
         elif arcType == en.SEL_ARC_SMALL:
             self.cutRadius = self.materialRadius
-            self.center = LathePt(0, self.zStart - self.smallRadius)
+            self.center = LathePt(0, self.startZ - self.smallRadius)
             self.setupActions()
             self.ball = True
             self.stem(self.smallRadius, self.smallStem, \
@@ -2240,30 +2246,33 @@ class Arc(LatheOp, UpdatePass):
         elif arcType == en.SEL_ARC_LARGE:
             self.cutRadius = self.materialRadius
             self.arcRadius = self.largeRadius
-            self.center = LathePt(0, self.zStart - self.largeRadius)
+            self.center = LathePt(0, self.startZ - self.largeRadius)
             self.setupActions()
             self.ball = True
             self.stem(self.largeRadius, self.largeStem, \
                       self.smallStem, self.smallRadius, stem=False, draw=draw)
         elif arcType == en.SEL_ARC_SMALL_STEM:
             self.cutRadius = self.materialRadius
-            self.center = LathePt(0, self.zStart - self.smallRadius)
+            self.center = LathePt(0, self.startZ - self.smallRadius)
             self.stem(self.smallRadius, self.smallStem, \
                       self.largeStem, self.largeRadius)
         elif arcType == en.SEL_ARC_LARGE_STEM:
             self.cutRadius = self.materialRadius
             self.arcRadius = self.largeRadius
-            self.center = LathePt(0, self.zStart - self.largeRadius)
+            self.center = LathePt(0, self.startZ - self.largeRadius)
             self.stem(self.largeRadius, self.largeStem, \
                       self.smallStem, self.smallRadius)
 
-        self.arcRadiusSqrd = self.arcRadius * self.arcRadius
-        self.radiusStart = hypot(self.materialRadius - self.center.x, \
-                                 self.arcRadius)
-        self.cut = self.radiusStart - self.arcRadius
-        self.cutRadiusSqrd = self.cutRadius * self.cutRadius
+        self.radiusStart = \
+            hypot(self.materialRadius - self.center.x, self.arcRadius)
 
-        jogPanel.dPrt("radiusStart %5.3f" % (self.radiusStart))
+        self.toolRadiusStart = self.radiusStart + self.toolRadius # ***
+        self.toolArcRadius = self.arcRadius + self.toolRadius     # ***
+        self.cut = self.toolRadiusStart - self.toolArcRadius
+
+        print("toolRadiusStart %5.3f toolArcRadius %5.3f cut %5.3f" % \
+              (self.toolRadiusStart, self.toolArcRadius, self.cut))
+        stdout.flush()
 
         val = getFloatVal(panel.zFeed)
         rpm = getIntVal(panel.rpm)
@@ -2339,8 +2348,8 @@ class Arc(LatheOp, UpdatePass):
             m.drawL(trim3)
 
         toolCentArc = GeoArc((self.center.z, self.center.x), \
-                             rad0F + self.toolRadius, 180, 270)
-        toolCentLine = trim3.parallel(self.toolRadius, CW)
+                             rad0F + self.toolRadius, 180, 270) # ***
+        toolCentLine = trim3.parallel(self.toolRadius, CW)      # ***
         toolCentLine.intersect(toolCentArc, end=1, trim=False)
         toolEndCenter = toolCentLine.p1
         self.toolEnd = LathePt(toolEndCenter.y, \
@@ -2389,7 +2398,7 @@ class Arc(LatheOp, UpdatePass):
             if trimType == 2:
                 p = l.intersect(trim3, False)
                 distance = l.pointDistance(toolEndCenter)
-                if distance != None and distance > self.toolRadius:
+                if distance != None and distance > self.toolRadius: # ***
                     done = True
 
             if draw:
@@ -2405,7 +2414,7 @@ class Arc(LatheOp, UpdatePass):
 
     def runOperation(self):
         # if cfg.getBoolInfoData(cf.cfgDraw):
-        #     self.m.draw("arc", self.zStart, self.zEnd)
+        #     self.m.draw("arc", self.startZ, self.zEnd)
 
         self.getParameters(draw=False)
 
@@ -2421,25 +2430,64 @@ class Arc(LatheOp, UpdatePass):
             arcType == en.SEL_ARC_LARGE_STEM):
             self.passes = len(self.ballStem)
             self.initPass()
-            toolRadius = 0.0
+            toolRadius = 0.0    # ***
             self.arc = False
         else:
             self.calcFeed(self.feed, self.cut)
-            toolRadius = self.toolRadius
+            toolRadius = self.toolRadius # ***
             self.arc = True
+
+        print("cut %5.3f passes %d" % \
+              (self.cut, self.passes))
+        stdout.flush()
 
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
 
         self.panel.passes.SetValue("%d" % (self.passes))
-        print("cut %5.3f passes %d" % \
-              (self.cut, self.passes))
 
-        self.safeX = self.materialRadius + toolRadius + self.retract
-        self.safeZ = self.zStart + toolRadius + self.zRetract
+        self.safeX = self.materialRadius + toolRadius + self.retract # ***
+        self.safeZ = self.startZ + toolRadius + self.zRetract # ***
 
         if cfg.getBoolInfoData(cf.cfgDraw):
             self.m.draw("arc", self.zStart, self.zEnd)
+
+        if self.arc and True:
+            m = self.m
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.arcRadius), \
+                      (self.center.z + self.arcRadius, self.center.x))
+
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.toolArcRadius), \
+                      (self.center.z + self.toolArcRadius, self.center.x))
+
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.toolRadiusStart), \
+                      (self.center.z + self.toolRadiusStart, self.center.x))
+
+            m.drawArc((self.center.x, \
+                       self.center.z + self.arcRadius + toolRadius), \
+                      (self.center.z + self.arcRadius + 2*toolRadius, \
+                       self.center.x),
+                      (self.center.z + self.arcRadius + 2*toolRadius, \
+                       self.center.x))
+            
+            m.drawArc((self.center.x + self.arcRadius + toolRadius, \
+                       self.center.z), \
+                      (self.center.z + toolRadius, \
+                       self.center.x + self.arcRadius + toolRadius),
+                      (self.center.z + toolRadius, \
+                       self.center.x + self.arcRadius + toolRadius))
+
+            m.setLoc(self.center.z, self.materialRadius)
+            m.drawLine(self.startZ, self.materialRadius)
+            m.drawLine(self.startZ, self.center.x)
+
+            m.setLoc(self.center.z, self.materialRadius + toolRadius)
+            m.drawLine(self.startZ + toolRadius, \
+                       self.materialRadius + toolRadius)
+            m.drawLine(self.startZ + toolRadius, self.center.x)
 
         jogPanel.dPrt("\narc runOperation %s %s\n" % \
                       (("CCW", "CW")[self.arcCW], \
@@ -2467,7 +2515,7 @@ class Arc(LatheOp, UpdatePass):
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
             syncComm.command(sc.SYNC_SETUP)
 
-    def setup(self, add=False): # turn
+    def setup(self, add=False): # arc
         comm.queParm(pm.CURRENT_OP, en.OP_ARC)
         m = self.m
         if not add:
@@ -2494,6 +2542,8 @@ class Arc(LatheOp, UpdatePass):
 
         m.queFeedType(ct.FEED_PITCH)
         m.zSynSetup(cfg.getFloatInfoData(cf.arcZFeed))
+        if not self.arcCW:
+            m.xSynSetup(cfg.getFloatInfoData(cf.arcZFeed))
 
         self.movePostCut()
 
@@ -2512,43 +2562,43 @@ class Arc(LatheOp, UpdatePass):
         if self.arc:
             feed = self.cutAmount if final else self.passCount * self.actualFeed
             self.feed = feed
-            curRadius = self.radiusStart - feed + self.toolRadius
-            self.curRadius = curRadius
-            self.curRadiusSqrd = curRadius * curRadius
-            self.calcArcEnd(final)
+            self.curRadius = self.radiusStart - feed
+            self.calcArcEndPass(final)
         else:
             feed = self.xFeed
             self.curRadius = self.ballStem[self.passCount-1][1][1]
-            self.calcStem(final)
+            self.calcStemPass(final)
 
-        jogPanel.dPrt("pass %2d feed %5.3f xStart %5.3f zStart %5.3f " \
-                      " xEnd %5.3f zEnd %5.3f curRadius %5.3f %s\n" % \
+        jogPanel.dPrt("pass %2d feed %5.3f s (x %5.3f z %6.3f) " \
+                      "e (x %5.3f z %6.3f) r %5.3f %s\n" % \
                       (self.passCount, feed, self.xStart, self.zStart, \
                        self.xEnd, self.zEnd, self.curRadius, \
                        ("", "final")[final]), True, True)
 
-    def calcArcEnd(self, final):
-        x0 = sqrt(self.curRadiusSqrd - self.arcRadiusSqrd) + self.center.x
-        z0 = 0.0
+    def calcArcEndPass(self, final):
+        toolRadius = self.toolRadius
+        c = self.curRadius + toolRadius
+        a = self.toolArcRadius
+        
+        print("curToolRadius %7.4f toolArcRadius %7.4f" % (c, a))
+        stdout.flush()
+        x0 = sqrt(c * c - a * a) + self.center.x
+        z0 = self.startZ + toolRadius # ***
         self.passSize[self.passCount] = x0 * 2
 
         if self.curRadius < self.cutRadius:
+            self.xLabel = True
             if self.ball and final:
                 (x1, z1) = self.toolEnd
             else:
-                x1 = self.curRadius + self.center.x + self.toolRadius
+                x1 = self.center.x + self.curRadius + toolRadius # ***
                 z1 = self.center.z
         else:
-            x1 = self.materialRadius
-            z1 = sqrt(self.curRadiusSqrd - self.cutRadiusSqrd) + \
-                self.center.z
-            self.endLabel = True
-        toolRadius = self.toolRadius
-        z0 += toolRadius
-        x1 += toolRadius
+            self.xLabel = False
+            x1 = self.materialRadius + toolRadius # ***
+            z1 = sqrt(c * c - x1 * x1) + self.center.z
 
-        self.safeX = x1 + self.xRetract
-        self.passSize[self.passCount] = x1 * 2.0
+        self.passSize[self.passCount] = (x1 - toolRadius) * 2.0
 
         if self.arcCW:
             self.xStart = x0
@@ -2563,16 +2613,19 @@ class Arc(LatheOp, UpdatePass):
 
         self.curX = self.xStart
 
-    def calcStem(self, final):
-        self.endLabel = True
+    def calcStemPass(self, final):
+        self.xLabel = False
         ((self.zStart, self.xStart), (self.zEnd, self.xEnd)) = \
             self.ballStem[self.passCount - 1]
-        print("taper %7.4f" % \
-              ((self.xStart - self.xEnd) / (self.zStart - self.zEnd)))
+        # print("taper %7.4f" % \
+        #       ((self.xStart - self.xEnd) / (self.zStart - self.zEnd)))
         self.passSize[self.passCount] = self.xEnd * 2
 
     def runPass(self, addPass=False): # arc
         m = self.m
+        if addPass:
+            m.passNum |= 0x8000
+            
         flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
             ct.CMD_MOV
 
@@ -2583,10 +2636,6 @@ class Arc(LatheOp, UpdatePass):
         if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
             m.quePause(flag)
-        if not addPass:
-            if m.passNum & 0x300 == 0:
-                m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
-                       (self.safeZ, self.curX))
 
         self.movePreCut()
 
@@ -2599,30 +2648,10 @@ class Arc(LatheOp, UpdatePass):
         if DRO:
             m.saveZDro()
             m.saveXDro()
-        if not addPass:
-            if m.passNum & 0x300 == 0:
-                if self.endLabel:
-                    if self.arc:
-                        m.text("%2d %7.3f" % (m.passNum, self.zEnd), \
-                               (self.zEnd, self.safeX), RIGHT, textAngle=90)
-                        if self.zEnd == self.center.z:
-                            self.endLabel = False
-                    else:
-                        m.text("%2d %7.3f" % (m.passNum, self.zEnd), \
-                               (self.zStart, self.safeX), RIGHT, textAngle=90)
-                else:
-                    m.text("%2d %7.3f" % (m.passNum, self.xEnd), \
-                           (self.zEnd, self.xEnd), RIGHT)
-                if self.arc:
-                    m.drawArc(self.center, (self.zStart, self.xStart), \
-                              (self.zEnd, self.xEnd))
-                else:
-                    m.setLoc(self.zStart, self.xStart)
-                    m.drawLine(self.zEnd, self.xEnd)
-                if m.passNum == 1:
-                    m.drawCenter(self.center)
 
         self.movePostCut()
+
+        m.passNum &= ~0x8000
 
     def passMove(self):
         m = self.m
@@ -2636,13 +2665,33 @@ class Arc(LatheOp, UpdatePass):
     # clockwise arc, corner, and ball
 
     def moveInitCW(self, flag):
-        self.m.moveX(self.curX, flag)
+        m = self.m
+        m.moveX(self.curX, flag)
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                   (self.safeZ, self.curX))
 
     def movePreCW(self):
         self.m.moveZ(self.zStart)
 
     def moveCutCW(self):
         self.passMove()
+        m = self.m
+        if (m.passNum & 0xff00) == 0:
+            if self.xLabel:
+                m.text("%2d %7.3f" % (m.passNum, self.xEnd), \
+                       (self.zEnd, self.xEnd), RIGHT)
+                # if self.zEnd == self.center.z:
+                #     self.endLabel = False
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.zEnd), \
+                       (self.zEnd, self.safeX), RIGHT, textAngle=90)
+
+            m.drawArc(self.center, (self.zEnd, self.xEnd), \
+                      (self.zStart, self.xStart))
+
+            if m.passNum == 1:
+                m.drawCenter(self.center)
 
     def movePostCW(self):
         self.m.moveX(self.safeX)
@@ -2651,22 +2700,52 @@ class Arc(LatheOp, UpdatePass):
     # counter clockwise arc, corner, and ball
 
     def moveInitCCW(self, flag):
-        self.m.moveZ(self.zStart)
+        m = self.m
+        m.moveZ(self.zStart)
+        # jogPanel.dPrt("moveInitCCW moveZ zStart   %7.4f\n" % (self.zStart))
+        if (m.passNum & 0xff00) == 0:
+            if self.xLabel:
+                m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                       (self.zStart, self.xStart), RIGHT)
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.zStart), \
+                       (self.zStart, self.safeX), RIGHT, textAngle=90)
 
     def movePreCCW(self):
-        self.m.moveX(self.xStart)
+        m = self.m
+        m.moveX(self.xStart + self.retract)
+        m.moveX(self.xStart, ct.CMD_SYN)
+        # jogPanel.dPrt("moveInitCCW moveX xRetract %7.4f\n" % (self.xStart))
+        # jogPanel.dPrt("moveInitCCW moveX xStart   %7.4f\n" % (self.xStart))
 
     def moveCutCCW(self):
+        m = self.m
         self.passMove()
+        # jogPanel.dPrt("moveCutCCW  moveX zEnd     %7.4f xEnd %7.4f\n" % \
+        #               (self.zEnd, self.xEnd))
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xEnd), \
+                   (self.safeZ+.060, self.xEnd), RIGHT)
+            m.drawArc(self.center, (self.zStart, self.xStart), \
+                      (self.zEnd, self.xEnd))
+            if m.passNum == 1:
+                m.drawCenter(self.center)
 
     def movePostCCW(self):
-        self.m.moveZ(self.zRetract)
-        self.m.moveX(self.xRetract)
+        m = self.m
+        m.moveZ(self.safeZ)
+        m.moveX(self.safeX)
+        # jogPanel.dPrt("movePostCCW moveZ safeZ    %7.4f\n" % (self.safeZ))
+        # jogPanel.dPrt("movePostCCW moveX safeX    %7.4f\n" % (self.safeX))
 
     # stem
 
     def moveInitStem(self, final):
-        self.m.moveZ(self.zStart)
+        m = self.m
+        m.moveZ(self.zStart)
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                   (self.safeZ, self.curX))
 
     def movePreStem(self):
         self.m.moveX(self.xStart)
