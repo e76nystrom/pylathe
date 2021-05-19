@@ -406,7 +406,7 @@ class FormRoutines():
 
     def fieldList(self, sizer, fields, col=1):
         total = len(fields)
-        offset = total // 2
+        offset = (total + 1) // 2
         for i in range(total):
             if col == 1:
                 field = fields[i]
@@ -2577,8 +2577,8 @@ class Arc(LatheOp, UpdatePass):
 
     def calcArcEndPass(self, final):
         toolRadius = self.toolRadius
-        c = self.curRadius + toolRadius
-        a = self.toolArcRadius
+        c = self.curRadius + toolRadius # ***
+        a = self.toolArcRadius          # ***
         
         print("curToolRadius %7.4f toolArcRadius %7.4f" % (c, a))
         stdout.flush()
@@ -2598,7 +2598,7 @@ class Arc(LatheOp, UpdatePass):
             x1 = self.materialRadius + toolRadius # ***
             z1 = sqrt(c * c - x1 * x1) + self.center.z
 
-        self.passSize[self.passCount] = (x1 - toolRadius) * 2.0
+        self.passSize[self.passCount] = (x1 - toolRadius) * 2.0 # ***
 
         if self.arcCW:
             self.xStart = x0
@@ -2655,7 +2655,7 @@ class Arc(LatheOp, UpdatePass):
 
     def passMove(self):
         m = self.m
-        m.queParm(pm.ARC_RADIUS, self.curRadius)
+        m.queParm(pm.ARC_RADIUS, self.curRadius + self.toolRadius)
         m.queParm(pm.ARC_X_START, intRound(self.xStart * jogPanel.xStepsInch))
         m.queParm(pm.ARC_Z_START, intRound(self.zStart * jogPanel.zStepsInch))
         m.queParm(pm.ARC_X_END, intRound(self.xEnd * jogPanel.xStepsInch))
@@ -2714,7 +2714,7 @@ class Arc(LatheOp, UpdatePass):
     def movePreCCW(self):
         m = self.m
         m.moveX(self.xStart + self.retract)
-        m.moveX(self.xStart, ct.CMD_SYN)
+        m.moveX(self.xStart) #, ct.CMD_SYN)
         # jogPanel.dPrt("moveInitCCW moveX xRetract %7.4f\n" % (self.xStart))
         # jogPanel.dPrt("moveInitCCW moveX xStart   %7.4f\n" % (self.xStart))
 

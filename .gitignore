@@ -53,3 +53,5 @@ remcmd.py
 *.gz
 *.htm
 posinfo.txt
+
+*.txt
