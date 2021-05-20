@@ -15,7 +15,7 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterArguments>
     </InterpreterArguments>
-    <CommandLineArguments>cfg/config.txt -p cfg/posinfo.txt</CommandLineArguments>
+    <CommandLineArguments>cfg/config.txt -p cfg/posinfo.txt --xhomed</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>

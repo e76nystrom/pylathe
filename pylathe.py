@@ -2489,6 +2489,13 @@ class Arc(LatheOp, UpdatePass):
                        self.materialRadius + toolRadius)
             m.drawLine(self.startZ + toolRadius, self.center.x)
 
+            tick = 0.010
+            m.setLoc(self.center.z-tick, self.center.x)
+            m.drawLine(self.center.z+tick, self.center.x)
+
+            m.setLoc(self.center.z , self.center.x-tick)
+            m.drawLine(self.center.z, self.center.x+tick)
+            
         jogPanel.dPrt("\narc runOperation %s %s\n" % \
                       (("CCW", "CW")[self.arcCW], \
                        en.selArcTypeText[self.arcType]))
@@ -2569,10 +2576,18 @@ class Arc(LatheOp, UpdatePass):
             self.curRadius = self.ballStem[self.passCount-1][1][1]
             self.calcStemPass(final)
 
+        (xc, zc) = self.center
+        x0Delta = self.xStart - xc
+        z0Delta = self.zStart - zc
+        x1Delta = self.xEnd - xc
+        z1Delta = self.zEnd - zc
+        rad0 = hypot(x0Delta, z0Delta)
+        rad1 = hypot(x1Delta, z1Delta)
+
         jogPanel.dPrt("pass %2d feed %5.3f s (x %5.3f z %6.3f) " \
-                      "e (x %5.3f z %6.3f) r %5.3f %s\n" % \
+                      "e (x %5.3f z %6.3f) r %5.3f %5.3f %5.3f %s\n" % \
                       (self.passCount, feed, self.xStart, self.zStart, \
-                       self.xEnd, self.zEnd, self.curRadius, \
+                       self.xEnd, self.zEnd, self.curRadius, rad0, rad1,\
                        ("", "final")[final]), True, True)
 
     def calcArcEndPass(self, final):
@@ -2595,8 +2610,9 @@ class Arc(LatheOp, UpdatePass):
                 z1 = self.center.z
         else:
             self.xLabel = False
-            x1 = self.materialRadius + toolRadius # ***
+            x1 = self.materialRadius - self.center.x + toolRadius # ***
             z1 = sqrt(c * c - x1 * x1) + self.center.z
+            x1 += self.center.x
 
         self.passSize[self.passCount] = (x1 - toolRadius) * 2.0 # ***
 
