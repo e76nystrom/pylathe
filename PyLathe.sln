@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2050
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyLathe", "PyLathe.pyproj", "{07046536-49C2-404B-A8FA-2DCFEB3A88BD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lathe", "Lathe\Lathe.vcxproj", "{7F6E8E1F-7317-46C3-94D6-3CD6AF7605B3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F42C5BD9-12E0-4311-AFE2-A23D40877431}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
