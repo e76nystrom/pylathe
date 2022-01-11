@@ -113,12 +113,17 @@ PARM_DONE        = 1            # 0x01 done operation
 
 # isr active flags
 
+ARC_SHIFT        = 6            # 0x06 shift for arc syn
 SYNC_ACTIVE_EXT  = (1 << 0)     # 0x01 active for sync board
 SYNC_ACTIVE_TMR  = (1 << 1)     # 0x02 active for internal timer
 SYNC_ACTIVE_ENC  = (1 << 2)     # 0x04 active for encoder
 SYNC_ACTIVE_STEP = (1 << 3)     # 0x08 active for stepper
 SYNC_ACTIVE_TAPER = (1 << 4)    # 0x10 active for taper
 SYNC_ACTIVE_THREAD = (1 << 5)   # 0x20 active for threading
+ARC_ACTIVE_EXT   = (SYNC_ACTIVE_EXT << ARC_SHIFT)# 0x40 arc sync board
+ARC_ACTIVE_TMR   = (SYNC_ACTIVE_TMR << ARC_SHIFT)# 0x80 arc int tmr
+ARC_ACTIVE_ENC   = (SYNC_ACTIVE_ENC << ARC_SHIFT)# 0x100 arc encoder
+ARC_ACTIVE_STEP  = (SYNC_ACTIVE_STEP << ARC_SHIFT)# 0x200 arc stepper
 
 # encoder direct flags
 
@@ -131,9 +136,9 @@ PCMD_INCX_HLDZ_S1 = (0 << 0)    # 0x00 step x hold z then step 1
 PCMD_INCX_HLDZ_SN = (1 << 0)    # 0x01 step x hold z 1 then step z
 PCMD_HLDX_S1_INCZ = (2 << 0)    # 0x02 step x hold z then step 1
 PCMD_HLDX_SN_INCZ = (3 << 0)    # 0x03 hold x 1 then step x increment z
-PCMD_INCX2_INCZ  = (4 << 0)     # 0x04 step x 2 step z
+PCMD_EXTEND      = (4 << 0)     # 0x04 extend command
 PCMD_SPARE_0     = (5 << 0)     # 0x05 spare 0
-PCMD_SPARE_1     = (6 << 0)     # 0x06 spare 1
+PCMD_SPARE_1     = (5 << 0)     # 0x05 spare 1
 PCMD_SET_DIR     = (7 << 0)     # 0x07 set direction
 PCMD_X_NEG       = (1 << 0)     # 0x01 mov x negative
 PCMD_Z_NEG       = (1 << 1)     # 0x02 mov z negative
@@ -142,3 +147,8 @@ PCMD_CMD_MASK    = (7 << 0)     # 0x07 command mask
 PCMD_RPT_SHIFT   = (3)          # 0x03 repeat mask
 PCMD_RPT_SHORT   = (32)         # 0x20 repeat short
 PCMD_RPT_MASK    = (0x1f << PCMD_RPT_SHIFT)# 0xf8 repeat shift
+PEXT_OFFSET      = (8)          # 0x08 
+PEXT_INCX        = (0 << 0)     # 0x00 step x
+PEXT_INCZ        = (1 << 0)     # 0x01 step z
+PEXT_INCX_INCZ   = (2 << 0)     # 0x02 step x and z
+PEXT_INCX2_INCZ  = (3 << 0)     # 0x03 step x 2 step z

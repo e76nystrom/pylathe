@@ -6,7 +6,8 @@
     <ProjectGuid>{07046536-49c2-404b-a8fa-2dcfeb3a88bd}</ProjectGuid>
     <ProjectHome />
     <StartupFile>pylathe.py</StartupFile>
-    <SearchPath />
+    <SearchPath>
+    </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
@@ -14,11 +15,11 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterArguments>
     </InterpreterArguments>
-    <CommandLineArguments>--xhomed cfg/config.txt -p cfg/posInfo.txt</CommandLineArguments>
+    <CommandLineArguments>--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>
-    <InterpreterId>Global|VisualStudio|Python39</InterpreterId>
+    <InterpreterId>Global|VisualStudio|Python37</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -51,6 +52,7 @@
     <Compile Include="xRegDef.py" />
   </ItemGroup>
   <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.9" />
     <InterpreterReference Include="Global|VisualStudio|Python37" />
     <InterpreterReference Include="Global|VisualStudio|Python39" />
   </ItemGroup>

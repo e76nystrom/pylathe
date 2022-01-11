@@ -86,6 +86,7 @@ class ConfigInfo():
     def readInfo(self, file, config, configList=None):
         print("readInfo %s" % (file))
         stdout.flush()
+        line = 0
         try:
             f = open(file, 'r')
             for line in f:

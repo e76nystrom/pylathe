@@ -1,65 +1,93 @@
 #!/cygdrive/c/Python37/Python.exe
 
-from sys import argv
+from sys import argv, stdout
 from math import cos, pi, radians, sin, sqrt
 import ctlBitDef as ct
 
 def move(cmd, rpt):
     global steps, xDir, zDir, xPos, zPos
     mvTrace = []
-    if (cmd & ct.PCMD_RPT_MASK) != 0:
-        rpt = cmd >> ct.PCMD_RPT_SHIFT
-    cmd &= ct.PCMD_CMD_MASK
-    if cmd == ct.PCMD_INCX_HLDZ_S1:		# 0
-        steps += rpt
-        while True:
-            mvTrace.append((xPos, zPos))
-            xPos += xDir
-            rpt -= 1
-            if rpt == 0:
+    c = cmd & ct.PCMD_CMD_MASK
+    if c != ct.PCMD_EXTEND:
+        if (cmd & ct.PCMD_RPT_MASK) != 0:
+            rpt = cmd >> ct.PCMD_RPT_SHIFT
+        if c == ct.PCMD_INCX_HLDZ_S1:		# 0
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
+                xPos += xDir
+                rpt -= 1
+                if rpt == 0:
+                    zPos += zDir
+                    break
+        elif c == ct.PCMD_INCX_HLDZ_SN:		# 1
+            steps += rpt
+            count = 0
+            while count < rpt:
+                mvTrace.append((xPos, zPos))
+                xPos += xDir
+                if count > 0:
+                    zPos += zDir
+                count += 1
+        elif c == ct.PCMD_HLDX_S1_INCZ:		# 2
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
+                rpt -= 1
                 zPos += zDir
-                break
-    elif cmd == ct.PCMD_INCX_HLDZ_SN:		# 1
-        steps += rpt
-        count = 0
-        while count < rpt:
-            mvTrace.append((xPos, zPos))
-            xPos += xDir
-            if count > 0:
+                if rpt == 0:
+                    xPos += xDir
+                    break
+        elif c == ct.PCMD_HLDX_SN_INCZ:		# 3
+            steps += rpt
+            count = 0
+            while count < rpt:
+                mvTrace.append((xPos, zPos))
                 zPos += zDir
-            count += 1
-    elif cmd == ct.PCMD_HLDX_S1_INCZ:		# 2
-        steps += rpt
-        while True:
-            mvTrace.append((xPos, zPos))
-            rpt -= 1
-            zPos += zDir
-            if rpt == 0:
+                if count > 0:
+                    xPos += xDir
+                count += 1
+        elif c == ct.PCMD_SET_DIR:		# 7
+            xDir = 1 if (rpt & ct.PCMD_X_NEG) == 0 else -1
+            zDir = 1 if (rpt & ct.PCMD_Z_NEG) == 0 else -1
+            return None
+    else:                       # extended commands
+        c = cmd >> ct.PCMD_RPT_SHIFT
+        if c == ct.PEXT_INCX:			# 0
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
                 xPos += xDir
-                break
-    elif cmd == ct.PCMD_HLDX_SN_INCZ:		# 3
-        steps += rpt
-        count = 0
-        while count < rpt:
-            mvTrace.append((xPos, zPos))
-            zPos += zDir
-            if count > 0:
+                rpt -= 1
+                if rpt == 0:
+                    break
+        elif c == ct.PEXT_INCZ: 		# 1
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
+                zPos += zDir
+                rpt -= 1
+                if rpt == 0:
+                    break
+        elif c == ct.PEXT_INCX_INCZ: 		# 2
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
+                zPos += zDir
                 xPos += xDir
-            count += 1
-    elif cmd == ct.PCMD_INCX2_INCZ:		# 4
-        steps += rpt
-        while True:
-            mvTrace.append((xPos, zPos))
-            zPos += zDir
-            rpt -= 1
-            if rpt <= 1:
-                xPos += xDir
-            if rpt == 0:
-                break
-    elif cmd == ct.PCMD_SET_DIR:		# 7
-        xDir = 1 if (rpt & ct.PCMD_X_NEG) == 0 else -1
-        zDir = 1 if (rpt & ct.PCMD_Z_NEG) == 0 else -1
-        return None
+                rpt -= 1
+                if rpt == 0:
+                    break
+        elif c == ct.PEXT_INCX2_INCZ:		# 3
+            steps += rpt
+            while True:
+                mvTrace.append((xPos, zPos))
+                zPos += zDir
+                rpt -= 1
+                if rpt <= 1:
+                    xPos += xDir
+                if rpt == 0:
+                    break
     return mvTrace
 
 def arcTest():
@@ -90,8 +118,8 @@ def arcTest():
     print("%5d x %5d%s z %5d " % (count, cmdX, x45, cmdZ), end="")
     if trace:
         print("%5d %5d " % mvTrace[0], end="")
-    print("delta %4d %4s xChg %3d zChg %3d rpt %3d cmd %d %2x" % \
-          (delta, str(lastDelta), xChange, zChange, rpt, \
+    print("delta %4s %4s xChg %3d zChg %3d rpt %3d cmd %d %2x" % \
+          (str(delta), str(lastDelta), xChange, zChange, rpt, \
            cmd & ct.PCMD_CMD_MASK, cmd))
 
     if trace:
@@ -101,10 +129,12 @@ def arcTest():
         cmdSave = None
 
     historyLen = len(history)
+    moveLen = len(mvTrace)
+    
     if historyLen > 1:
         for i in range(1, historyLen):
             print("      x %5d  z %5d" % history[i][:2], end="")
-            if (mvTrace is not None) and (len(mvTrace) > 1):
+            if (mvTrace is not None) and (i < moveLen):
                 print(" %5d %5d" % mvTrace[i], end="")
             (delta, lastDelta) = history[i][2:]
             print(" delta %4d %4s" % (delta, str(lastDelta)))
@@ -185,6 +215,57 @@ def polarToRect(center, radius, a):
     z = lrint(cz + radius * cos(a0) * zStepsInch)
     return (x, z)
 
+def makeCommand():
+    global cmd, cmdX, cmdZ, mvTrace, oneByte, rpt, xChange, zChange
+    xChange = abs(x - cmdX)
+    zChange = abs(z - cmdZ)
+
+    extend = False
+    cmd = ct.PCMD_SPARE_0
+    if zChange == 1:
+        rpt = xChange
+        cmd = ct.PCMD_INCX_HLDZ_S1	# 0
+    elif xChange == (zChange + 1):
+        rpt = xChange
+        cmd = ct.PCMD_INCX_HLDZ_SN	# 1
+    elif xChange == 1:
+        rpt = zChange
+        cmd = ct.PCMD_HLDX_S1_INCZ	# 2
+    elif zChange == (xChange + 1):
+        rpt = zChange
+        cmd = ct.PCMD_HLDX_SN_INCZ	# 3
+    elif xChange == 2:
+        extend = True
+        rpt = zChange
+        cmd = ct.PEXT_INCX2_INCZ	# ext 3
+    elif xChange != 0 and zChange == 0:
+        extend = True
+        rpt = xChange
+        cmd = ct.PEXT_INCX		# ext 0
+    elif xChange == 0 and zChange != 0:
+        extend = True
+        rpt = xChange
+        cmd = ct.PEXT_INCZ		# ext 1
+    elif xChange == zChange:
+        extend = True
+        rpt = zChange
+        cmd = ct.PEXT_INCX_INCZ		# ext 2
+
+    if not extend:
+        cmdCount[cmd] += 1
+
+        if rpt < ct.PCMD_RPT_SHORT:
+            oneByte += 1
+            cmd |= rpt << ct.PCMD_RPT_SHIFT
+    else:
+        cmd = ct.PCMD_EXTEND | (cmd << ct.PCMD_RPT_SHIFT)
+
+    mvTrace = move(cmd, rpt)
+
+    arcTest()
+    cmdX = x
+    cmdZ = z
+    
 xStepsInch = int((200 * 10 * 25.4) / 4) #8192
 zStepsInch = int((200 * 10 * 25.4) / 5) #8192
 
@@ -216,8 +297,9 @@ p1 = polarToRect(center, radius, angle1)
 (x0, z0) = p0
 (x1, z1) = p1
 
-xStep45 = lrint(radius * (sqrt(2) / 2) * xStepsInch)
-zStep45 = lrint(radius * (sqrt(2) / 2) * zStepsInch)
+sinAngle = sin(radians(50))
+xStep45 = lrint(radius * sinAngle * xStepsInch)
+zStep45 = lrint(radius * sinAngle * zStepsInch)
 
 print("xStep45 %d zStep45 %d" % (xStep45, zStep45))
 
@@ -227,13 +309,26 @@ print("xStep45 %d zStep45 %d" % (xStep45, zStep45))
 #     oEnd = octantEnd(x, z)
 #     print("a %3d x %5d z %5d o %d %d" % (a, x, z, oStart, oEnd))
 
-cwDir = True
-
 octStart = octantStart(x0, z0)
 octEnd = octantEnd(x1, z1)
 
-print("p0 (%5d, %5d) o %d p1 (%5d %5d) o %d" % \
-(x0, z0, octStart, x1, z1, octEnd))
+cwDir = False
+if octEnd == octStart:
+    if x1 > x0:
+        cwDir = True
+elif octEnd > octStart:
+    cwDir = True
+else:
+    cwDir = False
+
+if cwDir:
+    pass
+else:
+    if (octStart == 2) and (z0 == 0):
+        octStart = 1
+
+print("p0 (%5d, %5d) o %d p1 (%5d %5d) o %d cwDir %s" % \
+      (x0, z0, octStart, x1, z1, octEnd, cwDir))
 
 lessThan45 = x0 < xStep45
 if x0 < xStep45:
@@ -274,6 +369,7 @@ cmdCount = [0, 0, 0, 0, 0, 0, 0, 0]
 
 updOctant()
 
+# print("x %5d z %5d delta %5s lastDelta %5s" % (x, z, str(delta), str(lastDelta)))
 while True:
     if lessThan45:
         if endCheck:
@@ -286,7 +382,7 @@ while True:
         x45 = " "
         zLast = z
         x = xNext
-        z = (lrint(sqrt(xRadiusSqrd - x * x)) * zStepsInch) // xStepsInch
+        z = lrint((sqrt(xRadiusSqrd - x * x) * zStepsInch) / xStepsInch)
         if octant > 1:
             z = -z
         lastDelta = delta
@@ -306,58 +402,44 @@ while True:
         if z == 0:
             x = xRadius
         else:
-            x = (lrint(sqrt(zRadiusSqrd - z * z)) * xStepsInch) // zStepsInch
+            x = lrint((sqrt(zRadiusSqrd - z * z) * xStepsInch) / zStepsInch)
         lastDelta = delta
         delta = x - xLast
         zNext += inZDir
 
+    # print("x %5d z %5d delta %5d lastDelta %5s" % (x, z, delta, str(lastDelta)))
+    # stdout.flush()
+    # if octant == 1:
+    #     if zNext >= zStep45:
+    #         octant -= 1
+    #         updOctant()
+    # continue
+
     if (lastDelta is not None) and delta != lastDelta:
-        xChange = abs(x - cmdX)
-        zChange = abs(z - cmdZ)
-
-        cmd = ct.PCMD_SPARE_0
-        if zChange == 1:
-            rpt = xChange
-            cmd = ct.PCMD_INCX_HLDZ_S1	# 0
-        elif xChange == (zChange + 1):
-            rpt = xChange
-            cmd = ct.PCMD_INCX_HLDZ_SN	# 1
-        elif xChange == 1:
-            rpt = zChange
-            cmd = ct.PCMD_HLDX_S1_INCZ	# 2
-        elif zChange == (xChange + 1):
-            rpt = zChange
-            cmd = ct.PCMD_HLDX_SN_INCZ	# 3
-        elif xChange == 2:
-            rpt = zChange
-            cmd = ct.PCMD_INCX2_INCZ	# 4
-
-        cmdCount[cmd] += 1
-
-        if rpt < ct.PCMD_RPT_SHORT:
-            oneByte += 1
-            cmd |= rpt << ct.PCMD_RPT_SHIFT
-        mvTrace = move(cmd, rpt)
-
-        arcTest()
+        makeCommand()
             
-        cmdX = x
-        cmdZ = z
         count += 1
         delta = None
+#       x-
+#     \5|6/
+#     4\|/7
+# z- ------- z+
+#     3/|\0  0->3  cw
+#     /2|1\  3->0 ccw
+#       x+
         if cwDir:
-            if octant == 0:
+            if octant == 0:     # inc x calc z
                 if xNext > xStep45:
                     octant += 1
                     updOctant()
                     xLast = x
                     zNext = z + inZDir
                     print("xLast %5d zNext %5d\n" % (xLast, zNext))
-            elif octant == 1:
+            elif octant == 1:   # inc z calc x
                 if zNext <= 0:
                     octant += 1
                     updOctant()
-            elif octant == 2:
+            elif octant == 2:   # inc z calc x
                 if abs(zNext) >= zStep45:
                     octant += 1
                     updOctant()
@@ -367,12 +449,39 @@ while True:
             else:
                 pass
         else:
-            pass
+            if octant == 1:     # inc z calc x
+                if zNext >= zStep45:
+                    octant -= 1
+                    updOctant()
+                    zLast = z
+                    xNext = x + inXDir
+                    print("zLast %5d xNext %5d\n" % (zLast, xNext))
+            elif octant == 2:   # inc z calc X
+                if zNext >= 0:
+                    octant -= 1
+                    updOctant()
+            elif octant == 3:   # inc x calc z
+                if xNext >= xStep45:
+                    octant -= 1
+                    updOctant()
+                    xLast = x
+                    zNext = z + inXDir
+                    print("zLast %5d xNext %5d\n" % (zLast, xNext))
+            else:
+                pass
                 
     history.append((x, z, delta, lastDelta))
 
+makeCommand()
+
 print("%5d x %5d  z %5d %5d %5d" % \
        (count, x, z, xPos, zPos))
+
+if lessThan45:
+    print("<cmdX %5d cmdZ %5d" % (cmdX, cmdZ))
+else:
+    print(">cmdX %5d cmdZ %5d" % (cmdX, cmdZ))
+
 for i in range(len(cmdCount)):
     val = cmdCount[i]
     if val != 0:
