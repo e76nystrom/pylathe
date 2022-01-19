@@ -5909,7 +5909,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if self.xStepsInch != 0.0 else 0.0
         txt = "%7.3f" % xPos
         self.xPos.SetValue(txt)
-        dialPanel.updatePointer((int(xPos * 10000) % 1000) / 10)
+        dialPanel.updatePointer(xPos)
 
     def updateRPM(self, val):
         print(val)
@@ -5945,7 +5945,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xPosition.value = x
                 xLocation = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLocation))
-                dialPanel.updatePointer(xLocation)
+                # dialPanel.updatePointer(xLocation)
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
             if not self.surfaceSpeed.value:
                 self.rpm.SetValue(str(rpm))
@@ -5992,6 +5992,7 @@ class JogPanel(wx.Panel, FormRoutines):
                           (xDROPos, xDroLoc, xDROOffset))
                     stdout.flush()
                 xDroLoc = xDroLoc - xDROOffset
+                dialPanel.updatePointer(xDroLoc)
                 if self.xDroDiam.value:
                     xDroLoc *= 2.0
                 self.xDROPos.SetValue("%0.4f" % (xDroLoc))
@@ -7512,6 +7513,7 @@ class DialPanel(wx.Panel):
         if self.pointerVal != pointerVal:
             self.pointerVal = pointerVal
             self.Refresh()
+            # self.Update()
         
     def OnResize(self, event):
         self.bmp = None
