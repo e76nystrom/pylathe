@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python37/Python.exe
+#!/cygdrive/c/Python39/Python.exe
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
@@ -43,6 +43,9 @@ import syncCmdDef as sc
 import syncParmDef as sp
 from configInfo import ConfigInfo, InfoValue
 from sync import Sync
+
+import cairo
+import wx.lib.wxcairo as wxcairo
 
 DBG_DIR = os.path.join(os.getcwd(), "dbg")
 DXF_DIR = os.path.join(os.getcwd(), "dxf")
@@ -173,6 +176,9 @@ moveCommands = None
 buttonRepeat = None
 jogPanel = None
 jogShuttle = None
+
+dialFrame = None
+dialPanel = None
 
 spindleDataSent = False
 zDataSent = False
@@ -5899,9 +5905,11 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
-        txt = "%7.3f" % (float(val) / self.xStepsInch) \
-              if self.xStepsInch != 0.0 else '0.000'
+        xPos = (float(val) / self.xStepsInch) \
+            if self.xStepsInch != 0.0 else 0.0
+        txt = "%7.3f" % xPos
         self.xPos.SetValue(txt)
+        dialPanel.updatePointer((int(xPos * 10000) % 1000) / 10)
 
     def updateRPM(self, val):
         print(val)
@@ -5937,6 +5945,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 self.xPosition.value = x
                 xLocation = float(x) / self.xStepsInch - xHomeOffset
                 self.xPos.SetValue("%0.4f" % (xLocation))
+                dialPanel.updatePointer(xLocation)
                 self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
             if not self.surfaceSpeed.value:
                 self.rpm.SetValue(str(rpm))
@@ -7449,6 +7458,7 @@ class UpdateThread(Thread):
 #             print("key down")
 #         event.Skip()
 
+
 EVT_RESIZE_ID = wx.Window.NewControlId()
 
 class ResizeEvent(wx.PyEvent):
@@ -7470,6 +7480,218 @@ class Delay(Thread):
         wx.PostEvent(self.frame, ResizeEvent())
         print("Delay done")
         stdout.flush()
+
+class DialFrame(wx.Frame):
+    def __init__(self, title, parent=None):
+        wx.Frame.__init__(self, parent=parent, title=title)
+
+        self.pointerVal = 0
+        
+        self.SetSize(wx.Size(512, 512))
+        
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+        self.dialPanel = panel = DialPanel(self)
+        global dialPanel
+        dialPanel = panel
+        panel.SetAutoLayout(True)
+        panel.SetSizer(sizerV)
+        sizerV.Fit(panel)
+        self.Show()
+
+class DialPanel(wx.Panel):
+    def __init__(self, parent, *args, **kwargs):
+        super(DialPanel, self).__init__(parent, *args, **kwargs)
+
+        self.pointerVal = 0
+        self.Bind(wx.EVT_SIZE, self.OnResize)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.bmp = None
+
+    def updatePointer(self, val):
+        pointerVal = (int(val * 10000) % 1000) / 10
+        if self.pointerVal != pointerVal:
+            self.pointerVal = pointerVal
+            self.Refresh()
+        
+    def OnResize(self, event):
+        self.bmp = None
+        self.Refresh()
+        self.Layout()
+
+    def OnPaint(self, e):
+        dc = wx.PaintDC(self)
+        dc.SetMapMode(wx.MM_TEXT)
+        brush = wx.Brush("white")
+        dc.SetBackground(brush)
+        dc.Clear()
+        self.render(dc)
+
+    def render(self, dc):
+
+        sz = self.GetSize()
+
+        size = self.GetSize()
+        # print("width %3d height %3d" % (size.x, size.y))
+        # stdout.flush()
+ 
+        WIDTH, HEIGHT = size.x, size.y
+
+        r = 0.5
+        self.r = r
+        if self.bmp is None:
+            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
+            ctx = cairo.Context(surface)
+
+            # ctx = wxcairo.ContextFromDC(dc)
+
+            s = min(size.x, size.y)
+            self.scale = s
+            ctx.scale(s, s)         # Normalizing the canvas
+
+            ctx.set_font_size(0.05)
+            ctx.select_font_face("Arial",
+                                 cairo.FONT_SLANT_NORMAL,
+                                 cairo.FONT_WEIGHT_NORMAL)
+
+            r0 = 0.9 * r
+            rc = 0.99 * r
+            ctx.translate(r, r)  # Changing the current transformation matrix
+
+            ctx.move_to(rc, 0)
+
+            ctx.arc(0.0, 0.0, rc, 0.0, 2*pi)
+
+            for i in range(100):
+                a = radians((i / 100) * 360) - pi/2
+                if i % 10 == 0:
+                    r0 = 0.8 * r
+                    label = True
+                else:
+                    rem = i % 5
+                    if rem == 0:
+                        r0 = 0.85 * r
+                    # elif (rem == 2) or (rem == 3):
+                    #     r0 = 0.85 * r
+                    else:
+                        r0 = 0.9 * r
+                x0 = r0 * cos(a)
+                y0 = r0 * sin(a)
+                x1 = rc * cos(a)
+                y1 = rc * sin(a)
+                # print(i, x0, y0, x1, y1)
+                ctx.move_to(x0, y0)
+                ctx.line_to(x1, y1)
+                if label:
+                    txt = str(i)
+                    extents = ctx.text_extents(txt)
+                    r1 = r0 - 0.01
+                    x0 = r1 * cos(a)
+                    y0 = r1 * sin(a)
+                    xOffset = 0
+                    yOffset = 0
+                    if i == 0:
+                        xOffset = -extents.x_advance / 2
+                        yOffset = extents.height
+                    elif i == 10:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height *.75
+                    elif i == 20:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height / 2
+                    elif i == 30:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height / 2
+                    elif i == 40:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height *.25
+                    elif i == 50:
+                        xOffset = -extents.x_advance / 2
+                    elif i == 60:
+                        yOffset = extents.height * .25
+                    elif i == 70:
+                        yOffset = extents.height / 2
+                    elif i == 80:
+                        yOffset = extents.height / 2
+                    elif i == 90:
+                        yOffset = extents.height *.75
+                    ctx.move_to(x0 + xOffset, y0 + yOffset)
+                    ctx.show_text(str(i))
+                    label = False
+
+            ctx.set_source_rgb(0.3, 0.2, 0.5)  # Solid color
+            ctx.set_line_width(0.002)
+            ctx.stroke()
+
+            ctx.arc(0, 0, 0.05 * r, 0, 2 * pi)
+            ctx.fill()
+
+            self.bmp = wxcairo.BitmapFromImageSurface(surface)
+
+        dc.DrawBitmap(self.bmp, 0, 0)
+  
+        # # Arc(cx, cy, radius, start_angle, stop_angle)
+        # ctx.arc(0.2, 0.1, 0.1, -math.pi / 2, 0)
+        # ctx.line_to(0.5, 0.1)  # Line to (x,y)
+        # # Curve(x1, y1, x2, y2, x3, y3)
+        # ctx.curve_to(0.5, 0.2, 0.5, 0.4, 0.2, 0.8)
+        # ctx.close_path()
+
+        if False:
+            ctx = wxcairo.ContextFromDC(dc)
+
+            s = min(size.x, size.y)
+            ctx.scale(s, s)         # Normalizing the canvas
+            ctx.translate(r, r)	# Changing the current transformation matrix
+
+            # ctx.arc(0, 0, 0.05 * r, 0, 2 * pi)
+            # ctx.fill()
+
+            ctx.move_to(0, 0)
+            ctx.line_to(0.75 * r, 0)
+
+            ctx.set_source_rgb(1.0, 0.0, 0.0)
+            ctx.set_line_width(0.01)
+            ctx.stroke()
+
+            ctx.move_to(0.75 * r, 0)
+            ctx.line_to(0.95 * r, 0)
+
+            ctx.set_source_rgb(1.0, 0.0, 0.0)
+            ctx.set_line_width(0.002)
+            ctx.stroke()
+
+        self.drawPointer(dc)
+
+    def drawPointer(self, dc):
+        ctx = wxcairo.ContextFromDC(dc)
+
+        s = self.scale
+        r = self.r
+        
+        ctx.scale(s, s)         # Normalizing the canvas
+        ctx.translate(r, r)	# Changing the current transformation matrix
+
+        r0 = 0.70 * r
+        r1 = 0.95 * r
+        a = radians((self.pointerVal / 100) * 360) - pi/2
+
+        x0 = r0 * cos(a)
+        y0 = r0 * sin(a)
+        ctx.move_to(0, 0)
+        ctx.line_to(x0, y0)
+
+        ctx.set_source_rgb(1.0, 0.0, 0.0)
+        ctx.set_line_width(0.01)
+        ctx.stroke()
+       
+        x1 = r1 * cos(a)
+        y1 = r1 * sin(a)
+        ctx.move_to(x0, y0)
+        ctx.line_to(x1, y1)
+        
+        ctx.set_source_rgb(1.0, 0.0, 0.0)
+        ctx.set_line_width(0.002)
+        ctx.stroke()
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
@@ -7505,6 +7727,8 @@ class MainFrame(wx.Frame):
 
         self.menuSetup()
         self.initUI()
+        self.dialFrame = DialFrame("Dial Frame")
+        dialFrame = self.dialFrame
 
         global updateThread
         self.updateThread = updateThread = UpdateThread(self.jogPanel)
@@ -7562,6 +7786,7 @@ class MainFrame(wx.Frame):
             comm.rpi.close()
         if keypad is not None:
             keypad.close()
+        self.dialFrame.Destroy()
         self.Destroy()
 
     def menuSetup(self):
