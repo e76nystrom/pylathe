@@ -4391,6 +4391,8 @@ class ScrewThread(LatheOp, UpdatePass):
 
         if not self.alternate:
             self.zOffset = -feed * self.tanAngle
+            jogPanel.dPrt("startZ %7.4f zOffset %7.4f\n" % \
+                          (self.startZ, self.zOffset))
         else:
             offset = passFeed * self.tanAngle
             if (self.passCount & 1) == 0:
@@ -4473,8 +4475,8 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
             m.quePause(flag)
-            if addPass:
-                m.moveZOffset()
+            # if addPass:
+            #     m.moveZOffset()
 
         if DRO:
             m.saveXDro()
@@ -7254,7 +7256,7 @@ class UpdateThread(Thread):
                 self.baseTime = time()
             return("strt " + timeStr())
         elif val == ct.PARM_DONE:
-            return("done\n")
+            return("done " + timeStr())
 
     def dbgTest(self, val):
         return("test %d" % (val))
