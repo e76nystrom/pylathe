@@ -1356,11 +1356,11 @@ def sendSpindleData(send=False, rpm=None):
                 print(R_PI)
                 if not R_PI:
                     cfgReg = 0
-                    if cfg.getBoolInfoData(cf.cfgInvEncDir):
+                    if bool(cfg.getBoolInfoData(cf.cfgInvEncDir)):
                         cfgReg |= xb.ENC_POL
-                    if cfg.getBoolInfoData(cf.zInvDir):
+                    if bool(cfg.getBoolInfoData(cf.zInvDir)):
                         cfgReg |= xb.ZDIR_POL
-                    if cfg.getBoolInfoData(cf.xInvDir):
+                    if bool(cfg.getBoolInfoData(cf.xInvDir)):
                         cfgReg |= xb.XDIR_POL
                     queParm(pm.X_CFG_REG, cfgReg)
                 else:
@@ -1495,7 +1495,7 @@ def sendZData(send=False):
             comm.queParm(pm.Z_HOME_DIST_BACKOFF, \
                          cfg.getInfoData(cf.zHomeDistBackoff))
             comm.queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
-            comm.queParm(pm.Z_HOME_DIR, 1 if cfg.getBoolInfoData(cf.zHomeDir) \
+            comm.queParm(pm.Z_HOME_DIR, 1 if bool(cfg.getBoolInfoData(cf.zHomeDir)) \
                          else -1)
 
             comm.command(cm.CMD_ZSETUP)
@@ -1600,7 +1600,7 @@ def sendXData(send=False):
             comm.queParm(pm.X_HOME_DIST_BACKOFF, \
                          cfg.getInfoData(cf.xHomeDistBackoff))
             comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-            comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
+            comm.queParm(pm.X_HOME_DIR, 1 if bool(cfg.getBoolInfoData(cf.xHomeDir)) \
                          else -1)
 
             if HOME_TEST:
@@ -1840,7 +1840,7 @@ class Turn(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             self.m.draw("turn", self.zStart, self.zEnd)
 
         jogPanel.dPrt("\nturn runOperation\n")
@@ -2168,12 +2168,12 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
+            if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
                 updateThread.openDebug()
 
     def OnManualStart(self, e):
         self.sendData()
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
+        if bool(fg.getBoolInfoData(cf.cfgDbgSave)):
             updateThread.openDebug()
         self.control.manualOperation()
 
@@ -2455,7 +2455,7 @@ class Arc(LatheOp, UpdatePass):
         self.safeX = self.materialRadius + toolRadius + self.retract # ***
         self.safeZ = self.startZ + toolRadius + self.zRetract # ***
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             self.m.draw("arc", self.zStart, self.zEnd)
 
         if self.arc and True:
@@ -2964,7 +2964,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
+            if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
                 updateThread.openDebug()
 
     def addAction(self):
@@ -3028,7 +3028,7 @@ class Face(LatheOp, UpdatePass):
         self.safeZ = self.zStart + self.zRetract
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             m.draw("face", self.xStart, self.xEnd)
             m.setTextAngle(90)
 
@@ -3247,7 +3247,7 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
             if jogPanel.mvStatus & ct.MV_READ_Z:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
+            if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
                 updateThread.openDebug()
 
     def addAction(self):
@@ -3296,7 +3296,7 @@ class Cutoff(LatheOp):
 
         self.passSize[0] = self.cutoffZ
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             m.draw("cutoff", self.xStart, self.zStart)
 
         jogPanel.dPrt("\ncutoff runOperation\n")
@@ -3428,7 +3428,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
     def startAction(self):
         comm.command(cm.CMD_RESUME)
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
+        if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
             updateThread.openDebug()
 
 class Taper(LatheOp, UpdatePass):
@@ -3592,7 +3592,7 @@ class Taper(LatheOp, UpdatePass):
               (self.passes, self.cutAmount, self.actualFeed))
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             m.draw("taper", self.zStart, self.taper)
 
         jogPanel.dPrt("\ntaper nexternalRunOperation\n")
@@ -3730,7 +3730,7 @@ class Taper(LatheOp, UpdatePass):
         self.safeZ = self.zStart + self.zRetract
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             m.draw("taper", self.zStart, self.taper)
 
         jogPanel.dPrt("\ntaper internalRunOperation\n")
@@ -4054,7 +4054,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
+            if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
                 updateThread.openDebug()
 
     def addAction(self):
@@ -4350,7 +4350,7 @@ class ScrewThread(LatheOp, UpdatePass):
         #     self.draw(self.xStart * 2.0, self.tpi)
         #     self.p0 = (0, 0)
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if bool(cfg.getBoolInfoData(cf.cfgDraw)):
             self.m.draw("threada", self.xStart * 2.0, self.tpi)
 
         jogPanel.dPrt("\nthread runOperation\n")
@@ -4713,7 +4713,9 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             if jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
+            if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
+                print("openDebug")
+                stdout.flush()
                 updateThread.openDebug()
 
     def addAction(self):
@@ -5869,7 +5871,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def axisTest(self, inc=0.025, passes=10, retract=None, \
               pause=True, axis=AXIS_X):
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
+        if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
             updateThread.openDebug("dbg_%s.txt" % \
                                    ("x" if axis == AXIS_X else "z"))
         if retract is not None:
@@ -6166,7 +6168,7 @@ class JogPanel(wx.Panel, FormRoutines):
         return(mainFrame.panels[panel])
 
     def clrActive(self):
-        updateThread.closeDbg()
+        # updateThread.closeDbg()
         panel = self.currentPanel
         panel.active = False
         if not panel.manualMode:
@@ -7305,8 +7307,13 @@ class UpdateThread(Thread):
 
     def dbgXPDro(self, val):
         tmp = float(val) / jogPanel.xDROInch - xDROOffset
-        s = "pass %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
-            (self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
+        spring = (self.passVal & 0xf00) >> 8
+        if spring == 0:
+            spring = "  "
+        else:
+            spring = "s" + str(spring)
+        s = "pass %s %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
+            (spring, self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)
         return("xpdro " + s)
 
@@ -7385,8 +7392,13 @@ class UpdateThread(Thread):
 
     def dbgZPDro(self, val):
         tmp = float(val) / jogPanel.zDROInch - zDROOffset
-        s = "pass %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
-            (self.passVal, tmp, self.zLoc, self.zLoc - tmp)
+        spring = (self.passVal & 0xf00) >> 8
+        if spring == 0:
+            spring = "  "
+        else:
+            spring = "s" + str(spring)
+        s = "pass %s %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
+            (spring, self.passVal, tmp, self.zLoc, self.zLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)
         return("zpdro " + s)
 
