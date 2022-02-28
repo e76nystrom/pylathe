@@ -7307,13 +7307,15 @@ class UpdateThread(Thread):
 
     def dbgXPDro(self, val):
         tmp = float(val) / jogPanel.xDROInch - xDROOffset
-        spring = (self.passVal & 0xf00) >> 8
+        passVal = self.passVal
+        spring = (passVal & 0xf00) >> 8
+        passVal &= 0xff
         if spring == 0:
             spring = "  "
         else:
             spring = "s" + str(spring)
         s = "pass %s %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
-            (spring, self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
+            (spring, passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)
         return("xpdro " + s)
 
@@ -7392,13 +7394,15 @@ class UpdateThread(Thread):
 
     def dbgZPDro(self, val):
         tmp = float(val) / jogPanel.zDROInch - zDROOffset
-        spring = (self.passVal & 0xf00) >> 8
+        passVal = self.passVal
+        spring = (passVal & 0xf00) >> 8
+        passVal &= 0xff
         if spring == 0:
             spring = "  "
         else:
             spring = "s" + str(spring)
         s = "pass %s %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
-            (spring, self.passVal, tmp, self.zLoc, self.zLoc - tmp)
+            (spring, passVal, tmp, self.zLoc, self.zLoc - tmp)
         jogPanel.dPrt(s + "\n", flush=True)
         return("zpdro " + s)
 
