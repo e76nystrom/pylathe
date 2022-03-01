@@ -6169,6 +6169,8 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def clrActive(self):
         # updateThread.closeDbg()
+        updateThread.baseTime = None
+        print("***clear baseTime***")
         panel = self.currentPanel
         panel.active = False
         if not panel.manualMode:
@@ -7179,6 +7181,7 @@ class UpdateThread(Thread):
                 try:
                     cmd = int(cmd, 16)
                     val = int(val, 16)
+                    # print("c %2x val %4x" % (cmd, val))
                     try:
                         action = self.dbgTbl[cmd]
                         output = action(val)
@@ -7380,8 +7383,17 @@ class UpdateThread(Thread):
             return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
-        return(("z_st %s" % (en.axisStatesList[val])) + \
-                ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
+        if jogPanel.currentPanel.active:
+            return(("z_st %s" % (en.axisStatesList[val])) + \
+                   ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
+        else:
+            rtnVal = "z_st %s" % (en.axisStatesList[val])
+            if val == en.AXIS_IDLE:
+                self.baseTime = None
+                rtnVal += "\n"
+            elif self.baseTime is None:
+                self.baseTime = time()
+            return(rtnVal)
 
     def dbgZBSteps(self, val):
         tmp = float(val) / jogPanel.zStepsInch
@@ -7752,6 +7764,10 @@ class MainFrame(wx.Frame):
 
         global updateThread
         self.updateThread = updateThread = UpdateThread(self.jogPanel)
+
+        if bool(cfg.getBoolInfoData(cf.cfgDbgSave)):
+            print("***start saving debug***")
+            updateThread.openDebug()
 
         global jogShuttle
         self.jogShuttle = jogShuttle = JogShuttle()
