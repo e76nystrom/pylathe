@@ -5045,6 +5045,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt = buttonRepeat = ButtonRepeat()
         self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
+        self.retractXDialog = None
+        self.retractZDialog = None
         self.probeLoc = 0.0
         self.probeStatus = 0
         self.mvStatus = 0
@@ -5355,7 +5357,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.placeHolder(sizerG, 1)
 
-        self.addButton(sizerG, 'P', self.OnZPark, style=wx.BU_EXACTFIT, \
+        self.addButton(sizerG, 'R', self.OnZRetract, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
         self.placeHolder(sizerG, 1)
@@ -5364,7 +5366,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.addBitmapButton(sizerG, "south.gif", self.OnXPosDown,
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
-        self.addButton(sizerG, 'P', self.OnXPark, style=wx.BU_EXACTFIT, \
+        self.addButton(sizerG, 'R', self.OnXRetract, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag|wx.ALIGN_CENTER_HORIZONTAL)
 
         sizerH.Add(sizerG)
@@ -5474,8 +5476,8 @@ class JogPanel(wx.Panel, FormRoutines):
         comm.command(cm.ZMOVEABS)
         self.combo.SetFocus()
 
-    def OnZPark(self, e):
-        comm.queParm(pm.Z_MOVE_POS, cfg.getFloatInfoData(cf.zParkLoc))
+    def OnZRetract(self, e):
+        comm.queParm(pm.Z_MOVE_POS, cfg.getFloatInfoData(cf.zRetractLoc))
         comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
         comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
         comm.command(cm.ZMOVEABS)
@@ -5490,8 +5492,8 @@ class JogPanel(wx.Panel, FormRoutines):
         comm.command(cm.XMOVEABS)
         self.combo.SetFocus()
 
-    def OnXPark(self, e):
-        comm.queParm(pm.X_MOVE_POS, cfg.getFloatInfoData(cf.xParkLoc))
+    def OnXRetract(self, e):
+        comm.queParm(pm.X_MOVE_POS, cfg.getFloatInfoData(cf.xRetractLoc))
         comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
         comm.queParm(pm.X_FLAG, ct.CMD_MAX)
         comm.command(cm.XMOVEABS)
@@ -6487,6 +6489,10 @@ class PosMenu(wx.Menu):
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
 
+        item = wx.MenuItem(self, wx.Window.NewControlId(), "Retract")
+        self.Append(item)
+        self.Bind(wx.EVT_MENU, self.OnRetract, item)
+
     def getPosCtl(self):
         ctl = self.jP.zPos if self.axis == AXIS_Z else \
               self.jP.xPos
@@ -6610,6 +6616,20 @@ class PosMenu(wx.Menu):
         else:
             self.jP.setXFromExt()
         self.jP.focus()
+
+    def OnRetract(self, e):
+        jp = self.jP
+        if self.axis == AXIS_Z:
+            dialog = jp.retractZDialog
+            if dialog is None:
+                jp.retractZDialog = dialog = RetractDialog(self.jP, self.axis)
+        else:
+            dialog = jp.retractXDialog
+            if dialog is None:
+                jp.retractXDialog = dialog = RetractDialog(self.jP, self.axis)
+        dialog.SetPosition(self.getPosCtl())
+        dialog.Raise()
+        dialog.Show(True)
 
 class SetPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPnl, axis):
@@ -6913,6 +6933,70 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         self.Show(False)
         jogPanel.focus()
+
+class RetractDialog(wx.Dialog, FormRoutines):
+    def __init__(self, jogPnl, axis):
+        FormRoutines.__init__(self, False)
+        self.axis = axis
+        pos = (10, 10)
+        title = "Retract %s" % ('Z Position' if axis == AXIS_Z else 'X Diameter')
+        wx.Dialog.__init__(self, jogPnl, -1, title, pos, \
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        self.pos = \
+            self.addDialogField(sizerV, tcDefault="0.000", \
+                tcFont=jogPnl.posFont, size=(120,-1), action=self.OnKeyChar)
+
+        self.addButton(sizerV, 'Ok', self.OnOk, border=10)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, e):
+        if done:
+            return
+        if self.IsShown():
+            val = cfg.getFloatInfoData(cf.zRetractLoc) if self.axis == AXIS_Z else \
+                cfg.getFloatInfoData(cf.xRetractLoc)
+            try:
+                val = float(val)
+            except ValueError:
+                val = 0.0
+            if self.axis == AXIS_X:
+                val *= 2.0
+            self.pos.SetValue("%0.4f" % (val))
+            self.pos.SetSelection(-1, -1)
+
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnOk(None)
+        e.Skip()
+
+    def OnOk(self, e):
+        try:
+            loc = float(self.pos.GetValue())
+            m = moveCommands
+            m.queClear()
+            comm.command(cm.CMD_PAUSE)
+            comm.command(cm.CLEARQUE)
+            if self.axis == AXIS_Z:
+                sendZData()
+                m.saveZOffset()
+                m.moveZ(loc, ct.CMD_JOG)
+            else:
+                sendXData()
+                m.saveXOffset()
+                m.moveX(loc / 2.0, ct.CMD_JOG)
+            comm.command(cm.CMD_RESUME)
+            self.Show(False)
+            jogPanel.focus()
+        except ValueError:
+            print("ValueError on retract")
+            stdout.flush()
 
 class RpmMenu(wx.Menu):
     def __init__(self, jP):
@@ -8508,7 +8592,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bInvert Dir", cf.zInvDir, None), \
             ("bInvert MPG", cf.zInvMpg, None), \
 
-            ("Park Loc", cf.zParkLoc, 'f'), \
+            ("Retract Loc", cf.zRetractLoc, 'f'), \
             ("Probe Dist", cf.zProbeDist, 'f'), \
             ("Home/Probe Speed", cf.zHomeSpeed, 'fs'), \
 
@@ -8592,7 +8676,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bInvert Dir", cf.xInvDir, None), \
             ("bInvert MPG", cf.xInvMpg, None), \
 
-            ("Park Loc", cf.xParkLoc, 'f'), \
+            ("Retract Loc", cf.xRetractLoc, 'f'), \
             ("Probe Dist", cf.xProbeDist, 'f'), \
             ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
 

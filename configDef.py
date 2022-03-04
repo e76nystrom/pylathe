@@ -283,7 +283,7 @@ xMicroSteps      = 226          # x axis
 xMinSpeed        = 227          # x axis 
 xMotorRatio      = 228          # x axis 
 xMotorSteps      = 229          # x axis 
-xParkLoc         = 230          # x axis 
+xRetractLoc      = 230          # x axis 
 xPitch           = 231          # x axis 
 xProbeDist       = 232          # x axis 
 
@@ -330,7 +330,7 @@ zMicroSteps      = 267          # z axis
 zMinSpeed        = 268          # z axis 
 zMotorRatio      = 269          # z axis 
 zMotorSteps      = 270          # z axis 
-zParkLoc         = 271          # z axis 
+zRetractLoc      = 271          # z axis 
 zPitch           = 272          # z axis 
 zProbeDist       = 273          # z axis 
 zProbeSpeed      = 274          # z axis 
@@ -574,7 +574,7 @@ config = { \
     'xMinSpeed' : 227,
     'xMotorRatio' : 228,
     'xMotorSteps' : 229,
-    'xParkLoc' : 230,
+    'xRetractLoc' : 230,
     'xPitch' : 231,
     'xProbeDist' : 232,
     'xSvPosition' : 233,
@@ -615,7 +615,7 @@ config = { \
     'zMinSpeed' : 268,
     'zMotorRatio' : 269,
     'zMotorSteps' : 270,
-    'zParkLoc' : 271,
+    'zRetractLoc' : 271,
     'zPitch' : 272,
     'zProbeDist' : 273,
     'zProbeSpeed' : 274,
@@ -857,7 +857,7 @@ configTable = ( \
     'xMinSpeed',
     'xMotorRatio',
     'xMotorSteps',
-    'xParkLoc',
+    'xRetractLoc',
     'xPitch',
     'xProbeDist',
     'xSvPosition',
@@ -898,7 +898,7 @@ configTable = ( \
     'zMinSpeed',
     'zMotorRatio',
     'zMotorSteps',
-    'zParkLoc',
+    'zRetractLoc',
     'zPitch',
     'zProbeDist',
     'zProbeSpeed',
