@@ -288,7 +288,7 @@ configList = \
     ('xMinSpeed', 'x axis '),
     ('xMotorRatio', 'x axis '),
     ('xMotorSteps', 'x axis '),
-    ('xParkLoc', 'x axis '),
+    ('xRetractLoc', 'x axis '),
     ('xPitch', 'x axis '),
     ('xProbeDist', 'x axis '),
 
@@ -335,7 +335,7 @@ configList = \
     ('zMinSpeed', 'z axis '),
     ('zMotorRatio', 'z axis '),
     ('zMotorSteps', 'z axis '),
-    ('zParkLoc', 'z axis '),
+    ('zRetractLoc', 'z axis '),
     ('zPitch', 'z axis '),
     ('zProbeDist', 'z axis '),
     ('zProbeSpeed', 'z axis '),

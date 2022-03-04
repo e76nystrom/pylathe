@@ -15,11 +15,11 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterArguments>
     </InterpreterArguments>
-    <CommandLineArguments>--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt</CommandLineArguments>
+    <CommandLineArguments>--xhomed cfg/config.txt -p cfg/posInfo.txt</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>
-    <InterpreterId>Global|VisualStudio|Python37</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -53,8 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.9" />
-    <InterpreterReference Include="Global|VisualStudio|Python37" />
-    <InterpreterReference Include="Global|VisualStudio|Python39" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>
