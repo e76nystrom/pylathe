@@ -8272,7 +8272,7 @@ class MainFrame(wx.Frame):
                         comm.queParm(pm.Z_DRO_LOC, zDROPosition)
                         zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
                         comm.queParm(pm.Z_DRO_OFFSET, \
-                                     round(zDROOffset, jogPanel.zDROInch))
+                                     round(zDROOffset * jogPanel.zDROInch))
                         print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
                               (zDROPosition, zDROPosition, \
                                float(zDROPosition) / jogPanel.zDROInch, \
