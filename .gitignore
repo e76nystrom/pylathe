@@ -1,5 +1,6 @@
 
 *#
+*.AD_PRT
 *.bak
 *.db
 *.dxf
@@ -11,7 +12,6 @@
 *.lst
 *.opendb
 *.orig
-*.png
 *.pyc
 *.pyd
 *.save*

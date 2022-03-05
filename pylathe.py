@@ -774,6 +774,7 @@ class ActionRoutines():
             jogPanel.setStatus(st.STR_OP_IN_PROGRESS)
         else:
             jogPanel.setStatus(st.STR_CLR)
+            jogPanel.clrRetract()
             try:
                 curPass = comm.getParm(pm.CURRENT_PASS)
                 if curPass >= self.control.passes:
@@ -5047,6 +5048,8 @@ class JogPanel(wx.Panel, FormRoutines):
         self.fixXPosDialog = None
         self.retractXDialog = None
         self.retractZDialog = None
+        self.xReturnLoc = None
+        self.zReturnLoc = None
         self.probeLoc = 0.0
         self.probeStatus = 0
         self.mvStatus = 0
@@ -5315,7 +5318,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.placeHolder(sizerG, 3)
 
         self.xNegButton = \
-            self.addBitmapButton(sizerG, "north.gif", self.OnXNegDown, \
+            self.addBitmapButton(sizerG, "north.png", self.OnXNegDown, \
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
         self.placeHolder(sizerG, 1)
@@ -5323,14 +5326,14 @@ class JogPanel(wx.Panel, FormRoutines):
         # second row
 
         self.zNegButton = \
-            self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
+            self.addBitmapButton(sizerG, "west.png", self.OnZNegDown, \
                                  self.OnZUp, flag=sFlag)
 
         self.addButton(sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
         self.zPosButton = \
-            self.addBitmapButton(sizerG, "east.gif", self.OnZPosDown, \
+            self.addBitmapButton(sizerG, "east.png", self.OnZPosDown, \
                                  self.OnZUp, flag=sFlag)
 
         self.addButton(sizerG, 'S', self.OnXSafe, style=wx.BU_EXACTFIT, \
@@ -5357,17 +5360,19 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.placeHolder(sizerG, 1)
 
-        self.addButton(sizerG, 'R', self.OnZRetract, style=wx.BU_EXACTFIT, \
-                       size=btnSize, flag=sFlag)
+        self.zButton = \
+            self.addBitmapButton(sizerG, "eastG.png", self.OnZRetract, \
+                                 None,  flag=sFlag|wx.EXPAND)
 
         self.placeHolder(sizerG, 1)
 
         self.xPosButton = \
-            self.addBitmapButton(sizerG, "south.gif", self.OnXPosDown,
+            self.addBitmapButton(sizerG, "south.png", self.OnXPosDown,
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
-        self.addButton(sizerG, 'R', self.OnXRetract, style=wx.BU_EXACTFIT, \
-                       size=btnSize, flag=sFlag|wx.ALIGN_CENTER_HORIZONTAL)
+        self.xButton = \
+            self.addBitmapButton(sizerG, "southG.png", self.OnXRetract, \
+                                 None,  flag=sFlag|wx.EXPAND)
 
         sizerH.Add(sizerG)
 
@@ -5468,35 +5473,61 @@ class JogPanel(wx.Panel, FormRoutines):
         return(val)
 
     def OnZSafe(self, e):
-        panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
-        comm.queParm(pm.Z_MOVE_POS, z)
-        comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
-        comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
-        comm.command(cm.ZMOVEABS)
+        if self.addEna:
+            panel = self.getPanel()
+            (z, x) = panel.getSafeLoc()
+            comm.queParm(pm.Z_MOVE_POS, z)
+            comm.queParm(pm.Z_HOME_OFFSET, \
+                         round(zHomeOffset * jogPanel.zStepsInch))
+            comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
+            comm.command(cm.ZMOVEABS)
         self.combo.SetFocus()
 
     def OnZRetract(self, e):
-        comm.queParm(pm.Z_MOVE_POS, cfg.getFloatInfoData(cf.zRetractLoc))
-        comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
-        comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
-        comm.command(cm.ZMOVEABS)
+        if self.addEna:
+            if self.zReturnLoc is None:
+                loc = cfg.getFloatInfoData(cf.zRetractLoc)
+                bitmap = "westR.png"
+                self.zReturnLoc = self.zPos.GetValue()
+            else:
+                loc = self.zReturnLoc
+                bitmap = "eastG.png"
+                self.zReturnLoc = None
+            self.zButton.SetBitmap(wx.Bitmap(bitmap))
+            comm.queParm(pm.Z_MOVE_POS, loc)
+            comm.queParm(pm.Z_HOME_OFFSET, \
+                         round(zHomeOffset * jogPanel.zStepsInch))
+            comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
+            comm.command(cm.ZMOVEABS)
         self.combo.SetFocus()
 
     def OnXSafe(self, e):
-        panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
-        comm.queParm(pm.X_MOVE_POS, x)
-        comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
-        comm.queParm(pm.X_FLAG, ct.CMD_MAX)
-        comm.command(cm.XMOVEABS)
+        if self.addEna:
+            panel = self.getPanel()
+            (z, x) = panel.getSafeLoc()
+            comm.queParm(pm.X_MOVE_POS, x)
+            comm.queParm(pm.X_HOME_OFFSET, \
+                         round(xHomeOffset * jogPanel.xStepsInch))
+            comm.queParm(pm.X_FLAG, ct.CMD_MAX)
+            comm.command(cm.XMOVEABS)
         self.combo.SetFocus()
 
     def OnXRetract(self, e):
-        comm.queParm(pm.X_MOVE_POS, cfg.getFloatInfoData(cf.xRetractLoc))
-        comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
-        comm.queParm(pm.X_FLAG, ct.CMD_MAX)
-        comm.command(cm.XMOVEABS)
+        if self.addEna:
+            if self.xReturnLoc is None:
+                loc = cfg.getFloatInfoData(cf.xRetractLoc)
+                bitmap = "northR.png"
+                self.xReturnLoc = self.xPos.GetValue()
+            else:
+                loc = self.xReturnLoc
+                bitmap = "southG.png"
+                self.xReturnLoc = None
+            self.xButton.SetBitmap(wx.Bitmap(bitmap))
+            comm.queParm(pm.X_MOVE_POS, loc)
+            comm.queParm(pm.X_HOME_OFFSET, \
+                         round(xHomeOffset * jogPanel.xStepsInch))
+            comm.queParm(pm.X_FLAG, ct.CMD_MAX)
+            comm.command(cm.XMOVEABS)
         self.combo.SetFocus()
 
     def zJogCmd(self, code, val):
@@ -6169,6 +6200,12 @@ class JogPanel(wx.Panel, FormRoutines):
         panel = cfg.getInfoData(cf.mainPanel)
         return(mainFrame.panels[panel])
 
+    def clrRetract(self):
+        self.xReturnLoc = None
+        self.zReturnLoc = None
+        self.xButton.SetBitmap(wx.Bitmap("southG.png"))
+        self.zButton.SetBitmap(wx.Bitmap("eastG.png"))
+
     def clrActive(self):
         # updateThread.closeDbg()
         updateThread.baseTime = None
@@ -6188,6 +6225,7 @@ class JogPanel(wx.Panel, FormRoutines):
         buttonEnable(btn)
         buttonDisable(self.pauseButton)
         buttonDisable(self.measureButton)
+        self.clrRetract()
         self.setStatus(st.STR_CLR)
 
     def OnStartSpindle(self, e):
@@ -6488,10 +6526,14 @@ class PosMenu(wx.Menu):
                 item = wx.MenuItem(self, wx.Window.NewControlId(), "DRO Diam")
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
-
-        item = wx.MenuItem(self, wx.Window.NewControlId(), "Retract")
-        self.Append(item)
-        self.Bind(wx.EVT_MENU, self.OnRetract, item)
+        
+        if jogPanel.addEna:
+            retract = jogPanel.zReturnLoc is None if self.axis == AXIS_Z \
+                else jogPanel.xReturnLoc is None
+            tmp = "Retract" if retract else "Return"
+            item = wx.MenuItem(self, wx.Window.NewControlId(), tmp)
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnRetract, item)
 
     def getPosCtl(self):
         ctl = self.jP.zPos if self.axis == AXIS_Z else \
@@ -6938,8 +6980,9 @@ class RetractDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPnl, axis):
         FormRoutines.__init__(self, False)
         self.axis = axis
+        self.axisVal = 'Z' if axis == AXIS_Z else 'X'
         pos = (10, 10)
-        title = "Retract %s" % ('Z Position' if axis == AXIS_Z else 'X Diameter')
+        title = "Return %s" % self.axisVal
         wx.Dialog.__init__(self, jogPnl, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
@@ -6959,14 +7002,29 @@ class RetractDialog(wx.Dialog, FormRoutines):
         if done:
             return
         if self.IsShown():
-            val = cfg.getFloatInfoData(cf.zRetractLoc) if self.axis == AXIS_Z else \
-                cfg.getFloatInfoData(cf.xRetractLoc)
+            if self.axis == AXIS_Z:
+                self.retract = jogPanel.zReturnLoc is None
+                if self.retract:
+                    val = cfg.getFloatInfoData(cf.zRetractLoc)
+                else:
+                    val = jogPanel.zReturnLoc
+            else:
+                self.retract = jogPanel.xReturnLoc is None
+                if self.retract:
+                    val = cfg.getFloatInfoData(cf.xRetractLoc)
+                else:
+                    val = jogPanel.xReturnLoc
+
+            title = "%s %s" % ("Retract" if self.retract \
+                               else "Return", self.axisVal)
+            self.SetTitle(title)
+            self.pos.SetEditable(self.retract)
+
             try:
                 val = float(val)
             except ValueError:
                 val = 0.0
-            if self.axis == AXIS_X:
-                val *= 2.0
+
             self.pos.SetValue("%0.4f" % (val))
             self.pos.SetSelection(-1, -1)
 
@@ -6987,10 +7045,18 @@ class RetractDialog(wx.Dialog, FormRoutines):
                 sendZData()
                 m.saveZOffset()
                 m.moveZ(loc, ct.CMD_JOG)
+                jogPanel.zReturnLoc = \
+                    jogPanel.zPos.GetValue() if self.retract else None
+                bitmap = "westR.png" if self.retract else "eastG.png"
+                jogPanel.zButton.SetBitmap(wx.Bitmap(bitmap))
             else:
                 sendXData()
                 m.saveXOffset()
-                m.moveX(loc / 2.0, ct.CMD_JOG)
+                m.moveX(loc, ct.CMD_JOG)
+                jogPanel.xReturnLoc = \
+                    jogPanel.xPos.GetValue() if self.retract else None
+                bitmap = "northR.png" if self.retract else "southG.png"
+                jogPanel.xButton.SetBitmap(wx.Bitmap(bitmap))
             comm.command(cm.CMD_RESUME)
             self.Show(False)
             jogPanel.focus()
