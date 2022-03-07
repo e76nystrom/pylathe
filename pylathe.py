@@ -4791,7 +4791,7 @@ class Keypad(Thread):
         while self.threadRun:
             if self.ser is not None:
                 try:
-                    tmp = str(self.ser.read(1))
+                    tmp = str(self.ser.read(1).decode('utf8'))
                 except serial.SerialException:
                     self.ser = None
                     pass
@@ -5756,17 +5756,27 @@ class JogPanel(wx.Panel, FormRoutines):
         # stdout.flush()
         evt.Skip()
 
+                       # (ord('a'), (self.OnEStop, None)), \
+                       # (ord('b'), (self.OnStop, None)), \
+                       # (ord('c'), (self.OnStartSpindle, None)), \
+                       # (ord('d'), self.noAction), \
+
+                       # (ord('e'), self.start), \
+                       # (ord('f'), (self.OnResume, None)), \
+                       # (ord('g'), (self.OnPause, None)), \
+                       # (ord('h'), (self.OnDone, None)), \
+
     def initKeypadTable(self):
         keypadTable = (\
-                       (ord('a'), (self.OnEStop, None)), \
-                       (ord('b'), (self.OnStop, None)), \
-                       (ord('c'), (self.OnStartSpindle, None)), \
-                       (ord('d'), self.noAction), \
+                       (ord('1'), (self.OnEStop, None)), \
+                       (ord('2'), (self.OnStop, None)), \
+                       (ord('3'), (self.OnStartSpindle, None)), \
+                       (ord('a'), self.noAction), \
 
-                       (ord('e'), self.start), \
-                       (ord('f'), (self.OnResume, None)), \
-                       (ord('g'), (self.OnPause, None)), \
-                       (ord('h'), (self.OnDone, None)), \
+                       (ord('*'), self.start), \
+                       (ord('0'), (self.OnPause, None)), \
+                       (ord('#'), (self.OnDone, None)), \
+                       (ord('d'), (self.OnResume, None)), \
 
                        (ord('i'), self.noAction), \
                        (ord('j'), self.noAction), \
@@ -6219,7 +6229,8 @@ class JogPanel(wx.Panel, FormRoutines):
             panel.sendButton.Disable()
             buttonEnable(panel.startButton)
         btn = self.spindleButton
-        if btn.GetValue():
+        if self.spindleActive:
+            self.spindleActive = False
             btn.SetLabel('Start Spindle')
             btn.SetValue(False)
         buttonEnable(btn)
@@ -6230,21 +6241,24 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def OnStartSpindle(self, e):
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
-            btn = e.GetEventObject()
-            self.spindleActive = state = btn.GetValue()
-            if state:
-                btn.SetLabel('Stop Spindle')
-                btn.SetBackgroundColour('Red')
-                panel = self.currentPanel
-                panel.sendButton.Disable()
-                rpm = panel.rpm.GetValue()
-                sendSpindleData(True, rpm)
-                comm.command(cm.SPINDLE_START)
-            else:
-                btn.SetLabel('Start Spindle')
-                btn.SetBackgroundColour('Green')
-                self.currentPanel.sendButton.Enable()
-                comm.command(cm.SPINDLE_STOP)
+            if not self.currentPanel.active:
+                btn = self.spindleButton
+                # self.spindleActive = state = btn.GetValue()
+                if self.spindleActive:
+                    self.spindleActive = False
+                    btn.SetLabel('Start Spindle')
+                    btn.SetBackgroundColour('Green')
+                    self.currentPanel.sendButton.Enable()
+                    comm.command(cm.SPINDLE_STOP)
+                else:
+                    self.spindleActive = True
+                    btn.SetLabel('Stop Spindle')
+                    btn.SetBackgroundColour('Red')
+                    panel = self.currentPanel
+                    panel.sendButton.Disable()
+                    rpm = panel.rpm.GetValue()
+                    sendSpindleData(True, rpm)
+                    comm.command(cm.SPINDLE_START)
         self.combo.SetFocus()
 
     def spindleJogCmd(self, code, val):
