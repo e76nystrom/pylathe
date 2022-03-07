@@ -40,6 +40,7 @@ class ExtDro():
 
     def openSerial(self, port, rate):
         try:
+            print("openSerial %s %s" % (port, rate))
             self.dro = serial.Serial(port, rate, timeout=.5)
         except IOError:
             print("unable to open port %s" % (port))
@@ -52,7 +53,7 @@ class ExtDro():
         data = False
         rsp = ""
         while True:
-            tmp = self.dro.read(1)
+            tmp = self.dro.read(1).decode('utf8')
             print(tmp, end='')
             if len(tmp) == 0:
                 if data:
@@ -64,11 +65,13 @@ class ExtDro():
 
     def command(self, cmd, response=False, delimiter='\n'):
         self.droLock.acquire(True)
-        cmd += '/n'
+        cmd += '\n'
+        print(cmd, end="")
+        stdout.flush()
         self.dro.write(cmd.encode())
         rsp = ""
         while response:
-            tmp = str(self.dro.read(1))
+            tmp = str(self.dro.read(1).decode('utf8'))
             if len(tmp) == 0:
                 self.droLock.release()
                 if not self.timeout:
@@ -81,4 +84,6 @@ class ExtDro():
             if rsp.endswith(delimiter):
                 break
         self.droLock.release()
+        print(rsp, end="")
+        stdout.flush()
         return(rsp)
