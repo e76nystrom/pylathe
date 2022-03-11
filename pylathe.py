@@ -33,11 +33,11 @@ import wx
 import wx.lib.inspection
 from dxfwrite import DXFEngine as dxf
 
-import cmdDef as cm
+import remCmdDef as cm
 import configDef as cf
 import ctlBitDef as ct
 import enumDef as en
-import parmDef as pm
+import remParmDef as pm
 import stringDef as st
 import syncCmdDef as sc
 import syncParmDef as sp
@@ -4768,33 +4768,37 @@ class KeypadEvent(wx.PyEvent):
 
 class Keypad(Thread):
     def __init__(self, port, rate):
+        self.threadRun = False
+        self.threadDone = False
         if port is None:
             return
         if len(port) == 0:
             return
         Thread.__init__(self)
-        self.threadRun = True
-        self.threadDone = False
         self.port = port
         self.rate = rate
         try:
             self.ser = serial.Serial(port, rate, timeout=1)
         except IOError:
-            print("unable to open port %s" % (port))
+            print("keypad unable to open port %s exit" % (port))
             stdout.flush()
             self.ser = None
+            self.threadDone = True
+            return
 
         self.start()
 
     def run(self):
+        self.threadRun = True
         prtErr = True
         while self.threadRun:
             if self.ser is not None:
                 try:
                     tmp = str(self.ser.read(1).decode('utf8'))
                 except serial.SerialException:
+                    self.ser.close()
                     self.ser = None
-                    pass
+                    print("keypad SerialException")
                 if len(tmp) != 0:
                     wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
             else:
@@ -4808,6 +4812,8 @@ class Keypad(Thread):
                     stdout.flush()
                     self.ser = None
                     sleep(5)
+        if self.ser is not None:
+            self.ser.close
         print("Keypad done")
         stdout.flush()
         self.threadDone = True
@@ -8253,6 +8259,7 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
+                comm.queParm(pm.CFG_MEGA, cfg.getBoolInfoData(cf.cfgMega))
                 comm.queParm(pm.CFG_SWITCH, cfg.getBoolInfoData(cf.spSwitch))
                 comm.queParm(pm.CFG_VAR_SPEED, \
                              cfg.getBoolInfoData(cf.spVarSpeed))
@@ -9034,6 +9041,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDRO", cf.cfgDRO, None), \
             ("bExternal DRO", cf.cfgExtDro, None), \
             ("bLCD", cf.cfgLCD, None), \
+            ("bControl MEGA", cf.cfgMega, None), \
             ("bProbe Inv", cf.cfgPrbInv, None), \
             ("wfcy", cf.cfgFcy, 'd'), \
             ("bDisable Commands", cf.cfgCmdDis, None), \

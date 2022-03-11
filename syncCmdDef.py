@@ -6,6 +6,7 @@ SYNC_STOP            =   2
 SYNC_LOADVAL         =   3
 SYNC_LOADMULTI       =   4
 SYNC_READVAL         =   5
+SYNC_POLL            =   6
 
 # command table
 
@@ -16,4 +17,5 @@ cmdTable = ( \
     ("SYNC_LOADVAL", None),             #   3
     ("SYNC_LOADMULTI", None),           #   4
     ("SYNC_READVAL", None),             #   5
+    ("SYNC_POLL", None),                #   6
     )

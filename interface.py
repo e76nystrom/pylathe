@@ -46,6 +46,7 @@ configList = \
     ('cfgHomeInPlace', 'config home in place'),
     ('cfgInvEncDir', 'config fpga invert encoder direction'),
     ('cfgLCD', 'config enable lcd'),
+    ('cfgMega', 'config control link to mega'),
     ('cfgMPG', 'config enable manual pulse generator'),
     ('cfgPrbInv', 'config invert probe signal'),
     ('cfgRemDbg', 'config print remote debug info'),
@@ -467,6 +468,7 @@ syncCmdList = \
  ("SYNC_LOADVAL", "", "load parameters"),
  ("SYNC_LOADMULTI", "", "load multiple parameters"),
  ("SYNC_READVAL", "", "read parameters"),
+ ("SYNC_POLL", "", "poll sync board"),
 )
 
 parmList = \
@@ -669,6 +671,7 @@ parmList = \
     # ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
     ("CAP_TMR_ENABLE", "enable capture timer", "char"), 
     ("CFG_FPGA", "using fpga", "char"),
+    ("CFG_MEGA", "control link to mega", "char"),
     ("CFG_MPG", "manual pulse generator", "char"),
     ("CFG_DRO", "digital readout", "char"),
     ("CFG_LCD", "lcd display", "char"),
@@ -1696,6 +1699,35 @@ enumList =\
     # ("EV_", ""),
     "};",
  
+    "mega commands",
+    
+    "enum cmd_Mega",
+    "{",
+     ("MEGA_NONE", "no command"),
+     ("MEGA_SET_RPM", "set pwm for rpm"),
+     ("MEGA_GET_RPM", "get pwm value"),
+     ("MEGA_POLL", "poll mega info"),
+     # ("MEGA_", ""),
+    "};",
+
+    "mega poll response bits",
+    
+    "enum poll_Mega",
+    "{",
+     ("M_POLL_ESTOP_NO", "estop no in"),
+     ("M_POLL_ESTOP_NC", "estop nc in"),
+     ("M_POLL_SP_FWD", "spindle forward in"),
+     ("M_POLL_SP_REV", "spindle reverse in"),
+     ("M_POLL_ESTOP", "estop condition"),
+     ("M_POLL_WD_ENA", "watchdog enabled"),
+     ("M_POLL_CP_ACTIVE", "charge pump active"),
+     ("M_POLL_PWM_ACTIVE", "pwm active"),
+     ("M_POLL_STEP_DIS", "stepper disabled"),
+     ("M_POLL_ESTOP_RLY", "estop relay"),
+     ("M_POLL_ESTOP_PC", "estop pc"),
+     # ("M_POLL_", ""),
+    "};",
+
     "turning sync selector",
     
     "enum sel_Turn c",
@@ -1757,7 +1789,7 @@ if __name__ == '__main__':
     if WINDOWS:
         from pywinusb.hid import find_all_hid_devices
         # from comm import Comm, CommTimeout
-        from commPi import Comm, CommTimeout
+#        from commPi import Comm, CommTimeout
         R_PI = True
     else:
         if not os.uname().machine.startswith('arm'):
@@ -1791,10 +1823,17 @@ if __name__ == '__main__':
     setup.file = True
     setup.createConfig(configList)
     setup.createStrings(strList)
+
     setup.createCommands(cmdList, cLoc, fData)
-    setup.createCommands(syncCmdList, syncLoc, fData, 'syncCmdDef')
+    setup.createCommands(syncCmdList, cLoc, fData, prefix='sync')
+    setup.createCommands(syncCmdList, syncLoc, fData, \
+                         pyFile=False, check=False, prefix='sync')
+
     setup.createParameters(parmList, cLoc, fData)
-    setup.createParameters(syncParmList, syncLoc, fData, 'syncParmDef')
+    setup.createParameters(syncParmList, cLoc, fData, prefix='sync')
+    setup.createParameters(syncParmList, syncLoc, fData, pyFile=False,
+                           cSource='../src/', prefix='sync')
+
     setup.createEnums(enumList, cLoc, fData)
     setup.createCtlBits(regList, cLoc, fData)
 

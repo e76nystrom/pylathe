@@ -12,7 +12,8 @@ stringList = None
 xRegTable = None
 
 def fWrite(f, txt):
-    f.write(txt.encode())
+    if f is not None:
+        f.write(txt.encode())
     
 class Setup():
     def __init__(self):
@@ -110,20 +111,21 @@ class Setup():
         self.strTable = strTable
         return(strTable)
 
-    def createCommands(self, cmdList, cLoc, fData=False, file='cmdDef'):
+    def createCommands(self, cmdList, cLoc, fData=False, pyFile=True, \
+                       check=True, prefix="rem"):
         global cmdTable
         imports = []
         imports.append("cmdTable")
         cmdTable = []
         if fData:
-            cFile = open(cLoc + 'cmdList.h', 'wb')
-            fWrite(cFile, "enum COMMANDS\n{\n");
+            cFile = open(cLoc + prefix + 'CmdList.h', 'wb')
+            fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n");
             # jFile = open(jLoc + 'Cmd.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n");
             # fWrite(jFile, "public enum Cmd\n{\n");
         f = None
-        if self.file:
-            f = open(file + '.py', 'wb')
+        if self.file and pyFile:
+            f = open(prefix + 'CmdDef.py', 'wb')
             fWrite(f, "\n# commands\n")
         index = 0
         for i in range(len(cmdList)):
@@ -142,7 +144,7 @@ class Setup():
                         # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
                         #             (tmp.ljust(32), index, regComment))
                     cmdTable.append((regName, action))
-                    if regName in globals():
+                    if check and (regName in globals()):
                         print("createCommands %s already defined" % regName)
                     else:
                         globals()[regName] = index
@@ -184,21 +186,26 @@ class Setup():
         self.cmdTable = cmdTable
         return(cmdTable)
 
-    def createParameters(self, parmList, cLoc, fData=False, file='parmDef'):
+    def createParameters(self, parmList, cLoc, fData=False, pyFile=True, \
+                         cSource='../lathe_src/', prefix='rem'):
         global parmTable
         parmTable = []
         imports = []
         imports.append("parmTable")
+        preCap = prefix.capitalize()
+        preUC = prefix.upper()
         if fData:
-            cFile = open(cLoc + 'parmList.h', 'wb')
-            fWrite(cFile, "enum PARM\n{\n")
-            c1File = open(cLoc + 'remparm.h', 'wb')
-            fWrite(c1File, "T_PARM remparm[] =\n{\n")
-            c2File = open(cLoc + 'remvardef.h', 'wb')
-            c3File = open(cLoc + 'remstruct.h', 'wb')
-            fWrite(c3File, "#if !defined(REM_STRUCT)\n"\
-                   "#define REM_STRUCT\n\n"\
+            cFile = open(cLoc + prefix + 'ParmList.h', 'wb')
+            fWrite(cFile, "enum " + preUC + "_PARM\n{\n")
+            c1File = open(cLoc + prefix + 'Parm.h', 'wb')
+            fWrite(c1File, "char " + prefix + "Parm[] =\n{\n")
+            c2File = open(cLoc + prefix + 'VarDef.h', 'wb')
+            c3File = open(cLoc + prefix + 'Struct.h', 'wb')
+            fWrite(c3File, "#if !defined(" + preUC + "_STRUCT)\n"\
+                   "#define " + preUC + "_STRUCT\n\n"\
                    "#include <stdint.h>\n\n"\
+                   "#if !defined(__DATA_UNION__)\n"\
+                   "#define __DATA_UNION__\n\n"
                    "typedef union uDataUnion\n{\n"\
                    " float t_float;\n"\
                    " int t_int;\n"\
@@ -208,23 +215,27 @@ class Setup():
                    " uint16_t t_uint16_t;\n"\
                    " char t_char;\n"\
                    "} T_DATA_UNION, *P_DATA_UNION;\n\n"\
-                   "void setRemVar(int parm, T_DATA_UNION val);\n"\
-                   "void getRemVar(int parm, P_DATA_UNION val);\n\n"\
-                   "typedef struct sRemVar\n{\n")
+                   "#endif  /* __DATA_UNION__ */\n\n"\
+                   "void set" + preCap + "Var(int parm, T_DATA_UNION val);\n"\
+                   "void get" + preCap + "Var(int parm, P_DATA_UNION val);\n\n"\
+                   "typedef struct s" + preCap + "Var\n{\n")
             try:
                 remFunc = []
-                c4File = open(cLoc + '../lathe_src/remfunc.cpp', 'wb')
+                c4File = open(cLoc + cSource + prefix + 'Func.cpp', 'wb')
                 fWrite(c4File,
                        "#include <stdint.h>\n"\
                        "#define NO_REM_MACROS\n"\
-                       "#include \"parmList.h\"\n\n"\
-                       "#include \"remstruct.h\"\n\n"\
-                       "T_REM_VAR rVar;\n\n")
+                       "#include \"" + prefix + "ParmList.h\"\n\n"\
+                       "#include \"" + prefix + "Struct.h\"\n\n"\
+                       "T_" + preUC + "_VAR " + prefix[0] + "Var;\n\n")
                 fWrite(c4File,
-                       "void setRemVar(int parm, T_DATA_UNION val);\n"\
-                       "void getRemVar(int parm, P_DATA_UNION val);\n\n")
+                       "void set" + preCap + \
+                       "Var(int parm, T_DATA_UNION val);\n"\
+                       "void get" + preCap + \
+                       "Var(int parm, P_DATA_UNION val);\n\n")
                 fWrite(c4File,
-                       "void setRemVar(int parm, T_DATA_UNION val)\n{\n"\
+                       "void set" + preCap + \
+                       "Var(int parm, T_DATA_UNION val)\n{\n"\
                        " switch(parm)\n {\n")
             except FileNotFoundError:
                 c4File = None
@@ -232,8 +243,8 @@ class Setup():
             # fWrite(jFile, "package lathe;\n\n");
             # fWrite(jFile, "public enum Parm\n{\n")
         f = None
-        if self.file:
-            f = open(file + '.py', 'wb')
+        if self.file and pyFile:
+            f = open(prefix + 'ParmDef.py', 'wb')
             fWrite(f, "\n# parameters\n")
         index = 0
         for i in range(len(parmList)):
@@ -264,7 +275,7 @@ class Setup():
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment))
                     # tmp = " PARM(%s, %s), " % (varName, regAct)
-                    tmp = " PARM(%s), " % (varName)
+                    tmp = " sizeof(%sVar.%s), " % (prefix[0], varName)
                     fWrite(c1File, "%s/* 0x%02x %s */\n" % 
                                  (tmp.ljust(32), index, regComment))
                     tmp = " EXT %s %s;" % (varType, varName)
@@ -277,9 +288,9 @@ class Setup():
                         tmp = "case %s:" % (regName)
                         tmpType = varType.replace(' ', '_')
                         fWrite(c4File,
-                               " %s/* %2d 0x%02x %s */\n"\
-                               "  rVar.%s = val.t_%s;\n"\
-                               "  break;\n\n" % (tmp.ljust(32), index, index, \
+                               (" %s/* %2d 0x%02x %s */\n"\
+                               "  " + prefix[0] + "Var.%s = val.t_%s;\n"\
+                               "  break;\n\n") % (tmp.ljust(32), index, index, \
                                                  regComment, varName, tmpType))
                         remFunc.append((regName, index, regComment, \
                                         varName, tmpType))
@@ -319,7 +330,7 @@ class Setup():
             fWrite(c1File, "};\n")
             c1File.close()
             c2File.close()
-            fWrite(c3File, "} T_REM_VAR, *P_REM_VAR;\n\n")
+            fWrite(c3File, "} T_" + preUC + "_VAR, *P_" + preUC + "_VAR;\n\n")
             # if c4File is not None:
             #     fWrite(c3File, "#if !defined(NO_REM_MACROS)\n")
             #     for data in remFunc:
@@ -332,23 +343,25 @@ class Setup():
             #             fWrite(c3File, "\n// %s\n\n" % (data))
             # fWrite(c3File, "\n#endif /* NO_REM_MACROS */\n")
             fWrite(c3File,\
-                   "extern T_REM_VAR rVar;\n\n"\
-                   "#endif /* REM_STRUCT */\n")
+                   "extern T_" + preUC + "_VAR " + prefix[0] + "Var;\n\n"\
+                   "#endif /* " + preUC + "_STRUCT */\n")
             c3File.close()
             if c4File is not None:
                 fWrite(c4File, " };\n}\n\n")
                 fWrite(c4File,
-                       "void getRemVar(int parm, P_DATA_UNION val)\n{\n"\
+                       "void get" + preCap + \
+                       "Var(int parm, P_DATA_UNION val)\n{\n"\
                        " switch(parm)\n {\n")
                 for data in remFunc:
                     if not isinstance(data, str):
                         (regName, index, regComment, varName, tmpType) = data
                         tmp = "case %s:" % (regName)
                         fWrite(c4File,
-                               " %s/* %2d 0x%02x %s */\n"\
-                               "  val->t_%s = rVar.%s;\n"\
-                               "  break;\n\n" % (tmp.ljust(32), index, index, \
-                                                 regComment, tmpType, varName))
+                               (" %s/* %2d 0x%02x %s */\n"\
+                               "  val->t_%s = " + prefix[0] + "Var.%s;\n"\
+                               "  break;\n\n") % \
+                               (tmp.ljust(32), index, index, \
+                                regComment, tmpType, varName))
                 fWrite(c4File, " };\n}\n")
                 c4File.close()
             # fWrite(jFile, "};\n")

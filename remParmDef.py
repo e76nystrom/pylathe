@@ -194,118 +194,119 @@ TURN_SYNC            = 118
 THREAD_SYNC          = 119
 CAP_TMR_ENABLE       = 120
 CFG_FPGA             = 121
-CFG_MPG              = 122
-CFG_DRO              = 123
-CFG_LCD              = 124
-CFG_FCY              = 125
-CFG_SWITCH           = 126
-CFG_VAR_SPEED        = 127
+CFG_MEGA             = 122
+CFG_MPG              = 123
+CFG_DRO              = 124
+CFG_LCD              = 125
+CFG_FCY              = 126
+CFG_SWITCH           = 127
+CFG_VAR_SPEED        = 128
 
 # setup
 
-SETUP_DONE           = 128
+SETUP_DONE           = 129
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 129
+ENC_PER_REV          = 130
 
 # test encoder setup variables
 
-ENC_ENABLE           = 130
-ENC_PRE_SCALER       = 131
-ENC_TIMER            = 132
-ENC_RUN_COUNT        = 133
+ENC_ENABLE           = 131
+ENC_PRE_SCALER       = 132
+ENC_TIMER            = 133
+ENC_RUN_COUNT        = 134
 
 # test encoder status variables
 
-ENC_RUN              = 134
-ENC_COUNTER          = 135
-ENC_REV_COUNTER      = 136
+ENC_RUN              = 135
+ENC_COUNTER          = 136
+ENC_REV_COUNTER      = 137
 
 # measured spindle speed
 
-RPM                  = 137
+RPM                  = 138
 
 # fpga frequency variables
 
-FPGA_FREQUENCY       = 138
-FREQ_MULT            = 139
+FPGA_FREQUENCY       = 139
+FREQ_MULT            = 140
 
 # xilinx configuration register
 
-X_CFG_REG            = 140
+X_CFG_REG            = 141
 
 # sync parameters
 
-L_SYNC_CYCLE         = 141
-L_SYNC_OUTPUT        = 142
-L_SYNC_PRESCALER     = 143
+L_SYNC_CYCLE         = 142
+L_SYNC_OUTPUT        = 143
+L_SYNC_PRESCALER     = 144
 
 # threading variables
 
-TH_Z_START           = 144
-TH_X_START           = 145
-TAN_THREAD_ANGLE     = 146
-X_FEED               = 147
-RUNOUT_DISTANCE      = 148
-RUNOUT_DEPTH         = 149
+TH_Z_START           = 145
+TH_X_START           = 146
+TAN_THREAD_ANGLE     = 147
+X_FEED               = 148
+RUNOUT_DISTANCE      = 149
+RUNOUT_DEPTH         = 150
 
 # jog debug
 
-JOG_DEBUG            = 150
+JOG_DEBUG            = 151
 
 # motor and speed control
 
-PWM_FREQ             = 151
-MIN_SPEED            = 152
-MAX_SPEED            = 153
+PWM_FREQ             = 152
+MIN_SPEED            = 153
+MAX_SPEED            = 154
 
 # current operation
 
-CURRENT_OP           = 154
+CURRENT_OP           = 155
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 155
-COMMON_LIMITS        = 156
-LIMITS_ENABLED       = 157
-COMMON_HOME          = 158
+LIMIT_OVERRIDE       = 156
+COMMON_LIMITS        = 157
+LIMITS_ENABLED       = 158
+COMMON_HOME          = 159
 
 # z limits and home
 
-Z_LIM_ENA            = 159
-Z_LIM_NEG_INV        = 160
-Z_LIM_POS_INV        = 161
-Z_HOME_ENA           = 162
-Z_HOME_INV           = 163
+Z_LIM_ENA            = 160
+Z_LIM_NEG_INV        = 161
+Z_LIM_POS_INV        = 162
+Z_HOME_ENA           = 163
+Z_HOME_INV           = 164
 
 # x limits and home
 
-X_LIM_ENA            = 164
-X_LIM_NEG_INV        = 165
-X_LIM_POS_INV        = 166
-X_HOME_ENA           = 167
-X_HOME_INV           = 168
+X_LIM_ENA            = 165
+X_LIM_NEG_INV        = 166
+X_LIM_POS_INV        = 167
+X_HOME_ENA           = 168
+X_HOME_INV           = 169
 
 # e stop
 
-E_STOP_ENA           = 169
-E_STOP_INV           = 170
+E_STOP_ENA           = 170
+E_STOP_INV           = 171
 
 # command pause
 
-CMD_PAUSED           = 171
+CMD_PAUSED           = 172
 
 # arc parameters
 
-ARC_RADIUS           = 172
-ARC_X_CENTER         = 173
-ARC_Z_CENTER         = 174
-ARC_X_START          = 175
-ARC_Z_START          = 176
-ARC_X_END            = 177
-ARC_Z_END            = 178
-MAX_PARM             = 179
+ARC_RADIUS           = 173
+ARC_X_CENTER         = 174
+ARC_Z_CENTER         = 175
+ARC_X_START          = 176
+ARC_Z_START          = 177
+ARC_X_END            = 178
+ARC_Z_END            = 179
+MAX_PARM             = 180
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -430,6 +431,7 @@ parmTable = ( \
     ('THREAD_SYNC', 'char', 'threadSync'),
     ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
     ('CFG_FPGA', 'char', 'cfgFpga'),
+    ('CFG_MEGA', 'char', 'cfgMega'),
     ('CFG_MPG', 'char', 'cfgMpg'),
     ('CFG_DRO', 'char', 'cfgDro'),
     ('CFG_LCD', 'char', 'cfgLcd'),

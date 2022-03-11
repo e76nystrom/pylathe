@@ -253,6 +253,48 @@ evEventsList = ( \
     "EV_MAX",
     )
 
+# mega commands
+
+MEGA_NONE        =  0           # no command
+MEGA_SET_RPM     =  1           # set pwm for rpm
+MEGA_GET_RPM     =  2           # get pwm value
+MEGA_POLL        =  3           # poll mega info
+
+cmdMegaList = ( \
+    "MEGA_NONE",
+    "MEGA_SET_RPM",
+    "MEGA_GET_RPM",
+    "MEGA_POLL",
+    )
+
+# mega poll response bits
+
+M_POLL_ESTOP_NO  =  0           # estop no in
+M_POLL_ESTOP_NC  =  1           # estop nc in
+M_POLL_SP_FWD    =  2           # spindle forward in
+M_POLL_SP_REV    =  3           # spindle reverse in
+M_POLL_ESTOP     =  4           # estop condition
+M_POLL_WD_ENA    =  5           # watchdog enabled
+M_POLL_CP_ACTIVE =  6           # charge pump active
+M_POLL_PWM_ACTIVE =  7          # pwm active
+M_POLL_STEP_DIS  =  8           # stepper disabled
+M_POLL_ESTOP_RLY =  9           # estop relay
+M_POLL_ESTOP_PC  = 10           # estop pc
+
+pollMegaList = ( \
+    "M_POLL_ESTOP_NO",
+    "M_POLL_ESTOP_NC",
+    "M_POLL_SP_FWD",
+    "M_POLL_SP_REV",
+    "M_POLL_ESTOP",
+    "M_POLL_WD_ENA",
+    "M_POLL_CP_ACTIVE",
+    "M_POLL_PWM_ACTIVE",
+    "M_POLL_STEP_DIS",
+    "M_POLL_ESTOP_RLY",
+    "M_POLL_ESTOP_PC",
+    )
+
 # turning sync selector
 
 SEL_TU_SPEED     =  0           # Motor Speed

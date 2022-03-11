@@ -12,9 +12,9 @@ if SETUP:
     from setup import cmdTable, parmTable, cfgFpga, LOADMULTI, \
         LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 else:
-    from parmDef import parmTable
+    from remParmDef import parmTable
     from configDef import cfgFpga
-    from cmdDef import cmdTable,  LOADMULTI, \
+    from remCmdDef import cmdTable,  LOADMULTI, \
         LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
 
 cmdOverhead = 8
