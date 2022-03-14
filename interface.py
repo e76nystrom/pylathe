@@ -42,6 +42,8 @@ configList = \
     ('cfgEStopInv', 'config estop invert'),
     ('cfgExtDro', 'config external digital readout'),
     ('cfgFcy', 'config microprocesssor clock frequency'),
+    ('cfgFpga', 'config fpga interface present'),
+    ('cfgFpgaFreq', 'config fpga frequency'),
     ('cfgFreqMult', 'config fpga frequency multiplier'),
     ('cfgHomeInPlace', 'config home in place'),
     ('cfgInvEncDir', 'config fpga invert encoder direction'),
@@ -55,13 +57,12 @@ configList = \
     ('cfgSpSync', 'config spindle using timer'),
     ('cfgSpSyncBoard', 'config spindle sync board'),
     ('cfgSpUseEncoder', 'config use spindle encoder for threading'),
+    ('cfgSyncSPI', 'config sync comm through spi'),
     ('cfgTaperCycleDist', 'config taper cycle distance'),
     ('cfgTestMode', 'conifg test mode'),
     ('cfgTestRPM', 'config fpga test rpm value'),
     ('cfgTurnSync', 'config for turning synchronization'),
     ('cfgThreadSync', 'config for threading synchronization'),
-    ('cfgFpgaFreq', 'config fpga frequency'),
-    ('cfgFpga', 'config fpga interface present'),
 
   "communications cxonfig",
 
@@ -457,7 +458,6 @@ cmdList = \
 
     ("ENCSTART", "", "encoder start"),
     ("ENCSTOP", "", "encoder stop"),
-
 )
     
 syncCmdList = \
@@ -713,11 +713,17 @@ parmList = \
 
     ("X_CFG_REG", "xilinx cfg register", "int16_t"),
  
-    "sync parameters",
+    "z sync parameters",
    
     ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
     ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
     ("L_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+
+    "x sync parameters",
+   
+    ("L_X_SYNC_CYCLE", "sync cycle length", "uint16_t"),
+    ("L_X_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
+    ("L_X_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
 
     "threading variables",
 
@@ -1566,6 +1572,8 @@ enumList =\
     ("M_WAIT_Z", "wait for z to complete"),
     ("M_WAIT_X", "wait for x to complete"),
     ("M_WAIT_SPINDLE", "wait for spindle start"),
+    ("M_WAIT_SYNC_PARMS", "wait for sync paramaters"),
+    ("M_WAIT_SYNC_CMD", "wait for sync command"),
     ("M_START_SYNC", "start sync"),
     ("M_WAIT_SYNC_READY", "wait for sync"),
     ("M_WAIT_SYNC_DONE", "wait for sync done"),
@@ -1596,6 +1604,8 @@ enumList =\
     ("STOP_SPINDLE", "spindle stop"),
     ("Z_SYN_SETUP", "z sync setup"),
     ("X_SYN_SETUP", "x sync setup"),
+    ("SEND_SYNC_PARMS", "send sync parameters"),
+    ("SYNC_COMMAND", "send sync command"),
     ("PASS_NUM", "set pass number"),
     ("QUE_PAUSE", "pause queue"),
     ("MOVE_Z_OFFSET", "move z offset"),
@@ -1789,7 +1799,7 @@ if __name__ == '__main__':
     if WINDOWS:
         from pywinusb.hid import find_all_hid_devices
         # from comm import Comm, CommTimeout
-#        from commPi import Comm, CommTimeout
+        from commPi import Comm, CommTimeout
         R_PI = True
     else:
         if not os.uname().machine.startswith('arm'):

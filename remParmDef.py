@@ -236,77 +236,83 @@ FREQ_MULT            = 140
 
 X_CFG_REG            = 141
 
-# sync parameters
+# z sync parameters
 
 L_SYNC_CYCLE         = 142
 L_SYNC_OUTPUT        = 143
 L_SYNC_PRESCALER     = 144
 
+# x sync parameters
+
+L_X_SYNC_CYCLE       = 145
+L_X_SYNC_OUTPUT      = 146
+L_X_SYNC_PRESCALER   = 147
+
 # threading variables
 
-TH_Z_START           = 145
-TH_X_START           = 146
-TAN_THREAD_ANGLE     = 147
-X_FEED               = 148
-RUNOUT_DISTANCE      = 149
-RUNOUT_DEPTH         = 150
+TH_Z_START           = 148
+TH_X_START           = 149
+TAN_THREAD_ANGLE     = 150
+X_FEED               = 151
+RUNOUT_DISTANCE      = 152
+RUNOUT_DEPTH         = 153
 
 # jog debug
 
-JOG_DEBUG            = 151
+JOG_DEBUG            = 154
 
 # motor and speed control
 
-PWM_FREQ             = 152
-MIN_SPEED            = 153
-MAX_SPEED            = 154
+PWM_FREQ             = 155
+MIN_SPEED            = 156
+MAX_SPEED            = 157
 
 # current operation
 
-CURRENT_OP           = 155
+CURRENT_OP           = 158
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 156
-COMMON_LIMITS        = 157
-LIMITS_ENABLED       = 158
-COMMON_HOME          = 159
+LIMIT_OVERRIDE       = 159
+COMMON_LIMITS        = 160
+LIMITS_ENABLED       = 161
+COMMON_HOME          = 162
 
 # z limits and home
 
-Z_LIM_ENA            = 160
-Z_LIM_NEG_INV        = 161
-Z_LIM_POS_INV        = 162
-Z_HOME_ENA           = 163
-Z_HOME_INV           = 164
+Z_LIM_ENA            = 163
+Z_LIM_NEG_INV        = 164
+Z_LIM_POS_INV        = 165
+Z_HOME_ENA           = 166
+Z_HOME_INV           = 167
 
 # x limits and home
 
-X_LIM_ENA            = 165
-X_LIM_NEG_INV        = 166
-X_LIM_POS_INV        = 167
-X_HOME_ENA           = 168
-X_HOME_INV           = 169
+X_LIM_ENA            = 168
+X_LIM_NEG_INV        = 169
+X_LIM_POS_INV        = 170
+X_HOME_ENA           = 171
+X_HOME_INV           = 172
 
 # e stop
 
-E_STOP_ENA           = 170
-E_STOP_INV           = 171
+E_STOP_ENA           = 173
+E_STOP_INV           = 174
 
 # command pause
 
-CMD_PAUSED           = 172
+CMD_PAUSED           = 175
 
 # arc parameters
 
-ARC_RADIUS           = 173
-ARC_X_CENTER         = 174
-ARC_Z_CENTER         = 175
-ARC_X_START          = 176
-ARC_Z_START          = 177
-ARC_X_END            = 178
-ARC_Z_END            = 179
-MAX_PARM             = 180
+ARC_RADIUS           = 176
+ARC_X_CENTER         = 177
+ARC_Z_CENTER         = 178
+ARC_X_START          = 179
+ARC_Z_START          = 180
+ARC_X_END            = 181
+ARC_Z_END            = 182
+MAX_PARM             = 183
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -454,6 +460,9 @@ parmTable = ( \
     ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
     ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
     ('L_SYNC_PRESCALER', 'uint16_t', 'lSyncPrescaler'),
+    ('L_X_SYNC_CYCLE', 'uint16_t', 'lXSyncCycle'),
+    ('L_X_SYNC_OUTPUT', 'uint16_t', 'lXSyncOutput'),
+    ('L_X_SYNC_PRESCALER', 'uint16_t', 'lXSyncPrescaler'),
     ('TH_Z_START', 'int32_t', 'thZStart'),
     ('TH_X_START', 'int32_t', 'thXStart'),
     ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),

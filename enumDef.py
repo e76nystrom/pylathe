@@ -27,21 +27,25 @@ M_IDLE           =  0           # idle state
 M_WAIT_Z         =  1           # wait for z to complete
 M_WAIT_X         =  2           # wait for x to complete
 M_WAIT_SPINDLE   =  3           # wait for spindle start
-M_START_SYNC     =  4           # start sync
-M_WAIT_SYNC_READY =  5          # wait for sync
-M_WAIT_SYNC_DONE =  6           # wait for sync done
-M_WAIT_MEASURE_DONE =  7        # wait for measurment done
-M_WAIT_PROBE     =  8           # wait for probe to complete
-M_WAIT_MEASURE   =  9           # wait for measurement to complete
-M_WAIT_SAFE_X    = 10           # wait for move to safe x to complete
-M_WAIT_SAFE_Z    = 11           # wait for move to safe z to complete
-M_WAIT_ARC       = 12           # wait for arc move to complete
+M_WAIT_SYNC_PARMS =  4          # wait for sync paramaters
+M_WAIT_SYNC_CMD  =  5           # wait for sync command
+M_START_SYNC     =  6           # start sync
+M_WAIT_SYNC_READY =  7          # wait for sync
+M_WAIT_SYNC_DONE =  8           # wait for sync done
+M_WAIT_MEASURE_DONE =  9        # wait for measurment done
+M_WAIT_PROBE     = 10           # wait for probe to complete
+M_WAIT_MEASURE   = 11           # wait for measurement to complete
+M_WAIT_SAFE_X    = 12           # wait for move to safe x to complete
+M_WAIT_SAFE_Z    = 13           # wait for move to safe z to complete
+M_WAIT_ARC       = 14           # wait for arc move to complete
 
 mStatesList = ( \
     "M_IDLE",
     "M_WAIT_Z",
     "M_WAIT_X",
     "M_WAIT_SPINDLE",
+    "M_WAIT_SYNC_PARMS",
+    "M_WAIT_SYNC_CMD",
     "M_START_SYNC",
     "M_WAIT_SYNC_READY",
     "M_WAIT_SYNC_DONE",
@@ -70,20 +74,22 @@ START_SPINDLE    = 11           # spindle start
 STOP_SPINDLE     = 12           # spindle stop
 Z_SYN_SETUP      = 13           # z sync setup
 X_SYN_SETUP      = 14           # x sync setup
-PASS_NUM         = 15           # set pass number
-QUE_PAUSE        = 16           # pause queue
-MOVE_Z_OFFSET    = 17           # move z offset
-SAVE_FEED_TYPE   = 18           # save feed type
-Z_FEED_SETUP     = 19           # setup z feed
-X_FEED_SETUP     = 20           # setup x feed
-SAVE_FLAGS       = 21           # save thread flags
-PROBE_Z          = 22           # probe in z direction
-PROBE_X          = 23           # probe in x direction
-SAVE_Z_DRO       = 24           # save z dro reading
-SAVE_X_DRO       = 25           # save x dro reading
-QUE_PARM         = 26           # save parameter in queue
-MOVE_ARC         = 27           # move in an arc
-OP_DONE          = 28           # operation done
+SEND_SYNC_PARMS  = 15           # send sync parameters
+SYNC_COMMAND     = 16           # send sync command
+PASS_NUM         = 17           # set pass number
+QUE_PAUSE        = 18           # pause queue
+MOVE_Z_OFFSET    = 19           # move z offset
+SAVE_FEED_TYPE   = 20           # save feed type
+Z_FEED_SETUP     = 21           # setup z feed
+X_FEED_SETUP     = 22           # setup x feed
+SAVE_FLAGS       = 23           # save thread flags
+PROBE_Z          = 24           # probe in z direction
+PROBE_X          = 25           # probe in x direction
+SAVE_Z_DRO       = 26           # save z dro reading
+SAVE_X_DRO       = 27           # save x dro reading
+QUE_PARM         = 28           # save parameter in queue
+MOVE_ARC         = 29           # move in an arc
+OP_DONE          = 30           # operation done
 
 mCommandsList = ( \
     "MOVE_Z",
@@ -101,6 +107,8 @@ mCommandsList = ( \
     "STOP_SPINDLE",
     "Z_SYN_SETUP",
     "X_SYN_SETUP",
+    "SEND_SYNC_PARMS",
+    "SYNC_COMMAND",
     "PASS_NUM",
     "QUE_PAUSE",
     "MOVE_Z_OFFSET",

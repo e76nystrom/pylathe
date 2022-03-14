@@ -7,8 +7,8 @@ from math import floor, log
 import os
 import re
 
-from parmDef import parmTable
-from cmdDef import cmdTable
+from remParmDef import parmTable
+from remCmdDef import cmdTable
 import enumDef as en
 import lRegDef as rg
 import fpgaLathe as bt
