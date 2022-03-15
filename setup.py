@@ -199,7 +199,7 @@ class Setup():
             fWrite(cFile, "enum " + preUC + "_PARM\n{\n")
             c1File = open(cLoc + prefix + 'Parm.h', 'wb')
             fWrite(c1File, "char " + prefix + "Parm[] =\n{\n")
-            c2File = open(cLoc + prefix + 'VarDef.h', 'wb')
+            # c2File = open(cLoc + prefix + 'VarDef.h', 'wb')
             c3File = open(cLoc + prefix + 'Struct.h', 'wb')
             fWrite(c3File, "#if !defined(" + preUC + "_STRUCT)\n"\
                    "#define " + preUC + "_STRUCT\n\n"\
@@ -278,9 +278,9 @@ class Setup():
                     tmp = " sizeof(%sVar.%s), " % (prefix[0], varName)
                     fWrite(c1File, "%s/* 0x%02x %s */\n" % 
                                  (tmp.ljust(32), index, regComment))
-                    tmp = " EXT %s %s;" % (varType, varName)
-                    fWrite(c2File, "%s/* 0x%02x %s */\n" % 
-                           (tmp.ljust(32), index, regComment))
+                    # tmp = " EXT %s %s;" % (varType, varName)
+                    # fWrite(c2File, "%s/* 0x%02x %s */\n" % 
+                    #        (tmp.ljust(32), index, regComment))
                     tmp = " %s %s;" % (varType, varName)
                     fWrite(c3File, "%s/* 0x%02x %s */\n" % 
                                  (tmp.ljust(32), index, regComment))
@@ -310,7 +310,7 @@ class Setup():
                 if fData:
                     fWrite(cFile, "\n// %s\n\n" % (data))
                     fWrite(c1File, "\n// %s\n\n" % (data))
-                    fWrite(c2File, "\n// %s\n\n" % (data))
+                    # fWrite(c2File, "\n// %s\n\n" % (data))
                     fWrite(c3File, "\n// %s\n\n" % (data))
                     if c4File is not None:
                         remFunc.append(data)
@@ -329,7 +329,7 @@ class Setup():
             cFile.close()
             fWrite(c1File, "};\n")
             c1File.close()
-            c2File.close()
+            # c2File.close()
             fWrite(c3File, "} T_" + preUC + "_VAR, *P_" + preUC + "_VAR;\n\n")
             # if c4File is not None:
             #     fWrite(c3File, "#if !defined(NO_REM_MACROS)\n")
