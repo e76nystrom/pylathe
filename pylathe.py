@@ -109,6 +109,7 @@ THREAD_SYNC = en.SEL_TH_NO_ENC
 SPINDLE_SWITCH = False
 SPINDLE_VAR_SPEED = False
 HOME_IN_PLACE = False
+SYNC_SPI = False
 
 cLoc = "../Lathe/include/"
 fData = False
@@ -853,6 +854,8 @@ class DialogActions():
     def OnOk(self, e):
         if self.formatData(self.fields):
             self.Show(False)
+            if callable(self.okAction):
+                    self.okAction()
 
     def OnCancel(self, e):
         for field in self.fields:
@@ -1093,7 +1096,7 @@ class MoveCommands():
         self.zOffset = None
         self.xOffset = None
 
-    def queMove(self, op, val):
+    def queMove(self, op, val=0):
         if self.send:
             opString = en.mCommandsList[op]
             self.moveQue.put((opString, op, val))
@@ -1126,7 +1129,7 @@ class MoveCommands():
         self.saveXOffset()
 
     def stopSpindle(self):
-        self.queMove(en.STOP_SPINDLE, 0)
+        self.queMove(en.STOP_SPINDLE)
 
     def queFeedType(self, feedType):
         self.queMove(en.SAVE_FEED_TYPE, feedType)
@@ -1136,6 +1139,12 @@ class MoveCommands():
 
     def xSynSetup(self, feed):
         self.queMove(en.X_SYN_SETUP, feed)
+
+    def syncParms(self):
+        self.queMove(en.SEND_SYNC_PARMS)
+
+    def syncCommand(self, cmd):
+        self.queMove(en.SYNC_COMMAND, cmd)        
 
     def nextPass(self, passNum):
         self.passNum = passNum
@@ -1152,7 +1161,7 @@ class MoveCommands():
         self.queMove(en.QUE_PAUSE, val)
 
     def moveZOffset(self):
-        self.queMove(en.MOVE_Z_OFFSET, 0)
+        self.queMove(en.MOVE_Z_OFFSET)
 
     def moveZ(self, zLocation, flag=ct.CMD_MAX, backlash=0.0):
         if (flag & ct.DRO_POS) == 0:
@@ -1243,10 +1252,10 @@ class MoveCommands():
             print("probeX %7.4f" % (xDist))
 
     def saveZDro(self):
-        self.queMove(en.SAVE_Z_DRO, 0)
+        self.queMove(en.SAVE_Z_DRO)
 
     def saveXDro(self):
-        self.queMove(en.SAVE_X_DRO, 0)
+        self.queMove(en.SAVE_X_DRO)
 
     def queParm(self, parm, val):
         op = en.QUE_PARM
@@ -1255,7 +1264,7 @@ class MoveCommands():
         self.moveQue.put((opString, op, val))
 
     def moveArc(self):
-        self.queMove(en.MOVE_ARC, 0)
+        self.queMove(en.MOVE_ARC)
 
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
@@ -1759,6 +1768,34 @@ class UpdatePass():
     def fixCut(self, offset=0.0):
         pass
 
+def syncFuncSetup():
+    global TURN_SYNC, THREAD_SYNC
+    global zSyncInt, zSyncExt, xSyncInt, xSyncExt
+
+    TURN_SYNC = cfg.getIntInfoData(cf.cfgTurnSync)
+    THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
+        
+    syncDbg = True
+
+    if not FPGA:
+        if (TURN_SYNC == en.SEL_TU_ISYN or \
+            TURN_SYNC == en.SEL_TU_ESYN or \
+            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            zSyncInt = Sync(dbg=syncDbg)
+            zSyncExt = Sync(dbg=syncDbg)
+
+        if (TURN_SYNC == en.SEL_TU_ISYN or \
+            TURN_SYNC == en.SEL_TU_ESYN or \
+            THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+            THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            xSyncExt = Sync(dbg=syncDbg)
+            xSyncInt = Sync(dbg=syncDbg)
+    else:
+        zSyncInt = Sync(dbg=syncDbg, fpga=True)
+        xSyncInt = Sync(dbg=syncDbg, fpga=True)
+
 class Turn(LatheOp, UpdatePass):
     def __init__(self, turnPanel):
         LatheOp.__init__(self, turnPanel)
@@ -1856,19 +1893,6 @@ class Turn(LatheOp, UpdatePass):
         self.passDone()
         return(True)
 
-    def setupSync(self):
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
-
     def setup(self, add=False): # turn
         comm.queParm(pm.CURRENT_OP, en.OP_TURN)
         m = self.m
@@ -1878,7 +1902,22 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            self.setupSync()
+            if TURN_SYNC == en.SEL_TU_ISYN or \
+               TURN_SYNC == en.SEL_TU_SYN or \
+               ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
+                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
+                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
+                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+                if SYNC_SPI:
+                    m.syncParms()
+                    m.syncCommand(sc.SYNC_SETUP)
+            elif TURN_SYNC == en.SEL_TU_ESYN:
+                syncComm.setParm(sp.SYNC_ENCODER, \
+                                 cfg.getIntInfoData(cf.cfgEncoder))
+                syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
+                syncComm.setParm(sp.SYNC_OUTPUT, self.output)
+                syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+                syncComm.command(sc.SYNC_SETUP)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -2517,10 +2556,15 @@ class Arc(LatheOp, UpdatePass):
         return(True)
 
     def setupSync(self):
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or \
+           TURN_SYNC == en.SEL_TU_SYN or \
+           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm.setParm(sp.SYNC_ENCODER, \
                              cfg.getIntInfoData(cf.cfgEncoder))
@@ -3055,10 +3099,15 @@ class Face(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.zStart, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or \
+           TURN_SYNC == en.SEL_TU_SYN or \
+           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm.setParm(sp.SYNC_ENCODER, \
                              cfg.getIntInfoData(cf.cfgEncoder))
@@ -3321,10 +3370,15 @@ class Cutoff(LatheOp):
         comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
         m = self.m
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or \
+           TURN_SYNC == en.SEL_TU_SYN or \
+           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm.setParm(sp.SYNC_ENCODER, \
                              cfg.getIntInfoData(cf.cfgEncoder))
@@ -3510,10 +3564,15 @@ class Taper(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
+        if TURN_SYNC == en.SEL_TU_ISYN or \
+           TURN_SYNC == en.SEL_TU_SYN or \
+           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm.setParm(sp.SYNC_ENCODER, \
                              cfg.getIntInfoData(cf.cfgEncoder))
@@ -4197,23 +4256,28 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
+        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
+           THREAD_SYNC == en.SEL_TH_SYN or \
+           ((THREAD_SYNC == en.SEL_TH_ESYN_RENC) and SYNC_SPI):
             comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
             comm.queParm(pm.L_SYNC_OUTPUT, self.output)
             comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
+        elif THREAD_SYNC == en.SEL_TH_ESYN_RENC:
             syncComm.setParm(sp.SYNC_ENCODER, \
                              cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
             syncComm.command(sc.SYNC_SETUP)
-            if (self.runout != 0 and
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
+
+        if ((self.runout != 0) and \
+            (THREAD_SYNC == en.SEL_TH_ESYN_RSYN)):
+            comm.queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
+            comm.queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
+            comm.queParm(pm.L_X_SYNC_PRESCALER, self.xPreScaler)
 
         comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
         comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
@@ -7945,7 +8009,7 @@ class MainFrame(wx.Frame):
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
-        if SPINDLE_SYNC_BOARD:
+        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
             syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
                                 cfg.getInfoData(cf.syncRate))
             syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
@@ -8384,7 +8448,7 @@ class MainFrame(wx.Frame):
         global cfg, comm, FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
             TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
-            HOME_IN_PLACE, X_DRO_POS
+            HOME_IN_PLACE, X_DRO_POS, SYNC_SPI
 
         cfg = ConfigInfo(cf.configTable)
         cfg.clrInfo(len(cf.config))
@@ -8396,6 +8460,7 @@ class MainFrame(wx.Frame):
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+        SYNC_SPI = cfg.getInitialBoolInfo(cf.cfgSyncSPI)
 
         if DRO:
             X_DRO_POS = cfg.getInitialBoolInfo(cf.xDROPos)
@@ -8413,8 +8478,7 @@ class MainFrame(wx.Frame):
         else:
             SPINDLE_SYNC_BOARD = False
 
-        TURN_SYNC = cfg.getIntInfoData(cf.cfgTurnSync)
-        THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
+        syncFuncSetup()
 
         if True:
             print("FPGA %s" % (FPGA))
@@ -8451,31 +8515,9 @@ class MainFrame(wx.Frame):
             zDROPosition = 0.0
             xDROPosition = 0.0
 
-        if SPINDLE_SYNC_BOARD:
+        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
             global syncComm
             syncComm = Comm()
-
-        syncDbg = True
-
-        global zSyncInt, zSyncExt, xSyncInt, xSyncExt
-        if not FPGA:
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                zSyncInt = Sync(dbg=syncDbg)
-                zSyncExt = Sync(dbg=syncDbg)
-
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                xSyncExt = Sync(dbg=syncDbg)
-                xSyncInt = Sync(dbg=syncDbg)
-        else:
-            zSyncInt = Sync(dbg=syncDbg, fpga=True)
-            xSyncInt = Sync(dbg=syncDbg, fpga=True)
 
         comm = Comm()
         comm.SWIG = SWIG
@@ -8978,6 +9020,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             jogPanel.spindleRangeSetup()
             spindleDataSent = False
 
+    def okAction(self):
+        syncFuncSetup()
+
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, frame, defaultFont):
         pos = (10, 10)
@@ -9042,6 +9087,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bExternal DRO", cf.cfgExtDro, None), \
             ("bLCD", cf.cfgLCD, None), \
             ("bControl MEGA", cf.cfgMega, None), \
+            ("bSync SPI", cf.cfgSyncSPI, None), \
             ("bProbe Inv", cf.cfgPrbInv, None), \
             ("wfcy", cf.cfgFcy, 'd'), \
             ("bDisable Commands", cf.cfgCmdDis, None), \
