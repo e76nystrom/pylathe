@@ -471,6 +471,15 @@ syncCmdList = \
  ("SYNC_POLL", "", "poll sync board"),
 )
 
+megaCmdList = \
+(\
+ ("MEGA_NONE", "", "no command"),
+ ("MEGA_SET_RPM", "", "set pwm for rpm"),
+ ("MEGA_GET_RPM", "", "get pwm value"),
+ ("MEGA_POLL", "", "poll mega info"),
+ # ("MEGA_", ""),
+)
+
 parmList = \
 (\
     "spindle parameters",
@@ -806,6 +815,13 @@ syncParmList = \
  ("SYNC_PRESCALER", "sync prescaler", "uint16_t"),
  ("SYNC_ENCODER", "sync encoder pulses", "uint16_t"),
  ("SYNC_MAX_PARM", "sync maximum parameter", "int16_t")
+)
+
+megaParmList = \
+(\
+ ("MPARM_RPM", "rpm value", "uint16_t"),
+ ("MPARM_VFD_ENA", "", "char"),
+ # ("MPARM_", "", "char"),
 )
 
 regList = \
@@ -1709,35 +1725,6 @@ enumList =\
     # ("EV_", ""),
     "};",
  
-    "mega commands",
-    
-    "enum cmd_Mega",
-    "{",
-     ("MEGA_NONE", "no command"),
-     ("MEGA_SET_RPM", "set pwm for rpm"),
-     ("MEGA_GET_RPM", "get pwm value"),
-     ("MEGA_POLL", "poll mega info"),
-     # ("MEGA_", ""),
-    "};",
-
-    "mega poll response bits",
-    
-    "enum poll_Mega",
-    "{",
-     ("M_POLL_ESTOP_NO", "estop no in"),
-     ("M_POLL_ESTOP_NC", "estop nc in"),
-     ("M_POLL_SP_FWD", "spindle forward in"),
-     ("M_POLL_SP_REV", "spindle reverse in"),
-     ("M_POLL_ESTOP", "estop condition"),
-     ("M_POLL_WD_ENA", "watchdog enabled"),
-     ("M_POLL_CP_ACTIVE", "charge pump active"),
-     ("M_POLL_PWM_ACTIVE", "pwm active"),
-     ("M_POLL_STEP_DIS", "stepper disabled"),
-     ("M_POLL_ESTOP_RLY", "estop relay"),
-     ("M_POLL_ESTOP_PC", "estop pc"),
-     # ("M_POLL_", ""),
-    "};",
-
     "turning sync selector",
     
     "enum sel_Turn c",
@@ -1776,6 +1763,27 @@ enumList =\
     "};",
 )
     
+megaEnumList =\
+(\
+    "mega poll response bits",
+    
+    "enum poll_Mega",
+    "{",
+     ("M_POLL_ESTOP_NO", "estop no in"),
+     ("M_POLL_ESTOP_NC", "estop nc in"),
+     ("M_POLL_SP_FWD", "spindle forward in"),
+     ("M_POLL_SP_REV", "spindle reverse in"),
+     ("M_POLL_ESTOP", "estop condition"),
+     ("M_POLL_WD_ENA", "watchdog enabled"),
+     ("M_POLL_CP_ACTIVE", "charge pump active"),
+     ("M_POLL_PWM_ACTIVE", "pwm active"),
+     ("M_POLL_STEP_DIS", "stepper disabled"),
+     ("M_POLL_ESTOP_RLY", "estop relay"),
+     ("M_POLL_ESTOP_PC", "estop pc"),
+     # ("M_POLL_", ""),
+    "};",
+)
+
 xilinxEncList = \
 ( \
     "skip register zero",
@@ -1814,6 +1822,7 @@ if __name__ == '__main__':
 
         cLoc = path + '/../LatheCPP/include/'
         syncLoc = path + '/../SyncCPP/include/'
+        megaLoc = path + '/../../Arduino/output/'
 
         xLoc = path + '/../../Xilinx/LatheCtl/'
         fEncLoc = path + '/../../Altera/Encoder/VHDL/'
@@ -1835,16 +1844,35 @@ if __name__ == '__main__':
     setup.createStrings(strList)
 
     setup.createCommands(cmdList, cLoc, fData)
+
     setup.createCommands(syncCmdList, cLoc, fData, prefix='sync')
     setup.createCommands(syncCmdList, syncLoc, fData, \
                          pyFile=False, check=False, prefix='sync')
 
+    setup.createCommands(megaCmdList, cLoc, fData, prefix='mega', \
+                         pyFile=False)
+    setup.createCommands(megaCmdList, megaLoc, fData, \
+                         pyFile=False, check=False, prefix='mega')
+
     setup.createParameters(parmList, cLoc, fData)
-    setup.createParameters(syncParmList, cLoc, fData, prefix='sync')
+
+    setup.createParameters(syncParmList, cLoc, fData, prefix='sync',
+                           cSource=None)
     setup.createParameters(syncParmList, syncLoc, fData, pyFile=False,
                            cSource='../src/', prefix='sync')
 
+    setup.createParameters(megaParmList, cLoc, fData, pyFile=False,
+                           cSource=None, prefix='mega')
+    setup.createParameters(megaParmList, megaLoc, fData, pyFile=False,
+                           cSource='', prefix='mega')
+
     setup.createEnums(enumList, cLoc, fData)
+
+    setup.createEnums(megaEnumList, cLoc, fData, pyFile=False,
+                      prefix="mega")
+    setup.createEnums(megaEnumList, megaLoc, fData, pyFile=False,
+                      prefix="mega")
+
     setup.createCtlBits(regList, cLoc, fData)
 
     setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
