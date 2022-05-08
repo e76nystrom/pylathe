@@ -15,8 +15,10 @@ else:
     from remParmDef import parmTable
     from configDef import cfgFpga
     from remCmdDef import cmdTable,  LOADMULTI, \
-        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
-
+        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS, \
+        SET_MEGA_VAL, READ_MEGA_VAL
+    from megaParmDef import parmTable as megaParmTable
+    
 cmdOverhead = 8
 
 class CommTimeout(Exception):
@@ -75,7 +77,7 @@ class Comm():
             self.ser.close()
             self.ser = None
 
-    def command(self, cmdVal):
+    def command(self, cmdVal, silent=False):
         if len(self.parmList) > 0:
             self.sendMulti()
         (cmd, action) = self.cmdTable[cmdVal]
@@ -86,7 +88,7 @@ class Comm():
             actionCmd = "lathe." + action + "()"
             eval(actionCmd)
         cmdStr = '\x01%x \r' % (cmdVal)
-        if self.xDbgPrint:
+        if (not silent) and self.xDbgPrint:
             if cmd != self.lastCmd:
                 self.lastCmd = cmd
                 print("%-20s %s" % (cmd, cmdStr.strip('\x01\r')))
@@ -409,12 +411,69 @@ class Comm():
                     return(val)
             rsp = rsp + tmp;
 
-
     def dspXReg(self, reg, val, label=''):
         if self.xDbgPrint:
             print ("%-12s %2x %8x %12d %s" %
                    (xRegTable[reg], reg, val & 0xffffffff, val, label))
         return(val)
+
+    def setMegaParm(self, parm, val):
+        stdout.flush()
+        val = int(val)
+        if self.xDbgPrint:
+            print("%-20s %4x %6d" % \
+                  (megaParmTable[parm][0], val & 0xffffffff, val))
+            stdout.flush()
+        if self.ser is None:
+            return
+        cmd = '\x01%x %x %08x \r' % (SET_MEGA_VAL, parm, val & 0xffffffff)
+        self.commLock.acquire(True)
+        self.ser.write(cmd.encode())
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1).decode('utf8')
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout")
+                raise CommTimeout
+                break;
+            if tmp == '*':
+                self.timeout = False
+                break
+            rsp = rsp + tmp;
+        self.commLock.release()
+    
+    def readMegaParm(self, parm):
+        if self.ser is None:
+            return(0)
+        cmd = '\x01%x %x \r' % (READ_MEGA_VAL, parm)
+        if self.xDbgPrint:
+            pass
+        self.commLock.acquire(True)
+        self.ser.write(cmd.encode())
+        rsp = "";
+        while True:
+            tmp = self.ser.read(1).decode('utf8')
+            if len(tmp) == 0:
+                self.commLock.release()
+                if not self.timeout:
+                    self.timeout = True
+                    print("timeout")
+                raise CommTimeout
+                break;
+            if tmp == '*':
+                self.timeout = False
+                result = rsp.split()
+                if len(result) == 3:
+                    val = int(result[2], 16)
+                    val = c_int32(val).value
+                    # if val & 0x80000000:
+                    #     val = -((val ^ 0xffffffff) + 1)
+                    self.commLock.release()
+                    return(val)
+            rsp = rsp + tmp;
 
     def sendMove(self, opString, op, val):
         if isinstance(val, float):

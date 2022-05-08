@@ -18,7 +18,7 @@ def fWrite(f, txt):
 class Setup():
     def __init__(self):
         self.importList = []
-        self.outputFile = False
+        self.outputFile = True
 
     def listImports(self, file, importList):
         line = "from %s import " % (file)
@@ -388,7 +388,10 @@ class Setup():
             # fWrite(jFile, "public class CtlStates\n{\n");
         f = None
         if self.outputFile and pyFile:
-            fName = 'enumDef'
+            fName = 'enum'
+            if len(prefix) != 0:
+                fName = prefix + fName.capitalize()
+            fName += 'Def'
             f = open(fName + '.py', 'wb')
             fWrite(f, "\n# enums\n")
         val = 0

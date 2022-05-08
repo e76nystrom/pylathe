@@ -80,6 +80,11 @@ CLRDBG               =  46
 ENCSTART             =  47
 ENCSTOP              =  48
 
+#  mega commands 
+
+SET_MEGA_VAL         =  49
+READ_MEGA_VAL        =  50
+
 # command table
 
 cmdTable = ( \
@@ -132,4 +137,6 @@ cmdTable = ( \
     ("CLRDBG", "clearDbg"),             #  46
     ("ENCSTART", None),                 #  47
     ("ENCSTOP", None),                  #  48
+    ("SET_MEGA_VAL", None),             #  49
+    ("READ_MEGA_VAL", None),            #  50
     )

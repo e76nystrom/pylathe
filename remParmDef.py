@@ -312,7 +312,9 @@ ARC_X_START          = 179
 ARC_Z_START          = 180
 ARC_X_END            = 181
 ARC_Z_END            = 182
-MAX_PARM             = 183
+MEGA_VFD             = 183
+MEGA_SIM             = 184
+MAX_PARM             = 185
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -441,7 +443,7 @@ parmTable = ( \
     ('CFG_MPG', 'char', 'cfgMpg'),
     ('CFG_DRO', 'char', 'cfgDro'),
     ('CFG_LCD', 'char', 'cfgLcd'),
-    ('CFG_FCY', 'int', 'cfgFcy'),
+    ('CFG_FCY', 'unsigned int', 'cfgFcy'),
     ('CFG_SWITCH', 'int', 'cfgSwitch'),
     ('CFG_VAR_SPEED', 'int', 'cfgVarSpeed'),
     ('SETUP_DONE', 'char', 'setupDone'),
@@ -466,11 +468,11 @@ parmTable = ( \
     ('TH_Z_START', 'int32_t', 'thZStart'),
     ('TH_X_START', 'int32_t', 'thXStart'),
     ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),
-    ('X_FEED', 'int16_t', 'xFeed'),
+    ('X_FEED', 'int32_t', 'xFeed'),
     ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
     ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
     ('JOG_DEBUG', 'char', 'jogDebug'),
-    ('PWM_FREQ', 'int16_t', 'pwmFreq'),
+    ('PWM_FREQ', 'unsigned int', 'pwmFreq'),
     ('MIN_SPEED', 'int16_t', 'minSpeed'),
     ('MAX_SPEED', 'int16_t', 'maxSpeed'),
     ('CURRENT_OP', 'char', 'currentOp'),
@@ -498,5 +500,7 @@ parmTable = ( \
     ('ARC_Z_START', 'int', 'arcZStart'),
     ('ARC_X_END', 'int', 'arcXEnd'),
     ('ARC_Z_END', 'int', 'arcZEnd'),
+    ('MEGA_VFD', 'char', 'megaVfd'),
+    ('MEGA_SIM', 'char', 'megaSim'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )
