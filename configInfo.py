@@ -36,26 +36,26 @@ class ConfigInfo():
         self.configTable = configTable
 
     def clrInfo(self, size):
-        self.info = [None for i in range(size)]
-        self.infoData = [None for i in range(size)]
+        self.info = [None for _ in range(size)]
+        self.infoData = [None for _ in range(size)]
 
     def saveList(self, file, varList):
         f = open(file, 'wb')
         for index in varList:
             name = self.configTable[index]
             val = self.info[index]
-            str = self.formatConfig(name, val)
-            if str is not None:
-                f.write(str.encode())
+            string = self.formatConfig(name, val)
+            if string is not None:
+                f.write(string.encode())
         f.close()
 
     def saveInfo(self, file):
         f = open(file, 'wb')
         for index, (val) in enumerate(self.info):
             name = self.configTable[index]
-            str = self.formatConfig(name, val)
-            if str is not None:
-                f.write(str.encode())
+            string = self.formatConfig(name, val)
+            if string is not None:
+                f.write(string.encode())
         f.close()
 
     def updateFieldInfoData(self, fields):
@@ -66,7 +66,8 @@ class ConfigInfo():
         for (index, fmt) in formatList:
             self.infoData[index] = self.info[index].GetValue()
 
-    def formatConfig(self, name, val):
+    @staticmethod
+    def formatConfig(name, val):
         valClass = val.__class__.__name__
         # print(name, valClass)
         # stdout.flush()
@@ -127,11 +128,11 @@ class ConfigInfo():
                     self.info[index] = func
                     self.infoData[index] = func.GetValue()
                 # stdout.flush()
+            f.close()
         except Exception as e:
             print(line, "readInfo error")
             print(e)
             stdout.flush()
-        f.close()
 
     def initInfo(self, index, val):
         if self.info[index] is not None:
@@ -185,13 +186,13 @@ class ConfigInfo():
             val = self.info[index].GetValue()
             try:
                 return(int(val))
-            except ValueError as e:
+            except ValueError:
                 print("getIntInfo ValueError index %d %s %s" % \
                       (index, self.configTable[index], val))
-            except TypeError as e:
+            except TypeError:
                 print("getIntInfo TypeError index %d %s %s" % \
                       (index, self.configTable[index], val))
-        except IndexError as e:
+        except IndexError:
             print("getIntInfo IndexError %s" % (index))
         stdout.flush()
         return(0)
@@ -243,13 +244,13 @@ class ConfigInfo():
             val = self.infoData[index]
             try:
                 return(int(val))
-            except ValueError as e:
+            except ValueError:
                 print("getIntInfoData ValueError index %d %s %s" % \
                       (index, self.configTable[index], val))
-            except TypeError as e:
+            except TypeError:
                 print("getIntInfoData TypeError index %d %s %s" % \
                       (index, self.configTable[index], val))
-        except IndexError as e:
+        except IndexError:
             print("getIntInfo IndexError %s" % (index))
         stdout.flush()
         return(0)

@@ -1,10 +1,7 @@
 #!/cygdrive/c/Python37/python
 
-from __future__ import print_function
-
 import math
 from sys import stdout
-
 
 class Sync():
     def __init__(self, maxPrime=127, dbg=False, fpga=False):

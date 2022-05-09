@@ -94,7 +94,7 @@ class Comm():
                 print("%-20s %s" % (cmd, cmdStr.strip('\x01\r')))
                 stdout.flush()
         if self.ser is None:
-            return(None);
+            return(None)
         self.commLock.acquire(True)
         self.ser.write(cmdStr.encode())
         rsp = ""
@@ -107,11 +107,11 @@ class Comm():
                     print("timeout %s" % (cmd.strip('\x01\r')))
                     stdout.flush()
                 raise CommTimeout()
-                break
+
             if tmp == '*':
                 self.timeout = False
                 break
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
         self.commLock.release()
         return(rsp.strip("\n\r"))
 
@@ -171,7 +171,7 @@ class Comm():
         cmd = '\x01%x %x' %  (self.loadMulti, count)
         for parm in self.parmList:
             cmd += parm
-        cmd += ' \r';
+        cmd += ' \r'
         if self.xDbgPrint:
             print("cmdlen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
         self.parmList = []
@@ -183,17 +183,17 @@ class Comm():
             return
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
                 self.commLock.release()
                 if not self.timeout:
                     self.timeout = True
-                    print("setParm timeout %s" % (parm))
+                    print("sendMulti timeout")
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
@@ -237,7 +237,7 @@ class Comm():
             return
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -247,7 +247,7 @@ class Comm():
                     print("setParm timeout %s" % (parm))
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
@@ -263,7 +263,7 @@ class Comm():
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -273,7 +273,7 @@ class Comm():
                     print("getParm timeout %s" % (self.parmTable[parmIndex]))
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 result = rsp.split()
@@ -282,7 +282,7 @@ class Comm():
                     try:
                         retVal = int(result[2], 16)
                         retVal = c_int32(retVal).value
-                    except:
+                    except ValueError:
                         print("getParm error on %s" % (result))
                         stdout.flush()
                         retVal = 0
@@ -292,8 +292,7 @@ class Comm():
                         print("%08x" % (retVal))
                         stdout.flush()
                     return(retVal)
-            rsp = rsp + tmp;
-        self.commLock.release()
+            rsp = rsp + tmp
 
     def getString(self, command, parm=None):
         if self.ser is None:
@@ -303,7 +302,7 @@ class Comm():
         self.cmdLen = len(cmd) - 1
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -313,15 +312,14 @@ class Comm():
                     print("getString timeout")
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.commLock.release()
                 self.timeout = False
                 if len(rsp) <= 3:
                     return ""
                 return(rsp[self.cmdLen:])
-            rsp = rsp + tmp;
-        self.commLock.release()
+            rsp = rsp + tmp
 
     def setXReg(self, reg, val):
         if not (reg in xRegs):
@@ -338,7 +336,7 @@ class Comm():
         cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -347,11 +345,11 @@ class Comm():
                     self.timeout = True
                     print("timeout")
                 raise CommTimeout
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
         self.commLock.release()
 
     def setXRegN(self, reg, val):
@@ -365,7 +363,7 @@ class Comm():
             pass
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -374,11 +372,11 @@ class Comm():
                     self.timeout = True
                     print("timeout")
                 raise CommTimeout
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
         self.commLock.release()
 
     def getXReg(self, reg):
@@ -389,7 +387,7 @@ class Comm():
             pass
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -398,7 +396,7 @@ class Comm():
                     self.timeout = True
                     print("timeout")
                 raise CommTimeout
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 result = rsp.split()
@@ -409,7 +407,7 @@ class Comm():
                     #     val = -((val ^ 0xffffffff) + 1)
                     self.commLock.release()
                     return(val)
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
 
     def dspXReg(self, reg, val, label=''):
         if self.xDbgPrint:
@@ -429,7 +427,7 @@ class Comm():
         cmd = '\x01%x %x %08x \r' % (SET_MEGA_VAL, parm, val & 0xffffffff)
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -438,11 +436,11 @@ class Comm():
                     self.timeout = True
                     print("timeout")
                 raise CommTimeout
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
         self.commLock.release()
     
     def readMegaParm(self, parm):
@@ -453,7 +451,7 @@ class Comm():
             pass
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -462,7 +460,7 @@ class Comm():
                     self.timeout = True
                     print("timeout")
                 raise CommTimeout
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 result = rsp.split()
@@ -473,7 +471,7 @@ class Comm():
                     #     val = -((val ^ 0xffffffff) + 1)
                     self.commLock.release()
                     return(val)
-            rsp = rsp + tmp;
+            rsp = rsp + tmp
 
     def sendMove(self, opString, op, val):
         if isinstance(val, float):
@@ -499,7 +497,7 @@ class Comm():
             return
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -509,7 +507,7 @@ class Comm():
                     print("sendMove timeout")
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 break
@@ -522,7 +520,7 @@ class Comm():
         cmd = '\x01%x \r' % (MOVEQUESTATUS)
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = "";
+        rsp = ""
         while True:
             tmp = self.ser.read(1).decode('utf8')
             if len(tmp) == 0:
@@ -532,7 +530,7 @@ class Comm():
                     print("getQueStatus timeout")
                     stdout.flush()
                 raise CommTimeout()
-                break;
+
             if tmp == '*':
                 self.timeout = False
                 result = rsp.split()
@@ -543,5 +541,4 @@ class Comm():
                     # if retVal & 0x80000000:
                     #     retVal -= 0x100000000
                     return(retVal)
-            rsp = rsp + tmp;
-        self.commLock.release()
+            rsp = rsp + tmp

@@ -119,7 +119,7 @@ class Setup():
         cmdTable = []
         if fData:
             cFile = open(cLoc + prefix + 'CmdList.h', 'wb')
-            fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n");
+            fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n")
             # jFile = open(jLoc + 'Cmd.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n");
             # fWrite(jFile, "public enum Cmd\n{\n");
@@ -246,7 +246,7 @@ class Setup():
                 except FileNotFoundError:
                     c4File = None
             # jFile = open(jLoc + 'Parm.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n");
+            # fWrite(jFile, "package lathe;\n\n")
             # fWrite(jFile, "public enum Parm\n{\n")
         f = None
         if self.outputFile and pyFile:
@@ -273,7 +273,7 @@ class Setup():
                         varName = regName[3:].lower()
                     else:
                         varName = regName.lower()
-                regAct = '0';
+                regAct = '0'
                 if (len(data) >= 4):
                     regAct = data[3]
                 if fData:
@@ -384,8 +384,8 @@ class Setup():
                 fName = prefix + fName.capitalize()
             cFile = open(cLoc + fName, 'wb')
             # jFile = open(jLoc + 'CtlStates.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n");
-            # fWrite(jFile, "public class CtlStates\n{\n");
+            # fWrite(jFile, "package lathe;\n\n")
+            # fWrite(jFile, "public class CtlStates\n{\n")
         f = None
         if self.outputFile and pyFile:
             fName = 'enum'
@@ -404,8 +404,8 @@ class Setup():
                 if fData:
                     tmp =  " %s, " % (state)
                     fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
-                                (tmp.ljust(32), val, val, comment));
-                    # fWrite(jFile, '  "%-10s %s", \n' % (state, comment));
+                                (tmp.ljust(32), val, val, comment))
+                    # fWrite(jFile, '  "%-10s %s", \n' % (state, comment))
                 if pyFile:
                     if state in globals():
                         print("createCtlStates %s already defined" % state)
@@ -489,8 +489,8 @@ class Setup():
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n");
-            # fWrite(jFile, "public class CtlBits\n{\n");
+            # fWrite(jFile, "package lathe;\n\n")
+            # fWrite(jFile, "public class CtlBits\n{\n")
         f = None
         if self.outputFile:
             file ='ctlBitDef'
@@ -507,10 +507,10 @@ class Setup():
                         val = str(val)
                     bitVal = eval(val)
                     fWrite(cFile, "%s /* 0x%02x %s */\n" % 
-                                (tmp.ljust(32), bitVal, comment));
+                                (tmp.ljust(32), bitVal, comment))
                     tmp =  " public static final int %-10s = %s;" % (var, val)
                     # fWrite(jFile, "%s /* %s */\n" % 
-                    #             (tmp, comment));
+                    #             (tmp, comment))
                 if var in globals():
                     print("createctlBits %s already defined" % var)
                 else:
@@ -541,16 +541,15 @@ class Setup():
                         xName="RegDef"):
         global xRegTable
         xRegTable = []
-        imports = []
-        imports.append(table)
+        imports = [table]
         if fData:
             path = os.path.join(cLoc, cName + 'Reg.h')
             cFile = open(path, 'wb')
-            fWrite(cFile, "enum " + cName.upper() + "\n{\n");
+            fWrite(cFile, "enum " + cName.upper() + "\n{\n")
             try:
                 xPath = os.path.join(xLoc, xName + '.vhd')
                 xFile = open(xPath , 'wb')
-            except (OSError, IOError) as e:
+            except (OSError, IOError):
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
@@ -560,12 +559,12 @@ class Setup():
                 fWrite(xFile, "package RegDef is\n\n")
                 fWrite(xFile, "constant opb : positive := 8;\n\n")
             # jFile = open(jLoc + 'Xilinx.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n");
-            # fWrite(jFile, "public enum Xilinx\n {\n");
+            # fWrite(jFile, "package lathe;\n\n")
+            # fWrite(jFile, "public enum Xilinx\n {\n")
             # j1File = open(jLoc + 'XilinxStr.java', 'wb')
-            # j1File.write("package lathe;\n\n");
-            # j1File.write("public class XilinxStr\n{\n");
-            # j1File.write(" public static final String[] xilinxStr =\n {\n");
+            # j1File.write("package lathe;\n\n")
+            # j1File.write("public class XilinxStr\n{\n")
+            # j1File.write(" public static final String[] xilinxStr =\n {\n")
         f = None
         if self.outputFile:
             f = open(pName + '.py', 'wb')
@@ -595,7 +594,7 @@ class Setup():
                 if fData:
                     tmp = " %s, " % (regName)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
-                                (tmp.ljust(32), index, regComment));
+                                (tmp.ljust(32), index, regComment))
                     if xFile:
                         fWrite(xFile, ('constant %-18s : ' \
                                      'unsigned(opb-1 downto 0) ' \
@@ -603,10 +602,10 @@ class Setup():
                                     (regName, index, regComment))
                     # tmp = "  %s, " % (regName)
                     # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), index, regComment));
+                    #             (tmp.ljust(32), index, regComment))
                     # tmp = "  \"%s\", " % (regName)
                     # j1File.write("%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), index, regComment));
+                    #             (tmp.ljust(32), index, regComment))
                 globals()[regName] = index
                 imports.append(regName)
                 xRegTable.append(regName)
@@ -639,10 +638,10 @@ class Setup():
                             fWrite(xFile, "\n-- %s\n\n" % (data))
                         # fWrite(jFile, "\n// %s\n\n" % (data))
                     else:
-                        fWrite(cFile, "\n");
+                        fWrite(cFile, "\n")
                         if xFile:
-                            fWrite(xFile, "\n");
-                        # fWrite(jFile, "\n");
+                            fWrite(xFile, "\n")
+                        # fWrite(jFile, "\n")
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
 
@@ -756,7 +755,7 @@ class Setup():
             try:
                 path = os.path.join(xLoc, xName + 'Bits.vhd')
                 xFile = open(path , 'wb')
-            except IOError as e:
+            except IOError:
                 print("unable to open %s" % (xLoc,))
                 xFile = None
             if xFile:
@@ -765,8 +764,8 @@ class Setup():
                 "use ieee.numeric_std.all;\n\n")
                 fWrite(xFile, "package " + package + " is\n")
             # jFile = open(jLoc + 'XilinxBits.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n");
-            # fWrite(jFile, "public class XilinxBits\n{\n");
+            # fWrite(jFile, "package lathe;\n\n")
+            # fWrite(jFile, "public class XilinxBits\n{\n")
         regName = ""
         bitStr = []
         lastShift = -1
@@ -795,7 +794,7 @@ class Setup():
                         tmp =  "#define %-12s  (%s << %s)" % (cVar, bit, shift)
                         if shiftType != tuple:
                             fWrite(cFile, "%s/* 0x%03x %s */\n" % 
-                                   (tmp.ljust(32), bit << shift, comment));
+                                   (tmp.ljust(32), bit << shift, comment))
                             if (shift != lastShift):
                                 tmp =  "  \"%s\", " % (cVar)
                                 bitStr.append("%s/* 0x%02x %s */\n" % 
@@ -866,10 +865,10 @@ class Setup():
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
-                            for i in range(len(xLst)):
+                            for _ in range(len(xLst)):
                                 fWrite(xFile, xLst[i])
                             fWrite(xFile, "\n")
-                            for i in range(len(cLst)):
+                            for _ in range(len(cLst)):
                                 fWrite(xFile, cLst[i])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +
@@ -877,7 +876,7 @@ class Setup():
                         #                 (regName))
                         #     for i in range(len(bitStr)):
                         #         fWrite(jFile, bitStr[i])
-                        #     fWrite(jFile, " };\n");
+                        #     fWrite(jFile, " };\n")
                         #     bitStr = []
                     if (len(data) != 0):
                         fWrite(cFile, "\n// %s\n\n" % (data))
