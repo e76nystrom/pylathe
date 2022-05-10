@@ -218,8 +218,8 @@ class Sync():
             if len(result) != 0:
                 nFactors += result
                 if self.dbg:
-                    for n in result:
-                        print(n, end=' ')
+                    for j in result:
+                        print(j, end=' ')
             if self.dbg:
                 print()
         if self.dbg:
@@ -237,8 +237,8 @@ class Sync():
             if len(result) != 0:
                 dFactors += result
                 if self.dbg:
-                    for n in result:
-                        print(n, end=' ')
+                    for j in result:
+                        print(j, end=' ')
             if self.dbg:
                 print()
         if self.dbg:
@@ -325,7 +325,7 @@ class Sync():
 
         primes = []
         for i in range(maxPrime):
-            if sieve[i] == True:
+            if sieve[i]:
                 primes.append(i)
         self.primes = primes
 
