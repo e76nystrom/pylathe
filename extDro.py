@@ -12,21 +12,6 @@ def setZ(val):
 def setX(val):
     return("ax(1," + val + ")")
 
-extReadX = "print(axis.read(1))"
-extReadZ = "print(axis.read(2))"
-axisFunc = ("function ax(a, t)", \
-            "axis.zeroa(a,-t+axis.read(a))", 
-            'io.write("ok\\n")',
-            "end")
-delim = "\x1b[K"
-matchPrompt = "\x1b\[G.+?\x1b\[K"
-automateOn = "luash.automate(true)"
-automateOff = "luash.automate(nil)"
-showFunc = "func.show()"
-diamFunc = "func.diameter(1)"
-inchMode = "machine.inch()"
-absMode = "machine.abs()"
-
 class DroTimeout(Exception):
     pass
 
@@ -35,8 +20,21 @@ class ExtDro():
         self.dro = None
         self.timeout = False
         self.droLock = Lock()
-
         self.xDbgPrint = True
+        self.extReadX = "print(axis.read(1))"
+        self.extReadZ = "print(axis.read(2))"
+        self.axisFunc = ("function ax(a, t)", \
+                         "axis.zeroa(a,-t+axis.read(a))", \
+                         'io.write("ok\\n")', \
+                         "end")
+        self.delim = "\x1b[K"
+        self.matchPrompt = "\x1b\[G.+?\x1b\[K"
+        self.automateOn = "luash.automate(true)"
+        self.automateOff = "luash.automate(nil)"
+        self.showFunc = "func.show()"
+        self.diamFunc = "func.diameter(1)"
+        self.inchMode = "machine.inch()"
+        self.absMode = "machine.abs()"
 
     def openSerial(self, port, rate):
         try:

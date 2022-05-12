@@ -13,17 +13,18 @@ import subprocess
 import sys
 import traceback
 from ctypes import c_uint32
-from math import atan2, ceil, cos, degrees, floor, hypot, pi, \
+from math import atan2, ceil, cos, degrees, hypot, pi, \
     radians, sin, sqrt, tan
 from platform import system
 #from Queue import Empty, Queue
 from queue import Empty, Queue
 from sys import stderr, stdout
-from threading import Event, Lock, Thread
+from threading import Event, Thread
 from time import sleep, time
 from datetime import datetime
 from pytz import timezone
 from collections import namedtuple
+from extDro import DroTimeout
 # from contextlib import redirect_stderr
 #     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
 #          redirect_stderr(stderr):
@@ -86,8 +87,8 @@ for f in tuple(fileDir.split(os.sep)[:dirStrip]) + pncDir:
     filePath += f
 sys.path.append(filePath)
 print(sys.path)
-from geometry import Line, Point
-from geometry import ARC, CW, CCW, LINE, degAtan2
+from geometry import Line
+from geometry import ARC, CW, LINE
 from geometry import Arc as GeoArc
 import dbgprt as dp
 dp.DBG = True
@@ -138,8 +139,8 @@ if SETUP:
     if FPGA:
         xLoc = '../../Xilinx/LatheCtl/'
         from interface import xilinxList, xilinxBitList
-        setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
-        setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+        setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
+        setup.createFpgaBits(xilinxBitList, cLoc, xLoc, fData)
 
     importList = setup.importList
     setupCmd = "from setup import "
@@ -155,14 +156,10 @@ print(sys.version)
 print(wx.version())
 stdout.flush()
 
-#cfg = None
-#comm = None
-#moveCommands = None
-
 fcy = None
 REF = 'REF'
 TEXT = 'TEXT'
-dro = None
+#dro = None
 eDro = None
 fTest = None
 
@@ -174,38 +171,9 @@ class StatusEvent(wx.PyEvent):
         self.SetEventType(EVT_STATUS_UPDATE_ID)
         self.data = data
 
-#mainFrame = None
-#updateThread = None
-#jogPanel = None
-#jogShuttle = None
-#keypad = None
 dialPanel = None
-#buttonRepeat = None
 
-# xSyncInt = None
-# zSyncInt = None
-# xSyncExt = None
-# zSyncExt = None
-# syncComm = None
-
-# spindleDataSent = False
-# zDataSent = False
-# xDataSent = False
-# megaDataSent = False
-
-# zPosition = 0.0
-# zHomeOffset = 0.0
-# zDROOffset = 0.0
-# zDROPosition = 0.0
-
-# xPosition = 0.0
-# xHomeOffset = 0.0
-# xDROPosition = 0.0
-# xDROOffset = 0.0
-
-# xHomed = False
-# zHomed = False
-done = False
+#done = False
 
 MAX_PRIME = 127
 factor = None
@@ -236,8 +204,8 @@ def timeStr():
     now = datetime.now(tz=tz)
     return now.strftime("%a %b %d %Y %H:%M:%S\n")
 
-def commTimeout():
-    wx.PostEvent(self, UpdateStatus(st.STR_TIMEOUT_ERROR))
+def commTimeout(jogPanel):
+    wx.PostEvent(jogPanel, StatusEvent(st.STR_TIMEOUT_ERROR))
     # jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
 def getFloatVal(tc):
@@ -643,33 +611,33 @@ class FormRoutines:
         if self.formatList is None:
             return
         if self.formatData(self.formatList):
-            wx.PostEvent(self, UpdateStatus(st.STR_STR_CLR))
+            wx.PostEvent(self, StatusEvent(st.STR_CLR))
             # jogPanel.setStatus(st.STR_CLR)
             # jogPanel.focus()
         else:
-            wx.PostEvent(self, UpdateStatus(st.STR_FIELD_ERROR))
+            wx.PostEvent(self, StatusEvent(st.STR_FIELD_ERROR))
             # jogPanel.setStatus(st.STR_FIELD_ERROR)
 
-EVT_PANEL_DELAY_ID = wx.Window.NewControlId()
+# EVT_PANEL_DELAY_ID = wx.Window.NewControlId()
 
-class PanelDelayEvent(wx.PyEvent):
-    def __init__(self):
-        wx.PyEvent.__init__(self)
-        self.SetEventType(EVT_PANEL_DELAY_ID)
+# class PanelDelayEvent(wx.PyEvent):
+#     def __init__(self):
+#         wx.PyEvent.__init__(self)
+#         self.SetEventType(EVT_PANEL_DELAY_ID)
 
-class PanelDelay(Thread):
-    def __init__(self, panel):
-        Thread.__init__(self)
-        print("PanelDelay start")
-        stdout.flush()
-        self.panel = panel
-        self.start()
+# class PanelDelay(Thread):
+#     def __init__(self, panel):
+#         Thread.__init__(self)
+#         print("PanelDelay start")
+#         stdout.flush()
+#         self.panel = panel
+#         self.start()
 
-    def run(self):
-        sleep(2)
-        wx.PostEvent(self.panel, PanelDelayEvent())
-        print("send PanelDelayEvent")
-        stdout.flush()
+#     def run(self):
+#         sleep(2)
+#         wx.PostEvent(self.panel, PanelDelayEvent())
+#         print("send PanelDelayEvent")
+#         stdout.flush()
 
 class PanelVars:
     def __init__(self):
@@ -685,9 +653,28 @@ class PanelVars:
         self.spring = None
         self.internal = None
         
+def addButtons(panel, sizerG, add, rpm, pause, combine=False):
+    panel.sendButton = panel.addButton(sizerG, 'Send', panel.OnSend)
+    # panel.sendButton.SetBackgroundColour('Green')
+
+    panel.startButton = panel.addButton(sizerG, 'Start', panel.OnStart)
+    panel.startButton.Disable()
+
+    if add is not None:
+        panel.addButton = panel.addButton(sizerG, 'Add', panel.OnAdd)
+        panel.addButton.Disable()
+        panel.add = panel.addField(sizerG, None, add, 'f')
+    else:
+        panel.placeHolder(sizerG)
+
+    panel.rpm = panel.addField(sizerG, "RPM", rpm, 'd')
+    panel.rpm.Bind(wx.EVT_KILL_FOCUS, panel.OnRPMKillFocus)
+
+    panel.pause = panel.addCheckBox(sizerG, "Pause", pause, box=combine)
+
 class ActionRoutines():
     def __init__(self, mainFrame, control, op):
-        self.mf = mainFrame
+        self.armf = mainFrame
         self.control = control
         self.op = op
         self.rpm = None
@@ -700,36 +687,36 @@ class ActionRoutines():
         self.safeX = None
         self.safeZ = None
         self.formatList = []
-        self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
+        # self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
         self.manualMode = False
 
-    def delayEvent(self, _):
-        self.sendButton.SetBackgroundColour(None)
-        self.sendButton.SetBackgroundColour('Green')
+    # def delayEvent(self, _):
+    #     self.sendButton.SetBackgroundColour(None)
+    #     self.sendButton.SetBackgroundColour('Green')
 
     def formatData(self, formatList):
         print("ActionRoutines formatData stub called")
         stdout.flush()
         return True
 
-    def addButtons(self, sizerG, add, rpm, pause, combine=False):
-        self.sendButton = self.addButton(sizerG, 'Send', self.OnSend)
-        # self.sendButton.SetBackgroundColour('Green')
+    # def addButtons(self, sizerG, add, rpm, pause, combine=False):
+    #     self.sendButton = self.addButton(sizerG, 'Send', self.OnSend)
+    #     # self.sendButton.SetBackgroundColour('Green')
 
-        self.startButton = self.addButton(sizerG, 'Start', self.OnStart)
-        self.startButton.Disable()
+    #     self.startButton = self.addButton(sizerG, 'Start', self.OnStart)
+    #     self.startButton.Disable()
 
-        if add is not None:
-            self.addButton = self.addButton(sizerG, 'Add', self.OnAdd)
-            self.addButton.Disable()
-            self.add = self.addField(sizerG, None, add, 'f')
-        else:
-            self.placeHolder(sizerG)
+    #     if add is not None:
+    #         self.addButton = self.addButton(sizerG, 'Add', self.OnAdd)
+    #         self.addButton.Disable()
+    #         self.add = self.addField(sizerG, None, add, 'f')
+    #     else:
+    #         self.placeHolder(sizerG)
 
-        self.rpm = self.addField(sizerG, "RPM", rpm, 'd')
-        self.rpm.Bind(wx.EVT_KILL_FOCUS, self.OnRPMKillFocus)
+    #     self.rpm = self.addField(sizerG, "RPM", rpm, 'd')
+    #     self.rpm.Bind(wx.EVT_KILL_FOCUS, self.OnRPMKillFocus)
 
-        self.pause = self.addCheckBox(sizerG, "Pause", pause, box=combine)
+    #     self.pause = self.addCheckBox(sizerG, "Pause", pause, box=combine)
 
     def sendAction(self):
         print("ActionRoutines sendAction stub called")
@@ -758,12 +745,12 @@ class ActionRoutines():
         self.safeZ = control.zStart + control.zRetract
         return self.safeZ, self.safeX
 
-    def OnShow(self, _):
-        if self.mf.done:
+    def OnShow(self, evt):
+        if self.armf.done:
             return
         # print("OnShow %s %d" % (str(self.IsShown()), self.op))
         if self.IsShown():
-            jp = self.mf.jogPanel
+            jp = self.armf.jogPanel
             jp.currentPanel = self
             jp.currentControl = self.control
             try:
@@ -776,7 +763,7 @@ class ActionRoutines():
             self.active = False
 
     def OnSend(self, _):
-        jp = self.mf.jogPanel
+        jp = self.armf.jogPanel
         if self.formatData(self.formatList):
             if not jp.xHomed:
                 jp.setStatus(st.STR_NOT_HOMED)
@@ -793,7 +780,7 @@ class ActionRoutines():
                             buttonEnable(self.startButton)
                             buttonDisable(jp.spindleButton)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(jp)
                 except:
                     traceback.print_exc()
         else:
@@ -801,7 +788,7 @@ class ActionRoutines():
         jp.focus()
 
     def OnStart(self, _):
-        jp = self.mf.jogPanel
+        jp = self.armf.jogPanel
         if not self.active:
             jp.setStatus(st.STR_NOT_SENT)
         elif (jp.mvStatus & ct.MV_PAUSE) == 0:
@@ -813,14 +800,14 @@ class ActionRoutines():
                     self.startAction()
                     buttonDisable(self.startButton)
             except CommTimeout:
-                commTimeout()
+                commTimeout(jp)
             except AttributeError:
                 print("ActionRoutines OnStart AttributeError")
                 stdout.flush()
         jp.focus()
 
     def OnAdd(self, _):
-        jp = self.mf.jogPanel
+        jp = self.armf.jogPanel
         if not self.active:
             jp.setStatus(st.STR_OP_NOT_ACTIVE)
         elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
@@ -829,21 +816,21 @@ class ActionRoutines():
             jp.setStatus(st.STR_CLR)
             jp.clrRetract()
             try:
-                curPass = self.mf.comm.getParm(pm.CURRENT_PASS)
+                curPass = self.armf.comm.getParm(pm.CURRENT_PASS)
                 if curPass >= self.control.passes:
                     if callable(self.addAction):
                         self.addAction()
                 else:
                     jp.setStatus(st.STR_PASS_ERROR)
             except CommTimeout:
-                commTimeout()
+                commTimeout(jp)
             except AttributeError:
                 print("ActionRoutines OnAdd AttributeError")
                 stdout.flush()
         jp.focus()
 
     def OnRPMKillFocus(self, e):
-        self.mf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
+        self.armf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
         e.Skip()
 
 class DialogActions():
@@ -1349,7 +1336,7 @@ class SendData:
             self.comm.command(cm.CLRDBG)
             self.comm.command(cm.CMD_CLEAR)
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.jp)
         self.spindleDataSent = False
         self.zDataSent = False
         self.xDataSent = False
@@ -1434,7 +1421,7 @@ class SendData:
                     queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
                     # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
                     queParm(pm.FREQ_MULT, 8)
-                    xilinxTestMode()
+                    self.xilinxTestMode()
                     queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
                     print(R_PI)
                     if not R_PI:
@@ -1485,7 +1472,7 @@ class SendData:
                 comm.command(cm.CMD_SPSETUP)
                 self.spindleDataSent = True
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.jp)
 
     def sendZData(self, send=False):
         cfg = self.cfg
@@ -1596,7 +1583,7 @@ class SendData:
 
                 self.zDataSent = True
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.jp)
         except:
             print("setZData exception")
             stdout.flush()
@@ -1719,7 +1706,7 @@ class SendData:
                 comm.command(cm.CMD_XSETUP)
                 self.xDataSent = True
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.jp)
 
     def sendMegaData(self, send=False):
         if send or (not self.megaDataSent):
@@ -1748,7 +1735,8 @@ class LatheOp():
         self.safeZ = 0.0
 
 class UpdatePass():
-    def __init__(self):
+    def __init__(self, mainFrame):
+        self.upmf = mainFrame
         self.calcPassN = None    # calculate values for a pass
         self.runPassN = None     # run a pass with current values
 
@@ -1793,7 +1781,6 @@ class UpdatePass():
         self.runpassN = runpass
 
     def initPass(self):
-        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
         self.passSize = [None for _ in range(self.passes + 1)]
         self.passSize[0] = 0.0
         self.passCount = 0
@@ -1802,17 +1789,16 @@ class UpdatePass():
         self.feed = 0.0
         self.springFlag = False
         self.lastPass = False
-        self.pause = self.panel.pause.GetValue()
 
     def updatePass(self):
         if (self.passCount < self.passes) or self.springFlag:
             if self.springFlag:
                 self.springFlag = False
-                self.m.nextPass(0x100 | self.passCount)
+                self.upmf.move.nextPass(0x100 | self.passCount)
                 self.runpassN()
             else:
                 self.passCount += 1
-                self.m.nextPass(self.passCount)
+                self.upmf.move.nextPass(self.passCount)
                 self.calcPassN(self.passCount == self.passes)
                 self.lastPass = self.passCount == self.passes and \
                                 self.sPasses == 0
@@ -1831,7 +1817,7 @@ class UpdatePass():
         else:
             if self.spring < self.sPasses:
                 self.spring += 1
-                self.m.nextPass(0x200 | self.spring)
+                self.upmf.move.nextPass(0x200 | self.spring)
                 self.lastPass = self.spring == self.sPasses
                 # print("spring %d lastPass %s" % \
                 #       (self.spring, self.lastPass))
@@ -1842,31 +1828,31 @@ class UpdatePass():
         return True
 
     def passDone(self):
-        m = self.m
+        m = self.upmf.move
         m.drawClose()
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
             m.stopSpindle()
         m.done(ct.PARM_DONE)
         stdout.flush()
 
-    def addInit(self, label):
-        self.mf.dPrt("\n%s addPass\n" % (label))
-        self.mf.dPrt(timeStr() + "\n")
-        self.pause = self.panel.pause.GetValue()
+    def addInit(self, label, panel):
+        self.upmf.dPrt("\n%s addPass\n" % (label))
+        self.upmf.dPrt(timeStr() + "\n")
+        self.pause = panel.pause.GetValue()
         self.add = True
-        add = getFloatVal(self.panel.add)
+        add = getFloatVal(panel.add)
         if add != 0.0:
-            self.panel.add.SetValue("0.0000")
+            panel.add.SetValue("0.0000")
         else:
             self.pause = True
         return add
 
     def addDone(self):
-        m = self.m
+        m = self.upmf.move
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
             m.stopSpindle()
         m.done(ct.PARM_DONE)
-        self.mf.comm.command(cm.CMD_RESUME)
+        self.upmf.comm.command(cm.CMD_RESUME)
 
     def fixCut(self, offset=0.0):
         pass
@@ -1874,7 +1860,7 @@ class UpdatePass():
 class Turn(LatheOp, UpdatePass):
     def __init__(self, mainFrame, turnPanel):
         LatheOp.__init__(self, mainFrame, turnPanel)
-        UpdatePass.__init__(self)
+        UpdatePass.__init__(self, mainFrame)
         self.mf = mainFrame
         self.cfg = mainFrame.cfg
         self.xCut = 0.0
@@ -1938,6 +1924,8 @@ class Turn(LatheOp, UpdatePass):
         self.xCut = abs(self.xCut)
 
         self.calcFeed(self.xFeed, self.xCut)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
 
@@ -2068,7 +2056,7 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
 
     def addPass(self):
-        add = self.addInit("turn") / 2.0
+        add = self.addInit("turn", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.calcPass(True)
@@ -2095,6 +2083,7 @@ class Turn(LatheOp, UpdatePass):
         jp = self.mf.jogPanel
         startSpindle = not jp.spindleButton.GetValue()
 
+        comm = self.mf.comm
         xLocation = (float(comm.getParm(pm.X_LOC)) / jp.xStepsInch - \
                      jp.xHomeOffset)
 
@@ -2112,8 +2101,8 @@ class Turn(LatheOp, UpdatePass):
 
         comm.queParm(pm.CURRENT_OP, en.OP_TURN)
 
-        self.setupSync()
-        m = moveCommands
+        self.mf.setupSync()
+        m = self.mf.move
         m.queInit()
         m.done(ct.PARM_START)
 
@@ -2226,7 +2215,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButtons(sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause, True)
+        addButtons(self, sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause, True)
         fields0.append(self.sendButton)
         fields0.append(self.add)
         fields0.append(self.pause)
@@ -2281,7 +2270,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
             sd.sendZData()
             sd.sendXData()
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
@@ -2326,7 +2315,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 class Arc(LatheOp, UpdatePass):
     def __init__(self, mainFrame, arcPanel):
         LatheOp.__init__(self, mainFrame, arcPanel)
-        UpdatePass.__init__(self)
+        UpdatePass.__init__(self, mainFrame)
         self.mf = mainFrame
         self.dPrt = mainFrame.dPrt
         self.cut = 0.0
@@ -2598,6 +2587,9 @@ class Arc(LatheOp, UpdatePass):
             toolRadius = self.toolRadius # ***
             self.arc = True
 
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
+
         print("cut %5.3f passes %d" % \
               (self.cut, self.passes))
         stdout.flush()
@@ -2685,7 +2677,7 @@ class Arc(LatheOp, UpdatePass):
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm = self.mf.syncComm
             syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
+                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
@@ -3066,7 +3058,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # line 6 buttons
 
-        self.addButtons(sizerG, cf.arcAddFeed, cf.arcRPM, cf.arcPause, True)
+        addButtons(self, sizerG, cf.arcAddFeed, cf.arcRPM, cf.arcPause, True)
         fields0.append(self.sendButton)
         fields0.append(self.add)
         fields0.append(self.pause)
@@ -3121,7 +3113,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
             sd.sendZData()
             sd.sendXData()
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
@@ -3151,7 +3143,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
 class Face(LatheOp, UpdatePass):
     def __init__(self, mainFrame, facePanel):
         LatheOp.__init__(self, mainFrame, facePanel)
-        UpdatePass.__init__(self)
+        UpdatePass.__init__(self, mainFrame)
         self.mf = mainFrame
         self.internal = False
         self.zCut = 0.0
@@ -3185,6 +3177,8 @@ class Face(LatheOp, UpdatePass):
         self.zCut = abs(self.zStart - self.zEnd)
 
         self.calcFeed(self.zFeed, self.zCut)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
 
@@ -3237,7 +3231,7 @@ class Face(LatheOp, UpdatePass):
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm = self.mf.syncComm
             syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
+                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
@@ -3303,7 +3297,7 @@ class Face(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def addPass(self):
-        add = self.addInit("face")
+        add = self.addInit("face", self.panel)
         self.cutAmount += add
         self.setup(True)
         self.calcPass(True)
@@ -3394,7 +3388,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButtons(sizerG, cf.faAddFeed, cf.faRPM, cf.faPause)
+        addButtons(self, sizerG, cf.faAddFeed, cf.faRPM, cf.faPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -3415,7 +3409,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
             sd.sendXData()
 
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.mf.jogPanel.setStatus(st.STR_CLR)
@@ -3518,7 +3512,7 @@ class Cutoff(LatheOp):
         elif TURN_SYNC == en.SEL_TU_ESYN:
             syncComm = mf.syncComm
             syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
+                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
             syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
@@ -3596,7 +3590,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButtons(sizerG, None, cf.cuRPM, cf.cuPause)
+        addButtons(self, sizerG, None, cf.cuRPM, cf.cuPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
@@ -3616,7 +3610,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
             sd.sendZData()
             sd.sendXData()
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
@@ -3630,7 +3624,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 class Taper(LatheOp, UpdatePass):
     def __init__(self, mainFrame, taperPanel):
         LatheOp.__init__(self, mainFrame, taperPanel)
-        UpdatePass.__init__(self)
+        UpdatePass.__init__(self, mainFrame)
         self.mf = mainFrame
         self.zLength = 0.0
         self.largeDiameter = 0.0
@@ -3788,6 +3782,8 @@ class Taper(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.externalCalcPass, self.externalRunPass)
 
@@ -3888,7 +3884,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def externalAddPass(self):
-        add = self.addInit("external taper") / 2.0
+        add = self.addInit("external taper", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.externalCalcPass(True)
@@ -3922,6 +3918,8 @@ class Taper(LatheOp, UpdatePass):
         self.cut = self.xEnd - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.internalCalcPass, self.internalRunPass)
 
@@ -3973,7 +3971,7 @@ class Taper(LatheOp, UpdatePass):
     def internalRunPass(self, addPass=False):
         m = self.m
         if self.zBackInc != 0.0:
-            m.moveZ(self.startZ, backlash=-self.ZBackInc) # past the start
+            m.moveZ(self.startZ, backlash=-self.zBackInc) # past the start
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
@@ -4000,7 +3998,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def internalAddPass(self):
-        add = self.addInit("internal taper") / 2.0
+        add = self.addInit("internal taper", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.internalCalcPass(True)
@@ -4154,7 +4152,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         # control buttons
 
-        self.addButtons(sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
+        addButtons(self, sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
 
         self.internal = self.addCheckBox(sizerG, "Internal", cf.tpInternal, \
                                          self.OnInternal, box=True)
@@ -4255,7 +4253,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
             mf.comm.setParm(pm.TAPER_CYCLE_DIST, \
                             mf.cfg.getInfoData(cf.cfgTaperCycleDist))
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
@@ -4289,7 +4287,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 class ScrewThread(LatheOp, UpdatePass):
     def __init__(self, mainFrame, threadPanel):
         LatheOp.__init__(self, mainFrame, threadPanel)
-        UpdatePass.__init__(self)
+        UpdatePass.__init__(self, mainFrame)
         self.mf = mainFrame
         self.tpiBtn = None
         self.alternate = None
@@ -4568,6 +4566,8 @@ class ScrewThread(LatheOp, UpdatePass):
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
         self.initPass()
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
 
         if self.internal:
             self.xRetract = -self.xRetract
@@ -4726,7 +4726,7 @@ class ScrewThread(LatheOp, UpdatePass):
                 self.startZ)
 
     def addPass(self):
-        add = self.addInit("thread") / 2.0
+        add = self.addInit("thread", self.panel) / 2.0
         self.feed += add
         self.setup(True)
 
@@ -4897,7 +4897,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         # buttons
 
-        self.addButtons(sizerG, cf.thAddFeed, cf.thRPM, cf.thPause, True)
+        addButtons(self, sizerG, cf.thAddFeed, cf.thRPM, cf.thPause, True)
 
         self.internal = self.addCheckBox(sizerG, "Internal", cf.thInternal, \
                                          action=self.OnInternal, box=True)
@@ -5018,7 +5018,8 @@ class KeypadEvent(wx.PyEvent):
         self.data = data
 
 class Keypad(Thread):
-    def __init__(self, port, rate):
+    def __init__(self, mainFrame, port, rate):
+        self.mf = mainFrame
         self.threadRun = False
         self.threadDone = False
         if port is None:
@@ -5051,7 +5052,7 @@ class Keypad(Thread):
                     self.ser = None
                     print("keypad SerialException")
                 if len(tmp) != 0:
-                    wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
+                    wx.PostEvent(self.mf.jogPanel, KeypadEvent(ord(tmp[0])))
             else:
                 try:
                     self.ser = serial.Serial(self.port, self.rate, timeout=1)
@@ -5172,6 +5173,7 @@ class JogShuttle(Thread):
                 print("outerRing %d self.axisAction %s" % \
                       (outerRing, self.axisAction))
                 self.axisAction(0, outerRing)
+                buttonRepeat = self.mf.jogPanel.btnRpt
                 buttonRepeat.action = self.axisAction
                 buttonRepeat.code = 0
                 buttonRepeat.val = outerRing
@@ -5223,13 +5225,14 @@ class JogShuttle(Thread):
             # stdout.flush()
 
     def jogDone(self, cmd):
-            buttonRepeat.action = None
-            buttonRepeat.event.clear()
-            self.xCurIndex = -1
-            try:
-                self.mf.comm.command(cmd)
-            except CommTimeout:
-                commTimeout()
+        buttonRepeat = self.mf.jogPanel.btnRpt
+        buttonRepeat.action = None
+        buttonRepeat.event.clear()
+        self.xCurIndex = -1
+        try:
+            self.mf.comm.command(cmd)
+        except CommTimeout:
+            commTimeout(self.mf.jogPanel)
 
     def jogZ(self, code, val):
         if val == 0:
@@ -5250,7 +5253,7 @@ class JogShuttle(Thread):
                     self.mf.comm.setParm(pm.Z_JOG_SPEED, speed)
                 self.mf.comm.command(cm.ZJSPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
     def jogX(self, code, val):
         if val == 0:
@@ -5270,7 +5273,7 @@ class JogShuttle(Thread):
                     self.mf.comm.setParm(pm.X_JOG_SPEED, speed)
                 self.mf.comm.command(cm.XJSPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
     def jogSpindle(self, code, val):
         if val == 0:
@@ -5290,7 +5293,7 @@ class JogShuttle(Thread):
                     self.mf.comm.setParm(pm.SP_JOG_RPM, speed)
                 self.mf.comm.command(cm.SPINDLE_JOG_SPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
 class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, mainFrame, *args, **kwargs):
@@ -5337,19 +5340,20 @@ class JogPanel(wx.Panel, FormRoutines):
         self.lastXOffset = 0.0
         if DRO:
             self.zDROInch = 0
-            self.zDROPostition = 0.0
+            self.zDROPosition = 0.0
             self.zDROOffset = 0.0
-            self.zIDROPostition = None
+            self.zIDROPosition = None
             self.zIDROOffset = None
 
             self.xDROInch = 0
-            self.xDROPostition = 0.0
+            self.xDROPosition = 0.0
             self.xDROOffset = 0.0
-            self.xIDROPostition = None
+            self.xIDROPosition = None
             self.xIDROOffset = None
             self.xDroDiam = mainFrame.cfg.newInfo(cf.jpXDroDiam, False)
         self.overrideSet = False
         self.addEna = False
+        self.xHomed = False
 
         eventTable = (\
                       (en.EV_ZLOC, self.updateZ), \
@@ -5797,12 +5801,12 @@ class JogPanel(wx.Panel, FormRoutines):
                         self.comm.queParm(pm.Z_JOG_DIR, direction)
                         self.comm.command(cm.ZJMOV)
                     except CommTimeout:
-                        commTimeout()
+                        commTimeout(self)
             else:
                 try:
                     self.comm.command(cm.ZJMOV)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
         else:
             if self.jogCode is None:
                 self.jogCode = code
@@ -5815,7 +5819,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     self.comm.queParm(pm.Z_MOVE_DIST, val)
                     self.comm.command(cm.ZMOVEREL)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
 
     def jogDone(self, cmd):
         self.jogCode = None
@@ -5826,7 +5830,7 @@ class JogPanel(wx.Panel, FormRoutines):
             try:
                 self.comm.command(cmd)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self)
 
     def zDown(self, code):
         val = self.getInc()
@@ -5882,12 +5886,12 @@ class JogPanel(wx.Panel, FormRoutines):
                         self.comm.queParm(pm.X_JOG_DIR, direction)
                         self.comm.command(cm.XJMOV)
                     except CommTimeout:
-                        commTimeout()
+                        commTimeout(self)
             else:
                 try:
                     self.comm.command(cm.XJMOV)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
         else:
             if self.jogCode is None:
                 self.jogCode = code
@@ -5902,7 +5906,7 @@ class JogPanel(wx.Panel, FormRoutines):
                     self.comm.queParm(pm.X_MOVE_DIST, val)
                     self.comm.command(cm.XMOVEREL)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
 
     def xDown(self, code):
         val = self.getInc()
@@ -6402,9 +6406,9 @@ class JogPanel(wx.Panel, FormRoutines):
                               (x, xLocation, self.probeLoc, self.xHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone(AXIS_X, True, STR_PROBE_SUCCESS)
+                        self.homeDone(AXIS_X, True, st.STR_PROBE_SUCCESS)
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_X, False, STR_PROBE_FAIL)
+                        self.homeDone(AXIS_X, False, st.STR_PROBE_FAIL)
                 elif self.homeOrProbe == AXIS_Z:
                     val = self.comm.getParm(pm.Z_HOME_STATUS)
                     if val & ct.PROBE_SUCCESS:
@@ -6419,9 +6423,9 @@ class JogPanel(wx.Panel, FormRoutines):
                               (z, zLocation, self.probeLoc, self.zHomeOffset))
                         stdout.flush()
                         self.probeLoc = 0.0
-                        self.homeDone(AXIS_Z, True, STR_PROBE_SUCCESS)
+                        self.homeDone(AXIS_Z, True, st.STR_PROBE_SUCCESS)
                     elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_Z, False, STR_PROBE_FAIL)
+                        self.homeDone(AXIS_Z, False, st.STR_PROBE_FAIL)
 
     def updateError(self, text):
         self.setStatus(text)
@@ -6534,7 +6538,7 @@ class JogPanel(wx.Panel, FormRoutines):
         try:
             self.comm.command(cm.SPINDLE_JOG)
         except CommTimeout:
-            commTimeout()
+            commTimeout(self)
         self.combo.SetFocus()
 
     def OnJogSpindleFwd(self, _):
@@ -6560,7 +6564,7 @@ class JogPanel(wx.Panel, FormRoutines):
         try:
             self.comm.command(cm.SPINDLE_STOP)
         except CommTimeout:
-            commTimeout()
+            commTimeout(self)
         self.combo.SetFocus()
 
     def OnOverride(self, _):
@@ -6598,7 +6602,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if DRO:
                 self.updateZDroPos(val)
             if EXT_DRO:
-                dro.command(eDro.setZ("%0.4f" % (val)))
+                self.mf.dro.command(eDro.setZ("%0.4f" % (val)))
 
     def updateZDroPos(self, val, zDROPos=None):
         if zDROPos is None:
@@ -6616,7 +6620,7 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
 
     def setZFromExt(self):
-        val = dro.command(eDro.extReadZ, True)
+        val = self.mf.dro.command(eDro.extReadZ, True)
         val = val.strip()
         try:
             rsp = float(val)
@@ -6655,7 +6659,7 @@ class JogPanel(wx.Panel, FormRoutines):
             if DRO:
                 self.updateXDroPos(val)
             if EXT_DRO:
-                dro.command(eDro.setX("%0.4f" % (val * 2.0)))
+                self.mf.dro.command(eDro.setX("%0.4f" % (val * 2.0)))
 
     def updateXDroPos(self, val, xDROPos=None):
         if xDROPos is None:
@@ -6673,7 +6677,7 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
 
     def setXFromExt(self):
-        val = dro.command(eDro.extReadX, True)
+        val = self.mf.dro.command(eDro.extReadX, True)
         val = val.strip()
         try:
             rsp = float(val) / 2.0
@@ -7006,13 +7010,13 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         self.jp.focus()
 
 class ProbeDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jp, axis):
+    def __init__(self, jogPanel, axis):
         FormRoutines.__init__(self, False)
-        self.jogPanel = jp
+        self.jp = jogPanel
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, jp, -1, title, pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -7022,11 +7026,11 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         self.probeLoc = \
             self.addDialogField(sizerG, \
                 'Z Position' if axis == AXIS_Z else 'X Diameter', \
-                "0.000", jp.txtFont, jp.posFont, (120, -1))
+                "0.000", jogPanel.txtFont, jogPanel.posFont, (120, -1))
 
         self.probeDist = \
             self.addDialogField(sizerG, 'Distance', "0.000", \
-                jp.txtFont, jp.posFont, (120, -1), self.OnKeyChar)
+                jogPanel.txtFont, jogPanel.posFont, (120, -1), self.OnKeyChar)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
@@ -7044,7 +7048,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
                 probeLoc = "0.0000"
                 probeDist = self.jp.cfg.getFloatInfoData(cf.zProbeDist)
             else:
-                probeLoc = self.jogPanel.xPos.GetValue()
+                probeLoc = self.jp.xPos.GetValue()
                 probeDist = self.jp.cfg.getFloatInfoData(cf.xProbeDist)
             self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
@@ -7066,31 +7070,33 @@ class ProbeDialog(wx.Dialog, FormRoutines):
             print("probe ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        self.jogPanel.focus()
+        self.jp.focus()
 
     def probeZ(self, probeLoc):
         cfg = self.jp.cfg
         self.mf.move.queClear()
-        self.comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
-        self.comm.queParm(pm.PROBE_SPEED, cfg.getInfoData(cf.zProbeSpeed))
-        self.comm.queParm(pm.Z_HOME_STATUS, '0')
-        self.comm.sendMulti()
+        comm = self.mf.comm
+        comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
+        comm.queParm(pm.PROBE_SPEED, cfg.getInfoData(cf.zProbeSpeed))
+        comm.queParm(pm.Z_HOME_STATUS, '0')
+        comm.sendMulti()
         self.mf.move.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
-        self.jogPanel.probe(AXIS_Z, probeLoc)
-        self.jogPanel.focus()
+        self.jp.probe(AXIS_Z, probeLoc)
+        self.jp.focus()
 
     def probeX(self, probeLoc):
         cfg = self.jp.cfg
         self.mf.move.queClear()
-        self.comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
-        self.comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-        self.comm.queParm(pm.X_HOME_STATUS, '0')
-        self.comm.sendMulti()
+        comm = self.mf.comm
+        comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
+        comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
+        comm.queParm(pm.X_HOME_STATUS, '0')
+        comm.sendMulti()
         self.mf.move.probeX(getFloatVal(self.probeDist))
         self.Show(False)
-        self.jogPanel.probe(AXIS_X, probeLoc)
-        self.jogPanel.focus()
+        self.jp.probe(AXIS_X, probeLoc)
+        self.jp.focus()
 
 class GotoDialog(wx.Dialog, FormRoutines):
     def __init__(self, jp, axis):
@@ -7330,8 +7336,9 @@ class RetractDialog(wx.Dialog, FormRoutines):
             loc = float(self.pos.GetValue())
             m = self.jp.mf.move
             m.queClear()
-            self.comm.command(cm.CMD_PAUSE)
-            self.comm.command(cm.CLEARQUE)
+            comm = self.jp.mf.comm
+            comm.command(cm.CMD_PAUSE)
+            comm.command(cm.CLEARQUE)
             if self.axis == AXIS_Z:
                 self.jp.mf.sendData.sendZData()
                 m.saveZOffset()
@@ -7348,7 +7355,7 @@ class RetractDialog(wx.Dialog, FormRoutines):
                     jp.xPos.GetValue() if self.retract else None
                 bitmap = "northR.png" if self.retract else "southG.png"
                 jp.xButton.SetBitmap(wx.Bitmap(bitmap))
-            self.comm.command(cm.CMD_RESUME)
+            comm.command(cm.CMD_RESUME)
             self.Show(False)
             jp.focus()
         except ValueError:
@@ -8206,10 +8213,10 @@ class MainFrame(wx.Frame):
                 import lRegDef as xr
 
         if EXT_DRO:
-            global dro, eDro
+            # global eDro
             import extDro as eDro
             from extDro import DroTimeout
-            dro = eDro.ExtDro()
+            self.dro = eDro.ExtDro()
 
         if SPINDLE_SYNC_BOARD and not SYNC_SPI:
             self.syncComm = Comm()
@@ -8275,12 +8282,13 @@ class MainFrame(wx.Frame):
 
         port = cfg.getInfoData(cf.keypadPort)
         if len(port) != 0:
-            self.keypad = Keypad(cfg.getInfoData(cf.keypadPort), \
+            self.keypad = Keypad(self, cfg.getInfoData(cf.keypadPort), \
                                  cfg.getInfoData(cf.keypadRate))
         else:
             self.keypad = None
 
-        self.initDRO()
+        if EXT_DRO:
+            self.initDRO()
 
         if FPGA:
             comm.xRegs = xr.xRegTable
@@ -8530,65 +8538,65 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def initDRO(self):
-        if EXT_DRO:
-            cfg = self.cfg
-            port = cfg.getInfoData(cf.extDroPort)
-            print("port %s" % (port))
-            stdout.flush()
-            if port is not None:
-                dro.openSerial(cfg.getInfoData(cf.extDroPort), \
-                               cfg.getInfoData(cf.extDroRate))
-                # rsp = dro.command("system.reset()\n", True)
+        cfg = self.cfg
+        port = cfg.getInfoData(cf.extDroPort)
+        print("port %s" % (port))
+        stdout.flush()
+        if port is not None:
+            self.dro.openSerial(cfg.getInfoData(cf.extDroPort), \
+                           cfg.getInfoData(cf.extDroRate))
+            # rsp = dro.command("system.reset()\n", True)
+            # print(rsp)
+            # dro.flush()
+
+            # automate = False
+            # try:
+            #     dro.flush()
+            #     dro.command("\n", True, eDro.delim)
+            #     print("automation off")
+            # except DroTimeout:
+            #     print("automation on")
+            #     automate = True
+
+            # if automate:
+            #     try:
+            #         rsp = dro.command("luash.automate(nil)\n", \
+            #                           True, eDro.delim)
+            #         print("automation turned on")
+            #     except DroTimeout:
+            #         print("DroTimeont exception")
+
+            try:
+                dro = self.dro
+                dro.command(dro.automateOff, True, eDro.delim)
+                print("automation turned on")
+                rsp = dro.command(dro.showFunc, True, dro.delim)
+                rsp = re.sub(dro.matchPrompt, "", rsp)
                 # print(rsp)
-                # dro.flush()
-
-                # automate = False
-                # try:
-                #     dro.flush()
-                #     dro.command("\n", True, eDro.delim)
-                #     print("automation off")
-                # except DroTimeout:
-                #     print("automation on")
-                #     automate = True
-
-                # if automate:
-                #     try:
-                #         rsp = dro.command("luash.automate(nil)\n", \
-                #                           True, eDro.delim)
-                #         print("automation turned on")
-                #     except DroTimeout:
-                #         print("DroTimeont exception")
-
-                try:
-                    dro.command(eDro.automateOff, True, eDro.delim)
-                    print("automation turned on")
-                    rsp = dro.command(eDro.showFunc, True, eDro.delim)
-                    rsp = re.sub(eDro.matchPrompt, "", rsp)
-                    # print(rsp)
-                    rsp = rsp.split("\n")
-                    for option in rsp:
-                        tmp = option.strip().lower().split(":")
-                        if len(tmp) == 2:
-                            if tmp[0].strip() == "diameter":
-                                if tmp[1].strip() != "on":
-                                    dro.command(eDro.diamFunc, \
-                                                True, eDro.delim)
-                                    break
-                    dro.command(eDro.inchMode, True, eDro.delim)
-                    dro.command(eDro.absMode, True, eDro.delim)
-                    for line in eDro.axisFunc:
-                        dro.command(line, True, eDro.delim)
-                    rsp = dro.command(eDro.automateOn, True)
-                    # rsp = dro.command(eDro.extReadX, True)
-                    # print(rsp, end="")
-                    # rsp = dro.command(eDro.extReadZ, True)
-                    # print(rsp, end="")
-                    # dro.command(eDro.setZ(str(3.555)), True)
-                    # dro.command("axis.zeroa(1,-2+axis.read(1))")
-                    # dro.command("axis.zeroa(2,-4+axis.read(2))"\
-                    #             "io.write('ok\\n')", True)
-                except DroTimeout:
-                    print("DroTimeont excpetion")
+                rsp = rsp.split("\n")
+                for option in rsp:
+                    tmp = option.strip().lower().split(":")
+                    if len(tmp) == 2:
+                        if tmp[0].strip() == "diameter":
+                            if tmp[1].strip() != "on":
+                                dro.command(dro.diamFunc, \
+                                            True, dro.delim)
+                                break
+                dro.command(dro.inchMode, True, dro.delim)
+                dro.command(dro.absMode, True, dro.delim)
+                for line in dro.axisFunc:
+                    dro.command(line, True, dro.delim)
+                rsp = dro.command(dro.automateOn, True)
+                # rsp = dro.command(dro.extReadX, True)
+                # print(rsp, end="")
+                # rsp = dro.command(dro.extReadZ, True)
+                # print(rsp, end="")
+                # dro.command(dro.setZ(str(3.555)), True)
+                # dro.command("axis.zeroa(1,-2+axis.read(1))")
+                # dro.command("axis.zeroa(2,-4+axis.read(2))"\
+                #             "io.write('ok\\n')", True)
+            except DroTimeout:
+                print("DroTimeont excpetion")
 
     def initDevice(self):
         self.sendData.sendClear()
@@ -8685,7 +8693,7 @@ class MainFrame(wx.Frame):
                 comm.sendMulti()
 
             except CommTimeout:
-                commTimeout()
+                commTimeout(jp)
         else:
             self.sendData.sendZData()
             self.sendData.sendXData()
@@ -8812,7 +8820,7 @@ class MainFrame(wx.Frame):
         self.Fit()
 
     def OnSave(self, _):
-        cfg.saveInfo(self.cfgFile)
+        self.cfg.saveInfo(self.cfgFile)
 
     def OnInit(self, _):
         if False:
@@ -8826,11 +8834,11 @@ class MainFrame(wx.Frame):
         self.initDevice()
 
     def OnRestat(self, _):
-        cfg.saveInfo(self.cfgFile)
+        self.cfg.saveInfo(self.cfgFile)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def OnSavePanel(self, _):
-        panel = cfg.getInfoData(cf.mainPanel)
+        panel = self.cfg.getInfoData(cf.mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
         dlg = wx.FileDialog(self, "Save " + p + " Config", self.dirName,
@@ -8838,9 +8846,10 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            cfg.saveList(path, self.panels[panel].getConfigList())
+            self.cfg.saveList(path, self.panels[panel].getConfigList())
 
     def OnLoadPanel(self, _):
+        cfg = self.cfg
         panel = cfg.getInfoData(cf.mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
@@ -9168,9 +9177,9 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         self.Show(False)
 
     def OnSetHomeLoc(self, _):
-        loc = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
+        loc = str(int(self.mf.cfg.getFloatInfoData(cf.xHomeLoc) * \
                       self.mf.jogPanel.xStepsInch))
-        comm.setParm(pm.X_HOME_LOC, loc)
+        self.mf.comm.setParm(pm.X_HOME_LOC, loc)
 
     def setupVars(self):
         cfg = self.mf.cfg
@@ -9187,7 +9196,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             self.mf.jogPanel.xDROInch = droInch
 
     def setupAction(self):
-        self.setupVars();
+        self.setupVars()
         self.mf.sendData.sendXData(True)
 
     def showAction(self, changed):
@@ -9319,7 +9328,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             else:
                 indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
         else:
-            indexList += (en.SEL_TH_NO_ENC,)
+            indexList = (en.SEL_TH_NO_ENC,)
 
         choiceList = []
         for i in indexList:
@@ -9331,7 +9340,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if not self.formatData(self.fields):
             return
         for (label, index, fmt) in self.fields:
-            tmp = cfg.getInfoData(index)
+            tmp = mf.cfg.getInfoData(index)
             if self.fieldInfo[index] != tmp:
                 self.fieldInfo[index] = tmp
                 mf.sendData.spindleDataSent = False
@@ -9350,7 +9359,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             self.mf.sendData.spindleDataSent = False
 
     def okAction(self):
-        syncFuncSetup()
+        self.mf.syncFuncSetup()
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, mainFrame, defaultFont):
@@ -9549,7 +9558,7 @@ class TestSpindleDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self, defaultFont)
-        self.spindleTest = SpindleTest(txt)
+        self.spindleTest = SpindleTest(mainFrame, txt)
 
 class TestSyncDialog(wx.Dialog):
     def __init__(self, mainFrame, defaultFont):
@@ -9558,7 +9567,7 @@ class TestSyncDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self, defaultFont)
-        self.syncTest = SyncTest(txt)
+        self.syncTest = SyncTest(mainFrame, txt)
 
 class TestTaperDialog(wx.Dialog):
     def __init__(self, mainFrame, defaultFont):
@@ -9567,7 +9576,7 @@ class TestTaperDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self, defaultFont)
-        self.taperTest = TaperTest(txt)
+        self.taperTest = TaperTest(mainFrame, txt)
 
 class TestMoveDialog(wx.Dialog):
     def __init__(self, mainFrame, defaultFont):
@@ -9576,7 +9585,7 @@ class TestMoveDialog(wx.Dialog):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
         txt = testText(self, defaultFont)
-        self.moveTest = MoveTest(txt)
+        self.moveTest = MoveTest(mainFrame, txt)
 
 def dbgPrt(txt, fmt, values):
     txt.AppendText((fmt + "\n") % values)
@@ -9585,13 +9594,15 @@ def dbgPrt(txt, fmt, values):
 fcy = 90000000
 
 class SpindleTest():
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
         global fTest
         txt = self.txt
         txt.SetValue("")
+        cfg = self.mf.cfg
         minRPM = cfg.getFloatInfoData(cf.spMinRPM) # minimum rpm
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         accel = cfg.getFloatInfoData(cf.spAccel)   # accel rpm per sec
@@ -9724,7 +9735,8 @@ class SpindleTest():
         f.close()
 
 class SyncTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
@@ -9732,9 +9744,10 @@ class SyncTest(object):
         txt = self.txt
         txt.SetValue("")
         print("")
-        fTest = open(os.path_join(DBG_DIR, 'zsync.txt'), 'w')
+        fTest = open(os.path.join(DBG_DIR, 'zsync.txt'), 'w')
 
         zAxis = True
+        cfg = self.mf.cfg
         panel = cfg.getInfoData(cf.mainPanel)
         if panel == 'threadPanel':
             arg1 = cfg.getFloatInfoData(cf.thThread)
@@ -9943,15 +9956,17 @@ class SyncTest(object):
         f.close()
 
 class TaperTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
         global fTest
         txt = self.txt
         txt.SetValue("")
-        fTest = open(os.path_join(DBG_DIR, 'taper.txt'), 'w')
+        fTest = open(os.path.join(DBG_DIR, 'taper.txt'), 'w')
 
+        cfg = self.mf.cfg
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
         spindleMotorSteps = cfg.getIntInfoData(cf.spMotorSteps)
@@ -10037,7 +10052,8 @@ class TaperTest(object):
         f.close()
 
 class MoveTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
@@ -10045,8 +10061,9 @@ class MoveTest(object):
         txt = self.txt
         txt.SetValue("")
 
-        fTest = open(os.path_join(DBG_DIR, 'move.txt'), 'w')
+        fTest = open(os.path.join(DBG_DIR, 'move.txt'), 'w')
 
+        cfg = self.mf.cfg
         pitch = cfg.getFloatInfoData(cf.zPitch)
         microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.zMotorSteps)
