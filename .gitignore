@@ -58,3 +58,5 @@ tst.txt
 turnAccel.txt
 xtmp.txt
 zsync.txt
+geometry.py
+dbgprt.py

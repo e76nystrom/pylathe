@@ -865,10 +865,10 @@ class Setup():
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
-                            for _ in range(len(xLst)):
+                            for i in range(len(xLst)):
                                 fWrite(xFile, xLst[i])
                             fWrite(xFile, "\n")
-                            for _ in range(len(cLst)):
+                            for i in range(len(cLst)):
                                 fWrite(xFile, cLst[i])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +

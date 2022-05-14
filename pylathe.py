@@ -156,11 +156,8 @@ print(sys.version)
 print(wx.version())
 stdout.flush()
 
-#fcy = None
 REF = 'REF'
 TEXT = 'TEXT'
-#dro = None
-#eDro = None
 
 EVT_STATUS_UPDATE_ID = wx.Window.NewControlId()
 
@@ -228,7 +225,8 @@ class Factor:
     def __init__(self, maxPrime):
         self.primes = self.calcPrimes(maxPrime)
 
-    def remFactors(self, nFactors, dFactors):
+    @staticmethod
+    def remFactors(nFactors, dFactors):
         # print("remove common factors")
         dResult = []
         for d in dFactors:
@@ -244,13 +242,15 @@ class Factor:
                 dResult.append(d)
         return nFactors, dResult
 
-    def combineFactors(self, factors):
+    @staticmethod
+    def combineFactors(factors):
         result = 1
         for val in factors:
             result *= val
         return result
 
-    def calcPrimes(self, maxPrime):
+    @staticmethod
+    def calcPrimes(maxPrime):
         maxPrime += 1
         sieve = [True] * maxPrime
         sieve[0] = False
@@ -670,7 +670,6 @@ class ActionRoutines():
         self.safeX = None
         self.safeZ = None
         self.formatList = []
-        # self.Connect(-1, -1, EVT_PANEL_DELAY_ID, self.delayEvent)
         self.manualMode = False
 
     # def formatData(self, formatList):
@@ -832,9 +831,9 @@ class DialogActions():
         print("DialogAction showAction stub called")
         stdout.flush()
 
-    def formatData(self, _):
-        print("DialogAction formatData stub called")
-        stdout.flush()
+    # def formatData(self, _):
+    #     print("DialogAction formatData stub called")
+    #     stdout.flush()
 
     def saveData(self):
         changed = False
@@ -7654,20 +7653,20 @@ class UpdateThread(Thread):
                         #             self.dbg.close()
                         #             self.dbg = None
                     except IndexError:
-                        print("index error %s" % result)
+                        print("procDebug InndexError %s" % result)
                         stdout.flush()
                     except TypeError:
-                        print("type error %s %s" % \
+                        print("procDebug TypeError %s %s" % \
                               (en.dMessageList[cmd], result))
                         stdout.flush()
                 except ValueError:
-                    print("value error cmd %s val %s" % (cmd, val))
+                    print("procDebug ValueError cmd %s val %s" % (cmd, val))
                     stdout.flush()
         except CommTimeout:
-            print("getString CommTimeout")
+            print("procDebug getString CommTimeout")
             stdout.flush()
         except serial.SerialException:
-            print("getString SerialException")
+            print("procDebug getString SerialException")
             stdout.flush()
             return(True)
 
@@ -7685,10 +7684,10 @@ class UpdateThread(Thread):
                     self.dbg.write((t + output + "\n").encode())
                     self.dbg.flush()
         except IndexError:
-            print("index error %d" % cmd)
+            print("dbgDispatch IndexError %d" % cmd)
             stdout.flush()
         except TypeError:
-            print("type error %s %s" % \
+            print("dbgDispatch TypeError %s %s" % \
                   (en.dMessageList[cmd], str(val)))
             stdout.flush()
 
