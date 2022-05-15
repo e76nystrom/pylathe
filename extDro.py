@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from sys import stdout
 from threading import Event, Lock, Thread
 

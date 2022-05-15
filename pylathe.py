@@ -2,7 +2,6 @@
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
-#from __future__ import print_function
 
 #--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt
 
@@ -2821,7 +2820,7 @@ class Arc(LatheOp, UpdatePass):
         self.m.moveX(self.safeX)
         self.m.moveZ(self.safeZ)
 
-    # counter clockwise arc, corner, and ball
+    # counterclockwise arc, corner, and ball
 
     def moveInitCCW(self, flag):
         m = self.m
@@ -3748,7 +3747,7 @@ class Taper(LatheOp, UpdatePass):
         if self.mf.cfgDraw:
             m.draw("taper", self.zStart, self.taper)
 
-        self.mf.dPrt("\ntaper nexternalRunOperation\n")
+        self.mf.dPrt("\ntaper external RunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -4357,6 +4356,7 @@ class ScrewThread(LatheOp, UpdatePass):
 
         if self.runout != 0:
             if THREAD_SYNC == en.SEL_TH_ESYN_RSYN:
+                xSync = self.mf.xSyncExt
                 xSync.setExitRevs(self.runout)
                 (self.xCycle, self.xOutput, self.xPreScaler) = \
                     xSync.calcSync(self.depth, rpm=rpm, dist=True)
@@ -4424,7 +4424,7 @@ class ScrewThread(LatheOp, UpdatePass):
         m.zSynSetup(self.mf.cfg.getFloatInfoData(cf.thThread))
 
         if not self.rightHand:  # left hand threads
-            if self.runoutDist == 0.0: # wihout runout
+            if self.runoutDist == 0.0: # without runout
                 m.queFeedType(ct.FEED_PITCH)
                 m.xSynSetup(getFloatVal(th.lastFeed))
 
@@ -4536,7 +4536,7 @@ class ScrewThread(LatheOp, UpdatePass):
         #     self.p0 = (0, 0)
 
         if self.mf.cfgDraw:
-            self.m.draw("threada", self.xStart * 2.0, self.tpi)
+            self.m.draw("thread", self.xStart * 2.0, self.tpi)
 
         dPrt = self.mf.dPrt
         dPrt("\nthread runOperation\n")
@@ -7653,7 +7653,7 @@ class UpdateThread(Thread):
                         #             self.dbg.close()
                         #             self.dbg = None
                     except IndexError:
-                        print("procDebug InndexError %s" % result)
+                        print("procDebug IndexError %s" % result)
                         stdout.flush()
                     except TypeError:
                         print("procDebug TypeError %s %s" % \
@@ -8205,15 +8205,6 @@ class MainFrame(wx.Frame):
         self.zDROInch = None
         self.xDROInch = None
 
-        if FPGA:
-            global xb, xr
-            if not R_PI:
-                import xBitDef as xb
-                import xRegDef as xr
-            else:
-                import fpgaLathe as xb
-                import lRegDef as xr
-
         if EXT_DRO:
             # global eDro
             import extDro as eDro
@@ -8225,9 +8216,6 @@ class MainFrame(wx.Frame):
 
         self.comm = comm = Comm()
         comm.SWIG = SWIG
-
-        if FPGA:
-            comm.enableXilinx()
 
         self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
                                wx.NORMAL, False, u'Consolas')
@@ -8296,7 +8284,16 @@ class MainFrame(wx.Frame):
             self.initDRO()
 
         if FPGA:
-            comm.xRegs = xr.xRegTable
+            global xb, xr
+            if not R_PI:
+                # import xBitDef as xb
+                import xRegDef as xr
+
+                comm.enableXilinx()
+                comm.xRegs = xr.xRegTable
+            else:
+                # import fpgaLathe as xb
+                import lRegDef as xr
 
         self.initDevice()
 
@@ -8368,7 +8365,7 @@ class MainFrame(wx.Frame):
 
         ID_FILE_SAVE_RESTART = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
-        self.Bind(wx.EVT_MENU, self.OnRestat, menu)
+        self.Bind(wx.EVT_MENU, self.OnRestart, menu)
 
         ID_FILE_SAVE_PANEL = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_PANEL, 'Save Panel')
@@ -8613,7 +8610,7 @@ class MainFrame(wx.Frame):
                 # dro.command("axis.zeroa(2,-4+axis.read(2))"\
                 #             "io.write('ok\\n')", True)
             except DroTimeout:
-                print("DroTimeont excpetion")
+                print("DroTimeout exception")
 
     def initDevice(self):
         self.sendData.sendClear()
@@ -8850,7 +8847,7 @@ class MainFrame(wx.Frame):
         #     self.initialConfig()
         self.initDevice()
 
-    def OnRestat(self, _):
+    def OnRestart(self, _):
         self.cfg.saveInfo(self.cfgFile)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
@@ -9023,7 +9020,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Motor Ratio", cf.zMotorRatio, 'fs'), \
 
             ("Backlash", cf.zBacklash, 'f'), \
-            ("Backlash Incrment", cf.zBackInc, 'f'), \
+            ("Backlash Increment", cf.zBackInc, 'f'), \
 
             ("Accel Unit/Sec2", cf.zAccel, 'fs'), \
             ("Min Speed U/Min", cf.zMinSpeed, 'fs'), \
@@ -9139,7 +9136,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Motor Ratio", cf.xMotorRatio, 'fs'), \
 
             ("Backlash", cf.xBacklash, 'f'), \
-            ("Backlash Incrment", cf.xBackInc, 'f'), \
+            ("Backlash Increment", cf.xBackInc, 'f'), \
 
             ("Accel Unit/Sec2", cf.xAccel, 'fs'), \
             ("Min Speed U/Min", cf.xMinSpeed, 'fs'), \
@@ -9232,7 +9229,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
         stepsInch = (microSteps * motorSteps * motorRatio) / pitch
         self.mf.xStepsInch = stepsInch
-        self.mf.jogPanel.xSstepsInch = stepsInch
+        self.mf.jogPanel.xStepsInch = stepsInch
         if DRO:
             droInch = cfg.getIntInfoData(cf.xDROInch)
             self.mf.xDROInch = droInch
@@ -9285,7 +9282,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Jog Min", cf.spJogMin, 'd'), \
                 ("Jog Max", cf.spJogMax, 'd'), \
                 ("Jog Time Initial", cf.spJTimeInitial, 'f2'), \
-                ("Jog Time Incrmemnt", cf.spJTimeInc, 'f2'), \
+                ("Jog Time Increment", cf.spJTimeInc, 'f2'), \
                 ("Jog Time Maximum", cf.spJTimeMax, 'f2'), \
                 # ("Jog Accel Time", cf.spJogAccelTime, 'f'), \
                 ("bInvert Dir", cf.spInvDir, None), \
@@ -9493,7 +9490,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bControl MEGA", cf.cfgMega, None), \
             ("bSync SPI", cf.cfgSyncSPI, None), \
             ("bProbe Inv", cf.cfgPrbInv, None), \
-            ("wfcy", cf.cfgFcy, 'd'), \
+            ("wFcy", cf.cfgFcy, 'd'), \
             ("bDisable Commands", cf.cfgCmdDis, None), \
             ("bDraw Moves", cf.cfgDraw, None), \
             ("bSave Debug", cf.cfgDbgSave, None), \
@@ -9501,7 +9498,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHome in Place", cf.cfgHomeInPlace, None), \
             ("Taper Cycle Dist", cf.cfgTaperCycleDist, 'f'), \
             ("Jog Time Initial", cf.jogTimeInitial, 'f2'), \
-            ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
+            ("Jog Time Increment", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
             ("bMpg Jog Debug", cf.cfgJogDebug, None), \
 
