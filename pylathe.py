@@ -195,8 +195,8 @@ def timeStr():
     return now.strftime("%a %b %d %Y %H:%M:%S\n")
 
 def commTimeout(jogPanel):
-    wx.PostEvent(jogPanel, StatusEvent(st.STR_TIMEOUT_ERROR))
-    # jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
+    # wx.PostEvent(jogPanel, StatusEvent(st.STR_TIMEOUT_ERROR))
+    jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
 def getFloatVal(tc):
     try:
@@ -341,11 +341,9 @@ def OnEnter(panel):
         return
     jp = panel.mf.jogPanel
     if formatData(panel.mf.cfg, panel.formatList):
-        # wx.PostEvent(jp, StatusEvent(st.STR_CLR))
         jp.setStatus(st.STR_CLR)
         jp.focus()
     else:
-        # wx.PostEvent(jp, StatusEvent(st.STR_FIELD_ERROR))
         jp.setStatus(st.STR_FIELD_ERROR)
 
 def addFieldText(panel, sizer, label, key, fmt=None, keyText=None):
@@ -433,9 +431,14 @@ def addComboBox(panel, sizer, label, index, action, border=2,
     cfg.initInfo(index, combo)
     return combo
 
+class PanelButton(wx.Button):
+    def __init__(self, panel, *args, **kwargs):
+        wx.Button.__init__(self, *args, **kwargs)
+        self.panel = panel
+
 def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
               style=0, flag=wx.CENTER|wx.ALL):
-    btn = wx.Button(panel, label=label, style=style, size=size)
+    btn = PanelButton(panel, panel, label=label, style=style, size=size)
     btn.Bind(wx.EVT_BUTTON, action)
     sizer.Add(btn, flag=flag, border=border)
     return btn
@@ -464,8 +467,20 @@ def addBitmapButton(panel, sizer, bitmap, downAction, upAction, flag=0):
     sizer.Add(btn, flag=flag, border=2)
     return btn
 
+class DialogButton(wx.Button):
+    def __init__(self, dialog, *args, **kwargs):
+        wx.Button.__init__(self, *args, **kwargs)
+        self.dialog = dialog
+
+def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=2, \
+                   style=0, flag=wx.CENTER|wx.ALL):
+    btn = DialogButton(dialog, dialog, label=label, style=style, size=size)
+    btn.Bind(wx.EVT_BUTTON, action)
+    sizer.Add(btn, flag=flag, border=border)
+    return btn
+
 def addDialogButton(panel, sizer, idx, action=None, border=5):
-    btn = wx.Button(panel, idx)
+    btn = DialogButton(panel, panel, idx)
     if action is None:
         btn.SetDefault()
     else:
@@ -617,7 +632,7 @@ class PanelVars:
         self.internal = None
         
 def addButtons(panel, sizerG, add, rpm, pause, combine=False):
-    panel.sendButton = addButton(panel, sizerG, 'Send', panel.OnSend)
+    panel.sendButton = addButton(panel, sizerG, 'Send', OnPanelSend)
     # panel.sendButton.SetBackgroundColour('Green')
 
     panel.startButton = addButton(panel, sizerG, 'Start', panel.OnStart)
@@ -654,6 +669,32 @@ def OnPanelShow(evt):
         panel.update()
     else:
         panel.active = False
+
+def OnPanelSend(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if formatData(panel.mf.cfg, panel.formatList):
+        if not jp.xHomed:
+            jp.setStatus(st.STR_NOT_HOMED)
+        elif panel.active or \
+             jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+            jp.setStatus(st.STR_OP_IN_PROGRESS)
+        else:
+            jp.setStatus(st.STR_CLR)
+            try:
+                if callable(panel.sendAction):
+                    if panel.sendAction():
+                        panel.active = True
+                        panel.sendButton.Disable()
+                        buttonEnable(panel.startButton)
+                        buttonDisable(jp.spindleButton)
+            except CommTimeout:
+                commTimeout(jp)
+            except:
+                traceback.print_exc()
+    else:
+        jp.setStatus(st.STR_FIELD_ERROR)
+    jp.focus()
 
 class ActionRoutines():
     def __init__(self, mainFrame, control, op):
@@ -703,22 +744,23 @@ class ActionRoutines():
         self.safeZ = control.zStart + control.zRetract
         return self.safeZ, self.safeX
 
-    def OnSend(self, _):
-        jp = self.armf.jogPanel
-        if formatData(self.armf.cfg, self.formatList):
+    def OnSend(self, evt):
+        panel = evt.EventObject.panel
+        jp = panel.mf.jogPanel
+        if formatData(panel.mf.cfg, panel.formatList):
             if not jp.xHomed:
                 jp.setStatus(st.STR_NOT_HOMED)
-            elif self.active or \
+            elif panel.active or \
                  jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
                 jp.setStatus(st.STR_OP_IN_PROGRESS)
             else:
                 jp.setStatus(st.STR_CLR)
                 try:
-                    if callable(self.sendAction):
-                        if self.sendAction():
-                            self.active = True
-                            self.sendButton.Disable()
-                            buttonEnable(self.startButton)
+                    if callable(panel.sendAction):
+                        if panel.sendAction():
+                            panel.active = True
+                            panel.sendButton.Disable()
+                            buttonEnable(panel.startButton)
                             buttonDisable(jp.spindleButton)
                 except CommTimeout:
                     commTimeout(jp)
@@ -793,20 +835,23 @@ def OnDialogShow(evt):
            callable(dialog.showAction):
             dialog.showAction(changed)
 
-def OnDialogOk(dialog):
+def OnDialogOk(evt):
+    dialog = evt.EventObject.dialog
     if formatData(dialog.mf.cfg, dialog.fields):
         dialog.Show(False)
         if hasattr(dialog, 'okAction') and \
            callable(dialog.okAction):
             dialog.okAction()
 
-def OnDialogCancel(dialog):
+def OnDialogCancel(evt):
+    dialog = evt.EventObject.dialog
     for field in dialog.fields:
         index = field[1]
         dialog.mf.cfg.setInfo(index, dialog.fieldInfo[index])
     dialog.Show(False)
 
-def OnDialogSetup(dialog):
+def OnDialogSetup(evt):
+    dialog = evt.EventObject.dialog
     if not formatData(dialog.mf.cfg, dialog.fields):
         return
     dialog.mf.move.queClear()
@@ -829,10 +874,6 @@ class DialogActions():
     def showAction(self, changed):
         print("DialogAction showAction stub called")
         stdout.flush()
-
-    # def formatData(self, _):
-    #     print("DialogAction formatData stub called")
-    #     stdout.flush()
 
     def saveData(self):
         changed = False
@@ -5266,7 +5307,7 @@ class JogPanel(wx.Panel, FormRoutines):
         FormRoutines.__init__(self, False)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
         self.Connect(-1, -1, EVT_KEYPAD_ID, self.OnKeypadEvent)
-        self.Connect(-1, -1, EVT_STATUS_UPDATE_ID, self.OnStatusUpdate)
+        # self.Connect(-1, -1, EVT_STATUS_UPDATE_ID, self.OnStatusUpdate)
         # self.Bind(wx.EVT_CHAR_HOOK, self.OnCharHook)
         self.mf = mainFrame
         self.comm = mainFrame.comm
@@ -5369,10 +5410,12 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.FlexGridSizer(cols=6, rows=0, vgap=0, hgap=0)
 
-        self.txtFont = txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
-                                         wx.NORMAL, False, u'Consolas')
-        self.posFont = posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                                         wx.NORMAL, False, u'Consolas')
+        self.txtFont = txtFont = \
+            wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+        self.posFont = posFont = \
+            wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         # first row
         # z position
 
@@ -7533,7 +7576,7 @@ class UpdateThread(Thread):
             result = (en.EV_READ_ALL, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
-            print("readAll ValueError %s" % (result))
+            print("readAll ValueError ", result)
             stdout.flush()
 
     def run(self):
@@ -8029,8 +8072,7 @@ class DialPanel(wx.Panel):
             ctx.scale(s, s)         # Normalizing the canvas
 
             ctx.set_font_size(0.05)
-            ctx.select_font_face("Arial",
-                                 cairo.FONT_SLANT_NORMAL,
+            ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, \
                                  cairo.FONT_WEIGHT_NORMAL)
 
             # r0 = 0.9 * r
@@ -8217,11 +8259,12 @@ class MainFrame(wx.Frame):
         self.comm = comm = Comm()
         comm.SWIG = SWIG
 
-        self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                               wx.NORMAL, False, u'Consolas')
+        self.hdrFont = \
+            wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         self.defaultFont = defaultFont = \
-            wx.Font(10, wx.MODERN, wx.NORMAL,
-                    wx.NORMAL, False, u'Consolas')
+            wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         self.SetFont(defaultFont)
 
         self.currentPanel = None
@@ -9064,14 +9107,14 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
-        addButton(self, sizerV, 'Setup Z', self.OnSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup Z', OnDialogSetup, border=5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9081,15 +9124,6 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnEnter(self, _):
         OnEnter(self)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
-
-    def OnSetup(self, _):
-        OnDialogSetup(self)
 
     def setupVars(self):
         cfg = self.mf.cfg
@@ -9188,15 +9222,15 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         if HOME_TEST:
             addButton(self, sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
 
-        addButton(self, sizerV, 'Setup X', self.OnSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup X', OnDialogSetup, border=5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9206,15 +9240,6 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnEnter(self, _):
         OnEnter(self)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
-
-    def OnSetup(self, _):
-        OnDialogSetup(self)
 
     def OnSetHomeLoc(self, _):
         loc = str(int(self.mf.cfg.getFloatInfoData(cf.xHomeLoc) * \
@@ -9330,9 +9355,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9341,12 +9366,6 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnEnter(self, _):
         OnEnter(self)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
 
     def turnSync(self):
         if STEP_DRV:
@@ -9446,9 +9465,9 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9458,12 +9477,6 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnEnter(self, _):
         OnEnter(self)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
 
     def showAction(self, changed):
         pass
@@ -9525,9 +9538,9 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9537,12 +9550,6 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def OnEnter(self, _):
         OnEnter(self)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
 
     def showAction(self, changed):
         pass
@@ -9574,15 +9581,15 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
-        addButton(self, sizerV, 'Setup Mega', self.OnSetup, \
+        addSetupButton(self, sizerV, 'Setup Mega', OnDialogSetup, \
                        size=(80, -1), border=5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        addDialogButton(self, sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        addDialogButton(self, sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -9598,15 +9605,6 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
             changed = self.saveData()
             print("MegaDialog setupAction changed %s" % (changed))
             self.mf.sendData.sendMegaData(True)
-
-    def OnOk(self, _):
-        OnDialogOk(self)
-
-    def OnCancel(self, _):
-        OnDialogCancel(self)
-
-    def OnSetup(self, _):
-        OnDialogSetup(self)
 
     def showAction(self, changed):
         pass
