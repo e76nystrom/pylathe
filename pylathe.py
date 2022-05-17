@@ -635,18 +635,18 @@ def addButtons(panel, sizerG, add, rpm, pause, combine=False):
     panel.sendButton = addButton(panel, sizerG, 'Send', OnPanelSend)
     # panel.sendButton.SetBackgroundColour('Green')
 
-    panel.startButton = addButton(panel, sizerG, 'Start', panel.OnStart)
+    panel.startButton = addButton(panel, sizerG, 'Start', OnPanelStart)
     panel.startButton.Disable()
 
     if add is not None:
-        panel.addButton = addButton(panel, sizerG, 'Add', panel.OnAddPass)
+        panel.addButton = addButton(panel, sizerG, 'Add', OnPanelAddPass)
         panel.addButton.Disable()
         panel.addPass = addField(panel, sizerG, None, add, 'f')
     else:
         placeHolder(sizerG)
 
     panel.rpm = addField(panel, sizerG, "RPM", rpm, 'd')
-    panel.rpm.Bind(wx.EVT_KILL_FOCUS, panel.OnRPMKillFocus)
+    panel.rpm.Bind(wx.EVT_KILL_FOCUS, OnRPMKillFocus)
 
     panel.pause = addCheckBox(panel, sizerG, "Pause", pause, box=combine)
 
@@ -696,9 +696,64 @@ def OnPanelSend(evt):
         jp.setStatus(st.STR_FIELD_ERROR)
     jp.focus()
 
+def OnPanelStart(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if not panel.active:
+        jp.setStatus(st.STR_NOT_SENT)
+    elif (jp.mvStatus & ct.MV_PAUSE) == 0:
+        jp.setStatus(st.STR_NOT_PAUSED)
+    else:
+        jp.setStatus(st.STR_CLR)
+        try:
+            if callable(panel.startAction):
+                panel.startAction()
+                buttonDisable(panel.startButton)
+        except CommTimeout:
+            commTimeout(jp)
+        except AttributeError:
+            print("ActionRoutines OnStart AttributeError")
+            stdout.flush()
+    jp.focus()
+
+def OnPanelAddPass(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if not panel.active:
+        jp.setStatus(st.STR_OP_NOT_ACTIVE)
+    elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+        jp.setStatus(st.STR_OP_IN_PROGRESS)
+    else:
+        jp.setStatus(st.STR_CLR)
+        jp.clrRetract()
+        try:
+            curPass = panel.mf.comm.getParm(pm.CURRENT_PASS)
+            if curPass >= panel.control.passes:
+                if callable(panel.addAction):
+                    panel.addAction()
+            else:
+                jp.setStatus(st.STR_PASS_ERROR)
+        except CommTimeout:
+            commTimeout(jp)
+        except AttributeError:
+            print("ActionRoutines OnAddPass AttributeError")
+            stdout.flush()
+    jp.focus()
+
+def OnRPMKillFocus(evt):
+    panel = evt.EventObject.panel
+    panel.mf.jogPanel.setRPMSlider(int(panel.rpm.GetValue()))
+    evt.Skip()
+
+def getSafeLoc(panel):
+    control = panel.control
+    control.getParameters()
+    panel.safeX = control.xStart + control.xRetract
+    panel.safeZ = control.zStart + control.zRetract
+    return panel.safeZ, panel.safeX
+
 class ActionRoutines():
-    def __init__(self, mainFrame, control, op):
-        self.armf = mainFrame
+    def __init__(self, control, op):
         self.control = control
         self.op = op
         self.rpm = None
@@ -737,89 +792,106 @@ class ActionRoutines():
     def nextOperation(self):
         pass
 
-    def getSafeLoc(self):
-        control = self.control
-        control.getParameters()
-        self.safeX = control.xStart + control.xRetract
-        self.safeZ = control.zStart + control.zRetract
-        return self.safeZ, self.safeX
+    # def getSafeLoc(self):
+    #     control = self.control
+    #     control.getParameters()
+    #     self.safeX = control.xStart + control.xRetract
+    #     self.safeZ = control.zStart + control.zRetract
+    #     return self.safeZ, self.safeX
 
-    def OnSend(self, evt):
-        panel = evt.EventObject.panel
-        jp = panel.mf.jogPanel
-        if formatData(panel.mf.cfg, panel.formatList):
-            if not jp.xHomed:
-                jp.setStatus(st.STR_NOT_HOMED)
-            elif panel.active or \
-                 jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-                jp.setStatus(st.STR_OP_IN_PROGRESS)
-            else:
-                jp.setStatus(st.STR_CLR)
-                try:
-                    if callable(panel.sendAction):
-                        if panel.sendAction():
-                            panel.active = True
-                            panel.sendButton.Disable()
-                            buttonEnable(panel.startButton)
-                            buttonDisable(jp.spindleButton)
-                except CommTimeout:
-                    commTimeout(jp)
-                except:
-                    traceback.print_exc()
-        else:
-            jp.setStatus(st.STR_FIELD_ERROR)
-        jp.focus()
+    # def OnSend(self, evt):
+    #     panel = evt.EventObject.panel
+    #     jp = panel.mf.jogPanel
+    #     if formatData(panel.mf.cfg, panel.formatList):
+    #         if not jp.xHomed:
+    #             jp.setStatus(st.STR_NOT_HOMED)
+    #         elif panel.active or \
+    #              jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+    #             jp.setStatus(st.STR_OP_IN_PROGRESS)
+    #         else:
+    #             jp.setStatus(st.STR_CLR)
+    #             try:
+    #                 if callable(panel.sendAction):
+    #                     if panel.sendAction():
+    #                         panel.active = True
+    #                         panel.sendButton.Disable()
+    #                         buttonEnable(panel.startButton)
+    #                         buttonDisable(jp.spindleButton)
+    #             except CommTimeout:
+    #                 commTimeout(jp)
+    #             except:
+    #                 traceback.print_exc()
+    #     else:
+    #         jp.setStatus(st.STR_FIELD_ERROR)
+    #     jp.focus()
 
-    def OnStart(self, _):
-        jp = self.armf.jogPanel
-        if not self.active:
-            jp.setStatus(st.STR_NOT_SENT)
-        elif (jp.mvStatus & ct.MV_PAUSE) == 0:
-            jp.setStatus(st.STR_NOT_PAUSED)
-        else:
-            jp.setStatus(st.STR_CLR)
-            try:
-                if callable(self.startAction):
-                    self.startAction()
-                    buttonDisable(self.startButton)
-            except CommTimeout:
-                commTimeout(jp)
-            except AttributeError:
-                print("ActionRoutines OnStart AttributeError")
-                stdout.flush()
-        jp.focus()
+    # def OnStart(self, _):
+    #     jp = self.armf.jogPanel
+    #     if not self.active:
+    #         jp.setStatus(st.STR_NOT_SENT)
+    #     elif (jp.mvStatus & ct.MV_PAUSE) == 0:
+    #         jp.setStatus(st.STR_NOT_PAUSED)
+    #     else:
+    #         jp.setStatus(st.STR_CLR)
+    #         try:
+    #             if callable(self.startAction):
+    #                 self.startAction()
+    #                 buttonDisable(self.startButton)
+    #         except CommTimeout:
+    #             commTimeout(jp)
+    #         except AttributeError:
+    #             print("ActionRoutines OnStart AttributeError")
+    #             stdout.flush()
+    #     jp.focus()
 
-    def OnAddPass(self, _):
-        jp = self.armf.jogPanel
-        if not self.active:
-            jp.setStatus(st.STR_OP_NOT_ACTIVE)
-        elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-            jp.setStatus(st.STR_OP_IN_PROGRESS)
-        else:
-            jp.setStatus(st.STR_CLR)
-            jp.clrRetract()
-            try:
-                curPass = self.armf.comm.getParm(pm.CURRENT_PASS)
-                if curPass >= self.control.passes:
-                    if callable(self.addAction):
-                        self.addAction()
-                else:
-                    jp.setStatus(st.STR_PASS_ERROR)
-            except CommTimeout:
-                commTimeout(jp)
-            except AttributeError:
-                print("ActionRoutines OnAddPass AttributeError")
-                stdout.flush()
-        jp.focus()
+    # def OnAddPass(self, _):
+    #     jp = self.armf.jogPanel
+    #     if not self.active:
+    #         jp.setStatus(st.STR_OP_NOT_ACTIVE)
+    #     elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+    #         jp.setStatus(st.STR_OP_IN_PROGRESS)
+    #     else:
+    #         jp.setStatus(st.STR_CLR)
+    #         jp.clrRetract()
+    #         try:
+    #             curPass = self.armf.comm.getParm(pm.CURRENT_PASS)
+    #             if curPass >= self.control.passes:
+    #                 if callable(self.addAction):
+    #                     self.addAction()
+    #             else:
+    #                 jp.setStatus(st.STR_PASS_ERROR)
+    #         except CommTimeout:
+    #             commTimeout(jp)
+    #         except AttributeError:
+    #             print("ActionRoutines OnAddPass AttributeError")
+    #             stdout.flush()
+    #     jp.focus()
 
-    def OnRPMKillFocus(self, e):
-        self.armf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
-        e.Skip()
+    # def OnRPMKillFocus(self, e):
+    #     self.armf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
+    #     e.Skip()
+
+def saveData(dialog):
+    changed = False
+    cfg = dialog.mf.cfg
+    for fmt in dialog.fields:
+        (label, index) = fmt[:2]
+        val = cfg.getInfo(index)
+        if dialog.fieldInfo[index] != val:
+            dialog.fieldInfo[index] = val
+            cfg.setInfoData(index, val)
+            dialog.sendData = True
+            changed = True
+    return changed
 
 def OnDialogShow(evt):
     dialog = evt.EventObject
-    if dialog.mf.done:
+    try:
+        if dialog.mf.done:
+            return
+    except AttributeError:
         return
+
     changed = False
     if dialog.IsShown():
         formatData(dialog.mf.cfg, dialog.fields)
@@ -828,7 +900,7 @@ def OnDialogShow(evt):
             (label, index) = fmt[:2]
             dialog.fieldInfo[index] = dialog.mf.cfg.getInfo(index)
     else:
-        changed = dialog.saveData()
+        changed = saveData(dialog)
 
     if changed:
         if hasattr(dialog, 'showAction') and \
@@ -860,8 +932,7 @@ def OnDialogSetup(evt):
         dialog.setupAction()
 
 class DialogActions():
-    def __init__(self, mainFrame):
-        self.mf = mainFrame
+    def __init__(self):
         self.fields = None
         self.fieldInfo = None
         self.sendData = False
@@ -874,19 +945,6 @@ class DialogActions():
     def showAction(self, changed):
         print("DialogAction showAction stub called")
         stdout.flush()
-
-    def saveData(self):
-        changed = False
-        cfg = self.mf.cfg
-        for fmt in self.fields:
-            (label, index) = fmt[:2]
-            val = cfg.getInfo(index)
-            if self.fieldInfo[index] != val:
-                self.fieldInfo[index] = val
-                cfg.setInfoData(index, val)
-                self.sendData = True
-                changed = True
-        return changed
 
 class MoveCommands():
     def __init__(self, mainFrame):
@@ -2119,9 +2177,8 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
         super(TurnPanel, self).__init__(mainFrame, *args, **kwargs)
-        ActionRoutines.__init__(self, mainFrame, Turn(mainFrame, self), \
-                                en.OP_TURN)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, Turn(mainFrame, self), en.OP_TURN)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.fields0 = []
         self.hdrFont = hdrFont
@@ -2237,7 +2294,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
                 for f0 in self.fields0:
                     f0.Enable()
                     btn.Disable()
-                btn.Bind(wx.EVT_BUTTON, self.OnStart)
+                btn.Bind(wx.EVT_BUTTON, OnPanelStart)
             self.sizerV.Layout()
 
     def update(self):
@@ -2947,9 +3004,8 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
         super(ArcPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, mainFrame, Arc(mainFrame, self), \
-                                en.OP_ARC)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, Arc(mainFrame, self), en.OP_ARC)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
         self.InitUI()
@@ -3310,9 +3366,8 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
         super(FacePanel, self).__init__(mainFrame, *args, **kwargs)
-        ActionRoutines.__init__(self, mainFrame, Face(mainFrame, self), \
-                                en.OP_FACE)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, Face(mainFrame, self), en.OP_FACE)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
         self.InitUI()
@@ -3528,9 +3583,8 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
         super(CutoffPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, mainFrame, Cutoff(mainFrame, self),
-                                en.OP_CUTOFF)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, Cutoff(mainFrame, self), en.OP_CUTOFF)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
         self.InitUI()
@@ -4007,9 +4061,8 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         super(TaperPanel, self).__init__(mainFrame, *args, **kwargs)
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, mainFrame, Taper(mainFrame, self), \
-                                en.OP_TAPER)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, Taper(mainFrame, self), en.OP_TAPER)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
         self.taperDef = [("Custom",), \
@@ -4759,9 +4812,8 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         super(ThreadPanel, self).__init__(mainFrame, *args, **kwargs)
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, mainFrame, ScrewThread(mainFrame, self), \
-                                en.OP_THREAD)
-        self.Bind(wx.EVT_SHOW,OnPanelShow)
+        ActionRoutines.__init__(self, ScrewThread(mainFrame, self), en.OP_THREAD)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
         self.leftHand = None
@@ -5093,7 +5145,7 @@ class JogShuttle(Thread):
                         device.open()
                         device.set_raw_data_handler(self.ShuttleInput)
                         self.run()
-                    except:
+                    except HIDError:
                         traceback.print_exc()
                     break
         if self.device is not None:
@@ -5103,14 +5155,12 @@ class JogShuttle(Thread):
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, self.setZ), \
-                             (32, self.setX))
+        self.buttonAction = ((16, self.setZ), (32, self.setX))
         if STEP_DRV:
             self.buttonAction += ((64, self.setSpindle),)
         else:
             self.buttonAction += ((64, None),)
-        self.buttonAction += ((128, None), \
-                              (1, None))
+        self.buttonAction += ((128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
 
@@ -5152,7 +5202,7 @@ class JogShuttle(Thread):
                                 print("open shuttle")
                                 stdout.flush()
                                 t = 1
-                            except:
+                            except HIDError:
                                 traceback.print_exc()
             sleep(t)
         print("JogShuttle done")
@@ -5742,7 +5792,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnZSafe(self, _):
         if self.addEna:
             panel = self.getPanel()
-            (z, x) = panel.getSafeLoc()
+            (z, x) = getSafeLoc(panel)
             self.comm.queParm(pm.Z_MOVE_POS, z)
             self.comm.queParm(pm.Z_HOME_OFFSET, \
                          round(self.zHomeOffset * self.zStepsInch))
@@ -5771,7 +5821,7 @@ class JogPanel(wx.Panel, FormRoutines):
     def OnXSafe(self, _):
         if self.addEna:
             panel = self.getPanel()
-            (z, x) = panel.getSafeLoc()
+            (z, x) = getSafeLoc(panel)
             self.comm.queParm(pm.X_MOVE_POS, x)
             self.comm.queParm(pm.X_HOME_OFFSET, \
                          round(self.xHomeOffset * self.xStepsInch))
@@ -9052,7 +9102,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
@@ -9159,7 +9209,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
@@ -9279,7 +9329,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
@@ -9438,7 +9488,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
@@ -9489,7 +9539,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
@@ -9567,7 +9617,7 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
-        DialogActions.__init__(self, mainFrame)
+        DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
@@ -9602,7 +9652,7 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def setupAction(self):
         if formatData(self.mf.cfg, self.fields):
-            changed = self.saveData()
+            changed = saveData(self)
             print("MegaDialog setupAction changed %s" % (changed))
             self.mf.sendData.sendMegaData(True)
 
