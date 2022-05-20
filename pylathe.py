@@ -60,7 +60,7 @@ stderr.write("testing\n")
 R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
-    from pywinusb.hid import find_all_hid_devices
+    from pywinusb.hid import find_all_hid_devices, HIDError
     from comm import Comm, CommTimeout
     if os.path.isfile("rpi.txt"):
         from commPi import Comm, CommTimeout
@@ -107,8 +107,6 @@ STEP_DRV = False
 MOTOR_TEST = False
 SPINDLE_ENCODER = False
 SPINDLE_SYNC_BOARD = False
-TURN_SYNC = en.SEL_TU_SPEED
-THREAD_SYNC = en.SEL_TH_NO_ENC
 SPINDLE_SWITCH = False
 SPINDLE_VAR_SPEED = False
 HOME_IN_PLACE = False
@@ -216,7 +214,7 @@ def buttonDisable(btn):
 
 def buttonEnable(btn):
     # print("buttonEnable %s" % (btn.GetLabel()))
-    stdout.flush()
+    # stdout.flush()
     btn.Enable()
     btn.SetBackgroundColour('Green')
 
@@ -630,7 +628,7 @@ class PanelVars:
         self.sPInt = None
         self.spring = None
         self.internal = None
-        
+
 def addButtons(panel, sizerG, add, rpm, pause, combine=False):
     panel.sendButton = addButton(panel, sizerG, 'Send', OnPanelSend)
     # panel.sendButton.SetBackgroundColour('Green')
@@ -643,6 +641,7 @@ def addButtons(panel, sizerG, add, rpm, pause, combine=False):
         panel.addButton.Disable()
         panel.addPass = addField(panel, sizerG, None, add, 'f')
     else:
+        panel.addButton = None
         placeHolder(sizerG)
 
     panel.rpm = addField(panel, sizerG, "RPM", rpm, 'd')
@@ -741,7 +740,7 @@ def OnPanelAddPass(evt):
     jp.focus()
 
 def OnRPMKillFocus(evt):
-    panel = evt.EventObject.panel
+    panel = evt.EventObject.Parent
     panel.mf.jogPanel.setRPMSlider(int(panel.rpm.GetValue()))
     evt.Skip()
 
@@ -1370,7 +1369,7 @@ class SendData:
         self.zDataSent = False
         self.xDataSent = False
         self.megaDataSent = False
-        
+
     def sendClear(self):
         try:
             self.comm.command(cm.CLRDBG)
@@ -1780,7 +1779,7 @@ class UpdatePass():
         self.calcPassN = None    # calculate values for a pass
         self.runPassN = None     # run a pass with current values
 
-        self.add = False
+        self.addEnabled = False
         self.passes = 0
         self.passCount = 0
         self.passSize = [0.0, ]
@@ -1799,7 +1798,7 @@ class UpdatePass():
         self.lastPass = None
 
     def calcFeed(self, feed, cutAmount, finish=0.0):
-        self.add = False
+        self.addEnabled = False
         self.cutAmount = cutAmount
         cutToFinish = cutAmount - finish
         self.passes = int(ceil(cutToFinish / abs(feed)))
@@ -1878,10 +1877,10 @@ class UpdatePass():
         self.upmf.dPrt("\n%s addPass\n" % (label))
         self.upmf.dPrt(timeStr() + "\n")
         self.pause = panel.pause.GetValue()
-        self.add = True
+        self.addEnabled = True
         add = getFloatVal(panel.addPass)
         if add != 0.0:
-            panel.add.SetValue("0.0000")
+            panel.addPass.SetValue("0.0000")
         else:
             self.pause = True
         return add
@@ -1895,6 +1894,43 @@ class UpdatePass():
 
     def fixCut(self, offset=0.0):
         pass
+
+def getSyncParm(control, feed, rpm, axis):
+    val = getFloatVal(feed)
+    rpm = getIntVal(rpm)
+    mf = control.mf
+    turnSync = mf.turnSync
+    if turnSync == en.SEL_TU_ISYN or turnSync == en.SEL_TU_SYN:
+        syn = mf.zSyncInt if axis == AXIS_Z else mf.xSyncInt
+        (control.cycle, control.output, control.preScaler) = \
+            syn.calcSync(val, metric=False, rpm=rpm, turn=True)
+    elif turnSync == en.SEL_TU_ESYN:
+        syn = mf.zSyncExt if axis == AXIS_Z else mf.xSyncExt
+        (control.cycle, control.output, control.preScaler) = \
+            syn.calcSync(val, metric=False, rpm=rpm, turn=True)
+
+def sendSyncParm(control):
+    mf = control.mf
+    turnSync = mf.turnSync
+    queParm = mf.comm.queParm
+    if turnSync == en.SEL_TU_ISYN or \
+       turnSync == en.SEL_TU_SYN or \
+       ((turnSync == en.SEL_TU_ESYN) and SYNC_SPI):
+        queParm(pm.L_SYNC_CYCLE, control.cycle)
+        queParm(pm.L_SYNC_OUTPUT, control.output)
+        queParm(pm.L_SYNC_PRESCALER, control.preScaler)
+        if SYNC_SPI:
+            m = control.m
+            m.syncParms()
+            m.syncCommand(sc.SYNC_SETUP)
+    elif turnSync == en.SEL_TU_ESYN:
+        syncComm = mf.syncComm
+        syncComm.setParm(sp.SYNC_ENCODER, \
+                         control.cfg.getIntInfoData(cf.cfgEncoder))
+        syncComm.setParm(sp.SYNC_CYCLE, control.cycle)
+        syncComm.setParm(sp.SYNC_OUTPUT, control.output)
+        syncComm.setParm(sp.SYNC_PRESCALER, control.preScaler)
+        syncComm.command(sc.SYNC_SETUP)
 
 class Turn(LatheOp, UpdatePass):
     def __init__(self, mainFrame, turnPanel):
@@ -1926,14 +1962,7 @@ class Turn(LatheOp, UpdatePass):
         self.zEnd = getFloatVal(tu.zEnd)
         self.zRetract = getFloatVal(tu.zRetract)
 
-        val = getFloatVal(tu.zFeed)
-        rpm = getIntVal(tu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, tu.zFeed, tu.rpm, AXIS_Z)
 
     def runOperation(self):
         self.getParameters()
@@ -2007,23 +2036,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN or \
-               TURN_SYNC == en.SEL_TU_SYN or \
-               ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
-                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-                if SYNC_SPI:
-                    m.syncParms()
-                    m.syncCommand(sc.SYNC_SETUP)
-            elif TURN_SYNC == en.SEL_TU_ESYN:
-                syncComm = self.mf.syncComm
-                syncComm.setParm(sp.SYNC_ENCODER, \
-                                 self.cfg.getIntInfoData(cf.cfgEncoder))
-                syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-                syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-                syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-                syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -2320,7 +2333,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
     def startAction(self):
         self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
+        if control.addEnabled:
             if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
@@ -2464,14 +2477,7 @@ class Arc(LatheOp, UpdatePass):
               (self.toolRadiusStart, self.toolArcRadius, self.cut))
         stdout.flush()
 
-        val = getFloatVal(panel.zFeed)
-        rpm = getIntVal(panel.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, panel.zFeed, panel.rpm, AXIS_Z)
 
     def setupActions(self):
         if self.arcCW:
@@ -2703,27 +2709,6 @@ class Arc(LatheOp, UpdatePass):
         self.passDone()
         return(True)
 
-    def setupSync(self):
-        m = self.m
-        if TURN_SYNC == en.SEL_TU_ISYN or \
-           TURN_SYNC == en.SEL_TU_SYN or \
-           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
-            comm = self.mf.comm
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            if SYNC_SPI:
-                m.syncParms()
-                m.syncCommand(sc.SYNC_SETUP)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm = self.mf.syncComm
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
-
     def setup(self, add=False): # arc
         comm = self.mf.comm
         comm.queParm(pm.CURRENT_OP, en.OP_ARC)
@@ -2734,7 +2719,7 @@ class Arc(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            self.setupSync()
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -3165,7 +3150,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
     def startAction(self):
         self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
+        if control.addEnabled:
             if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
@@ -3204,14 +3189,7 @@ class Face(LatheOp, UpdatePass):
         self.zFeed = getFloatVal(fa.zFeed)
         self.zRetract = abs(getFloatVal(fa.zRetract))
 
-        val = getFloatVal(fa.xFeed)
-        rpm = getIntVal(fa.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, fa.xFeed, fa.rpm, AXIS_X)
 
     def runOperation(self):
         self.getParameters()
@@ -3262,23 +3240,7 @@ class Face(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.zStart, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or \
-           TURN_SYNC == en.SEL_TU_SYN or \
-           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            if SYNC_SPI:
-                m.syncParms()
-                m.syncCommand(sc.SYNC_SETUP)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm = self.mf.syncComm
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -3464,7 +3426,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
     def startAction(self):
         self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
+        if control.addEnabled:
             if self.mf.jogPanel.mvStatus & ct.MV_READ_Z:
                 control.fixCut()
         else:
@@ -3478,7 +3440,7 @@ class Cutoff(LatheOp):
     def __init__(self, mainFrame, cutoffPanel):
         LatheOp.__init__(self, mainFrame, cutoffPanel)
         self.mf = mainFrame
-        self.add = False
+        self.addEnabled = False
         self.passSize = [0.0, ]
 
         self.zCutoff = 0.0
@@ -3500,15 +3462,7 @@ class Cutoff(LatheOp):
         self.zCutoff = getFloatVal(cu.zCutoff)
         self.toolWidth = getFloatVal(cu.toolWidth)
 
-        val = getFloatVal(cu.xFeed)
-        rpm = getIntVal(cu.rpm)
-
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, cu.xFeed, cu.rpm, AXIS_Z)
 
     def runOperation(self):
         self.getParameters()
@@ -3545,23 +3499,7 @@ class Cutoff(LatheOp):
         comm = mf.comm
         comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or \
-           TURN_SYNC == en.SEL_TU_SYN or \
-           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            if SYNC_SPI:
-                m.syncParms()
-                m.syncCommand(sc.SYNC_SETUP)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm = mf.syncComm
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+        sendSyncParm(self)
 
         m.queInit()
         m.quePause()
@@ -3724,14 +3662,7 @@ class Taper(LatheOp, UpdatePass):
         self.zBackInc = abs(self.mf.cfg.getFloatInfoData(cf.zBackInc))
         self.finish = abs(getFloatVal(tp.finish))
 
-        val = getFloatVal(tp.zFeed)
-        rpm = getIntVal(tp.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, tp.zFeed, tp.rpm, AXIS_Z)
 
         totalTaper = taperInch * self.zLength
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
@@ -3748,23 +3679,7 @@ class Taper(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or \
-           TURN_SYNC == en.SEL_TU_SYN or \
-           ((TURN_SYNC == en.SEL_TU_ESYN) and SYNC_SPI):
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            if SYNC_SPI:
-                m.syncParms()
-                m.syncCommand(sc.SYNC_SETUP)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm = self.mf.syncComm
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -4316,7 +4231,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         mf = self.mf
         mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
+        if control.addEnabled:
             if mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
@@ -4426,11 +4341,12 @@ class ScrewThread(LatheOp, UpdatePass):
             self.tpi = 1.0 / self.pitch
             metric = True
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
+        threadSync = self.mf.threadSync
+        if threadSync == en.SEL_TH_ISYN_RENC or threadSync == en.SEL_TH_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 self.mf.zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
-        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
-              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+        elif (threadSync == en.SEL_TH_ESYN_RENC or
+              threadSync == en.SEL_TH_ESYN_RSYN):
             (self.cycle, self.output, self.preScaler) = \
                 self.mf.zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
 
@@ -4449,7 +4365,7 @@ class ScrewThread(LatheOp, UpdatePass):
         self.runout = getFloatVal(th.runout)
 
         if self.runout != 0:
-            if THREAD_SYNC == en.SEL_TH_ESYN_RSYN:
+            if threadSync == en.SEL_TH_ESYN_RSYN:
                 xSync = self.mf.xSyncExt
                 xSync.setExitRevs(self.runout)
                 (self.xCycle, self.xOutput, self.xPreScaler) = \
@@ -4459,7 +4375,8 @@ class ScrewThread(LatheOp, UpdatePass):
 
     def setup(self, add=False): # thread
         comm = self.mf.comm
-        comm.queParm(pm.CURRENT_OP, en.OP_THREAD)
+        queParm = comm.queParm
+        queParm(pm.CURRENT_OP, en.OP_THREAD)
         m = self.m
         if not add:
             m.setLoc(self.endZ, self.xStart)
@@ -4467,16 +4384,17 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-           THREAD_SYNC == en.SEL_TH_SYN or \
-           ((THREAD_SYNC == en.SEL_TH_ESYN_RENC) and SYNC_SPI):
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+        threadSync = self.mf.threadSync
+        if threadSync == en.SEL_TH_ISYN_RENC or \
+           threadSync == en.SEL_TH_SYN or \
+           ((threadSync == en.SEL_TH_ESYN_RENC) and SYNC_SPI):
+            queParm(pm.L_SYNC_CYCLE, self.cycle)
+            queParm(pm.L_SYNC_OUTPUT, self.output)
+            queParm(pm.L_SYNC_PRESCALER, self.preScaler)
             if SYNC_SPI:
                 m.syncParms()
                 m.syncCommand(sc.SYNC_SETUP)
-        elif THREAD_SYNC == en.SEL_TH_ESYN_RENC:
+        elif threadSync == en.SEL_TH_ESYN_RENC:
             syncComm = self.mf.syncComm
             syncComm.setParm(sp.SYNC_ENCODER, \
                              self.mf.cfg.getIntInfoData(cf.cfgEncoder))
@@ -4486,13 +4404,13 @@ class ScrewThread(LatheOp, UpdatePass):
             syncComm.command(sc.SYNC_SETUP)
 
         if ((self.runout != 0) and \
-            (THREAD_SYNC == en.SEL_TH_ESYN_RSYN)):
-            comm.queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
-            comm.queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
-            comm.queParm(pm.L_X_SYNC_PRESCALER, self.xPreScaler)
+            (threadSync == en.SEL_TH_ESYN_RSYN)):
+            queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
+            queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
+            queParm(pm.L_X_SYNC_PRESCALER, self.xPreScaler)
 
-        comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
-        comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
+        queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+        queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -4782,12 +4700,12 @@ class ScrewThread(LatheOp, UpdatePass):
         self.setup(True)
 
         jp = self.mf.jogPanel
-        comm = self.mf.comm
-        comm.queParm(pm.TH_Z_START, \
-                     round((self.startZ + jp.zHomeOffset) * jp.zStepsInch))
-        comm.queParm(pm.TH_X_START, \
-                     round((self.xStart + jp.xHomeOffset) * jp.xStepsInch))
-        comm.queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
+        queParm = self.mf.comm.queParm
+        queParm(pm.TH_Z_START, \
+                round((self.startZ + jp.zHomeOffset) * jp.zStepsInch))
+        queParm(pm.TH_X_START, \
+                round((self.xStart + jp.xHomeOffset) * jp.xStepsInch))
+        queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
 
         self.calcPass(add=True)
         self.m.nextPass(self.passCount)
@@ -5014,7 +4932,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
     def startAction(self):      # thread
         self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
+        if control.addEnabled:
             if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
@@ -6419,12 +6337,14 @@ class JogPanel(wx.Panel, FormRoutines):
                 panel = self.currentPanel
                 if addEna:
                     if not panel.manualMode:
-                        buttonEnable(panel.addButton)
+                        if panel.addButton is not None:
+                            buttonEnable(panel.addButton)
                         buttonEnable(self.doneButton)
                     buttonDisable(self.measureButton)
                     buttonDisable(self.pauseButton)
                 else:
-                    buttonDisable(panel.addButton)
+                    if panel.addButton is not None:
+                        buttonDisable(panel.addButton)
                     buttonDisable(self.doneButton)
                 self.addEna = addEna
 
@@ -7738,7 +7658,7 @@ class UpdateThread(Thread):
                                 self.dbg.flush()
                         # if cmd == en.D_DONE:
                         #     if val == 0:
-                        #         if not self.jp.currentPanel.control.add:
+                        #         if not self.jp.currentPanel.control.addEnabled:
                         #             self.baseTime = time()
                         #     if val == 1:
                         #         self.baseTime = None
@@ -7786,7 +7706,7 @@ class UpdateThread(Thread):
 
     def dbgNone(self, val):
         return "none"
-    
+
     def dbgPass(self, val):
         # tmp = val >> 8
         # if tmp == 0:
@@ -7804,7 +7724,7 @@ class UpdateThread(Thread):
 
     def dbgDone(self, val):
         if val == ct.PARM_START:
-            if not self.jp.currentPanel.control.add:
+            if not self.jp.currentPanel.control.addEnabled:
                 self.baseTime = time()
             return("strt " + timeStr())
         elif val == ct.PARM_DONE:
@@ -8283,6 +8203,9 @@ class MainFrame(wx.Frame):
         self.dbg.write(t.encode())
         self.dbg.flush()
 
+        self.turnSync = en.SEL_TU_SPEED
+        self.threadSync = en.SEL_TH_NO_ENC
+
         self.xSyncInt = None
         self.zSyncInt = None
         self.xSyncExt = None
@@ -8336,7 +8259,7 @@ class MainFrame(wx.Frame):
 
         self.zDialog.setupVars()
         self.xDialog.setupVars()
-        
+
         self.dbgSave = bool(cfg.getBoolInfoData(cf.cfgDbgSave))
         self.cfgDraw = bool(cfg.getBoolInfoData(cf.cfgDraw))
 
@@ -8627,7 +8550,7 @@ class MainFrame(wx.Frame):
         self.SetPosition((int((3 * dw) / 4 - w), 0))
 
         # read data here so updates below have data
-        
+
         cfg.readInfo(self.cfgFile, cf.config)
         cfg.readInfo(self.posFile, cf.config)
 
@@ -8847,7 +8770,7 @@ class MainFrame(wx.Frame):
     def initialConfig(self, cfg):
         global FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MEGA, MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
-            TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
+            SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS, SYNC_SPI
 
         cfg.clrInfo(len(cf.config))
@@ -8885,26 +8808,28 @@ class MainFrame(wx.Frame):
         cfg.clrInfo(len(cf.config))
 
     def syncFuncSetup(self, cfg):
-        global TURN_SYNC, THREAD_SYNC
 
-        TURN_SYNC = cfg.getIntInfoData(cf.cfgTurnSync)
-        THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
+        self.turnSync = cfg.getIntInfoData(cf.cfgTurnSync)
+        self.threadSync = cfg.getIntInfoData(cf.cfgThreadSync)
 
         syncDbg = True
 
+        turnSync = self.turnSync
+        threadSync = self.threadSync
+
         if not FPGA:
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            if (turnSync == en.SEL_TU_ISYN or \
+                turnSync == en.SEL_TU_ESYN or \
+                threadSync == en.SEL_TH_ISYN_RENC or \
+                threadSync == en.SEL_TH_ESYN_RENC or \
+                threadSync == en.SEL_TH_ESYN_RSYN):
                 self.zSyncInt = Sync(dbg=syncDbg)
                 self.zSyncExt = Sync(dbg=syncDbg)
 
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+            if (turnSync == en.SEL_TU_ISYN or \
+                turnSync == en.SEL_TU_ESYN or \
+                threadSync == en.SEL_TH_ISYN_RENC or \
+                threadSync == en.SEL_TH_ESYN_RSYN):
                 self.xSyncExt = Sync(dbg=syncDbg)
                 self.xSyncInt = Sync(dbg=syncDbg)
         else:
@@ -8916,9 +8841,9 @@ class MainFrame(wx.Frame):
             print("STEP_DRV %s SPINDLE_ENCODER %s "\
                   "SPINDLE_SYNC_BOARD %s" % \
                   (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD))
-            print("TURN_SYNC %d %s THREAD_SYNC %d %s" % \
-                  (TURN_SYNC, en.selTurnText[TURN_SYNC], \
-                   THREAD_SYNC, en.selThreadText[THREAD_SYNC]))
+            print("turnSync %d %s threadSync %d %s" % \
+                  (turnSync, en.selTurnText[turnSync], \
+                   threadSync, en.selThreadText[threadSync]))
 
     def OnResize(self, _):
         print("OnResize")
