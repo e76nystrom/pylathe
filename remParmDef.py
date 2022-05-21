@@ -190,131 +190,132 @@ STEPPER_DRIVE        = 114
 MOTOR_TEST           = 115
 SPINDLE_ENCODER      = 116
 SPINDLE_SYNC_BOARD   = 117
-TURN_SYNC            = 118
-THREAD_SYNC          = 119
-CAP_TMR_ENABLE       = 120
-CFG_FPGA             = 121
-CFG_MEGA             = 122
-CFG_MPG              = 123
-CFG_DRO              = 124
-CFG_LCD              = 125
-CFG_FCY              = 126
-CFG_SWITCH           = 127
-CFG_VAR_SPEED        = 128
+SPINDLE_INTERNAL_SYNC = 118
+TURN_SYNC            = 119
+THREAD_SYNC          = 120
+CAP_TMR_ENABLE       = 121
+CFG_FPGA             = 122
+CFG_MEGA             = 123
+CFG_MPG              = 124
+CFG_DRO              = 125
+CFG_LCD              = 126
+CFG_FCY              = 127
+CFG_SWITCH           = 128
+CFG_VAR_SPEED        = 129
 
 # setup
 
-SETUP_DONE           = 129
+SETUP_DONE           = 130
 
 # encoder counts per revolution
 
-ENC_PER_REV          = 130
+ENC_PER_REV          = 131
 
 # test encoder setup variables
 
-ENC_ENABLE           = 131
-ENC_PRE_SCALER       = 132
-ENC_TIMER            = 133
-ENC_RUN_COUNT        = 134
+ENC_ENABLE           = 132
+ENC_PRE_SCALER       = 133
+ENC_TIMER            = 134
+ENC_RUN_COUNT        = 135
 
 # test encoder status variables
 
-ENC_RUN              = 135
-ENC_COUNTER          = 136
-ENC_REV_COUNTER      = 137
+ENC_RUN              = 136
+ENC_COUNTER          = 137
+ENC_REV_COUNTER      = 138
 
 # measured spindle speed
 
-RPM                  = 138
+RPM                  = 139
 
 # fpga frequency variables
 
-FPGA_FREQUENCY       = 139
-FREQ_MULT            = 140
+FPGA_FREQUENCY       = 140
+FREQ_MULT            = 141
 
 # xilinx configuration register
 
-X_CFG_REG            = 141
+X_CFG_REG            = 142
 
 # z sync parameters
 
-L_SYNC_CYCLE         = 142
-L_SYNC_OUTPUT        = 143
-L_SYNC_PRESCALER     = 144
+L_SYNC_CYCLE         = 143
+L_SYNC_OUTPUT        = 144
+L_SYNC_PRESCALER     = 145
 
 # x sync parameters
 
-L_X_SYNC_CYCLE       = 145
-L_X_SYNC_OUTPUT      = 146
-L_X_SYNC_PRESCALER   = 147
+L_X_SYNC_CYCLE       = 146
+L_X_SYNC_OUTPUT      = 147
+L_X_SYNC_PRESCALER   = 148
 
 # threading variables
 
-TH_Z_START           = 148
-TH_X_START           = 149
-TAN_THREAD_ANGLE     = 150
-X_FEED               = 151
-RUNOUT_DISTANCE      = 152
-RUNOUT_DEPTH         = 153
+TH_Z_START           = 149
+TH_X_START           = 150
+TAN_THREAD_ANGLE     = 151
+X_FEED               = 152
+RUNOUT_DISTANCE      = 153
+RUNOUT_DEPTH         = 154
 
 # jog debug
 
-JOG_DEBUG            = 154
+JOG_DEBUG            = 155
 
 # motor and speed control
 
-PWM_FREQ             = 155
-MIN_SPEED            = 156
-MAX_SPEED            = 157
+PWM_FREQ             = 156
+MIN_SPEED            = 157
+MAX_SPEED            = 158
 
 # current operation
 
-CURRENT_OP           = 158
+CURRENT_OP           = 159
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 159
-COMMON_LIMITS        = 160
-LIMITS_ENABLED       = 161
-COMMON_HOME          = 162
+LIMIT_OVERRIDE       = 160
+COMMON_LIMITS        = 161
+LIMITS_ENABLED       = 162
+COMMON_HOME          = 163
 
 # z limits and home
 
-Z_LIM_ENA            = 163
-Z_LIM_NEG_INV        = 164
-Z_LIM_POS_INV        = 165
-Z_HOME_ENA           = 166
-Z_HOME_INV           = 167
+Z_LIM_ENA            = 164
+Z_LIM_NEG_INV        = 165
+Z_LIM_POS_INV        = 166
+Z_HOME_ENA           = 167
+Z_HOME_INV           = 168
 
 # x limits and home
 
-X_LIM_ENA            = 168
-X_LIM_NEG_INV        = 169
-X_LIM_POS_INV        = 170
-X_HOME_ENA           = 171
-X_HOME_INV           = 172
+X_LIM_ENA            = 169
+X_LIM_NEG_INV        = 170
+X_LIM_POS_INV        = 171
+X_HOME_ENA           = 172
+X_HOME_INV           = 173
 
 # e stop
 
-E_STOP_ENA           = 173
-E_STOP_INV           = 174
+E_STOP_ENA           = 174
+E_STOP_INV           = 175
 
 # command pause
 
-CMD_PAUSED           = 175
+CMD_PAUSED           = 176
 
 # arc parameters
 
-ARC_RADIUS           = 176
-ARC_X_CENTER         = 177
-ARC_Z_CENTER         = 178
-ARC_X_START          = 179
-ARC_Z_START          = 180
-ARC_X_END            = 181
-ARC_Z_END            = 182
-MEGA_VFD             = 183
-MEGA_SIM             = 184
-MAX_PARM             = 185
+ARC_RADIUS           = 177
+ARC_X_CENTER         = 178
+ARC_Z_CENTER         = 179
+ARC_X_START          = 180
+ARC_Z_START          = 181
+ARC_X_END            = 182
+ARC_Z_END            = 183
+MEGA_VFD             = 184
+MEGA_SIM             = 185
+MAX_PARM             = 186
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -435,6 +436,7 @@ parmTable = ( \
     ('MOTOR_TEST', 'char', 'motorTest'),
     ('SPINDLE_ENCODER', 'char', 'spindleEncoder'),
     ('SPINDLE_SYNC_BOARD', 'char', 'spindleSyncBoard'),
+    ('SPINDLE_INTERNAL_SYNC', 'char', 'spindleInternalSync'),
     ('TURN_SYNC', 'char', 'turnSync'),
     ('THREAD_SYNC', 'char', 'threadSync'),
     ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),

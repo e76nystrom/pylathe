@@ -196,10 +196,11 @@ D_ZEST           = 31           # z spindle encoder start count
 D_ZEDN           = 32           # Z spindle encoder done count
 D_ZX             = 33           # z 
 D_ZY             = 34           # z 
-D_ZIDX           = 35           # z dro at index pulse 
-D_HST            = 36           # home state
-D_MSTA           = 37           # move state
-D_MCMD           = 38           # move command
+D_ZIDXD          = 35           # z dro at index pulse
+D_ZIDXP          = 36           # z position at index pulse
+D_HST            = 37           # home state
+D_MSTA           = 38           # move state
+D_MCMD           = 39           # move command
 
 dMessageList = ( \
     "D_PASS",
@@ -237,7 +238,8 @@ dMessageList = ( \
     "D_ZEDN",
     "D_ZX",
     "D_ZY",
-    "D_ZIDX",
+    "D_ZIDXD",
+    "D_ZIDXP",
     "D_HST",
     "D_MSTA",
     "D_MCMD",
@@ -292,7 +294,7 @@ selTurnText = ( \
 
 SEL_TH_NO_ENC    =  0           # No Encoder
 SEL_TH_STEP      =  1           # Stepper
-SEL_TH_ENC       =  2           # Encoder Direct
+SEL_TH_ENC       =  2           # Encoder
 SEL_TH_ISYN_RENC =  3           # Int Syn, Runout Enc
 SEL_TH_ESYN_RENC =  4           # Ext Syn, Runout Enc
 SEL_TH_ESYN_RSYN =  5           # Ext Syn, Runout Syn
@@ -311,7 +313,7 @@ selThreadList = ( \
 selThreadText = ( \
     "No Encoder",
     "Stepper",
-    "Encoder Direct",
+    "Encoder",
     "Int Syn, Runout Enc",
     "Ext Syn, Runout Enc",
     "Ext Syn, Runout Syn",

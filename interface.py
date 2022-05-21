@@ -46,6 +46,7 @@ configList = \
         ('cfgFpgaFreq', 'config fpga frequency'),
         ('cfgFreqMult', 'config fpga frequency multiplier'),
         ('cfgHomeInPlace', 'config home in place'),
+        ('cfgIntSync', 'config internal sync'),
         ('cfgInvEncDir', 'config fpga invert encoder direction'),
         ('cfgLCD', 'config enable lcd'),
         ('cfgMega', 'config control link to mega'),
@@ -691,6 +692,7 @@ parmList = \
         ("MOTOR_TEST", "use stepper to test motor", "char"),
         ("SPINDLE_ENCODER", "motor with spindle enc", "char"),
         ("SPINDLE_SYNC_BOARD", "spindle sync board", "char"),
+        ("SPINDLE_INTERNAL_SYNC", "spindle internal sync", "char"),
         ("TURN_SYNC", "sync type for turning", "char"),
         ("THREAD_SYNC", "sync type for threading", "char"),
         # ("SPINDLE_SYNC", "spindle sync direct", "char"),
@@ -1729,7 +1731,8 @@ enumList = \
         ("D_ZX", "z "),
         ("D_ZY", "z "),
 
-        ("D_ZIDX", "z dro at index pulse "),
+        ("D_ZIDXD", "z dro at index pulse"),
+        ("D_ZIDXP", "z position at index pulse"),
 
         ("D_HST", "home state"),
 
@@ -1768,7 +1771,7 @@ enumList = \
         "{",
         ("SEL_TH_NO_ENC", "No Encoder"),
         ("SEL_TH_STEP", "Stepper"),
-        ("SEL_TH_ENC", "Encoder Direct"),
+        ("SEL_TH_ENC", "Encoder"),
         ("SEL_TH_ISYN_RENC", "Int Syn, Runout Enc"),
         ("SEL_TH_ESYN_RENC", "Ext Syn, Runout Enc"),
         ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),

@@ -107,6 +107,7 @@ STEP_DRV = False
 MOTOR_TEST = False
 SPINDLE_ENCODER = False
 SPINDLE_SYNC_BOARD = False
+SPINDLE_INTERNAL_SYNC = False
 SPINDLE_SWITCH = False
 SPINDLE_VAR_SPEED = False
 HOME_IN_PLACE = False
@@ -901,10 +902,9 @@ def OnDialogShow(evt):
     else:
         changed = saveData(dialog)
 
-    if changed:
-        if hasattr(dialog, 'showAction') and \
-           callable(dialog.showAction):
-            dialog.showAction(changed)
+    if hasattr(dialog, 'showAction') and \
+       callable(dialog.showAction):
+        dialog.showAction(changed)
 
 def OnDialogOk(evt):
     dialog = evt.EventObject.dialog
@@ -1426,6 +1426,8 @@ class SendData:
                         cfg.getBoolInfoData(cf.cfgSpEncoder))
                 queParm(pm.SPINDLE_SYNC_BOARD, \
                         cfg.getBoolInfoData(cf.cfgSpSyncBoard))
+                queParm(pm.SPINDLE_INTERNAL_SYNC, \
+                        cfg.getBoolInfoData(cf.cfgIntSync))
                 queParm(pm.TURN_SYNC, cfg.getInfoData(cf.cfgTurnSync))
                 queParm(pm.THREAD_SYNC, cfg.getInfoData(cf.cfgThreadSync))
                 if STEP_DRV or MOTOR_TEST:
@@ -1502,6 +1504,7 @@ class SendData:
                     else:
                         queParm(pm.MIN_SPEED, 0)
                         queParm(pm.MAX_SPEED, 0)
+                        
                 if STEP_DRV or MOTOR_TEST or SPINDLE_VAR_SPEED:
                     if rpm is not None:
                         queParm(pm.SP_MAX_RPM, rpm)
@@ -1599,7 +1602,7 @@ class SendData:
                 queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
 
                 queParm(pm.JOG_TIME_INITIAL,\
-                             cfg.getFloatInfoData(cf.jogTimeInitial))
+                        cfg.getFloatInfoData(cf.jogTimeInitial))
                 queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
                 queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
 
@@ -1608,15 +1611,13 @@ class SendData:
 
                 queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
 
-                comm.queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
-                comm.queParm(pm.Z_HOME_DIST_REV, \
-                             cfg.getInfoData(cf.zHomeDistRev))
-                comm.queParm(pm.Z_HOME_DIST_BACKOFF, \
-                             cfg.getInfoData(cf.zHomeDistBackoff))
-                comm.queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
-                comm.queParm(pm.Z_HOME_DIR, \
-                             1 if bool(cfg.getBoolInfoData(cf.zHomeDir)) \
-                             else -1)
+                queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
+                queParm(pm.Z_HOME_DIST_REV, cfg.getInfoData(cf.zHomeDistRev))
+                queParm(pm.Z_HOME_DIST_BACKOFF, \
+                        cfg.getInfoData(cf.zHomeDistBackoff))
+                queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
+                queParm(pm.Z_HOME_DIR, \
+                        1 if bool(cfg.getBoolInfoData(cf.zHomeDir)) else -1)
 
                 comm.command(cm.CMD_ZSETUP)
 
@@ -1728,8 +1729,7 @@ class SendData:
                              cfg.getInfoData(cf.xHomeDistBackoff))
                 comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
                 comm.queParm(pm.X_HOME_DIR,
-                             1 if bool(cfg.getBoolInfoData(cf.xHomeDir)) \
-                             else -1)
+                             1 if bool(cfg.getBoolInfoData(cf.xHomeDir)) else -1)
 
                 if HOME_TEST:
                     stepsInch = self.jp.xStepsInch
@@ -2637,8 +2637,7 @@ class Arc(LatheOp, UpdatePass):
         self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
         self.pause = self.panel.pause.GetValue()
 
-        print("cut %5.3f passes %d" % \
-              (self.cut, self.passes))
+        print("cut %5.3f passes %d" % (self.cut, self.passes))
         stdout.flush()
 
         self.setupSpringPasses(self.panel)
@@ -2669,7 +2668,7 @@ class Arc(LatheOp, UpdatePass):
             m.drawArc((self.center.x, \
                        self.center.z + self.arcRadius + toolRadius), \
                       (self.center.z + self.arcRadius + 2*toolRadius, \
-                       self.center.x),
+                       self.center.x),\
                       (self.center.z + self.arcRadius + 2*toolRadius, \
                        self.center.x))
 
@@ -2697,8 +2696,7 @@ class Arc(LatheOp, UpdatePass):
             m.drawLine(self.center.z, self.center.x+tick)
 
         self.dPrt("\narc runOperation %s %s\n" % \
-                  (("CCW", "CW")[self.arcCW], \
-                   en.selArcTypeText[self.arcType]))
+                  (("CCW", "CW")[self.arcCW], en.selArcTypeText[self.arcType]))
         self.dPrt(timeStr() + "\n")
         self.setup()
 
@@ -4083,8 +4081,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         # taper parameters
 
         self.deltaBtn = addRadioButton(self, sizerG, "Delta Z", cf.tpDeltaBtn, \
-                                       style=wx.RB_GROUP, \
-                                       action=self.OnDelta)
+                                       style=wx.RB_GROUP, action=self.OnDelta)
 
         self.zDelta = addField(self, sizerG, None, cf.tpZDelta, 'f')
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
@@ -4345,7 +4342,7 @@ class ScrewThread(LatheOp, UpdatePass):
         if threadSync == en.SEL_TH_ISYN_RENC or threadSync == en.SEL_TH_SYN:
             (self.cycle, self.output, self.preScaler) = \
                 self.mf.zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
-        elif (threadSync == en.SEL_TH_ESYN_RENC or
+        elif (threadSync == en.SEL_TH_ESYN_RENC or \
               threadSync == en.SEL_TH_ESYN_RSYN):
             (self.cycle, self.output, self.preScaler) = \
                 self.mf.zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
@@ -6234,202 +6231,204 @@ class JogPanel(wx.Panel, FormRoutines):
         stdout.flush()
 
     def updateAll(self, val):
-        if len(val) == 7:
-            (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
-            if z != '#':
-                self.zIPosition.value = z
-                zLocation = float(z) / self.zStepsInch
-                self.zLocation = zLocation
-                self.zPos.SetValue("%0.4f" % (zLocation - self.zHomeOffset))
+        if len(val) != 7:
+            return
+
+        (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
+        if z != '#':
+            self.zIPosition.value = z
+            zLocation = float(z) / self.zStepsInch
+            self.zLocation = zLocation
+            self.zPos.SetValue("%0.4f" % (zLocation - self.zHomeOffset))
+        else:
+            zLocation = self.zLocation
+
+        if x != '#':
+            self.xIPosition.value = x
+            xLocation = float(x) / self.xStepsInch - self.xHomeOffset
+            self.xLocation = xLocation
+            self.xPos.SetValue("%0.4f" % (xLocation))
+            dialPanel = self.mf.dialPanel
+            if dialPanel is not None:
+                dialPanel.updatePointer(xLocation)
+            self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
+            if self.surfaceSpeed.value:
+                fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
+                self.rpm.SetValue("%1.0f" % (fpm))
+        else:
+            xLocation = self.xLocation
+
+        if not self.surfaceSpeed.value:
+            self.rpm.SetValue(str(rpm))
+
+        val = int(curPass)
+        passNum = val & 0xff
+        passType = val >> 8
+        if passType == 0:
+            self.lastPass = passNum
+            curPass = str(passNum)
+            passSize = self.currentPanel.control.passSize
+            if len(passSize) > passNum:
+                self.passSize.SetValue("%0.4f" % \
+                    (passSize[passNum]))
             else:
-                zLocation = self.zLocation
+                self.passSize.SetValue("0.000")
+        elif passType == 1:
+            curPass = str(passNum) + "S"
+        else:
+            curPass = "%dS%d" % (self.lastPass, passNum)
+        self.curPass.SetValue(curPass)
 
-            if x != '#':
-                self.xIPosition.value = x
-                xLocation = float(x) / self.xStepsInch - self.xHomeOffset
-                self.xLocation = xLocation
-                self.xPos.SetValue("%0.4f" % (xLocation))
-                dialPanel = self.mf.dialPanel
-                if dialPanel is not None:
-                    dialPanel.updatePointer(xLocation)
-                self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
-                if self.surfaceSpeed.value:
-                    fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
-                    self.rpm.SetValue("%1.0f" % (fpm))
-            else:
-                xLocation = self.xLocation
-
-            if not self.surfaceSpeed.value:
-                self.rpm.SetValue(str(rpm))
-
-            val = int(curPass)
-            passNum = val & 0xff
-            passType = val >> 8
-            if passType == 0:
-                self.lastPass = passNum
-                curPass = str(passNum)
-                passSize = self.currentPanel.control.passSize
-                if len(passSize) > passNum:
-                    self.passSize.SetValue("%0.4f" % \
-                        (passSize[passNum]))
-                else:
-                    self.passSize.SetValue("0.000")
-            elif passType == 1:
-                curPass = str(passNum) + "S"
-            else:
-                curPass = "%dS%d" % (self.lastPass, passNum)
-            self.curPass.SetValue(curPass)
-
-            if DRO:
-                zDROPos = int(zDROPos)
-                self.zIDROPosition.value = zDROPos
-                zDroLoc = float(zDROPos) / self.zDROInch
-                if self.lastZOffset != self.zDROOffset:
-                    self.lastZOffset = self.zDROOffset
-                    print("zDROPos %d %0.4f zDROOffset %0.4f" % \
-                          (zDROPos, zDroLoc, self.zDROOffset))
-                    stdout.flush()
-                zDroLoc = zDroLoc - self.zDROOffset
-                self.zDROPos.SetValue("%0.4f" % (zDroLoc))
-
-                xDROPos = int(xDROPos)
-                self.xIDROPosition.value = xDROPos
-                xDroLoc = float(xDROPos) / self.xDROInch
-                if self.lastXOffset != self.xDROOffset:
-                    self.lastXOffset = self.xDROOffset
-                    print("xDROPos %d %0.4f xDROOffset %0.4f" % \
-                          (xDROPos, xDroLoc, self.xDROOffset))
-                    stdout.flush()
-                xDroLoc = xDroLoc - self.xDROOffset
-                self.xDROPos.SetValue("%0.4f" % (xDroLoc))
-
-                if self.xDroDiam.value:
-                    xDroLoc *= 2.0
-
-                dialPanel = self.mf.dialPanel
-                if dialPanel is not None:
-                    dialPanel.updatePointer(xDroLoc)
-
-            text = ''
-            if self.xHomed:
-                text = 'H'
-            if self.currentPanel.active:
-                text += '*'
-            mvStatus = int(mvStatus)
-
-            if mvStatus & ct.MV_MEASURE:
-                text += 'M'
-            if mvStatus & ct.MV_PAUSE:
-                text += 'P'
-            if mvStatus & ct.MV_ACTIVE:
-                text += 'A'
-            if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
-                text += 'L'
-            else:
-                if self.overrideSet:
-                    self.overrideSet = False
-                    self.limitOverride.SetValue(False)
-            self.statusText.SetLabel(text)
-
-            addEna = (mvStatus & ct.MV_DONE) != 0
-
-            if addEna != self.addEna:
-                panel = self.currentPanel
-                if addEna:
-                    if not panel.manualMode:
-                        if panel.addButton is not None:
-                            buttonEnable(panel.addButton)
-                        buttonEnable(self.doneButton)
-                    buttonDisable(self.measureButton)
-                    buttonDisable(self.pauseButton)
-                else:
-                    if panel.addButton is not None:
-                        buttonDisable(panel.addButton)
-                    buttonDisable(self.doneButton)
-                self.addEna = addEna
-
-            if mvStatus != self.mvStatus:
-                changed = mvStatus ^ self.mvStatus
-                if (changed & ct.MV_PAUSE) != 0:
-                    if (mvStatus & ct.MV_PAUSE) != 0:
-                        buttonEnable(self.resumeButton)
-                        buttonDisable(self.pauseButton)
-                        buttonDisable(self.measureButton)
-                    else:
-                        buttonDisable(self.resumeButton)
-                        if self.currentPanel.active:
-                            buttonEnable(self.pauseButton)
-                            if not self.currentPanel.manualMode:
-                                buttonEnable(self.measureButton)
-
-                self.mvStatus = mvStatus
-                print("mvStatus %x" % (mvStatus))
+        if DRO:
+            zDROPos = int(zDROPos)
+            self.zIDROPosition.value = zDROPos
+            zDroLoc = float(zDROPos) / self.zDROInch
+            if self.lastZOffset != self.zDROOffset:
+                self.lastZOffset = self.zDROOffset
+                print("zDROPos %d %0.4f zDROOffset %0.4f" % \
+                      (zDROPos, zDroLoc, self.zDROOffset))
                 stdout.flush()
+            zDroLoc = zDroLoc - self.zDROOffset
+            self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
-            if self.homeOrProbe is not None:
-                if self.homeOrProbe == HOME_X:
-                    val = self.comm.getParm(pm.X_HOME_STATUS)
-                    if val is not None:
-                        if val & ct.HOME_SUCCESS:
-                            self.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
-                            self.xHomed = True
-                            if not EXT_DRO:
-                                self.comm.setParm(pm.X_LOC, 0)
-                                if DRO:
-                                    self.comm.setParm(pm.X_DRO_LOC, 0)
-                                    self.updateXDroPos(xLocation)
-                            else:
-                                self.setXFromExt()
-                        elif val & ct.HOME_FAIL:
-                            self.homeDone(AXIS_X, False, st.STR_HOME_FAIL)
-                elif self.homeOrProbe == HOME_Z:
-                    val = self.comm.getParm(pm.Z_HOME_STATUS)
-                    if val is not None:
-                        if val & ct.HOME_SUCCESS:
-                            self.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
-                            zHomed = True
-                            if not EXT_DRO:
-                                self.comm.setParm(pm.Z_LOC, 0)
-                                if DRO:
-                                    self.comm.setParm(pm.Z_DRO_LOC, 0)
-                                    self.updateZDroPos(zLocation)
-                            else:
-                                self.setZFromExt()
-                        elif val & ct.HOME_FAIL:
-                            self.homeDone(AXIS_Z, False, st.STR_HOME_FAIL)
-                elif self.homeOrProbe == AXIS_X:
-                    val = self.comm.getParm(pm.X_HOME_STATUS)
-                    if val & ct.PROBE_SUCCESS:
-                        self.xHomeOffset = xLocation - self.probeLoc
-                        self.xIHomeOffset.value = self.xHomeOffset
-                        # cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
-                        if DRO:
-                            self.updateXDroPos(self.probeLoc, xDROPos)
-                        print("x %s xLocation %7.4f probeLoc %7.4f "\
-                              "xHomeOffset %7.4f" % \
-                              (x, xLocation, self.probeLoc, self.xHomeOffset))
-                        stdout.flush()
-                        self.probeLoc = 0.0
-                        self.homeDone(AXIS_X, True, st.STR_PROBE_SUCCESS)
-                    elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_X, False, st.STR_PROBE_FAIL)
-                elif self.homeOrProbe == AXIS_Z:
-                    val = self.comm.getParm(pm.Z_HOME_STATUS)
-                    if val & ct.PROBE_SUCCESS:
-                        self.zHomeOffset = zLocation - self.probeLoc
-                        self.zIHomeOffset.value = self.zHomeOffset
-                        # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % \
-                        #             (self.zHomeOffset))
-                        if DRO:
-                            self.updateZDroPos(self.probeLoc, zDROPos)
-                        print("z %s zLocation %7.4f probeLoc %7.4f "\
-                              "zHomeOffset %7.4f" % \
-                              (z, zLocation, self.probeLoc, self.zHomeOffset))
-                        stdout.flush()
-                        self.probeLoc = 0.0
-                        self.homeDone(AXIS_Z, True, st.STR_PROBE_SUCCESS)
-                    elif val & ct.PROBE_FAIL:
-                        self.homeDone(AXIS_Z, False, st.STR_PROBE_FAIL)
+            xDROPos = int(xDROPos)
+            self.xIDROPosition.value = xDROPos
+            xDroLoc = float(xDROPos) / self.xDROInch
+            if self.lastXOffset != self.xDROOffset:
+                self.lastXOffset = self.xDROOffset
+                print("xDROPos %d %0.4f xDROOffset %0.4f" % \
+                      (xDROPos, xDroLoc, self.xDROOffset))
+                stdout.flush()
+            xDroLoc = xDroLoc - self.xDROOffset
+            self.xDROPos.SetValue("%0.4f" % (xDroLoc))
+
+            if self.xDroDiam.value:
+                xDroLoc *= 2.0
+
+            dialPanel = self.mf.dialPanel
+            if dialPanel is not None:
+                dialPanel.updatePointer(xDroLoc)
+
+        text = ''
+        if self.xHomed:
+            text = 'H'
+        if self.currentPanel.active:
+            text += '*'
+        mvStatus = int(mvStatus)
+
+        if mvStatus & ct.MV_MEASURE:
+            text += 'M'
+        if mvStatus & ct.MV_PAUSE:
+            text += 'P'
+        if mvStatus & ct.MV_ACTIVE:
+            text += 'A'
+        if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
+            text += 'L'
+        else:
+            if self.overrideSet:
+                self.overrideSet = False
+                self.limitOverride.SetValue(False)
+        self.statusText.SetLabel(text)
+
+        addEna = (mvStatus & ct.MV_DONE) != 0
+
+        if addEna != self.addEna:
+            panel = self.currentPanel
+            if addEna:
+                if not panel.manualMode:
+                    if panel.addButton is not None:
+                        buttonEnable(panel.addButton)
+                    buttonEnable(self.doneButton)
+                buttonDisable(self.measureButton)
+                buttonDisable(self.pauseButton)
+            else:
+                if panel.addButton is not None:
+                    buttonDisable(panel.addButton)
+                buttonDisable(self.doneButton)
+            self.addEna = addEna
+
+        if mvStatus != self.mvStatus:
+            changed = mvStatus ^ self.mvStatus
+            if (changed & ct.MV_PAUSE) != 0:
+                if (mvStatus & ct.MV_PAUSE) != 0:
+                    buttonEnable(self.resumeButton)
+                    buttonDisable(self.pauseButton)
+                    buttonDisable(self.measureButton)
+                else:
+                    buttonDisable(self.resumeButton)
+                    if self.currentPanel.active:
+                        buttonEnable(self.pauseButton)
+                        if not self.currentPanel.manualMode:
+                            buttonEnable(self.measureButton)
+
+            self.mvStatus = mvStatus
+            print("mvStatus %x" % (mvStatus))
+            stdout.flush()
+
+        if self.homeOrProbe is not None:
+            if self.homeOrProbe == HOME_X:
+                val = self.comm.getParm(pm.X_HOME_STATUS)
+                if val is not None:
+                    if val & ct.HOME_SUCCESS:
+                        self.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
+                        self.xHomed = True
+                        if not EXT_DRO:
+                            self.comm.setParm(pm.X_LOC, 0)
+                            if DRO:
+                                self.comm.setParm(pm.X_DRO_LOC, 0)
+                                self.updateXDroPos(xLocation)
+                        else:
+                            self.setXFromExt()
+                    elif val & ct.HOME_FAIL:
+                        self.homeDone(AXIS_X, False, st.STR_HOME_FAIL)
+            elif self.homeOrProbe == HOME_Z:
+                val = self.comm.getParm(pm.Z_HOME_STATUS)
+                if val is not None:
+                    if val & ct.HOME_SUCCESS:
+                        self.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
+                        zHomed = True
+                        if not EXT_DRO:
+                            self.comm.setParm(pm.Z_LOC, 0)
+                            if DRO:
+                                self.comm.setParm(pm.Z_DRO_LOC, 0)
+                                self.updateZDroPos(zLocation)
+                        else:
+                            self.setZFromExt()
+                    elif val & ct.HOME_FAIL:
+                        self.homeDone(AXIS_Z, False, st.STR_HOME_FAIL)
+            elif self.homeOrProbe == AXIS_X:
+                val = self.comm.getParm(pm.X_HOME_STATUS)
+                if val & ct.PROBE_SUCCESS:
+                    self.xHomeOffset = xLocation - self.probeLoc
+                    self.xIHomeOffset.value = self.xHomeOffset
+                    # cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
+                    if DRO:
+                        self.updateXDroPos(self.probeLoc, xDROPos)
+                    print("x %s xLocation %7.4f probeLoc %7.4f "\
+                          "xHomeOffset %7.4f" % \
+                          (x, xLocation, self.probeLoc, self.xHomeOffset))
+                    stdout.flush()
+                    self.probeLoc = 0.0
+                    self.homeDone(AXIS_X, True, st.STR_PROBE_SUCCESS)
+                elif val & ct.PROBE_FAIL:
+                    self.homeDone(AXIS_X, False, st.STR_PROBE_FAIL)
+            elif self.homeOrProbe == AXIS_Z:
+                val = self.comm.getParm(pm.Z_HOME_STATUS)
+                if val & ct.PROBE_SUCCESS:
+                    self.zHomeOffset = zLocation - self.probeLoc
+                    self.zIHomeOffset.value = self.zHomeOffset
+                    # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % \
+                    #             (self.zHomeOffset))
+                    if DRO:
+                        self.updateZDroPos(self.probeLoc, zDROPos)
+                    print("z %s zLocation %7.4f probeLoc %7.4f "\
+                          "zHomeOffset %7.4f" % \
+                          (z, zLocation, self.probeLoc, self.zHomeOffset))
+                    stdout.flush()
+                    self.probeLoc = 0.0
+                    self.homeDone(AXIS_Z, True, st.STR_PROBE_SUCCESS)
+                elif val & ct.PROBE_FAIL:
+                    self.homeDone(AXIS_Z, False, st.STR_PROBE_FAIL)
 
     def updateError(self, text):
         self.setStatus(text)
@@ -7426,6 +7425,8 @@ class UpdateThread(Thread):
         self.dbg = None
         self.baseTime = None
         self.mIdle = False
+        self.lastZIdxD = None
+        self.lastZIdxP = None
         dbgSetup = (\
                     (en.D_PASS, self.dbgPass), \
                     (en.D_DONE, self.dbgDone), \
@@ -7465,7 +7466,8 @@ class UpdateThread(Thread):
                     (en.D_ZX, self.dbgZX), \
                     (en.D_ZY, self.dbgZY), \
 
-                    (en.D_ZIDX, self.dbgZIdx), \
+                    (en.D_ZIDXD, self.dbgZIdxD), \
+                    (en.D_ZIDXP, self.dbgZIdxP), \
 
                     (en.D_HST, self.dbgHome), \
 
@@ -7482,7 +7484,7 @@ class UpdateThread(Thread):
 
     def openDebug(self, file="dbg.txt"):
         self.dbg = open(os.path.join(DBG_DIR, file), "ab")
-        t = timeStr()
+        t = "\n" + timeStr()
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -7716,7 +7718,8 @@ class UpdateThread(Thread):
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
         self.passVal = val
-        self.lastZIdx = None
+        self.lastZIdxD = None
+        self.lastZIdxP = None
         result = "spring\n" if val & 0x100 else \
                  "spring %d\n" % (val & 0xff) if val & 0x200 else \
                  "pass %d\n" % (val)
@@ -7916,14 +7919,24 @@ class UpdateThread(Thread):
     def dbgZY(self, val):
         return("z_y  %7d" % (val))
 
-    def dbgZIdx(self, val):
-        result = "zidx %7.4f" % (float(val) /
-                                 self.jp.zDROInch - self.jp.zDROOffset)
+    def dbgZIdxD(self, val):
+        result = "zixd %7.4f" % (float(val) / self.jp.zDROInch - \
+                                 self.jp.zDROOffset)
 
-        if self.lastZIdx is not None:
-            delta = abs(self.lastZIdx - val)
-            result += " %7.4f %5d %5d" % (delta / self.jp.zDROInch, val, delta)
-        self.lastZIdx = val
+        if self.lastZIdxD is not None:
+            delta = abs(self.lastZIdxD - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.zDROInch, val, delta)
+        self.lastZIdxD = val
+        return(result)
+
+    def dbgZIdxP(self, val):
+        result = "zixp %7.4f" % (float(val) / self.jp.zStepsInch - \
+                                 self.jp.zHomeOffset)
+
+        if self.lastZIdxP is not None:
+            delta = abs(self.lastZIdxP - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.zStepsInch, val, delta)
+        self.lastZIdxP = val
         return(result)
 
     def dbgHome(self, val):
@@ -8770,7 +8783,7 @@ class MainFrame(wx.Frame):
     def initialConfig(self, cfg):
         global FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MEGA, MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
-            SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
+            SPINDLE_INTERNAL_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS, SYNC_SPI
 
         cfg.clrInfo(len(cf.config))
@@ -8798,40 +8811,45 @@ class MainFrame(wx.Frame):
 
         if SPINDLE_ENCODER:
             SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
+            SPINDLE_INTERNAL_SYNC = cfg.getInitialBoolInfo(cf.cfgIntSync)
         else:
             SPINDLE_SYNC_BOARD = False
+            SPINDLE_INTERNAL_SYNC = False
 
-        self.syncFuncSetup(cfg)
+        self.syncFuncSetup()
 
         HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
         cfg.clrInfo(len(cf.config))
 
-    def syncFuncSetup(self, cfg):
-
-        self.turnSync = cfg.getIntInfoData(cf.cfgTurnSync)
-        self.threadSync = cfg.getIntInfoData(cf.cfgThreadSync)
+    def syncFuncSetup(self):
+        cfg = self.cfg
+        self.turnSync = turnSync = cfg.getIntInfoData(cf.cfgTurnSync)
+        self.threadSync = threadSync = cfg.getIntInfoData(cf.cfgThreadSync)
 
         syncDbg = True
 
-        turnSync = self.turnSync
-        threadSync = self.threadSync
-
         if not FPGA:
-            if (turnSync == en.SEL_TU_ISYN or \
-                turnSync == en.SEL_TU_ESYN or \
-                threadSync == en.SEL_TH_ISYN_RENC or \
+            if (turnSync == en.SEL_TU_ESYN or \
                 threadSync == en.SEL_TH_ESYN_RENC or \
                 threadSync == en.SEL_TH_ESYN_RSYN):
-                self.zSyncInt = Sync(dbg=syncDbg)
-                self.zSyncExt = Sync(dbg=syncDbg)
+                if self.zSyncExt is None:
+                    self.zSyncExt = Sync(dbg=syncDbg)
 
-            if (turnSync == en.SEL_TU_ISYN or \
-                turnSync == en.SEL_TU_ESYN or \
+            if (turnSync == en.SEL_TU_ESYN or \
                 threadSync == en.SEL_TH_ISYN_RENC or \
                 threadSync == en.SEL_TH_ESYN_RSYN):
-                self.xSyncExt = Sync(dbg=syncDbg)
-                self.xSyncInt = Sync(dbg=syncDbg)
+                if self.xSyncExt is None:
+                    self.xSyncExt = Sync(dbg=syncDbg)
+
+            if (turnSync == en.SEL_TU_ISYN or \
+                threadSync == en.SEL_TH_ISYN_RENC):
+                if self.zSyncInt is None:
+                    self.zSyncInt = Sync(dbg=syncDbg)
+
+            if turnSync == en.SEL_TU_ISYN:
+                if self.xSyncInt is None:
+                    self.xSyncInt = Sync(dbg=syncDbg)
         else:
             self.zSyncInt = Sync(dbg=syncDbg, fpga=True)
             self.xSyncInt = Sync(dbg=syncDbg, fpga=True)
@@ -9267,7 +9285,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if SPINDLE_ENCODER:
             self.fields += (("Encoder", cf.cfgEncoder, 'd'),)
             if not FPGA:
-                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None),)
+                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None), \
+                                ("bInternal Sync", cf.cfgIntSync, None), \
+                                )
         self.fields += ( \
             ("cTurn Sync", cf.cfgTurnSync, 'c', self.turnSync), \
             ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync), \
@@ -9342,43 +9362,6 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
     def OnEnter(self, _):
         OnEnter(self)
 
-    def turnSync(self):
-        if STEP_DRV:
-            indexList = (en.SEL_TU_STEP,)
-        elif SPINDLE_ENCODER:
-            indexList = (en.SEL_TU_ENC,)
-            if not FPGA:
-                if SPINDLE_SYNC_BOARD:
-                    indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
-            else:
-                indexList += (en.SEL_TU_SYN,)
-        else:
-            indexList = (en.SEL_TU_SPEED,)
-
-        choiceList = []
-        for i in indexList:
-            choiceList.append(en.selTurnText[i])
-        return(indexList, choiceList, en.selTurnText)
-
-    def threadSync(self):
-        if STEP_DRV:
-            indexList = (en.SEL_TH_STEP,)
-        elif SPINDLE_ENCODER:
-            indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
-            if not FPGA:
-                # indexList += (en.SEL_TH_ISYN_RENC,)
-                if SPINDLE_SYNC_BOARD:
-                    indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
-            else:
-                indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
-        else:
-            indexList = (en.SEL_TH_NO_ENC,)
-
-        choiceList = []
-        for i in indexList:
-            choiceList.append(en.selThreadText[i])
-        return(indexList, choiceList, en.selThreadText)
-
     def OnStart(self, _):
         mf = self.mf
         if not formatData(self.mf.cfg, self.fields):
@@ -9399,11 +9382,54 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
     def showAction(self, changed):
         if changed:
+            self.mf.syncFuncSetup()
             self.mf.jogPanel.spindleRangeSetup()
             self.mf.sendData.spindleDataSent = False
 
     def okAction(self):
         self.mf.syncFuncSetup(self.mf.cfg)
+
+    @staticmethod
+    def turnSync():
+        if STEP_DRV:
+            indexList = (en.SEL_TU_STEP,)
+        elif SPINDLE_ENCODER:
+            indexList = (en.SEL_TU_ENC,)
+            if not FPGA:
+                if SPINDLE_INTERNAL_SYNC:
+                    indexList += (en.SEL_TU_ISYN,)
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TU_ESYN,)
+            else:
+                indexList += (en.SEL_TU_SYN,)
+        else:
+            indexList = (en.SEL_TU_SPEED,)
+
+        choiceList = []
+        for i in indexList:
+            choiceList.append(en.selTurnText[i])
+        return(indexList, choiceList, en.selTurnText)
+
+    @staticmethod
+    def threadSync():
+        if STEP_DRV:
+            indexList = (en.SEL_TH_STEP,)
+        elif SPINDLE_ENCODER:
+            indexList = (en.SEL_TH_ENC,)
+            if not FPGA:
+                if SPINDLE_INTERNAL_SYNC:
+                    indexList += (en.SEL_TH_ISYN_RENC,)
+                if SPINDLE_SYNC_BOARD:
+                    indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
+            else:
+                indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
+        else:
+            indexList = (en.SEL_TH_NO_ENC,)
+
+        choiceList = []
+        for i in indexList:
+            choiceList.append(en.selThreadText[i])
+        return(indexList, choiceList, en.selThreadText)
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, mainFrame, defaultFont):

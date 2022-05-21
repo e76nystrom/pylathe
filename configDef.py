@@ -44,313 +44,314 @@ cfgFpga          =  35          # config fpga interface present
 cfgFpgaFreq      =  36          # config fpga frequency
 cfgFreqMult      =  37          # config fpga frequency multiplier
 cfgHomeInPlace   =  38          # config home in place
-cfgInvEncDir     =  39          # config fpga invert encoder direction
-cfgLCD           =  40          # config enable lcd
-cfgMega          =  41          # config control link to mega
-cfgMPG           =  42          # config enable manual pulse generator
-cfgPrbInv        =  43          # config invert probe signal
-cfgRemDbg        =  44          # config print remote debug info
-cfgSpEncCap      =  45          # config encoder on capture interrupt
-cfgSpEncoder     =  46          # config spindle encoder
-cfgSpSync        =  47          # config spindle using timer
-cfgSpSyncBoard   =  48          # config spindle sync board
-cfgSpUseEncoder  =  49          # config use spindle encoder for threading
-cfgSyncSPI       =  50          # config sync comm through spi
-cfgTaperCycleDist =  51         # config taper cycle distance
-cfgTestMode      =  52          # conifg test mode
-cfgTestRPM       =  53          # config fpga test rpm value
-cfgTurnSync      =  54          # config for turning synchronization
-cfgThreadSync    =  55          # config for threading synchronization
+cfgIntSync       =  39          # config internal sync
+cfgInvEncDir     =  40          # config fpga invert encoder direction
+cfgLCD           =  41          # config enable lcd
+cfgMega          =  42          # config control link to mega
+cfgMPG           =  43          # config enable manual pulse generator
+cfgPrbInv        =  44          # config invert probe signal
+cfgRemDbg        =  45          # config print remote debug info
+cfgSpEncCap      =  46          # config encoder on capture interrupt
+cfgSpEncoder     =  47          # config spindle encoder
+cfgSpSync        =  48          # config spindle using timer
+cfgSpSyncBoard   =  49          # config spindle sync board
+cfgSpUseEncoder  =  50          # config use spindle encoder for threading
+cfgSyncSPI       =  51          # config sync comm through spi
+cfgTaperCycleDist =  52         # config taper cycle distance
+cfgTestMode      =  53          # conifg test mode
+cfgTestRPM       =  54          # config fpga test rpm value
+cfgTurnSync      =  55          # config for turning synchronization
+cfgThreadSync    =  56          # config for threading synchronization
 
 # communications cxonfig
 
-commPort         =  56          # comm port
-commRate         =  57          # comm baud rate
+commPort         =  57          # comm port
+commRate         =  58          # comm baud rate
 
 # cutoff config
 
-cuPause          =  58          # cutoff pause before cutting
-cuRPM            =  59          # cutoff rpm
-cuToolWidth      =  60          # cutoff tool width
-cuXEnd           =  61          # cutoff x end
-cuXFeed          =  62          # cutoff x feed
-cuXRetract       =  63          # cutoff x retract
-cuXStart         =  64          # cutoff x start
-cuZCutoff        =  65          # cutoff offset to z cutoff
-cuZRetract       =  66          # cutoff offset to z retract
-cuZStart         =  67          # cutoff z location
+cuPause          =  59          # cutoff pause before cutting
+cuRPM            =  60          # cutoff rpm
+cuToolWidth      =  61          # cutoff tool width
+cuXEnd           =  62          # cutoff x end
+cuXFeed          =  63          # cutoff x feed
+cuXRetract       =  64          # cutoff x retract
+cuXStart         =  65          # cutoff x start
+cuZCutoff        =  66          # cutoff offset to z cutoff
+cuZRetract       =  67          # cutoff offset to z retract
+cuZStart         =  68          # cutoff z location
 
 # dro position
 
-droXPos          =  68          # dro x position
-droZPos          =  69          # dro z position
+droXPos          =  69          # dro x position
+droZPos          =  70          # dro z position
 
 # external dro
 
-extDroPort       =  70          # external dro port
-extDroRate       =  71          # external dro baud Rate
+extDroPort       =  71          # external dro port
+extDroRate       =  72          # external dro baud Rate
 
 # face config
 
-faAddFeed        =  72          # face 
-faPasses         =  73          # face 
-faPause          =  74          # face pause before cutting
-faRPM            =  75          # face 
-faSPInt          =  76          # face 
-faSpring         =  77          # face 
-faXEnd           =  78          # face 
-faXFeed          =  79          # face 
-faXRetract       =  80          # face 
-faXStart         =  81          # face 
-faZEnd           =  82          # face 
-faZFeed          =  83          # face 
-faZRetract       =  84          # face 
-faZStart         =  85          # face 
+faAddFeed        =  73          # face 
+faPasses         =  74          # face 
+faPause          =  75          # face pause before cutting
+faRPM            =  76          # face 
+faSPInt          =  77          # face 
+faSpring         =  78          # face 
+faXEnd           =  79          # face 
+faXFeed          =  80          # face 
+faXRetract       =  81          # face 
+faXStart         =  82          # face 
+faZEnd           =  83          # face 
+faZFeed          =  84          # face 
+faZRetract       =  85          # face 
+faZStart         =  86          # face 
 
 # jog config
 
-jogInc           =  86          # jog 
-jogXPos          =  87          # jog 
-jogXPosDiam      =  88          # jog 
-jogZPos          =  89          # jog 
+jogInc           =  87          # jog 
+jogXPos          =  88          # jog 
+jogXPosDiam      =  89          # jog 
+jogZPos          =  90          # jog 
 
 # jog panel config
 
-jpSurfaceSpeed   =  90          # jogpanle fpm or rpm
-jpXDroDiam       =  91          # jogpanel x dro diameter
+jpSurfaceSpeed   =  91          # jogpanle fpm or rpm
+jpXDroDiam       =  92          # jogpanel x dro diameter
 
 # jog time parameters
 
-jogTimeInitial   =  92          # jog time initial
-jogTimeInc       =  93          # jog time increment
-jogTimeMax       =  94          # jog time max
+jogTimeInitial   =  93          # jog time initial
+jogTimeInc       =  94          # jog time increment
+jogTimeMax       =  95          # jog time max
 
 # keypad
 
-keypadPort       =  95          # external dro port
-keypadRate       =  96          # external dro baud Rate
+keypadPort       =  96          # external dro port
+keypadRate       =  97          # external dro baud Rate
 
 # main panel
 
-mainPanel        =  97          # name of main panel
+mainPanel        =  98          # name of main panel
 
 # mega config
 
-cfgMegaVFD       =  98          # mega vfd speed mode
-cfgMegaEncTest   =  99          # mega encoder test
-cfgMegaEncLines  = 100          # mega encoder lines
+cfgMegaVFD       =  99          # mega vfd speed mode
+cfgMegaEncTest   = 100          # mega encoder test
+cfgMegaEncLines  = 101          # mega encoder lines
 
 # spindle config
 
-spAccel          = 101          # spindle acceleration
-spAccelTime      = 102          # spindle accelerationtime
-spCurRange       = 103          # spindle current range
-spInvDir         = 104          # spindle invert direction
-spJogAccelTime   = 105          # spindle jog acceleration time
-spJogMax         = 106          # spindle jog max speed
-spJogMin         = 107          # spindle jog min speed
-spJTimeInc       = 108          # spindle jog increment
-spJTimeInitial   = 109          # spindle jog initial time 
-spJTimeMax       = 110          # spindle jog max
-spMaxRPM         = 111          # spindle jog max rpm
-spMicroSteps     = 112          # spindle micro steps
-spMinRPM         = 113          # spindle minimum rpm
-spMotorSteps     = 114          # spindle motor stpes per revolution
-spMotorTest      = 115          # use stepper drive to test motor
-spPWMFreq        = 116          # spindle pwm frequency
-spMegaSim        = 117          # spindle use mega to simulate index and encoder
-spRangeMin1      = 118          # spindle speed range 1 minimum
-spRangeMin2      = 119          # spindle speed range 2 minimum
-spRangeMin3      = 120          # spindle speed range 3 minimum
-spRangeMin4      = 121          # spindle speed range 4 minimum
-spRangeMin5      = 122          # spindle speed range 5 minimum
-spRangeMin6      = 123          # spindle speed range 6 minimum
-spRangeMax1      = 124          # spindle speed range 1 maximum
-spRangeMax2      = 125          # spindle speed range 2 maximum
-spRangeMax3      = 126          # spindle speed range 3 maximum
-spRangeMax4      = 127          # spindle speed range 4 maximum
-spRangeMax5      = 128          # spindle speed range 5 maximum
-spRangeMax6      = 129          # spindle speed range 6 maximum
-spRanges         = 130          # spindle number of speed ranges
-spStepDrive      = 131          # spindle stepper drive
-spSwitch         = 132          # spindle off on switch
-spTestEncoder    = 133          # spindle test generate encoder test pulse
-spTestIndex      = 134          # spindle test generate internal index pulse
-spVarSpeed       = 135          # spindle variable speed
+spAccel          = 102          # spindle acceleration
+spAccelTime      = 103          # spindle accelerationtime
+spCurRange       = 104          # spindle current range
+spInvDir         = 105          # spindle invert direction
+spJogAccelTime   = 106          # spindle jog acceleration time
+spJogMax         = 107          # spindle jog max speed
+spJogMin         = 108          # spindle jog min speed
+spJTimeInc       = 109          # spindle jog increment
+spJTimeInitial   = 110          # spindle jog initial time 
+spJTimeMax       = 111          # spindle jog max
+spMaxRPM         = 112          # spindle jog max rpm
+spMicroSteps     = 113          # spindle micro steps
+spMinRPM         = 114          # spindle minimum rpm
+spMotorSteps     = 115          # spindle motor stpes per revolution
+spMotorTest      = 116          # use stepper drive to test motor
+spPWMFreq        = 117          # spindle pwm frequency
+spMegaSim        = 118          # spindle use mega to simulate index and encoder
+spRangeMin1      = 119          # spindle speed range 1 minimum
+spRangeMin2      = 120          # spindle speed range 2 minimum
+spRangeMin3      = 121          # spindle speed range 3 minimum
+spRangeMin4      = 122          # spindle speed range 4 minimum
+spRangeMin5      = 123          # spindle speed range 5 minimum
+spRangeMin6      = 124          # spindle speed range 6 minimum
+spRangeMax1      = 125          # spindle speed range 1 maximum
+spRangeMax2      = 126          # spindle speed range 2 maximum
+spRangeMax3      = 127          # spindle speed range 3 maximum
+spRangeMax4      = 128          # spindle speed range 4 maximum
+spRangeMax5      = 129          # spindle speed range 5 maximum
+spRangeMax6      = 130          # spindle speed range 6 maximum
+spRanges         = 131          # spindle number of speed ranges
+spStepDrive      = 132          # spindle stepper drive
+spSwitch         = 133          # spindle off on switch
+spTestEncoder    = 134          # spindle test generate encoder test pulse
+spTestIndex      = 135          # spindle test generate internal index pulse
+spVarSpeed       = 136          # spindle variable speed
 
 # sync communications config
 
-syncPort         = 136          # sync comm port
-syncRate         = 137          # sync comm baud rate
+syncPort         = 137          # sync comm port
+syncRate         = 138          # sync comm baud rate
 
 # threading config
 
-thAddFeed        = 138          # thread feed to add after done
-thAlternate      = 139          # thread althernate thread flanks
-thAngle          = 140          # thread hanlf angle of thread
-thFirstFeed      = 141          # thread first feed for thread area calc
-thFirstFeedBtn   = 142          # thread button to select first feed
-thInternal       = 143          # thread internal threads
-thLastFeed       = 144          # thread last feed for thread area calculation
-thLastFeedBtn    = 145          # thread button to select last feed
-thLeftHand       = 146          # thread left hand 
-thMM             = 147          # thread button for mm
-thPasses         = 148          # thread number of passes
-thPause          = 149          # thread pause between passes
-thRPM            = 150          # thread speed for threading operation
-thRunout         = 151          # thread runout for rh exit or lh entrance
-thSPInt          = 152          # thread spring pass interval
-thSpring         = 153          # thread number of spring passes at end
-thTPI            = 154          # thread select thread in threads per inch
-thThread         = 155          # thread field containing tpi or pitch
-thXDepth         = 156          # thread x depth of thread
-thXRetract       = 157          # thread x retract
-thXStart         = 158          # thread x diameter
-thXTaper         = 159          # thread x taper
-thZ0             = 160          # thread z right end of thread left start
-thZ1             = 161          # thread z right start left end
-thZRetract       = 162          # thread z retract
+thAddFeed        = 139          # thread feed to add after done
+thAlternate      = 140          # thread althernate thread flanks
+thAngle          = 141          # thread hanlf angle of thread
+thFirstFeed      = 142          # thread first feed for thread area calc
+thFirstFeedBtn   = 143          # thread button to select first feed
+thInternal       = 144          # thread internal threads
+thLastFeed       = 145          # thread last feed for thread area calculation
+thLastFeedBtn    = 146          # thread button to select last feed
+thLeftHand       = 147          # thread left hand 
+thMM             = 148          # thread button for mm
+thPasses         = 149          # thread number of passes
+thPause          = 150          # thread pause between passes
+thRPM            = 151          # thread speed for threading operation
+thRunout         = 152          # thread runout for rh exit or lh entrance
+thSPInt          = 153          # thread spring pass interval
+thSpring         = 154          # thread number of spring passes at end
+thTPI            = 155          # thread select thread in threads per inch
+thThread         = 156          # thread field containing tpi or pitch
+thXDepth         = 157          # thread x depth of thread
+thXRetract       = 158          # thread x retract
+thXStart         = 159          # thread x diameter
+thXTaper         = 160          # thread x taper
+thZ0             = 161          # thread z right end of thread left start
+thZ1             = 162          # thread z right start left end
+thZRetract       = 163          # thread z retract
 
 # taper config
 
-tpAddFeed        = 163          # tp 
-tpAngle          = 164          # tp 
-tpAngleBtn       = 165          # tp 
-tpDeltaBtn       = 166          # tp 
-tpInternal       = 167          # tp 
-tpLargeDiam      = 168          # tp 
-tpPasses         = 169          # tp 
-tpPause          = 170          # tp 
-tpRPM            = 171          # tp 
-tpSPInt          = 172          # tp 
-tpSmallDiam      = 173          # tp 
-tpSpring         = 174          # tp 
-tpTaperSel       = 175          # tp 
-tpXDelta         = 176          # tp 
-tpXFeed          = 177          # tp 
-tpXFinish        = 178          # tp 
-tpXInFeed        = 179          # tp 
-tpXRetract       = 180          # tp 
-tpZDelta         = 181          # tp 
-tpZFeed          = 182          # tp 
-tpZLength        = 183          # tp 
-tpZRetract       = 184          # tp 
-tpZStart         = 185          # tp 
+tpAddFeed        = 164          # tp 
+tpAngle          = 165          # tp 
+tpAngleBtn       = 166          # tp 
+tpDeltaBtn       = 167          # tp 
+tpInternal       = 168          # tp 
+tpLargeDiam      = 169          # tp 
+tpPasses         = 170          # tp 
+tpPause          = 171          # tp 
+tpRPM            = 172          # tp 
+tpSPInt          = 173          # tp 
+tpSmallDiam      = 174          # tp 
+tpSpring         = 175          # tp 
+tpTaperSel       = 176          # tp 
+tpXDelta         = 177          # tp 
+tpXFeed          = 178          # tp 
+tpXFinish        = 179          # tp 
+tpXInFeed        = 180          # tp 
+tpXRetract       = 181          # tp 
+tpZDelta         = 182          # tp 
+tpZFeed          = 183          # tp 
+tpZLength        = 184          # tp 
+tpZRetract       = 185          # tp 
+tpZStart         = 186          # tp 
 
 # turn config
 
-tuAddFeed        = 186          # turn 
-tuInternal       = 187          # turn internal
-tuManual         = 188          # turn manual mode
-tuPasses         = 189          # turn 
-tuPause          = 190          # turn 
-tuRPM            = 191          # turn 
-tuSPInt          = 192          # turn 
-tuSpring         = 193          # turn 
-tuXDiam0         = 194          # turn 
-tuXDiam1         = 195          # turn 
-tuXFeed          = 196          # turn 
-tuXRetract       = 197          # turn 
-tuZEnd           = 198          # turn 
-tuZFeed          = 199          # turn 
-tuZRetract       = 200          # turn 
-tuZStart         = 201          # turn 
+tuAddFeed        = 187          # turn 
+tuInternal       = 188          # turn internal
+tuManual         = 189          # turn manual mode
+tuPasses         = 190          # turn 
+tuPause          = 191          # turn 
+tuRPM            = 192          # turn 
+tuSPInt          = 193          # turn 
+tuSpring         = 194          # turn 
+tuXDiam0         = 195          # turn 
+tuXDiam1         = 196          # turn 
+tuXFeed          = 197          # turn 
+tuXRetract       = 198          # turn 
+tuZEnd           = 199          # turn 
+tuZFeed          = 200          # turn 
+tuZRetract       = 201          # turn 
+tuZStart         = 202          # turn 
 
 # x axis config
 
-xAccel           = 202          # x axis 
-xBackInc         = 203          # z axis distance to go past for taking out backlash
-xBacklash        = 204          # x axis 
-xDoneDelay       = 205          # x axis done to read dro delay
-xDroFinalDist    = 206          # x dro final approach dist
-xDROInch         = 207          # x axis 
-xDROPos          = 208          # x axis use dro to go to correct position
-xHomeDir         = 209          # x axis 
-xHomeDist        = 210          # x axis 
-xHomeDistBackoff = 211          # x axis 
-xHomeDistRev     = 212          # x axis 
-xHomeEna         = 213          # x axis 
-xHomeEnd         = 214          # x axis 
-xHomeInv         = 215          # x axis 
-xHomeLoc         = 216          # x axis 
-xHomeSpeed       = 217          # x axis 
-xHomeStart       = 218          # x axis 
-xInvDRO          = 219          # x axis invert dro
-xInvDir          = 220          # x axis invert stepper direction
-xInvEnc          = 221          # x axis 
-xInvMpg          = 222          # x axis invert mpg direction
-xJogMax          = 223          # x axis 
-xJogMin          = 224          # x axis 
-xLimEna          = 225          # x axis limits enable
-xLimNegInv       = 226          # x axis negative limit invert
-xLimPosInv       = 227          # x axis positive limit invert
-xMpgInc          = 228          # x axis jog increment
-xMpgMax          = 229          # x axis jog maximum
-xJogSpeed        = 230          # x axis 
-xMaxSpeed        = 231          # x axis 
-xMicroSteps      = 232          # x axis 
-xMinSpeed        = 233          # x axis 
-xMotorRatio      = 234          # x axis 
-xMotorSteps      = 235          # x axis 
-xRetractLoc      = 236          # x axis 
-xPitch           = 237          # x axis 
-xProbeDist       = 238          # x axis 
+xAccel           = 203          # x axis 
+xBackInc         = 204          # z axis distance to go past for taking out backlash
+xBacklash        = 205          # x axis 
+xDoneDelay       = 206          # x axis done to read dro delay
+xDroFinalDist    = 207          # x dro final approach dist
+xDROInch         = 208          # x axis 
+xDROPos          = 209          # x axis use dro to go to correct position
+xHomeDir         = 210          # x axis 
+xHomeDist        = 211          # x axis 
+xHomeDistBackoff = 212          # x axis 
+xHomeDistRev     = 213          # x axis 
+xHomeEna         = 214          # x axis 
+xHomeEnd         = 215          # x axis 
+xHomeInv         = 216          # x axis 
+xHomeLoc         = 217          # x axis 
+xHomeSpeed       = 218          # x axis 
+xHomeStart       = 219          # x axis 
+xInvDRO          = 220          # x axis invert dro
+xInvDir          = 221          # x axis invert stepper direction
+xInvEnc          = 222          # x axis 
+xInvMpg          = 223          # x axis invert mpg direction
+xJogMax          = 224          # x axis 
+xJogMin          = 225          # x axis 
+xLimEna          = 226          # x axis limits enable
+xLimNegInv       = 227          # x axis negative limit invert
+xLimPosInv       = 228          # x axis positive limit invert
+xMpgInc          = 229          # x axis jog increment
+xMpgMax          = 230          # x axis jog maximum
+xJogSpeed        = 231          # x axis 
+xMaxSpeed        = 232          # x axis 
+xMicroSteps      = 233          # x axis 
+xMinSpeed        = 234          # x axis 
+xMotorRatio      = 235          # x axis 
+xMotorSteps      = 236          # x axis 
+xRetractLoc      = 237          # x axis 
+xPitch           = 238          # x axis 
+xProbeDist       = 239          # x axis 
 
 # x axis position config
 
-xSvPosition      = 239          # x axis 
-xSvHomeOffset    = 240          # x axis 
-xSvDROPosition   = 241          # x axis 
-xSvDROOffset     = 242          # x axis 
+xSvPosition      = 240          # x axis 
+xSvHomeOffset    = 241          # x axis 
+xSvDROPosition   = 242          # x axis 
+xSvDROOffset     = 243          # x axis 
 
 # z axis config
 
-zAccel           = 243          # z axis 
-zBackInc         = 244          # z axis distance to go past for taking out backlash
-zBacklash        = 245          # z axis 
-zDoneDelay       = 246          # z axis done to read dro delay
-zDroFinalDist    = 247          # z dro final approach dist
-zDROPos          = 248          # z axis use dro to go to correct position
-zDROInch         = 249          # z axis 
-zHomeDir         = 250          # z axis 
-zHomeDist        = 251          # z axis 
-zHomeDistRev     = 252          # z axis 
-zHomeDistBackoff = 253          # z axis 
-zHomeEna         = 254          # z axis 
-zHomeEnd         = 255          # z axis 
-zHomeInv         = 256          # z axis 
-zHomeLoc         = 257          # z axis 
-zHomeSpeed       = 258          # z axis 
-zHomeStart       = 259          # z axis 
-zInvDRO          = 260          # z axis 
-zInvDir          = 261          # z axis 
-zInvEnc          = 262          # z axis 
-zInvMpg          = 263          # z axis 
-zJogMax          = 264          # z axis 
-zJogMin          = 265          # z axis 
-zMpgInc          = 266          # z axis jog increment
-zMpgMax          = 267          # z axis jog maximum
-zJogSpeed        = 268          # z axis 
-zLimEna          = 269          # z axis limits enable
-zLimNegInv       = 270          # z axis negative limit invert
-zLimPosInv       = 271          # z axis positive limit invert
-zMaxSpeed        = 272          # z axis 
-zMicroSteps      = 273          # z axis 
-zMinSpeed        = 274          # z axis 
-zMotorRatio      = 275          # z axis 
-zMotorSteps      = 276          # z axis 
-zRetractLoc      = 277          # z axis 
-zPitch           = 278          # z axis 
-zProbeDist       = 279          # z axis 
-zProbeSpeed      = 280          # z axis 
+zAccel           = 244          # z axis 
+zBackInc         = 245          # z axis distance to go past for taking out backlash
+zBacklash        = 246          # z axis 
+zDoneDelay       = 247          # z axis done to read dro delay
+zDroFinalDist    = 248          # z dro final approach dist
+zDROPos          = 249          # z axis use dro to go to correct position
+zDROInch         = 250          # z axis 
+zHomeDir         = 251          # z axis 
+zHomeDist        = 252          # z axis 
+zHomeDistRev     = 253          # z axis 
+zHomeDistBackoff = 254          # z axis 
+zHomeEna         = 255          # z axis 
+zHomeEnd         = 256          # z axis 
+zHomeInv         = 257          # z axis 
+zHomeLoc         = 258          # z axis 
+zHomeSpeed       = 259          # z axis 
+zHomeStart       = 260          # z axis 
+zInvDRO          = 261          # z axis 
+zInvDir          = 262          # z axis 
+zInvEnc          = 263          # z axis 
+zInvMpg          = 264          # z axis 
+zJogMax          = 265          # z axis 
+zJogMin          = 266          # z axis 
+zMpgInc          = 267          # z axis jog increment
+zMpgMax          = 268          # z axis jog maximum
+zJogSpeed        = 269          # z axis 
+zLimEna          = 270          # z axis limits enable
+zLimNegInv       = 271          # z axis negative limit invert
+zLimPosInv       = 272          # z axis positive limit invert
+zMaxSpeed        = 273          # z axis 
+zMicroSteps      = 274          # z axis 
+zMinSpeed        = 275          # z axis 
+zMotorRatio      = 276          # z axis 
+zMotorSteps      = 277          # z axis 
+zRetractLoc      = 278          # z axis 
+zPitch           = 279          # z axis 
+zProbeDist       = 280          # z axis 
+zProbeSpeed      = 281          # z axis 
 
 # z axis position config
 
-zSvPosition      = 281          # z axis 
-zSvHomeOffset    = 282          # z axis 
-zSvDROPosition   = 283          # z axis 
-zSvDROOffset     = 284          # z axis 
-cfgJogDebug      = 285          # debug jogging
+zSvPosition      = 282          # z axis 
+zSvHomeOffset    = 283          # z axis 
+zSvDROPosition   = 284          # z axis 
+zSvDROOffset     = 285          # z axis 
+cfgJogDebug      = 286          # debug jogging
 
 config = { \
     'arcAddFeed' : 0,
@@ -392,253 +393,254 @@ config = { \
     'cfgFpgaFreq' : 36,
     'cfgFreqMult' : 37,
     'cfgHomeInPlace' : 38,
-    'cfgInvEncDir' : 39,
-    'cfgLCD' : 40,
-    'cfgMega' : 41,
-    'cfgMPG' : 42,
-    'cfgPrbInv' : 43,
-    'cfgRemDbg' : 44,
-    'cfgSpEncCap' : 45,
-    'cfgSpEncoder' : 46,
-    'cfgSpSync' : 47,
-    'cfgSpSyncBoard' : 48,
-    'cfgSpUseEncoder' : 49,
-    'cfgSyncSPI' : 50,
-    'cfgTaperCycleDist' : 51,
-    'cfgTestMode' : 52,
-    'cfgTestRPM' : 53,
-    'cfgTurnSync' : 54,
-    'cfgThreadSync' : 55,
-    'commPort' : 56,
-    'commRate' : 57,
-    'cuPause' : 58,
-    'cuRPM' : 59,
-    'cuToolWidth' : 60,
-    'cuXEnd' : 61,
-    'cuXFeed' : 62,
-    'cuXRetract' : 63,
-    'cuXStart' : 64,
-    'cuZCutoff' : 65,
-    'cuZRetract' : 66,
-    'cuZStart' : 67,
-    'droXPos' : 68,
-    'droZPos' : 69,
-    'extDroPort' : 70,
-    'extDroRate' : 71,
-    'faAddFeed' : 72,
-    'faPasses' : 73,
-    'faPause' : 74,
-    'faRPM' : 75,
-    'faSPInt' : 76,
-    'faSpring' : 77,
-    'faXEnd' : 78,
-    'faXFeed' : 79,
-    'faXRetract' : 80,
-    'faXStart' : 81,
-    'faZEnd' : 82,
-    'faZFeed' : 83,
-    'faZRetract' : 84,
-    'faZStart' : 85,
-    'jogInc' : 86,
-    'jogXPos' : 87,
-    'jogXPosDiam' : 88,
-    'jogZPos' : 89,
-    'jpSurfaceSpeed' : 90,
-    'jpXDroDiam' : 91,
-    'jogTimeInitial' : 92,
-    'jogTimeInc' : 93,
-    'jogTimeMax' : 94,
-    'keypadPort' : 95,
-    'keypadRate' : 96,
-    'mainPanel' : 97,
-    'cfgMegaVFD' : 98,
-    'cfgMegaEncTest' : 99,
-    'cfgMegaEncLines' : 100,
-    'spAccel' : 101,
-    'spAccelTime' : 102,
-    'spCurRange' : 103,
-    'spInvDir' : 104,
-    'spJogAccelTime' : 105,
-    'spJogMax' : 106,
-    'spJogMin' : 107,
-    'spJTimeInc' : 108,
-    'spJTimeInitial' : 109,
-    'spJTimeMax' : 110,
-    'spMaxRPM' : 111,
-    'spMicroSteps' : 112,
-    'spMinRPM' : 113,
-    'spMotorSteps' : 114,
-    'spMotorTest' : 115,
-    'spPWMFreq' : 116,
-    'spMegaSim' : 117,
-    'spRangeMin1' : 118,
-    'spRangeMin2' : 119,
-    'spRangeMin3' : 120,
-    'spRangeMin4' : 121,
-    'spRangeMin5' : 122,
-    'spRangeMin6' : 123,
-    'spRangeMax1' : 124,
-    'spRangeMax2' : 125,
-    'spRangeMax3' : 126,
-    'spRangeMax4' : 127,
-    'spRangeMax5' : 128,
-    'spRangeMax6' : 129,
-    'spRanges' : 130,
-    'spStepDrive' : 131,
-    'spSwitch' : 132,
-    'spTestEncoder' : 133,
-    'spTestIndex' : 134,
-    'spVarSpeed' : 135,
-    'syncPort' : 136,
-    'syncRate' : 137,
-    'thAddFeed' : 138,
-    'thAlternate' : 139,
-    'thAngle' : 140,
-    'thFirstFeed' : 141,
-    'thFirstFeedBtn' : 142,
-    'thInternal' : 143,
-    'thLastFeed' : 144,
-    'thLastFeedBtn' : 145,
-    'thLeftHand' : 146,
-    'thMM' : 147,
-    'thPasses' : 148,
-    'thPause' : 149,
-    'thRPM' : 150,
-    'thRunout' : 151,
-    'thSPInt' : 152,
-    'thSpring' : 153,
-    'thTPI' : 154,
-    'thThread' : 155,
-    'thXDepth' : 156,
-    'thXRetract' : 157,
-    'thXStart' : 158,
-    'thXTaper' : 159,
-    'thZ0' : 160,
-    'thZ1' : 161,
-    'thZRetract' : 162,
-    'tpAddFeed' : 163,
-    'tpAngle' : 164,
-    'tpAngleBtn' : 165,
-    'tpDeltaBtn' : 166,
-    'tpInternal' : 167,
-    'tpLargeDiam' : 168,
-    'tpPasses' : 169,
-    'tpPause' : 170,
-    'tpRPM' : 171,
-    'tpSPInt' : 172,
-    'tpSmallDiam' : 173,
-    'tpSpring' : 174,
-    'tpTaperSel' : 175,
-    'tpXDelta' : 176,
-    'tpXFeed' : 177,
-    'tpXFinish' : 178,
-    'tpXInFeed' : 179,
-    'tpXRetract' : 180,
-    'tpZDelta' : 181,
-    'tpZFeed' : 182,
-    'tpZLength' : 183,
-    'tpZRetract' : 184,
-    'tpZStart' : 185,
-    'tuAddFeed' : 186,
-    'tuInternal' : 187,
-    'tuManual' : 188,
-    'tuPasses' : 189,
-    'tuPause' : 190,
-    'tuRPM' : 191,
-    'tuSPInt' : 192,
-    'tuSpring' : 193,
-    'tuXDiam0' : 194,
-    'tuXDiam1' : 195,
-    'tuXFeed' : 196,
-    'tuXRetract' : 197,
-    'tuZEnd' : 198,
-    'tuZFeed' : 199,
-    'tuZRetract' : 200,
-    'tuZStart' : 201,
-    'xAccel' : 202,
-    'xBackInc' : 203,
-    'xBacklash' : 204,
-    'xDoneDelay' : 205,
-    'xDroFinalDist' : 206,
-    'xDROInch' : 207,
-    'xDROPos' : 208,
-    'xHomeDir' : 209,
-    'xHomeDist' : 210,
-    'xHomeDistBackoff' : 211,
-    'xHomeDistRev' : 212,
-    'xHomeEna' : 213,
-    'xHomeEnd' : 214,
-    'xHomeInv' : 215,
-    'xHomeLoc' : 216,
-    'xHomeSpeed' : 217,
-    'xHomeStart' : 218,
-    'xInvDRO' : 219,
-    'xInvDir' : 220,
-    'xInvEnc' : 221,
-    'xInvMpg' : 222,
-    'xJogMax' : 223,
-    'xJogMin' : 224,
-    'xLimEna' : 225,
-    'xLimNegInv' : 226,
-    'xLimPosInv' : 227,
-    'xMpgInc' : 228,
-    'xMpgMax' : 229,
-    'xJogSpeed' : 230,
-    'xMaxSpeed' : 231,
-    'xMicroSteps' : 232,
-    'xMinSpeed' : 233,
-    'xMotorRatio' : 234,
-    'xMotorSteps' : 235,
-    'xRetractLoc' : 236,
-    'xPitch' : 237,
-    'xProbeDist' : 238,
-    'xSvPosition' : 239,
-    'xSvHomeOffset' : 240,
-    'xSvDROPosition' : 241,
-    'xSvDROOffset' : 242,
-    'zAccel' : 243,
-    'zBackInc' : 244,
-    'zBacklash' : 245,
-    'zDoneDelay' : 246,
-    'zDroFinalDist' : 247,
-    'zDROPos' : 248,
-    'zDROInch' : 249,
-    'zHomeDir' : 250,
-    'zHomeDist' : 251,
-    'zHomeDistRev' : 252,
-    'zHomeDistBackoff' : 253,
-    'zHomeEna' : 254,
-    'zHomeEnd' : 255,
-    'zHomeInv' : 256,
-    'zHomeLoc' : 257,
-    'zHomeSpeed' : 258,
-    'zHomeStart' : 259,
-    'zInvDRO' : 260,
-    'zInvDir' : 261,
-    'zInvEnc' : 262,
-    'zInvMpg' : 263,
-    'zJogMax' : 264,
-    'zJogMin' : 265,
-    'zMpgInc' : 266,
-    'zMpgMax' : 267,
-    'zJogSpeed' : 268,
-    'zLimEna' : 269,
-    'zLimNegInv' : 270,
-    'zLimPosInv' : 271,
-    'zMaxSpeed' : 272,
-    'zMicroSteps' : 273,
-    'zMinSpeed' : 274,
-    'zMotorRatio' : 275,
-    'zMotorSteps' : 276,
-    'zRetractLoc' : 277,
-    'zPitch' : 278,
-    'zProbeDist' : 279,
-    'zProbeSpeed' : 280,
-    'zSvPosition' : 281,
-    'zSvHomeOffset' : 282,
-    'zSvDROPosition' : 283,
-    'zSvDROOffset' : 284,
-    'cfgJogDebug' : 285,
+    'cfgIntSync' : 39,
+    'cfgInvEncDir' : 40,
+    'cfgLCD' : 41,
+    'cfgMega' : 42,
+    'cfgMPG' : 43,
+    'cfgPrbInv' : 44,
+    'cfgRemDbg' : 45,
+    'cfgSpEncCap' : 46,
+    'cfgSpEncoder' : 47,
+    'cfgSpSync' : 48,
+    'cfgSpSyncBoard' : 49,
+    'cfgSpUseEncoder' : 50,
+    'cfgSyncSPI' : 51,
+    'cfgTaperCycleDist' : 52,
+    'cfgTestMode' : 53,
+    'cfgTestRPM' : 54,
+    'cfgTurnSync' : 55,
+    'cfgThreadSync' : 56,
+    'commPort' : 57,
+    'commRate' : 58,
+    'cuPause' : 59,
+    'cuRPM' : 60,
+    'cuToolWidth' : 61,
+    'cuXEnd' : 62,
+    'cuXFeed' : 63,
+    'cuXRetract' : 64,
+    'cuXStart' : 65,
+    'cuZCutoff' : 66,
+    'cuZRetract' : 67,
+    'cuZStart' : 68,
+    'droXPos' : 69,
+    'droZPos' : 70,
+    'extDroPort' : 71,
+    'extDroRate' : 72,
+    'faAddFeed' : 73,
+    'faPasses' : 74,
+    'faPause' : 75,
+    'faRPM' : 76,
+    'faSPInt' : 77,
+    'faSpring' : 78,
+    'faXEnd' : 79,
+    'faXFeed' : 80,
+    'faXRetract' : 81,
+    'faXStart' : 82,
+    'faZEnd' : 83,
+    'faZFeed' : 84,
+    'faZRetract' : 85,
+    'faZStart' : 86,
+    'jogInc' : 87,
+    'jogXPos' : 88,
+    'jogXPosDiam' : 89,
+    'jogZPos' : 90,
+    'jpSurfaceSpeed' : 91,
+    'jpXDroDiam' : 92,
+    'jogTimeInitial' : 93,
+    'jogTimeInc' : 94,
+    'jogTimeMax' : 95,
+    'keypadPort' : 96,
+    'keypadRate' : 97,
+    'mainPanel' : 98,
+    'cfgMegaVFD' : 99,
+    'cfgMegaEncTest' : 100,
+    'cfgMegaEncLines' : 101,
+    'spAccel' : 102,
+    'spAccelTime' : 103,
+    'spCurRange' : 104,
+    'spInvDir' : 105,
+    'spJogAccelTime' : 106,
+    'spJogMax' : 107,
+    'spJogMin' : 108,
+    'spJTimeInc' : 109,
+    'spJTimeInitial' : 110,
+    'spJTimeMax' : 111,
+    'spMaxRPM' : 112,
+    'spMicroSteps' : 113,
+    'spMinRPM' : 114,
+    'spMotorSteps' : 115,
+    'spMotorTest' : 116,
+    'spPWMFreq' : 117,
+    'spMegaSim' : 118,
+    'spRangeMin1' : 119,
+    'spRangeMin2' : 120,
+    'spRangeMin3' : 121,
+    'spRangeMin4' : 122,
+    'spRangeMin5' : 123,
+    'spRangeMin6' : 124,
+    'spRangeMax1' : 125,
+    'spRangeMax2' : 126,
+    'spRangeMax3' : 127,
+    'spRangeMax4' : 128,
+    'spRangeMax5' : 129,
+    'spRangeMax6' : 130,
+    'spRanges' : 131,
+    'spStepDrive' : 132,
+    'spSwitch' : 133,
+    'spTestEncoder' : 134,
+    'spTestIndex' : 135,
+    'spVarSpeed' : 136,
+    'syncPort' : 137,
+    'syncRate' : 138,
+    'thAddFeed' : 139,
+    'thAlternate' : 140,
+    'thAngle' : 141,
+    'thFirstFeed' : 142,
+    'thFirstFeedBtn' : 143,
+    'thInternal' : 144,
+    'thLastFeed' : 145,
+    'thLastFeedBtn' : 146,
+    'thLeftHand' : 147,
+    'thMM' : 148,
+    'thPasses' : 149,
+    'thPause' : 150,
+    'thRPM' : 151,
+    'thRunout' : 152,
+    'thSPInt' : 153,
+    'thSpring' : 154,
+    'thTPI' : 155,
+    'thThread' : 156,
+    'thXDepth' : 157,
+    'thXRetract' : 158,
+    'thXStart' : 159,
+    'thXTaper' : 160,
+    'thZ0' : 161,
+    'thZ1' : 162,
+    'thZRetract' : 163,
+    'tpAddFeed' : 164,
+    'tpAngle' : 165,
+    'tpAngleBtn' : 166,
+    'tpDeltaBtn' : 167,
+    'tpInternal' : 168,
+    'tpLargeDiam' : 169,
+    'tpPasses' : 170,
+    'tpPause' : 171,
+    'tpRPM' : 172,
+    'tpSPInt' : 173,
+    'tpSmallDiam' : 174,
+    'tpSpring' : 175,
+    'tpTaperSel' : 176,
+    'tpXDelta' : 177,
+    'tpXFeed' : 178,
+    'tpXFinish' : 179,
+    'tpXInFeed' : 180,
+    'tpXRetract' : 181,
+    'tpZDelta' : 182,
+    'tpZFeed' : 183,
+    'tpZLength' : 184,
+    'tpZRetract' : 185,
+    'tpZStart' : 186,
+    'tuAddFeed' : 187,
+    'tuInternal' : 188,
+    'tuManual' : 189,
+    'tuPasses' : 190,
+    'tuPause' : 191,
+    'tuRPM' : 192,
+    'tuSPInt' : 193,
+    'tuSpring' : 194,
+    'tuXDiam0' : 195,
+    'tuXDiam1' : 196,
+    'tuXFeed' : 197,
+    'tuXRetract' : 198,
+    'tuZEnd' : 199,
+    'tuZFeed' : 200,
+    'tuZRetract' : 201,
+    'tuZStart' : 202,
+    'xAccel' : 203,
+    'xBackInc' : 204,
+    'xBacklash' : 205,
+    'xDoneDelay' : 206,
+    'xDroFinalDist' : 207,
+    'xDROInch' : 208,
+    'xDROPos' : 209,
+    'xHomeDir' : 210,
+    'xHomeDist' : 211,
+    'xHomeDistBackoff' : 212,
+    'xHomeDistRev' : 213,
+    'xHomeEna' : 214,
+    'xHomeEnd' : 215,
+    'xHomeInv' : 216,
+    'xHomeLoc' : 217,
+    'xHomeSpeed' : 218,
+    'xHomeStart' : 219,
+    'xInvDRO' : 220,
+    'xInvDir' : 221,
+    'xInvEnc' : 222,
+    'xInvMpg' : 223,
+    'xJogMax' : 224,
+    'xJogMin' : 225,
+    'xLimEna' : 226,
+    'xLimNegInv' : 227,
+    'xLimPosInv' : 228,
+    'xMpgInc' : 229,
+    'xMpgMax' : 230,
+    'xJogSpeed' : 231,
+    'xMaxSpeed' : 232,
+    'xMicroSteps' : 233,
+    'xMinSpeed' : 234,
+    'xMotorRatio' : 235,
+    'xMotorSteps' : 236,
+    'xRetractLoc' : 237,
+    'xPitch' : 238,
+    'xProbeDist' : 239,
+    'xSvPosition' : 240,
+    'xSvHomeOffset' : 241,
+    'xSvDROPosition' : 242,
+    'xSvDROOffset' : 243,
+    'zAccel' : 244,
+    'zBackInc' : 245,
+    'zBacklash' : 246,
+    'zDoneDelay' : 247,
+    'zDroFinalDist' : 248,
+    'zDROPos' : 249,
+    'zDROInch' : 250,
+    'zHomeDir' : 251,
+    'zHomeDist' : 252,
+    'zHomeDistRev' : 253,
+    'zHomeDistBackoff' : 254,
+    'zHomeEna' : 255,
+    'zHomeEnd' : 256,
+    'zHomeInv' : 257,
+    'zHomeLoc' : 258,
+    'zHomeSpeed' : 259,
+    'zHomeStart' : 260,
+    'zInvDRO' : 261,
+    'zInvDir' : 262,
+    'zInvEnc' : 263,
+    'zInvMpg' : 264,
+    'zJogMax' : 265,
+    'zJogMin' : 266,
+    'zMpgInc' : 267,
+    'zMpgMax' : 268,
+    'zJogSpeed' : 269,
+    'zLimEna' : 270,
+    'zLimNegInv' : 271,
+    'zLimPosInv' : 272,
+    'zMaxSpeed' : 273,
+    'zMicroSteps' : 274,
+    'zMinSpeed' : 275,
+    'zMotorRatio' : 276,
+    'zMotorSteps' : 277,
+    'zRetractLoc' : 278,
+    'zPitch' : 279,
+    'zProbeDist' : 280,
+    'zProbeSpeed' : 281,
+    'zSvPosition' : 282,
+    'zSvHomeOffset' : 283,
+    'zSvDROPosition' : 284,
+    'zSvDROOffset' : 285,
+    'cfgJogDebug' : 286,
     }
 
 configTable = ( \
@@ -681,6 +683,7 @@ configTable = ( \
     'cfgFpgaFreq',
     'cfgFreqMult',
     'cfgHomeInPlace',
+    'cfgIntSync',
     'cfgInvEncDir',
     'cfgLCD',
     'cfgMega',
