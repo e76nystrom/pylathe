@@ -8,7 +8,7 @@ M_PARM_ENC_LINES     =   4
 M_PARM_MAX_PARM      =   5
 
 parmTable = ( \
-    ('M_PARM_RPM', 'uint16_t', 'mParmRpm'),
+    ('M_PARM_RPM', 'int', 'mParmRpm'),
     ('M_PARM_VFD_ENA', 'char', 'mParmVfdEna'),
     ('M_PARM_PWM_CFG', 'char', 'mParmPwmCfg'),
     ('M_PARM_ENC_TEST', 'char', 'mParmEncTest'),

@@ -39,7 +39,7 @@ cfgEncoder       =  30          # config encoder counts per revolution
 cfgEStop         =  31          # config estop enable
 cfgEStopInv      =  32          # config estop invert
 cfgExtDro        =  33          # config external digital readout
-cfgFcy           =  34          # config microprocesssor clock frequency
+cfgFcy           =  34          # config microprocessor clock frequency
 cfgFpga          =  35          # config fpga interface present
 cfgFpgaFreq      =  36          # config fpga frequency
 cfgFreqMult      =  37          # config fpga frequency multiplier
@@ -144,7 +144,7 @@ cfgMegaEncLines  = 101          # mega encoder lines
 # spindle config
 
 spAccel          = 102          # spindle acceleration
-spAccelTime      = 103          # spindle accelerationtime
+spAccelTime      = 103          # spindle acceleration time
 spCurRange       = 104          # spindle current range
 spInvDir         = 105          # spindle invert direction
 spJogAccelTime   = 106          # spindle jog acceleration time
@@ -187,8 +187,8 @@ syncRate         = 138          # sync comm baud rate
 # threading config
 
 thAddFeed        = 139          # thread feed to add after done
-thAlternate      = 140          # thread althernate thread flanks
-thAngle          = 141          # thread hanlf angle of thread
+thAlternate      = 140          # thread alternate thread flanks
+thAngle          = 141          # thread half angle of thread
 thFirstFeed      = 142          # thread first feed for thread area calc
 thFirstFeedBtn   = 143          # thread button to select first feed
 thInternal       = 144          # thread internal threads

@@ -41,7 +41,7 @@ configList = \
         ('cfgEStop', 'config estop enable'),
         ('cfgEStopInv', 'config estop invert'),
         ('cfgExtDro', 'config external digital readout'),
-        ('cfgFcy', 'config microprocesssor clock frequency'),
+        ('cfgFcy', 'config microprocessor clock frequency'),
         ('cfgFpga', 'config fpga interface present'),
         ('cfgFpgaFreq', 'config fpga frequency'),
         ('cfgFreqMult', 'config fpga frequency multiplier'),
@@ -147,7 +147,7 @@ configList = \
         "spindle config",
 
         ('spAccel', 'spindle acceleration'),
-        ('spAccelTime', 'spindle accelerationtime'),
+        ('spAccelTime', 'spindle acceleration time'),
         ('spCurRange', 'spindle current range'),
         ('spInvDir', 'spindle invert direction'),
         ('spJogAccelTime', 'spindle jog acceleration time'),
@@ -193,8 +193,8 @@ configList = \
         "threading config",
 
         ('thAddFeed', 'thread feed to add after done'),
-        ('thAlternate', 'thread althernate thread flanks'),
-        ('thAngle', 'thread hanlf angle of thread'),
+        ('thAlternate', 'thread alternate thread flanks'),
+        ('thAngle', 'thread half angle of thread'),
         ('thFirstFeed', 'thread first feed for thread area calc'),
         ('thFirstFeedBtn', 'thread button to select first feed'),
         ('thInternal', 'thread internal threads'),
@@ -805,7 +805,7 @@ parmList = \
         "e stop",
 
         ("E_STOP_ENA", "enable estop", "char"),
-        ("E_STOP_INV", "invert estop siganl", "char"),
+        ("E_STOP_INV", "invert estop signal", "char"),
 
         "command pause",
 
@@ -842,7 +842,7 @@ syncParmList = \
 
 megaParmList = \
     (
-        ("M_PARM_RPM", "rpm value", "uint16_t"),
+        ("M_PARM_RPM", "rpm value", "int"),
         ("M_PARM_VFD_ENA", "", "char"),
         ("M_PARM_PWM_CFG", "", "char"),
         ("M_PARM_ENC_TEST", "", "char"),
@@ -1252,7 +1252,7 @@ xilinxList = \
         ("XRDZXPOS", "read z sync x pos"),
         ("XRDZYPOS", "read z sync y pos"),
         ("XRDZACLSUM", "read z acl sum"),
-        ("XRDZASTP", "read z acl stps"),
+        ("XRDZASTP", "read z acl steps"),
 
         "read x motion",
 
@@ -1260,7 +1260,7 @@ xilinxList = \
         ("XRDXXPOS", "read x sync x pos"),
         ("XRDXYPOS", "read x sync y pos"),
         ("XRDXACLSUM", "read x acl sum"),
-        ("XRDXASTP", "read z acl stps"),
+        ("XRDXASTP", "read z acl steps"),
 
         "read distance",
 
@@ -1295,8 +1295,8 @@ xilinxList = \
 
         "read control regs",
 
-        ("XRDZCTL", "read control regiisters"),
-        ("XRDXCTL", "read control regiisters")
+        ("XRDZCTL", "read control registers"),
+        ("XRDXCTL", "read control registers")
     )
 
 xilinxBitList = \
@@ -1366,7 +1366,7 @@ xilinxBitList = \
         "status register",
 
         ("stat",),
-        ("s_Z_Done_Int", 1, 0, "z done interrrupt"),
+        ("s_Z_Done_Int", 1, 0, "z done interrupt"),
         ("s_X_Done_Int", 1, 1, "x done interrupt"),
         ("s_Dbg_Done", 1, 2, "debug done"),
         ("s_Z_Start", 1, 3, "z start"),
@@ -1464,7 +1464,7 @@ fpgaLatheBitList = \
         ("ctlSlave", 1, 7, "slave controlled by other axis"),
         ("ctlDroEnd", 1, 8, "use dro to end move"),
         ("ctlJogEna", 1, 9, "enable jog"),
-        ("ctlHome", 1, 10, "homeing axis"),
+        ("ctlHome", 1, 10, "homing axis"),
         ("ctlIgnoreLim", 1, 11, "ignore limits"),
 
         "axis status register",
@@ -1484,7 +1484,7 @@ fpgaLatheBitList = \
         ("cfgXDroInv", 1, 3, "x dro direction inverted"),
         ("cfgZJogInv", 1, 4, "z jog direction inverted"),
         ("cfgXJogInv", 1, 5, "x jog direction inverted"),
-        ("cfgSpDirInv", 1, 6, "spindle directiion inverted"),
+        ("cfgSpDirInv", 1, 6, "spindle direction inverted"),
 
         ("cfgZHomeInv", 1, 7, "z home inverted"),
         ("cfgZMinusInv", 1, 8, "z minus inverted"),
@@ -1615,12 +1615,12 @@ enumList = \
         ("M_WAIT_Z", "wait for z to complete"),
         ("M_WAIT_X", "wait for x to complete"),
         ("M_WAIT_SPINDLE", "wait for spindle start"),
-        ("M_WAIT_SYNC_PARMS", "wait for sync paramaters"),
+        ("M_WAIT_SYNC_PARMS", "wait for sync parameters"),
         ("M_WAIT_SYNC_CMD", "wait for sync command"),
         ("M_START_SYNC", "start sync"),
         ("M_WAIT_SYNC_READY", "wait for sync"),
         ("M_WAIT_SYNC_DONE", "wait for sync done"),
-        ("M_WAIT_MEASURE_DONE", "wait for measurment done"),
+        ("M_WAIT_MEASURE_DONE", "wait for measurement done"),
         ("M_WAIT_PROBE", "wait for probe to complete"),
         ("M_WAIT_MEASURE", "wait for measurement to complete"),
         ("M_WAIT_SAFE_X", "wait for move to safe x to complete"),
@@ -1731,6 +1731,8 @@ enumList = \
         ("D_ZX", "z "),
         ("D_ZY", "z "),
 
+        ("D_XIDXD", "x dro at index pulse"),
+        ("D_XIDXP", "x position at index pulse"),
         ("D_ZIDXD", "z dro at index pulse"),
         ("D_ZIDXP", "z position at index pulse"),
 

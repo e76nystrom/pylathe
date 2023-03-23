@@ -75,7 +75,7 @@ class Setup():
         self.importList += imports
         self.configImports = imports
         self.config = config
-        self.confgTable = configTable
+        self.configTable = configTable
         return(config, configTable)
 
     def createStrings(self, strList):
@@ -508,7 +508,7 @@ class Setup():
                     bitVal = eval(val)
                     fWrite(cFile, "%s /* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), bitVal, comment))
-                    tmp =  " public static final int %-10s = %s;" % (var, val)
+                    # tmp =  " public static final int %-10s = %s;" % (var, val)
                     # fWrite(jFile, "%s /* %s */\n" % 
                     #             (tmp, comment))
                 if var in globals():
@@ -868,8 +868,8 @@ class Setup():
                             for i in range(len(xLst)):
                                 fWrite(xFile, xLst[i])
                             fWrite(xFile, "\n")
-                            for i in range(len(cLst)):
-                                fWrite(xFile, cLst[i])
+                            for j in range(len(cLst)):
+                                fWrite(xFile, cLst[j])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +
                         #                 "String[] %sBits =\n {\n") % \

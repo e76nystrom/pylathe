@@ -27,12 +27,12 @@ M_IDLE           =  0           # idle state
 M_WAIT_Z         =  1           # wait for z to complete
 M_WAIT_X         =  2           # wait for x to complete
 M_WAIT_SPINDLE   =  3           # wait for spindle start
-M_WAIT_SYNC_PARMS =  4          # wait for sync paramaters
+M_WAIT_SYNC_PARMS =  4          # wait for sync parameters
 M_WAIT_SYNC_CMD  =  5           # wait for sync command
 M_START_SYNC     =  6           # start sync
 M_WAIT_SYNC_READY =  7          # wait for sync
 M_WAIT_SYNC_DONE =  8           # wait for sync done
-M_WAIT_MEASURE_DONE =  9        # wait for measurment done
+M_WAIT_MEASURE_DONE =  9        # wait for measurement done
 M_WAIT_PROBE     = 10           # wait for probe to complete
 M_WAIT_MEASURE   = 11           # wait for measurement to complete
 M_WAIT_SAFE_X    = 12           # wait for move to safe x to complete
@@ -196,11 +196,13 @@ D_ZEST           = 31           # z spindle encoder start count
 D_ZEDN           = 32           # Z spindle encoder done count
 D_ZX             = 33           # z 
 D_ZY             = 34           # z 
-D_ZIDXD          = 35           # z dro at index pulse
-D_ZIDXP          = 36           # z position at index pulse
-D_HST            = 37           # home state
-D_MSTA           = 38           # move state
-D_MCMD           = 39           # move command
+D_XIDXD          = 35           # x dro at index pulse
+D_XIDXP          = 36           # x position at index pulse
+D_ZIDXD          = 37           # z dro at index pulse
+D_ZIDXP          = 38           # z position at index pulse
+D_HST            = 39           # home state
+D_MSTA           = 40           # move state
+D_MCMD           = 41           # move command
 
 dMessageList = ( \
     "D_PASS",
@@ -238,6 +240,8 @@ dMessageList = ( \
     "D_ZEDN",
     "D_ZX",
     "D_ZY",
+    "D_XIDXD",
+    "D_XIDXP",
     "D_ZIDXD",
     "D_ZIDXP",
     "D_HST",

@@ -52,7 +52,7 @@ XRDZSUM          = 27           # read z sync sum
 XRDZXPOS         = 28           # read z sync x pos
 XRDZYPOS         = 29           # read z sync y pos
 XRDZACLSUM       = 30           # read z acl sum
-XRDZASTP         = 31           # read z acl stps
+XRDZASTP         = 31           # read z acl steps
 
 # read x motion
 
@@ -60,7 +60,7 @@ XRDXSUM          = 32           # read x sync sum
 XRDXXPOS         = 33           # read x sync x pos
 XRDXYPOS         = 34           # read x sync y pos
 XRDXACLSUM       = 35           # read x acl sum
-XRDXASTP         = 36           # read z acl stps
+XRDXASTP         = 36           # read z acl steps
 
 # read distance
 
@@ -95,8 +95,8 @@ XLDTCOUNT        = 49           # load test count
 
 # read control regs
 
-XRDZCTL          = 50           # read control regiisters
-XRDXCTL          = 51           # read control regiisters
+XRDZCTL          = 50           # read control registers
+XRDXCTL          = 51           # read control registers
 # fpga table
 
 xRegTable = ( \

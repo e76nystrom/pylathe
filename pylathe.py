@@ -2338,12 +2338,12 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
                 control.fixCut()
         else:
             if self.mf.dbgSave:
-                self.mf.updateThread.openDebug()
+                self.mf.updateThread.openDebug(action=en.OP_TURN)
 
     def OnManualStart(self, _):
         self.sendData()
         if self.mf.dbgSave:
-            self.mf.updateThread.openDebug()
+            self.mf.updateThread.openDebug(action=en.OP_TURN)
         self.control.manualOperation()
 
     def addAction(self):
@@ -3153,7 +3153,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
                 control.fixCut()
         else:
             if self.mf.dbgSave:
-                self.mf.updateThread.openDebug()
+                self.mf.updateThread.openDebug(action=en.OP_ARC)
 
     def addAction(self):
         self.control.addPass()
@@ -3429,7 +3429,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
                 control.fixCut()
         else:
             if self.mf.dbgSave:
-                self.mf.updateThread.openDebug()
+                self.mf.updateThread.openDebug(action=en.OP_FACE)
 
     def addAction(self):
         self.control.addPass()
@@ -3602,7 +3602,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def startAction(self):
         self.mf.comm.command(cm.CMD_RESUME)
         if self.mf.dbgSave:
-            self.mf.updateThread.openDebug()
+            self.mf.updateThread.openDebug(action=en.OP_CUTOFF)
 
 class Taper(LatheOp, UpdatePass):
     def __init__(self, mainFrame, taperPanel):
@@ -4233,7 +4233,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
                 control.fixCut()
         else:
             if mf.dbgSave:
-                mf.updateThread.openDebug()
+                mf.updateThread.openDebug(action=en.OP_TAPER)
 
     def addAction(self):
         self.control.internalAddPass() if self.internal.GetValue() else \
@@ -4936,7 +4936,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
             if self.mf.dbgSave:
                 print("openDebug")
                 stdout.flush()
-                self.mf.updateThread.openDebug()
+                self.mf.updateThread.openDebug(action=en.OP_THREAD)
 
     def addAction(self):
         self.control.addPass()
@@ -7425,6 +7425,8 @@ class UpdateThread(Thread):
         self.dbg = None
         self.baseTime = None
         self.mIdle = False
+        self.lastXIdxD = None
+        self.lastXIdxP = None
         self.lastZIdxD = None
         self.lastZIdxP = None
         dbgSetup = (\
@@ -7466,6 +7468,9 @@ class UpdateThread(Thread):
                     (en.D_ZX, self.dbgZX), \
                     (en.D_ZY, self.dbgZY), \
 
+                    (en.D_XIDXD, self.dbgXIdxD), \
+                    (en.D_XIDXP, self.dbgXIdxP), \
+
                     (en.D_ZIDXD, self.dbgZIdxD), \
                     (en.D_ZIDXP, self.dbgZIdxP), \
 
@@ -7482,9 +7487,11 @@ class UpdateThread(Thread):
         #         print("dbgTbl action for %s missing" % (en.dMessageList[i]))
         #         stdout.flush()
 
-    def openDebug(self, file="dbg.txt"):
-        self.dbg = open(os.path.join(DBG_DIR, file), "ab")
+    def openDebug(self, fName="dbg.txt", action=None):
+        self.dbg = open(os.path.join(DBG_DIR, fName), "ab")
         t = "\n" + timeStr()
+        if action is not None:
+            t = t[:-1] + " " + en.operationsList[action] + "\n"
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -7718,6 +7725,8 @@ class UpdateThread(Thread):
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
         self.passVal = val
+        self.lastXIdxD = None
+        self.lastXIdxP = None
         self.lastZIdxD = None
         self.lastZIdxP = None
         result = "spring\n" if val & 0x100 else \
@@ -7919,6 +7928,27 @@ class UpdateThread(Thread):
     def dbgZY(self, val):
         return("z_y  %7d" % (val))
 
+    def dbgXIdxD(self, val):
+        result = "xixd %7.4f" % (float(val) / self.jp.xDROInch - \
+                                 self.jp.xDROOffset)
+
+        if self.lastXIdxD is not None:
+            delta = abs(self.lastXIdxD - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.xDROInch, val, delta)
+        self.lastXIdxD = val
+        return(result)
+
+    def dbgXIdxP(self, val):
+        result = "xixp %7.4f" % (float(val) / self.jp.xStepsInch - \
+                                 self.jp.xHomeOffset)
+
+        if self.lastXIdxP is not None:
+            delta = abs(self.lastXIdxP - val)
+            result += " %7.4f %6d %5d" % \
+                (delta / self.jp.xStepsInch, val, delta)
+        self.lastXIdxP = val
+        return(result)
+
     def dbgZIdxD(self, val):
         result = "zixd %7.4f" % (float(val) / self.jp.zDROInch - \
                                  self.jp.zDROOffset)
@@ -7935,7 +7965,8 @@ class UpdateThread(Thread):
 
         if self.lastZIdxP is not None:
             delta = abs(self.lastZIdxP - val)
-            result += " %7.4f %6d %5d" % (delta / self.jp.zStepsInch, val, delta)
+            result += " %7.4f %6d %5d" % \
+                (delta / self.jp.zStepsInch, val, delta)
         self.lastZIdxP = val
         return(result)
 
@@ -8121,7 +8152,7 @@ class DialPanel(wx.Panel):
                     elif i == 90:
                         yOffset = extents.height *.75
                     ctx.move_to(x0 + xOffset, y0 + yOffset)
-                    ctx.show_text(str(i))
+                    ctx.show_text(txt)
                     # label = False
 
             ctx.set_source_rgb(0.3, 0.2, 0.5)  # Solid color
@@ -9387,7 +9418,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             self.mf.sendData.spindleDataSent = False
 
     def okAction(self):
-        self.mf.syncFuncSetup(self.mf.cfg)
+        self.mf.syncFuncSetup()
 
     @staticmethod
     def turnSync():
@@ -9408,7 +9439,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         choiceList = []
         for i in indexList:
             choiceList.append(en.selTurnText[i])
-        return(indexList, choiceList, en.selTurnText)
+        return( indexList, choiceList, en.selTurnText)
 
     @staticmethod
     def threadSync():
@@ -9429,7 +9460,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         choiceList = []
         for i in indexList:
             choiceList.append(en.selThreadText[i])
-        return(indexList, choiceList, en.selThreadText)
+        return (indexList, choiceList, en.selThreadText)
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
     def __init__(self, mainFrame, defaultFont):

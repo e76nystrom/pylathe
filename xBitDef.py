@@ -58,7 +58,7 @@ Dbg_Move     = 0x40             # used debug clock for move
 
 # status register
 
-s_Z_Done_Int = 0x01             # z done interrrupt
+s_Z_Done_Int = 0x01             # z done interrupt
 s_X_Done_Int = 0x02             # x done interrupt
 s_Dbg_Done   = 0x04             # debug done
 s_Z_Start    = 0x08             # z start
