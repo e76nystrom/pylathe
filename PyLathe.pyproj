@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{07046536-49c2-404b-a8fa-2dcfeb3a88bd}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>pylathe.py</StartupFile>
+    <StartupFile>interface.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -19,7 +19,7 @@
     <IsWindowsApplication>False</IsWindowsApplication>
     <PublishUrl>
     </PublishUrl>
-    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.10</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -28,7 +28,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="circle.py" />
-    <Compile Include="cmdDef.py" />
     <Compile Include="comm.py" />
     <Compile Include="commPi.py" />
     <Compile Include="configDef.py" />
@@ -39,10 +38,12 @@
     <Compile Include="extDro.py" />
     <Compile Include="interface.py" />
     <Compile Include="lathe.py" />
+    <Compile Include="megaEnumDef.py" />
     <Compile Include="newTest.py" />
-    <Compile Include="parmDef.py" />
     <Compile Include="pincon.py" />
     <Compile Include="pylathe.py" />
+    <Compile Include="remCmdDef.py" />
+    <Compile Include="remParmDef.py" />
     <Compile Include="setup.py" />
     <Compile Include="stringDef.py" />
     <Compile Include="sync.py" />
@@ -52,7 +53,7 @@
     <Compile Include="xRegDef.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.9" />
+    <InterpreterReference Include="Global|PythonCore|3.10" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>
