@@ -61,7 +61,7 @@ R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices, HIDError
-    from comm import Comm, CommTimeout
+    from comm import Comm, CommTimeout, enableXilinx
     if os.path.isfile("rpi.txt"):
         from commPi import Comm, CommTimeout
         R_PI = True
@@ -1752,9 +1752,12 @@ class SendData:
             self.megaDataSent = True
             cfg = self.cfg
             setMega = self.comm.setMegaParm
-            setMega(mp.M_PARM_PWM_CFG, cfg.getIntInfoData(cf.cfgMegaVFD))
-            setMega(mp.M_PARM_ENC_TEST, cfg.getBoolInfoData(cf.cfgMegaEncTest))
-            setMega(mp.M_PARM_ENC_LINES, cfg.getIntInfoData(cf.cfgMegaEncLines))
+            try:
+                setMega(mp.M_PARM_PWM_CFG, cfg.getIntInfoData(cf.cfgMegaVFD))
+                setMega(mp.M_PARM_ENC_TEST, cfg.getBoolInfoData(cf.cfgMegaEncTest))
+                setMega(mp.M_PARM_ENC_LINES, cfg.getIntInfoData(cf.cfgMegaEncLines))
+            except CommTimeout:
+                pass
 
 class LatheOp():
     def __init__(self, mainFrame, panel):
@@ -5021,6 +5024,8 @@ class Keypad(Thread):
                     self.ser.close()
                     self.ser = None
                     print("keypad SerialException")
+                except UnicodeDecodeError:
+                    print("keypad UnicodeDecodeError")
             else:
                 try:
                     self.ser = serial.Serial(self.port, self.rate, timeout=1)
@@ -7429,6 +7434,8 @@ class UpdateThread(Thread):
         self.lastXIdxP = None
         self.lastZIdxD = None
         self.lastZIdxP = None
+        self.queCount = 0
+        self.dbgCount = 0
         dbgSetup = (\
                     (en.D_PASS, self.dbgPass), \
                     (en.D_DONE, self.dbgDone), \
@@ -7550,8 +7557,10 @@ class UpdateThread(Thread):
             wx.PostEvent(self.notifyWindow,
                          UpdateEvent((en.EV_ERROR, st.STR_CLR)))
         try:
-            (z, x, rpm, curPass, droZ, droX, flag) = \
-                result.rstrip().split(' ')[1:]
+            (z, x, rpm, curPass, droZ, droX, flag, \
+             queCount, dbgCount) = result.rstrip().split(' ')[1:]
+            self.queCount = int(queCount)
+            self.dbgCount = int(dbgCount)
             result = (en.EV_READ_ALL, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
@@ -7560,7 +7569,6 @@ class UpdateThread(Thread):
 
     def run(self):
         i = 0
-        op = None
         scanMax = len(self.parmList)
         moveQue = self.mf.move.moveQue
         while True:
@@ -7592,22 +7600,22 @@ class UpdateThread(Thread):
 
             # process move queue
 
-            if not moveQue.empty() or (op is not None):
+            if not moveQue.empty():
                 if not self.threadRun:
                     break
                 try:
-                    num = self.comm.getQueueStatus()
-                    if not self.threadRun:
-                        break
+                    # num = self.comm.getQueueStatus()
+                    # if not self.threadRun:
+                    #     break
+                    num = self.queCount
                     while num > 0:
                         num -= 1
-                        if op is None:
-                            try:
-                                (opString, op, val) = moveQue.get(False)
-                                self.comm.sendMove(opString, op, val)
-                            except Empty:
-                                break
-                        op = None
+                        try:
+                            (opString, op, val) = moveQue.get(False)
+                            self.comm.queMove(opString, op, val)
+                            # self.comm.sendMove(opString, op, val)
+                        except Empty:
+                            break
                 except CommTimeout:
                     print("CommTimeout on queue")
                     stdout.flush()
@@ -7616,12 +7624,15 @@ class UpdateThread(Thread):
                     stdout.flush()
                     break
                 except TypeError:
-                    pass
+                    print("TypeError on queue")
+                    stdout.flush()
+                self.comm.sendMultiMove()
 
             # get debug data
 
-            if self.procDebug():
-                break
+            if self.dbgCount != 0:
+                if self.procDebug():
+                    break
 
         print("UpdateThread done")
         stdout.flush()

@@ -455,6 +455,7 @@ cmdList = \
 
         ("CLEARQUE", "clearQue", "clear move que"),
         ("QUEMOVE", "", "que move command"),
+        ("MOVEMULTI", "", "que move command"),
         ("MOVEQUESTATUS", "", "read move queue status"),
 
         "location and debug info",
@@ -823,6 +824,8 @@ parmList = \
 
         ('MEGA_VFD', 'mega vfd speed mode', "char"),
         ('MEGA_SIM', 'mega encoder lines', "char"),
+
+        ('USB_ENA', 'enable usb', "char"),
 
         # ("", "", ""),
         # ("", "", ""),

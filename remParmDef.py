@@ -315,7 +315,8 @@ ARC_X_END            = 182
 ARC_Z_END            = 183
 MEGA_VFD             = 184
 MEGA_SIM             = 185
-MAX_PARM             = 186
+USB_ENA              = 186
+MAX_PARM             = 187
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -504,5 +505,6 @@ parmTable = ( \
     ('ARC_Z_END', 'int', 'arcZEnd'),
     ('MEGA_VFD', 'char', 'megaVfd'),
     ('MEGA_SIM', 'char', 'megaSim'),
+    ('USB_ENA', 'char', 'usbEna'),
     ('MAX_PARM', 'int16_t', 'maxParm'),
     )

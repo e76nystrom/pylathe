@@ -67,23 +67,24 @@ READXREG             =  40
 
 CLEARQUE             =  41
 QUEMOVE              =  42
-MOVEQUESTATUS        =  43
+MOVEMULTI            =  43
+MOVEQUESTATUS        =  44
 
 # location and debug info
 
-READALL              =  44
-READDBG              =  45
-CLRDBG               =  46
+READALL              =  45
+READDBG              =  46
+CLRDBG               =  47
 
 # encoder commands
 
-ENCSTART             =  47
-ENCSTOP              =  48
+ENCSTART             =  48
+ENCSTOP              =  49
 
 #  mega commands 
 
-SET_MEGA_VAL         =  49
-READ_MEGA_VAL        =  50
+SET_MEGA_VAL         =  50
+READ_MEGA_VAL        =  51
 
 # command table
 
@@ -131,12 +132,13 @@ cmdTable = ( \
     ("READXREG", None),                 #  40
     ("CLEARQUE", "clearQue"),           #  41
     ("QUEMOVE", None),                  #  42
-    ("MOVEQUESTATUS", None),            #  43
-    ("READALL", "readAll"),             #  44
-    ("READDBG", "readDbg"),             #  45
-    ("CLRDBG", "clearDbg"),             #  46
-    ("ENCSTART", None),                 #  47
-    ("ENCSTOP", None),                  #  48
-    ("SET_MEGA_VAL", None),             #  49
-    ("READ_MEGA_VAL", None),            #  50
+    ("MOVEMULTI", None),                #  43
+    ("MOVEQUESTATUS", None),            #  44
+    ("READALL", "readAll"),             #  45
+    ("READDBG", "readDbg"),             #  46
+    ("CLRDBG", "clearDbg"),             #  47
+    ("ENCSTART", None),                 #  48
+    ("ENCSTOP", None),                  #  49
+    ("SET_MEGA_VAL", None),             #  50
+    ("READ_MEGA_VAL", None),            #  51
     )
