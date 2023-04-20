@@ -80,28 +80,38 @@ class Comm():
             return
         self.commLock.acquire(True)
         self.ser.write(cmd.encode())
-        rsp = ""
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("timeout")
-                    stdout.flush()
-                raise CommTimeout()
+        rsp = self.ser.read(3).decode('utf8')
+        if len(rsp) == 0:
+            self.commLock.release()
+            if not self.timeout:
+                self.timeout = True
+                print("timeout")
+                stdout.flush()
+            raise CommTimeout()
 
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp
+        length = int(rsp[1:3], 16)
+        rsp += self.ser.read(length).decode('utf8')
+        if rsp[-1] == '*':
+            self.timeout = False
+            # col = 0
+            # for ch in rsp:
+            #     val = ord(ch)
+            #     if val > ord(' '):
+            #         print(" %s " % (ch, ), end="")
+            #     else:
+            #         print("%02x " % (val, ), end="")
+            #     col += 1
+            #     if col >= 32:
+            #         col = 0
+            #         print()
+            # if col != 0:
+            #     print()
         self.commLock.release()
         return rsp
 
     def getResult(self, rsp, index):
         result = rsp.split()
         if len(result) > index:
-            self.commLock.release()
             retVal = int(result[index], 16)
             retVal = c_int32(retVal).value
             # if retVal & 0x80000000:
@@ -287,7 +297,6 @@ class Comm():
         #     val = c_int32(val).value
         #     # if val & 0x80000000:
         #     #     val = -((val ^ 0xffffffff) + 1)
-        #     self.commLock.release()
         #     return val
         # return 0
 
@@ -324,7 +333,6 @@ class Comm():
         #     val = c_int32(val).value
         #     # if val & 0x80000000:
         #     #     val = -((val ^ 0xffffffff) + 1)
-        #     self.commLock.release()
         #     return val
         # return 0
 

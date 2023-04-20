@@ -7436,56 +7436,50 @@ class UpdateThread(Thread):
         self.lastZIdxP = None
         self.queCount = 0
         self.dbgCount = 0
-        dbgSetup = (\
-                    (en.D_PASS, self.dbgPass), \
-                    (en.D_DONE, self.dbgDone), \
-                    (en.D_TEST, self.dbgTest), \
-
-                    (en.D_XMOV, self.dbgXMov), \
-                    (en.D_XLOC, self.dbgXLoc), \
-                    (en.D_XDST, self.dbgXDst), \
-                    (en.D_XSTP, self.dbgXStp),
-                    (en.D_XST,  self.dbgXState), \
-                    (en.D_XBSTP, self.dbgXBSteps), \
-                    (en.D_XDRO, self.dbgXDro), \
-                    (en.D_XPDRO, self.dbgXPDro), \
-                    (en.D_XEXP, self.dbgXExp), \
-                    (en.D_XERR, self.dbgXErr), \
-                    (en.D_XWT,  self.dbgXWait), \
-                    (en.D_XDN,  self.dbgXDone), \
-                    (en.D_XEST, self.dbgXEncStart), \
-                    (en.D_XEDN, self.dbgXEncDone), \
-                    (en.D_XX, self.dbgXX), \
-                    (en.D_XY, self.dbgXY), \
-
-                    (en.D_ZMOV, self.dbgZMov), \
-                    (en.D_ZLOC, self.dbgZLoc), \
-                    (en.D_ZDST, self.dbgZDst), \
-                    (en.D_ZSTP, self.dbgZStp),
-                    (en.D_ZST, self.dbgZState), \
-                    (en.D_ZBSTP, self.dbgZBSteps), \
-                    (en.D_ZDRO, self.dbgZDro), \
-                    (en.D_ZPDRO, self.dbgZPDro), \
-                    (en.D_ZEXP, self.dbgZExp), \
-                    (en.D_ZERR, self.dbgZErr), \
-                    (en.D_ZWT, self.dbgZWait), \
-                    (en.D_ZDN, self.dbgZDone), \
-                    (en.D_ZEST, self.dbgZEncStart), \
-                    (en.D_ZEDN, self.dbgZEncDone), \
-                    (en.D_ZX, self.dbgZX), \
-                    (en.D_ZY, self.dbgZY), \
-
-                    (en.D_XIDXD, self.dbgXIdxD), \
-                    (en.D_XIDXP, self.dbgXIdxP), \
-
-                    (en.D_ZIDXD, self.dbgZIdxD), \
-                    (en.D_ZIDXP, self.dbgZIdxP), \
-
-                    (en.D_HST, self.dbgHome), \
-
-                    (en.D_MSTA, self.dbgMoveState), \
-                    (en.D_MCMD, self.dbgMoveCmd), \
-        )
+        dbgSetup = ( \
+            (en.D_PASS, self.dbgPass), \
+            (en.D_DONE, self.dbgDone), \
+            (en.D_TEST, self.dbgTest), \
+            (en.D_XMOV, self.dbgXMov), \
+            (en.D_XLOC, self.dbgXLoc), \
+            (en.D_XDST, self.dbgXDst), \
+            (en.D_XSTP, self.dbgXStp),
+            (en.D_XST, self.dbgXState), \
+            (en.D_XBSTP, self.dbgXBSteps), \
+            (en.D_XDRO, self.dbgXDro), \
+            (en.D_XPDRO, self.dbgXPDro), \
+            (en.D_XEXP, self.dbgXExp), \
+            (en.D_XERR, self.dbgXErr), \
+            (en.D_XWT, self.dbgXWait), \
+            (en.D_XDN, self.dbgXDone), \
+            (en.D_XEST, self.dbgXEncStart), \
+            (en.D_XEDN, self.dbgXEncDone), \
+            (en.D_XX, self.dbgXX), \
+            (en.D_XY, self.dbgXY), \
+            (en.D_ZMOV, self.dbgZMov), \
+            (en.D_ZLOC, self.dbgZLoc), \
+            (en.D_ZDST, self.dbgZDst), \
+            (en.D_ZSTP, self.dbgZStp),
+            (en.D_ZST, self.dbgZState), \
+            (en.D_ZBSTP, self.dbgZBSteps), \
+            (en.D_ZDRO, self.dbgZDro), \
+            (en.D_ZPDRO, self.dbgZPDro), \
+            (en.D_ZEXP, self.dbgZExp), \
+            (en.D_ZERR, self.dbgZErr), \
+            (en.D_ZWT, self.dbgZWait), \
+            (en.D_ZDN, self.dbgZDone), \
+            (en.D_ZEST, self.dbgZEncStart), \
+            (en.D_ZEDN, self.dbgZEncDone), \
+            (en.D_ZX, self.dbgZX), \
+            (en.D_ZY, self.dbgZY), \
+            (en.D_XIDXD, self.dbgXIdxD), \
+            (en.D_XIDXP, self.dbgXIdxP), \
+            (en.D_ZIDXD, self.dbgZIdxD), \
+            (en.D_ZIDXP, self.dbgZIdxP), \
+            (en.D_HST, self.dbgHome), \
+            (en.D_MSTA, self.dbgMoveState), \
+            (en.D_MCMD, self.dbgMoveCmd), \
+            )
         self.dbgTbl = dbgTbl = [self.dbgNone for _ in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
             dbgTbl[index] = action
@@ -7557,8 +7551,9 @@ class UpdateThread(Thread):
             wx.PostEvent(self.notifyWindow,
                          UpdateEvent((en.EV_ERROR, st.STR_CLR)))
         try:
+            tmp = result[3:].split(' ')
             (z, x, rpm, curPass, droZ, droX, flag, \
-             queCount, dbgCount) = result.rstrip().split(' ')[1:]
+             queCount, dbgCount) = tmp[1:10]
             self.queCount = int(queCount)
             self.dbgCount = int(dbgCount)
             result = (en.EV_READ_ALL, z, x, rpm, curPass, droZ, droX, flag)
