@@ -1,10 +1,10 @@
 
 # parameters
-SYNC_CYCLE           =   0
-SYNC_OUTPUT          =   1
-SYNC_PRESCALER       =   2
-SYNC_ENCODER         =   3
-SYNC_MAX_PARM        =   4
+SYNC_CYCLE           =   0	# 0x00
+SYNC_OUTPUT          =   1	# 0x01
+SYNC_PRESCALER       =   2	# 0x02
+SYNC_ENCODER         =   3	# 0x03
+SYNC_MAX_PARM        =   4	# 0x04
 
 parmTable = ( \
     ('SYNC_CYCLE', 'uint16_t', 'syncCycle'),

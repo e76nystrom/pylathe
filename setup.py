@@ -117,6 +117,7 @@ class Setup():
         imports = []
         imports.append("cmdTable")
         cmdTable = []
+        cFile = None
         if fData:
             cFile = open(cLoc + prefix + 'CmdList.h', 'wb')
             fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n")
@@ -150,7 +151,8 @@ class Setup():
                         globals()[regName] = index
                         imports.append(regName)
                         if f is not None:
-                            fWrite(f, "%s = %3d\n" % (regName.ljust(20), index))
+                            fWrite(f, "%s = %3d\t# 0x%02x\n" % \
+                                   (regName.ljust(20), index, index))
                     index += 1
             else:
                 if fData:
@@ -194,15 +196,20 @@ class Setup():
         imports.append("parmTable")
         preCap = prefix.capitalize()
         preUC = prefix.upper()
+        remFunc = None
+        cFile = None
+        c1File = None
+        c3File = None
+        c4File = None
         if fData:
             cFile = open(cLoc + prefix + 'ParmList.h', 'wb')
             fWrite(cFile, "enum " + preUC + "_PARM\n{\n")
-            c1File = None
-            c3File = None
-            c4File = None
             if cSource is not None:
                 c1File = open(cLoc + prefix + 'Parm.h', 'wb')
-                fWrite(c1File, "char " + prefix + "Parm[] =\n{\n")
+                fWrite(c1File, "/* defines */\n\n")
+                fWrite(c1File, "#define FLT (0x80)\n")
+                fWrite(c1File, "#define SIZE_MASK (0x7)\n\n")
+                fWrite(c1File, "unsigned char " + prefix + "Parm[] =\n{\n")
                 # c2File = open(cLoc + prefix + 'VarDef.h', 'wb')
                 c3File = open(cLoc + prefix + 'Struct.h', 'wb')
                 fWrite(c3File, "#if !defined(" + preUC + "_STRUCT)\n"\
@@ -282,9 +289,13 @@ class Setup():
                                 (tmp.ljust(32), index, regComment))
                     # tmp = " PARM(%s, %s), " % (varName, regAct)
                     if c1File is not None:
-                        tmp = " sizeof(%sVar.%s), " % (prefix[0], varName)
-                        fWrite(c1File, "%s/* 0x%02x %s */\n" % 
-                                     (tmp.ljust(32), index, regComment))
+                        if varType == "float":
+                            tmp = " sizeof(%sVar.%s) | FLT, " % \
+                                  (prefix[0], varName)
+                        else:
+                            tmp = " sizeof(%sVar.%s), " % (prefix[0], varName)
+                        fWrite(c1File, "%s/* 0x%02x %s */\n" %
+                                     (tmp.ljust(40), index, regComment))
                     # tmp = " EXT %s %s;" % (varType, varName)
                     # fWrite(c2File, "%s/* 0x%02x %s */\n" % 
                     #        (tmp.ljust(32), index, regComment))
@@ -312,7 +323,8 @@ class Setup():
                     # globals()[regName] = index
                     imports.append(regName)
                     if f is not None:
-                        fWrite(f, "%s = %3d\n" % (regName.ljust(20), index))
+                        fWrite(f, "%s = %3d\t# 0x%02x\n" % \
+                               (regName.ljust(20), index, index))
                 index += 1
             else:
                 if fData:
@@ -377,7 +389,9 @@ class Setup():
 
     def createEnums(self, enumList, cLoc, fData=False, pyFile=True,
                     prefix=""):
+        global enum, stringList
         imports = []
+        cFile = None
         if fData:
             fName = 'ctlstates.h'
             if len(prefix) != 0:

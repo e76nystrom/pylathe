@@ -22,6 +22,17 @@ def enableXilinx():
     pass
     # from setup import xRegTable
 
+def getResult(rsp, index):
+    result = rsp.split()
+    print("getResult %s index %d %s" % (rsp, index, result))
+    if index < len(result):
+        retVal = int(result[index], 16)
+        retVal = c_int32(retVal).value
+        # if retVal & 0x80000000:
+        #     retVal -= 0x100000000
+        return retVal
+    return 0
+
 class Comm():
     def __init__(self):
         self.ser = None
@@ -76,6 +87,8 @@ class Comm():
             self.ser = None
 
     def send(self, cmd):
+        if cmd[1:3] != "2d":
+            print("cmd", cmd.strip('\x01\r'))
         if self.ser is None:
             return
         self.commLock.acquire(True)
@@ -91,6 +104,8 @@ class Comm():
 
         length = int(rsp[1:3], 16)
         rsp += self.ser.read(length).decode('utf8')
+        if rsp[3:5] != "2d":
+            print("rsp", rsp)
         if rsp[-1] == '*':
             self.timeout = False
             # col = 0
@@ -108,16 +123,6 @@ class Comm():
             #     print()
         self.commLock.release()
         return rsp
-
-    def getResult(self, rsp, index):
-        result = rsp.split()
-        if len(result) > index:
-            retVal = int(result[index], 16)
-            retVal = c_int32(retVal).value
-            # if retVal & 0x80000000:
-            #     retVal -= 0x100000000
-            return retVal
-        return 0
 
     def command(self, cmdVal, silent=False):
         if len(self.parmList) > 0:
@@ -143,7 +148,7 @@ class Comm():
         cmdInfo = self.parmTable[parmIndex]
         parm = cmdInfo[0]
         parmType = cmdInfo[1]
-        valString = "0"
+        # valString = "0"
         # if self.SWIG and (len(cmdInfo) == 3):
         #     if self.importLathe:
         #         import lathe
@@ -170,10 +175,10 @@ class Comm():
         else:
             try:
                 val = int(val)
-                if val < 10:
-                    valString = "%d" % (val)
-                else:
-                    valString = "x%x" % (val)
+                # if val < 10:
+                #     valString = "%d" % (val)
+                # else:
+                valString = "%x" % (val)
             except ValueError:
                 valString = "0"
                 print("ValueError int queParm %s %s" % (parm, val))
@@ -212,7 +217,7 @@ class Comm():
             cmd += parm
         cmd += ' \r'
         if self.xDbgPrint:
-            print("cmdlen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
+            print("cmdLen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
         self.parmList = []
         self.cmdLen = CMD_OVERHEAD
         if self.xDbgPrint:
@@ -229,7 +234,7 @@ class Comm():
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
             stdout.flush()
         rsp = self.send(cmd)
-        return self.getResult(rsp, 2)
+        return getResult(rsp, 1)
 
         # result = rsp.split()
         # if len(result) >= 3:
@@ -289,7 +294,7 @@ class Comm():
         if self.xDbgPrint:
             pass
         rsp = self.send(cmd)
-        return self.getResult(rsp, 2)
+        return getResult(rsp, 2)
 
         # result = rsp.split()
         # if len(result) == 3:
@@ -325,7 +330,7 @@ class Comm():
         if self.xDbgPrint:
             pass
         rsp = self.send(cmd)
-        return self.getResult(rsp, 2)
+        return getResult(rsp, 2)
 
         # result = rsp.split()
         # if len(result) >= 3:
@@ -340,8 +345,9 @@ class Comm():
         if isinstance(val, float):
             valStr = "%0.4f" % (val)
             prtStr = "%7.4f" % (val)
+            valStr = valStr.rstrip('0')
         elif isinstance(val, int):
-            valStr = "x%x" % (val)
+            valStr = "%x" % (val)
             prtStr = "%7x" % (val)
         elif isinstance(val, str):
             valStr = val
@@ -350,9 +356,8 @@ class Comm():
             print("sendMove val invalid type")
             stdout.flush()
             return
-        if '.' in valStr:
-            valStr = valStr.rstrip('0')
-        cmd = 'x%x %s ' % (op, valStr)
+
+        cmd = '%x %s ' % (op, valStr)
         if self.xDbgPrint:
             print("cmd %-18s %6x %s" % (opString, op, prtStr))
             stdout.flush()
@@ -391,4 +396,4 @@ class Comm():
             return(None)
         cmd = '\x01%x \r' % (MOVEQUESTATUS)
         rsp = self.send(cmd)
-        return self.getResult(rsp, 1)
+        return getResult(rsp, 1)

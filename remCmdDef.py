@@ -3,88 +3,88 @@
 
 # z motion commands
 
-ZMOVEABS             =   0
-ZMOVEREL             =   1
-ZJMOV                =   2
-ZJSPEED              =   3
-ZSTOP                =   4
-ZSETLOC              =   5
-ZHOMEFWD             =   6
-ZHOMEREV             =   7
+ZMOVEABS             =   0	# 0x00
+ZMOVEREL             =   1	# 0x01
+ZJMOV                =   2	# 0x02
+ZJSPEED              =   3	# 0x03
+ZSTOP                =   4	# 0x04
+ZSETLOC              =   5	# 0x05
+ZHOMEFWD             =   6	# 0x06
+ZHOMEREV             =   7	# 0x07
 
 # x motion commands
 
-XMOVEABS             =   8
-XMOVEREL             =   9
-XJMOV                =  10
-XJSPEED              =  11
-XSTOP                =  12
-XSETLOC              =  13
-XHOMEFWD             =  14
-XHOMEREV             =  15
+XMOVEABS             =   8	# 0x08
+XMOVEREL             =   9	# 0x09
+XJMOV                =  10	# 0x0a
+XJSPEED              =  11	# 0x0b
+XSTOP                =  12	# 0x0c
+XSETLOC              =  13	# 0x0d
+XHOMEFWD             =  14	# 0x0e
+XHOMEREV             =  15	# 0x0f
 
 # spindle operations
 
-SPINDLE_START        =  16
-SPINDLE_STOP         =  17
-SPINDLE_UPDATE       =  18
-SPINDLE_JOG          =  19
-SPINDLE_JOG_SPEED    =  20
+SPINDLE_START        =  16	# 0x10
+SPINDLE_STOP         =  17	# 0x11
+SPINDLE_UPDATE       =  18	# 0x12
+SPINDLE_JOG          =  19	# 0x13
+SPINDLE_JOG_SPEED    =  20	# 0x14
 
 # end operations
 
-CMD_PAUSE            =  21
-CMD_RESUME           =  22
-CMD_STOP             =  23
-CMD_DONE             =  24
-CMD_MEASURE          =  25
+CMD_PAUSE            =  21	# 0x15
+CMD_RESUME           =  22	# 0x16
+CMD_STOP             =  23	# 0x17
+CMD_DONE             =  24	# 0x18
+CMD_MEASURE          =  25	# 0x19
 
 # setup operations
 
-CMD_CLEAR            =  26
-CMD_SETUP            =  27
-CMD_SPSETUP          =  28
-CMD_SYNCSETUP        =  29
-CMD_ZSETUP           =  30
-CMD_ZSYNSETUP        =  31
-CMD_XSETUP           =  32
-CMD_XSYNSETUP        =  33
+CMD_CLEAR            =  26	# 0x1a
+CMD_SETUP            =  27	# 0x1b
+CMD_SPSETUP          =  28	# 0x1c
+CMD_SYNCSETUP        =  29	# 0x1d
+CMD_ZSETUP           =  30	# 0x1e
+CMD_ZSYNSETUP        =  31	# 0x1f
+CMD_XSETUP           =  32	# 0x20
+CMD_XSYNSETUP        =  33	# 0x21
 
 # state information
 
-READSTAT             =  34
-READISTATE           =  35
+READSTAT             =  34	# 0x22
+READISTATE           =  35	# 0x23
 
 # load processor and xilinx parameters
 
-LOADVAL              =  36
-LOADMULTI            =  37
-READVAL              =  38
-LOADXREG             =  39
-READXREG             =  40
+LOADVAL              =  36	# 0x24
+LOADMULTI            =  37	# 0x25
+READVAL              =  38	# 0x26
+LOADXREG             =  39	# 0x27
+READXREG             =  40	# 0x28
 
 # move command operations
 
-CLEARQUE             =  41
-QUEMOVE              =  42
-MOVEMULTI            =  43
-MOVEQUESTATUS        =  44
+CLEARQUE             =  41	# 0x29
+QUEMOVE              =  42	# 0x2a
+MOVEMULTI            =  43	# 0x2b
+MOVEQUESTATUS        =  44	# 0x2c
 
 # location and debug info
 
-READALL              =  45
-READDBG              =  46
-CLRDBG               =  47
+READALL              =  45	# 0x2d
+READDBG              =  46	# 0x2e
+CLRDBG               =  47	# 0x2f
 
 # encoder commands
 
-ENCSTART             =  48
-ENCSTOP              =  49
+ENCSTART             =  48	# 0x30
+ENCSTOP              =  49	# 0x31
 
 #  mega commands 
 
-SET_MEGA_VAL         =  50
-READ_MEGA_VAL        =  51
+SET_MEGA_VAL         =  50	# 0x32
+READ_MEGA_VAL        =  51	# 0x33
 
 # command table
 

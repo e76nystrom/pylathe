@@ -1289,7 +1289,7 @@ class MoveCommands():
             self.queMove(en.SAVE_X_OFFSET,
                          round(jp.xHomeOffset * jp.xStepsInch))
             if self.dbg:
-                print("savexOffset  %7.4f" % (jp.xHomeOffset))
+                print("saveXOffset  %7.4f" % (jp.xHomeOffset))
                 stdout.flush()
 
     def moveXZ(self, zLocation, xLocation):
@@ -7595,7 +7595,7 @@ class UpdateThread(Thread):
 
             # process move queue
 
-            if not moveQue.empty():
+            if not moveQue.empty() and self.queCount > 10:
                 if not self.threadRun:
                     break
                 try:
