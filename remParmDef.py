@@ -241,82 +241,84 @@ X_CFG_REG            = 142	# 0x8e
 
 L_SYNC_CYCLE         = 143	# 0x8f
 L_SYNC_OUTPUT        = 144	# 0x90
-L_SYNC_PRESCALER     = 145	# 0x91
+L_SYNC_IN_PRESCALER  = 145	# 0x91
+L_SYNC_OUT_PRESCALER = 146	# 0x92
 
 # x sync parameters
 
-L_X_SYNC_CYCLE       = 146	# 0x92
-L_X_SYNC_OUTPUT      = 147	# 0x93
-L_X_SYNC_PRESCALER   = 148	# 0x94
+L_X_SYNC_CYCLE       = 147	# 0x93
+L_X_SYNC_OUTPUT      = 148	# 0x94
+L_X_SYNC_IN_PRESCALER = 149	# 0x95
+L_X_SYNC_OUT_PRESCALER = 150	# 0x96
 
 # threading variables
 
-TH_Z_START           = 149	# 0x95
-TH_X_START           = 150	# 0x96
-TAN_THREAD_ANGLE     = 151	# 0x97
-X_FEED               = 152	# 0x98
-RUNOUT_DISTANCE      = 153	# 0x99
-RUNOUT_DEPTH         = 154	# 0x9a
+TH_Z_START           = 151	# 0x97
+TH_X_START           = 152	# 0x98
+TAN_THREAD_ANGLE     = 153	# 0x99
+X_FEED               = 154	# 0x9a
+RUNOUT_DISTANCE      = 155	# 0x9b
+RUNOUT_DEPTH         = 156	# 0x9c
 
 # jog debug
 
-JOG_DEBUG            = 155	# 0x9b
+JOG_DEBUG            = 157	# 0x9d
 
 # motor and speed control
 
-PWM_FREQ             = 156	# 0x9c
-MIN_SPEED            = 157	# 0x9d
-MAX_SPEED            = 158	# 0x9e
+PWM_FREQ             = 158	# 0x9e
+MIN_SPEED            = 159	# 0x9f
+MAX_SPEED            = 160	# 0xa0
 
 # current operation
 
-CURRENT_OP           = 159	# 0x9f
+CURRENT_OP           = 161	# 0xa1
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 160	# 0xa0
-COMMON_LIMITS        = 161	# 0xa1
-LIMITS_ENABLED       = 162	# 0xa2
-COMMON_HOME          = 163	# 0xa3
+LIMIT_OVERRIDE       = 162	# 0xa2
+COMMON_LIMITS        = 163	# 0xa3
+LIMITS_ENABLED       = 164	# 0xa4
+COMMON_HOME          = 165	# 0xa5
 
 # z limits and home
 
-Z_LIM_ENA            = 164	# 0xa4
-Z_LIM_NEG_INV        = 165	# 0xa5
-Z_LIM_POS_INV        = 166	# 0xa6
-Z_HOME_ENA           = 167	# 0xa7
-Z_HOME_INV           = 168	# 0xa8
+Z_LIM_ENA            = 166	# 0xa6
+Z_LIM_NEG_INV        = 167	# 0xa7
+Z_LIM_POS_INV        = 168	# 0xa8
+Z_HOME_ENA           = 169	# 0xa9
+Z_HOME_INV           = 170	# 0xaa
 
 # x limits and home
 
-X_LIM_ENA            = 169	# 0xa9
-X_LIM_NEG_INV        = 170	# 0xaa
-X_LIM_POS_INV        = 171	# 0xab
-X_HOME_ENA           = 172	# 0xac
-X_HOME_INV           = 173	# 0xad
+X_LIM_ENA            = 171	# 0xab
+X_LIM_NEG_INV        = 172	# 0xac
+X_LIM_POS_INV        = 173	# 0xad
+X_HOME_ENA           = 174	# 0xae
+X_HOME_INV           = 175	# 0xaf
 
 # e stop
 
-E_STOP_ENA           = 174	# 0xae
-E_STOP_INV           = 175	# 0xaf
+E_STOP_ENA           = 176	# 0xb0
+E_STOP_INV           = 177	# 0xb1
 
 # command pause
 
-CMD_PAUSED           = 176	# 0xb0
+CMD_PAUSED           = 178	# 0xb2
 
 # arc parameters
 
-ARC_RADIUS           = 177	# 0xb1
-ARC_X_CENTER         = 178	# 0xb2
-ARC_Z_CENTER         = 179	# 0xb3
-ARC_X_START          = 180	# 0xb4
-ARC_Z_START          = 181	# 0xb5
-ARC_X_END            = 182	# 0xb6
-ARC_Z_END            = 183	# 0xb7
-MEGA_VFD             = 184	# 0xb8
-MEGA_SIM             = 185	# 0xb9
-USB_ENA              = 186	# 0xba
-MAX_PARM             = 187	# 0xbb
+ARC_RADIUS           = 179	# 0xb3
+ARC_X_CENTER         = 180	# 0xb4
+ARC_Z_CENTER         = 181	# 0xb5
+ARC_X_START          = 182	# 0xb6
+ARC_Z_START          = 183	# 0xb7
+ARC_X_END            = 184	# 0xb8
+ARC_Z_END            = 185	# 0xb9
+MEGA_VFD             = 186	# 0xba
+MEGA_SIM             = 187	# 0xbb
+USB_ENA              = 188	# 0xbc
+MAX_PARM             = 189	# 0xbd
 
 parmTable = ( \
     ('SP_STEPS', 'int16_t', 'spSteps'),
@@ -464,10 +466,12 @@ parmTable = ( \
     ('X_CFG_REG', 'int16_t', 'xCfgReg'),
     ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
     ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
-    ('L_SYNC_PRESCALER', 'uint16_t', 'lSyncPrescaler'),
+    ('L_SYNC_IN_PRESCALER', 'uint16_t', 'lSyncInPrescaler'),
+    ('L_SYNC_OUT_PRESCALER', 'uint16_t', 'lSyncOutPrescaler'),
     ('L_X_SYNC_CYCLE', 'uint16_t', 'lXSyncCycle'),
     ('L_X_SYNC_OUTPUT', 'uint16_t', 'lXSyncOutput'),
-    ('L_X_SYNC_PRESCALER', 'uint16_t', 'lXSyncPrescaler'),
+    ('L_X_SYNC_IN_PRESCALER', 'uint16_t', 'lXSyncInPrescaler'),
+    ('L_X_SYNC_OUT_PRESCALER', 'uint16_t', 'lXSyncOutPrescaler'),
     ('TH_Z_START', 'int32_t', 'thZStart'),
     ('TH_X_START', 'int32_t', 'thXStart'),
     ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),

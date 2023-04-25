@@ -747,13 +747,15 @@ parmList = \
 
         ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
         ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
-        ("L_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+        ("L_SYNC_IN_PRESCALER", "input sync prescaler", "uint16_t"),
+        ("L_SYNC_OUT_PRESCALER", "output sync prescaler", "uint16_t"),
 
         "x sync parameters",
 
         ("L_X_SYNC_CYCLE", "sync cycle length", "uint16_t"),
         ("L_X_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
-        ("L_X_SYNC_PRESCALER", "sync prescaler", "uint16_t"),
+        ("L_X_SYNC_IN_PRESCALER", "input sync prescaler", "uint16_t"),
+        ("L_X_SYNC_OUT_PRESCALER", "output sync prescaler", "uint16_t"),
 
         "threading variables",
 

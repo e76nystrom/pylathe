@@ -1905,11 +1905,13 @@ def getSyncParm(control, feed, rpm, axis):
     turnSync = mf.turnSync
     if turnSync == en.SEL_TU_ISYN or turnSync == en.SEL_TU_SYN:
         syn = mf.zSyncInt if axis == AXIS_Z else mf.xSyncInt
-        (control.cycle, control.output, control.preScaler) = \
+        (control.cycle, control.output,
+         control.inPreScaler, control.outPreScaler) = \
             syn.calcSync(val, metric=False, rpm=rpm, turn=True)
     elif turnSync == en.SEL_TU_ESYN:
         syn = mf.zSyncExt if axis == AXIS_Z else mf.xSyncExt
-        (control.cycle, control.output, control.preScaler) = \
+        (control.cycle, control.output,
+         control.inPreScaler, control.outPreScaler) = \
             syn.calcSync(val, metric=False, rpm=rpm, turn=True)
 
 def sendSyncParm(control):
@@ -1921,7 +1923,8 @@ def sendSyncParm(control):
        ((turnSync == en.SEL_TU_ESYN) and SYNC_SPI):
         queParm(pm.L_SYNC_CYCLE, control.cycle)
         queParm(pm.L_SYNC_OUTPUT, control.output)
-        queParm(pm.L_SYNC_PRESCALER, control.preScaler)
+        queParm(pm.L_SYNC_IN_PRESCALER, control.inPreScaler)
+        queParm(pm.L_SYNC_OUT_PRESCALER, control.outPreScaler)
         if SYNC_SPI:
             m = control.m
             m.syncParms()
@@ -1932,7 +1935,7 @@ def sendSyncParm(control):
                          control.cfg.getIntInfoData(cf.cfgEncoder))
         syncComm.setParm(sp.SYNC_CYCLE, control.cycle)
         syncComm.setParm(sp.SYNC_OUTPUT, control.output)
-        syncComm.setParm(sp.SYNC_PRESCALER, control.preScaler)
+        syncComm.setParm(sp.SYNC_PRESCALER, control.outPreScaler)
         syncComm.command(sc.SYNC_SETUP)
 
 class Turn(LatheOp, UpdatePass):
@@ -2757,7 +2760,8 @@ class Arc(LatheOp, UpdatePass):
 
     def calcPass(self, final=False):
         if self.arc:
-            feed = self.cutAmount if final else self.passCount * self.actualFeed
+            feed = self.cutAmount if final else \
+                self.passCount * self.actualFeed
             self.feed = feed
             self.curRadius = self.radiusStart - feed
             self.calcArcEndPass(final)
@@ -4330,25 +4334,27 @@ class ScrewThread(LatheOp, UpdatePass):
         self.alternate = th.alternate.GetValue()
         self.firstFeedBtn = th.firstFeedBtn.GetValue()
 
-        val =  getFloatVal(th.thread)
+        thVal =  getFloatVal(th.thread)
         rpm = getIntVal(th.rpm)
         if self.tpiBtn:
-            self.tpi = val
-            self.pitch = 1.0 / val
+            self.tpi = thVal
+            self.pitch = 1.0 / thVal
             metric = False
         else:
-            self.pitch = val / 25.4
+            self.pitch = thVal / 25.4
             self.tpi = 1.0 / self.pitch
             metric = True
 
         threadSync = self.mf.threadSync
         if threadSync == en.SEL_TH_ISYN_RENC or threadSync == en.SEL_TH_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
+            (self.cycle, self.output, self.inPreScaler, self.outPreScaler) = \
+                self.mf.zSyncInt.calcSync(thVal, dbg=True,
+                                          metric=metric, rpm=rpm)
         elif (threadSync == en.SEL_TH_ESYN_RENC or \
               threadSync == en.SEL_TH_ESYN_RSYN):
-            (self.cycle, self.output, self.preScaler) = \
-                self.mf.zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
+            (self.cycle, self.output, self.inPreScaler, self.outPreScaler) = \
+                self.mf.zSyncExt.calcSync(thVal, dbg=True,
+                                          metric=metric, rpm=rpm)
 
         self.xStart = getFloatVal(th.xStart) / 2.0
         self.xRetract = abs(getFloatVal(th.xRetract))
@@ -4368,7 +4374,8 @@ class ScrewThread(LatheOp, UpdatePass):
             if threadSync == en.SEL_TH_ESYN_RSYN:
                 xSync = self.mf.xSyncExt
                 xSync.setExitRevs(self.runout)
-                (self.xCycle, self.xOutput, self.xPreScaler) = \
+                (self.xCycle, self.xOutput, self.xInPreScaler,
+                 self.xOutPreScaler) = \
                     xSync.calcSync(self.depth, rpm=rpm, dist=True)
 
         self.endZ = self.zEnd
@@ -4390,7 +4397,8 @@ class ScrewThread(LatheOp, UpdatePass):
            ((threadSync == en.SEL_TH_ESYN_RENC) and SYNC_SPI):
             queParm(pm.L_SYNC_CYCLE, self.cycle)
             queParm(pm.L_SYNC_OUTPUT, self.output)
-            queParm(pm.L_SYNC_PRESCALER, self.preScaler)
+            queParm(pm.L_SYNC_IN_PRESCALER, self.inPreScaler)
+            queParm(pm.L_SYNC_IN_PRESCALER, self.outPreScaler)
             if SYNC_SPI:
                 m.syncParms()
                 m.syncCommand(sc.SYNC_SETUP)
@@ -4400,14 +4408,15 @@ class ScrewThread(LatheOp, UpdatePass):
                              self.mf.cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+            syncComm.setParm(sp.SYNC_PRESCALER, self.outPreScaler)
             syncComm.command(sc.SYNC_SETUP)
 
         if ((self.runout != 0) and \
             (threadSync == en.SEL_TH_ESYN_RSYN)):
             queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
             queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
-            queParm(pm.L_X_SYNC_PRESCALER, self.xPreScaler)
+            queParm(pm.L_X_SYNC_IN_PRESCALER, self.xInPreScaler)
+            queParm(pm.L_X_SYNC_OUT_PRESCALER, self.xOutPreScaler)
 
         queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
         queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
