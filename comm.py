@@ -1,26 +1,37 @@
-from __future__ import print_function
-
 from ctypes import c_int32
 from sys import stdout
-from threading import Event, Lock, Thread
+from threading import Lock
 
 import serial
 
-SETUP = False
-
-if SETUP:
-    from setup import cmdTable, parmTable, cfgFpga, LOADMULTI, \
-        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
-else:
-    from parmDef import parmTable
-    from configDef import cfgFpga
-    from cmdDef import cmdTable,  LOADMULTI, \
-        LOADVAL, READVAL, READDBG, LOADXREG, READXREG, QUEMOVE, MOVEQUESTATUS
-
-cmdOverhead = 8
+from remParmDef import parmTable
+# from configDef import cfgFpga
+from remCmdDef import cmdTable, LOADMULTI, \
+    LOADVAL, READVAL, LOADXREG, READXREG, QUEMOVE, MOVEMULTI, \
+    MOVEQUESTATUS, SET_MEGA_VAL, READ_MEGA_VAL
+from megaParmDef import parmTable as megaParmTable
+    
+CMD_OVERHEAD = 8
+MOVE_OVERHEAD = 8
+MAX_CMD_LEN = 80
 
 class CommTimeout(Exception):
     pass
+
+def enableXilinx():
+    pass
+    # from setup import xRegTable
+
+def getResult(rsp, index):
+    result = rsp.split()
+    print("getResult %s index %d %s" % (rsp, index, result))
+    if index < len(result):
+        retVal = int(result[index], 16)
+        retVal = c_int32(retVal).value
+        # if retVal & 0x80000000:
+        #     retVal -= 0x100000000
+        return retVal
+    return 0
 
 class Comm():
     def __init__(self):
@@ -34,11 +45,14 @@ class Comm():
         self.lastCmd = ''
 
         self.parmList = []
-        self.cmdLen = cmdOverhead
+        self.cmdLen = CMD_OVERHEAD
 
         self.loadMulti = LOADMULTI
         self.loadVal = LOADVAL
         self.readVal = READVAL
+
+        self.moveList = []
+        self.moveLen = MOVE_OVERHEAD
 
         self.cmdTable = cmdTable
         self.parmTable = parmTable
@@ -51,9 +65,6 @@ class Comm():
     def setupTables(self, cmdTbl, parmTbl):
         self.cmdTable = cmdTbl
         self.parmTable = parmTbl
-
-    def enableXilinx(self):
-        from setup import xRegTable
 
     def openSerial(self, port, rate):
         if port is None or rate is None:
@@ -75,60 +86,80 @@ class Comm():
             self.ser.close()
             self.ser = None
 
-    def command(self, cmdVal):
+    def send(self, cmd):
+        if cmd[1:3] != "2d":
+            print("cmd", cmd.strip('\x01\r'))
+        if self.ser is None:
+            return
+        self.commLock.acquire(True)
+        self.ser.write(cmd.encode())
+        rsp = self.ser.read(3).decode('utf8')
+        if len(rsp) == 0:
+            self.commLock.release()
+            if not self.timeout:
+                self.timeout = True
+                print("timeout")
+                stdout.flush()
+            raise CommTimeout()
+
+        length = int(rsp[1:3], 16)
+        rsp += self.ser.read(length).decode('utf8')
+        if rsp[3:5] != "2d":
+            print("rsp", rsp)
+        if rsp[-1] == '*':
+            self.timeout = False
+            # col = 0
+            # for ch in rsp:
+            #     val = ord(ch)
+            #     if val > ord(' '):
+            #         print(" %s " % (ch, ), end="")
+            #     else:
+            #         print("%02x " % (val, ), end="")
+            #     col += 1
+            #     if col >= 32:
+            #         col = 0
+            #         print()
+            # if col != 0:
+            #     print()
+        self.commLock.release()
+        return rsp
+
+    def command(self, cmdVal, silent=False):
         if len(self.parmList) > 0:
             self.sendMulti()
         (cmd, action) = self.cmdTable[cmdVal]
-        if self.SWIG and (action is not None):
-            if self.importLathe:
-                import lathe
-                self.importLathe = False
-            actionCmd = "lathe." + action + "()"
-            eval(actionCmd)
+        # if self.SWIG and (action is not None):
+        #     if self.importLathe:
+        #         import lathe
+        #         self.importLathe = False
+        #     actionCmd = "lathe." + action + "()"
+        #     eval(actionCmd)
         cmdStr = '\x01%x \r' % (cmdVal)
-        if self.xDbgPrint:
+        if (not silent) and self.xDbgPrint:
             if cmd != self.lastCmd:
                 self.lastCmd = cmd
-                print("%-17s %s" % (cmd, cmdStr.strip('\x01\r')))
+                print("%-20s %s" % (cmd, cmdStr.strip('\x01\r')))
                 stdout.flush()
-        if self.ser is None:
-            return(None);
-        self.commLock.acquire(True)
-        self.ser.write(cmdStr.encode())
-        rsp = ""
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("timeout %s" % (cmd.strip('\x01\r')))
-                    stdout.flush()
-                raise CommTimeout()
-                break
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp;
-        self.commLock.release()
-        return(rsp.strip("\n\r"))
+        rsp = self.send(cmdStr)
+        # print(rsp)
+        return rsp.strip("\n\r")
 
-    def queParm(self, parmIndex, val):
+    def encodeParm(self, parmIndex, val):
         cmdInfo = self.parmTable[parmIndex]
         parm = cmdInfo[0]
         parmType = cmdInfo[1]
-        valString = "0"
-        if self.SWIG and (len(cmdInfo) == 3):
-            if self.importLathe:
-                import lathe
-                self.importLathe = False
-            parmVar = cmdInfo[2]
-            if parmType == 'float':
-                valString = "%5.6f" % (float(val))
-            else:
-                valString = "%d" % (int(val))
-            cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
-            exec(cmd)
+        # valString = "0"
+        # if self.SWIG and (len(cmdInfo) == 3):
+        #     if self.importLathe:
+        #         import lathe
+        #         self.importLathe = False
+        #     parmVar = cmdInfo[2]
+        #     if parmType == 'float':
+        #         valString = "%5.6f" % (float(val))
+        #     else:
+        #         valString = "%d" % (int(val))
+        #     cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
+        #     exec(cmd)
         if parmType == 'float':
             try:
                 valString = "%5.6f" % (float(val))
@@ -137,20 +168,39 @@ class Comm():
                 valString = "0.0"
                 print("ValueError float queParm %s %s" % (parm, val))
                 stdout.flush()
+            except TypeError:
+                valString = "0.0"
+                print("TypeError float queParm %s %s" % (parm, val))
+                stdout.flush()
         else:
             try:
                 val = int(val)
-                if val < 10 :
-                    valString = "%d" % (val)
-                else:
-                    valString = "x%x" % (val)
+                # if val < 10:
+                #     valString = "%d" % (val)
+                # else:
+                valString = "%x" % (val)
             except ValueError:
                 valString = "0"
                 print("ValueError int queParm %s %s" % (parm, val))
                 stdout.flush()
+        return parm, valString
+
+    def setParm(self, parmIndex, val):
+        parm, valString = self.encodeParm(parmIndex, val)
+
+        cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
+        if self.xDbgPrint:
+            print("%-20s %s" % (parm, cmd.strip('\x01\r')))
+            stdout.flush()
+
+        self.send(cmd)
+
+    def queParm(self, parmIndex, val):
+        parm, valString = self.encodeParm(parmIndex, val)
+
         cmd = ' %x %s' % (parmIndex, valString)
         if self.xDbgPrint:
-            print("%-17s %s" % (parm, cmd.strip()))
+            print("%-20s %s" % (parm, cmd.strip()))
             stdout.flush()
         length = len(cmd)
         if self.cmdLen + length > 80:
@@ -162,191 +212,69 @@ class Comm():
         count = len(self.parmList)
         if count == 0:
             return
-        cmd = '\x01%x %x' %  (self.loadMulti, count)
+        cmd = '\x01%x %x' % (self.loadMulti, count)
         for parm in self.parmList:
             cmd += parm
-        cmd += ' \r';
+        cmd += ' \r'
         if self.xDbgPrint:
-            print("cmdlen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
+            print("cmdLen %d len(cmd) %d" % (self.cmdLen, len(cmd)))
         self.parmList = []
-        self.cmdLen = cmdOverhead
+        self.cmdLen = CMD_OVERHEAD
         if self.xDbgPrint:
-            print("%-17s %s" % ('LOADMULTI', cmd.strip('\x01\r')))
+            print("%-20s %s" % ('load multi', cmd.strip('\x01\r')))
             stdout.flush()
-        if self.ser is None:
-            return
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("setParm timeout %s" % (parm))
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp
-        self.commLock.release()
-
-    def setParm(self, parmIndex, val):
-        cmdInfo = self.parmTable[parmIndex]
-        parm = cmdInfo[0]
-        parmType = cmdInfo[1]
-        valString = "0"
-        if self.SWIG and (len(cmdInfo) == 3):
-            if self.importLathe:
-                import lathe
-                self.importLathe = False
-            parmVar = cmdInfo[2]
-            if parmType == 'float':
-                valString = "%5.6f" % (float(val))
-            else:
-                valString = "%d" % (int(val))
-            cmd = "lathe.cvar.%s = %s" % (parmVar, valString)
-            exec(cmd)
-        if parmType == 'float':
-            try:
-                valString = "%5.6f" % (float(val))
-                valString = valString.rstrip('0')
-            except ValueError:
-                valString = "0.0"
-                print("ValueError setParm %s %s" % (parm, val))
-                stdout.flush()
-        else:
-            try:
-                valString = "x%x" % (int(val))
-            except ValueError:
-                valString = "0"
-        cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
-        if self.xDbgPrint:
-            print("%-17s %s" % (parm, cmd.strip('\x01\r')))
-            stdout.flush()
-        if self.ser is None:
-            return
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("setParm timeout %s" % (parm))
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp
-        self.commLock.release()
+        self.send(cmd)
 
     def getParm(self, parmIndex, dbg=False):
         if self.ser is None:
             return(None)
         cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
         if dbg:
-            print("%-17s %s" % \
+            print("%-20s %s" % \
                   (self.parmTable[parmIndex], cmd.strip('\x01\r')), end="")
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("getParm timeout %s" % (self.parmTable[parmIndex]))
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.timeout = False
-                result = rsp.split()
-                if len(result) == 3:
-                    self.commLock.release()
-                    try:
-                        retVal = int(result[2], 16)
-                        retVal = c_int32(retVal).value
-                    except:
-                        print("getParm error on %s" % (result))
-                        stdout.flush()
-                        retVal = 0
-                    # if retVal & 0x80000000:
-                    #     retVal -= 0x100000000
-                    if dbg:
-                        print("%08x" % (retVal))
-                        stdout.flush()
-                    return(retVal)
-            rsp = rsp + tmp;
-        self.commLock.release()
+            stdout.flush()
+        rsp = self.send(cmd)
+        return getResult(rsp, 1)
+
+        # result = rsp.split()
+        # if len(result) >= 3:
+        #     try:
+        #         retVal = int(result[2], 16)
+        #         retVal = c_int32(retVal).value
+        #     except ValueError:
+        #         print("getParm error on %s" % (result))
+        #         stdout.flush()
+        #         retVal = 0
+        #         if dbg:
+        #             print("%08x" % (retVal))
+        #             stdout.flush()
+        #         return(retVal)
 
     def getString(self, command, parm=None):
         if self.ser is None:
             return(None)
         arg = "" if parm is None else " %x" % parm
         cmd = '\x01%x%s \r' % (command, arg)
-        self.cmdLen = len(cmd) - 1
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("getString timeout")
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.commLock.release()
-                self.timeout = False
-                if len(rsp) <= 3:
-                    return ""
-                return(rsp[self.cmdLen:])
-            rsp = rsp + tmp;
-        self.commLock.release()
+        cmdLen = len(cmd) - 1
+        rsp = self.send(cmd)
+        if len(rsp) <= 3:
+            return ""
+        return rsp[cmdLen]
 
-    def setXReg(self, reg, val):
-        if not (reg in xRegs):
-            print("invalid register " + reg)
-            stdout.flush()
-            return
-        val = int(val)
-        if self.xDbgPrint:
-            print("%-12s %2x %8x %12d" % \
-                  (reg, xRegs[reg], val & 0xffffffff, val))
-            stdout.flush()
-        if self.ser is None:
-            return
-        cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("timeout")
-                raise CommTimeout
-                break;
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp;
-        self.commLock.release()
+    # def setXReg(self, reg, val):
+    #     if not (reg in xRegs):
+    #         print("invalid register " + reg)
+    #         stdout.flush()
+    #         return
+    #     val = int(val)
+    #     if self.xDbgPrint:
+    #         print("%-12s %2x %8x %12d" % \
+    #               (reg, xRegs[reg], val & 0xffffffff, val))
+    #         stdout.flush()
+    #     if self.ser is None:
+    #         return
+    #     cmd = '\x01%x %x %08x \r' % (LOADXREG, xRegs[reg], val & 0xffffffff)
+    #     self.send(cmd)
 
     def setXRegN(self, reg, val):
         if self.ser is None:
@@ -357,23 +285,7 @@ class Comm():
         cmd = '\x01%x %x %08x \r' % (LOADXREG, reg, val & 0xffffffff)
         if self.xDbgPrint:
             pass
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("timeout")
-                raise CommTimeout
-                break;
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp;
-        self.commLock.release()
+        self.send(cmd)
 
     def getXReg(self, reg):
         if self.ser is None:
@@ -381,43 +293,61 @@ class Comm():
         cmd = '\x01%x %x \r' % (READXREG, reg)
         if self.xDbgPrint:
             pass
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("timeout")
-                raise CommTimeout
-                break;
-            if tmp == '*':
-                self.timeout = False
-                result = rsp.split()
-                if len(result) == 3:
-                    val = int(result[2], 16)
-                    val = c_int32(val).value
-                    # if val & 0x80000000:
-                    #     val = -((val ^ 0xffffffff) + 1)
-                    self.commLock.release()
-                    return(val)
-            rsp = rsp + tmp;
+        rsp = self.send(cmd)
+        return getResult(rsp, 2)
 
+        # result = rsp.split()
+        # if len(result) == 3:
+        #     val = int(result[2], 16)
+        #     val = c_int32(val).value
+        #     # if val & 0x80000000:
+        #     #     val = -((val ^ 0xffffffff) + 1)
+        #     return val
+        # return 0
 
-    def dspXReg(self, reg, val, label=''):
+    # def dspXReg(self, reg, val, label=''):
+    #     if self.xDbgPrint:
+    #         print ("%-12s %2x %8x %12d %s" %
+    #                (xRegTable[reg], reg, val & 0xffffffff, val, label))
+    #     return(val)
+
+    def setMegaParm(self, parm, val):
+        stdout.flush()
+        val = int(val)
         if self.xDbgPrint:
-            print ("%-12s %2x %8x %12d %s" %
-                   (xRegTable[reg], reg, val & 0xffffffff, val, label))
-        return(val)
+            print("%-20s %4x %6d" % \
+                  (megaParmTable[parm][0], val & 0xffffffff, val))
+            stdout.flush()
+        if self.ser is None:
+            return
+        cmd = '\x01%x %x %08x \r' % (SET_MEGA_VAL, parm, val & 0xffffffff)
+        self.send(cmd)
+    
+    def readMegaParm(self, parm):
+        if self.ser is None:
+            return(0)
+        cmd = '\x01%x %x \r' % (READ_MEGA_VAL, parm)
+        if self.xDbgPrint:
+            pass
+        rsp = self.send(cmd)
+        return getResult(rsp, 2)
 
-    def sendMove(self, opString, op, val):
+        # result = rsp.split()
+        # if len(result) >= 3:
+        #     val = int(result[2], 16)
+        #     val = c_int32(val).value
+        #     # if val & 0x80000000:
+        #     #     val = -((val ^ 0xffffffff) + 1)
+        #     return val
+        # return 0
+
+    def moveCommand(self, opString, op, val):
         if isinstance(val, float):
             valStr = "%0.4f" % (val)
             prtStr = "%7.4f" % (val)
+            valStr = valStr.rstrip('0')
         elif isinstance(val, int):
-            valStr = "x%x" % (val)
+            valStr = "%x" % (val)
             prtStr = "%7x" % (val)
         elif isinstance(val, str):
             valStr = val
@@ -426,59 +356,44 @@ class Comm():
             print("sendMove val invalid type")
             stdout.flush()
             return
-        if '.' in valStr:
-            valStr = valStr.rstrip('0')
-        cmd = '\x01%x x%x %s \r' % (QUEMOVE, op, valStr)
+
+        cmd = '%x %s ' % (op, valStr)
         if self.xDbgPrint:
-            print("cmd %-18s %4x %s" % (opString, op, prtStr))
+            print("cmd %-18s %6x %s" % (opString, op, prtStr))
             stdout.flush()
-        if self.ser is None:
+        return cmd
+
+    def queMove(self, opString, op, val):
+        cmd = self.moveCommand(opString, op, val)
+        length = len(cmd)
+        if (self.moveLen + length) > MAX_CMD_LEN:
+            self.sendMultiMove()
+        self.moveList.append(cmd)
+        self.moveLen += len(cmd)
+
+    def sendMove(self, opString, op, val):
+        cmd = self.moveCommand(opString, op, val)
+        cmd += "\x01%x %s \r" % (QUEMOVE, cmd)
+        self.send(cmd)
+
+    def sendMultiMove(self):
+        count = len(self.moveList)
+        if count == 0:
             return
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("sendMove timeout")
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.timeout = False
-                break
-            rsp = rsp + tmp
-        self.commLock.release()
+        cmd = '\x01%x %x ' % (MOVEMULTI, count)
+        for m in self.moveList:
+            cmd += m
+        cmd += '\r'
+        if self.xDbgPrint:
+            print("%-23s %s" % ('move multi', cmd.strip('\x01\r')))
+            stdout.flush()
+        self.send(cmd)
+        self.moveList = []
+        self.moveLen = MOVE_OVERHEAD
 
     def getQueueStatus(self):
         if self.ser is None:
             return(None)
         cmd = '\x01%x \r' % (MOVEQUESTATUS)
-        self.commLock.acquire(True)
-        self.ser.write(cmd.encode())
-        rsp = "";
-        while True:
-            tmp = self.ser.read(1).decode('utf8')
-            if len(tmp) == 0:
-                self.commLock.release()
-                if not self.timeout:
-                    self.timeout = True
-                    print("getQueStatus timeout")
-                    stdout.flush()
-                raise CommTimeout()
-                break;
-            if tmp == '*':
-                self.timeout = False
-                result = rsp.split()
-                if len(result) == 2:
-                    self.commLock.release()
-                    retVal = int(result[1], 16)
-                    retVal = c_int32(retVal).value
-                    # if retVal & 0x80000000:
-                    #     retVal -= 0x100000000
-                    return(retVal)
-            rsp = rsp + tmp;
-        self.commLock.release()
+        rsp = self.send(cmd)
+        return getResult(rsp, 1)

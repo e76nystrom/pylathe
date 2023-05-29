@@ -55,7 +55,7 @@ ctlChDirect  = 0x40             # ch input direct
 ctlSlave     = 0x80             # slave controlled by other axis
 ctlDroEnd    = 0x100            # use dro to end move
 ctlJogEna    = 0x200            # enable jog
-ctlHome      = 0x400            # homeing axis
+ctlHome      = 0x400            # homing axis
 ctlIgnoreLim = 0x800            # ignore limits
 
 # axis status register
@@ -73,7 +73,7 @@ cfgZDroInv   = 0x04             # z dro direction inverted
 cfgXDroInv   = 0x08             # x dro direction inverted
 cfgZJogInv   = 0x10             # z jog direction inverted
 cfgXJogInv   = 0x20             # x jog direction inverted
-cfgSpDirInv  = 0x40             # spindle directiion inverted
+cfgSpDirInv  = 0x40             # spindle direction inverted
 cfgZHomeInv  = 0x80             # z home inverted
 cfgZMinusInv = 0x100            # z minus inverted
 cfgZPlusInv  = 0x200            # z plus inverted

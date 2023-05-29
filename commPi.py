@@ -7,8 +7,8 @@ from math import floor, log
 import os
 import re
 
-from parmDef import parmTable
-from cmdDef import cmdTable
+from remParmDef import parmTable
+from remCmdDef import cmdTable
 import enumDef as en
 import lRegDef as rg
 import fpgaLathe as bt
@@ -22,9 +22,10 @@ lastRdCmd = -1
 lastResult = 0
 
 def ld(cmd, data, size, dbg=True):
+    s0 = rg.fpgaSizeTable[cmd]
     if dbg:
-        print("ld 0x%02x %10d %08x %s" % \
-              (cmd, data, data&0xffffffff, rg.xRegTable[cmd]))
+        print("ld 0x%02x %d %10d %08x %s" % \
+              (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]))
     if spi is None:
         return
     data &= 0xffffffff
@@ -33,11 +34,14 @@ def ld(cmd, data, size, dbg=True):
     spi.xfer2(msg)
 
 def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
+<<<<<<< HEAD
     global lastRdCmd, lastResult
     if dbg:
         if cmd != lastRdCmd:
             print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
             lastRdCmd = cmd
+=======
+>>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
     if spi is None:
         return(0)
     msg = [cmd]
@@ -46,10 +50,17 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     result = int.from_bytes(val, byteorder='big')
     if result & ext:
         result |= -1 & ~mask
+<<<<<<< HEAD
     if dbg:
         if (cmd == rg.F_Rd_Status) and (result != lastResult):
             print("status %08x" % result)
             lastResult = result
+=======
+    s0 = rg.fpgaSizeTable[cmd]
+    if dbg:
+        print("ld 0x%02x %d %10d %08x %s" % \
+              (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
+>>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
     return(result)
 
 def prtAxisCtl(base, axisCtl):
@@ -477,6 +488,7 @@ class PiLathe(Thread):
         else:
             self.curRPM = 0
 
+<<<<<<< HEAD
         status = rd(rg.F_Rd_Status, True)
 
         if status != self.lastStatus:
@@ -496,6 +508,9 @@ class PiLathe(Thread):
             self.lastStatus = status
             print(sString)
             
+=======
+        status = rd(rg.F_Rd_Status)
+>>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
         axis = self.zAxis
         self.zDro =  rd(rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro, \
                         False, 0x20000, 0x3ffff)

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{07046536-49c2-404b-a8fa-2dcfeb3a88bd}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>interface.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <InterpreterArguments>
+    </InterpreterArguments>
+    <CommandLineArguments>--xhomed cfg/config.txt -p cfg/posInfo.txt</CommandLineArguments>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <PublishUrl>
+    </PublishUrl>
+    <InterpreterId>Global|PythonCore|3.10</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="circle.py" />
+    <Compile Include="comm.py" />
+    <Compile Include="commPi.py" />
+    <Compile Include="configDef.py" />
+    <Compile Include="configInfo.py" />
+    <Compile Include="ctlBitDef.py" />
+    <Compile Include="enc.py" />
+    <Compile Include="enumDef.py" />
+    <Compile Include="extDro.py" />
+    <Compile Include="interface.py" />
+    <Compile Include="lathe.py" />
+    <Compile Include="megaEnumDef.py" />
+    <Compile Include="newTest.py" />
+    <Compile Include="pincon.py" />
+    <Compile Include="pylathe.py" />
+    <Compile Include="remCmdDef.py" />
+    <Compile Include="remParmDef.py" />
+    <Compile Include="setup.py" />
+    <Compile Include="stringDef.py" />
+    <Compile Include="sync.py" />
+    <Compile Include="syncCmdDef.py" />
+    <Compile Include="syncParmDef.py" />
+    <Compile Include="xBitDef.py" />
+    <Compile Include="xRegDef.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.10" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>

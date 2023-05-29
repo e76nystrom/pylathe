@@ -1,8 +1,9 @@
-#!/cygdrive/c/Python37/Python.exe
+#!/cygdrive/c/Python310/Python.exe
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
-from __future__ import print_function
+
+#--xhomed ../TPyLathe/config.txt -p ../TPyLathe/posInfo.txt
 
 import math
 import os
@@ -11,13 +12,18 @@ import subprocess
 import sys
 import traceback
 from ctypes import c_uint32
-from math import atan2, ceil, cos, degrees, floor, pi, radians, sqrt, tan
+from math import atan2, ceil, cos, degrees, hypot, pi, \
+    radians, sin, sqrt, tan
 from platform import system
 #from Queue import Empty, Queue
 from queue import Empty, Queue
 from sys import stderr, stdout
-from threading import Event, Lock, Thread
-from time import localtime, sleep, strftime, time
+from threading import Event, Thread
+from time import sleep, time
+from datetime import datetime
+from pytz import timezone
+from collections import namedtuple
+from extDro import DroTimeout
 # from contextlib import redirect_stderr
 #     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
 #          redirect_stderr(stderr):
@@ -27,16 +33,21 @@ import wx
 import wx.lib.inspection
 from dxfwrite import DXFEngine as dxf
 
-import cmdDef as cm
+import remCmdDef as cm
 import configDef as cf
 import ctlBitDef as ct
 import enumDef as en
-import parmDef as pm
+import megaEnumDef as em
+import remParmDef as pm
+import megaParmDef as mp
 import stringDef as st
 import syncCmdDef as sc
 import syncParmDef as sp
 from configInfo import ConfigInfo, InfoValue
 from sync import Sync
+
+import cairo
+import wx.lib.wxcairo as wxcairo
 
 DBG_DIR = os.path.join(os.getcwd(), "dbg")
 DXF_DIR = os.path.join(os.getcwd(), "dxf")
@@ -49,12 +60,14 @@ stderr.write("testing\n")
 R_PI = False
 WINDOWS = system() == 'Windows'
 if WINDOWS:
-    from pywinusb.hid import find_all_hid_devices
-    from comm import Comm, CommTimeout
+    from pywinusb.hid import find_all_hid_devices, HIDError
+    from comm import Comm, CommTimeout, enableXilinx
     if os.path.isfile("rpi.txt"):
         from commPi import Comm, CommTimeout
         R_PI = True
         print("rpi test mode")
+    pncDir = ("Python", "Pnc")
+    dirStrip = -2
 else:
     print(os.uname())
     if not os.uname().machine.startswith('arm'):
@@ -62,25 +75,43 @@ else:
     else:
         from commPi import Comm, CommTimeout
         R_PI = True
+    pncDir = ("Pnc",)
+    dirStrip = -1
+
+fileDir = os.path.dirname(os.path.abspath(__file__))
+filePath = ""
+for f in tuple(fileDir.split(os.sep)[:dirStrip]) + pncDir:
+    if len(filePath) != 0:
+        filePath += os.sep
+    filePath += f
+sys.path.append(filePath)
+print(sys.path)
+from geometry import Line
+from geometry import ARC, CW, LINE
+from geometry import Arc as GeoArc
+import dbgprt as dp
+dp.DBG = True
 
 SWIG = False
 HOME_TEST = False
 SETUP = False
 
+MEGA = False
 FPGA = False
 DRO = False
 EXT_DRO = False
 X_DRO_POS = False
+Z_DRO_POS = False
 REM_DBG = False
 STEP_DRV = False
 MOTOR_TEST = False
 SPINDLE_ENCODER = False
 SPINDLE_SYNC_BOARD = False
-TURN_SYNC = en.SEL_TU_SPEED
-THREAD_SYNC = en.SEL_TH_NO_ENC
+SPINDLE_INTERNAL_SYNC = False
 SPINDLE_SWITCH = False
 SPINDLE_VAR_SPEED = False
 HOME_IN_PLACE = False
+SYNC_SPI = False
 
 cLoc = "../Lathe/include/"
 fData = False
@@ -97,7 +128,7 @@ if SETUP:
     for var in setup.configImports:
         setupCmd += var + ","
     exec(setupCmd[:-1])
-    
+
     setup.createCommands(cmdList, cLoc, fData)
     setup.createStrings(strList)
     setup.createParameters(parmList, cLoc, fData)
@@ -106,8 +137,8 @@ if SETUP:
     if FPGA:
         xLoc = '../../Xilinx/LatheCtl/'
         from interface import xilinxList, xilinxBitList
-        setup.createXilinxReg(xilinxList, cLoc, xLoc, fData)
-        setup.createXilinxBits(xilinxBitList, cLoc, xLoc, fData)
+        setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
+        setup.createFpgaBits(xilinxBitList, cLoc, xLoc, fData)
 
     importList = setup.importList
     setupCmd = "from setup import "
@@ -115,54 +146,26 @@ if SETUP:
         setupCmd += var + ","
     exec(setupCmd[:-1])
 
-if SWIG:
-    import lathe
-    from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit
+# if SWIG:
+#     import lathe
+#     from lathe import taperCalc, T_ACCEL, zTaperInit, xTaperInit
 
 print(sys.version)
 print(wx.version())
 stdout.flush()
 
-cfg = None
-comm = None
-fcy = None
-TEXT = None
-REF = None
-dro = None
-eDro = None
-EXT_DRO = None
-EVT_UPDATE_ID = None
-xDROOffset = None
-zDROOffset = None
-xDROPosition = None
-zDROPosition = None
-f = None
-xSyncInt = None
-zSyncInt = None
-xSyncExt = None
-zSyncExt = None
-syncComm = None
-mainFrame = None
-updateThread = None
-moveCommands = None
-buttonRepeat = None
-jogPanel = None
-jogShuttle = None
+REF = 'REF'
+TEXT = 'TEXT'
 
-spindleDataSent = False
-zDataSent = False
-xDataSent = False
+EVT_STATUS_UPDATE_ID = wx.Window.NewControlId()
 
-zPosition = 0.0
-zHomeOffset = 0.0
-xPosition = 0.0
-xHomeOffset = 0.0
-
-xHomed = False
-done = False
+class StatusEvent(wx.PyEvent):
+    def __init__(self, data):
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_STATUS_UPDATE_ID)
+        self.data = data
 
 MAX_PRIME = 127
-factor = None
 
 AL_LEFT   = 0x001
 AL_RIGHT  = 0x002
@@ -174,30 +177,54 @@ LEFT      = 0x040
 RIGHT     = 0x080
 CENTER    = 0x100
 
+HOME_Z = -2
 HOME_X = -1
 AXIS_Z = 0
 AXIS_X = 1
 
-def commTimeout():
+LathePt = namedtuple('LathePt', ['x', 'z'])
+
+tz = timezone("America/New_York")
+
+def intRound(val):
+    return int(round(val))
+
+def timeStr():
+    now = datetime.now(tz=tz)
+    return now.strftime("%a %b %d %Y %H:%M:%S\n")
+
+def commTimeout(jogPanel):
+    # wx.PostEvent(jogPanel, StatusEvent(st.STR_TIMEOUT_ERROR))
     jogPanel.setStatus(st.STR_TIMEOUT_ERROR)
 
 def getFloatVal(tc):
     try:
-        return(float(tc.GetValue()))
+        return float(tc.GetValue())
     except ValueError:
-        return(0.0)
+        return 0.0
 
 def getIntVal(tc):
     try:
-        return(int(tc.GetValue()))
+        return int(tc.GetValue())
     except ValueError:
-        return(0)
+        return 0
+
+def buttonDisable(btn):
+    btn.Disable()
+    btn.SetBackgroundColour(None)
+
+def buttonEnable(btn):
+    # print("buttonEnable %s" % (btn.GetLabel()))
+    # stdout.flush()
+    btn.Enable()
+    btn.SetBackgroundColour('Green')
 
 class Factor:
     def __init__(self, maxPrime):
         self.primes = self.calcPrimes(maxPrime)
-        
-    def remFactors(self, nFactors, dFactors):
+
+    @staticmethod
+    def remFactors(nFactors, dFactors):
         # print("remove common factors")
         dResult = []
         for d in dFactors:
@@ -211,15 +238,17 @@ class Factor:
                     break
             if not found:
                 dResult.append(d)
-        return(nFactors, dResult)
+        return nFactors, dResult
 
-    def combineFactors(self, factors):
+    @staticmethod
+    def combineFactors(factors):
         result = 1
         for val in factors:
             result *= val
         return result
 
-    def calcPrimes(self, maxPrime):
+    @staticmethod
+    def calcPrimes(maxPrime):
         maxPrime += 1
         sieve = [True] * maxPrime
         sieve[0] = False
@@ -233,9 +262,9 @@ class Factor:
 
         primes = []
         for i in range(maxPrime):
-            if sieve[i] == True:
+            if sieve[i]:
                 primes.append(i)
-        return(primes)
+        return primes
 
     def factor(self, n):
         factors = []
@@ -243,18 +272,21 @@ class Factor:
             while n % i == 0:
                 factors.append(i)
                 n /= i
-        return(factors)
+        return factors
 
-class Offset():
+factor = Factor(MAX_PRIME)
+
+class Offset:
     def __init__(self, scale):
         self.scale = scale
         self.val = None
 
     def intVal(self):
-        return(self.val * self.scale)
+        return self.val * self.scale
 
-class ComboBox(wx.ComboBox): 
-    def __init__(self, parent, label, indexList,  choiceList, *args, **kwargs):
+class ComboBox(wx.ComboBox):
+    def __init__(self, parent, label, indexList,  choiceList, \
+                 *args, **kwargs):
         self.label = label
         self.indexList = indexList
         self.choiceList = choiceList
@@ -264,10 +296,10 @@ class ComboBox(wx.ComboBox):
     def GetValue(self):
         val = self.GetCurrentSelection()
         rtnVal = self.indexList[val]
-        if self.text is not None:
-            print("%s GetValue %d %s index %d" % \
-                  (self.label, rtnVal, self.text[val], val))
-            print(self.indexList)
+        # if self.text is not None:
+        #     print("label \"%s\" GetValue %d text \"%s\" index %d" % \
+        #           (self.label, rtnVal, self.text[val], val))
+        #     print("indexList", self.indexList)
         return str(rtnVal)
 
     def SetValue(self, val):
@@ -276,285 +308,474 @@ class ComboBox(wx.ComboBox):
         for (n, index) in enumerate(self.indexList):
             if val == index:
                 self.SetSelection(n)
-                if self.text is not None:
-                    print("%s SetValue %d %s index %d" % \
-                          (self.label, val, self.text[index], n))
-                    print(self.indexList)
-    
-class FormRoutines():
+                # if self.text is not None:
+                #     print("label \"%s\" SetValue %d text \"%s\" index %d" % \
+                #           (self.label, val, self.text[index], n))
+                #     print("indexList", self.indexList)
+
+def fieldList(panel, sizer, fields, col=1):
+    total = len(fields)
+    offset = (total + 1) // 2
+    for i in range(total):
+        if col == 1:
+            field = fields[i]
+        else:
+            j = i // 2
+            if (i & 1) != 0:
+                j += offset
+            field = fields[j]
+        (label, index) = field[:2]
+        if label.startswith('b'):
+            addCheckBox(panel, sizer, label[1:], index)
+        elif label.startswith('c'):
+            action = field[3]
+            addComboBox(panel, sizer, label[1:], index, action)
+        elif label.startswith('w'):
+            addField(panel, sizer, label[1:], index, (80, -1))
+        else:
+            addField(panel, sizer, label, index)
+
+def OnEnter(panel):
+    if panel.formatList is None:
+        return
+    jp = panel.mf.jogPanel
+    if formatData(panel.mf.cfg, panel.formatList):
+        jp.setStatus(st.STR_CLR)
+        jp.focus()
+    else:
+        jp.setStatus(st.STR_FIELD_ERROR)
+
+def addFieldText(panel, sizer, label, key, fmt=None, keyText=None):
+    if fmt is not None:
+        panel.formatList.append((key, fmt))
+
+    cfg = panel.mf.cfg
+    txt = None
+    if len(label) != 0:
+        txt = wx.StaticText(panel, -1, label)
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                  wx.ALIGN_CENTER_VERTICAL, border=2)
+        if keyText is not None:
+            cfg.initInfo(keyText, txt)
+
+    tc = wx.TextCtrl(panel, -1, "", size=(panel.width, -1), \
+                     style=wx.TE_PROCESS_ENTER)
+    tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
+    sizer.Add(tc, flag=wx.ALL, border=2)
+    cfg.initInfo(key, tc)
+    return tc, txt
+
+def addField(panel, sizer, label, index, fmt=None, size=None):
+    if size is None:
+        size = (panel.width, -1)
+    if fmt is not None:
+        panel.formatList.append((index, fmt))
+    if label is not None:
+        txt = wx.StaticText(panel, -1, label)
+        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                  wx.ALIGN_CENTER_VERTICAL, border=2)
+
+    tc = wx.TextCtrl(panel, -1, "", size=size, \
+                     style=wx.TE_PROCESS_ENTER)
+    tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
+    sizer.Add(tc, flag=wx.ALL, border=2)
+
+    cfg = panel.mf.cfg
+    if cfg.info[index] is not None:
+        val = cfg.getInfo(index)
+        tc.SetValue(val)
+    cfg.initInfo(index, tc)
+    return tc
+
+def addCheckBox(panel, sizer, label, index, action=None, box=False):
+    txt = wx.StaticText(panel, -1, label)
+    if box:
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        sizerH.Add(txt, flag=wx.ALL|\
+                   wx.ALIGN_CENTER_VERTICAL, border=2)
+    else:
+        sizerH = sizer
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+                   wx.ALIGN_CENTER_VERTICAL, border=2)
+    cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
+    if action is not None:
+        panel.Bind(wx.EVT_CHECKBOX, action, cb)
+    sizerH.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+
+    cfg = panel.mf.cfg
+    if cfg.info[index] is not None:
+        val = cfg.getInfo(index)
+        cb.SetValue(val == 'True')
+    cfg.initInfo(index, cb)
+    if box:
+        sizer.Add(sizerH, flag=wx.ALIGN_RIGHT)
+    return cb
+
+def addComboBox(panel, sizer, label, index, action, border=2,
+                flag=wx.CENTER|wx.ALL):
+    txt = wx.StaticText(panel, -1, label)
+    sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
+              wx.ALIGN_CENTER_VERTICAL, border=2)
+
+    (indexList, choiceList, text) = action()
+    combo = ComboBox(panel, label, indexList, choiceList, \
+                     id=-1, value=choiceList[0], choices=choiceList, \
+                     style=wx.CB_READONLY)
+    combo.text = text
+    cfg = panel.mf.cfg
+    if cfg.info[index] is not None:
+        val = cfg.getInfo(index)
+        combo.SetValue(val)
+    sizer.Add(combo, flag=flag, border=border)
+    cfg.initInfo(index, combo)
+    return combo
+
+class PanelButton(wx.Button):
+    def __init__(self, panel, *args, **kwargs):
+        wx.Button.__init__(self, *args, **kwargs)
+        self.panel = panel
+
+def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
+              style=0, flag=wx.CENTER|wx.ALL):
+    btn = PanelButton(panel, panel, label=label, style=style, size=size)
+    btn.Bind(wx.EVT_BUTTON, action)
+    sizer.Add(btn, flag=flag, border=border)
+    return btn
+
+def addToggleButton(panel, sizer, label, action, size=(60, -1), border=2, \
+                    style=0, flag=wx.CENTER|wx.ALL):
+    btn = wx.ToggleButton(panel, label=label, style=style, size=size)
+    btn.Bind(wx.EVT_TOGGLEBUTTON, action)
+    sizer.Add(btn, flag=flag, border=border)
+    return btn
+
+def addControlButton(panel, sizer, label, downAction, upAction, \
+                     flag=wx.CENTER|wx.ALL):
+    btn = wx.Button(panel, label=label)
+    btn.Bind(wx.EVT_LEFT_DOWN, downAction)
+    btn.Bind(wx.EVT_LEFT_UP, upAction)
+    sizer.Add(btn, flag=flag, border=2)
+    return btn
+
+def addBitmapButton(panel, sizer, bitmap, downAction, upAction, flag=0):
+    bmp = wx.Bitmap(bitmap, wx.BITMAP_TYPE_ANY)
+    btn = wx.BitmapButton(panel, id=wx.ID_ANY, bitmap=bmp, \
+                          size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+    btn.Bind(wx.EVT_LEFT_DOWN, downAction)
+    btn.Bind(wx.EVT_LEFT_UP, upAction)
+    sizer.Add(btn, flag=flag, border=2)
+    return btn
+
+class DialogButton(wx.Button):
+    def __init__(self, dialog, *args, **kwargs):
+        wx.Button.__init__(self, *args, **kwargs)
+        self.dialog = dialog
+
+def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=2, \
+                   style=0, flag=wx.CENTER|wx.ALL):
+    btn = DialogButton(dialog, dialog, label=label, style=style, size=size)
+    btn.Bind(wx.EVT_BUTTON, action)
+    sizer.Add(btn, flag=flag, border=border)
+    return btn
+
+def addDialogButton(panel, sizer, idx, action=None, border=5):
+    btn = DialogButton(panel, panel, idx)
+    if action is None:
+        btn.SetDefault()
+    else:
+        btn.Bind(wx.EVT_BUTTON, action)
+    sizer.Add(btn, 0, wx.ALL|wx.CENTER, border=border)
+    return btn
+
+def addRadioButton(panel, sizer, label, key, style=0, action=None):
+    btn = wx.RadioButton(panel, label=label, style=style)
+    if action is not None:
+        btn.Bind(wx.EVT_RADIOBUTTON, action)
+    sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+    panel.mf.cfg.initInfo(key, btn)
+    return btn
+
+EMPTY_CELL = (0, 0)
+
+def placeHolder(sizerG, count=2):
+    for _ in range(count):
+        sizerG.Add(EMPTY_CELL)
+
+def addDialogField(panel, sizer, label=None, tcDefault="", textFont=None, \
+                   tcFont=None, size=wx.DefaultSize, action=None, \
+                   border=None, index=None, edit=True, text=False):
+    if border is None:
+        b0 = 10
+        b1 = 10
+    elif isinstance(border, tuple) or isinstance(border, list):
+        b0 = border[0]
+        b1 = border[1] if len(border) >= 2 else b0
+    else:
+        b0 = border
+        b1 = border
+
+    txt = None
+    if label is not None:
+        txt = wx.StaticText(panel, -1, label)
+        if textFont is not None:
+            txt.SetFont(textFont)
+        sizer.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|\
+                  wx.ALIGN_CENTER_VERTICAL, border=b0)
+
+    tc = wx.TextCtrl(panel, -1, tcDefault, size=size, \
+                     style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
+    if tcFont is not None:
+        tc.SetFont(tcFont)
+    if action is not None:
+        tc.Bind(wx.EVT_CHAR, action)
+    if not edit:
+        tc.SetEditable(False)
+    if index is not None:
+        panel.mf.cfg.initInfo(index, tc)
+    sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
+    return tc if not text else (tc, txt)
+
+def formatData(cfg, formatList):
+    if formatList is None:
+        return True
+    success = True
+    for fmt in formatList:
+        if len(fmt) == 2:
+            (index, fieldType) = fmt
+        else:
+            (name, index, fieldType) = fmt[:3]
+        if fieldType is None:
+            continue
+        ctl = cfg.info[index]
+        strVal = ctl.GetValue()
+        if fieldType.startswith('f'):
+            strip = False
+            strVal = strVal.lower()
+            metric = strVal.endswith('mm')
+            if metric:
+                strVal = strVal[:-2]
+                strip = True
+            if fieldType.endswith('s'):
+                fieldType = fieldType[:-1]
+                strip = True
+
+            digits = 4
+            if len(fieldType) > 1:
+                try:
+                    digits = int(fieldType[1])
+                except ValueError:
+                    pass
+            if metric:
+                digits -= 2
+            fmt = "%%0.%df" % digits
+
+            try:
+                if len(strVal) != 0:
+                    val = float(strVal)
+                    val = fmt % val
+                    if strip:
+                        if re.search(r"\.0*$", val):
+                            val = re.sub(r"\.0*$", "", val)
+                        else:
+                            val = val.rstrip('0')
+                    if metric:
+                        val += 'mm'
+                        strVal += 'mm'
+                    ctl.SetValue(val)
+            except ValueError:
+                success = False
+                strVal = ''
+                ctl.SetValue('')
+        elif fieldType == 'd':
+            try:
+                if len(strVal) != 0:
+                    val = int(strVal)
+                    ctl.SetValue("%d" % val)
+            except ValueError:
+                success = False
+                strVal = ''
+                ctl.SetValue('')
+        elif fieldType == 'c':
+            pass
+        cfg.setInfoData(index, strVal)
+    return success
+
+def getConfigList(panel):
+    if panel.configList is None:
+        panel.configList = []
+        for i, name in enumerate(cf.configTable):
+            if name.startswith(panel.prefix):
+                panel.configList.append(i)
+    return panel.configList
+
+class FormRoutines:
     def __init__(self, panel=True):
-        self.emptyCell = (0, 0)
         self.configList = None
         self.prefix = ""
         self.focusField = None
-        self.formatList = None
+        self.formatList = []
         self.width = 60 if WINDOWS else 75
 
-    def formatData(self, formatList):
-        if formatList is None:
-            return(True)
-        success = True
-        for fmt in formatList:
-            if len(fmt) == 2:
-                (index, fieldType) = fmt
-            else:
-                (name, index, fieldType) = fmt[:3]
-            if fieldType is None:
-                continue
-            ctl = cfg.info[index]
-            strVal = ctl.GetValue()
-            if fieldType.startswith('f'):
-                strip = False
-                strVal = strVal.lower()
-                metric = strVal.endswith('mm')
-                if metric:
-                    strVal = strVal[:-2]
-                    strip = True
-                if fieldType.endswith('s'):
-                    fieldType = fieldType[:-1]
-                    strip = True
+class PanelVars:
+    def __init__(self):
+        self.zRetract = None
+        self.zFeed = None
+        self.zStart = None
+        self.zEnd = None
+        self.xRetract = None
+        self.xFeed = None
+        self.sizerV = None
+        self.passes = None
+        self.sPInt = None
+        self.spring = None
+        self.internal = None
 
-                digits = 4
-                if len(fieldType) > 1:
-                    try:
-                        digits = int(fieldType[1])
-                    except ValueError:
-                        pass
-                if metric:
-                    digits -= 2
-                fmt = "%%0.%df" % digits
+def addButtons(panel, sizerG, add, rpm, pause, combine=False):
+    panel.sendButton = addButton(panel, sizerG, 'Send', OnPanelSend)
+    # panel.sendButton.SetBackgroundColour('Green')
 
-                try:
-                    if len(strVal) != 0:
-                        val = float(strVal)
-                        val = fmt % (val)
-                        if strip:
-                            if re.search("\.0*$", val):
-                                val = re.sub("\.0*$", "", val)
-                            else:
-                                val = val.rstrip('0')
-                        if metric:
-                            val += 'mm'
-                            strVal += 'mm'
-                        ctl.SetValue(val)
-                except ValueError:
-                    success = False
-                    strVal = ''
-                    ctl.SetValue('')
-            elif fieldType == 'd':
-                try:
-                    if len(strVal) != 0:
-                        val = int(strVal)
-                        ctl.SetValue("%d" % (val))
-                except ValueError:
-                    success = False
-                    strVal = ''
-                    ctl.SetValue('')
-            elif fieldType == 'c':
-                pass
-            cfg.setInfoData(index, strVal)
-        return(success)
+    panel.startButton = addButton(panel, sizerG, 'Start', OnPanelStart)
+    panel.startButton.Disable()
 
-    def fieldList(self, sizer, fields):
-        for field  in fields:
-            (label, index) = field[:2]
-            if label.startswith('b'):
-                self.addCheckBox(sizer, label[1:], index)
-            elif label.startswith('c'):
-                action = field[3]
-                self.addComboBox(sizer, label[1:], index, action) 
-            elif label.startswith('w'):
-                self.addField(sizer, label[1:], index, (80, -1))
-            else:
-                self.addField(sizer, label, index)
+    if add is not None:
+        panel.addButton = addButton(panel, sizerG, 'Add', OnPanelAddPass)
+        panel.addButton.Disable()
+        panel.addPass = addField(panel, sizerG, None, add, 'f')
+    else:
+        panel.addButton = None
+        placeHolder(sizerG)
 
-    def getConfigList(self):
-        if self.configList is None:
-            self.configList = []
-            for i, name in enumerate(cf.configTable):
-                if name.startswith(self.prefix):
-                    self.configList.append(i)
-        return(self.configList)
+    panel.rpm = addField(panel, sizerG, "RPM", rpm, 'd')
+    panel.rpm.Bind(wx.EVT_KILL_FOCUS, OnRPMKillFocus)
 
-    def addFieldText(self, sizer, label, key, keyText=None):
-        if len(label) != 0:
-            txt = wx.StaticText(self, -1, label)
-            sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                      wx.ALIGN_CENTER_VERTICAL, border=2)
-            if keyText is not None:
-                cfg.initInfo(keyText, txt)
+    panel.pause = addCheckBox(panel, sizerG, "Pause", pause, box=combine)
 
-        tc = wx.TextCtrl(self, -1, "", size=(self.width, -1), \
-                         style=wx.TE_PROCESS_ENTER)
-        tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
-        sizer.Add(tc, flag=wx.ALL, border=2)
-        cfg.initInfo(key, tc)
-        return(tc, txt)
-
-    def addField(self, sizer, label, index, size=None):
-        if size is None:
-            size = (self.width, -1)
-        if label is not None:
-            txt = wx.StaticText(self, -1, label)
-            sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                      wx.ALIGN_CENTER_VERTICAL, border=2)
-
-        tc = wx.TextCtrl(self, -1, "", size=size, \
-                         style=wx.TE_PROCESS_ENTER)
-        tc.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
-        sizer.Add(tc, flag=wx.ALL, border=2)
-        if cfg.info[index] is not None:
-            val = cfg.getInfo(index)
-            tc.SetValue(val)
-        cfg.initInfo(index, tc)
-        return(tc)
-
-    def addCheckBox(self, sizer, label, index, action=None):
-        txt = wx.StaticText(self, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                  wx.ALIGN_CENTER_VERTICAL, border=2)
-
-        cb = wx.CheckBox(self, -1, style=wx.ALIGN_LEFT)
-        if action is not None:
-            self.Bind(wx.EVT_CHECKBOX, action, cb)
-        sizer.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
-        if cfg.info[index] is not None:
-            val = cfg.getInfo(index)
-            cb.SetValue(val == 'True')
-        cfg.initInfo(index, cb)
-        return(cb)
-
-    def addComboBox(self, sizer, label, index, action, border=2,
-                    flag=wx.CENTER|wx.ALL):
-        txt = wx.StaticText(self, -1, label)
-        sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                  wx.ALIGN_CENTER_VERTICAL, border=2)
-
-        (indexList, choiceList, text) = action()
-        combo = ComboBox(self, label, indexList, choiceList, \
-                         id=-1, value=choiceList[0], choices=choiceList, \
-                         style=wx.CB_READONLY)
-        combo.text = text
-        if cfg.info[index] is not None:
-            val = cfg.getInfo(index)
-            combo.SetValue(val)
-        sizer.Add(combo, flag=flag, border=border)
-        cfg.initInfo(index, combo)
-
-    def addButton(self, sizer, label, action, size=(60, -1), border=2, \
-                  style=0, flag=wx.CENTER|wx.ALL):
-        btn = wx.Button(self, label=label, style=style, size=size)
-        btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, flag=flag, border=border)
-        return(btn)
-
-    def addControlButton(self, sizer, label, downAction, upAction, \
-                         flag=wx.CENTER|wx.ALL):
-        btn = wx.Button(self, label=label)
-        btn.Bind(wx.EVT_LEFT_DOWN, downAction)
-        btn.Bind(wx.EVT_LEFT_UP, upAction)
-        sizer.Add(btn, flag=flag, border=2)
-        return(btn)
-
-    def addBitmapButton(self, sizer, bitmap, downAction, upAction, flag=0):
-        bmp = wx.Bitmap(bitmap, wx.BITMAP_TYPE_ANY)
-        btn = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp, \
-                              size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
-        btn.Bind(wx.EVT_LEFT_DOWN, downAction)
-        btn.Bind(wx.EVT_LEFT_UP, upAction)
-        sizer.Add(btn, flag=flag, border=2)
-        return(btn)
-
-    def addDialogButton(self, sizer, idx, action=None, border=5):
-        btn = wx.Button(self, idx)
-        if action is None:
-            btn.SetDefault()
-        else:
-            btn.Bind(wx.EVT_BUTTON, action)
-        sizer.Add(btn, 0, wx.ALL|wx.CENTER, border=border)
-        return(btn)
-
-    def addRadioButton(self, sizer, label, key, style=0, action=None):
-        btn = wx.RadioButton(self, label=label, style=style)
-        if action is not None:
-            btn.Bind(wx.EVT_RADIOBUTTON, action)
-        sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-        cfg.initInfo(key, btn)
-        return(btn)
-
-    def addDialogField(self, sizer, label=None, tcDefault="", textFont=None, \
-                       tcFont=None, size=wx.DefaultSize, action=None, \
-                       border=None, index=None, edit=True, text=False):
-        if border is None:
-            b0 = 10
-            b1 = 10
-        elif isinstance(border, tuple) or isinstance(border, list):
-            b0 = border[0]
-            b1 = border[1] if len(border) >= 2 else b0
-        else:
-            b0 = border
-            b1 = border
-
-        if label is not None:
-            txt = wx.StaticText(self, -1, label)
-            if textFont is not None:
-                txt.SetFont(textFont)
-            sizer.Add(txt, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_RIGHT|\
-                      wx.ALIGN_CENTER_VERTICAL, border=b0)
-
-        tc = wx.TextCtrl(self, -1, tcDefault, size=size, \
-                         style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
-        if tcFont is not None:
-            tc.SetFont(tcFont)
-        if action is not None:
-            tc.Bind(wx.EVT_CHAR, action)
-        if not edit:
-            tc.SetEditable(False)
-        if index is not None:
-            cfg.initInfo(index, tc)
-        sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
-        return(tc if not text else (tc, txt))
-
-    def setFocus(self):
-        field = self.focusField
-        if field is not None:
-            field.SetFocus()
-            field.SetSelection(-1, -1)
-            
-    def setAddFocus(self):
-        field = self.add
-        if field is not None:
-            field.SetFocus()
-            field.SetSelection(-1, -1)
-
-    def OnEnter(self, e):
-        if self.formatList is None:
+def OnPanelShow(evt):
+    panel = evt.EventObject
+    try:
+        if panel.mf.done:
             return
-        if self.formatData(self.formatList):
-            jogPanel.setStatus(st.STR_CLR)
-            jogPanel.focus()
+    except AttributeError:
+        return
+    if panel.IsShown():
+        jp = panel.mf.jogPanel
+        jp.currentPanel = panel
+        jp.currentControl = panel.control
+        try:
+            jp.setRPMSlider(int(panel.rpm.GetValue()))
+        except ValueError:
+            panel.rpm.SetValue('0')
+            jp.setRPMSlider(0)
+        panel.update()
+    else:
+        panel.active = False
+
+def OnPanelSend(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if formatData(panel.mf.cfg, panel.formatList):
+        if not jp.xHomed:
+            jp.setStatus(st.STR_NOT_HOMED)
+        elif panel.active or \
+             jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+            jp.setStatus(st.STR_OP_IN_PROGRESS)
         else:
-            jogPanel.setStatus(st.STR_FIELD_ERROR)
-            
+            jp.setStatus(st.STR_CLR)
+            try:
+                if callable(panel.sendAction):
+                    if panel.sendAction():
+                        panel.active = True
+                        panel.sendButton.Disable()
+                        buttonEnable(panel.startButton)
+                        buttonDisable(jp.spindleButton)
+            except CommTimeout:
+                commTimeout(jp)
+            except:
+                traceback.print_exc()
+    else:
+        jp.setStatus(st.STR_FIELD_ERROR)
+    jp.focus()
+
+def OnPanelStart(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if not panel.active:
+        jp.setStatus(st.STR_NOT_SENT)
+    elif (jp.mvStatus & ct.MV_PAUSE) == 0:
+        jp.setStatus(st.STR_NOT_PAUSED)
+    else:
+        jp.setStatus(st.STR_CLR)
+        try:
+            if callable(panel.startAction):
+                panel.startAction()
+                buttonDisable(panel.startButton)
+        except CommTimeout:
+            commTimeout(jp)
+        except AttributeError:
+            print("ActionRoutines OnStart AttributeError")
+            stdout.flush()
+    jp.focus()
+
+def OnPanelAddPass(evt):
+    panel = evt.EventObject.panel
+    jp = panel.mf.jogPanel
+    if not panel.active:
+        jp.setStatus(st.STR_OP_NOT_ACTIVE)
+    elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+        jp.setStatus(st.STR_OP_IN_PROGRESS)
+    else:
+        jp.setStatus(st.STR_CLR)
+        jp.clrRetract()
+        try:
+            curPass = panel.mf.comm.getParm(pm.CURRENT_PASS)
+            if curPass >= panel.control.passes:
+                if callable(panel.addAction):
+                    panel.addAction()
+            else:
+                jp.setStatus(st.STR_PASS_ERROR)
+        except CommTimeout:
+            commTimeout(jp)
+        except AttributeError:
+            print("ActionRoutines OnAddPass AttributeError")
+            stdout.flush()
+    jp.focus()
+
+def OnRPMKillFocus(evt):
+    panel = evt.EventObject.Parent
+    panel.mf.jogPanel.setRPMSlider(int(panel.rpm.GetValue()))
+    evt.Skip()
+
+def getSafeLoc(panel):
+    control = panel.control
+    control.getParameters()
+    panel.safeX = control.xStart + control.xRetract
+    panel.safeZ = control.zStart + control.zRetract
+    return panel.safeZ, panel.safeX
+
 class ActionRoutines():
     def __init__(self, control, op):
         self.control = control
         self.op = op
+        self.rpm = None
+        self.addPass = None
+        self.sendButton = None
+        self.startButton = None
+        self.pause = None
         self.active = False
-        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.safeX = None
         self.safeZ = None
-        self.formatList = None
+        self.formatList = []
+        self.manualMode = False
 
-    def formatData(self, formatList):
-        print("ActionRoutines formatData stub called")
-        stdout.flush()
-        return(True)
+    # def formatData(self, formatList):
+    #     print("ActionRoutines formatData stub called")
+    #     stdout.flush()
+    #     return True
 
     def sendAction(self):
         print("ActionRoutines sendAction stub called")
         stdout.flush()
-        return(False)
+        return False
 
     def startAction(self):
         print("ActionRoutines startAction stub called")
@@ -571,82 +792,143 @@ class ActionRoutines():
     def nextOperation(self):
         pass
 
-    def getSafeLoc(self):
-        control = self.control
-        control.getParameters()
-        self.safeX = control.xStart + control.xRetract
-        self.safeZ = control.zStart + control.zRetract
-        return(self.safeZ, self.safeX)
+    # def getSafeLoc(self):
+    #     control = self.control
+    #     control.getParameters()
+    #     self.safeX = control.xStart + control.xRetract
+    #     self.safeZ = control.zStart + control.zRetract
+    #     return self.safeZ, self.safeX
 
-    def OnShow(self, e):
-        if done:
+    # def OnSend(self, evt):
+    #     panel = evt.EventObject.panel
+    #     jp = panel.mf.jogPanel
+    #     if formatData(panel.mf.cfg, panel.formatList):
+    #         if not jp.xHomed:
+    #             jp.setStatus(st.STR_NOT_HOMED)
+    #         elif panel.active or \
+    #              jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+    #             jp.setStatus(st.STR_OP_IN_PROGRESS)
+    #         else:
+    #             jp.setStatus(st.STR_CLR)
+    #             try:
+    #                 if callable(panel.sendAction):
+    #                     if panel.sendAction():
+    #                         panel.active = True
+    #                         panel.sendButton.Disable()
+    #                         buttonEnable(panel.startButton)
+    #                         buttonDisable(jp.spindleButton)
+    #             except CommTimeout:
+    #                 commTimeout(jp)
+    #             except:
+    #                 traceback.print_exc()
+    #     else:
+    #         jp.setStatus(st.STR_FIELD_ERROR)
+    #     jp.focus()
+
+    # def OnStart(self, _):
+    #     jp = self.armf.jogPanel
+    #     if not self.active:
+    #         jp.setStatus(st.STR_NOT_SENT)
+    #     elif (jp.mvStatus & ct.MV_PAUSE) == 0:
+    #         jp.setStatus(st.STR_NOT_PAUSED)
+    #     else:
+    #         jp.setStatus(st.STR_CLR)
+    #         try:
+    #             if callable(self.startAction):
+    #                 self.startAction()
+    #                 buttonDisable(self.startButton)
+    #         except CommTimeout:
+    #             commTimeout(jp)
+    #         except AttributeError:
+    #             print("ActionRoutines OnStart AttributeError")
+    #             stdout.flush()
+    #     jp.focus()
+
+    # def OnAddPass(self, _):
+    #     jp = self.armf.jogPanel
+    #     if not self.active:
+    #         jp.setStatus(st.STR_OP_NOT_ACTIVE)
+    #     elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
+    #         jp.setStatus(st.STR_OP_IN_PROGRESS)
+    #     else:
+    #         jp.setStatus(st.STR_CLR)
+    #         jp.clrRetract()
+    #         try:
+    #             curPass = self.armf.comm.getParm(pm.CURRENT_PASS)
+    #             if curPass >= self.control.passes:
+    #                 if callable(self.addAction):
+    #                     self.addAction()
+    #             else:
+    #                 jp.setStatus(st.STR_PASS_ERROR)
+    #         except CommTimeout:
+    #             commTimeout(jp)
+    #         except AttributeError:
+    #             print("ActionRoutines OnAddPass AttributeError")
+    #             stdout.flush()
+    #     jp.focus()
+
+    # def OnRPMKillFocus(self, e):
+    #     self.armf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
+    #     e.Skip()
+
+def saveData(dialog):
+    changed = False
+    cfg = dialog.mf.cfg
+    for fmt in dialog.fields:
+        (label, index) = fmt[:2]
+        val = cfg.getInfo(index)
+        if dialog.fieldInfo[index] != val:
+            dialog.fieldInfo[index] = val
+            cfg.setInfoData(index, val)
+            dialog.sendData = True
+            changed = True
+    return changed
+
+def OnDialogShow(evt):
+    dialog = evt.EventObject
+    try:
+        if dialog.mf.done:
             return
-        # print("OnShow %s %d" % (str(self.IsShown()), self.op))
-        if self.IsShown():
-            jogPanel.currentPanel = self
-            jogPanel.currentControl = self.control
-            self.update()
-        else:
-            self.active = False
+    except AttributeError:
+        return
 
-    def OnSend(self, e):
-        if self.formatData(self.formatList):
-            if not xHomed:
-                jogPanel.setStatus(st.STR_NOT_HOMED)
-            elif self.active or \
-                 jogPanel.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-                jogPanel.setStatus(st.STR_OP_IN_PROGRESS)
-            else:
-                jogPanel.setStatus(st.STR_CLR)
-                try:
-                    if callable(self.sendAction):
-                        if self.sendAction():
-                            self.active = True
-                except CommTimeout:
-                    commTimeout()
-                except:
-                    traceback.print_exc()
-        else:
-            jogPanel.setStatus(st.STR_FIELD_ERROR)
-        jogPanel.focus()
+    changed = False
+    if dialog.IsShown():
+        formatData(dialog.mf.cfg, dialog.fields)
+        dialog.fieldInfo = {}
+        for fmt in dialog.fields:
+            (label, index) = fmt[:2]
+            dialog.fieldInfo[index] = dialog.mf.cfg.getInfo(index)
+    else:
+        changed = saveData(dialog)
 
-    def OnStart(self, e):
-        if not self.active:
-            jogPanel.setStatus(st.STR_NOT_SENT)
-        elif (jogPanel.mvStatus & ct.MV_PAUSE) == 0:
-            jogPanel.setStatus(st.STR_NOT_PAUSED)
-        else:
-            jogPanel.setStatus(st.STR_CLR)
-            try:
-                if callable(self.startAction):
-                    self.startAction()
-            except CommTimeout:
-                commTimeout()
-            except AttributeError:
-                print("ActionRoutines OnStart AttributeError")
-                stdout.flush()
-        jogPanel.focus()
+    if hasattr(dialog, 'showAction') and \
+       callable(dialog.showAction):
+        dialog.showAction(changed)
 
-    def OnAdd(self, e):
-        if not self.active:
-            jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
-        elif jogPanel.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-            jogPanel.setStatus(st.STR_OP_IN_PROGRESS)
-        else:
-            jogPanel.setStatus(st.STR_CLR)
-            try:
-                curPass = comm.getParm(pm.CURRENT_PASS)
-                if curPass >= self.control.passes:
-                    if callable(self.addAction):
-                        self.addAction()
-                else:
-                    jogPanel.setStatus(st.STR_PASS_ERROR)
-            except CommTimeout:
-                commTimeout()
-            except AttributeError:
-                print("ActionRoutines OnAdd AttributeError")
-                stdout.flush()
-        jogPanel.focus()
+def OnDialogOk(evt):
+    dialog = evt.EventObject.dialog
+    if formatData(dialog.mf.cfg, dialog.fields):
+        dialog.Show(False)
+        if hasattr(dialog, 'okAction') and \
+           callable(dialog.okAction):
+            dialog.okAction()
+
+def OnDialogCancel(evt):
+    dialog = evt.EventObject.dialog
+    for field in dialog.fields:
+        index = field[1]
+        dialog.mf.cfg.setInfo(index, dialog.fieldInfo[index])
+    dialog.Show(False)
+
+def OnDialogSetup(evt):
+    dialog = evt.EventObject.dialog
+    if not formatData(dialog.mf.cfg, dialog.fields):
+        return
+    dialog.mf.move.queClear()
+    if hasattr(dialog, 'setupAction') and \
+       callable(dialog.setupAction):
+        dialog.setupAction()
 
 class DialogActions():
     def __init__(self):
@@ -654,7 +936,6 @@ class DialogActions():
         self.fieldInfo = None
         self.sendData = False
         self.changed = False
-        self.Bind(wx.EVT_SHOW, self.OnShow)
 
     def setupAction(self):
         print("DialogAction setupAction stub called")
@@ -664,63 +945,15 @@ class DialogActions():
         print("DialogAction showAction stub called")
         stdout.flush()
 
-    def formatData(self, fields):
-        print("DialogAction formatData stub called")
-        stdout.flush()
-
-    def OnSetup(self, e):
-        if not self.formatData(self.fields):
-            return
-        moveCommands.queClear()
-        try:
-            if callable(self.setupAction):
-                self.setupAction()
-        except AttributeError:
-            print("Dialog OnSetup AttributeError")
-            stdout.flush()
-
-    def OnShow(self, e):
-        if done:
-            return
-        changed = False
-        if self.IsShown():
-            self.formatData(self.fields)
-            self.fieldInfo = {}
-            for fmt in self.fields:
-                (label, index) = fmt[:2]
-                self.fieldInfo[index] = cfg.getInfo(index)
-        else:
-            for fmt in self.fields:
-                (label, index) = fmt[:2]
-                val = cfg.getInfo(index)
-                if self.fieldInfo[index] != val:
-                    cfg.setInfoData(index, val)
-                    self.sendData = True
-                    changed = True
-        if changed:
-            try:
-                if callable(self.showAction):
-                    self.showAction(changed)
-            except AttributeError:
-                print("Dialog OnShow AttributeError")
-                stdout.flush()
-
-    def OnOk(self, e):
-        if self.formatData(self.fields):
-            self.Show(False)
-
-    def OnCancel(self, e):
-        for field in self.fields:
-            index = field[1]
-            cfg.setInfo(index, self.fieldInfo[index])
-        self.Show(False)
-
 class MoveCommands():
-    def __init__(self):
+    def __init__(self, mainFrame):
+        self.jp = mainFrame.jogPanel
+        self.cfg = mainFrame.cfg
+        self.comm = mainFrame.comm
         if not R_PI:
             self.moveQue = Queue()
         else:
-            self.moveQue = comm.rpi.moveQue
+            self.moveQue = self.comm.rpi.moveQue
         self.passNum = 0
         self.send = False
         self.dbg = True
@@ -748,8 +981,9 @@ class MoveCommands():
             os.makedirs(DXF_DIR)
         d = dxf.drawing(self.fileName)
         self.style = dxf.style("CONSOLAS", font="Consolas.ttf")
-        d.add_layer(TEXT, color=0)
-        d.add_layer(REF, color=1)
+        d.add_layer('0', color=0, lineweight=0)
+        d.add_layer(TEXT, color=0, lineweight=0)
+        d.add_layer(REF, color=1, lineweight=0)
         self.textAngle = 0.0
         self.d = d
         self.xText = []
@@ -768,27 +1002,80 @@ class MoveCommands():
         if self.d is not None:
             (p0X, p0Y) = p0
             (p1X, p1Y) = p1
-            self.d.add(dxf.line((p0X, self.flip * p0Y), \
-                                (p1X, self.flip * p1Y), layer=layer))
-            
+            flip = self.flip
+            self.d.add(dxf.line((p0X, flip * p0Y), \
+                                (p1X, flip * p1Y), layer=layer))
+
     def drawLineX(self, x, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
-                                (self.lastZ, self.flip * x), layer=layer))
+            flip = self.flip
+            self.d.add(dxf.line((self.lastZ, flip * self.lastX), \
+                                (self.lastZ, flip * x), layer=layer))
             self.lastX = x
 
     def drawLineZ(self, z, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
-                                (z, self.flip * self.lastX), layer=layer))
+            flip = self.flip
+            self.d.add(dxf.line((self.lastZ, flip * self.lastX), \
+                                (z, flip * self.lastX), layer=layer))
             self.lastZ = z
 
     def drawLine(self, z, x, layer=0):
         if self.d is not None:
-            self.d.add(dxf.line((self.lastZ, self.flip * self.lastX), \
-                                (z, self.flip * x), layer=layer))
+            flip = self.flip
+            self.d.add(dxf.line((self.lastZ, flip * self.lastX), \
+                                (z, flip * x), layer=layer))
             self.lastX = x
             self.lastZ = z
+
+    def drawCenter(self, center, layer=0):
+        if self.d is not None:
+            l = 0.005
+            (yc, xc) = center
+            yc *= self.flip
+            self.d.add(dxf.line((xc, yc + l), (xc, yc - l), layer=layer))
+            self.d.add(dxf.line((xc + l, yc), (xc - l, yc), layer=layer))
+
+    def drawArc(self, center, p0, p1, layer=0):
+        if self.d is not None:
+            (yc, xc) = center
+            (x0, y0) = p0
+            (x1, y1) = p1
+            self.lastX = x1
+            self.lastY = y1
+            flip = self.flip
+            yc *= flip
+            y0 *= flip
+            y1 *= flip
+            dx = x0 - xc
+            dy = y0 - yc
+            a0 = degrees(atan2(dy, dx))
+            if a0 < 0:
+                a0 += 360
+            a1 = degrees(atan2(y1 - yc, x1 - xc))
+            if a1 < 0:
+                a1 += 360
+            if a1 < a0:
+                a1 += 360
+            # print("drawArc a0 %7.3f a1 %7.3f" % (a0, a1))
+            radius = hypot(dy, dx)
+            if a0 > a1:
+                (a0, a1) = (a1, a0)
+            self.d.add(dxf.arc(radius, (xc, yc), a0, a1, layer=layer))
+
+    def drawDXFArc(self, center, radius, a0, a1, layer=0):
+        if self.d is not None:
+            (yc, xc) = center
+            yc *= self.flip
+            self.d.add(dxf.arc(radius, (xc, yc), a0, a1, layer=layer))
+
+    def drawL(self, l, layer=0):
+        if l.type == LINE:
+            self.setLoc(l.p0.x, l.p0.y)
+            self.drawLine(l.p1.x, l.p1.y, layer=layer)
+        elif l.type == ARC:
+            (yc, xc) = l.c
+            self.drawArc((xc, yc), l.p0, l.p1, layer=layer)
 
     def saveXText(self, val, pos):
         if self.xText is not None:
@@ -832,7 +1119,7 @@ class MoveCommands():
             lastX = x
         self.textAngle = 0.0
 
-    def text(self, text, p0, align=None, layer='TEXT'):
+    def text(self, text, p0, align=None, layer='TEXT', textAngle=None):
         if self.d is not None:
             (x, y) = p0
             hOffset = self.hS
@@ -863,12 +1150,14 @@ class MoveCommands():
                     elif align & MIDDLE:
                         vOffset = -(self.textH / 2)
 
-            if self.textAngle != 0.0:
+            if textAngle is None:
+                textAngle = self.textAngle
+            if textAngle != 0.0:
                 (vOffset, hOffset) = (hOffset, -vOffset)
-            self.d.add(dxf.text(text, (x + hOffset, \
-                                       self.flip * y + vOffset), \
-                                height=self.textH, rotation=self.textAngle, \
-                                layer=layer, style=self.style))
+            self.d.add(dxf.text(text, \
+                                (x + hOffset, self.flip * y + vOffset), \
+                                height=self.textH, rotation=textAngle, \
+                                layer=layer, style=self.style, thickness=0.0))
 
     def drawClose(self):
         if self.d is not None:
@@ -888,11 +1177,11 @@ class MoveCommands():
             self.d = None
 
     def queInit(self):
-        comm.sendMulti()        # send parameters first
+        self.comm.sendMulti()   # send parameters first
         self.zOffset = None
         self.xOffset = None
 
-    def queMove(self, op, val):
+    def queMove(self, op, val=0):
         if self.send:
             opString = en.mCommandsList[op]
             self.moveQue.put((opString, op, val))
@@ -904,7 +1193,7 @@ class MoveCommands():
             self.moveQue.put((opString, op, val))
 
     def queClear(self):
-        self.send = not cfg.getBoolInfoData(cf.cfgCmdDis)
+        self.send = not self.cfg.getBoolInfoData(cf.cfgCmdDis)
         while not self.moveQue.empty():
             self.moveQue.get()
         self.queInit()
@@ -925,7 +1214,7 @@ class MoveCommands():
         self.saveXOffset()
 
     def stopSpindle(self):
-        self.queMove(en.STOP_SPINDLE, 0)
+        self.queMove(en.STOP_SPINDLE)
 
     def queFeedType(self, feedType):
         self.queMove(en.SAVE_FEED_TYPE, feedType)
@@ -935,6 +1224,12 @@ class MoveCommands():
 
     def xSynSetup(self, feed):
         self.queMove(en.X_SYN_SETUP, feed)
+
+    def syncParms(self):
+        self.queMove(en.SEND_SYNC_PARMS)
+
+    def syncCommand(self, cmd):
+        self.queMove(en.SYNC_COMMAND, cmd)
 
     def nextPass(self, passNum):
         self.passNum = passNum
@@ -951,10 +1246,14 @@ class MoveCommands():
         self.queMove(en.QUE_PAUSE, val)
 
     def moveZOffset(self):
-        self.queMove(en.MOVE_Z_OFFSET, 0)
+        self.queMove(en.MOVE_Z_OFFSET)
 
     def moveZ(self, zLocation, flag=ct.CMD_MAX, backlash=0.0):
-        self.queMoveF(en.MOVE_Z, flag, zLocation + backlash)
+        if (flag & ct.DRO_POS) == 0:
+            val = round((zLocation + backlash) * self.jp.zStepsInch)
+        else:
+            val = round((zLocation + backlash) * self.jp.zDROInch)
+        self.queMoveF(en.MOVE_Z, flag, val)
         self.drawLineZ(zLocation)
         if self.dbg:
             print("moveZ   %7.4f" % (zLocation))
@@ -962,9 +1261,9 @@ class MoveCommands():
 
     def moveX(self, xLocation, flag=ct.CMD_MAX, backlash=0.0):
         if (flag & ct.DRO_POS) == 0:
-            val = round((xLocation + backlash) * jogPanel.xStepsInch)
+            val = round((xLocation + backlash) * self.jp.xStepsInch)
         else:
-            val = round((xLocation + backlash) * jogPanel.xDROInch)
+            val = round((xLocation + backlash) * self.jp.xDROInch)
         self.queMoveF(en.MOVE_X, flag, val)
         self.drawLineX(xLocation)
         if self.dbg:
@@ -972,23 +1271,25 @@ class MoveCommands():
             stdout.flush()
 
     def saveZOffset(self):
-        if self.zOffset != zHomeOffset:
-            self.zOffset = zHomeOffset
+        jp = self.jp
+        if self.zOffset != jp.zHomeOffset:
+            self.zOffset = jp.zHomeOffset
             # zHomeOffset floating, zHomeOffset sent as integer
             self.queMove(en.SAVE_Z_OFFSET,
-                         round(zHomeOffset * jogPanel.zStepsInch))
+                         round(jp.zHomeOffset * jp.zStepsInch))
             if self.dbg:
-                print("saveZOffset  %7.4f" % (zHomeOffset))
+                print("saveZOffset %7.4f" % (jp.zHomeOffset))
                 stdout.flush()
 
     def saveXOffset(self):
-        if self.xOffset != xHomeOffset:
-            self.xOffset = xHomeOffset
+        jp = self.jp
+        if self.xOffset != jp.xHomeOffset:
+            self.xOffset = jp.xHomeOffset
             # xHomeOffset floating, xHomeOffset sent as integer
             self.queMove(en.SAVE_X_OFFSET,
-                         round(xHomeOffset * jogPanel.xStepsInch))
+                         round(jp.xHomeOffset * jp.xStepsInch))
             if self.dbg:
-                print("savexOffset  %7.4f" % (xHomeOffset))
+                print("saveXOffset  %7.4f" % (jp.xHomeOffset))
                 stdout.flush()
 
     def moveXZ(self, zLocation, xLocation):
@@ -1038,345 +1339,430 @@ class MoveCommands():
             print("probeX %7.4f" % (xDist))
 
     def saveZDro(self):
-        self.queMove(en.SAVE_Z_DRO, 0)
+        self.queMove(en.SAVE_Z_DRO)
 
     def saveXDro(self):
-        self.queMove(en.SAVE_X_DRO, 0)
+        self.queMove(en.SAVE_X_DRO)
+
+    def queParm(self, parm, val):
+        op = en.QUE_PARM
+        opString = en.mCommandsList[op]
+        op |= parm << 16
+        self.moveQue.put((opString, op, val))
+
+    def moveArc(self):
+        self.queMove(en.MOVE_ARC)
 
     def done(self, parm):
         self.queMove(en.OP_DONE, parm)
+        if parm == ct.PARM_START:
+            self.saveZOffset()
+            self.saveXOffset()
 
-def sendClear():
-    global spindleDataSent, zDataSent, xDataSent
-    try:
-        comm.command(cm.CLRDBG)
-        comm.command(cm.CMD_CLEAR)
-    except CommTimeout:
-        commTimeout()
-    spindleDataSent = False
-    zDataSent = False
-    xDataSent = False
+class SendData:
+    def __init__(self, mainFrame):
+        self.mf = mainFrame
+        self.jp = mainFrame.jogPanel
+        self.cfg = mainFrame.cfg
+        self.comm = mainFrame.comm
+        self.spindleDataSent = False
+        self.zDataSent = False
+        self.xDataSent = False
+        self.megaDataSent = False
 
-def xilinxTestMode():
-    testMode = False
-    try:
-        testMode = cfg.getBoolInfoData(cf.cfgTestMode)
-    except KeyError:
+    def sendClear(self):
+        try:
+            self.comm.command(cm.CLRDBG)
+            self.comm.command(cm.CMD_CLEAR)
+        except CommTimeout:
+            commTimeout(self.jp)
+        self.spindleDataSent = False
+        self.zDataSent = False
+        self.xDataSent = False
+
+    def xilinxTestMode(self):
+        cfg = self.cfg
+        comm = self.comm
         testMode = False
-    if testMode:
-        encoder = 0
         try:
-            encoder = cfg.getIntInfoData(cf.cfgEncoder)
+            testMode = cfg.getBoolInfoData(cf.cfgTestMode)
         except KeyError:
-            encoder = 0
-        rpm = 0
+            testMode = False
+        if testMode:
+            try:
+                encoder = cfg.getIntInfoData(cf.cfgEncoder)
+            except KeyError:
+                encoder = 0
+            try:
+                rpm = int(cfg.getFloatInfoData(cf.cfgTestRPM))
+            except KeyError:
+                rpm = 0
+            if encoder != 0:
+                preScaler = 1
+                if rpm == 0:
+                    rpm = 1
+                rps = rpm / 60.0
+                fcy = cfg.getIntInfoData(cf.cfgFpgaFreq)
+                encTimer = int(fcy / (encoder * rps))
+                while encTimer >= 65536:
+                    preScaler += 1
+                    encTimer = int(fcy / (encoder * rps * preScaler))
+                print("preScaler %d encTimer %d" % (preScaler, encTimer))
+                comm.queParm(pm.ENC_ENABLE, '1')
+                comm.queParm(pm.ENC_PRE_SCALER, preScaler)
+                comm.queParm(pm.ENC_TIMER, encTimer)
+        else:
+            comm.queParm(pm.ENC_ENABLE, '0')
+
+    def sendSpindleData(self, send=False, rpm=None):
+        cfg = self.cfg
+        comm = self.comm
+        queParm = self.comm.queParm
         try:
-            rpm = int(cfg.getFloatInfoData(cf.cfgTestRPM))
-        except KeyError:
-            rpm = 0
-        if encoder != 0:
-            preScaler = 1
-            if rpm == 0:
-                rpm = 1
-            rps = rpm / 60.0
-            encTimer = int(fcy / (encoder * rps))
-            while encTimer >= 65536:
-                preScaler += 1
-                encTimer = int(fcy / (encoder * rps * preScaler))
-            print("preScaler %d encTimer %d" % (preScaler, encTimer))
-            comm.queParm(pm.ENC_ENABLE, '1')
-            comm.queParm(pm.ENC_PRE_SCALER, preScaler)
-            comm.queParm(pm.ENC_TIMER, encTimer)
-    else:
-        comm.queParm(pm.ENC_ENABLE, '0')
+            if send or (not self.spindleDataSent):
+                queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
+                queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
+                queParm(pm.SPINDLE_ENCODER, \
+                        cfg.getBoolInfoData(cf.cfgSpEncoder))
+                queParm(pm.SPINDLE_SYNC_BOARD, \
+                        cfg.getBoolInfoData(cf.cfgSpSyncBoard))
+                queParm(pm.SPINDLE_INTERNAL_SYNC, \
+                        cfg.getBoolInfoData(cf.cfgIntSync))
+                queParm(pm.TURN_SYNC, cfg.getInfoData(cf.cfgTurnSync))
+                queParm(pm.THREAD_SYNC, cfg.getInfoData(cf.cfgThreadSync))
+                if STEP_DRV or MOTOR_TEST:
+                    queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
+                    queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
+                    queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
+                    # if rpm is not None:
+                    #     queParm(pm.SP_MAX_RPM, rpm)
+                    # else:
+                    #     queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
 
-def sendSpindleData(send=False, rpm=None):
-    global spindleDataSent
-    queParm = comm.queParm
-    try:
-        if send or (not spindleDataSent):
-            queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
-            queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
-            queParm(pm.SPINDLE_ENCODER, cfg.getBoolInfoData(cf.cfgSpEncoder))
-            queParm(pm.SPINDLE_SYNC_BOARD, \
-                    cfg.getBoolInfoData(cf.cfgSpSyncBoard))
-            queParm(pm.TURN_SYNC, cfg.getInfoData(cf.cfgTurnSync))
-            queParm(pm.THREAD_SYNC, cfg.getInfoData(cf.cfgThreadSync))
-            if STEP_DRV or MOTOR_TEST:
-                queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
-                queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
-                queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
-                # if rpm is not None:
-                #     queParm(pm.SP_MAX_RPM, rpm)
-                # else:
-                #     queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                    queParm(pm.SP_ACCEL, cfg.getInfoData(cf.spAccel))
+                    queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
+                    queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
 
-                queParm(pm.SP_ACCEL, cfg.getInfoData(cf.spAccel))
-                queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
-                queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
+                    queParm(pm.SP_JOG_TIME_INITIAL, \
+                            cfg.getInfoData(cf.spJTimeInitial))
+                    queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
+                    queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
 
-                queParm(pm.SP_JOG_TIME_INITIAL, \
-                        cfg.getInfoData(cf.spJTimeInitial))
-                queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
-                queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
+                    queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
+                    queParm(pm.SP_TEST_INDEX, \
+                            cfg.getBoolInfoData(cf.spTestIndex))
+                    count = (cfg.getIntInfoData(cf.spMotorSteps) * \
+                             cfg.getIntInfoData(cf.spMicroSteps))
+                    queParm(pm.ENC_PER_REV, count)
+                    self.mf.updateThread.encoderCount = count
+                    if MOTOR_TEST and SPINDLE_ENCODER:
+                        queParm(pm.SP_TEST_ENCODER, \
+                                cfg.getBoolInfoData(cf.spTestEncoder))
+                elif FPGA:
+                    queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
+                    queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
+                    # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                    queParm(pm.FREQ_MULT, 8)
+                    self.xilinxTestMode()
+                    queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
+                    print(R_PI)
+                    if not R_PI:
+                        cfgReg = 0
+                        if bool(cfg.getBoolInfoData(cf.cfgInvEncDir)):
+                            cfgReg |= xb.ENC_POL
+                        if bool(cfg.getBoolInfoData(cf.zInvDir)):
+                            cfgReg |= xb.ZDIR_POL
+                        if bool(cfg.getBoolInfoData(cf.xInvDir)):
+                            cfgReg |= xb.XDIR_POL
+                        queParm(pm.X_CFG_REG, cfgReg)
+                    else:
+                        pass
+                    comm.sendMulti()
+                elif SPINDLE_ENCODER:
+                    mf = self.mf
+                    count = cfg.getIntInfoData(cf.cfgEncoder)
+                    if mf.zSyncExt is not None:
+                        mf.zSyncExt.setEncoder(count)
+                    if mf.xSyncExt is not None:
+                        mf.xSyncExt.setEncoder(count)
+                    if mf.zSyncInt is not None:
+                        mf.zSyncInt.setEncoder(count)
+                    if mf.xSyncInt is not None:
+                        mf.xSyncInt.setEncoder(count)
+                    queParm(pm.ENC_PER_REV, count)
+                    mf.updateThread.encoderCount = count
 
-                queParm(pm.SP_DIR_FLAG, cfg.getBoolInfoData(cf.spInvDir))
-                queParm(pm.SP_TEST_INDEX, \
-                        cfg.getBoolInfoData(cf.spTestIndex))
-                count = (cfg.getIntInfoData(cf.spMotorSteps) * \
-                         cfg.getIntInfoData(cf.spMicroSteps))
-                queParm(pm.ENC_PER_REV, count)
-                updateThread.encoderCount = count
-                if MOTOR_TEST and SPINDLE_ENCODER:
-                    queParm(pm.SP_TEST_ENCODER, \
-                            cfg.getBoolInfoData(cf.spTestEncoder))
-            elif FPGA:
-                queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
-                # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
-                queParm(pm.FREQ_MULT, 8)
-                xilinxTestMode()
-                queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
-                print(R_PI)
-                if not R_PI:
-                    cfgReg = 0
-                    if cfg.getBoolInfoData(cf.cfgInvEncDir):
-                        cfgReg |= xb.ENC_POL
-                    if cfg.getBoolInfoData(cf.zInvDir):
-                        cfgReg |= xb.ZDIR_POL
-                    if cfg.getBoolInfoData(cf.xInvDir):
-                        cfgReg |= xb.XDIR_POL
-                    queParm(pm.X_CFG_REG, cfgReg)
+                if SPINDLE_VAR_SPEED:
+                    queParm(pm.PWM_FREQ, cfg.getIntInfoData(cf.spPWMFreq))
+                    curRange = cfg.getIntInfoData(cf.spCurRange)
+                    if 1 <= curRange <= cfg.getIntInfoData(cf.spRanges):
+                        curRange -= 1
+                        queParm(pm.MIN_SPEED, \
+                                cfg.getIntInfoData(cf.spRangeMin1 + curRange))
+                        queParm(pm.MAX_SPEED, \
+                                cfg.getIntInfoData(cf.spRangeMax1 + curRange))
+                    else:
+                        queParm(pm.MIN_SPEED, 0)
+                        queParm(pm.MAX_SPEED, 0)
+                        
+                if STEP_DRV or MOTOR_TEST or SPINDLE_VAR_SPEED:
+                    if rpm is not None:
+                        queParm(pm.SP_MAX_RPM, rpm)
+                    else:
+                        queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+
+                comm.command(cm.CMD_SPSETUP)
+                self.spindleDataSent = True
+        except CommTimeout:
+            commTimeout(self.jp)
+
+    def sendZData(self, send=False):
+        cfg = self.cfg
+        comm = self.comm
+        queParm = self.comm.queParm
+        try:
+            # pitch = cfg.getDistInfoData(cf.zPitch)
+            motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
+            microSteps = cfg.getIntInfoData(cf.zMicroSteps)
+            # motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
+            # self.jp.zStepsInch = stepsInch = (microSteps * motorSteps * \
+            #                                   motorRatio) / pitch
+            self.jp.zStepsInch = stepsInch = self.mf.zStepsInch
+
+            zSyncInt = self.mf.zSyncInt
+            if zSyncInt is not None:
+                zSyncInt.setLeadscrew(cfg.getInfoData(cf.zPitch))
+                zSyncInt.setMotorSteps(motorSteps)
+                zSyncInt.setMicroSteps(microSteps)
+                if not FPGA:
+                    zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
                 else:
-                    pass
-                comm.sendMulti()
-            elif SPINDLE_ENCODER:
-                count = cfg.getIntInfoData(cf.cfgEncoder)
-                if zSyncExt is not None:
-                    zSyncExt.setEncoder(count)
-                if xSyncExt is not None:
-                    xSyncExt.setEncoder(count)
-                if zSyncInt is not None:
-                    zSyncInt.setEncoder(count)
-                if xSyncInt is not None:
-                    xSyncInt.setEncoder(count)
-                queParm(pm.ENC_PER_REV, count)
-                updateThread.encoderCount = count
+                    zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
-            if SPINDLE_VAR_SPEED:
-                queParm(pm.PWM_FREQ, cfg.getIntInfoData(cf.spPWMFreq))
-                range = cfg.getIntInfoData(cf.spCurRange)
-                if range >= 1 and range <= cfg.getIntInfoData(cf.spRanges):
-                    range -= 1
-                    queParm(pm.MIN_SPEED, \
-                            cfg.getIntInfoData(cf.spRangeMin1 + range))
-                    queParm(pm.MAX_SPEED, \
-                            cfg.getIntInfoData(cf.spRangeMax1 + range))
+            zSyncExt = self.mf.zSyncExt
+            if zSyncExt is not None:
+                zSyncExt.setLeadscrew(cfg.getInfoData(cf.zPitch))
+                zSyncExt.setMotorSteps(motorSteps)
+                zSyncExt.setMicroSteps(microSteps)
+
+            # droInch = 0
+            # if DRO:
+                # self.jp.zDROInch = droInch = cfg.getIntInfoData(cf.zDROInch)
+
+            # print("zStepsInch %0.2f" % (self.jp.zStepsInch))
+            # stdout.flush()
+
+            if send or (not self.zDataSent):
+                if DRO:
+                    droInch = self.mf.zDROInch
+                    queParm(pm.Z_DRO_COUNT_INCH, droInch)
+                    queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
+                    queParm(pm.Z_USE_DRO, cfg.getBoolInfoData(cf.zDROPos))
+                    queParm(pm.Z_DONE_DELAY, cfg.getIntInfoData(cf.zDoneDelay))
+                    queParm(pm.Z_DRO_FINAL_DIST,
+                            round(cfg.getFloatInfoData(cf.zDroFinalDist) * \
+                                  droInch))
+                    stepF = factor.factor(stepsInch)
+                    droF = factor.factor(droInch)
+                    (stepF, droF) = factor.remFactors(stepF, droF)
+                    stepFactor = factor.combineFactors(stepF)
+                    droFactor = factor.combineFactors(droF)
+                    queParm(pm.Z_STEP_FACTOR, stepFactor)
+                    queParm(pm.Z_DRO_FACTOR, droFactor)
                 else:
-                    queParm(pm.MIN_SPEED, 0)
-                    queParm(pm.MAX_SPEED, 0)
-            if STEP_DRV or MOTOR_TEST or SPINDLE_VAR_SPEED:
-                if rpm is not None:
-                    queParm(pm.SP_MAX_RPM, rpm)
+                    queParm(pm.Z_DONE_DELAY, 0)
+
+                val = self.jp.combo.GetValue()
+                try:
+                    val = float(val)
+
+                    if val > 0.020:
+                        val = 0.020
+                except ValueError:
+                    # val = cfg.getFloatInfoData(cf.zMpgInc)
+                    val = 0
+                if FPGA:
+                    queParm(pm.FREQ_MULT, 8)
+
+                queParm(pm.Z_MPG_INC, round(val * stepsInch))
+                queParm(pm.Z_MPG_MAX, \
+                        round(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
+
+                queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
+                queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
+                queParm(pm.Z_MICRO, cfg.getInfoData(cf.zMicroSteps))
+                queParm(pm.Z_MOTOR, cfg.getInfoData(cf.zMotorSteps))
+                queParm(pm.Z_ACCEL, cfg.getInfoData(cf.zAccel))
+                queParm(pm.Z_BACKLASH, cfg.getInfoData(cf.zBacklash))
+
+                queParm(pm.Z_MOVE_MIN, cfg.getInfoData(cf.zMinSpeed))
+                queParm(pm.Z_MOVE_MAX, cfg.getInfoData(cf.zMaxSpeed))
+
+                queParm(pm.Z_JOG_MIN, cfg.getInfoData(cf.zJogMin))
+                queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
+
+                queParm(pm.JOG_TIME_INITIAL,\
+                        cfg.getFloatInfoData(cf.jogTimeInitial))
+                queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+                queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
+
+                queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
+                queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
+
+                queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
+
+                queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
+                queParm(pm.Z_HOME_DIST_REV, cfg.getInfoData(cf.zHomeDistRev))
+                queParm(pm.Z_HOME_DIST_BACKOFF, \
+                        cfg.getInfoData(cf.zHomeDistBackoff))
+                queParm(pm.Z_HOME_SPEED, cfg.getInfoData(cf.zHomeSpeed))
+                queParm(pm.Z_HOME_DIR, \
+                        1 if bool(cfg.getBoolInfoData(cf.zHomeDir)) else -1)
+
+                comm.command(cm.CMD_ZSETUP)
+
+                self.zDataSent = True
+        except CommTimeout:
+            commTimeout(self.jp)
+        except:
+            print("setZData exception")
+            stdout.flush()
+            traceback.print_exc()
+
+    def sendXData(self, send=False):
+        cfg = self.cfg
+        comm = self.comm
+        queParm = comm.queParm
+        try:
+            # pitch = cfg.getDistInfoData(cf.xPitch)
+            motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
+            microSteps = cfg.getIntInfoData(cf.xMicroSteps)
+            # motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
+            # if motorRatio == 0:
+            #     motorRatio = 1
+            # self.jp.xStepsInch = stepsInch = (microSteps * motorSteps * \
+            #                                   motorRatio) / pitch
+            self.jp.xStepsInch = stepsInch = self.mf.xStepsInch
+
+            xSyncInt = self.mf.xSyncInt
+            if xSyncInt is not None:
+                xSyncInt.setLeadscrew(cfg.getInfoData(cf.xPitch))
+                xSyncInt.setMotorSteps(motorSteps)
+                xSyncInt.setMicroSteps(microSteps)
+                if not FPGA:
+                    xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
                 else:
-                    queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                    xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
 
-            comm.command(cm.CMD_SPSETUP)
-            spindleDataSent = True
-    except CommTimeout:
-        commTimeout()
+            xSyncExt = self.mf.xSyncExt
+            if xSyncExt is not None:
+                xSyncExt.setLeadscrew(cfg.getInfoData(cf.xPitch))
+                xSyncExt.setMotorSteps(motorSteps)
+                xSyncExt.setMicroSteps(microSteps)
 
-def sendZData(send=False):
-    global zDataSent
-    queParm = comm.queParm
-    try:
-        pitch = cfg.getDistInfoData(cf.zPitch)
-        motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
-        microSteps = cfg.getIntInfoData(cf.zMicroSteps)
-        motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
-        jogPanel.zStepsInch = stepsInch = (microSteps * motorSteps * \
-                                           motorRatio) / pitch
+            # droInch = 0
+            # if DRO:
+            #     self.jp.xDROInch = droInch = cfg.getIntInfoData(cf.xDROInch)
 
-        if zSyncInt is not None:
-            zSyncInt.setLeadscrew(cfg.getInfoData(cf.zPitch))
-            zSyncInt.setMotorSteps(motorSteps)
-            zSyncInt.setMicroSteps(microSteps)
-            if not FPGA:
-                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
-            else:
-                zSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
+            # print("xStepsInch %0.2f" % (self.jp.xStepsInch))
+            # stdout.flush()
 
-        if zSyncExt is not None:
-            zSyncExt.setLeadscrew(cfg.getInfoData(cf.zPitch))
-            zSyncExt.setMotorSteps(motorSteps)
-            zSyncExt.setMicroSteps(microSteps)
-                       
-        if DRO:
-            jogPanel.zDROInch = cfg.getIntInfoData(cf.zDROInch)
+            if send or (not self.xDataSent):
+                if DRO:
+                    droInch = self.mf.xDROInch
+                    queParm(pm.X_DRO_COUNT_INCH, droInch)
+                    queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
+                    queParm(pm.X_USE_DRO, cfg.getBoolInfoData(cf.xDROPos))
+                    queParm(pm.X_DONE_DELAY, cfg.getIntInfoData(cf.xDoneDelay))
+                    queParm(pm.X_DRO_FINAL_DIST,
+                            round(cfg.getFloatInfoData(cf.xDroFinalDist) * \
+                                  droInch))
+                    stepF = factor.factor(stepsInch)
+                    droF = factor.factor(droInch)
+                    (stepF, droF) = factor.remFactors(stepF, droF)
+                    stepFactor = factor.combineFactors(stepF)
+                    droFactor = factor.combineFactors(droF)
+                    queParm(pm.X_STEP_FACTOR, stepFactor)
+                    queParm(pm.X_DRO_FACTOR, droFactor)
+                else:
+                    queParm(pm.X_DONE_DELAY, 0)
 
-        # print("zStepsInch %0.2f" % (jogPanel.zStepsInch))
-        # stdout.flush()
+                val = self.jp.combo.GetValue()
+                try:
+                    val = float(val)
+                    if val > 0.020:
+                        val = 0.020
+                except ValueError:
+                    # val = cfg.getFloatInfoData(cf.xMpgInc)
+                    val = 0
+                queParm(pm.X_MPG_INC, round(val * stepsInch))
+                queParm(pm.X_MPG_MAX, \
+                        round(cfg.getFloatInfoData(cf.xMpgMax) * stepsInch))
 
-        if send or (not zDataSent):
-            if DRO:
-                queParm(pm.Z_DRO_COUNT_INCH, jogPanel.zDROInch)
-                queParm(pm.Z_DRO_INVERT, cfg.getBoolInfoData(cf.zInvDRO))
-                queParm(pm.Z_USE_DRO, cfg.getBoolInfoData(cf.zDROPos))
+                queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
+                queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
+                queParm(pm.X_MICRO, cfg.getInfoData(cf.xMicroSteps))
+                queParm(pm.X_MOTOR, cfg.getInfoData(cf.xMotorSteps))
+                queParm(pm.X_ACCEL, cfg.getInfoData(cf.xAccel))
+                queParm(pm.X_BACKLASH, cfg.getInfoData(cf.xBacklash))
 
-            val = jogPanel.combo.GetValue()
+                queParm(pm.X_MOVE_MIN, cfg.getInfoData(cf.xMinSpeed))
+                queParm(pm.X_MOVE_MAX, cfg.getInfoData(cf.xMaxSpeed))
+
+                queParm(pm.X_JOG_MIN, cfg.getInfoData(cf.xJogMin))
+                queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
+
+                queParm(pm.JOG_TIME_INITIAL,\
+                             cfg.getFloatInfoData(cf.jogTimeInitial))
+                queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
+                queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
+
+                queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
+                queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
+
+                queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
+
+                comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
+                comm.queParm(pm.X_HOME_DIST_REV, \
+                             cfg.getInfoData(cf.xHomeDistRev))
+                comm.queParm(pm.X_HOME_DIST_BACKOFF, \
+                             cfg.getInfoData(cf.xHomeDistBackoff))
+                comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
+                comm.queParm(pm.X_HOME_DIR,
+                             1 if bool(cfg.getBoolInfoData(cf.xHomeDir)) else -1)
+
+                if HOME_TEST:
+                    stepsInch = self.jp.xStepsInch
+                    start = str(int(cfg.getFloatInfoData(cf.xHomeStart) * \
+                                    stepsInch))
+                    end = str(int(cfg.getFloatInfoData(cf.xHomeEnd) * \
+                                  stepsInch))
+                    if end > start:
+                        (start, end) = (end, start)
+                    queParm(pm.X_HOME_START, start)
+                    queParm(pm.X_HOME_END, end)
+
+                comm.command(cm.CMD_XSETUP)
+                self.xDataSent = True
+        except CommTimeout:
+            commTimeout(self.jp)
+
+    def sendMegaData(self, send=False):
+        if send or (not self.megaDataSent):
+            self.megaDataSent = True
+            cfg = self.cfg
+            setMega = self.comm.setMegaParm
             try:
-                val = float(val)
-                if val > 0.020:
-                    val = 0.020
-            except ValueError:
-                # val = cfg.getFloatInfoData(cf.zMpgInc)
-                val = 0
-            if FPGA:
-                queParm(pm.FREQ_MULT, 8)
-                
-            queParm(pm.Z_MPG_INC, round(val * stepsInch))
-            queParm(pm.Z_MPG_MAX, \
-                    round(cfg.getFloatInfoData(cf.zMpgMax) * stepsInch))
-
-            queParm(pm.Z_PITCH, cfg.getDistInfoData(cf.zPitch, 6))
-            queParm(pm.Z_RATIO, cfg.getInfoData(cf.zMotorRatio))
-            queParm(pm.Z_MICRO, cfg.getInfoData(cf.zMicroSteps))
-            queParm(pm.Z_MOTOR, cfg.getInfoData(cf.zMotorSteps))
-            queParm(pm.Z_ACCEL, cfg.getInfoData(cf.zAccel))
-            queParm(pm.Z_BACKLASH, cfg.getInfoData(cf.zBacklash))
-
-            queParm(pm.Z_MOVE_MIN, cfg.getInfoData(cf.zMinSpeed))
-            queParm(pm.Z_MOVE_MAX, cfg.getInfoData(cf.zMaxSpeed))
-
-            queParm(pm.Z_JOG_MIN, cfg.getInfoData(cf.zJogMin))
-            queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
-
-            queParm(pm.JOG_TIME_INITIAL,\
-                         cfg.getFloatInfoData(cf.jogTimeInitial))
-            queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
-            queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
-
-            queParm(pm.Z_DIR_FLAG, cfg.getBoolInfoData(cf.zInvDir))
-            queParm(pm.Z_MPG_FLAG, cfg.getBoolInfoData(cf.zInvMpg))
-
-            queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
-
-            comm.command(cm.CMD_ZSETUP)
-
-            zDataSent = True
-    except CommTimeout:
-        commTimeout()
-    except:
-        print("setZData exception")
-        stdout.flush()
-        traceback.print_exc()
-
-def sendXData(send=False):
-    global xDataSent
-    queParm = comm.queParm
-    try:
-        pitch = cfg.getDistInfoData(cf.xPitch)
-        motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
-        microSteps = cfg.getIntInfoData(cf.xMicroSteps)
-        motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
-        if motorRatio == 0:
-            motorRatio = 1
-        jogPanel.xStepsInch = stepsInch = (microSteps * motorSteps * \
-                                           motorRatio) / pitch
-
-        if xSyncInt is not None:
-            xSyncInt.setLeadscrew(cfg.getInfoData(cf.xPitch))
-            xSyncInt.setMotorSteps(motorSteps)
-            xSyncInt.setMicroSteps(microSteps)
-            if not FPGA:
-                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFcy))
-            else:
-                xSyncInt.setClockFreq(cfg.getIntInfoData(cf.cfgFpgaFreq))
-
-        if xSyncExt is not None:
-            xSyncExt.setLeadscrew(cfg.getInfoData(cf.xPitch))
-            xSyncExt.setMotorSteps(motorSteps)
-            xSyncExt.setMicroSteps(microSteps)
-
-        if DRO:
-            jogPanel.xDROInch = droInch = cfg.getIntInfoData(cf.xDROInch)
-
-        # print("xStepsInch %0.2f" % (jogPanel.xStepsInch))
-        # stdout.flush()
-
-        if send or (not xDataSent):
-            if DRO:
-                queParm(pm.X_DRO_COUNT_INCH, jogPanel.xDROInch)
-                queParm(pm.X_DRO_INVERT, cfg.getBoolInfoData(cf.xInvDRO))
-                queParm(pm.X_USE_DRO, cfg.getBoolInfoData(cf.xDROPos))
-                queParm(pm.X_DONE_DELAY, cfg.getIntInfoData(cf.xDoneDelay))
-                queParm(pm.X_DRO_FINAL_DIST,
-                        round(cfg.getFloatInfoData(cf.xDroFinalDist) * \
-                              droInch))
-                stepF = factor.factor(stepsInch)
-                droF = factor.factor(droInch)
-                (stepF, droF) = factor.remFactors(stepF, droF)
-                stepFactor = factor.combineFactors(stepF)
-                droFactor = factor.combineFactors(droF)
-                queParm(pm.X_STEP_FACTOR, stepFactor)
-                queParm(pm.X_DRO_FACTOR, droFactor)
-            else:
-                queParm(pm.X_DONE_DELAY, 0)
-
-            val = jogPanel.combo.GetValue()
-            try:
-                val = float(val)
-                if val > 0.020:
-                    val = 0.020
-            except ValueError:
-                # val = cfg.getFloatInfoData(cf.xMpgInc)
-                val = 0
-            queParm(pm.X_MPG_INC, round(val * stepsInch))
-            queParm(pm.X_MPG_MAX, \
-                    round(cfg.getFloatInfoData(cf.xMpgMax) * stepsInch))
-
-            queParm(pm.X_PITCH, cfg.getDistInfoData(cf.xPitch, 6))
-            queParm(pm.X_RATIO, cfg.getInfoData(cf.xMotorRatio))
-            queParm(pm.X_MICRO, cfg.getInfoData(cf.xMicroSteps))
-            queParm(pm.X_MOTOR, cfg.getInfoData(cf.xMotorSteps))
-            queParm(pm.X_ACCEL, cfg.getInfoData(cf.xAccel))
-            queParm(pm.X_BACKLASH, cfg.getInfoData(cf.xBacklash))
-
-            queParm(pm.X_MOVE_MIN, cfg.getInfoData(cf.xMinSpeed))
-            queParm(pm.X_MOVE_MAX, cfg.getInfoData(cf.xMaxSpeed))
-
-            queParm(pm.X_JOG_MIN, cfg.getInfoData(cf.xJogMin))
-            queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
-
-            queParm(pm.JOG_TIME_INITIAL,\
-                         cfg.getFloatInfoData(cf.jogTimeInitial))
-            queParm(pm.JOG_TIME_INC, cfg.getFloatInfoData(cf.jogTimeInc))
-            queParm(pm.JOG_TIME_MAX, cfg.getFloatInfoData(cf.jogTimeMax))
-
-            queParm(pm.X_DIR_FLAG, cfg.getBoolInfoData(cf.xInvDir))
-            queParm(pm.X_MPG_FLAG, cfg.getBoolInfoData(cf.xInvMpg))
-
-            queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
-
-            if HOME_TEST:
-                stepsInch = jogPanel.xStepsInch
-                start = str(int(cfg.getFloatInfoData(cf.xHomeStart) * \
-                                stepsInch))
-                end = str(int(cfg.getFloatInfoData(cf.xHomeEnd) * stepsInch))
-                if end > start:
-                    (start, end) = (end, start)
-                queParm(pm.X_HOME_START, start)
-                queParm(pm.X_HOME_END, end)
-
-            comm.command(cm.CMD_XSETUP)
-            xDataSent = True
-    except CommTimeout:
-        commTimeout()
+                setMega(mp.M_PARM_PWM_CFG, cfg.getIntInfoData(cf.cfgMegaVFD))
+                setMega(mp.M_PARM_ENC_TEST, cfg.getBoolInfoData(cf.cfgMegaEncTest))
+                setMega(mp.M_PARM_ENC_LINES, cfg.getIntInfoData(cf.cfgMegaEncLines))
+            except CommTimeout:
+                pass
 
 class LatheOp():
-    def __init__(self, panel):
+    def __init__(self, mainFrame, panel):
         self.panel = panel
-        self.m = moveCommands
+        self.m = mainFrame.move
         self.zStart = 0.0
         self.zEnd = 0.0
         self.zFeed = 0.0
@@ -1391,11 +1777,12 @@ class LatheOp():
         self.safeZ = 0.0
 
 class UpdatePass():
-    def __init__(self):
+    def __init__(self, mainFrame):
+        self.upmf = mainFrame
         self.calcPassN = None    # calculate values for a pass
         self.runPassN = None     # run a pass with current values
 
-        self.add = False
+        self.addEnabled = False
         self.passes = 0
         self.passCount = 0
         self.passSize = [0.0, ]
@@ -1411,9 +1798,10 @@ class UpdatePass():
         self.actualFeed = 0.0
 
         self.pause = False
+        self.lastPass = None
 
-    def calcFeed(self, feed, cutAmount, finish=0):
-        self.add = False
+    def calcFeed(self, feed, cutAmount, finish=0.0):
+        self.addEnabled = False
         self.cutAmount = cutAmount
         cutToFinish = cutAmount - finish
         self.passes = int(ceil(cutToFinish / abs(feed)))
@@ -1435,26 +1823,23 @@ class UpdatePass():
         self.runpassN = runpass
 
     def initPass(self):
-        comm.setParm(pm.TOTAL_PASSES, self.passes)
-        self.passSize = [None for i in range(self.passes + 1)]
-        self.passSize[0] = 0.0
+        self.passSize = [0.0 for _ in range(self.passes + 1)]
         self.passCount = 0
         self.sPassCtr = 0
         self.spring = 0
         self.feed = 0.0
         self.springFlag = False
         self.lastPass = False
-        self.pause = self.panel.pause.GetValue()
 
     def updatePass(self):
         if (self.passCount < self.passes) or self.springFlag:
             if self.springFlag:
                 self.springFlag = False
-                moveCommands.nextPass(0x100 | self.passCount)
+                self.upmf.move.nextPass(0x100 | self.passCount)
                 self.runpassN()
             else:
                 self.passCount += 1
-                moveCommands.nextPass(self.passCount)
+                self.upmf.move.nextPass(self.passCount)
                 self.calcPassN(self.passCount == self.passes)
                 self.lastPass = self.passCount == self.passes and \
                                 self.sPasses == 0
@@ -1469,53 +1854,96 @@ class UpdatePass():
                            (self.sPasses == 0):
                             self.springFlag = True
                         else:
-                            return(True)
+                            return True
         else:
             if self.spring < self.sPasses:
                 self.spring += 1
-                moveCommands.nextPass(0x200 | self.spring)
+                self.upmf.move.nextPass(0x200 | self.spring)
                 self.lastPass = self.spring == self.sPasses
                 # print("spring %d lastPass %s" % \
                 #       (self.spring, self.lastPass))
                 self.runpassN()
             else:
-                return(False)
+                return False
         # print("updatePass %d %s" % (self.passCount, self.springFlag))
-        return(True)
+        return True
 
     def passDone(self):
-        m = self.m
+        m = self.upmf.move
         m.drawClose()
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
             m.stopSpindle()
         m.done(ct.PARM_DONE)
         stdout.flush()
 
-    def addInit(self, label):
-        jogPanel.dPrt("\n%s addPass\n" % (label))
-        self.pause = self.panel.pause.GetValue()
-        self.add = True
-        add = getFloatVal(self.panel.add)
+    def addInit(self, label, panel):
+        self.upmf.dPrt("\n%s addPass\n" % (label))
+        self.upmf.dPrt(timeStr() + "\n")
+        self.pause = panel.pause.GetValue()
+        self.addEnabled = True
+        add = getFloatVal(panel.addPass)
         if add != 0.0:
-            self.panel.add.SetValue("0.0000")
+            panel.addPass.SetValue("0.0000")
         else:
             self.pause = True
-        return(add)
+        return add
 
     def addDone(self):
-        m = self.m
+        m = self.upmf.move
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
             m.stopSpindle()
         m.done(ct.PARM_DONE)
-        comm.command(cm.CMD_RESUME)
+        self.upmf.comm.command(cm.CMD_RESUME)
 
     def fixCut(self, offset=0.0):
         pass
 
+def getSyncParm(control, feed, rpm, axis):
+    val = getFloatVal(feed)
+    rpm = getIntVal(rpm)
+    mf = control.mf
+    turnSync = mf.turnSync
+    if turnSync == en.SEL_TU_ISYN or turnSync == en.SEL_TU_SYN:
+        syn = mf.zSyncInt if axis == AXIS_Z else mf.xSyncInt
+        (control.cycle, control.output,
+         control.inPreScaler, control.outPreScaler) = \
+            syn.calcSync(val, metric=False, rpm=rpm, turn=True)
+    elif turnSync == en.SEL_TU_ESYN:
+        syn = mf.zSyncExt if axis == AXIS_Z else mf.xSyncExt
+        (control.cycle, control.output,
+         control.inPreScaler, control.outPreScaler) = \
+            syn.calcSync(val, metric=False, rpm=rpm, turn=True)
+
+def sendSyncParm(control):
+    mf = control.mf
+    turnSync = mf.turnSync
+    queParm = mf.comm.queParm
+    if turnSync == en.SEL_TU_ISYN or \
+       turnSync == en.SEL_TU_SYN or \
+       ((turnSync == en.SEL_TU_ESYN) and SYNC_SPI):
+        queParm(pm.L_SYNC_CYCLE, control.cycle)
+        queParm(pm.L_SYNC_OUTPUT, control.output)
+        queParm(pm.L_SYNC_IN_PRESCALER, control.inPreScaler)
+        queParm(pm.L_SYNC_OUT_PRESCALER, control.outPreScaler)
+        if SYNC_SPI:
+            m = control.m
+            m.syncParms()
+            m.syncCommand(sc.SYNC_SETUP)
+    elif turnSync == en.SEL_TU_ESYN:
+        syncComm = mf.syncComm
+        syncComm.setParm(sp.SYNC_ENCODER, \
+                         control.cfg.getIntInfoData(cf.cfgEncoder))
+        syncComm.setParm(sp.SYNC_CYCLE, control.cycle)
+        syncComm.setParm(sp.SYNC_OUTPUT, control.output)
+        syncComm.setParm(sp.SYNC_PRESCALER, control.outPreScaler)
+        syncComm.command(sc.SYNC_SETUP)
+
 class Turn(LatheOp, UpdatePass):
-    def __init__(self, turnPanel):
-        LatheOp.__init__(self, turnPanel)
-        UpdatePass.__init__(self)
+    def __init__(self, mainFrame, turnPanel):
+        LatheOp.__init__(self, mainFrame, turnPanel)
+        UpdatePass.__init__(self, mainFrame)
+        self.mf = mainFrame
+        self.cfg = mainFrame.cfg
         self.xCut = 0.0
         self.curX = 0.0
         self.internal = False
@@ -1523,29 +1951,24 @@ class Turn(LatheOp, UpdatePass):
 
     def getParameters(self):
         tu = self.panel
+        self.manual = tu.manual.GetValue()
         self.internal = tu.internal.GetValue()
 
-        if self.internal:
-            self.xStart = getFloatVal(tu.xDiam1) / 2.0
-            self.xEnd = getFloatVal(tu.xDiam0) / 2.0
-        else:
-            self.xStart = getFloatVal(tu.xDiam0) / 2.0
-            self.xEnd = getFloatVal(tu.xDiam1) / 2.0
-        self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
+        if not self.manual:
+            if self.internal:
+                self.xStart = getFloatVal(tu.xDiam1) / 2.0
+                self.xEnd = getFloatVal(tu.xDiam0) / 2.0
+            else:
+                self.xStart = getFloatVal(tu.xDiam0) / 2.0
+                self.xEnd = getFloatVal(tu.xDiam1) / 2.0
+            self.xFeed = abs(getFloatVal(tu.xFeed) / 2.0)
         self.xRetract = abs(getFloatVal(tu.xRetract))
 
         self.zStart = getFloatVal(tu.zStart)
         self.zEnd = getFloatVal(tu.zEnd)
         self.zRetract = getFloatVal(tu.zRetract)
 
-        val = getFloatVal(tu.zFeed)
-        rpm = getIntVal(tu.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, tu.zFeed, tu.rpm, AXIS_Z)
 
     def runOperation(self):
         self.getParameters()
@@ -1554,27 +1977,29 @@ class Turn(LatheOp, UpdatePass):
             if self.xEnd <= 0:
                 self.neg = True
             else:
-                jogPanel.setStatus(st.STR_SIGN_ERROR)
-                return(False)
+                self.mf.jogPanel.setStatus(st.STR_SIGN_ERROR)
+                return False
         else:
             if self.xEnd >= 0:
                 self.neg = False
             else:
-                jogPanel.setStatus(st.STR_SIGN_ERROR)
-                return(False)
+                self.mf.jogPanel.setStatus(st.STR_SIGN_ERROR)
+                return False
 
         self.xCut = abs(self.xStart) - abs(self.xEnd)
         if self.internal:
             if self.xCut > 0:
-                jogPanel.setStatus(st.STR_INTERNAL_ERROR)
-                return(False)
+                self.mf.jogPanel.setStatus(st.STR_INTERNAL_ERROR)
+                return False
         else:
             if self.xCut < 0:
-                jogPanel.setStatus(st.STR_EXTERNAL_ERROR)
-                return(False)
+                self.mf.jogPanel.setStatus(st.STR_EXTERNAL_ERROR)
+                return False
         self.xCut = abs(self.xCut)
 
         self.calcFeed(self.xFeed, self.xCut)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
 
@@ -1592,21 +2017,23 @@ class Turn(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
         self.safeZ = self.zStart + self.zRetract
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if self.mf.cfgDraw:
             self.m.draw("turn", self.zStart, self.zEnd)
 
-        jogPanel.dPrt("\nturn runOperation\n")
+        self.mf.dPrt("\nturn runOperation\n")
+        self.mf.dPrt(timeStr() + "\n")
         self.setup()
 
         while self.updatePass():
             pass
 
-        self.m.moveX(self.xStart + self.xRetract)
+        self.m.moveX(self.safeX)
 
         self.passDone()
         return(True)
 
     def setup(self, add=False): # turn
+        comm = self.mf.comm
         comm.queParm(pm.CURRENT_OP, en.OP_TURN)
         m = self.m
         if not add:
@@ -1615,17 +2042,7 @@ class Turn(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-            if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-                comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-            elif TURN_SYNC == en.SEL_TU_ESYN:
-                syncComm.setParm(sp.SYNC_ENCODER, \
-                                 cfg.getIntInfoData(cf.cfgEncoder))
-                syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-                syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-                syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-                syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -1633,15 +2050,15 @@ class Turn(LatheOp, UpdatePass):
         m.done(ct.PARM_START)
 
         comm.command(cm.CMD_SYNCSETUP)
-        
-        m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
+
+        m.startSpindle(self.cfg.getIntInfoData(cf.tuRPM))
 
         m.queFeedType(ct.FEED_PITCH)
-        m.zSynSetup(cfg.getFloatInfoData(cf.tuZFeed))
-            
+        m.zSynSetup(self.cfg.getFloatInfoData(cf.tuZFeed))
+
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        
+
         if not add:
             m.text("%7.3f" % (self.xStart * 2.0), \
                    (self.safeZ, self.xStart))
@@ -1665,13 +2082,16 @@ class Turn(LatheOp, UpdatePass):
         self.curX = self.xStart + feed
         self.safeX = self.curX + self.xRetract
         self.passSize[self.passCount] = self.curX * 2.0
-        jogPanel.dPrt("pass %2d feed %5.3f x %5.3f diameter %5.3f\n" % \
-                      (self.passCount, feed, self.curX, self.curX * 2.0), \
-                      True, True)
+        self.mf.dPrt("pass %2d feed %5.3f x %5.3f "\
+                     "diameter %5.3f %s\n" % \
+                     (self.passCount, feed, self.curX, \
+                      self.curX * 2.0, ("", "final")[final]), \
+                     True, True)
 
     def runPass(self, addPass=False): # turn
         m = self.m
-        flag = ct.CMD_MOV | ((ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else 0)
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
         m.moveX(self.curX, flag)
         if DRO:
             m.saveXDro()
@@ -1694,19 +2114,19 @@ class Turn(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
 
     def addPass(self):
-        add = self.addInit("turn") / 2.0
+        add = self.addInit("turn", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.calcPass(True)
-        moveCommands.nextPass(self.passCount)
+        self.m.nextPass(self.passCount)
         self.runPass(True)
         self.m.moveX(self.xStart + self.xRetract)
         self.addDone()
 
     def fixCut(self, offset=0.0): # turn
-        passNum = jogPanel.lastPass
+        passNum = self.mf.jogPanel.lastPass
         if offset == 0.0:
-            actual = float(jogPanel.xPos.GetValue())
+            actual = float(self.mf.jogPanel.xPos.GetValue())
             self.passSize[passNum] = 2 * actual
             if self.internal:
                 self.cutAmount = actual - self.xStart
@@ -1715,32 +2135,92 @@ class Turn(LatheOp, UpdatePass):
         else:
             self.passSize[passNum] += offset
 
-class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, hdrFont, *args, **kwargs):
-        super(TurnPanel, self).__init__(parent, *args, **kwargs)
-        self.hdrFont = hdrFont
+    def manualOperation(self):
+        self.getParameters()
+
+        jp = self.mf.jogPanel
+        startSpindle = not jp.spindleButton.GetValue()
+
+        comm = self.mf.comm
+        xLocation = (float(comm.getParm(pm.X_LOC)) / jp.xStepsInch - \
+                     jp.xHomeOffset)
+
+        if self.internal:
+            self.xRetract = -self.xRetract
+
+        self.safeX = xLocation + self.xRetract
+        self.safeZ = self.zStart + self.zRetract
+
+        self.passSize = [0.0, 2 * xLocation]
+        self.passNum = 1
+
+        self.mf.dPrt("\nturn manualOperation\n")
+        self.mf.dPrt(timeStr() + "\n")
+
+        comm.queParm(pm.CURRENT_OP, en.OP_TURN)
+
+        self.mf.setupSync()
+        m = self.mf.move
+        m.queInit()
+        m.done(ct.PARM_START)
+
+        comm.command(cm.CMD_SYNCSETUP)
+
+        if startSpindle:
+            m.startSpindle(self.cfg.getIntInfoData(cf.tuRPM))
+
+        m.queFeedType(ct.FEED_PITCH)
+        m.zSynSetup(self.cfg.getFloatInfoData(cf.tuZFeed))
+
+        self.passCount = 1
+        m.nextPass(self.passCount)
+
+        m.moveZ(self.zStart)
+        m.moveZ(self.zEnd, ct.CMD_SYN)
+
+        m.moveX(self.safeX)
+        m.moveZ(self.safeZ)
+
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
+        m.moveX(xLocation, flag)
+
+        if startSpindle:
+            if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
+                m.stopSpindle()
+        m.done(ct.PARM_DONE)
+        stdout.flush()
+
+class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Turn(self), en.OP_TURN)
+        super(TurnPanel, self).__init__(mainFrame, *args, **kwargs)
+        ActionRoutines.__init__(self, Turn(mainFrame, self), en.OP_TURN)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.fields0 = []
+        self.hdrFont = hdrFont
         self.InitUI()
-        self.configList = None
         self.prefix = 'tu'
-        self.formatList = ((cf.tuAddFeed, 'f'), \
-                           (cf.tuInternal, None), \
-                           (cf.tuPasses, 'd'), \
-                           (cf.tuPause, None), \
-                           (cf.tuRPM, 'd'), \
-                           (cf.tuSPInt, 'd'), \
-                           (cf.tuSpring, 'd'), \
-                           (cf.tuXDiam0, 'f'), \
-                           (cf.tuXDiam1, 'f'), \
-                           (cf.tuXFeed, 'f'), \
-                           (cf.tuXRetract, 'f'), \
-                           (cf.tuZEnd, 'f'), \
-                           (cf.tuZFeed, 'f'), \
-                           (cf.tuZRetract, 'f'), \
-                           (cf.tuZStart, 'f'))
+        # self.formatList = ((cf.tuAddFeed, 'f'), \
+        #                    (cf.tuInternal, None), \
+        #                    (cf.tuPasses, 'd'), \
+        #                    (cf.tuPause, None), \
+        #                    (cf.tuRPM, 'd'), \
+        #                    (cf.tuSPInt, 'd'), \
+        #                    (cf.tuSpring, 'd'), \
+        #                    (cf.tuXDiam0, 'f'), \
+        #                    (cf.tuXDiam1, 'f'), \
+        #                    (cf.tuXFeed, 'f'), \
+        #                    (cf.tuXRetract, 'f'), \
+        #                    (cf.tuZEnd, 'f'), \
+        #                    (cf.tuZFeed, 'f'), \
+        #                    (cf.tuZRetract, 'f'), \
+        #                    (cf.tuZStart, 'f'))
 
     def InitUI(self):
+        fields0 = self.fields0
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         txt = wx.StaticText(self, -1, "Turn", size=(120, 30))
@@ -1753,123 +2233,951 @@ class TurnPanel(wx.Panel, FormRoutines, ActionRoutines):
         # x parameters
 
         (self.xDiam0, self.diam0Txt) = \
-            self.addFieldText(sizerG, "X Start D", cf.tuXDiam0)
+            addFieldText(self, sizerG, "X Start D", cf.tuXDiam0, 'f')
         self.focusField = self.xDiam0
+        fields0.append(self.xDiam0)
 
         (self.xDiam1, self.diam1Txt) = \
-            self.addFieldText(sizerG, "X End D", cf.tuXDiam1)
+            addFieldText(self, sizerG, "X End D", cf.tuXDiam1, 'f')
+        fields0.append(self.xDiam1)
 
-        self.xFeed = self.addField(sizerG, "X Feed D", cf.tuXFeed)
+        self.xFeed = addField(self, sizerG, "X Feed D", cf.tuXFeed, 'f')
+        fields0.append(self.xFeed)
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.tuXRetract)
+        self.xRetract = addField(self, sizerG, "X Retract", cf.tuXRetract, 'f')
 
         # z parameters
 
-        self.zEnd = self.addField(sizerG, "Z End", cf.tuZEnd)
+        self.zEnd = addField(self, sizerG, "Z End", cf.tuZEnd, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.tuZStart)
+        self.zStart = addField(self, sizerG, "Z Start", cf.tuZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.tuZFeed)
+        self.zFeed = addField(self, sizerG, "Z Feed", cf.tuZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.tuZRetract)
+        self.zRetract = addField(self, sizerG, "Z Retract", cf.tuZRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.tuPasses)
+        self.passes = addField(self, sizerG, "Passes", cf.tuPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.tuSPInt)
+        self.sPInt = addField(self, sizerG, "SP Int", cf.tuSPInt, 'd')
+        fields0.append(self.sPInt)
 
-        self.spring = self.addField(sizerG, "Spring", cf.tuSpring)
+        self.spring = addField(self, sizerG, "Spring", cf.tuSpring, 'd')
+        fields0.append(self.spring)
 
-        self.internal = self.addCheckBox(sizerG, "Internal", cf.tuInternal, \
-                                         self.OnInternal)
-        
+        self.manual = addCheckBox(self, sizerG, "Manual", cf.tuManual, \
+                                  self.OnManual)
+
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
+        addButtons(self, sizerG, cf.tuAddFeed, cf.tuRPM, cf.tuPause, True)
+        fields0.append(self.sendButton)
+        fields0.append(self.addPass)
+        fields0.append(self.pause)
 
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.tuAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.tuRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.tuPause)
+        self.internal = addCheckBox(self, sizerG, "Internal", cf.tuInternal, \
+                                    self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
-    def OnInternal(self, e):
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def OnManual(self, _):
         self.updateUI()
-            
+
+    def OnInternal(self, _):
+        self.updateUI()
+
     def updateUI(self):
-        if self.internal.GetValue():
-            self.diam0Txt.SetLabel("X End D")
-            self.diam1Txt.SetLabel("X Start D")
-        else:
-            self.diam0Txt.SetLabel("X Start D")
-            self.diam1Txt.SetLabel("X End D")
-        self.sizerV.Layout()
+        if not self.active:
+            if self.internal.GetValue():
+                self.diam0Txt.SetLabel("X End D")
+                self.diam1Txt.SetLabel("X Start D")
+            else:
+                self.diam0Txt.SetLabel("X Start D")
+                self.diam1Txt.SetLabel("X End D")
+            btn = self.startButton
+            self.manualMode = self.manual.GetValue()
+            if self.manualMode:
+                for f0 in self.fields0:
+                    f0.Disable()
+                btn.Enable()
+                btn.Bind(wx.EVT_BUTTON, self.OnManualStart)
+            else:
+                for f0 in self.fields0:
+                    f0.Enable()
+                    btn.Disable()
+                btn.Bind(wx.EVT_BUTTON, OnPanelStart)
+            self.sizerV.Layout()
 
     def update(self):
         self.updateUI()
-        self.formatData(self.formatList)
-        jogPanel.setPassText("Diam")
+        formatData(self.mf.cfg, self.formatList)
+        self.mf.jogPanel.setPassText("Diam")
 
     def sendData(self):
         try:
-            moveCommands.queClear()
-            sendClear()
-            sendSpindleData()
-            sendZData()
-            sendXData()
+            self.mf.move.queClear()
+            sd = self.mf.sendData
+            sd.sendClear()
+            sd.sendSpindleData()
+            sd.sendZData()
+            sd.sendXData()
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
         return(self.control.runOperation())
 
     def startAction(self):
-        comm.command(cm.CMD_RESUME)
+        self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
-            if jogPanel.mvStatus & ct.MV_READ_X:
+        if control.addEnabled:
+            if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
-                updateThread.openDebug()
+            if self.mf.dbgSave:
+                self.mf.updateThread.openDebug(action=en.OP_TURN)
+
+    def OnManualStart(self, _):
+        self.sendData()
+        if self.mf.dbgSave:
+            self.mf.updateThread.openDebug(action=en.OP_TURN)
+        self.control.manualOperation()
 
     def addAction(self):
         self.control.addPass()
 
     def nextOperation(self):
         if not self.active:
-            jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
+            self.mf.jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
             return
-        
+
         if self.internal.GetValue():
             dCur = self.xDiam1
             dNxt = self.xDiam0
         else:
             dCur = self.xDiam0
             dNxt = self.xDiam1
-        dCur.SetValue(jogPanel.passSize.GetValue())
+        dCur.SetValue(self.mf.jogPanel.passSize.GetValue())
         dNxt.SetFocus()
         dNxt.SetSelection(-1, -1)
         self.active = False
-        jogPanel.setStatus(st.STR_CLR)
+        self.mf.jogPanel.setStatus(st.STR_CLR)
+
+class Arc(LatheOp, UpdatePass):
+    def __init__(self, mainFrame, arcPanel):
+        LatheOp.__init__(self, mainFrame, arcPanel)
+        UpdatePass.__init__(self, mainFrame)
+        self.mf = mainFrame
+        self.dPrt = mainFrame.dPrt
+        self.cut = 0.0
+        self.curX = 0.0
+        self.neg = False
+        self.internal = False
+        self.arcRadius = None
+        self.materialRadius = None
+        self.retract = None
+        self.startZ = None
+        self.toolRadius = None
+        self.largeRadius = None
+        self.largeStem = None
+        self.smallRadius = None
+        self.smallStem = None
+        self.endDist = None
+        self.toolAngle = None
+        self.finishAllowance = None
+        self.arcCW = None
+        self.arcType = None
+        self.ball = None
+        self.cutRadius = None
+        self.center = None
+        self.radiusStart = None
+        self.toolRadiusStart = None
+        self.toolArcRadius = None
+        self.moveInitial = None
+        self.movePreCut = None
+        self.moveCut = None
+        self.movePostCut = None
+        self.toolEnd = None
+        self.ballStem = None
+
+    def getParameters(self, draw=False):
+        panel = self.panel
+
+        self.arcRadius = getFloatVal(panel.arcRadius)
+        self.materialRadius = getFloatVal(panel.diameter) / 2
+        self.feed = abs(getFloatVal(panel.feed) / 2.0)
+        self.retract = abs(getFloatVal(panel.retract))
+
+        self.startZ = getFloatVal(panel.zStart)
+
+        self.toolRadius = getFloatVal(panel.toolRadius) # ***
+
+        self.largeRadius = getFloatVal(panel.largeEnd) / 2
+        self.largeStem = getFloatVal(panel.largeStem) / 2
+        self.smallStem = getFloatVal(panel.smallStem) / 2
+        self.smallRadius = getFloatVal(panel.smallEnd) / 2
+        self.endDist = getFloatVal(panel.endDist)
+
+        self.toolAngle = getFloatVal(panel.toolAngle)
+        self.xFeed = abs(getFloatVal(panel.xFeed) / 2.0)
+        self.finishAllowance = getFloatVal(panel.finishAllowance)
+
+        self.arcCW = not panel.arcCCW.GetValue()
+        self.arcType = panel.arcType.GetSelection()
+
+        self.ball = False
+        arcType = self.arcType
+        if arcType == en.SEL_ARC_END:
+            self.cutRadius = self.materialRadius
+            self.center = LathePt(0, self.startZ - self.arcRadius)
+            self.setupActions()
+        elif arcType == en.SEL_ARC_CORNER:
+            self.cutRadius = self.arcRadius
+            self.center = LathePt(self.materialRadius - self.arcRadius, \
+                                  self.startZ - self.arcRadius)
+            self.setupActions()
+        elif arcType == en.SEL_ARC_SMALL:
+            self.cutRadius = self.materialRadius
+            self.center = LathePt(0, self.startZ - self.smallRadius)
+            self.setupActions()
+            self.ball = True
+            self.stem(self.smallRadius, self.smallStem, \
+                      self.largeStem, self.largeRadius, stem=False, draw=draw)
+        elif arcType == en.SEL_ARC_LARGE:
+            self.cutRadius = self.materialRadius
+            self.arcRadius = self.largeRadius
+            self.center = LathePt(0, self.startZ - self.largeRadius)
+            self.setupActions()
+            self.ball = True
+            self.stem(self.largeRadius, self.largeStem, \
+                      self.smallStem, self.smallRadius, stem=False, draw=draw)
+        elif arcType == en.SEL_ARC_SMALL_STEM:
+            self.cutRadius = self.materialRadius
+            self.center = LathePt(0, self.startZ - self.smallRadius)
+            self.stem(self.smallRadius, self.smallStem, \
+                      self.largeStem, self.largeRadius)
+        elif arcType == en.SEL_ARC_LARGE_STEM:
+            self.cutRadius = self.materialRadius
+            self.arcRadius = self.largeRadius
+            self.center = LathePt(0, self.startZ - self.largeRadius)
+            self.stem(self.largeRadius, self.largeStem, \
+                      self.smallStem, self.smallRadius)
+
+        self.radiusStart = \
+            hypot(self.materialRadius - self.center.x, self.arcRadius)
+
+        self.toolRadiusStart = self.radiusStart + self.toolRadius # ***
+        self.toolArcRadius = self.arcRadius + self.toolRadius     # ***
+        self.cut = self.toolRadiusStart - self.toolArcRadius
+
+        print("toolRadiusStart %5.3f toolArcRadius %5.3f cut %5.3f" % \
+              (self.toolRadiusStart, self.toolArcRadius, self.cut))
+        stdout.flush()
+
+        getSyncParm(self, panel.zFeed, panel.rpm, AXIS_Z)
+
+    def setupActions(self):
+        if self.arcCW:
+            self.moveInitial = self.moveInitCW
+            self.movePreCut = self.movePreCW
+            self.moveCut = self.moveCutCW
+            self.movePostCut = self.movePostCW
+        else:
+            self.moveInitial = self.moveInitCCW
+            self.movePreCut = self.movePreCCW
+            self.moveCut = self.moveCutCCW
+            self.movePostCut = self.movePostCCW
+
+    def stem(self, rad0, stem0, stem1, rad1, stem=True, draw=False):
+        m = self.m
+        x0 = stem0
+        z0 = self.center.z - sqrt(rad0 * rad0 - x0 * x0)
+        x1 = stem1
+        z1 = self.center.z - self.endDist + sqrt(rad1 * rad1 - x1 * x1)
+
+        if stem:
+            rad0F = rad0 + self.finishAllowance
+            rad1F = rad1 + self.finishAllowance
+            self.moveInitial = self.moveInitStem
+            self.movePreCut = self.movePreStem
+            self.moveCut = self.moveCutStem
+            self.movePostCut = self.movePostStem
+        else:
+            rad0F = rad0
+            rad1F = rad1
+
+        if draw:
+            m.drawArc(self.center, (z0, x0), (self.center.z, 0))
+            m.setLoc(z0, x0)
+            m.drawLine(z1, x1)
+            m.drawArc((self.center.x, self.center.z - self.endDist), \
+                      (self.center.z - self.endDist - rad1, 0), (z1, x1))
+
+        toolAngle = radians(self.toolAngle / 2)
+        tanToolAngle = tan(toolAngle)
+        self.taper = tanToolAngle
+        offset = tanToolAngle * (self.materialRadius - rad0F)
+        matIntersect = self.center.z + offset
+        axisIntersect = self.center.z + offset + (self.materialRadius / \
+                                                  tanToolAngle)
+
+        if draw:
+            m.setLoc(self.center.z, rad0)
+            m.drawLine(matIntersect, self.materialRadius)
+
+        trim1 = Line((self.center.z, self.arcRadius),
+                     (matIntersect, self.materialRadius))
+        if draw:
+            m.drawL(trim1)
+
+        trim2 = GeoArc((self.center.z, self.center.x), rad0F, 180, 270)
+        if draw:
+            m.drawL(trim2)
+
+        trim3 = Line((z1, x1 + self.finishAllowance), \
+                     (z0, x0 + self.finishAllowance))
+
+        if draw:
+            m.drawL(trim3)
+
+        toolCentArc = GeoArc((self.center.z, self.center.x), \
+                             rad0F + self.toolRadius, 180, 270) # ***
+        toolCentLine = trim3.parallel(self.toolRadius, CW)      # ***
+        toolCentLine.intersect(toolCentArc, end=1, trim=False)
+        toolEndCenter = toolCentLine.p1
+        self.toolEnd = LathePt(toolEndCenter.y, \
+                               toolEndCenter.x) # x <- y, z <- x
+
+        # if draw:
+        #     toolCentArc.prt()
+        #     toolCentLine.prt()
+        #     toolEnd = GeoArc(p, self.toolRadius, 0, 360)
+        #     toolEnd.prt()
+        #     m.drawL(toolCentArc)
+        #     m.drawL(toolCentLine)
+        #     m.drawL(toolEnd)
+
+        if not stem:
+            return
+
+        pMat = (matIntersect, self.materialRadius)
+        pAxis = (axisIntersect, 0)
+
+        lStart = Line(pMat, pAxis)
+        zFeedOffset = self.xFeed / sin(toolAngle)
+        # print("zFeedOffset %7.4f" % (zFeedOffset))
+        trimType = 0
+        dbg = False
+        self.ballStem = []
+        wDone = False
+        i = 1
+        while not wDone:
+            passFeed = i * zFeedOffset
+            l = Line((matIntersect - passFeed, self.materialRadius), \
+                     (axisIntersect - passFeed, 0))
+            if dbg:
+                print("%2d " % (i), end="")
+                l.prt()
+            if trimType == 0:
+                p = l.intersect(trim1, False, dbg=dbg)
+                if p[1] < rad0F:
+                    trimType = 1
+
+            if trimType == 1:
+                p = l.intersect(trim2, end=0, trim=False, dbg=dbg)
+                if p[1] < x0:
+                    trimType = 2
+
+            if trimType == 2:
+                p = l.intersect(trim3, False)
+                distance = l.pointDistance(toolEndCenter)
+                if distance is not None and distance > self.toolRadius: # ***
+                    wDone = True
+
+            if draw:
+                m.drawL(l)
+            self.ballStem.append((l.p0, l.p1))
+            i += 1
+
+        m.drawClose()
+
+    def moveNone(self, val=None):
+        if val is not None:
+            print("moveNone called with", val)
+
+    def runOperation(self):
+        # if self.mf.cfgDraw:
+        #     self.m.draw("arc", self.startZ, self.zEnd)
+
+        self.getParameters(draw=False)
+
+        mf = self.mf
+        mf.comm.queParm(pm.ARC_X_CENTER, \
+                     intRound(self.center.x * mf.jogPanel.xStepsInch))
+
+        mf.comm.queParm(pm.ARC_Z_CENTER, \
+                     intRound(self.center.z * mf.jogPanel.zStepsInch))
+        mf.comm.sendMulti()
+
+        arcType = self.arcType
+        if (arcType == en.SEL_ARC_SMALL_STEM or \
+            arcType == en.SEL_ARC_LARGE_STEM):
+            self.passes = len(self.ballStem)
+            self.initPass()
+            toolRadius = 0.0    # ***
+            self.arc = False
+        else:
+            self.calcFeed(self.feed, self.cut)
+            toolRadius = self.toolRadius # ***
+            self.arc = True
+
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
+
+        print("cut %5.3f passes %d" % (self.cut, self.passes))
+        stdout.flush()
+
+        self.setupSpringPasses(self.panel)
+        self.setupAction(self.calcPass, self.runPass)
+
+        self.panel.passes.SetValue("%d" % (self.passes))
+
+        self.safeX = self.materialRadius + toolRadius + self.retract # ***
+        self.safeZ = self.startZ + toolRadius + self.zRetract # ***
+
+        if self.mf.cfgDraw:
+            self.m.draw("arc", self.zStart, self.zEnd)
+
+        if self.arc and True:
+            m = self.m
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.arcRadius), \
+                      (self.center.z + self.arcRadius, self.center.x))
+
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.toolArcRadius), \
+                      (self.center.z + self.toolArcRadius, self.center.x))
+
+            m.drawArc(self.center, \
+                      (self.center.z, self.center.x + self.toolRadiusStart), \
+                      (self.center.z + self.toolRadiusStart, self.center.x))
+
+            m.drawArc((self.center.x, \
+                       self.center.z + self.arcRadius + toolRadius), \
+                      (self.center.z + self.arcRadius + 2*toolRadius, \
+                       self.center.x),\
+                      (self.center.z + self.arcRadius + 2*toolRadius, \
+                       self.center.x))
+
+            m.drawArc((self.center.x + self.arcRadius + toolRadius, \
+                       self.center.z), \
+                      (self.center.z + toolRadius, \
+                       self.center.x + self.arcRadius + toolRadius),
+                      (self.center.z + toolRadius, \
+                       self.center.x + self.arcRadius + toolRadius))
+
+            m.setLoc(self.center.z, self.materialRadius)
+            m.drawLine(self.startZ, self.materialRadius)
+            m.drawLine(self.startZ, self.center.x)
+
+            m.setLoc(self.center.z, self.materialRadius + toolRadius)
+            m.drawLine(self.startZ + toolRadius, \
+                       self.materialRadius + toolRadius)
+            m.drawLine(self.startZ + toolRadius, self.center.x)
+
+            tick = 0.010
+            m.setLoc(self.center.z-tick, self.center.x)
+            m.drawLine(self.center.z+tick, self.center.x)
+
+            m.setLoc(self.center.z , self.center.x-tick)
+            m.drawLine(self.center.z, self.center.x+tick)
+
+        self.dPrt("\narc runOperation %s %s\n" % \
+                  (("CCW", "CW")[self.arcCW], en.selArcTypeText[self.arcType]))
+        self.dPrt(timeStr() + "\n")
+        self.setup()
+
+        while self.updatePass():
+            pass
+
+        self.m.moveX(self.safeX)
+        self.passDone()
+        return(True)
+
+    def setup(self, add=False): # arc
+        comm = self.mf.comm
+        comm.queParm(pm.CURRENT_OP, en.OP_ARC)
+        m = self.m
+        if not add:
+            m.setLoc(self.zEnd, self.xStart)
+            m.drawLineZ(self.zStart, REF)
+            m.drawLineX(self.xEnd, REF)
+            m.setLoc(self.safeZ, self.safeX)
+
+            sendSyncParm(self)
+
+        m.queInit()
+        if (not add) or (add and not self.pause):
+            m.quePause()
+        m.done(ct.PARM_START)
+
+        comm.command(cm.CMD_SYNCSETUP)
+
+        cfg = self.mf.cfg
+        if not self.arc:
+            comm.setParm(pm.TAPER_CYCLE_DIST, \
+                         cfg.getInfoData(cf.cfgTaperCycleDist))
+            m.saveTaper(self.taper)
+
+        m.startSpindle(cfg.getIntInfoData(cf.tuRPM))
+
+        m.queFeedType(ct.FEED_PITCH)
+        m.zSynSetup(cfg.getFloatInfoData(cf.arcZFeed))
+        if not self.arcCW:
+            m.xSynSetup(cfg.getFloatInfoData(cf.arcZFeed))
+
+        self.movePostCut()
+
+        if not add:
+            m.text("%7.3f" % (self.xStart * 2.0), \
+                   (self.safeZ, self.xStart))
+            m.text("%7.3f" % (self.zStart), \
+                   (self.zStart, self.xEnd), \
+                   CENTER | (ABOVE if self.internal else BELOW))
+            m.text("%7.3f %6.3f" % (self.safeX * 2.0, self.actualFeed), \
+                   (self.safeZ, self.safeX))
+            m.text("%7.3f" % (self.zEnd), \
+                   (self.zEnd, self.safeX), CENTER)
+
+    def calcPass(self, final=False):
+        if self.arc:
+            feed = self.cutAmount if final else \
+                self.passCount * self.actualFeed
+            self.feed = feed
+            self.curRadius = self.radiusStart - feed
+            self.calcArcEndPass(final)
+        else:
+            feed = self.xFeed
+            self.curRadius = self.ballStem[self.passCount-1][1][1]
+            self.calcStemPass(final)
+
+        (xc, zc) = self.center
+        x0Delta = self.xStart - xc
+        z0Delta = self.zStart - zc
+        x1Delta = self.xEnd - xc
+        z1Delta = self.zEnd - zc
+        rad0 = hypot(x0Delta, z0Delta)
+        rad1 = hypot(x1Delta, z1Delta)
+
+        self.dPrt("pass %2d feed %5.3f s (x %5.3f z %6.3f) " \
+                  "e (x %5.3f z %6.3f) r %5.3f %5.3f %5.3f %s\n" % \
+                  (self.passCount, feed, self.xStart, self.zStart, \
+                   self.xEnd, self.zEnd, self.curRadius, rad0, rad1,\
+                   ("", "final")[final]), True, True)
+
+    def calcArcEndPass(self, final):
+        toolRadius = self.toolRadius
+        c = self.curRadius + toolRadius # ***
+        a = self.toolArcRadius          # ***
+
+        print("curToolRadius %7.4f toolArcRadius %7.4f" % (c, a))
+        stdout.flush()
+        x0 = sqrt(c * c - a * a) + self.center.x
+        z0 = self.startZ + toolRadius # ***
+        self.passSize[self.passCount] = x0 * 2
+
+        if self.curRadius < self.cutRadius:
+            self.xLabel = True
+            if self.ball and final:
+                (x1, z1) = self.toolEnd
+            else:
+                x1 = self.center.x + self.curRadius + toolRadius # ***
+                z1 = self.center.z
+        else:
+            self.xLabel = False
+            x1 = self.materialRadius - self.center.x + toolRadius # ***
+            z1 = sqrt(c * c - x1 * x1) + self.center.z
+            x1 += self.center.x
+
+        self.passSize[self.passCount] = (x1 - toolRadius) * 2.0 # ***
+
+        if self.arcCW:
+            self.xStart = x0
+            self.zStart = z0
+            self.xEnd = x1
+            self.zEnd = z1
+        else:
+            self.xStart = x1
+            self.zStart = z1
+            self.xEnd = x0
+            self.zEnd = z0
+
+        self.curX = self.xStart
+
+    def calcStemPass(self, final):
+        self.xLabel = False
+        ((self.zStart, self.xStart), (self.zEnd, self.xEnd)) = \
+            self.ballStem[self.passCount - 1]
+        # print("taper %7.4f" % \
+        #       ((self.xStart - self.xEnd) / (self.zStart - self.zEnd)))
+        self.passSize[self.passCount] = self.xEnd * 2
+
+    def runPass(self, addPass=False): # arc
+        m = self.m
+        if addPass:
+            m.passNum |= 0x8000
+
+        flag = (ct.CMD_JOG | ct.DRO_POS | ct.DRO_UPD) if X_DRO_POS else \
+            ct.CMD_MOV
+
+        self.moveInitial(flag)
+
+        if DRO:
+            m.saveXDro()
+        if self.pause:
+            flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
+            m.quePause(flag)
+
+        self.movePreCut()
+
+        if DRO:
+            m.saveXDro()
+            m.saveZDro()
+
+        self.moveCut()
+
+        if DRO:
+            m.saveZDro()
+            m.saveXDro()
+
+        self.movePostCut()
+
+        m.passNum &= ~0x8000
+
+    def passMove(self):
+        m = self.m
+        jp = self.mf.jogPanel
+        m.queParm(pm.ARC_RADIUS, self.curRadius + self.toolRadius)
+        m.queParm(pm.ARC_X_START, intRound(self.xStart * jp.xStepsInch))
+        m.queParm(pm.ARC_Z_START, intRound(self.zStart * jp.zStepsInch))
+        m.queParm(pm.ARC_X_END, intRound(self.xEnd * jp.xStepsInch))
+        m.queParm(pm.ARC_Z_END, intRound(self.zEnd * jp.zStepsInch))
+        m.moveArc()
+
+    # clockwise arc, corner, and ball
+
+    def moveInitCW(self, flag):
+        m = self.m
+        m.moveX(self.curX, flag)
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                   (self.safeZ, self.curX))
+
+    def movePreCW(self):
+        self.m.moveZ(self.zStart)
+
+    def moveCutCW(self):
+        self.passMove()
+        m = self.m
+        if (m.passNum & 0xff00) == 0:
+            if self.xLabel:
+                m.text("%2d %7.3f" % (m.passNum, self.xEnd), \
+                       (self.zEnd, self.xEnd), RIGHT)
+                # if self.zEnd == self.center.z:
+                #     self.endLabel = False
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.zEnd), \
+                       (self.zEnd, self.safeX), RIGHT, textAngle=90)
+
+            m.drawArc(self.center, (self.zEnd, self.xEnd), \
+                      (self.zStart, self.xStart))
+
+            if m.passNum == 1:
+                m.drawCenter(self.center)
+
+    def movePostCW(self):
+        self.m.moveX(self.safeX)
+        self.m.moveZ(self.safeZ)
+
+    # counterclockwise arc, corner, and ball
+
+    def moveInitCCW(self, flag):
+        m = self.m
+        m.moveZ(self.zStart)
+        # self.dPrt("moveInitCCW moveZ zStart   %7.4f\n" % (self.zStart))
+        if (m.passNum & 0xff00) == 0:
+            if self.xLabel:
+                m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                       (self.zStart, self.xStart), RIGHT)
+            else:
+                m.text("%2d %7.3f" % (m.passNum, self.zStart), \
+                       (self.zStart, self.safeX), RIGHT, textAngle=90)
+
+    def movePreCCW(self):
+        m = self.m
+        m.moveX(self.xStart + self.retract)
+        m.moveX(self.xStart) #, ct.CMD_SYN)
+        # self.dPrt("moveInitCCW moveX xRetract %7.4f\n" % (self.xStart))
+        # self.dPrt("moveInitCCW moveX xStart   %7.4f\n" % (self.xStart))
+
+    def moveCutCCW(self):
+        m = self.m
+        self.passMove()
+        # self.dPrt("moveCutCCW  moveX zEnd     %7.4f xEnd %7.4f\n" % \
+        #               (self.zEnd, self.xEnd))
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xEnd), \
+                   (self.safeZ+.060, self.xEnd), RIGHT)
+            m.drawArc(self.center, (self.zStart, self.xStart), \
+                      (self.zEnd, self.xEnd))
+            if m.passNum == 1:
+                m.drawCenter(self.center)
+
+    def movePostCCW(self):
+        m = self.m
+        m.moveZ(self.safeZ)
+        m.moveX(self.safeX)
+        # self.dPrt("movePostCCW moveZ safeZ    %7.4f\n" % (self.safeZ))
+        # self.dPrt("movePostCCW moveX safeX    %7.4f\n" % (self.safeX))
+
+    # stem
+
+    def moveInitStem(self, final):
+        m = self.m
+        m.moveZ(self.zStart)
+        if (m.passNum & 0xff00) == 0:
+            m.text("%2d %7.3f" % (m.passNum, self.xStart * 2), \
+                   (self.safeZ, self.curX))
+
+    def movePreStem(self):
+        self.m.moveX(self.xStart)
+
+    def moveCutStem(self):
+        self.m.taperZX(self.zEnd, self.xEnd)
+
+    def movePostStem(self):
+        self.m.moveX(self.safeX)
+
+    # def addPass(self):
+    #     add = self.addInit("turn") / 2.0
+    #     self.cutAmount += add
+    #     self.setup(True)
+    #     self.calcPass(True)
+    #     moveCommands.nextPass(self.passCount)
+    #     self.runPass(True)
+    #     self.m.moveX(self.xStart + self.xRetract)
+    #     self.addDone()
+
+    def fixCut(self, offset=0.0): # arc
+        jp = self.mf.jogPanel
+        passNum = jp.lastPass
+        if offset == 0.0:
+            actual = float(jp.xPos.GetValue())
+            self.passSize[passNum] = 2 * actual
+            if self.internal:
+                self.cutAmount = actual - self.xStart
+            else:
+                self.cutAmount = self.xStart - actual
+        else:
+            self.passSize[passNum] += offset
+
+class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        super(ArcPanel, self).__init__(mainFrame, *args, **kwargs)
+        FormRoutines.__init__(self)
+        ActionRoutines.__init__(self, Arc(mainFrame, self), en.OP_ARC)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.hdrFont = hdrFont
+        self.InitUI()
+        self.prefix = 'arc'
+
+    def InitUI(self):
+        fields0 = self.fields0 = []
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        txt = wx.StaticText(self, -1, "Arc", size=(120, 30))
+        txt.SetFont(self.hdrFont)
+
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
+
+        # line 1 radius parameters
+
+        self.arcRadius = addField(self, sizerG, "Radius", cf.arcRadius, 'f')
+
+        self.diameter = addField(self, sizerG, "Diam", cf.arcDiam, 'f')
+
+        self.feed = addField(self, sizerG, "Radius Feed", cf.arcFeed, 'f')
+
+        self.zFeed = addField(self, sizerG, "Z Feed", cf.arcZFeed, 'f')
+
+
+        # line 2 diameter and angle
+
+        self.zStart = addField(self, sizerG, "Z Start", cf.arcZStart, 'f')
+
+        self.retract = addField(self, sizerG, "Retract", cf.arcRetract, 'f')
+
+        self.toolRadius = addField(self, sizerG, "Tool Radius", \
+                                   cf.arcToolRad, 'f')
+
+        self.arcType = addComboBox(self, sizerG, "Arc Type", cf.arcType, \
+                                   self.arcTypeSetup)
+        self.arcType.Bind(wx.EVT_COMBOBOX, self.OnArcType)
+
+
+        # line 3 z parameters
+
+        self.ballList = []
+        self.largeEnd = f0 = addField(self, sizerG, "Large End", \
+                                      cf.arcLargeEnd, 'f')
+        self.ballList.append(f0)
+
+        self.largeStem = f0 = addField(self, sizerG, "Large Stem", \
+                                       cf.arcLargeStem, 'f')
+        self.ballList.append(f0)
+
+        self.smallStem = f0 = addField(self, sizerG, "Small Stem", \
+                                       cf.arcSmallStem, 'f')
+        self.ballList.append(f0)
+
+        self.smallEnd = f0 = addField(self, sizerG, "Small End", \
+                                      cf.arcSmallEnd, 'f')
+        self.ballList.append(f0)
+
+        # line 4
+
+        self.toolAngle = f0 = addField(self, sizerG, "Tool Angle", \
+                                       cf.arcToolAngle, 'f0')
+        self.ballList.append(f0)
+
+        self.xFeed = f0 = addField(self, sizerG, "x Feed", cf.arcXFeed, 'f')
+        self.ballList.append(f0)
+
+        self.finishAllowance = f0 = addField(self, sizerG, "Finish", \
+                                             cf.arcFinish, 'f')
+        self.ballList.append(f0)
+
+        self.endDist = f0 =addField(self, sizerG, "Ball Dist", \
+                                    cf.arcBallDist, 'f')
+        self.ballList.append(f0)
+
+        # line 5 pass info
+
+        self.passes = addField(self, sizerG, "Passes", cf.arcPasses, 'd')
+        self.passes.SetEditable(False)
+
+        self.sPInt = addField(self, sizerG, "SP Int", cf.arcSPInt, 'd')
+        fields0.append(self.sPInt)
+
+        self.spring = addField(self, sizerG, "Spring", cf.arcSpring, 'd')
+        fields0.append(self.spring)
+
+        placeHolder(sizerG)
+
+        # line 6 buttons
+
+        addButtons(self, sizerG, cf.arcAddFeed, cf.arcRPM, cf.arcPause, True)
+        fields0.append(self.sendButton)
+        fields0.append(self.addPass)
+        fields0.append(self.pause)
+
+        self.arcCCW = addCheckBox(self, sizerG, "Dir CCW", cf.arcCCW, box=True)
+
+        # self.internal = addCheckBox(self, sizerG, "Internal", cf.arcInternal, \
+        #                                  self.OnInternal, box=True)
+
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+
+        self.SetSizer(sizerV)
+        sizerV.Fit(self)
+
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def arcTypeSetup(self):
+        indexList = (en.SEL_ARC_END, en.SEL_ARC_CORNER, \
+                     en.SEL_ARC_SMALL, en.SEL_ARC_LARGE, \
+                     en.SEL_ARC_SMALL_STEM, en.SEL_ARC_LARGE_STEM)
+        choiceList = []
+        for i in indexList:
+            choiceList.append(en.selArcTypeText[i])
+        return (indexList, choiceList, en.selArcTypeText)
+
+    # def OnInternal(self, _):
+    #     self.updateUI()
+
+    def updateUI(self):
+        if not self.active:
+            arcType = self.arcType.GetSelection()
+            if (arcType == en.SEL_ARC_END or \
+                arcType == en.SEL_ARC_CORNER):
+                self.arcRadius.Enable()
+                for f0 in self.ballList:
+                    f0.Disable()
+            else:
+                self.arcRadius.Disable()
+                for f0 in self.ballList:
+                    f0.Enable()
+            self.sizerV.Layout()
+
+    def update(self):
+        self.updateUI()
+        formatData(self.mf.cfg, self.formatList)
+        self.mf.jogPanel.setPassText("Radius")
+
+    def sendData(self):
+        try:
+            self.mf.move.queClear()
+            sd = self.mf.sendData
+            sd.sendClear()
+            sd.sendSpindleData()
+            sd.sendZData()
+            sd.sendXData()
+        except CommTimeout:
+            commTimeout(self.mf.jogPanel)
+
+    def sendAction(self):
+        self.sendData()
+        return(self.control.runOperation())
+
+    def startAction(self):
+        self.mf.comm.command(cm.CMD_RESUME)
+        control = self.control
+        if control.addEnabled:
+            if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
+                control.fixCut()
+        else:
+            if self.mf.dbgSave:
+                self.mf.updateThread.openDebug(action=en.OP_ARC)
+
+    def addAction(self):
+        self.control.addPass()
+
+    def nextOperation(self):
+        if not self.active:
+            self.mf.jogPanel.setStatus(st.STR_OP_NOT_ACTIVE)
+            return
+
+    def OnArcType(self, _):
+        self.updateUI()
 
 class Face(LatheOp, UpdatePass):
-    def __init__(self, facePanel):
-        LatheOp.__init__(self, facePanel)
-        UpdatePass.__init__(self)
-
+    def __init__(self, mainFrame, facePanel):
+        LatheOp.__init__(self, mainFrame, facePanel)
+        UpdatePass.__init__(self, mainFrame)
+        self.mf = mainFrame
         self.internal = False
         self.zCut = 0.0
         self.curZ = 0.0
@@ -1886,14 +3194,7 @@ class Face(LatheOp, UpdatePass):
         self.zFeed = getFloatVal(fa.zFeed)
         self.zRetract = abs(getFloatVal(fa.zRetract))
 
-        val = getFloatVal(fa.xFeed)
-        rpm = getIntVal(fa.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, fa.xFeed, fa.rpm, AXIS_X)
 
     def runOperation(self):
         self.getParameters()
@@ -1902,6 +3203,8 @@ class Face(LatheOp, UpdatePass):
         self.zCut = abs(self.zStart - self.zEnd)
 
         self.calcFeed(self.zFeed, self.zCut)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
 
@@ -1915,11 +3218,12 @@ class Face(LatheOp, UpdatePass):
         self.safeZ = self.zStart + self.zRetract
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if self.mf.cfgDraw:
             m.draw("face", self.xStart, self.xEnd)
             m.setTextAngle(90)
 
-        jogPanel.dPrt("\nface runOperation\n")
+        self.mf.dPrt("\nface runOperation\n")
+        self.mf.dPrt(timeStr() + "\n")
         self.setup()
 
         while self.updatePass():
@@ -1932,6 +3236,7 @@ class Face(LatheOp, UpdatePass):
         return(True)
 
     def setup(self, add=False): # face
+        comm = self.mf.comm
         comm.queParm(pm.CURRENT_OP, en.OP_FACE)
         m = self.m
         if not add:
@@ -1940,17 +3245,7 @@ class Face(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.zStart, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -1959,10 +3254,10 @@ class Face(LatheOp, UpdatePass):
 
         comm.command(cm.CMD_SYNCSETUP)
 
-        m.startSpindle(cfg.getIntInfoData(cf.faRPM))
+        m.startSpindle(self.mf.cfg.getIntInfoData(cf.faRPM))
 
         m.queFeedType(ct.FEED_PITCH)
-        m.xSynSetup(cfg.getFloatInfoData(cf.faXFeed))
+        m.xSynSetup(self.mf.cfg.getFloatInfoData(cf.faXFeed))
 
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
@@ -1984,8 +3279,8 @@ class Face(LatheOp, UpdatePass):
         self.curZ = self.zStart - feed
         self.safeZ = self.curZ + self.zRetract
         self.passSize[self.passCount] = self.curZ
-        jogPanel.dPrt("pass %2d feed %5.3f z %5.3f\n" % \
-                      (self.passCount, feed, self.curZ), True, True)
+        self.mf.dPrt("pass %2d feed %5.3f z %5.3f\n" % \
+                     (self.passCount, feed, self.curZ), True, True)
 
     def runPass(self, addPass=False):
         m = self.m
@@ -2012,49 +3307,52 @@ class Face(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def addPass(self):
-        add = self.addInit("face")
+        add = self.addInit("face", self.panel)
         self.cutAmount += add
         self.setup(True)
         self.calcPass(True)
-        moveCommands.nextPass(self.passCount)
-        self.runPass(True)
         m = self.m
+        m.nextPass(self.passCount)
+        self.runPass(True)
         m.moveX(self.safeX)
         m.moveZ(self.zStart + self.zRetract)
         self.addDone()
 
     def fixCut(self, offset=0.0): # turn
-        passNum = jogPanel.lastPass
+        jp = self.mf.jogPanel
+        passNum = jp.lastPass
         if offset == 0.0:
-            actual = float(jogPanel.zPos.GetValue())
+            actual = float(jp.zPos.GetValue())
             self.passSize[passNum] = actual
             self.cutAmount = self.zStart - actual
         else:
             self.passSize[passNum] += offset
-        
-class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, hdrFont, *args, **kwargs):
-        super(FacePanel, self).__init__(parent, *args, **kwargs)
-        self.hdrFont = hdrFont
+
+class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Face(self), en.OP_FACE)
+        super(FacePanel, self).__init__(mainFrame, *args, **kwargs)
+        ActionRoutines.__init__(self, Face(mainFrame, self), en.OP_FACE)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.hdrFont = hdrFont
         self.InitUI()
-        self.configList = None
         self.prefix = 'fa'
-        self.formatList = ((cf.faAddFeed, 'f'), \
-                           (cf.faPasses, 'd'), \
-                           (cf.faPause, None), \
-                           (cf.faRPM, 'd'), \
-                           (cf.faSPInt, 'd'), \
-                           (cf.faSpring, 'd'), \
-                           (cf.faXEnd, 'f'), \
-                           (cf.faXFeed, 'f'), \
-                           (cf.faXRetract, 'f'), \
-                           (cf.faXStart, 'f'), \
-                           (cf.faZEnd, 'f'), \
-                           (cf.faZFeed, 'f'), \
-                           (cf.faZRetract, 'f'), \
-                           (cf.faZStart, 'f'))
+        # self.formatList = ((cf.faAddFeed, 'f'), \
+        #                    (cf.faPasses, 'd'), \
+        #                    (cf.faPause, None), \
+        #                    (cf.faRPM, 'd'), \
+        #                    (cf.faSPInt, 'd'), \
+        #                    (cf.faSpring, 'd'), \
+        #                    (cf.faXEnd, 'f'), \
+        #                    (cf.faXFeed, 'f'), \
+        #                    (cf.faXRetract, 'f'), \
+        #                    (cf.faXStart, 'f'), \
+        #                    (cf.faZEnd, 'f'), \
+        #                    (cf.faZFeed, 'f'), \
+        #                    (cf.faZRetract, 'f'), \
+        #                    (cf.faZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2068,92 +3366,86 @@ class FacePanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zEnd = self.addField(sizerG, "Z End", cf.faZEnd)
+        self.zEnd = addField(self, sizerG, "Z End", cf.faZEnd, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.faZStart)
+        self.zStart = addField(self, sizerG, "Z Start", cf.faZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.faZFeed)
+        self.zFeed = addField(self, sizerG, "Z Feed", cf.faZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.faZRetract)
+        self.zRetract = addField(self, sizerG, "Z Retract", cf.faZRetract, 'f')
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.faXStart)
+        self.xStart = addField(self, sizerG, "X Start D", cf.faXStart, 'f')
 
-        self.xEnd = self.addField(sizerG, "X End D", cf.faXEnd)
+        self.xEnd = addField(self, sizerG, "X End D", cf.faXEnd, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Feed", cf.faXFeed)
+        self.xFeed = addField(self, sizerG, "X Feed", cf.faXFeed, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.faXRetract)
+        self.xRetract = addField(self, sizerG, "X Retract", cf.faXRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.faPasses)
+        self.passes = addField(self, sizerG, "Passes", cf.faPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.faSPInt)
+        self.sPInt = addField(self, sizerG, "SP Int", cf.faSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.faSpring)
+        self.spring = addField(self, sizerG, "Spring", cf.faSpring, 'd')
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        placeHolder(sizerG)
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.faAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.faRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.faPause)
+        addButtons(self, sizerG, cf.faAddFeed, cf.faRPM, cf.faPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def update(self):
-        self.formatData(self.formatList)
-        jogPanel.setPassText("Len")
+        formatData(self.mf.cfg, self.formatList)
+        self.mf.jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
-            moveCommands.queClear()
-            sendClear()
-            sendSpindleData()
-            sendZData()
-            sendXData()
+            self.mf.move.queClear()
+            sd = self.mf.sendData
+            sd.sendClear()
+            sd.sendSpindleData()
+            sd.sendZData()
+            sd.sendXData()
 
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
-        jogPanel.setStatus(st.STR_CLR)
+        self.mf.jogPanel.setStatus(st.STR_CLR)
         self.sendData()
         return(self.control.runOperation())
 
     def startAction(self):
-        comm.command(cm.CMD_RESUME)
+        self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
-            if jogPanel.mvStatus & ct.MV_READ_Z:
+        if control.addEnabled:
+            if self.mf.jogPanel.mvStatus & ct.MV_READ_Z:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
-                updateThread.openDebug()
+            if self.mf.dbgSave:
+                self.mf.updateThread.openDebug(action=en.OP_FACE)
 
     def addAction(self):
         self.control.addPass()
 
 class Cutoff(LatheOp):
-    def __init__(self, cutoffPanel):
-        LatheOp.__init__(self, cutoffPanel)
-        self.add = False
+    def __init__(self, mainFrame, cutoffPanel):
+        LatheOp.__init__(self, mainFrame, cutoffPanel)
+        self.mf = mainFrame
+        self.addEnabled = False
         self.passSize = [0.0, ]
 
         self.zCutoff = 0.0
@@ -2175,15 +3467,7 @@ class Cutoff(LatheOp):
         self.zCutoff = getFloatVal(cu.zCutoff)
         self.toolWidth = getFloatVal(cu.toolWidth)
 
-        val = getFloatVal(cu.xFeed)
-        rpm = getIntVal(cu.rpm)
-
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                xSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                xSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, cu.xFeed, cu.rpm, AXIS_Z)
 
     def runOperation(self):
         self.getParameters()
@@ -2193,14 +3477,17 @@ class Cutoff(LatheOp):
 
         self.passSize[0] = self.cutoffZ
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if self.mf.cfgDraw:
             m.draw("cutoff", self.xStart, self.zStart)
 
+        dPrt = self.mf.dPrt
+        dPrt("\ncutoff runOperation\n")
+        dPrt(timeStr() + "\n")
         self.setup()
 
         if self.panel.pause.GetValue():
             m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
-            
+
         m.moveX(self.xEnd, ct.CMD_SYN)
         m.moveX(self.safeX)
         m.moveZ(self.zStart)
@@ -2212,20 +3499,12 @@ class Cutoff(LatheOp):
         return(True)
 
     def setup(self):            # cutoff
-        comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
         m = self.m
+        mf = self.mf
+        comm = mf.comm
+        comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+        sendSyncParm(self)
 
         m.queInit()
         m.quePause()
@@ -2233,6 +3512,7 @@ class Cutoff(LatheOp):
 
         comm.command(cm.CMD_SYNCSETUP)
 
+        cfg = mf.cfg
         m.startSpindle(cfg.getIntInfoData(cf.cuRPM))
 
         m.queFeedType(ct.FEED_PITCH)
@@ -2243,25 +3523,26 @@ class Cutoff(LatheOp):
         m.moveX(self.xStart)
 
 class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, hdrFont, *args, **kwargs):
-        super(CutoffPanel, self).__init__(parent, *args, **kwargs)
-        self.hdrFont = hdrFont
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        super(CutoffPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Cutoff(self), en.OP_CUTOFF)
+        ActionRoutines.__init__(self, Cutoff(mainFrame, self), en.OP_CUTOFF)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.hdrFont = hdrFont
         self.InitUI()
-        self.configList = None
         self.prefix = 'cf'
-        self.formatList = ((cf.cuPause, None), \
-                           (cf.cuRPM, 'd'), \
-                           (cf.cuToolWidth, 'f'), \
-                           (cf.cuXEnd, 'f'), \
-                           (cf.cuXFeed, 'f'), \
-                           (cf.cuXRetract, 'f'), \
-                           (cf.cuXStart, 'f'), \
-                           (cf.cuZCutoff, 'f'), \
-                           (cf.cuZStart, 'f'), \
-                           (cf.cuZRetract, 'f'), \
-        )
+        # self.formatList = ((cf.cuPause, None), \
+        #                    (cf.cuRPM, 'd'), \
+        #                    (cf.cuToolWidth, 'f'), \
+        #                    (cf.cuXEnd, 'f'), \
+        #                    (cf.cuXFeed, 'f'), \
+        #                    (cf.cuXRetract, 'f'), \
+        #                    (cf.cuXStart, 'f'), \
+        #                    (cf.cuZCutoff, 'f'), \
+        #                    (cf.cuZStart, 'f'), \
+        #                    (cf.cuZRetract, 'f'), \
+        # )
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2275,70 +3556,66 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zCutoff = self.addField(sizerG, "Z Cutoff", cf.cuZCutoff)
+        self.zCutoff = addField(self, sizerG, "Z Cutoff", cf.cuZCutoff, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.cuZStart)
+        self.zStart = addField(self, sizerG, "Z Start", cf.cuZStart, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.cuZRetract)
+        self.zRetract = addField(self, sizerG, "Z Retract", cf.cuZRetract, 'f')
 
-        self.toolWidth = self.addField(sizerG, "Tool Width", cf.cuToolWidth)
+        self.toolWidth = addField(self, sizerG, "Tool Width", \
+                                  cf.cuToolWidth, 'f')
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.cuXStart)
+        self.xStart = addField(self, sizerG, "X Start D", cf.cuXStart, 'f')
 
-        self.xEnd = self.addField(sizerG, "X End D", cf.cuXEnd)
+        self.xEnd = addField(self, sizerG, "X End D", cf.cuXEnd, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Feed", cf.cuXFeed)
+        self.xFeed = addField(self, sizerG, "X Feed", cf.cuXFeed, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.cuXRetract)
+        self.xRetract = addField(self, sizerG, "X Retract", cf.cuXRetract, 'f')
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
-
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.cuRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.cuPause)
+        addButtons(self, sizerG, None, cf.cuRPM, cf.cuPause)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def update(self):
-        self.formatData(self.formatList)
-        jogPanel.setPassText("Len")
+        formatData(self.mf.cfg, self.formatList)
+        self.mf.jogPanel.setPassText("Len")
 
     def sendData(self):
         try:
-            moveCommands.queClear()
-            sendClear()
-            sendSpindleData()
-            sendZData()
-            sendXData()
+            self.mf.move.queClear()
+            sd = self.mf.sendData
+            sd.sendClear()
+            sd.sendSpindleData()
+            sd.sendZData()
+            sd.sendXData()
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
         return(self.control.runOperation())
 
     def startAction(self):
-        comm.command(cm.CMD_RESUME)
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug()
+        self.mf.comm.command(cm.CMD_RESUME)
+        if self.mf.dbgSave:
+            self.mf.updateThread.openDebug(action=en.OP_CUTOFF)
 
 class Taper(LatheOp, UpdatePass):
-    def __init__(self, taperPanel):
-        LatheOp.__init__(self, taperPanel)
-        UpdatePass.__init__(self)
-
+    def __init__(self, mainFrame, taperPanel):
+        LatheOp.__init__(self, mainFrame, taperPanel)
+        UpdatePass.__init__(self, mainFrame)
+        self.mf = mainFrame
         self.zLength = 0.0
         self.largeDiameter = 0.0
         self.smallDiameter = 0.0
@@ -2387,42 +3664,27 @@ class Taper(LatheOp, UpdatePass):
         self.xFeed = getFloatVal(tp.xFeed) / 2.0
         self.xRetract = abs(getFloatVal(tp.xRetract))
 
-        self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
+        self.zBackInc = abs(self.mf.cfg.getFloatInfoData(cf.zBackInc))
         self.finish = abs(getFloatVal(tp.finish))
 
-        val = getFloatVal(tp.zFeed)
-        rpm = getIntVal(tp.rpm)
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncInt.calcSync(val, metric=False, rpm=rpm, turn=True)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncExt.calcSync(val, metric=False, rpm=rpm, turn=True)
+        getSyncParm(self, tp.zFeed, tp.rpm, AXIS_Z)
 
         totalTaper = taperInch * self.zLength
         print("taperX %s totalTaper %5.3f taperInch %6.4f" % \
               (self.taperX, totalTaper, taperInch))
 
     def setup(self, add=False): # taper
-        comm.queParm(pm.CURRENT_OP, en.OP_TAPER)
+        comm = self.mf.comm
+        cfg = self.mf.cfg
         m = self.m
+        comm.queParm(pm.CURRENT_OP, en.OP_TAPER)
         if not add:
             m.setLoc(self.zEnd, self.xStart)
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if TURN_SYNC == en.SEL_TU_ISYN or TURN_SYNC == en.SEL_TU_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif TURN_SYNC == en.SEL_TU_ESYN:
-            syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
-            syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
-            syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
-            syncComm.command(sc.SYNC_SETUP)
+            sendSyncParm(self)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -2430,12 +3692,12 @@ class Taper(LatheOp, UpdatePass):
         m.done(ct.PARM_START)
 
         comm.command(cm.CMD_SYNCSETUP)
-        
+
         if self.taperX:
             m.saveTaper(self.taper)
         else:
             m.saveTaper(1.0 / self.taper)
-            
+
         m.startSpindle(cfg.getIntInfoData(cf.tpRPM))
 
         m.queFeedType(ct.FEED_PITCH)
@@ -2444,7 +3706,7 @@ class Taper(LatheOp, UpdatePass):
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ)
-        
+
         if not add:
             m.text("%0.3f" % (self.zStart), \
                    (self.zStart, self.xEnd), \
@@ -2487,18 +3749,20 @@ class Taper(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
 
         self.calcFeed(feed, self.cut, finish)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.externalCalcPass, self.externalRunPass)
 
-        self.panel.passes.SetValue("%d" % (self.passes))
+        self.panel.passes.SetValue("%d" % (self.passes,))
         print("passes %d cutAmount %5.3f feed %6.3f" % \
               (self.passes, self.cutAmount, self.actualFeed))
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if self.mf.cfgDraw:
             m.draw("taper", self.zStart, self.taper)
 
-        jogPanel.dPrt("\ntaper nexternalRunOperation\n")
+        self.mf.dPrt("\ntaper external RunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -2536,11 +3800,11 @@ class Taper(LatheOp, UpdatePass):
             self.endX = self.xStart - taperLength \
                         if taperLength < self.xLength else self.xEnd
             self.passSize[self.passCount] = self.startZ
-        jogPanel.dPrt("%2d start (%6.3f %6.3f) end (%6.3f %6.3f) "\
-                      "%6.3f %6.3f\n" % \
-                      (self.passCount, self.startZ, self.startX, \
-                       self.endZ, self.endX, self.startX * 2.0, \
-                       self.endX * 2.0), True, True)
+        self.mf.dPrt("%2d start (%6.3f %6.3f) end (%6.3f %6.3f) "\
+                     "%6.3f %6.3f\n" % \
+                     (self.passCount, self.startZ, self.startX, \
+                      self.endZ, self.endX, self.startX * 2.0, \
+                      self.endX * 2.0), True, True)
 
     def externalRunPass(self, addPass=False):
         m = self.m
@@ -2587,7 +3851,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def externalAddPass(self):
-        add = self.addInit("external taper") / 2.0
+        add = self.addInit("external taper", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.externalCalcPass(True)
@@ -2597,11 +3861,12 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
         m.moveZ(self.startZ)
         self.addDone()
-            
+
     def fixCut(self, offset=0.0): # taper
         if offset == 0:
-            actual = float(jogPanel.xPos.GetValue())
-            passNum = jogPanel.lastPass
+            jp = self.mf.jogPanel
+            actual = float(jp.xPos.GetValue())
+            passNum = jp.lastPass
             self.passSize[passNum] = 2 * actual
             if self.internal:
                 self.cutAmount = actual - self.xStart
@@ -2620,6 +3885,8 @@ class Taper(LatheOp, UpdatePass):
         self.cut = self.xEnd - self.boreRadius
 
         self.calcFeed(self.xFeed, self.cut, self.finish)
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
         self.setupSpringPasses(self.panel)
         self.setupAction(self.internalCalcPass, self.internalRunPass)
 
@@ -2633,10 +3900,10 @@ class Taper(LatheOp, UpdatePass):
         self.safeZ = self.zStart + self.zRetract
 
         m = self.m
-        if cfg.getBoolInfoData(cf.cfgDraw):
+        if self.mf.cfgDraw:
             m.draw("taper", self.zStart, self.taper)
 
-        jogPanel.dPrt("\ntaper internalRunOperation\n")
+        self.mf.dPrt("\ntaper internalRunOperation\n")
         self.setup()
 
         while self.updatePass():
@@ -2662,16 +3929,16 @@ class Taper(LatheOp, UpdatePass):
             self.startX = (self.boreRadius + self.feed - \
                            self.zLength * self.taper)
         self.passSize[self.passCount] = self.endX * 2.0
-        jogPanel.dPrt("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
-                      "%6.3f %6.3f\n" % \
-                      (self.passCount, self.feed, self.startX,
-                       self.startZ, self.endX, self.endZ, \
-                       self.startX * 2.0, self.endX * 2.0), True, True)
+        self.mf.dPrt("%2d feed %6.3f start (%6.3f,%6.3f) end (%6.3f %6.3f) "\
+                     "%6.3f %6.3f\n" % \
+                     (self.passCount, self.feed, self.startX,
+                      self.startZ, self.endX, self.endZ, \
+                      self.startX * 2.0, self.endX * 2.0), True, True)
 
     def internalRunPass(self, addPass=False):
         m = self.m
         if self.zBackInc != 0.0:
-            m.moveZ(self.startZ, backlash=-self.ZBackInc) # past the start
+            m.moveZ(self.startZ, backlash=-self.zBackInc) # past the start
         m.moveZ(self.startZ, ct.CMD_JOG) # back to start to remove backlash
         m.moveX(self.startX, ct.CMD_SYN)
         if self.pause:
@@ -2698,7 +3965,7 @@ class Taper(LatheOp, UpdatePass):
         m.moveX(self.safeX)
 
     def internalAddPass(self):
-        add = self.addInit("internal taper") / 2.0
+        add = self.addInit("internal taper", self.panel) / 2.0
         self.cutAmount += add
         self.setup(True)
         self.internalCalcPass(True)
@@ -2709,12 +3976,15 @@ class Taper(LatheOp, UpdatePass):
         m.moveZ(self.safeZ)
         self.addDone()
 
-class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, hdrFont, *args, **kwargs):
-        super(TaperPanel, self).__init__(parent, *args, **kwargs)
-        self.hdrFont = hdrFont
+class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        super(TaperPanel, self).__init__(mainFrame, *args, **kwargs)
+        PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, Taper(self), en.OP_TAPER)
+        ActionRoutines.__init__(self, Taper(mainFrame, self), en.OP_TAPER)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.hdrFont = hdrFont
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -2729,36 +3999,43 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
                          ("", 0., 0., 0, 0.), \
                          ("", 0., 0., 0, 0.), \
         ]
+        self.taperSel = None
+        self.zLength = None
+        self.xInFeed = None
+        self.deltaBtn = None
+        self.zDelta = None
+        self.xDelta = None
+        self.angleButton = None
+        self.angle = None
+        self.finish = None
         self.taperList = []
         for t in self.taperDef:
             self.taperList.append(t[0])
         self.InitUI()
-        self.configList = None
-        self.m = moveCommands
         self.prefix = 'tp'
-        self.formatList = ((cf.tpAddFeed, 'f'), \
-                           (cf.tpAngle, 'fs'), \
-                           (cf.tpAngleBtn, None), \
-                           (cf.tpDeltaBtn, None), \
-                           (cf.tpInternal, None), \
-                           (cf.tpLargeDiam, 'f'), \
-                           (cf.tpPasses, 'd'), \
-                           (cf.tpPause, None), \
-                           (cf.tpRPM, 'd'), \
-                           (cf.tpSPInt, 'd'), \
-                           (cf.tpSmallDiam, 'f'), \
-                           (cf.tpSpring, 'd'), \
-                           (cf.tpTaperSel, None), \
-                           (cf.tpXDelta, 'f5'), \
-                           (cf.tpXFeed, 'f'), \
-                           (cf.tpXFinish, 'f'), \
-                           (cf.tpXInFeed, 'f'), \
-                           (cf.tpXRetract, 'f'), \
-                           (cf.tpZDelta, 'f'), \
-                           (cf.tpZFeed, 'f'), \
-                           (cf.tpZLength, 'f'), \
-                           (cf.tpZRetract, 'f'), \
-                           (cf.tpZStart, 'f'))
+        # self.formatList = ((cf.tpAddFeed, 'f'), \
+        #                    (cf.tpAngle, 'fs'), \
+        #                    (cf.tpAngleBtn, None), \
+        #                    (cf.tpDeltaBtn, None), \
+        #                    (cf.tpInternal, None), \
+        #                    (cf.tpLargeDiam, 'f'), \
+        #                    (cf.tpPasses, 'd'), \
+        #                    (cf.tpPause, None), \
+        #                    (cf.tpRPM, 'd'), \
+        #                    (cf.tpSPInt, 'd'), \
+        #                    (cf.tpSmallDiam, 'f'), \
+        #                    (cf.tpSpring, 'd'), \
+        #                    (cf.tpTaperSel, None), \
+        #                    (cf.tpXDelta, 'f5'), \
+        #                    (cf.tpXFeed, 'f'), \
+        #                    (cf.tpXFinish, 'f'), \
+        #                    (cf.tpXInFeed, 'f'), \
+        #                    (cf.tpXRetract, 'f'), \
+        #                    (cf.tpZDelta, 'f'), \
+        #                    (cf.tpZFeed, 'f'), \
+        #                    (cf.tpZLength, 'f'), \
+        #                    (cf.tpZRetract, 'f'), \
+        #                    (cf.tpZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -2778,7 +4055,7 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
-        cfg.initInfo(cf.tpTaperSel, combo)
+        self.mf.cfg.initInfo(cf.tpTaperSel, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         sizerH.Add(combo, flag=wx.ALL, border=2)
 
@@ -2788,92 +4065,76 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         # z parameters
 
-        self.zLength = self.addField(sizerG, "Z Length", cf.tpZLength)
+        self.zLength = addField(self, sizerG, "Z Length", cf.tpZLength, 'f')
 
-        self.zStart = self.addField(sizerG, "Z Start", cf.tpZStart)
+        self.zStart = addField(self, sizerG, "Z Start", cf.tpZStart, 'f')
 
-        self.zFeed = self.addField(sizerG, "Z Feed", cf.tpZFeed)
+        self.zFeed = addField(self, sizerG, "Z Feed", cf.tpZFeed, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.tpZRetract)
+        self.zRetract = addField(self, sizerG, "Z Retract", cf.tpZRetract, 'f')
 
         # x parameters
 
         (self.largeDiam, self.largeDiamTxt) = \
-            self.addFieldText(sizerG, "Large Diam", cf.tpLargeDiam)
+            addFieldText(self, sizerG, "Large Diam", cf.tpLargeDiam, 'f')
 
         (self.smallDiam, self.smallDiamTxt) = \
-            self.addFieldText(sizerG, "Small Diam", cf.tpSmallDiam)
+            addFieldText(self, sizerG, "Small Diam", cf.tpSmallDiam, 'f')
 
-        self.xInFeed = self.addField(sizerG, "X In Feed R", cf.tpXInFeed)
+        self.xInFeed = addField(self, sizerG, "X In Feed R", cf.tpXInFeed, 'f')
 
-        self.xFeed = self.addField(sizerG, "X Pass D", cf.tpXFeed)
+        self.xFeed = addField(self, sizerG, "X Pass D", cf.tpXFeed, 'f')
 
         # taper parameters
 
-        self.deltaBtn = self.addRadioButton(sizerG, "Delta Z", cf.tpDeltaBtn, \
-                                            style=wx.RB_GROUP, \
-                                            action=self.OnDelta)
+        self.deltaBtn = addRadioButton(self, sizerG, "Delta Z", cf.tpDeltaBtn, \
+                                       style=wx.RB_GROUP, action=self.OnDelta)
 
-        self.zDelta = self.addField(sizerG, None, cf.tpZDelta)
+        self.zDelta = addField(self, sizerG, None, cf.tpZDelta, 'f')
         self.zDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.xDelta = self.addField(sizerG, "Delta X", cf.tpXDelta)
+        self.xDelta = addField(self, sizerG, "Delta X", cf.tpXDelta, 'f5')
         self.xDelta.Bind(wx.EVT_KILL_FOCUS, self.OnDeltaFocus)
 
-        self.angleBtn = self.addRadioButton(sizerG, "Angle", cf.tpAngleBtn, \
-                                            action=self.OnAngle)
+        self.angleBtn = addRadioButton(self, sizerG, "Angle", cf.tpAngleBtn, \
+                                       action=self.OnAngle)
 
-        self.angle = self.addField(sizerG, None, cf.tpAngle)
+        self.angle = addField(self, sizerG, None, cf.tpAngle, 'fs')
         self.angle.Bind(wx.EVT_KILL_FOCUS, self.OnAngleFocus)
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.tpXRetract)
+        self.xRetract = addField(self, sizerG, "X Retract", cf.tpXRetract, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.tpPasses)
+        self.passes = addField(self, sizerG, "Passes", cf.tpPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.tpSPInt)
+        self.sPInt = addField(self, sizerG, "SP Int", cf.tpSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.tpSpring)
+        self.spring = addField(self, sizerG, "Spring", cf.tpSpring, 'd')
 
-        self.finish = self.addField(sizerG, "Finish", cf.tpXFinish)
+        self.finish = addField(self, sizerG, "Finish", cf.tpXFinish, 'f')
 
         # control buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
+        addButtons(self, sizerG, cf.tpAddFeed, cf.tpRPM, cf.tpPause, True)
 
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.tpAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.tpRPM)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.internal = self.addCheckBox(sizerH, "Internal", cf.tpInternal, \
-                                         self.OnInternal)
-
-        sizerG.Add(sizerH)
-
-        sizerH = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.pause = self.addCheckBox(sizerH, "Pause", cf.tpPause)
-
-        sizerG.Add(sizerH)
+        self.internal = addCheckBox(self, sizerG, "Internal", cf.tpInternal, \
+                                    self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def update(self):
         self.updateUI()
         self.updateDelta()
         self.updateAngle()
-        self.formatData(self.formatList)
+        formatData(self.mf.cfg, self.formatList)
 
     def updateUI(self):
         val = self.deltaBtn.GetValue()
@@ -2884,13 +4145,13 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         if self.internal.GetValue():
             self.largeDiamTxt.SetLabel("Bore Diam")
             self.smallDiamTxt.SetLabel("Large Diam")
-            jogPanel.setPassText("L Diam")
+            self.mf.jogPanel.setPassText("L Diam")
 
         else:
             self.largeDiamTxt.SetLabel("Large Diam")
             self.smallDiamTxt.SetLabel("Small Diam")
-            jogPanel.setPassText("S Diam" if taper < 1.0 else \
-                                       "Z Start")
+            self.mf.jogPanel.setPassText("S Diam" if taper < 1.0 else \
+                                         "Z Start")
         self.sizerV.Layout()
 
     def updateAngle(self):
@@ -2910,10 +4171,10 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
             try:
                 angle = degrees(atan2(deltaX, deltaZ))
                 self.angle.ChangeValue("%5.3f" % (angle))
-            except:
+            except ValueError:
                 traceback.print_exc()
 
-    def OnCombo(self, e):
+    def OnCombo(self, _):
         index = self.taperSel.GetSelection()
         if index != 0:
             (name, large, small, length, taper) = self.taperDef[index]
@@ -2939,62 +4200,69 @@ class TaperPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.updateUI()
         e.Skip()
 
-    def OnInternal(self, e):
+    def OnInternal(self, _):
         self.updateUI()
 
-    def OnDelta(self, e):
+    def OnDelta(self, _):
         self.updateUI()
 
-    def OnAngle(self, e):
+    def OnAngle(self, _):
         self.updateUI()
 
     def sendData(self):
         try:
-            moveCommands.queClear()
-            sendClear()
-            sendSpindleData()
-            sendZData()
-            sendXData()
-            comm.setParm(pm.TAPER_CYCLE_DIST, \
-                         cfg.getInfoData(cf.cfgTaperCycleDist))
+            mf = self.mf
+            mf.move.queClear()
+            sd = mf.sendData
+            sd.sendClear()
+            sd.sendSpindleData()
+            sd.sendZData()
+            sd.sendXData()
+            mf.comm.setParm(pm.TAPER_CYCLE_DIST, \
+                            mf.cfg.getInfoData(cf.cfgTaperCycleDist))
         except CommTimeout:
-            commTimeout()
+            commTimeout(self.mf.jogPanel)
 
     def sendAction(self):
         self.sendData()
         taper = getFloatVal(self.xDelta) / getFloatVal(self.zDelta)
         if self.internal.GetValue():
-            return(self.control.internalRunOperation(taper))
+            return self.control.internalRunOperation(taper)
         else:
-            return(self.control.externalRunOperation(taper))
+            return self.control.externalRunOperation(taper)
 
     def startAction(self):      # taper
-        comm.command(cm.CMD_RESUME)
+        mf = self.mf
+        mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
-            if jogPanel.mvStatus & ct.MV_READ_X:
+        if control.addEnabled:
+            if mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
-                updateThread.openDebug()
+            if mf.dbgSave:
+                mf.updateThread.openDebug(action=en.OP_TAPER)
 
     def addAction(self):
         self.control.internalAddPass() if self.internal.GetValue() else \
             self.control.externalAddPass()
 
-    # def OnDebug(self, e):
+    # def OnDebug(self, _):
     #     self.sendData()
     #     moveX(1.000)
     #     moveZ(0.010)
     #     taperZX(-0.25, 0.0251)
 
-REF   = 'REF'
-TEXT  = 'TEXT'
-
 class ScrewThread(LatheOp, UpdatePass):
-    def __init__(self, threadPanel):
-        LatheOp.__init__(self, threadPanel)
-        UpdatePass.__init__(self)
+    def __init__(self, mainFrame, threadPanel):
+        LatheOp.__init__(self, mainFrame, threadPanel)
+        UpdatePass.__init__(self, mainFrame)
+        self.mf = mainFrame
+        self.tpiBtn = None
+        self.alternate = None
+        self.firstFeedBtn = None
+        self.runout = None
+        self.endZ = 0.0
+
         self.rightHand = False
         self.internal = False
         self.tpi = 0.0
@@ -3051,7 +4319,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.zStart = getFloatVal(th.z1)
             self.zEnd = getFloatVal(th.z0)
             self.safeZ = self.zStart + self.zRetract
-            self.startZ = self.safeZ 
+            self.startZ = self.safeZ
 
         else:                   # left and threads
             self.zStart = getFloatVal(th.z0)
@@ -3060,30 +4328,33 @@ class ScrewThread(LatheOp, UpdatePass):
             self.startZ = self.zStart
 
         self.zAccelDist = 0.0
-        self.zBackInc = abs(cfg.getFloatInfoData(cf.zBackInc))
+        self.zBackInc = abs(self.mf.cfg.getFloatInfoData(cf.zBackInc))
 
         self.tpiBtn = th.tpi.GetValue()
         self.alternate = th.alternate.GetValue()
         self.firstFeedBtn = th.firstFeedBtn.GetValue()
 
-        val =  getFloatVal(th.thread)
+        thVal =  getFloatVal(th.thread)
         rpm = getIntVal(th.rpm)
         if self.tpiBtn:
-            self.tpi = val
-            self.pitch = 1.0 / val
+            self.tpi = thVal
+            self.pitch = 1.0 / thVal
             metric = False
         else:
-            self.pitch = val / 25.4
+            self.pitch = thVal / 25.4
             self.tpi = 1.0 / self.pitch
             metric = True
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncInt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
-        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or
-              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-            (self.cycle, self.output, self.preScaler) = \
-                zSyncExt.calcSync(val, dbg=True, metric=metric, rpm=rpm)
+        threadSync = self.mf.threadSync
+        if threadSync == en.SEL_TH_ISYN_RENC or threadSync == en.SEL_TH_SYN:
+            (self.cycle, self.output, self.inPreScaler, self.outPreScaler) = \
+                self.mf.zSyncInt.calcSync(thVal, dbg=True,
+                                          metric=metric, rpm=rpm)
+        elif (threadSync == en.SEL_TH_ESYN_RENC or \
+              threadSync == en.SEL_TH_ESYN_RSYN):
+            (self.cycle, self.output, self.inPreScaler, self.outPreScaler) = \
+                self.mf.zSyncExt.calcSync(thVal, dbg=True,
+                                          metric=metric, rpm=rpm)
 
         self.xStart = getFloatVal(th.xStart) / 2.0
         self.xRetract = abs(getFloatVal(th.xRetract))
@@ -3100,16 +4371,19 @@ class ScrewThread(LatheOp, UpdatePass):
         self.runout = getFloatVal(th.runout)
 
         if self.runout != 0:
-            if THREAD_SYNC == en.SEL_TH_ESYN_RSYN:
+            if threadSync == en.SEL_TH_ESYN_RSYN:
+                xSync = self.mf.xSyncExt
                 xSync.setExitRevs(self.runout)
-                (self.xCycle, self.xOutput, self.xPreScaler) = \
+                (self.xCycle, self.xOutput, self.xInPreScaler,
+                 self.xOutPreScaler) = \
                     xSync.calcSync(self.depth, rpm=rpm, dist=True)
 
         self.endZ = self.zEnd
 
     def setup(self, add=False): # thread
-        global zHomeOffset, xHomeOffset
-        comm.queParm(pm.CURRENT_OP, en.OP_THREAD)
+        comm = self.mf.comm
+        queParm = comm.queParm
+        queParm(pm.CURRENT_OP, en.OP_THREAD)
         m = self.m
         if not add:
             m.setLoc(self.endZ, self.xStart)
@@ -3117,26 +4391,35 @@ class ScrewThread(LatheOp, UpdatePass):
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        if THREAD_SYNC == en.SEL_TH_ISYN_RENC or THREAD_SYNC == en.SEL_TH_SYN:
-            comm.queParm(pm.L_SYNC_CYCLE, self.cycle)
-            comm.queParm(pm.L_SYNC_OUTPUT, self.output)
-            comm.queParm(pm.L_SYNC_PRESCALER, self.preScaler)
-        elif (THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-              THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
+        threadSync = self.mf.threadSync
+        if threadSync == en.SEL_TH_ISYN_RENC or \
+           threadSync == en.SEL_TH_SYN or \
+           ((threadSync == en.SEL_TH_ESYN_RENC) and SYNC_SPI):
+            queParm(pm.L_SYNC_CYCLE, self.cycle)
+            queParm(pm.L_SYNC_OUTPUT, self.output)
+            queParm(pm.L_SYNC_IN_PRESCALER, self.inPreScaler)
+            queParm(pm.L_SYNC_IN_PRESCALER, self.outPreScaler)
+            if SYNC_SPI:
+                m.syncParms()
+                m.syncCommand(sc.SYNC_SETUP)
+        elif threadSync == en.SEL_TH_ESYN_RENC:
+            syncComm = self.mf.syncComm
             syncComm.setParm(sp.SYNC_ENCODER, \
-                             cfg.getIntInfoData(cf.cfgEncoder))
+                             self.mf.cfg.getIntInfoData(cf.cfgEncoder))
             syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
             syncComm.setParm(sp.SYNC_OUTPUT, self.output)
-            syncComm.setParm(sp.SYNC_PRESCALER, self.preScaler)
+            syncComm.setParm(sp.SYNC_PRESCALER, self.outPreScaler)
             syncComm.command(sc.SYNC_SETUP)
-            if (self.runout != 0 and
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                comm.queParm(pm.L_SYNC_CYCLE, self.xCycle)
-                comm.queParm(pm.L_SYNC_OUTPUT, self.xOutput)
-                comm.queParm(pm.L_SYNC_PRESCALER, self.xPreScaler)
-   
-        comm.queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
-        comm.queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
+
+        if ((self.runout != 0) and \
+            (threadSync == en.SEL_TH_ESYN_RSYN)):
+            queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
+            queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
+            queParm(pm.L_X_SYNC_IN_PRESCALER, self.xInPreScaler)
+            queParm(pm.L_X_SYNC_OUT_PRESCALER, self.xOutPreScaler)
+
+        queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+        queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
 
         m.queInit()
         if (not add) or (add and not self.pause):
@@ -3159,14 +4442,14 @@ class ScrewThread(LatheOp, UpdatePass):
             flag |= ct.TH_INTERNAL
         m.saveThreadFlags(flag)
 
-        m.zSynSetup(cfg.getFloatInfoData(cf.thThread))
+        m.zSynSetup(self.mf.cfg.getFloatInfoData(cf.thThread))
 
         if not self.rightHand:  # left hand threads
-            if self.runoutDist == 0.0: # wihout runout
+            if self.runoutDist == 0.0: # without runout
                 m.queFeedType(ct.FEED_PITCH)
                 m.xSynSetup(getFloatVal(th.lastFeed))
 
-        m.startSpindle(cfg.getIntInfoData(cf.thRPM))
+        m.startSpindle(self.mf.cfg.getIntInfoData(cf.thRPM))
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ if self.rightHand else self.startZ)
@@ -3201,7 +4484,7 @@ class ScrewThread(LatheOp, UpdatePass):
             self.startZ += w
         else:                   # left hand threads
             self.startZ -= w
-                
+
         self.area = area = self.depth * halfWidth
         print("depth %6.4f halfWdith %6.4f area %8.6f startZ %6.4f" % \
               (self.depth, halfWidth, area, self.startZ))
@@ -3260,6 +4543,8 @@ class ScrewThread(LatheOp, UpdatePass):
         self.setupSpringPasses(self.panel)
         self.setupAction(self.calcPass, self.runPass)
         self.initPass()
+        self.mf.comm.setParm(pm.TOTAL_PASSES, self.passes)
+        self.pause = self.panel.pause.GetValue()
 
         if self.internal:
             self.xRetract = -self.xRetract
@@ -3267,25 +4552,27 @@ class ScrewThread(LatheOp, UpdatePass):
         self.safeX = self.xStart + self.xRetract
         # self.startZ = self.zStart + self.zAccelDist
 
-        # if cfg.getBoolInfoData(cf.cfgDraw):
+        # if self.mf.cfgDraw:
         #     self.draw(self.xStart * 2.0, self.tpi)
         #     self.p0 = (0, 0)
 
-        if cfg.getBoolInfoData(cf.cfgDraw):
-            self.m.draw("threada", self.xStart * 2.0, self.tpi)
+        if self.mf.cfgDraw:
+            self.m.draw("thread", self.xStart * 2.0, self.tpi)
 
-        jogPanel.dPrt("\nthread runOperation\n")
+        dPrt = self.mf.dPrt
+        dPrt("\nthread runOperation\n")
+        dPrt(timeStr() + "\n")
         self.setup()
 
         self.curArea = 0.0
         self.prevFeed = 0.0
         self.zOffset = 0.0
         if not self.alternate:
-            jogPanel.dPrt("pass     area   xfeed  xdelta zoffset  " \
-                          "xsize startz\n", True, True)
+            dPrt("pass     area   xfeed  xdelta zoffset  " \
+                 "xsize startz\n", True, True)
         else:
-            jogPanel.dPrt("pass     area   xfeed  xdelta  offset " \
-                          "zoffset  xsize startz\n", True, True)
+            dPrt("pass     area   xfeed  xdelta  offset " \
+                 "zoffset  xsize startz\n", True, True)
 
         while self.updatePass():
             pass
@@ -3298,6 +4585,7 @@ class ScrewThread(LatheOp, UpdatePass):
         return(True)
 
     def calcPass(self, final=False, add=False):
+        dPrt = self.mf.dPrt
         if not add:
             if final:
                 self.curArea = self.area
@@ -3308,9 +4596,12 @@ class ScrewThread(LatheOp, UpdatePass):
         feed = self.feed
         passFeed = feed - self.prevFeed
         self.prevFeed = feed
- 
+
+        offset = 0
         if not self.alternate:
             self.zOffset = -feed * self.tanAngle
+            dPrt("startZ %7.4f zOffset %7.4f\n" % \
+                          (self.startZ, self.zOffset))
         else:
             offset = passFeed * self.tanAngle
             if (self.passCount & 1) == 0:
@@ -3330,13 +4621,13 @@ class ScrewThread(LatheOp, UpdatePass):
         startZPass = self.startZPass
 
         if not self.alternate:
-            jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
+            dPrt("%4d %8.6f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
                            passFeed, self.zOffset, \
                            self.curX * 2.0, startZPass), \
                           True, True)
         else:
-            jogPanel.dPrt("%4d %8.6f %7.4f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
+            dPrt("%4d %8.6f %7.4f %7.4f %7.4f %7.4f %6.4f %6.4f\n" % \
                           (self.passCount, self.curArea, feed, \
                            passFeed, offset, self.zOffset, \
                            self.curX * 2.0, startZPass), \
@@ -3393,13 +4684,13 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.pause:
             flag = (ct.PAUSE_ENA_X_JOG | ct.PAUSE_READ_X) if addPass else 0
             m.quePause(flag)
-            if addPass:
-                m.moveZOffset()
-            
+            # if addPass:
+            #     m.moveZOffset()
+
         if DRO:
             m.saveXDro()
             m.saveZDro()
-        
+
         if not addPass and m.passNum & 0x300 == 0:
             m.saveXText((m.passNum, startZPass, self.zOffset, \
                         self.curX * 2.0, self.feed), \
@@ -3413,25 +4704,28 @@ class ScrewThread(LatheOp, UpdatePass):
                 self.startZ)
 
     def addPass(self):
-        add = self.addInit("thread") / 2.0
+        add = self.addInit("thread", self.panel) / 2.0
         self.feed += add
         self.setup(True)
 
-        comm.queParm(pm.TH_Z_START, \
-                     round((self.startZ + zHomeOffset) * jogPanel.zStepsInch))
-        comm.queParm(pm.TH_X_START, \
-                     round((self.xStart + xHomeOffset) * jogPanel.xStepsInch))
-        comm.queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
-        
+        jp = self.mf.jogPanel
+        queParm = self.mf.comm.queParm
+        queParm(pm.TH_Z_START, \
+                round((self.startZ + jp.zHomeOffset) * jp.zStepsInch))
+        queParm(pm.TH_X_START, \
+                round((self.xStart + jp.xHomeOffset) * jp.xStepsInch))
+        queParm(pm.TAN_THREAD_ANGLE, self.tanAngle)
+
         self.calcPass(add=True)
-        moveCommands.nextPass(self.passCount)
+        self.m.nextPass(self.passCount)
         self.runPass(True)
         self.addDone()
 
     def fixCut(self, offset=0.0): # thread
         if offset == 0.0:
-            actual = float(jogPanel.xPos.GetValue())
-            passNum = jogPanel.lastPass
+            jp = self.mf.jogPanel
+            actual = float(jp.xPos.GetValue())
+            passNum = jp.lastPass
             if self.internal:
                 self.feed = actual - self.xStart
             else:
@@ -3440,40 +4734,56 @@ class ScrewThread(LatheOp, UpdatePass):
         else:
             pass
 
-class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
-    def __init__(self, parent, hdrFont, *args, **kwargs):
-        super(ThreadPanel, self).__init__(parent, *args, **kwargs)
-        self.hdrFont = hdrFont
+class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
+    def __init__(self, mainFrame, hdrFont, *args, **kwargs):
+        super(ThreadPanel, self).__init__(mainFrame, *args, **kwargs)
+        PanelVars.__init__(self)
         FormRoutines.__init__(self)
-        ActionRoutines.__init__(self, ScrewThread(self), en.OP_THREAD)
+        ActionRoutines.__init__(self, ScrewThread(mainFrame, self), en.OP_THREAD)
+        self.Bind(wx.EVT_SHOW, OnPanelShow)
+        self.mf = mainFrame
+        self.hdrFont = hdrFont
+        self.leftHand = None
+        self.xStart = None
+        self.depth = None
+        self.alternate = None
+        self.thread = None
+        self.tpi = None
+        self.mm = None
+        self.angle = None
+        self.firstFeedBtn = None
+        self.firstFeed = None
+        self.xTaper = None
+        self.runout = None
+        self.lastFeedBtn = None
+        self.lastFeed = None
         self.InitUI()
-        self.configList = None
         self.prefix = 'th'
-        self.formatList = ((cf.thAddFeed, 'f'), \
-                           (cf.thAlternate, None), \
-                           (cf.thAngle, 'fs'), \
-                           (cf.thFirstFeed, 'f'), \
-                           (cf.thFirstFeedBtn, None), \
-                           (cf.thInternal, None), \
-                           (cf.thLastFeed, 'f'), \
-                           (cf.thLastFeedBtn, None), \
-                           (cf.thLeftHand, None), \
-                           (cf.thMM, None), \
-                           (cf.thPasses, 'd'), \
-                           (cf.thPause, None), \
-                           (cf.thRPM, 'd'), \
-                           (cf.thSPInt, 'n'), \
-                           (cf.thSpring, 'n'), \
-                           (cf.thTPI, None), \
-                           (cf.thThread, 'fs'), \
-                           (cf.thXDepth, 'f'), \
-                           (cf.thXRetract, 'f'), \
-                           (cf.thRunout, 'fs'), \
-                           (cf.thXStart, 'f'), \
-                           (cf.thXTaper, 'f'), \
-                           (cf.thZ0, 'f'), \
-                           (cf.thZ1, 'f'), \
-                           (cf.thZRetract, 'f'))
+        # self.formatList = ((cf.thAddFeed, 'f'), \
+        #                    (cf.thAlternate, None), \
+        #                    (cf.thAngle, 'fs'), \
+        #                    (cf.thFirstFeed, 'f'), \
+        #                    (cf.thFirstFeedBtn, None), \
+        #                    (cf.thInternal, None), \
+        #                    (cf.thLastFeed, 'f'), \
+        #                    (cf.thLastFeedBtn, None), \
+        #                    (cf.thLeftHand, None), \
+        #                    (cf.thMM, None), \
+        #                    (cf.thPasses, 'd'), \
+        #                    (cf.thPause, None), \
+        #                    (cf.thRPM, 'd'), \
+        #                    (cf.thSPInt, 'n'), \
+        #                    (cf.thSpring, 'n'), \
+        #                    (cf.thTPI, None), \
+        #                    (cf.thThread, 'fs'), \
+        #                    (cf.thXDepth, 'f'), \
+        #                    (cf.thXRetract, 'f'), \
+        #                    (cf.thRunout, 'fs'), \
+        #                    (cf.thXStart, 'f'), \
+        #                    (cf.thXTaper, 'f'), \
+        #                    (cf.thZ0, 'f'), \
+        #                    (cf.thZ1, 'f'), \
+        #                    (cf.thZRetract, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -3483,113 +4793,107 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.sizerG = sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
-        
+        sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
+
         # z parameters
 
         (self.z0, self.z0Txt) = \
-            self.addFieldText(sizerG, "Z End", cf.thZ0)
+            addFieldText(self, sizerG, "Z End", cf.thZ0, 'f')
 
         (self.z1, self.z1Txt) = \
-            self.addFieldText(sizerG, "Z Start", cf.thZ1)
+            addFieldText(self, sizerG, "Z Start", cf.thZ1, 'f')
 
-        self.zRetract = self.addField(sizerG, "Z Retract", cf.thZRetract)
+        self.zRetract = addField(self, sizerG, "Z Retract", cf.thZRetract, 'f')
 
-        self.leftHand = self.addCheckBox(sizerG, "Left Hand", cf.thLeftHand, \
-                                         action=self.OnLeftHand)
+        self.leftHand = addCheckBox(self, sizerG, "Left Hand", cf.thLeftHand, \
+                                    action=self.OnLeftHand)
 
         # x parameters
 
-        self.xStart = self.addField(sizerG, "X Start D", cf.thXStart)
+        self.xStart = addField(self, sizerG, "X Start D", cf.thXStart, 'f')
 
-        self.xRetract = self.addField(sizerG, "X Retract", cf.thXRetract)
+        self.xRetract = addField(self, sizerG, "X Retract", cf.thXRetract, 'f')
 
-        self.depth = self.addField(sizerG, "Depth", cf.thXDepth)
+        self.depth = addField(self, sizerG, "Depth", cf.thXDepth, 'f')
 
-        self.alternate = self.addCheckBox(sizerG, "Alternate", cf.thAlternate)
+        self.alternate = addCheckBox(self, sizerG, "Alternate", cf.thAlternate)
 
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # cfg.initInfo(thFinal, btn)
+        # self.mf.cfg.initInfo(thFinal, btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
         # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
-        # cfg.initInfo(thDepth, btn)
+        # self.mf.cfg.initInfo(thDepth, btn)
 
         # thread parameters
 
-        self.thread = self.addField(sizerG, "Thread", cf.thThread)
+        self.thread = addField(self, sizerG, "Thread", cf.thThread, 'fs')
 
-        self.tpi = self.addRadioButton(sizerG, "TPI", cf.thTPI, \
-                                       style=wx.RB_GROUP)
+        self.tpi = addRadioButton(self, sizerG, "TPI", cf.thTPI, \
+                                  style=wx.RB_GROUP)
 
-        self.mm = self.addRadioButton(sizerG, "mm", cf.thMM)
+        self.mm = addRadioButton(self, sizerG, "mm", cf.thMM)
 
-        self.angle = self.addField(sizerG, "Angle", cf.thAngle)
+        self.angle = addField(self, sizerG, "Angle", cf.thAngle, 'fs')
 
 
-        self.firstFeedBtn = self.addRadioButton(sizerG, "First Feed", \
-                                                cf.thFirstFeedBtn, \
-                                                style=wx.RB_GROUP, \
-                                                action=self.OnFirstFeed)
+        self.firstFeedBtn = addRadioButton(self, sizerG, "First Feed", \
+                                           cf.thFirstFeedBtn, \
+                                           style=wx.RB_GROUP, \
+                                           action=self.OnFirstFeed)
 
-        self.firstFeed = self.addField(sizerG, None, cf.thFirstFeed)
+        self.firstFeed = addField(self, sizerG, None, cf.thFirstFeed, 'f')
 
         # special thread parameters
 
-        self.xTaper = self.addField(sizerG, "Taper", cf.thXTaper)
+        self.xTaper = addField(self, sizerG, "Taper", cf.thXTaper, 'f')
 
-        self.runout = self.addField(sizerG, "Exit Rev", cf.thRunout)
+        self.runout = addField(self, sizerG, "Exit Rev", cf.thRunout, 'fs')
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        placeHolder(sizerG)
 
-        self.lastFeedBtn = self.addRadioButton(sizerG, "Last Feed", \
-                                               cf.thLastFeedBtn, \
-                                               action=self.OnLastFeed)
+        self.lastFeedBtn = addRadioButton(self, sizerG, "Last Feed", \
+                                          cf.thLastFeedBtn, \
+                                          action=self.OnLastFeed)
 
-        self.lastFeed = self.addField(sizerG, None, cf.thLastFeed)
+        self.lastFeed = addField(self, sizerG, None, cf.thLastFeed, 'f')
 
         # pass info
 
-        self.passes = self.addField(sizerG, "Passes", cf.thPasses)
+        self.passes = addField(self, sizerG, "Passes", cf.thPasses, 'd')
         self.passes.SetEditable(False)
 
-        self.sPInt = self.addField(sizerG, "SP Int", cf.thSPInt)
+        self.sPInt = addField(self, sizerG, "SP Int", cf.thSPInt, 'd')
 
-        self.spring = self.addField(sizerG, "Spring", cf.thSpring)
+        self.spring = addField(self, sizerG, "Spring", cf.thSpring, 'd')
 
-        self.internal = self.addCheckBox(sizerG, "Internal", cf.thInternal, \
-                                         action=self.OnInternal)
+        placeHolder(sizerG)
 
         # buttons
 
-        self.addButton(sizerG, 'Send', self.OnSend)
+        addButtons(self, sizerG, cf.thAddFeed, cf.thRPM, cf.thPause, True)
 
-        self.addButton(sizerG, 'Start', self.OnStart)
-
-        self.addButton(sizerG, 'Add', self.OnAdd)
-
-        self.add = self.addField(sizerG, None, cf.thAddFeed)
-
-        self.rpm = self.addField(sizerG, "RPM", cf.thRPM)
-
-        self.pause = self.addCheckBox(sizerG, "Pause", cf.thPause)
+        self.internal = addCheckBox(self, sizerG, "Internal", cf.thInternal, \
+                                    action=self.OnInternal, box=True)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def update(self):
-        self.formatData(self.formatList)
+        formatData(self.mf.cfg, self.formatList)
         self.updateLeftHand()
         self.updateFirstFeed()
         self.updateLastFeed()
         self.sizerV.Layout()
-        jogPanel.setPassText("Feed")
+        self.mf.jogPanel.setPassText("Feed")
 
     def updateFirstFeed(self):
         if self.firstFeedBtn.GetValue():
@@ -3609,39 +4913,42 @@ class ThreadPanel(wx.Panel, FormRoutines, ActionRoutines):
             self.z0Txt.SetLabel("Z End")
             self.z1Txt.SetLabel("Z Start")
 
-    def OnLeftHand(self, e):
+    def OnLeftHand(self, _):
         self.updateLeftHand()
         self.sizerV.Layout()
 
-    def OnInternal(self, e):
+    def OnInternal(self, _):
         pass
 
-    def OnFirstFeed(self, e):
+    def OnFirstFeed(self, _):
         self.updateFirstFeed()
 
-    def OnLastFeed(self, e):
+    def OnLastFeed(self, _):
         self.updateLastFeed()
 
     def sendData(self):
-        moveCommands.queClear()
-        sendClear()
-        sendSpindleData()
-        sendZData()
-        sendXData()
+        self.mf.move.queClear()
+        sd = self.mf.sendData
+        sd.sendClear()
+        sd.sendSpindleData()
+        sd.sendZData()
+        sd.sendXData()
 
     def sendAction(self):
         self.sendData()
         return(self.control.runOperation())
 
     def startAction(self):      # thread
-        comm.command(cm.CMD_RESUME)
+        self.mf.comm.command(cm.CMD_RESUME)
         control = self.control
-        if control.add:
-            if jogPanel.mvStatus & ct.MV_READ_X:
+        if control.addEnabled:
+            if self.mf.jogPanel.mvStatus & ct.MV_READ_X:
                 control.fixCut()
         else:
-            if cfg.getBoolInfoData(cf.cfgDbgSave):
-                updateThread.openDebug()
+            if self.mf.dbgSave:
+                print("openDebug")
+                stdout.flush()
+                self.mf.updateThread.openDebug(action=en.OP_THREAD)
 
     def addAction(self):
         self.control.addPass()
@@ -3666,7 +4973,7 @@ class ButtonRepeat(Thread):
             self.event.wait(.2)
             if not self.threadRun:
                 break
-            while self.event.isSet():
+            while self.event.is_set():
                 if flag:
                     flag = False
                     print("buttonRepeat running %s" % (self.action))
@@ -3689,38 +4996,45 @@ class KeypadEvent(wx.PyEvent):
         wx.PyEvent.__init__(self)
         self.SetEventType(EVT_KEYPAD_ID)
         self.data = data
-    
+
 class Keypad(Thread):
-    def __init__(self, port, rate):
+    def __init__(self, mainFrame, port, rate):
+        self.mf = mainFrame
+        self.threadRun = False
+        self.threadDone = False
         if port is None:
             return
         if len(port) == 0:
             return
         Thread.__init__(self)
-        self.threadRun = True
-        self.threadDone = False
         self.port = port
         self.rate = rate
         try:
             self.ser = serial.Serial(port, rate, timeout=1)
         except IOError:
-            print("unable to open port %s" % (port))
+            print("keypad unable to open port %s exit" % (port))
             stdout.flush()
             self.ser = None
+            self.threadDone = True
+            return
 
         self.start()
 
     def run(self):
+        self.threadRun = True
         prtErr = True
         while self.threadRun:
             if self.ser is not None:
                 try:
-                    tmp = str(self.ser.read(1))
+                    tmp = str(self.ser.read(1).decode('utf8'))
+                    if len(tmp) != 0:
+                        wx.PostEvent(self.mf.jogPanel, KeypadEvent(ord(tmp[0])))
                 except serial.SerialException:
+                    self.ser.close()
                     self.ser = None
-                    pass
-                if len(tmp) != 0:
-                    wx.PostEvent(jogPanel, KeypadEvent(ord(tmp[0])))
+                    print("keypad SerialException")
+                except UnicodeDecodeError:
+                    print("keypad UnicodeDecodeError")
             else:
                 try:
                     self.ser = serial.Serial(self.port, self.rate, timeout=1)
@@ -3732,6 +5046,8 @@ class Keypad(Thread):
                     stdout.flush()
                     self.ser = None
                     sleep(5)
+        if self.ser is not None:
+            self.ser.close()
         print("Keypad done")
         stdout.flush()
         self.threadDone = True
@@ -3740,7 +5056,9 @@ class Keypad(Thread):
         self.threadRun = False
 
 class JogShuttle(Thread):
-    def __init__(self):
+    def __init__(self, mainFrame):
+        Thread.__init__(self)
+        self.mf = mainFrame
         allHids = None
         self.threadRun = True
         self.threadDone = False
@@ -3755,35 +5073,35 @@ class JogShuttle(Thread):
                         self.device = device
                         device.open()
                         device.set_raw_data_handler(self.ShuttleInput)
-                        self.run
-                    except:
+                        self.run()
+                    except HIDError:
                         traceback.print_exc()
                     break
-        if self.device == None:
+        if self.device is not None:
             self.threadDone = True
             return
 
         self.lastOuterRing = 0
         self.lastKnob = None
         self.lastButton = 0
-        self.buttonAction = ((16, self.setZ), \
-                             (32, self.setX))
+        self.buttonAction = ((16, self.setZ), (32, self.setX))
         if STEP_DRV:
             self.buttonAction += ((64, self.setSpindle),)
         else:
             self.buttonAction += ((64, None),)
-        self.buttonAction += ((128, None), \
-                              (1, None))
+        self.buttonAction += ((128, None), (1, None))
         self.axisAction = None
         self.factor = (0.00, 0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00)
 
-        self.zSpeed = [None, None, None, None, None, None, None, None]
+        factorLen = len(self.factor)
+
+        self.zSpeed = [0.0 for _ in range(factorLen)]
         self.zCurSpeed = 0.0
 
-        self.xSpeed = [None, None, None, None, None, None, None, None]
+        self.xSpeed = [0.0 for _ in range(factorLen)]
         self.xCurSpeed = 0.0
 
-        self.spindleSpeed = [None, None, None, None, None, None, None, None]
+        self.spindleSpeed = [0.0 for _ in range(factorLen)]
         self.spindleCurSpeed = 0.0
 
         self.start()
@@ -3796,7 +5114,7 @@ class JogShuttle(Thread):
 
             if self.device is not None:
                 if not self.device.is_plugged():
-                    print("shuttle unplugged");
+                    print("shuttle unplugged")
                     stdout.flush()
                     self.device = None
                     t = 5
@@ -3810,10 +5128,10 @@ class JogShuttle(Thread):
                                 self.device = device
                                 device.open()
                                 device.set_raw_data_handler(self.KeypadInput)
-                                print("open shuttle");
+                                print("open shuttle")
                                 stdout.flush()
                                 t = 1
-                            except:
+                            except HIDError:
                                 traceback.print_exc()
             sleep(t)
         print("JogShuttle done")
@@ -3822,6 +5140,9 @@ class JogShuttle(Thread):
 
     def close(self):
         self.threadRun = False
+
+    def KeypadInput(self):
+        pass
 
         # 0.0 0.5 1.0 5.0 10.0 20.0 150.0 240.0
 
@@ -3837,6 +5158,7 @@ class JogShuttle(Thread):
                 print("outerRing %d self.axisAction %s" % \
                       (outerRing, self.axisAction))
                 self.axisAction(0, outerRing)
+                buttonRepeat = self.mf.jogPanel.btnRpt
                 buttonRepeat.action = self.axisAction
                 buttonRepeat.code = 0
                 buttonRepeat.val = outerRing
@@ -3862,7 +5184,7 @@ class JogShuttle(Thread):
     def setZ(self, button, val):
         if button & val:
             self.axisAction = self.jogZ
-            maxSpeed = cfg.getFloatInfoData(cf.zMaxSpeed)
+            maxSpeed = self.mf.cfg.getFloatInfoData(cf.zMaxSpeed)
             for val in range(len(self.factor)):
                 self.zSpeed[val] = maxSpeed * self.factor[val]
             # print("set z")
@@ -3871,7 +5193,7 @@ class JogShuttle(Thread):
     def setX(self, button, val):
         if button & val:
             self.axisAction = self.jogX
-            maxSpeed = cfg.getFloatInfoData(cf.xMaxSpeed)
+            maxSpeed = self.mf.cfg.getFloatInfoData(cf.xMaxSpeed)
             for val in range(len(self.factor)):
                 self.xSpeed[val] = maxSpeed * self.factor[val]
             # print("set x")
@@ -3880,7 +5202,7 @@ class JogShuttle(Thread):
     def setSpindle(self, button, val):
         if button & val:
             self.axisAction = self.jogSpindle
-            maxSpeed = cfg.getFloatInfoData(cf.spMaxRPM)
+            maxSpeed = self.mf.cfg.getFloatInfoData(cf.spMaxRPM)
             for val in range(len(self.factor)):
                 self.spindleSpeed[val] = \
                     maxSpeed * self.factor[val]
@@ -3888,18 +5210,19 @@ class JogShuttle(Thread):
             # stdout.flush()
 
     def jogDone(self, cmd):
-            buttonRepeat.action = None
-            buttonRepeat.event.clear()
-            self.xCurIndex = -1
-            try:
-                comm.command(cmd)
-            except CommTimeout:
-                commTimeout()
+        buttonRepeat = self.mf.jogPanel.btnRpt
+        buttonRepeat.action = None
+        buttonRepeat.event.clear()
+        self.xCurIndex = -1
+        try:
+            self.mf.comm.command(cmd)
+        except CommTimeout:
+            commTimeout(self.mf.jogPanel)
 
     def jogZ(self, code, val):
         if val == 0:
             self.jogDone(cm.ZSTOP)
-            
+
             print("jogZ done")
             stdout.flush()
         else:
@@ -3912,10 +5235,10 @@ class JogShuttle(Thread):
             try:
                 if self.zCurSpeed != speed:
                     self.zCurSpeed = speed
-                    comm.setParm(pm.Z_JOG_SPEED, speed)
-                comm.command(cm.ZJSPEED)
+                    self.mf.comm.setParm(pm.Z_JOG_SPEED, speed)
+                self.mf.comm.command(cm.ZJSPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
     def jogX(self, code, val):
         if val == 0:
@@ -3932,10 +5255,10 @@ class JogShuttle(Thread):
             try:
                 if self.xCurSpeed != speed:
                     self.xCurSpeed = speed
-                    comm.setParm(pm.X_JOG_SPEED, speed)
-                comm.command(cm.XJSPEED)
+                    self.mf.comm.setParm(pm.X_JOG_SPEED, speed)
+                self.mf.comm.command(cm.XJSPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
     def jogSpindle(self, code, val):
         if val == 0:
@@ -3952,57 +5275,72 @@ class JogShuttle(Thread):
             try:
                 if self.spindleCurSpeed != speed:
                     self.spindleCurSpeed = speed
-                    comm.setParm(pm.SP_JOG_RPM, speed)
-                comm.command(cm.SPINDLE_JOG_SPEED)
+                    self.mf.comm.setParm(pm.SP_JOG_RPM, speed)
+                self.mf.comm.command(cm.SPINDLE_JOG_SPEED)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self.mf.jogPanel)
 
 class JogPanel(wx.Panel, FormRoutines):
-    def __init__(self, parent, *args, **kwargs):
-        global buttonRepeat
-        super(JogPanel, self).__init__(parent, *args, **kwargs)
+    def __init__(self, mainFrame, *args, **kwargs):
+        super(JogPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self, False)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
-        self.Connect(-1, -1, EVT_KEYPAD_ID, self.keypadEvent)
+        self.Connect(-1, -1, EVT_KEYPAD_ID, self.OnKeypadEvent)
+        # self.Connect(-1, -1, EVT_STATUS_UPDATE_ID, self.OnStatusUpdate)
         # self.Bind(wx.EVT_CHAR_HOOK, self.OnCharHook)
+        self.mf = mainFrame
+        self.comm = mainFrame.comm
+        self.cfg = mainFrame.cfg
         self.jogCode = None
         self.repeat = 0
-        self.btnRpt = buttonRepeat = ButtonRepeat()
-        self.surfaceSpeed = cfg.newInfo(cf.jpSurfaceSpeed, False)
+        self.btnRpt = ButtonRepeat()
+        self.surfaceSpeed = mainFrame.cfg.newInfo(cf.jpSurfaceSpeed, False)
         self.fixXPosDialog = None
-        self.xHome = False
-        self.probeAxis = 0
+        self.retractXDialog = None
+        self.retractZDialog = None
+        self.xReturnLoc = None
+        self.zReturnLoc = None
         self.probeLoc = 0.0
         self.probeStatus = 0
         self.mvStatus = 0
         self.lastPass = 0
         self.currentPanel = None
         self.currentControl = None
-        self.lastZOffset = 0.0
-        self.lastXOffset = 0.0
+        self.spindleActive = False
+
+        self.homeOrProbe = None
+
         self.zStepsInch = 0
+        self.lastZOffset = 0.0
+        self.zPosition = 0.0
+        self.zHomeOffset = 0.0
+        self.zIPosition = None
+        self.zIHomeOffset = None
+        self.zLocation = 0.0
+
         self.xStepsInch = 0
-        self.zPosition = None
-        self.zHomeOffset = None
-        self.xPosition = None
-        self.xHomeOffset = None
+        self.xPosition = 0.0
+        self.xHomeOffset = 0.0
+        self.xIPosition = None
+        self.xIHomeOffset = None
+        self.lastXOffset = 0.0
+        self.xLocation = 0.0
         if DRO:
             self.zDROInch = 0
-            self.xDROInch = 0
-            self.zDROPostition = None
-            self.zDROOffset = None
-            self.xDROPostition = None
-            self.xDROOffset = None
-            # self.xDroDiam = False
-            self.xDroDiam = cfg.newInfo(cf.jpXDroDiam, False)
-        self.overrideSet = False
+            self.zDROPosition = 0.0
+            self.zDROOffset = 0.0
+            self.zIDROPosition = None
+            self.zIDROOffset = None
 
-        if not os.path.exists(DBG_DIR):
-            os.makedirs(DBG_DIR)
-        self.dbg = open(DBG_LOG, "ab")
-        t = strftime("\n%a %b %d %Y %H:%M:%S\n", localtime())
-        self.dbg.write(t.encode())
-        self.dbg.flush()
+            self.xDROInch = 0
+            self.xDROPosition = 0.0
+            self.xDROOffset = 0.0
+            self.xIDROPosition = None
+            self.xIDROOffset = None
+            self.xDroDiam = mainFrame.cfg.newInfo(cf.jpXDroDiam, False)
+        self.overrideSet = False
+        self.addEna = False
+        self.xHomed = False
 
         eventTable = (\
                       (en.EV_ZLOC, self.updateZ), \
@@ -4012,7 +5350,7 @@ class JogPanel(wx.Panel, FormRoutines):
                       (en.EV_ERROR, self.updateError), \
                       )
 
-        self.procUpdate = [None for i in range(en.EV_MAX)]
+        self.procUpdate = [None for _ in range(en.EV_MAX)]
         for (event, action) in eventTable:
             self.procUpdate[event] = action
 
@@ -4032,7 +5370,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def postUpdate(self, result):
         wx.PostEvent(self, UpdateEvent(result))
-        
+
     def OnUpdate(self, e):
         index = e.data[0]
         if index < len(self.procUpdate):
@@ -4041,22 +5379,9 @@ class JogPanel(wx.Panel, FormRoutines):
                 val = e.data[1:]
                 if len(val) == 1:
                     val = val[0]
+                assert (callable(update))
                 update(val)
 
-    def close(self):
-        if self.dbg is not None:
-            self.dbg.close()
-            self.dbg = None
-
-    def dPrt(self, text, console=False, flush=False):
-        self.dbg.write(text.encode())
-        if flush:
-            self.dbg.flush()
-        if console:
-            print(text, end='')
-            if flush:
-                stdout.flush
-                
     def initUI(self):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseEvent)
 
@@ -4064,77 +5389,81 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerG = wx.FlexGridSizer(cols=6, rows=0, vgap=0, hgap=0)
 
-        self.txtFont = txtFont = wx.Font(16, wx.MODERN, wx.NORMAL, \
-                                         wx.NORMAL, False, u'Consolas')
-        self.posFont = posFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                                         wx.NORMAL, False, u'Consolas')
+        self.txtFont = txtFont = \
+            wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+        self.posFont = posFont = \
+            wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         # first row
         # z position
 
         self.zPos = \
-            self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                posFont, (130, -1), border=(10, 2), \
-                                edit=False, index=cf.jogZPos)
+            addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+                           posFont, (130, -1), border=(10, 2), \
+                           edit=False, index=cf.jogZPos)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
         # x Position
 
         self.xPos = \
-            self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                posFont, (130, -1), border=(10, 2), \
-                                edit=False, index=cf.jogXPos)
+            addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+                           posFont, (130, -1), border=(10, 2), \
+                           edit=False, index=cf.jogXPos)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # rpm
 
         (self.rpm, self.rpmText) = \
-            self.addDialogField(sizerG, "RPM", "0", txtFont, \
-                                posFont, (80, -1), border=(10, 2), \
-                                edit=False, text=True)
+            addDialogField(self, sizerG, "RPM", "0", txtFont, \
+                           posFont, (80, -1), border=(10, 2), \
+                           edit=False, text=True)
         self.rpm.Bind(wx.EVT_RIGHT_DOWN, self.OnRpmMenu)
         self.setSurfaceSpeed()
 
         # second row
         # pass size
-        
+
         (self.passSize, self.passText) = \
-            self.addDialogField(sizerG, "Size", "0.000", txtFont, \
-                                posFont, (130, -1), border=(10,2), \
-                                edit=False, text=True)
+            addDialogField(self, sizerG, "Size", "0.000", txtFont, \
+                           posFont, (130, -1), border=(10,2), \
+                           edit=False, text=True)
         # x diameter
 
         self.xPosDiam = \
-            self.addDialogField(sizerG, "X D", "0.0000", txtFont, \
-                                posFont, (130, -1), border=(10, 2), \
-                                edit=False)
+            addDialogField(self, sizerG, "X D", "0.0000", txtFont, \
+                           posFont, (130, -1), border=(10, 2), \
+                           edit=False)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # pass
 
         self.curPass = \
-            self.addDialogField(sizerG, "Pass", "0", txtFont, \
-                                posFont, (80, -1), border=(10, 2), \
-                                edit=False)
+            addDialogField(self, sizerG, "Pass", "0", txtFont, \
+                           posFont, (80, -1), border=(10, 2), \
+                           edit=False)
 
         if DRO:
             # third row
             # z dro position
 
             self.zDROPos = \
-                self.addDialogField(sizerG, "Z", "0.0000", txtFont, \
-                                    posFont, (130, -1), border=(10, 2), \
-                                    edit=False, index=cf.droZPos)
+                addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
+                               posFont, (130, -1), border=(10, 2), \
+                               edit=False, index=cf.droZPos)
             self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
             # x dro Position
 
             self.xDROPos = \
-                self.addDialogField(sizerG, "X", "0.0000", txtFont, \
-                                    posFont, (130, -1), border=(10, 2), \
-                                    edit=False, index=cf.droXPos)
+                addDialogField(self, sizerG, "X", "0.0000", txtFont, \
+                               posFont, (130, -1), border=(10, 2), \
+                               edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
-        sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        # sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        #            border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, \
                    border=2)
 
         # status line
@@ -4153,12 +5482,14 @@ class JogPanel(wx.Panel, FormRoutines):
                    wx.ALIGN_CENTER_VERTICAL, border=2)
 
         txt = wx.StaticText(self, -1, "Limit Override ")
-        sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        # sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        #            border=2)
+        sizerH.Add(txt, flag=wx.ALIGN_CENTER_VERTICAL, \
                    border=2)
 
         self.limitOverride = cb = wx.CheckBox(self, -1)
         self.Bind(wx.EVT_CHECKBOX, self.OnOverride, cb)
-        sizerH.Add(cb, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
+        sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL, \
                    border=2)
 
         sizerV.Add(sizerH)
@@ -4173,39 +5504,51 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # first line
 
-        self.addButton(sizerG, 'E Stop', self.OnEStop, btnSize)
+        btn = addButton(self, sizerG, 'E Stop', self.OnEStop, btnSize)
+        btn.SetBackgroundColour('Red')
 
-        self.addButton(sizerG, 'Pause', self.OnPause, btnSize)
+        self.pauseButton = \
+            addButton(self, sizerG, 'Pause', self.OnPause, btnSize)
+        self.pauseButton.Disable()
 
         if STEP_DRV:
-            self.addControlButton(sizerG, 'Jog Spindle +', \
+            addControlButton(self, sizerG, 'Jog Spindle +', \
                                   self.OnJogSpindleFwd, self.OnJogUp)
         else:
-            sizerG.Add(self.emptyCell)
+            placeHolder(sizerG, 1)
 
         # second line
 
-        self.addButton(sizerG, 'Stop', self.OnStop, btnSize)
+        btn = addButton(self, sizerG, 'Stop', self.OnStop, btnSize)
+        btn.SetBackgroundColour(wx.Colour(255, 160, 0))
 
-        self.addButton(sizerG, 'Measure', self.OnMeasure, btnSize)
+        self.measureButton = \
+            addButton(self, sizerG, 'Measure', self.OnMeasure, btnSize)
+        self.measureButton.Disable()
 
         if STEP_DRV:
-            self.addControlButton(sizerG, 'Jog Spindle -', \
+            addControlButton(self, sizerG, 'Jog Spindle -', \
                                   self.OnJogSpindleRev, self.OnJogUp)
         else:
-            sizerG.Add(self.emptyCell)
+            placeHolder(sizerG, 1)
 
         # third line
 
-        self.addButton(sizerG, 'Done', self.OnDone, btnSize)
+        self.doneButton = addButton(self, sizerG, 'Done', self.OnDone, btnSize)
+        self.doneButton.Disable()
 
-        self.addButton(sizerG, 'Resume', self.OnResume, btnSize)
+        self.resumeButton = \
+            addButton(self, sizerG, 'Resume', self.OnResume, btnSize)
+        self.resumeButton.Disable()
+
 
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
-            self.addButton(sizerG, 'Start Spindle', \
-                           self.OnStartSpindle, btnSize)
+            self.spindleButton = \
+                addToggleButton(self, sizerG, 'Start Spindle', \
+                                self.OnStartSpindle, btnSize)
+            self.spindleButton.SetBackgroundColour('Green')
         else:
-            sizerG.Add(self.emptyCell)
+            placeHolder(sizerG, 1)
 
         sizerH.Add(sizerG)
 
@@ -4214,29 +5557,28 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # first row
 
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
-        sizerG.Add(self.emptyCell)
+        placeHolder(sizerG, 3)
 
         self.xNegButton = \
-            self.addBitmapButton(sizerG, "north.gif", self.OnXNegDown, \
+            addBitmapButton(self, sizerG, "north.png", self.OnXNegDown, \
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
-        sizerG.Add(self.emptyCell)
+
+        placeHolder(sizerG, 1)
 
         # second row
 
         self.zNegButton = \
-            self.addBitmapButton(sizerG, "west.gif", self.OnZNegDown, \
+            addBitmapButton(self, sizerG, "west.png", self.OnZNegDown, \
                                  self.OnZUp, flag=sFlag)
 
-        self.addButton(sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
+        addButton(self, sizerG, 'S', self.OnZSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
         self.zPosButton = \
-            self.addBitmapButton(sizerG, "east.gif", self.OnZPosDown, \
+            addBitmapButton(self, sizerG, "east.png", self.OnZPosDown, \
                                  self.OnZUp, flag=sFlag)
 
-        self.addButton(sizerG, 'S', self.OnXSafe, style=wx.BU_EXACTFIT, \
+        addButton(self, sizerG, 'S', self.OnXSafe, style=wx.BU_EXACTFIT, \
                        size=btnSize, flag=sFlag)
 
         self.step = step = ["Cont", "0.0001", "0.0002", "0.0005", \
@@ -4246,7 +5588,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.combo = combo = wx.ComboBox(self, -1, step[1], choices=step, \
                                          style=wx.CB_READONLY)
-        cfg.initInfo(cf.jogInc, combo)
+        self.cfg.initInfo(cf.jogInc, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
         combo.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         combo.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
@@ -4258,30 +5600,80 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # third row
 
-        sizerG.Add(self.emptyCell)
+        placeHolder(sizerG, 1)
 
-        self.addButton(sizerG, 'P', self.OnZPark, style=wx.BU_EXACTFIT, \
-                       size=btnSize, flag=sFlag)
+        self.zButton = \
+            addBitmapButton(self, sizerG, "eastG.png", self.OnZRetract, \
+                                 None,  flag=sFlag|wx.EXPAND)
 
-        sizerG.Add(self.emptyCell)
+        placeHolder(sizerG, 1)
 
         self.xPosButton = \
-            self.addBitmapButton(sizerG, "south.gif", self.OnXPosDown,
+            addBitmapButton(self, sizerG, "south.png", self.OnXPosDown,
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
-        self.addButton(sizerG, 'P', self.OnXPark, style=wx.BU_EXACTFIT, \
-                       size=btnSize, flag=sFlag|wx.ALIGN_CENTER_HORIZONTAL)
+        self.xButton = \
+            addBitmapButton(self, sizerG, "southG.png", self.OnXRetract, \
+                                 None,  flag=sFlag|wx.EXPAND)
 
         sizerH.Add(sizerG)
 
-        sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        # sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
+        #            border=2)
+        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, \
                    border=2)
+
+
+        self.sliderMax = 1000
+        self.spindleSlider = slider = wx.Slider(self, size=(500, -1),
+                                                maxValue=self.sliderMax)
+        slider.Bind(wx.EVT_SCROLL_THUMBTRACK, self.OnSliderThumbtrack)
+        slider.Bind(wx.EVT_SCROLL_THUMBRELEASE, self.OnSliderRelease)
+
+        sizerV.Add(slider)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def spindleRangeSetup(self):
+        print("spindleRangeSetup")
+        cfg = self.cfg
+        spRange = cfg.getIntInfoData(cf.spCurRange)
+        if 1 <= spRange <= cfg.getIntInfoData(cf.spRanges):
+            spRange -= 1
+            self.minSpeed = cfg.getIntInfoData(cf.spRangeMin1 + spRange)
+            self.maxSpeed = cfg.getIntInfoData(cf.spRangeMax1 + spRange)
+            self.speedRange = self.maxSpeed - self.minSpeed
+
+    def setRPMSlider(self, rpm):
+        if rpm > self.minSpeed:
+            pos = int((float(rpm - self.minSpeed) / self.speedRange) * \
+                      self.sliderMax)
+            self.spindleSlider.SetValue(pos)
+        else:
+            self.spindleSlider.SetValue(0)
+
+    def OnSliderThumbtrack(self, e):
+        pos = e.GetPosition()
+        rpm = int(self.minSpeed + \
+                  (float(pos) / self.sliderMax) * self.speedRange)
+        self.currentPanel.rpm.SetValue(str(rpm))
+        # print(pos, rpm)
+        # stdout.flush()
+
+    def OnSliderRelease(self, _):
+        if self.spindleActive:
+            rpm = int(self.currentPanel.rpm.GetValue())
+            self.comm.setParm(pm.SP_RPM, rpm)
+            self.comm.command(cm.SPINDLE_UPDATE)
+        self.focus()
+
     def update(self):
         self.setSurfaceSpeed()
+        self.spindleRangeSetup()
 
     def setPassText(self, txt):
         self.passText.SetLabel(txt)
@@ -4311,12 +5703,12 @@ class JogPanel(wx.Panel, FormRoutines):
         menu = PosMenu(self, AXIS_X)
         self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
-        
+
     def OnRpmMenu(self, e):
         menu = RpmMenu(self)
         self.PopupMenu(menu, self.menuPos(e, self.xPos))
         menu.Destroy()
-        
+
     def focus(self):
         self.combo.SetFocus()
 
@@ -4326,41 +5718,67 @@ class JogPanel(wx.Panel, FormRoutines):
         # stdout.flush()
         return(val)
 
-    def OnZSafe(self, e):
-        panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
-        comm.queParm(pm.Z_MOVE_POS, z)
-        comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
-        comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
-        comm.command(cm.ZMOVEABS)
+    def OnZSafe(self, _):
+        if self.addEna:
+            panel = self.getPanel()
+            (z, x) = getSafeLoc(panel)
+            self.comm.queParm(pm.Z_MOVE_POS, z)
+            self.comm.queParm(pm.Z_HOME_OFFSET, \
+                         round(self.zHomeOffset * self.zStepsInch))
+            self.comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
+            self.comm.command(cm.ZMOVEABS)
         self.combo.SetFocus()
 
-    def OnZPark(self, e):
-        comm.queParm(pm.Z_MOVE_POS, cfg.getFloatInfoData(cf.zParkLoc))
-        comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
-        comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
-        comm.command(cm.ZMOVEABS)
+    def OnZRetract(self, _):
+        if self.addEna:
+            if self.zReturnLoc is None:
+                loc = self.cfg.getFloatInfoData(cf.zRetractLoc)
+                bitmap = "westR.png"
+                self.zReturnLoc = self.zPos.GetValue()
+            else:
+                loc = self.zReturnLoc
+                bitmap = "eastG.png"
+                self.zReturnLoc = None
+            self.zButton.SetBitmap(wx.Bitmap(bitmap))
+            self.comm.queParm(pm.Z_MOVE_POS, loc)
+            self.comm.queParm(pm.Z_HOME_OFFSET, \
+                         round(self.zHomeOffset * self.zStepsInch))
+            self.comm.queParm(pm.Z_FLAG, ct.CMD_MAX)
+            self.comm.command(cm.ZMOVEABS)
         self.combo.SetFocus()
 
-    def OnXSafe(self, e):
-        panel = self.getPanel()
-        (z, x) = panel.getSafeLoc()
-        comm.queParm(pm.X_MOVE_POS, x)
-        comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
-        comm.queParm(pm.X_FLAG, ct.CMD_MAX)
-        comm.command(cm.XMOVEABS)
+    def OnXSafe(self, _):
+        if self.addEna:
+            panel = self.getPanel()
+            (z, x) = getSafeLoc(panel)
+            self.comm.queParm(pm.X_MOVE_POS, x)
+            self.comm.queParm(pm.X_HOME_OFFSET, \
+                         round(self.xHomeOffset * self.xStepsInch))
+            self.comm.queParm(pm.X_FLAG, ct.CMD_MAX)
+            self.comm.command(cm.XMOVEABS)
         self.combo.SetFocus()
 
-    def OnXPark(self, e):
-        comm.queParm(pm.X_MOVE_POS, cfg.getFloatInfoData(cf.xParkLoc))
-        comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
-        comm.queParm(pm.X_FLAG, ct.CMD_MAX)
-        comm.command(cm.XMOVEABS)
+    def OnXRetract(self, _):
+        if self.addEna:
+            if self.xReturnLoc is None:
+                loc = self.cfg.getFloatInfoData(cf.xRetractLoc)
+                bitmap = "northR.png"
+                self.xReturnLoc = self.xPos.GetValue()
+            else:
+                loc = self.xReturnLoc
+                bitmap = "southG.png"
+                self.xReturnLoc = None
+            self.xButton.SetBitmap(wx.Bitmap(bitmap))
+            self.comm.queParm(pm.X_MOVE_POS, loc)
+            self.comm.queParm(pm.X_HOME_OFFSET, \
+                         round(self.xHomeOffset * self.xStepsInch))
+            self.comm.queParm(pm.X_FLAG, ct.CMD_MAX)
+            self.comm.command(cm.XMOVEABS)
         self.combo.SetFocus()
 
     def zJogCmd(self, code, val):
         self.repeat += 1
-        sendZData()
+        self.mf.sendData.sendZData()
         if val == 'Cont':
             if self.jogCode != code: # new jog code
                 if self.jogCode is None: # jogging stopped
@@ -4371,16 +5789,17 @@ class JogPanel(wx.Panel, FormRoutines):
                         direction = -1
                     print("zJogCmd %d" % (direction))
                     try:
-                        comm.queParm(pm.Z_JOG_MAX, cfg.getInfoData(cf.zJogMax))
-                        comm.queParm(pm.Z_JOG_DIR, direction)
-                        comm.command(cm.ZJMOV)
+                        self.comm.queParm(pm.Z_JOG_MAX, \
+                                          self.cfg.getInfoData(cf.zJogMax))
+                        self.comm.queParm(pm.Z_JOG_DIR, direction)
+                        self.comm.command(cm.ZJMOV)
                     except CommTimeout:
-                        commTimeout()
+                        commTimeout(self)
             else:
                 try:
-                    comm.command(cm.ZJMOV)
+                    self.comm.command(cm.ZJMOV)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
         else:
             if self.jogCode is None:
                 self.jogCode = code
@@ -4389,11 +5808,11 @@ class JogPanel(wx.Panel, FormRoutines):
                 print("zJogCmd %s" % (val))
                 stdout.flush()
                 try:
-                    comm.queParm(pm.Z_FLAG, ct.CMD_JOG)
-                    comm.queParm(pm.Z_MOVE_DIST, val)
-                    comm.command(cm.ZMOVEREL)
+                    self.comm.queParm(pm.Z_FLAG, ct.CMD_JOG)
+                    self.comm.queParm(pm.Z_MOVE_DIST, val)
+                    self.comm.command(cm.ZMOVEREL)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
 
     def jogDone(self, cmd):
         self.jogCode = None
@@ -4402,9 +5821,9 @@ class JogPanel(wx.Panel, FormRoutines):
             print("jogDone %d" % (self.repeat))
             stdout.flush()
             try:
-                comm.command(cmd)
+                self.comm.command(cmd)
             except CommTimeout:
-                commTimeout()
+                commTimeout(self)
 
     def zDown(self, code):
         val = self.getInc()
@@ -4416,7 +5835,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.val = val
             self.btnRpt.event.set()
 
-    def OnZUp(self, e):
+    def OnZUp(self, _):
         print("OnZUp")
         stdout.flush()
         val = self.getInc()
@@ -4427,11 +5846,11 @@ class JogPanel(wx.Panel, FormRoutines):
         self.jogCode = None
         self.combo.SetFocus()
 
-    def OnZNegDown(self, e):
+    def OnZNegDown(self, _):
         self.zNegButton.SetFocus()
         self.zDown(wx.WXK_LEFT)
 
-    def OnZPosDown(self, e):
+    def OnZPosDown(self, _):
         print("OnZPosDown")
         stdout.flush()
         self.zPosButton.SetFocus()
@@ -4443,7 +5862,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def xJogCmd(self, code, val):
         self.repeat += 1
-        sendXData()
+        self.mf.sendData.sendXData()
         if val == 'Cont':
             if self.jogCode != code:
                 if self.jogCode is None:
@@ -4455,16 +5874,17 @@ class JogPanel(wx.Panel, FormRoutines):
                     print("xJogCmd %d" % (direction))
                     stdout.flush()
                     try:
-                        comm.queParm(pm.X_JOG_MAX, cfg.getInfoData(cf.xJogMax))
-                        comm.queParm(pm.X_JOG_DIR, direction)
-                        comm.command(cm.XJMOV)
+                        self.comm.queParm(pm.X_JOG_MAX, \
+                                          self.cfg.getInfoData(cf.xJogMax))
+                        self.comm.queParm(pm.X_JOG_DIR, direction)
+                        self.comm.command(cm.XJMOV)
                     except CommTimeout:
-                        commTimeout()
+                        commTimeout(self)
             else:
                 try:
-                    comm.command(cm.XJMOV)
+                    self.comm.command(cm.XJMOV)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
         else:
             if self.jogCode is None:
                 self.jogCode = code
@@ -4475,11 +5895,11 @@ class JogPanel(wx.Panel, FormRoutines):
                 try:
                     flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
                                          if X_DRO_POS else 0)
-                    comm.queParm(pm.X_FLAG, flag)
-                    comm.queParm(pm.X_MOVE_DIST, val)
-                    comm.command(cm.XMOVEREL)
+                    self.comm.queParm(pm.X_FLAG, flag)
+                    self.comm.queParm(pm.X_MOVE_DIST, val)
+                    self.comm.command(cm.XMOVEREL)
                 except CommTimeout:
-                    commTimeout()
+                    commTimeout(self)
 
     def xDown(self, code):
         val = self.getInc()
@@ -4491,7 +5911,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.btnRpt.val = val
             self.btnRpt.event.set()
 
-    def OnXUp(self, e):
+    def OnXUp(self, _):
         val = self.getInc()
         if val == "Cont":
             self.btnRpt.event.clear()
@@ -4500,15 +5920,15 @@ class JogPanel(wx.Panel, FormRoutines):
         self.jogCode = None
         self.combo.SetFocus()
 
-    def OnXPosDown(self, e):
+    def OnXPosDown(self, _):
         self.xPosButton.SetFocus()
         self.xDown(wx.WXK_DOWN)
 
-    def OnXNegDown(self, e):
+    def OnXNegDown(self, _):
         self.xNegButton.SetFocus()
         self.xDown(wx.WXK_UP)
 
-    def OnCombo(self, e):
+    def OnCombo(self, _):
         val = self.combo.GetValue()
         print("combo val %s" % (val))
         try:
@@ -4517,9 +5937,9 @@ class JogPanel(wx.Panel, FormRoutines):
                 val = 0.020
         except ValueError:
             val = 0.0
-        comm.queParm(pm.Z_MPG_INC, round(val * self.zStepsInch))
-        comm.queParm(pm.X_MPG_INC, round(val * self.xStepsInch))
-        comm.sendMulti()
+        self.comm.queParm(pm.Z_MPG_INC, round(val * self.zStepsInch))
+        self.comm.queParm(pm.X_MPG_INC, round(val * self.xStepsInch))
+        self.comm.sendMulti()
 
     def OnMouseEvent(self, evt):
         self.combo.SetFocus()
@@ -4575,26 +5995,36 @@ class JogPanel(wx.Panel, FormRoutines):
             self.jogDone(cm.XSTOP)
             return
         elif code == wx.WXK_NUMPAD_PAGEDOWN:
-            comm.command(cm.SPINDLE_STOP)
+            self.comm.command(cm.SPINDLE_STOP)
             return
         elif code == wx.WXK_NUMPAD_PAGEUP:
-            comm.command(cm.SPINDLE_STOP)
+            self.comm.command(cm.SPINDLE_STOP)
             return
         # print("key up %x" % (code))
         # stdout.flush()
         evt.Skip()
 
+                       # (ord('a'), (self.OnEStop, None)), \
+                       # (ord('b'), (self.OnStop, None)), \
+                       # (ord('c'), (self.OnStartSpindle, None)), \
+                       # (ord('d'), self.noAction), \
+
+                       # (ord('e'), self.start), \
+                       # (ord('f'), (self.OnResume, None)), \
+                       # (ord('g'), (self.OnPause, None)), \
+                       # (ord('h'), (self.OnDone, None)), \
+
     def initKeypadTable(self):
         keypadTable = (\
-                       (ord('a'), (self.OnEStop, None)), \
-                       (ord('b'), (self.OnStop, None)), \
-                       (ord('c'), (self.OnStartSpindle, None)), \
-                       (ord('d'), self.noAction), \
+                       (ord('1'), (self.OnEStop, None)), \
+                       (ord('2'), (self.OnStop, None)), \
+                       (ord('3'), (self.OnStartSpindle, None)), \
+                       (ord('a'), self.noAction), \
 
-                       (ord('e'), self.start), \
-                       (ord('f'), (self.OnResume, None)), \
-                       (ord('g'), (self.OnPause, None)), \
-                       (ord('h'), (self.OnDone, None)), \
+                       (ord('*'), self.start), \
+                       (ord('0'), (self.OnPause, None)), \
+                       (ord('#'), (self.OnDone, None)), \
+                       (ord('d'), (self.OnResume, None)), \
 
                        (ord('i'), self.noAction), \
                        (ord('j'), self.noAction), \
@@ -4610,7 +6040,7 @@ class JogPanel(wx.Panel, FormRoutines):
         for (key, action) in keypadTable:
             self.keypadTable[key] = action
 
-    def keypadEvent(self, event):
+    def OnKeypadEvent(self, event):
         code = event.data
         if code in self.keypadTable:
             action = self.keypadTable[code]
@@ -4674,33 +6104,41 @@ class JogPanel(wx.Panel, FormRoutines):
         self.OnCombo(None)
 
     def start(self):
-        panel = mainFrame.getCurrentPanel()
+        panel = self.mf.getCurrentPanel()
         panel.OnSend(None)
 
     def nextOperation(self):
-        panel = mainFrame.getCurrentPanel()
+        panel = self.mf.getCurrentPanel()
         panel.nextOperation()
 
     def add(self):
-        panel = mainFrame.getCurrentPanel()
-        panel.OnAdd(None)
+        panel = self.mf.getCurrentPanel()
+        panel.OnAddPass(None)
 
     def addFocus(self):
-        panel = mainFrame.getCurrentPanel()
-        panel.setAddFocus()
+        panel = self.mf.getCurrentPanel()
+        # panel.setAddFocus()
+        field = panel.addPass
+        if field is not None:
+            field.SetFocus()
+            field.SetSelection(-1, -1)
 
     def focusPanel(self):
-        panel = mainFrame.getCurrentPanel()
-        panel.setFocus()
+        panel = self.mf.getCurrentPanel()
+        # panel.setFocus()
+        field = panel.focusField
+        if field is not None:
+            field.SetFocus()
+            field.SetSelection(-1, -1)
 
     def togglePause(self):
-        panel = mainFrame.currentPanel
+        panel = self.mf.currentPanel
         val = panel.pause.GetValue()
         panel.pause.SetValue(not val)
 
     def help(self):
-        dialog = HelpDialog(mainFrame)
-        mainFrame.showDialog(dialog)
+        dialog = HelpDialog(self.mf)
+        self.mf.showDialog(dialog)
 
     def OnKeyChar(self, evt):
         code = evt.GetKeyCode()
@@ -4716,8 +6154,12 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
             evt.Skip()
 
+    def OnStatusUpdate(self, evt):
+        self.setStatus(evt.data)
+        self.focus()
+
     def testPass(self, passNum, curLoc, retract=None, pause=True, axis=AXIS_X):
-        m = moveCommands
+        m = self.mf.move
         m.nextPass(passNum)
         m.moveX(curLoc) if axis == AXIS_X else m.moveZ(curLoc)
         if DRO:
@@ -4732,25 +6174,27 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def axisTest(self, inc=0.025, passes=10, retract=None, \
               pause=True, axis=AXIS_X):
-        if cfg.getBoolInfoData(cf.cfgDbgSave):
-            updateThread.openDebug("dbg_%s.txt" % \
+        if self.mf.dbgSave:
+            self.mf.updateThread.openDebug("dbg_%s.txt" % \
                                    ("x" if axis == AXIS_X else "z"))
         if retract is not None:
             retract = abs(retract) if inc < 0.0 else -abs(retract)
-        jogPanel.dPrt("\naxisTest inc %7.4f%s\n" % \
-                      (inc, "" if retract is None else \
-                       " retract %7.4f" % (retract)), flush=True)
-        m = moveCommands
+        self.mf.dPrt("\naxisTest inc %7.4f%s\n" % \
+                     (inc, "" if retract is None else \
+                      " retract %7.4f" % (retract)), flush=True)
+        m = self.mf.move
         m.queClear()
         m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         m.done(ct.PARM_START)
         if axis == AXIS_X:
-            curLoc = float(self.xPosition.value) / self.xStepsInch - xHomeOffset
+            curLoc = (float(self.xIPosition.value) / self.xStepsInch - \
+                      self.xHomeOffset)
             m.saveXOffset()
         else:
-            curLoc = float(self.zPosition.value) / self.zStepsInch - zHomeOffset
+            curLoc = (float(self.zIPosition.value) / self.zStepsInch - \
+                      self.zHomeOffset)
             m.saveZOffset()
-        jogPanel.dPrt("curLoc %7.4f\n" % (curLoc), console=True)
+        self.mf.dPrt("curLoc %7.4f\n" % (curLoc), console=True)
 
         passNum = 0
         self.testPass(99, curLoc + (0.050 if inc < 0 else -0.050), \
@@ -4762,7 +6206,7 @@ class JogPanel(wx.Panel, FormRoutines):
             curLoc += inc
             print("pass %2d curLoc %7.4f" % (passNum, curLoc))
             self.testPass(passNum, curLoc, retract, pause, axis)
-        m.done(ct.PARM_DONE)            
+        m.done(ct.PARM_DONE)
 
     def updateZ(self, val):
         txt = "%7.3f" % (float(val) / self.zStepsInch) \
@@ -4770,237 +6214,351 @@ class JogPanel(wx.Panel, FormRoutines):
         self.zPos.SetValue(txt)
 
     def updateX(self, val):
-        txt = "%7.3f" % (float(val) / self.xStepsInch) \
-              if self.xStepsInch != 0.0 else '0.000'
+        xPos = (float(val) / self.xStepsInch) \
+            if self.xStepsInch != 0.0 else 0.0
+        txt = "%7.3f" % xPos
         self.xPos.SetValue(txt)
+        dialPanel = self.mf.dialPanel
+        if dialPanel is not None:
+            dialPanel.updatePointer(xPos)
 
     def updateRPM(self, val):
         print(val)
         stdout.flush()
 
     def probe(self, axis, probeLoc=None):
-        self.xHome = True
-        self.probeAxis = axis
+        self.homeOrProbe = axis
         if probeLoc is not None:
             self.probeLoc = probeLoc
 
-    def homeDone(self, status):
-        self.xHome = False
+    def homeDone(self, axis, status, msg):
+        if axis == AXIS_X:
+            axisStr = 'X'
+        elif axis == AXIS_Z:
+            axisStr = 'Z'
+        else:
+            axisStr = ''
+        self.homeOrProbe = None
         self.probeStatus = 0
-        print(status)
+        self.setStatus(msg)
+        print(axisStr + st.strTable[msg])
         stdout.flush()
 
     def updateAll(self, val):
-        global zHomeOffset, xHomeOffset, xHomed
-        if len(val) == 7:
-            (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
-            if z != '#':
-                self.zPosition.value = z
-                zLocation = float(z) / self.zStepsInch
-                self.zPos.SetValue("%0.4f" % (zLocation - zHomeOffset))
-            if x != '#':
-                self.xPosition.value = x
-                xLocation = float(x) / self.xStepsInch - xHomeOffset
-                self.xPos.SetValue("%0.4f" % (xLocation))
-                self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
-            if not self.surfaceSpeed.value:
-                self.rpm.SetValue(str(rpm))
-            else:
+        if len(val) != 7:
+            return
+
+        (z, x, rpm, curPass, zDROPos, xDROPos, mvStatus) = val
+        if z != '#':
+            self.zIPosition.value = z
+            zLocation = float(z) / self.zStepsInch
+            self.zLocation = zLocation
+            self.zPos.SetValue("%0.4f" % (zLocation - self.zHomeOffset))
+        else:
+            zLocation = self.zLocation
+
+        if x != '#':
+            self.xIPosition.value = x
+            xLocation = float(x) / self.xStepsInch - self.xHomeOffset
+            self.xLocation = xLocation
+            self.xPos.SetValue("%0.4f" % (xLocation))
+            dialPanel = self.mf.dialPanel
+            if dialPanel is not None:
+                dialPanel.updatePointer(xLocation)
+            self.xPosDiam.SetValue("%0.4f" % (abs(xLocation * 2)))
+            if self.surfaceSpeed.value:
                 fpm = (float(rpm) * abs(xLocation) * 2 * pi) / 12.0
                 self.rpm.SetValue("%1.0f" % (fpm))
+        else:
+            xLocation = self.xLocation
 
-            val = int(curPass)
-            passNum = val & 0xff
-            passType = val >> 8
-            if passType == 0:
-                self.lastPass = passNum
-                curPass = str(passNum)
-                passSize = self.currentPanel.control.passSize
-                if len(passSize) > passNum:
-                    self.passSize.SetValue("%0.4f" % \
-                        (passSize[passNum]))
-                else:
-                    self.passSize.SetValue("0.000")
-            elif passType == 1:
-                curPass = str(passNum) + "S"
+        if not self.surfaceSpeed.value:
+            self.rpm.SetValue(str(rpm))
+
+        val = int(curPass)
+        passNum = val & 0xff
+        passType = val >> 8
+        if passType == 0:
+            self.lastPass = passNum
+            curPass = str(passNum)
+            passSize = self.currentPanel.control.passSize
+            if len(passSize) > passNum:
+                self.passSize.SetValue("%0.4f" % \
+                    (passSize[passNum]))
             else:
-                curPass = "%dS%d" % (self.lastPass, passNum)
-            self.curPass.SetValue(curPass)
+                self.passSize.SetValue("0.000")
+        elif passType == 1:
+            curPass = str(passNum) + "S"
+        else:
+            curPass = "%dS%d" % (self.lastPass, passNum)
+        self.curPass.SetValue(curPass)
 
-            if DRO:
-                zDROPos = int(zDROPos)
-                self.zDROPosition.value = zDROPos
-                zDroLoc = float(zDROPos) / self.zDROInch
-                if self.lastZOffset != zDROOffset:
-                    self.lastZOffset = zDROOffset
-                    print("zDROPos %d %0.4f zDROOffset %0.4f" % \
-                          (zDROPos, zDroLoc, zDROOffset))
-                    stdout.flush()
-                zDroLoc = zDroLoc - zDROOffset
-                self.zDROPos.SetValue("%0.4f" % (zDroLoc))
-
-                xDROPos = int(xDROPos)
-                self.xDROPosition.value = xDROPos
-                xDroLoc = float(xDROPos) / self.xDROInch
-                if self.lastXOffset != xDROOffset:
-                    self.lastXOffset = xDROOffset
-                    print("xDROPos %d %0.4f xDROOffset %0.4f" % \
-                          (xDROPos, xDroLoc, xDROOffset))
-                    stdout.flush()
-                xDroLoc = xDroLoc - xDROOffset
-                if self.xDroDiam.value:
-                    xDroLoc *= 2.0
-                self.xDROPos.SetValue("%0.4f" % (xDroLoc))
-
-            text = ''
-            if xHomed:
-                text = 'H'
-            if self.currentPanel.active:
-                text += '*'
-            mvStatus = int(mvStatus)
-
-            if mvStatus & ct.MV_MEASURE:
-                text += 'M'
-            if mvStatus & ct.MV_PAUSE:
-                text  += 'P'
-            if mvStatus & ct.MV_ACTIVE:
-                text += 'A'
-            if mvStatus & ct.MV_LIMIT:
-                text += 'L'
-            else:
-                if self.overrideSet:
-                    self.overrideSet = False
-                    self.limitOverride.SetValue(False)
-            self.statusText.SetLabel(text)
-
-            if mvStatus != self.mvStatus:
-                print("mvStatus %x" % (mvStatus))
+        if DRO:
+            zDROPos = int(zDROPos)
+            self.zIDROPosition.value = zDROPos
+            zDroLoc = float(zDROPos) / self.zDROInch
+            if self.lastZOffset != self.zDROOffset:
+                self.lastZOffset = self.zDROOffset
+                print("zDROPos %d %0.4f zDROOffset %0.4f" % \
+                      (zDROPos, zDroLoc, self.zDROOffset))
                 stdout.flush()
-            self.mvStatus = mvStatus
+            zDroLoc = zDroLoc - self.zDROOffset
+            self.zDROPos.SetValue("%0.4f" % (zDroLoc))
 
-            if self.xHome:
-                if self.probeAxis == HOME_X:
-                    val = comm.getParm(pm.X_HOME_STATUS)
-                    if val is not None:
-                        if val & ct.HOME_SUCCESS:
-                            self.homeDone("home success")
-                            xHomed = True
-                            if not EXT_DRO:
-                                comm.setParm(pm.X_LOC, 0)
-                                if DRO:
-                                    comm.setParm(pm.X_DRO_POS, 0)
-                                    self.updateXDroPos(xLocation)
-                            else:
-                                self.setXFromExt()
-                        elif val & ct.HOME_FAIL:
-                            self.homeDone("home success")
-                elif self.probeAxis == AXIS_Z:
-                    val = comm.getParm(pm.Z_HOME_STATUS)
-                    if val & ct.PROBE_SUCCESS:
-                        zHomeOffset = zLocation - self.probeLoc
-                        self.zHomeOffset.value = zHomeOffset
-                        # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % (zHomeOffset))
-                        if DRO:
-                            self.updateZDroPos(self.probeLoc, zDROPos)
-                        print("z %s zLocation %7.4f probeLoc %7.4f "\
-                              "zHomeOffset %7.4f" % \
-                              (z, zLocation, self.probeLoc, zHomeOffset))
-                        stdout.flush()
-                        self.probeLoc = 0.0
-                        self.homeDone("z probe success")
-                    elif val & ct.PROBE_FAIL:
-                        self.homeDone("z probe failure")
-                elif self.probeAxis == AXIS_X:
-                    val = comm.getParm(pm.X_HOME_STATUS)
-                    if val & ct.PROBE_SUCCESS:
-                        xHomeOffset = xLocation - self.probeLoc
-                        self.xHomeOffset.value = xHomeOffset
-                        # cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
-                        if DRO:
-                            self.updateXDroPos(self.probeLoc, xDROPos)
-                        print("x %s xLocation %7.4f probeLoc %7.4f "\
-                              "xHomeOffset %7.4f" % \
-                              (x, xLocation, self.probeLoc, xHomeOffset))
-                        stdout.flush()
-                        self.probeLoc = 0.0
-                        self.homeDone("x probe success")
-                    elif val & ct.PROBE_FAIL:
-                        self.homeDone("x probe failure")
+            xDROPos = int(xDROPos)
+            self.xIDROPosition.value = xDROPos
+            xDroLoc = float(xDROPos) / self.xDROInch
+            if self.lastXOffset != self.xDROOffset:
+                self.lastXOffset = self.xDROOffset
+                print("xDROPos %d %0.4f xDROOffset %0.4f" % \
+                      (xDROPos, xDroLoc, self.xDROOffset))
+                stdout.flush()
+            xDroLoc = xDroLoc - self.xDROOffset
+            self.xDROPos.SetValue("%0.4f" % (xDroLoc))
+
+            if self.xDroDiam.value:
+                xDroLoc *= 2.0
+
+            dialPanel = self.mf.dialPanel
+            if dialPanel is not None:
+                dialPanel.updatePointer(xDroLoc)
+
+        text = ''
+        if self.xHomed:
+            text = 'H'
+        if self.currentPanel.active:
+            text += '*'
+        mvStatus = int(mvStatus)
+
+        if mvStatus & ct.MV_MEASURE:
+            text += 'M'
+        if mvStatus & ct.MV_PAUSE:
+            text += 'P'
+        if mvStatus & ct.MV_ACTIVE:
+            text += 'A'
+        if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
+            text += 'L'
+        else:
+            if self.overrideSet:
+                self.overrideSet = False
+                self.limitOverride.SetValue(False)
+        self.statusText.SetLabel(text)
+
+        addEna = (mvStatus & ct.MV_DONE) != 0
+
+        if addEna != self.addEna:
+            panel = self.currentPanel
+            if addEna:
+                if not panel.manualMode:
+                    if panel.addButton is not None:
+                        buttonEnable(panel.addButton)
+                    buttonEnable(self.doneButton)
+                buttonDisable(self.measureButton)
+                buttonDisable(self.pauseButton)
+            else:
+                if panel.addButton is not None:
+                    buttonDisable(panel.addButton)
+                buttonDisable(self.doneButton)
+            self.addEna = addEna
+
+        if mvStatus != self.mvStatus:
+            changed = mvStatus ^ self.mvStatus
+            if (changed & ct.MV_PAUSE) != 0:
+                if (mvStatus & ct.MV_PAUSE) != 0:
+                    buttonEnable(self.resumeButton)
+                    buttonDisable(self.pauseButton)
+                    buttonDisable(self.measureButton)
+                else:
+                    buttonDisable(self.resumeButton)
+                    if self.currentPanel.active:
+                        buttonEnable(self.pauseButton)
+                        if not self.currentPanel.manualMode:
+                            buttonEnable(self.measureButton)
+
+            self.mvStatus = mvStatus
+            print("mvStatus %x" % (mvStatus))
+            stdout.flush()
+
+        if self.homeOrProbe is not None:
+            if self.homeOrProbe == HOME_X:
+                val = self.comm.getParm(pm.X_HOME_STATUS)
+                if val is not None:
+                    if val & ct.HOME_SUCCESS:
+                        self.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
+                        self.xHomed = True
+                        if not EXT_DRO:
+                            self.comm.setParm(pm.X_LOC, 0)
+                            if DRO:
+                                self.comm.setParm(pm.X_DRO_LOC, 0)
+                                self.updateXDroPos(xLocation)
+                        else:
+                            self.setXFromExt()
+                    elif val & ct.HOME_FAIL:
+                        self.homeDone(AXIS_X, False, st.STR_HOME_FAIL)
+            elif self.homeOrProbe == HOME_Z:
+                val = self.comm.getParm(pm.Z_HOME_STATUS)
+                if val is not None:
+                    if val & ct.HOME_SUCCESS:
+                        self.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
+                        zHomed = True
+                        if not EXT_DRO:
+                            self.comm.setParm(pm.Z_LOC, 0)
+                            if DRO:
+                                self.comm.setParm(pm.Z_DRO_LOC, 0)
+                                self.updateZDroPos(zLocation)
+                        else:
+                            self.setZFromExt()
+                    elif val & ct.HOME_FAIL:
+                        self.homeDone(AXIS_Z, False, st.STR_HOME_FAIL)
+            elif self.homeOrProbe == AXIS_X:
+                val = self.comm.getParm(pm.X_HOME_STATUS)
+                if val & ct.PROBE_SUCCESS:
+                    self.xHomeOffset = xLocation - self.probeLoc
+                    self.xIHomeOffset.value = self.xHomeOffset
+                    # cfg.setInfo(cf.xSvHomeOffset, "%0.4f" % (xHomeOffset))
+                    if DRO:
+                        self.updateXDroPos(self.probeLoc, xDROPos)
+                    print("x %s xLocation %7.4f probeLoc %7.4f "\
+                          "xHomeOffset %7.4f" % \
+                          (x, xLocation, self.probeLoc, self.xHomeOffset))
+                    stdout.flush()
+                    self.probeLoc = 0.0
+                    self.homeDone(AXIS_X, True, st.STR_PROBE_SUCCESS)
+                elif val & ct.PROBE_FAIL:
+                    self.homeDone(AXIS_X, False, st.STR_PROBE_FAIL)
+            elif self.homeOrProbe == AXIS_Z:
+                val = self.comm.getParm(pm.Z_HOME_STATUS)
+                if val & ct.PROBE_SUCCESS:
+                    self.zHomeOffset = zLocation - self.probeLoc
+                    self.zIHomeOffset.value = self.zHomeOffset
+                    # cfg.setInfo(cf.zSvHomeOffset, "%0.4f" % \
+                    #             (self.zHomeOffset))
+                    if DRO:
+                        self.updateZDroPos(self.probeLoc, zDROPos)
+                    print("z %s zLocation %7.4f probeLoc %7.4f "\
+                          "zHomeOffset %7.4f" % \
+                          (z, zLocation, self.probeLoc, self.zHomeOffset))
+                    stdout.flush()
+                    self.probeLoc = 0.0
+                    self.homeDone(AXIS_Z, True, st.STR_PROBE_SUCCESS)
+                elif val & ct.PROBE_FAIL:
+                    self.homeDone(AXIS_Z, False, st.STR_PROBE_FAIL)
 
     def updateError(self, text):
         self.setStatus(text)
 
-    def OnEStop(self, e):
-        global spindleDataSent, zDataSent, xDataSent
-        moveCommands.queClear()
-        comm.command(cm.CMD_CLEAR)
-        spindleDataSent = False
-        zDataSent = False
-        xDataSent = False
-        mainFrame.initDevice()
+    def OnEStop(self, _):
+        self.homeOrProbe = None
+        self.mf.move.queClear()
+        self.comm.command(cm.CMD_CLEAR)
+        sd = self.mf.sendData
+        sd.spindleDataSent = False
+        sd.zDataSent = False
+        sd.xDataSent = False
+        self.mf.initDevice()
         self.clrActive()
         self.combo.SetFocus()
 
-    def OnStop(self, e):
-        self.homeDone("stopped")
-        moveCommands.queClear()
-        comm.command(cm.CMD_STOP)
-        mainFrame.initDevice()
+    def OnStop(self, _):
+        self.homeOrProbe = None
+        self.mf.move.queClear()
+        self.comm.command(cm.CMD_STOP)
+        self.mf.initDevice()
+        self.setStatus(st.STR_STOPPED)
         self.clrActive()
         self.combo.SetFocus()
 
-    def OnPause(self, e):
-        comm.command(cm.CMD_PAUSE)
+    def OnPause(self, _):
+        self.comm.command(cm.CMD_PAUSE)
         self.combo.SetFocus()
 
-    def OnResume(self, e):
-        comm.command(cm.CMD_RESUME)
+    def OnResume(self, _):
+        self.comm.command(cm.CMD_RESUME)
         self.combo.SetFocus()
 
-    def OnDone(self, e):
-        if self.mvStatus == 0:
+    def OnDone(self, _):
+        if (self.mvStatus & (ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_MEASURE)) == 0:
             self.clrActive()
+            self.comm.command(cm.CMD_DONE)
         else:
             self.setStatus(st.STR_OP_IN_PROGRESS)
         self.combo.SetFocus()
 
-    def OnMeasure(self, e):
-        comm.command(cm.CMD_MEASURE)
+    def OnMeasure(self, _):
+        self.comm.command(cm.CMD_MEASURE)
         self.combo.SetFocus()
 
     def getPanel(self):
-        panel = cfg.getInfoData(cf.mainPanel)
-        return(mainFrame.panels[panel])
+        panel = self.cfg.getInfoData(cf.mainPanel)
+        return(self.mf.panels[panel])
+
+    def clrRetract(self):
+        self.xReturnLoc = None
+        self.zReturnLoc = None
+        self.xButton.SetBitmap(wx.Bitmap("southG.png"))
+        self.zButton.SetBitmap(wx.Bitmap("eastG.png"))
 
     def clrActive(self):
-        updateThread.closeDbg()
-        self.currentPanel.active = False
+        # updateThread.closeDbg()
+        self.mf.updateThread.baseTime = None
+        print("***clear baseTime***")
+        panel = self.currentPanel
+        panel.active = False
+        if not panel.manualMode:
+            panel.sendButton.Enable()
+            buttonDisable(panel.startButton)
+        else:
+            panel.sendButton.Disable()
+            buttonEnable(panel.startButton)
+        btn = self.spindleButton
+        if self.spindleActive:
+            self.spindleActive = False
+            btn.SetLabel('Start Spindle')
+            btn.SetValue(False)
+        buttonEnable(btn)
+        buttonDisable(self.pauseButton)
+        buttonDisable(self.measureButton)
+        self.clrRetract()
         self.setStatus(st.STR_CLR)
 
-    def OnStartSpindle(self, e):
-        if STEP_DRV or MOTOR_TEST:
-            panel = self.getPanel()
-            rpm = panel.rpm.GetValue()
-            sendSpindleData(True, rpm)
-            comm.command(cm.SPINDLE_START)
+    def OnStartSpindle(self, _):
+        if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH or SPINDLE_VAR_SPEED:
+            if not self.currentPanel.active:
+                btn = self.spindleButton
+                # self.spindleActive = state = btn.GetValue()
+                if self.spindleActive:
+                    self.spindleActive = False
+                    btn.SetLabel('Start Spindle')
+                    btn.SetBackgroundColour('Green')
+                    self.currentPanel.sendButton.Enable()
+                    self.comm.command(cm.SPINDLE_STOP)
+                else:
+                    self.spindleActive = True
+                    btn.SetLabel('Stop Spindle')
+                    btn.SetBackgroundColour('Red')
+                    panel = self.currentPanel
+                    panel.sendButton.Disable()
+                    rpm = panel.rpm.GetValue()
+                    self.mf.sendData.sendSpindleData(True, rpm)
+                    self.comm.command(cm.SPINDLE_START)
         self.combo.SetFocus()
 
     def spindleJogCmd(self, code, val):
         self.repeat += 1
         if self.jogCode != code:
             if self.jogCode is None:
-                sendSpindleData()
+                self.mf.sendData.sendSpindleData()
                 direction = 0 if code == wx.WXK_NUMPAD_PAGEDOWN else 1
-                comm.setParm(pm.SP_JOG_DIR, direction)
+                self.comm.setParm(pm.SP_JOG_DIR, direction)
                 self.jogCode = code
                 self.repeat = 0
         try:
-            comm.command(cm.SPINDLE_JOG)
+            self.comm.command(cm.SPINDLE_JOG)
         except CommTimeout:
-            commTimeout()
+            commTimeout(self)
         self.combo.SetFocus()
 
-    def OnJogSpindleFwd(self, e):
+    def OnJogSpindleFwd(self, _):
         print("jog spingle")
         stdout.flush()
         self.btnRpt.action = self.spindleJogCmd
@@ -5008,7 +6566,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt.val = 0
         self.btnRpt.event.set()
 
-    def OnJogSpindleRev(self, e):
+    def OnJogSpindleRev(self, _):
         print("jog spingle")
         stdout.flush()
         self.btnRpt.action = self.spindleJogCmd
@@ -5016,28 +6574,28 @@ class JogPanel(wx.Panel, FormRoutines):
         self.btnRpt.val = 0
         self.btnRpt.event.set()
 
-    def OnJogUp(self, e):
+    def OnJogUp(self, _):
         self.btnRpt.event.clear()
         self.btnRpt.action = None
         self.jogCode = None
         try:
-            comm.command(cm.SPINDLE_STOP)
+            self.comm.command(cm.SPINDLE_STOP)
         except CommTimeout:
-            commTimeout()
+            commTimeout(self)
         self.combo.SetFocus()
 
-    def OnOverride(self, e):
+    def OnOverride(self, _):
         val = self.limitOverride.GetValue()
         print("override %s" % (val))
         stdout.flush()
-        if val and ((self.mvStatus & ct.MV_LIMIT) == 0):
+        if val and ((self.mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT)) == 0):
             self.limitOverride.SetValue(False)
             return
         self.overrideSet = val
-        comm.setParm(pm.LIMIT_OVERRIDE, (0, 1)[val]);
+        self.comm.setParm(pm.LIMIT_OVERRIDE, (0, 1)[val])
 
     def setStatus(self, text):
-        if done:
+        if self.mf.done:
             return
         if isinstance(text, int):
             self.statusLine.SetLabel(st.strTable[text])
@@ -5047,40 +6605,41 @@ class JogPanel(wx.Panel, FormRoutines):
         self.Update()
 
     def updateZPos(self, val):
-        global zHomeOffset
-        sendZData()
-        zLocation = comm.getParm(pm.Z_LOC)
+        self.mf.sendData.sendZData()
+        zLocation = self.comm.getParm(pm.Z_LOC)
         if zLocation is not None:
             zLocation = float(zLocation) / self.zStepsInch
-            zHomeOffset = zLocation - val
-            self.zHomeOffset.value = zHomeOffset
-            comm.setParm(pm.Z_HOME_OFFSET, \
-                         round(zHomeOffset * jogPanel.zStepsInch))
+            self.zHomeOffset = zLocation - val
+            self.zIHomeOffset.value = self.zHomeOffset
+            self.comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(self.zHomeOffset * self.zStepsInch))
             print("pos %0.4f zLocation %0.4f zHomeOffset %0.4f" % \
-                  (val, zLocation, zHomeOffset))
+                  (val, zLocation, self.zHomeOffset))
             stdout.flush()
             if DRO:
                 self.updateZDroPos(val)
             if EXT_DRO:
-                dro.command(eDro.setZ("%0.4f" % (val)))
+                dro = self.mf.dro
+                dro.command(dro.setZ("%0.4f" % (val)))
 
     def updateZDroPos(self, val, zDROPos=None):
-        global zDROOffset
         if zDROPos is None:
-            zDROPos = comm.getParm(pm.Z_DRO_POS, True)
+            zDROPos = self.comm.getParm(pm.Z_DRO_LOC, True)
         if zDROPos is not None:
             droPos = float(zDROPos) / self.zDROInch
             print("pos %0.4f zDROPos %d %0.4f" % \
                   (val, zDROPos, droPos))
-            zDROOffset = droPos - val
-            self.zDROOffset.value = zDROOffset
-            comm.setParm(pm.Z_DRO_OFFSET, round(zDROOffset * jogPanel.zDROInch))
+            self.zDROOffset = droPos - val
+            self.zIDROOffset.value = self.zDROOffset
+            self.comm.setParm(pm.Z_DRO_OFFSET, \
+                         round(self.zDROOffset * self.zDROInch))
             print("zDROOffset %d %0.4f" % \
-                  (int(zDROOffset * self.zDROInch), zDROOffset))
+                  (int(self.zDROOffset * self.zDROInch), self.zDROOffset))
             stdout.flush()
 
     def setZFromExt(self):
-        val = dro.command(eDro.extReadZ, True)
+        dro = self.mf.dro
+        val = dro.command(dro.extReadZ, True)
         val = val.strip()
         try:
             rsp = float(val)
@@ -5088,55 +6647,58 @@ class JogPanel(wx.Panel, FormRoutines):
             print("setZFromExt ValueError %s" % (val))
             stdout.flush()
             rsp = 0.0
-        zPosition = round(rsp * jogPanel.zStepsInch)
-        zHomeOffset = 0.0
-        self.zHomeOffset.value = zHomeOffset
-        comm.queParm(pm.Z_LOC, zPosition)
-        comm.queParm(pm.Z_HOME_OFFSET, round(zHomeOffset * jogPanel.zStepsInch))
+        self.zPosition = round(rsp * self.zStepsInch)
+        self.zHomeOffset = 0.0
+        self.zIHomeOffset.value = self.zHomeOffset
+        self.comm.queParm(pm.Z_LOC, self.zPosition)
+        self.comm.queParm(pm.Z_HOME_OFFSET, \
+                     round(self.zHomeOffset * self.zStepsInch))
         if DRO:
-            zDROPosition = round(rsp * jogPanel.zDROInch)
-            zDROOffset = 0.0
-            self.zDROOffset.value = zDROOffset
-            comm.queParm(pm.Z_DRO_POS, zDROPosition)
-            comm.queParm(pm.Z_DRO_OFFSET, round(zDROOffset * jogPanel.zDROInch))
-        comm.sendMulti()
+            self.zDROPosition = round(rsp * self.zDROInch)
+            self.zDROOffset = 0.0
+            self.zIDROOffset.value = self.zDROOffset
+            self.comm.queParm(pm.Z_DRO_LOC, self.zDROPosition)
+            self.comm.queParm(pm.Z_DRO_OFFSET, \
+                         round(self.zDROOffset * self.zDROInch))
+        self.comm.sendMulti()
 
     def updateXPos(self, val):
-        global xHomeOffset
         val /= 2.0
-        sendXData()
-        xLocation = comm.getParm(pm.X_LOC)
+        self.mf.sendData.sendXData()
+        xLocation = self.comm.getParm(pm.X_LOC)
         if xLocation is not None:
             xLocation = float(xLocation) / self.xStepsInch
-            xHomeOffset = xLocation - val
-            self.xHomeOffset.value = xHomeOffset
-            comm.setParm(pm.X_HOME_OFFSET, \
-                         round(xHomeOffset * jogPanel.xStepsInch))
+            self.xHomeOffset = xLocation - val
+            self.xIHomeOffset.value = self.xHomeOffset
+            self.comm.setParm(pm.X_HOME_OFFSET, \
+                         round(self.xHomeOffset * self.xStepsInch))
             print("pos %0.4f xLocation %0.4f xHomeOffset %0.4f" % \
-                  (val, xLocation, xHomeOffset))
+                  (val, xLocation, self.xHomeOffset))
             stdout.flush()
             if DRO:
                 self.updateXDroPos(val)
             if EXT_DRO:
-                dro.command(eDro.setX("%0.4f" % (val * 2.0)))
+                dro = self.mf.dro
+                dro.command(dro.setX("%0.4f" % (val * 2.0)))
 
     def updateXDroPos(self, val, xDROPos=None):
-        global xDROOffset
         if xDROPos is None:
-            xDROPos = comm.getParm(pm.X_DRO_POS)
+            xDROPos = self.comm.getParm(pm.X_DRO_LOC)
         if xDROPos is not None:
             droPos = float(xDROPos) / self.xDROInch
             print("pos %0.4f xDROPos %d %0.4f" % \
                   (val, xDROPos, droPos))
-            xDROOffset = droPos - val
-            self.xDROOffset.value = xDROOffset
-            comm.setParm(pm.X_DRO_OFFSET, round(xDROOffset * jogPanel.xDROInch))
+            self.xDROOffset = droPos - val
+            self.xIDROOffset.value = self.xDROOffset
+            self.comm.setParm(pm.X_DRO_OFFSET, \
+                         round(self.xDROOffset * self.xDROInch))
             print("xDROOffset %d %0.4f" % \
-                  (int(xDROOffset * self.xDROInch), xDROOffset))
+                  (int(self.xDROOffset * self.xDROInch), self.xDROOffset))
             stdout.flush()
 
     def setXFromExt(self):
-        val = dro.command(eDro.extReadX, True)
+        dro = self.mf.dro
+        val = dro.command(dro.extReadX, True)
         val = val.strip()
         try:
             rsp = float(val) / 2.0
@@ -5145,22 +6707,24 @@ class JogPanel(wx.Panel, FormRoutines):
             stdout.flush()
             rsp = 0.0
         print("val %s rsp %9.6f" % (val, rsp))
-        xPosition = round(rsp * jogPanel.xStepsInch)
-        xHomeOffset = 0.0
-        self.xHomeOffset.value = xHomeOffset
-        comm.queParm(pm.X_LOC, xPosition)
-        comm.queParm(pm.X_HOME_OFFSET, round(xHomeOffset * jogPanel.xStepsInch))
+        self.xPosition = round(rsp * self.xStepsInch)
+        self.xHomeOffset = 0.0
+        self.xIHomeOffset.value = self.xHomeOffset
+        self.comm.queParm(pm.X_LOC, self.xPosition)
+        self.comm.queParm(pm.X_HOME_OFFSET, \
+                     round(self.xHomeOffset * self.xStepsInch))
         if DRO:
-            xDROPosition = round(rsp * jogPanel.xDROInch)
-            print("xDROPosition %d" % (xDROPosition))
-            xDROOffset = 0.0
-            self.xDROOffset.value = xDROOffset
-            comm.queParm(pm.X_DRO_POS, xDROPosition)
-            comm.queParm(pm.X_DRO_OFFSET, round(xDROOffset * jogPanel.xDROInch))
-        comm.sendMulti()
+            self.xDROPosition = round(rsp * self.xDROInch)
+            print("xDROPosition %d" % (self.xDROPosition))
+            self.xDROOffset = 0.0
+            self.xIDROOffset.value = self.xDROOffset
+            self.comm.queParm(pm.X_DRO_LOC, self.xDROPosition)
+            self.comm.queParm(pm.X_DRO_OFFSET, \
+                         round(self.xDROOffset * self.xDROInch))
+        self.comm.sendMulti()
 
     def getPos(self, ctl):
-        (xPos, yPos) = mainFrame.GetPosition()
+        (xPos, yPos) = self.mf.GetPosition()
         (x, y) = self.GetPosition()
         xPos += x
         yPos += y
@@ -5216,9 +6780,10 @@ class PosMenu(wx.Menu):
     def __init__(self, jP, axis):
         wx.Menu.__init__(self)
         self.jP = jP
+        self.comm = jP.mf.comm
         self.axis = axis
- 
-        active = jogPanel.currentPanel.active
+
+        active = jP.currentPanel.active
         if not active:
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Set")
             self.Append(item)
@@ -5237,10 +6802,19 @@ class PosMenu(wx.Menu):
             self.Append(item)
             self.Bind(wx.EVT_MENU, self.OnProbe, item)
 
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
+            self.Append(item)
             if self.axis == AXIS_X:
-                item = wx.MenuItem(self, wx.Window.NewControlId(), "Home")
-                self.Append(item)
-                self.Bind(wx.EVT_MENU, self.OnHomeX, item)
+                self.Bind(wx.EVT_MENU, self.OnHomeXFwd, item)
+            elif self.axis == AXIS_Z:
+                self.Bind(wx.EVT_MENU, self.OnHomeZFwd, item)
+
+            item = wx.MenuItem(self, wx.Window.NewControlId(), "Rev Home")
+            self.Append(item)
+            if self.axis == AXIS_X:
+                self.Bind(wx.EVT_MENU, self.OnHomeXRev, item)
+            elif self.axis == AXIS_Z:
+                self.Bind(wx.EVT_MENU, self.OnHomeZRev, item)
 
             item = wx.MenuItem(self, wx.Window.NewControlId(), "Go to")
             self.Append(item)
@@ -5256,60 +6830,120 @@ class PosMenu(wx.Menu):
                 self.Append(item)
                 self.Bind(wx.EVT_MENU, self.OnDroDiam, item)
 
-    def getPosCtl(self):
-        ctl = self.jP.zPos if self.axis == AXIS_Z else \
-              self.jP.xPos
-        return(self.jP.getPos(ctl))
+        if jP.addEna:
+            retract = jP.zReturnLoc is None if self.axis == AXIS_Z \
+                else jP.xReturnLoc is None
+            tmp = "Retract" if retract else "Return"
+            item = wx.MenuItem(self, wx.Window.NewControlId(), tmp)
+            self.Append(item)
+            self.Bind(wx.EVT_MENU, self.OnRetract, item)
 
-    def OnSet(self, e):
+    def getPosCtl(self):
+        jP = self.jP
+        ctl = jP.zPos if self.axis == AXIS_Z else \
+              jP.xPos
+        return(jP.getPos(ctl))
+
+    def OnSet(self, _):
         dialog = SetPosDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
-    def OnZero(self, e):
+    def OnZero(self, _):
         self.jP.updateZPos(0) if self.axis == AXIS_Z else \
             self.jP.updateXPos(0)
         self.jP.focus()
 
-    def OnProbe(self, e):
+    def OnProbe(self, _):
         dialog = ProbeDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
-    def OnHomeX(self, e):
-        global xHomeOffset, xHomed
+    def OnHomeXFwd(self, _):
+        jp = self.jP
         if not HOME_IN_PLACE:
-            comm.queParm(pm.X_HOME_DIST, cfg.getInfoData(cf.xHomeDist))
-            comm.queParm(pm.X_HOME_BACKOFF_DIST, \
-                         cfg.getInfoData(cf.xHomeBackoffDist))
-            comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
-            comm.queParm(pm.X_HOME_DIR, 1 if cfg.getBoolInfoData(cf.xHomeDir) \
-                         else -1)
-            comm.command(cm.XHOMEAXIS)
+            self.comm.command(cm.XHOMEFWD)
             self.jP.probe(HOME_X)
-        else: 
-            xLocation = float(jogPanel.xPos.GetValue())
-            xHomeOffset = 0 - xLocation
-            jogPanel.xHomeOffset.value = xHomeOffset
-            comm.setParm(pm.X_LOC, 0)
-            comm.setParm(pm.X_HOME_OFFSET, \
-                         round(xHomeOffset * jogPanel.xStepsInch))
+        else:
+            xLocation = float(jp.xPos.GetValue())
+            jp.xHomeOffset = 0 - xLocation
+            jp.xIHomeOffset.value = jp.xHomeOffset
+            self.comm.setParm(pm.X_LOC, 0)
+            self.comm.setParm(pm.X_HOME_OFFSET, \
+                         round(jp.xHomeOffset * jp.xStepsInch))
             if DRO:
-                comm.setParm(pm.X_DRO_POS, 0)
+                self.comm.setParm(pm.X_DRO_LOC, 0)
                 self.jP.updateXDroPos(xLocation)
-            self.jP.homeDone("home success")
-            xHomed = True
+            self.jP.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
+            jp.xHomed = True
         self.jP.focus()
 
-    def OnGoto(self, e):
+    def OnHomeZFwd(self, _):
+        jp = self.jP
+        if not HOME_IN_PLACE:
+            self.comm.command(cm.ZHOMEFWD)
+            jp.probe(HOME_Z)
+        else:
+            zLocation = float(jp.zPos.GetValue())
+            jp.zHomeOffset = 0 - zLocation
+            jp.zIHomeOffset.value = jp.zHomeOffset
+            self.comm.setParm(pm.Z_LOC, 0)
+            self.comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(jp.zHomeOffset * jp.zStepsInch))
+            if DRO:
+                self.comm.setParm(pm.Z_DRO_LOC, 0)
+                jp.updateZDroPos(zLocation)
+            jp.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
+            jp.zHomed = True
+        jp.focus()
+
+    def OnHomeXRev(self, _):
+        jp = self.jP
+        if not HOME_IN_PLACE:
+            self.comm.command(cm.XHOMEREV)
+            jp.probe(HOME_X)
+        else:
+            xLocation = float(jp.xPos.GetValue())
+            jp.xHomeOffset = 0 - xLocation
+            jp.xIHomeOffset.value = jp.xHomeOffset
+            self.comm.setParm(pm.X_LOC, 0)
+            self.comm.setParm(pm.X_HOME_OFFSET, \
+                         round(jp.xHomeOffset * jp.xStepsInch))
+            if DRO:
+                self.comm.setParm(pm.X_DRO_LOC, 0)
+                jp.updateXDroPos(xLocation)
+            jp.homeDone(AXIS_X, True, st.STR_HOME_SUCCESS)
+            jp.xHomed = True
+        jp.focus()
+
+    def OnHomeZRev(self, _):
+        jp = self.jP
+        if not HOME_IN_PLACE:
+            self.comm.command(cm.ZHOMEREV)
+            jp.probe(HOME_Z)
+        else:
+            zLocation = float(jp.zPos.GetValue())
+            jp.zHomeOffset = 0 - zLocation
+            jp.zIHomeOffset.value = jp.zHomeOffset
+            self.comm.setParm(pm.Z_LOC, 0)
+            self.comm.setParm(pm.Z_HOME_OFFSET, \
+                         round(jp.zHomeOffset * jp.zStepsInch))
+            if DRO:
+                self.comm.setParm(pm.Z_DRO_LOC, 0)
+                jp.updateZDroPos(zLocation)
+            jp.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
+            jp.zHomed = True
+        jp.focus()
+
+    def OnGoto(self, _):
         dialog = GotoDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
         dialog.Show(True)
 
-    def OnFixX(self, e):
+    def OnFixX(self, _):
         jP = self.jP
         dialog = jP.fixXPosDialog
         if dialog is None:
@@ -5318,45 +6952,61 @@ class PosMenu(wx.Menu):
         dialog.Raise()
         dialog.Show(True)
 
-    def OnDroDiam(self, e):
-        self.jP.xDroDiam.value = not self.jP.xDroDiam.value
-        self.jP.focus()
+    def OnDroDiam(self, _):
+        jp = self.jP
+        jp.xDroDiam.value = not jp.xDroDiam.value
+        jp.focus()
 
-    def OnSetFromExt(self, e):
+    def OnSetFromExt(self, _):
+        jp = self.jP
         if self.axis == AXIS_Z:
-            self.jP.setZFromExt()
+            jp.setZFromExt()
         else:
-            self.jP.setXFromExt()
-        self.jP.focus()
+            jp.setXFromExt()
+        jp.focus()
+
+    def OnRetract(self, _):
+        jp = self.jP
+        if self.axis == AXIS_Z:
+            dialog = jp.retractZDialog
+            if dialog is None:
+                jp.retractZDialog = dialog = RetractDialog(jp, self.axis)
+        else:
+            dialog = jp.retractXDialog
+            if dialog is None:
+                jp.retractXDialog = dialog = RetractDialog(jp, self.axis)
+        dialog.SetPosition(self.getPosCtl())
+        dialog.Raise()
+        dialog.Show(True)
 
 class SetPosDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jogPnl, axis):
+    def __init__(self, jp, axis):
         FormRoutines.__init__(self, False)
-        self.jogPanel = jogPnl
+        self.jp = jp
         self.axis = axis
         pos = (10, 10)
         title = "Position %s" % ('Z' if axis == AXIS_Z else 'X')
-        wx.Dialog.__init__(self, jogPnl, -1, title, pos, \
+        wx.Dialog.__init__(self, jp, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.pos = \
-            self.addDialogField(sizerV, tcDefault="0.000", \
-                tcFont=jogPnl.posFont, size=(120,-1), action=self.OnKeyChar)
+            addDialogField(self, sizerV, tcDefault="0.000", \
+                tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
 
-        self.addDialogButton(sizerV, wx.ID_OK, self.OnOk, border=10)
+        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk, border=10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        if done:
+    def OnShow(self, _):
+        if self.jp.mf.done:
             return
         if self.IsShown():
-            val = self.jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
-               self.jogPanel.xPos.GetValue()
+            val = self.jp.zPos.GetValue() if self.axis == AXIS_Z else \
+               self.jp.xPos.GetValue()
             if self.axis == AXIS_X:
                 val = "%0.4f" % (float(val) * 2)
             self.pos.SetValue(val)
@@ -5368,26 +7018,26 @@ class SetPosDialog(wx.Dialog, FormRoutines):
             self.OnOk(None)
         e.Skip()
 
-    def OnOk(self, e):
+    def OnOk(self, _):
         val = self.pos.GetValue()
         try:
             val = float(val)
-            self.jogPanel.updateZPos(val) if self.axis == AXIS_Z else \
-                self.jogPanel.updateXPos(val)
+            self.jp.updateZPos(val) if self.axis == AXIS_Z else \
+                self.jp.updateXPos(val)
         except ValueError:
             print("ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        self.jogPanel.focus()
+        self.jp.focus()
 
 class ProbeDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jogPnl, axis):
+    def __init__(self, jogPanel, axis):
         FormRoutines.__init__(self, False)
-        self.jogPanel = jogPnl
+        self.jp = jogPanel
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, jogPnl, -1, title, pos, \
+        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -5395,32 +7045,32 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.probeLoc = \
-            self.addDialogField(sizerG, \
+            addDialogField(self, sizerG, \
                 'Z Position' if axis == AXIS_Z else 'X Diameter', \
-                "0.000", jogPnl.txtFont, jogPnl.posFont, (120, -1))
+                "0.000", jogPanel.txtFont, jogPanel.posFont, (120, -1))
 
         self.probeDist = \
-            self.addDialogField(sizerG, 'Distance', "0.000", \
-                jogPnl.txtFont, jogPnl.posFont, (120, -1), self.OnKeyChar)
+            addDialogField(self, sizerG, 'Distance', "0.000", \
+                jogPanel.txtFont, jogPanel.posFont, (120, -1), self.OnKeyChar)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        self.addButton(sizerV, 'Ok', self.OnOk, border=10)
+        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        if done:
+    def OnShow(self, _):
+        if self.jp.mf.done:
             return
         if self.IsShown():
             if self.axis == AXIS_Z:
                 probeLoc = "0.0000"
-                probeDist = cfg.getFloatInfoData(cf.zProbeDist)
+                probeDist = self.jp.cfg.getFloatInfoData(cf.zProbeDist)
             else:
-                probeLoc = self.jogPanel.xPos.GetValue()
-                probeDist = cfg.getFloatInfoData(cf.xProbeDist)
+                probeLoc = self.jp.xPos.GetValue()
+                probeDist = self.jp.cfg.getFloatInfoData(cf.xProbeDist)
             self.probeLoc.SetValue(probeLoc)
             self.probeLoc.SetSelection(-1, -1)
             self.probeDist.SetValue("%7.4f" % probeDist)
@@ -5431,7 +7081,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
             self.OnOk(None)
         e.Skip()
 
-    def OnOk(self, e):
+    def OnOk(self, _):
         val = self.probeLoc.GetValue()
         try:
             probeLoc = float(val)
@@ -5441,57 +7091,68 @@ class ProbeDialog(wx.Dialog, FormRoutines):
             print("probe ValueError on %s" % (val))
             stdout.flush()
         self.Show(False)
-        self.jogPanel.focus()
+        self.jp.focus()
 
     def probeZ(self, probeLoc):
-        moveCommands.queClear()
+        jp = self.jp
+        mf = jp.mf
+        cfg = jp.cfg
+        mf.move.queClear()
+        comm = mf.comm
         comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
         comm.queParm(pm.PROBE_SPEED, cfg.getInfoData(cf.zProbeSpeed))
         comm.queParm(pm.Z_HOME_STATUS, '0')
         comm.sendMulti()
-        moveCommands.probeZ(getFloatVal(self.probeDist))
+        mf.move.probeZ(getFloatVal(self.probeDist))
         self.Show(False)
-        self.jogPanel.probe(AXIS_Z, probeLoc)
-        self.jogPanel.focus()
+        self.jp.probe(AXIS_Z, probeLoc)
+        self.jp.focus()
 
     def probeX(self, probeLoc):
-        moveCommands.queClear()
+        jp = self.jp
+        mf = jp.mf
+        cfg = jp.cfg
+        mf.move.queClear()
+        comm = mf.comm
         comm.queParm(pm.PROBE_INV, cfg.getBoolInfoData(cf.cfgPrbInv))
         comm.queParm(pm.X_HOME_SPEED, cfg.getInfoData(cf.xHomeSpeed))
         comm.queParm(pm.X_HOME_STATUS, '0')
         comm.sendMulti()
-        moveCommands.probeX(getFloatVal(self.probeDist))
+        mf.move.probeX(getFloatVal(self.probeDist))
         self.Show(False)
-        self.jogPanel.probe(AXIS_X, probeLoc)
-        self.jogPanel.focus()
+        jp.probe(AXIS_X, probeLoc)
+        jp.focus()
 
 class GotoDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jogPnl, axis):
+    def __init__(self, jp, axis):
         FormRoutines.__init__(self, False)
+        self.jp = jp
+        self.comm = jp.mf.comm
         self.axis = axis
         pos = (10, 10)
         title = "Go to %s" % ('Z Position' if axis == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, jogPnl, -1, title, pos, \
+        wx.Dialog.__init__(self, jp, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.pos = \
-            self.addDialogField(sizerV, tcDefault="0.000", \
-                tcFont=jogPnl.posFont, size=(120,-1), action=self.OnKeyChar)
+            addDialogField(self, sizerV, tcDefault="0.000", \
+                tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
 
-        self.addButton(sizerV, 'Ok', self.OnOk, border=10)
+        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        if done:
+    def OnShow(self, _):
+        jp = self.jp
+        if jp.mf.done:
             return
         if self.IsShown():
-            val = jogPanel.zPos.GetValue() if self.axis == AXIS_Z else \
-               jogPanel.xPos.GetValue()
+            val = jp.zPos.GetValue() if self.axis == AXIS_Z else \
+               jp.xPos.GetValue()
             try:
                 val = float(val)
             except ValueError:
@@ -5507,37 +7168,41 @@ class GotoDialog(wx.Dialog, FormRoutines):
             self.OnOk(None)
         e.Skip()
 
-    def OnOk(self, e):
+    def OnOk(self, _):
         try:
             loc = float(self.pos.GetValue())
-            m = moveCommands
+            m = self.jp.mf.move
             m.queClear()
-            comm.command(cm.CMD_PAUSE)
-            comm.command(cm.CLEARQUE)
+            self.comm.command(cm.CMD_PAUSE)
+            self.comm.command(cm.CLEARQUE)
             if self.axis == AXIS_Z:
-                sendZData()
+                self.jp.mf.sendData.sendZData()
                 m.saveZOffset()
-                m.moveZ(loc)
+                flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
+                                     if X_DRO_POS else 0)
+                m.moveZ(loc, flag)
             else:
-                sendXData()
+                self.jp.mf.sendData.sendXData()
                 m.dbg = True
                 m.saveXOffset()
                 flag = ct.CMD_JOG | ((ct.DRO_POS | ct.DRO_UPD) \
                                      if X_DRO_POS else 0)
                 m.moveX(loc / 2.0, flag)
                 m.dbg = False
-            comm.command(cm.CMD_RESUME)
+            self.comm.command(cm.CMD_RESUME)
             self.Show(False)
-            jogPanel.focus()
+            self.jp.focus()
         except ValueError:
             print("ValueError on goto")
             stdout.flush()
 
 class FixXPosDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jogPnl):
+    def __init__(self, jp):
         FormRoutines.__init__(self, False)
+        self.jp = jp
+        self.comm = jp.mf.comm
         pos = (10, 10)
-        wx.Dialog.__init__(self, jogPnl, -1, "Fix X Size", pos, \
+        wx.Dialog.__init__(self, jp, -1, "Fix X Size", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -5545,29 +7210,29 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.curXPos = \
-            self.addDialogField(sizerG, 'Current', "0.000", jogPnl.txtFont, \
-                                jogPnl.posFont, (120, -1))
+            addDialogField(self, sizerG, 'Current', "0.000", jp.txtFont, \
+                                jp.posFont, (120, -1))
 
         self.actualXPos = \
-            self.addDialogField(sizerG, 'Measured', "0.000", jogPnl.txtFont, \
-                jogPnl.posFont, (120, -1), self.OnKeyChar)
+            addDialogField(self, sizerG, 'Measured', "0.000", jp.txtFont, \
+                jp.posFont, (120, -1), self.OnKeyChar)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        self.addButton(sizerV, 'Fix', self.OnFix, border=5)
+        addButton(self, sizerV, 'Fix', self.OnFix, border=5)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnShow(self, e):
-        if done:
+    def OnShow(self, _):
+        if self.jp.mf.done:
             return
         if self.IsShown():
-            xDiameter = jogPanel.passSize.GetValue()
+            xDiameter = self.jp.passSize.GetValue()
             # try:
-            #     xDiameter = float(comm.getParm(pm.X_DIAMETER)) / \
-            #                 jogPanel.xStepsInch
+            #     xDiameter = float(self.comm.getParm(pm.X_DIAMETER)) / \
+            #                 self.jp.xStepsInch
             # except (ValueError, TypeError):
             #     xDiameter = 0.0
             # self.curXPos.SetValue("%0.4f" % (xDiameter))
@@ -5582,28 +7247,28 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             self.OnFix(None)
         e.Skip()
 
-    def OnFix(self, e):
-        global xHomeOffset
+    def OnFix(self, _):
         try:
             curX = float(self.curXPos.GetValue())
         except ValueError:
             self.curXPos.SetValue('0.000')
             return
-        
+
         try:
             actualX = float(self.actualXPos.GetValue())
         except ValueError:
             self.actualXPos.SetValue('0.000')
             return
-        
-        offset = (actualX - curX)
-        curHomeOffset = xHomeOffset
-        x = comm.getParm(pm.X_LOC)
-        print("x %d xPosition %d" % (x, int(jogPanel.xPosition.value)))
-        xLocation = 2 * (float(x) / jogPanel.xStepsInch - xHomeOffset)
-        jogPanel.updateXPos(xLocation + offset)
 
-        currentPanel = jogPanel.currentPanel
+        jp = self.jp
+        offset = (actualX - curX)
+        curHomeOffset = jp.xHomeOffset
+        x = self.comm.getParm(pm.X_LOC)
+        print("x %d xPosition %d" % (x, int(jp.xIPosition.value)))
+        xLocation = 2 * (float(x) / jp.xStepsInch - jp.xHomeOffset)
+        jp.updateXPos(xLocation + offset)
+
+        currentPanel = jp.currentPanel
         if currentPanel.active:
             op = currentPanel.op
             if (op == en.OP_TURN) or \
@@ -5613,22 +7278,114 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
             elif op == en.OP_FACE:
                 pass
 
-        dPrt = jogPanel.dPrt
+        dPrt = jp.mf.dPrt
         dPrt("fix x\n")
         dPrt("curX %7.4f actualX %7.4f offset %7.4f\n" \
                   "xHomeOffset cur %7.4f new %7.4f\n" % \
-                  (curX, actualX, offset, curHomeOffset, xHomeOffset))
-        curLoc = float(jogPanel.xPosition.value) / jogPanel.xStepsInch
+                  (curX, actualX, offset, curHomeOffset, jp.xHomeOffset))
+        curLoc = float(jp.xIPosition.value) / jp.xStepsInch
         dPrt("xDiam cur %7.4f new %7.4f\n\n" % \
-                  ((curLoc - curHomeOffset) * 2, (curLoc - xHomeOffset) * 2), \
-             flush=True)
+                  ((curLoc - curHomeOffset) * 2,
+                   (curLoc - jp.xHomeOffset) * 2), flush=True)
 
         print("curX %0.4f actualX %0.4f offset %0.4f xHomeOffset %0.4f" % \
-              (curX, actualX, offset, xHomeOffset))
+              (curX, actualX, offset, jp.xHomeOffset))
         stdout.flush()
 
         self.Show(False)
-        jogPanel.focus()
+        jp.focus()
+
+class RetractDialog(wx.Dialog, FormRoutines):
+    def __init__(self, jp, axis):
+        FormRoutines.__init__(self, False)
+        self.jp = jp
+        self.axis = axis
+        self.axisVal = 'Z' if axis == AXIS_Z else 'X'
+        pos = (10, 10)
+        title = "Return %s" % self.axisVal
+        wx.Dialog.__init__(self, jp -1, title, pos, \
+                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+
+        self.pos = \
+            addDialogField(self, sizerV, tcDefault="0.000", \
+                tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
+
+        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnShow(self, _):
+        jp = self.jp
+        if jp.mf.done:
+            return
+        if self.IsShown():
+            if self.axis == AXIS_Z:
+                self.retract = jp.zReturnLoc is None
+                if self.retract:
+                    val = self.jp.cfg.getFloatInfoData(cf.zRetractLoc)
+                else:
+                    val = jp.zReturnLoc
+            else:
+                self.retract = jp.xReturnLoc is None
+                if self.retract:
+                    val = self.jp.cfg.getFloatInfoData(cf.xRetractLoc)
+                else:
+                    val = jp.xReturnLoc
+
+            title = "%s %s" % ("Retract" if self.retract \
+                               else "Return", self.axisVal)
+            self.SetTitle(title)
+            self.pos.SetEditable(self.retract)
+
+            try:
+                val = float(val)
+            except ValueError:
+                val = 0.0
+
+            self.pos.SetValue("%0.4f" % (val))
+            self.pos.SetSelection(-1, -1)
+
+    def OnKeyChar(self, e):
+        keyCode = e.GetKeyCode()
+        if keyCode == wx.WXK_RETURN:
+            self.OnOk(None)
+        e.Skip()
+
+    def OnOk(self, _):
+        jp = self.jp
+        try:
+            loc = float(self.pos.GetValue())
+            m = self.jp.mf.move
+            m.queClear()
+            comm = self.jp.mf.comm
+            comm.command(cm.CMD_PAUSE)
+            comm.command(cm.CLEARQUE)
+            if self.axis == AXIS_Z:
+                self.jp.mf.sendData.sendZData()
+                m.saveZOffset()
+                m.moveZ(loc, ct.CMD_JOG)
+                jp.zReturnLoc = \
+                    jp.zPos.GetValue() if self.retract else None
+                bitmap = "westR.png" if self.retract else "eastG.png"
+                jp.zButton.SetBitmap(wx.Bitmap(bitmap))
+            else:
+                self.jp.mf.sendData.sendXData()
+                m.saveXOffset()
+                m.moveX(loc, ct.CMD_JOG)
+                jp.xReturnLoc = \
+                    jp.xPos.GetValue() if self.retract else None
+                bitmap = "northR.png" if self.retract else "southG.png"
+                jp.xButton.SetBitmap(wx.Bitmap(bitmap))
+            comm.command(cm.CMD_RESUME)
+            self.Show(False)
+            jp.focus()
+        except ValueError:
+            print("ValueError on retract")
+            stdout.flush()
 
 class RpmMenu(wx.Menu):
     def __init__(self, jP):
@@ -5642,10 +7399,10 @@ class RpmMenu(wx.Menu):
         self.Append(item)
         self.Bind(wx.EVT_MENU, self.OnSurfaceSpeed, item)
 
-    def OnRPM(self, e):
+    def OnRPM(self, _):
         self.jP.setSurfaceSpeed(False)
 
-    def OnSurfaceSpeed(self, e):
+    def OnSurfaceSpeed(self, _):
         self.jP.setSurfaceSpeed(True)
 
 EVT_UPDATE_ID = wx.Window.NewControlId()
@@ -5657,8 +7414,11 @@ class UpdateEvent(wx.PyEvent):
         self.data = data
 
 class UpdateThread(Thread):
-    def __init__(self, notifyWindow):
+    def __init__(self, mainFrame, notifyWindow):
         Thread.__init__(self)
+        self.mf = mainFrame
+        self.jp = mainFrame.jogPanel
+        self.comm = mainFrame.comm
         self.readAllError = False
         self.notifyWindow = notifyWindow
         self.threadRun = True
@@ -5679,59 +7439,69 @@ class UpdateThread(Thread):
         self.dbg = None
         self.baseTime = None
         self.mIdle = False
-        dbgSetup = (\
-                    (en.D_PASS, self.dbgPass), \
-                    (en.D_DONE, self.dbgDone), \
-                    (en.D_TEST, self.dbgTest), \
-
-                    (en.D_XMOV, self.dbgXMov), \
-                    (en.D_XLOC, self.dbgXLoc), \
-                    (en.D_XDST, self.dbgXDst), \
-                    (en.D_XSTP, self.dbgXStp),
-                    (en.D_XST,  self.dbgXState), \
-                    (en.D_XBSTP, self.dbgXBSteps), \
-                    (en.D_XDRO, self.dbgXDro), \
-                    (en.D_XPDRO, self.dbgXPDro), \
-                    (en.D_XEXP, self.dbgXExp), \
-                    (en.D_XWT,  self.dbgXWait), \
-                    (en.D_XDN,  self.dbgXDone), \
-                    (en.D_XEST, self.dbgXEncStart), \
-                    (en.D_XEDN, self.dbgXEncDone), \
-                    (en.D_XX, self.dbgXX), \
-                    (en.D_XY, self.dbgXY), \
-
-                    (en.D_ZMOV, self.dbgZMov), \
-                    (en.D_ZLOC, self.dbgZLoc), \
-                    (en.D_ZDST, self.dbgZDst), \
-                    (en.D_ZSTP, self.dbgZStp),
-                    (en.D_ZST, self.dbgZState), \
-                    (en.D_ZBSTP, self.dbgZBSteps), \
-                    (en.D_ZDRO, self.dbgZDro), \
-                    (en.D_ZPDRO, self.dbgZPDro), \
-                    (en.D_ZEXP, self.dbgZExp), \
-                    (en.D_ZWT, self.dbgZWait), \
-                    (en.D_ZDN, self.dbgZDone), \
-                    (en.D_ZEST, self.dbgZEncStart), \
-                    (en.D_ZEDN, self.dbgZEncDone), \
-                    (en.D_ZX, self.dbgZX), \
-                    (en.D_ZY, self.dbgZY), \
-
-                    (en.D_HST, self.dbgHome), \
-
-                    (en.D_MSTA, self.dbgMoveState), \
-                    (en.D_MCMD, self.dbgMoveCmd), \
-        )
-        self.dbgTbl = dbgTbl = [None for i in range(len(dbgSetup))]
+        self.lastXIdxD = None
+        self.lastXIdxP = None
+        self.lastZIdxD = None
+        self.lastZIdxP = None
+        self.queCount = 0
+        self.dbgCount = 0
+        dbgSetup = ( \
+            (en.D_PASS, self.dbgPass), \
+            (en.D_DONE, self.dbgDone), \
+            (en.D_TEST, self.dbgTest), \
+            (en.D_XMOV, self.dbgXMov), \
+            (en.D_XLOC, self.dbgXLoc), \
+            (en.D_XDST, self.dbgXDst), \
+            (en.D_XSTP, self.dbgXStp),
+            (en.D_XST, self.dbgXState), \
+            (en.D_XBSTP, self.dbgXBSteps), \
+            (en.D_XDRO, self.dbgXDro), \
+            (en.D_XPDRO, self.dbgXPDro), \
+            (en.D_XEXP, self.dbgXExp), \
+            (en.D_XERR, self.dbgXErr), \
+            (en.D_XWT, self.dbgXWait), \
+            (en.D_XDN, self.dbgXDone), \
+            (en.D_XEST, self.dbgXEncStart), \
+            (en.D_XEDN, self.dbgXEncDone), \
+            (en.D_XX, self.dbgXX), \
+            (en.D_XY, self.dbgXY), \
+            (en.D_ZMOV, self.dbgZMov), \
+            (en.D_ZLOC, self.dbgZLoc), \
+            (en.D_ZDST, self.dbgZDst), \
+            (en.D_ZSTP, self.dbgZStp),
+            (en.D_ZST, self.dbgZState), \
+            (en.D_ZBSTP, self.dbgZBSteps), \
+            (en.D_ZDRO, self.dbgZDro), \
+            (en.D_ZPDRO, self.dbgZPDro), \
+            (en.D_ZEXP, self.dbgZExp), \
+            (en.D_ZERR, self.dbgZErr), \
+            (en.D_ZWT, self.dbgZWait), \
+            (en.D_ZDN, self.dbgZDone), \
+            (en.D_ZEST, self.dbgZEncStart), \
+            (en.D_ZEDN, self.dbgZEncDone), \
+            (en.D_ZX, self.dbgZX), \
+            (en.D_ZY, self.dbgZY), \
+            (en.D_XIDXD, self.dbgXIdxD), \
+            (en.D_XIDXP, self.dbgXIdxP), \
+            (en.D_ZIDXD, self.dbgZIdxD), \
+            (en.D_ZIDXP, self.dbgZIdxP), \
+            (en.D_HST, self.dbgHome), \
+            (en.D_MSTA, self.dbgMoveState), \
+            (en.D_MCMD, self.dbgMoveCmd), \
+            )
+        self.dbgTbl = dbgTbl = [self.dbgNone for _ in range(len(dbgSetup))]
         for (index, action) in dbgSetup:
             dbgTbl[index] = action
-        for i, val in enumerate(dbgTbl):
-            if val is None:
-                print("dbgTbl action for %s missing" % (en.dMessageList[i]))
-                stdout.flush()
+        # for i, val in enumerate(dbgTbl):
+        #     if val is None:
+        #         print("dbgTbl action for %s missing" % (en.dMessageList[i]))
+        #         stdout.flush()
 
-    def openDebug(self, file="dbg.txt"):
-        self.dbg = open(os.path.join(DBG_DIR, file), "wb")
-        t = strftime("%a %b %d %Y %H:%M:%S\n", localtime())
+    def openDebug(self, fName="dbg.txt", action=None):
+        self.dbg = open(os.path.join(DBG_DIR, fName), "ab")
+        t = "\n" + timeStr()
+        if action is not None:
+            t = t[:-1] + " " + en.operationsList[action] + "\n"
         self.dbg.write(t.encode())
         self.dbg.flush()
 
@@ -5761,16 +7531,16 @@ class UpdateThread(Thread):
     #         wx.PostEvent(self.notifyWindow, UpdateEvent(result))
 
     def readAll(self):
-        if done:
+        if self.mf.done:
             return
-        comm.xDbgPrint = False
+        #comm.xDbgPrint = False
         try:
-            result = comm.command(cm.READALL)
+            result = self.comm.command(cm.READALL, True)
             if result is None:
                 return
 
         except CommTimeout:
-            if done:
+            if self.mf.done:
                 return
             self.readAllError = True
             wx.PostEvent(self.notifyWindow, \
@@ -5784,24 +7554,27 @@ class UpdateThread(Thread):
             stdout.flush()
             return
 
-        comm.xDbgPrint = True
+        #comm.xDbgPrint = True
         if self.readAllError:
             self.readAllError = False
             wx.PostEvent(self.notifyWindow,
                          UpdateEvent((en.EV_ERROR, st.STR_CLR)))
         try:
-            (z, x, rpm, curPass, droZ, droX, flag) = \
-                result.rstrip().split(' ')[1:]
+            tmp = result[3:].split(' ')
+            (z, x, rpm, curPass, droZ, droX, flag, \
+             queCount, dbgCount) = tmp[1:10]
+            self.queCount = int(queCount)
+            self.dbgCount = int(dbgCount)
             result = (en.EV_READ_ALL, z, x, rpm, curPass, droZ, droX, flag)
             wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
-            print("readAll ValueError %s" % (result))
+            print("readAll ValueError ", result)
             stdout.flush()
 
     def run(self):
         i = 0
-        op = None
         scanMax = len(self.parmList)
+        moveQue = self.mf.move.moveQue
         while True:
             stdout.flush()
             sleep(0.1)
@@ -5823,7 +7596,7 @@ class UpdateThread(Thread):
                     stdout.flush()
                     break
                 except RuntimeError:
-                    if done:
+                    if self.mf.done:
                         break
             i += 1
             if i >= scanMax:
@@ -5831,23 +7604,22 @@ class UpdateThread(Thread):
 
             # process move queue
 
-            moveQue = moveCommands.moveQue
-            if not moveQue.empty() or (op is not None):
+            if not moveQue.empty() and self.queCount > 10:
                 if not self.threadRun:
                     break
                 try:
-                    num = comm.getQueueStatus()
-                    if not self.threadRun:
-                        break
+                    # num = self.comm.getQueueStatus()
+                    # if not self.threadRun:
+                    #     break
+                    num = self.queCount
                     while num > 0:
                         num -= 1
-                        if op is None:
-                            try:
-                                (opString, op, val) = moveQue.get(False)
-                            except Empty:
-                                break
-                        comm.sendMove(opString, op, val)
-                        op = None
+                        try:
+                            (opString, op, val) = moveQue.get(False)
+                            self.comm.queMove(opString, op, val)
+                            # self.comm.sendMove(opString, op, val)
+                        except Empty:
+                            break
                 except CommTimeout:
                     print("CommTimeout on queue")
                     stdout.flush()
@@ -5855,12 +7627,17 @@ class UpdateThread(Thread):
                     print("SerialException on queue")
                     stdout.flush()
                     break
+                except TypeError:
+                    print("TypeError on queue")
+                    stdout.flush()
+                self.comm.sendMultiMove()
 
             # get debug data
 
-            if self.procDebug():
-                break
-            
+            if self.dbgCount != 0:
+                if self.procDebug():
+                    break
+
         print("UpdateThread done")
         stdout.flush()
         self.threadDone = True
@@ -5868,10 +7645,10 @@ class UpdateThread(Thread):
     def close(self):
         self.closeDbg()
         self.threadRun = False
-        
+
     def procDebug(self):
         try:
-            result = comm.getString(cm.READDBG, 10)
+            result = self.comm.getString(cm.READDBG, 10)
             if not self.threadRun:
                 return(True)
             if result is None:
@@ -5891,8 +7668,10 @@ class UpdateThread(Thread):
                 try:
                     cmd = int(cmd, 16)
                     val = int(val, 16)
+                    # print("c %2x val %4x" % (cmd, val))
                     try:
                         action = self.dbgTbl[cmd]
+                        assert (callable(action))
                         output = action(val)
                         if output is not None:
                             if self.dbg is None:
@@ -5903,7 +7682,7 @@ class UpdateThread(Thread):
                                 self.dbg.flush()
                         # if cmd == en.D_DONE:
                         #     if val == 0:
-                        #         if not jogPanel.currentPanel.control.add:
+                        #         if not self.jp.currentPanel.control.addEnabled:
                         #             self.baseTime = time()
                         #     if val == 1:
                         #         self.baseTime = None
@@ -5911,20 +7690,20 @@ class UpdateThread(Thread):
                         #             self.dbg.close()
                         #             self.dbg = None
                     except IndexError:
-                        print("index error %s" % result)
+                        print("procDebug IndexError %s" % result)
                         stdout.flush()
                     except TypeError:
-                        print("type error %s %s" % \
+                        print("procDebug TypeError %s %s" % \
                               (en.dMessageList[cmd], result))
                         stdout.flush()
                 except ValueError:
-                    print("value error cmd %s val %s" % (cmd, val))
+                    print("procDebug ValueError cmd %s val %s" % (cmd, val))
                     stdout.flush()
         except CommTimeout:
-            print("getString CommTimeout")
+            print("procDebug getString CommTimeout")
             stdout.flush()
         except serial.SerialException:
-            print("getString SerialException")
+            print("procDebug getString SerialException")
             stdout.flush()
             return(True)
 
@@ -5942,12 +7721,15 @@ class UpdateThread(Thread):
                     self.dbg.write((t + output + "\n").encode())
                     self.dbg.flush()
         except IndexError:
-            print("index error %d" % cmd)
+            print("dbgDispatch IndexError %d" % cmd)
             stdout.flush()
         except TypeError:
-            print("type error %s %s" % \
+            print("dbgDispatch TypeError %s %s" % \
                   (en.dMessageList[cmd], str(val)))
             stdout.flush()
+
+    def dbgNone(self, val):
+        return "none"
 
     def dbgPass(self, val):
         # tmp = val >> 8
@@ -5958,6 +7740,10 @@ class UpdateThread(Thread):
         # elif tmp == 2:
         #     return("spring %d\n" % (val & 0xff))
         self.passVal = val
+        self.lastXIdxD = None
+        self.lastXIdxP = None
+        self.lastZIdxD = None
+        self.lastZIdxP = None
         result = "spring\n" if val & 0x100 else \
                  "spring %d\n" % (val & 0xff) if val & 0x200 else \
                  "pass %d\n" % (val)
@@ -5965,37 +7751,37 @@ class UpdateThread(Thread):
 
     def dbgDone(self, val):
         if val == ct.PARM_START:
-            if not jogPanel.currentPanel.control.add:
+            if not self.jp.currentPanel.control.addEnabled:
                 self.baseTime = time()
-            return("strt\n")
+            return("strt " + timeStr())
         elif val == ct.PARM_DONE:
-            return("done\n")
+            return("done " + timeStr())
 
     def dbgTest(self, val):
         return("test %d" % (val))
 
     def dbgXMov(self, val):
-        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
         return("xmov %7.4f %7.4f" % (tmp, tmp * 2.0))
 
     def dbgXLoc(self, val):
         iTmp = int(val)
         self.xIntLoc = iTmp
-        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
         self.xLoc = tmp
         if self.xDro is not None:
             diff = " diff %7.4f" % (self.xDro - tmp)
             self.xDro = None
         else:
             diff = ""
-        return("xloc %7d %7.4f %7.4f%s" % (iTmp, tmp, tmp * 2.0, diff))
+        return("xloc %7.4f %7.4f %7d%s" % (tmp, tmp * 2.0, iTmp, diff))
 
     def dbgXDst(self, val):
-        tmp = float(val) / jogPanel.xStepsInch
+        tmp = float(val) / self.mf.xStepsInch
         return("xdst %7.4f %7d" % (tmp, val))
 
     def dbgXStp(self, val):
-        dist = float(val) / jogPanel.xStepsInch
+        dist = float(val) / self.mf.xStepsInch
         if self.xEncoderCount is None or self.xEncoderCount == 0:
             return("xstp %7.4f %7d" % (dist, val))
         else:
@@ -6004,28 +7790,39 @@ class UpdateThread(Thread):
             return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
-        return(("x_st %s" % (en.xStatesList[val])) + \
-                ("\n" if self.mIdle and val == en.XIDLE else ""))
+        return(("x_st %s" % (en.axisStatesList[val])) + \
+                ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
 
     def dbgXBSteps(self, val):
-        tmp = float(val) / jogPanel.xStepsInch
+        tmp = float(val) / self.mf.xStepsInch
         return("xbst %7.4f %7d" % (tmp, val))
 
     def dbgXDro(self, val):
-        tmp = float(val) / jogPanel.xDROInch - xDROOffset
+        tmp = float(val) / self.jp.xDROInch - self.jp.xDROOffset
         self.xDro = tmp
         return("xdro %7.4f %7.4f %7d" % (tmp, tmp * 2.0, val))
 
     def dbgXPDro(self, val):
-        tmp = float(val) / jogPanel.xDROInch - xDROOffset
-        s = "pass %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
-            (self.passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
-        jogPanel.dPrt(s + "\n", flush=True)
+        tmp = float(val) / self.jp.xDROInch - self.jp.xDROOffset
+        passVal = self.passVal
+        spring = (passVal & 0xf00) >> 8
+        passVal &= 0xff
+        if spring == 0:
+            spring = "  "
+        else:
+            spring = "s" + str(spring)
+        s = "pass %s %2d xdro %7.4f xloc %7.4f diff %7.4f" % \
+            (spring, passVal, tmp * 2.0, self.xLoc * 2.0, self.xLoc - tmp)
+        self.jp.mf.dPrt(s + "\n", flush=True)
         return("xpdro " + s)
 
     def dbgXExp(self, val):
-        tmp = float(val) / jogPanel.xStepsInch - xHomeOffset
+        tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
         return("xexp %7.4f" % (tmp))
+
+    def dbgXErr(self, val):
+        tmp = float(val) / self.mf.xStepsInch
+        return("xerr %7.4f" % (tmp))
 
     def dbgXWait(self, val):
         return("xwt  %2x" % (val))
@@ -6051,27 +7848,27 @@ class UpdateThread(Thread):
         return("xedn %7.2f %7d" % (float(count) / self.encoderCount, count))
 
     def dbgZMov(self, val):
-        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
         return("zmov %7.4f" % (tmp))
 
     def dbgZLoc(self, val):
         iTmp = int(val)
         self.zIntLoc = iTmp
-        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
         self.zLoc = tmp
         if self.zDro is not None:
             diff = " diff %7.4f" % (self.zDro - tmp)
             self.zDro = None
         else:
             diff = ""
-        return("zloc %7d %7.4f%s" % (iTmp, tmp, diff))
+        return("zloc %7.4f %7d %s" % (tmp, iTmp, diff))
 
     def dbgZDst(self, val):
-        tmp = float(val) / jogPanel.zStepsInch
+        tmp = float(val) / self.mf.zStepsInch
         return("zdst %7.4f %7d" % (tmp, val))
 
     def dbgZStp(self, val):
-        dist = float(val) / jogPanel.zStepsInch
+        dist = float(val) / self.mf.zStepsInch
         if self.zEncoderCount is None or self.zEncoderCount == 0:
             return("zstp %7.4f %7d" % (dist, val))
         else:
@@ -6080,28 +7877,48 @@ class UpdateThread(Thread):
             return("zstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgZState(self, val):
-        return(("z_st %s" % (en.zStatesList[val])) + \
-                ("\n" if self.mIdle and val == en.ZIDLE else ""))
+        if self.jp.currentPanel.active:
+            return(("z_st %s" % (en.axisStatesList[val])) + \
+                   ("\n" if self.mIdle and val == en.AXIS_IDLE else ""))
+        else:
+            rtnVal = "z_st %s" % (en.axisStatesList[val])
+            if val == en.AXIS_IDLE:
+                self.baseTime = None
+                rtnVal += "\n"
+            elif self.baseTime is None:
+                self.baseTime = time()
+            return(rtnVal)
 
     def dbgZBSteps(self, val):
-        tmp = float(val) / jogPanel.zStepsInch
+        tmp = float(val) / self.mf.zStepsInch
         return("zbst %7.4f %7d" % (tmp, val))
 
     def dbgZDro(self, val):
-        tmp = float(val) / jogPanel.zDROInch - zDROOffset
+        tmp = float(val) / self.jp.zDROInch - self.jp.zDROOffset
         self.zDro = tmp
         return("zdro %7.4f" % (tmp))
 
     def dbgZPDro(self, val):
-        tmp = float(val) / jogPanel.zDROInch - zDROOffset
-        s = "pass %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
-            (self.passVal, tmp, self.zLoc, self.zLoc - tmp)
-        jogPanel.dPrt(s + "\n", flush=True)
+        tmp = float(val) / self.jp.zDROInch - self.jp.zDROOffset
+        passVal = self.passVal
+        spring = (passVal & 0xf00) >> 8
+        passVal &= 0xff
+        if spring == 0:
+            spring = "  "
+        else:
+            spring = "s" + str(spring)
+        s = "pass %s %2d zdro %7.4f zloc %7.4f diff %7.4f" % \
+            (spring, passVal, tmp, self.zLoc, self.zLoc - tmp)
+        self.jp.mf.dPrt(s + "\n", flush=True)
         return("zpdro " + s)
 
     def dbgZExp(self, val):
-        tmp = float(val) / jogPanel.zStepsInch - zHomeOffset
+        tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
         return("zexp %7.4f" % (tmp))
+
+    def dbgZErr(self, val):
+        tmp = float(val) / self.mf.zStepsInch
+        return("zerr %7.4f" % (tmp))
 
     def dbgZWait(self, val):
         return("zwt  %2x" % (val))
@@ -6125,6 +7942,48 @@ class UpdateThread(Thread):
 
     def dbgZY(self, val):
         return("z_y  %7d" % (val))
+
+    def dbgXIdxD(self, val):
+        result = "xixd %7.4f" % (float(val) / self.jp.xDROInch - \
+                                 self.jp.xDROOffset)
+
+        if self.lastXIdxD is not None:
+            delta = abs(self.lastXIdxD - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.xDROInch, val, delta)
+        self.lastXIdxD = val
+        return(result)
+
+    def dbgXIdxP(self, val):
+        result = "xixp %7.4f" % (float(val) / self.jp.xStepsInch - \
+                                 self.jp.xHomeOffset)
+
+        if self.lastXIdxP is not None:
+            delta = abs(self.lastXIdxP - val)
+            result += " %7.4f %6d %5d" % \
+                (delta / self.jp.xStepsInch, val, delta)
+        self.lastXIdxP = val
+        return(result)
+
+    def dbgZIdxD(self, val):
+        result = "zixd %7.4f" % (float(val) / self.jp.zDROInch - \
+                                 self.jp.zDROOffset)
+
+        if self.lastZIdxD is not None:
+            delta = abs(self.lastZIdxD - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.zDROInch, val, delta)
+        self.lastZIdxD = val
+        return(result)
+
+    def dbgZIdxP(self, val):
+        result = "zixp %7.4f" % (float(val) / self.jp.zStepsInch - \
+                                 self.jp.zHomeOffset)
+
+        if self.lastZIdxP is not None:
+            delta = abs(self.lastZIdxP - val)
+            result += " %7.4f %6d %5d" % \
+                (delta / self.jp.zStepsInch, val, delta)
+        self.lastZIdxP = val
+        return(result)
 
     def dbgHome(self, val):
         return("hsta %s" % (en.hStatesList[val]))
@@ -6157,6 +8016,7 @@ class UpdateThread(Thread):
 #             print("key down")
 #         event.Skip()
 
+
 EVT_RESIZE_ID = wx.Window.NewControlId()
 
 class ResizeEvent(wx.PyEvent):
@@ -6179,32 +8039,274 @@ class Delay(Thread):
         print("Delay done")
         stdout.flush()
 
+class DialFrame(wx.Frame):
+    def __init__(self, title, parent=None):
+        wx.Frame.__init__(self, parent=parent, title=title)
+
+        self.pointerVal = 0
+
+        self.SetSize(wx.Size(512, 512))
+
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+        self.dialPanel = panel = DialPanel(self)
+        panel.SetAutoLayout(True)
+        panel.SetSizer(sizerV)
+        sizerV.Fit(panel)
+        self.Show()
+
+class DialPanel(wx.Panel):
+    def __init__(self, parent, *args, **kwargs):
+        super(DialPanel, self).__init__(parent, *args, **kwargs)
+
+        self.pointerVal = 0
+        self.Bind(wx.EVT_SIZE, self.OnResize)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.bmp = None
+
+    def updatePointer(self, val):
+        pointerVal = (int(val * 10000) % 1000) / 10
+        if self.pointerVal != pointerVal:
+            self.pointerVal = pointerVal
+            self.Refresh()
+            # self.Update()
+
+    def OnResize(self, event):
+        self.bmp = None
+        self.Refresh()
+        self.Layout()
+
+    def OnPaint(self, _):
+        dc = wx.PaintDC(self)
+        dc.SetMapMode(wx.MM_TEXT)
+        brush = wx.Brush("white")
+        dc.SetBackground(brush)
+        dc.Clear()
+        self.render(dc)
+
+    def render(self, dc):
+        size = self.GetSize()
+        # print("width %3d height %3d" % (size.x, size.y))
+        # stdout.flush()
+
+        WIDTH, HEIGHT = size.x, size.y
+
+        r = 0.5
+        self.r = r
+        if self.bmp is None:
+            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
+            ctx = cairo.Context(surface)
+
+            s = min(size.x, size.y)
+            self.scale = s
+            ctx.scale(s, s)         # Normalizing the canvas
+
+            ctx.set_font_size(0.05)
+            ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, \
+                                 cairo.FONT_WEIGHT_NORMAL)
+
+            # r0 = 0.9 * r
+            rc = 0.99 * r
+            ctx.translate(r, r)  # Changing the current transformation matrix
+
+            ctx.move_to(rc, 0)
+
+            ctx.arc(0.0, 0.0, rc, 0.0, 2*pi)
+
+            for i in range(100):
+                a = radians((i / 100) * 360) - pi/2
+                label = False
+                if i % 10 == 0:
+                    r0 = 0.8 * r
+                    label = True
+                else:
+                    rem = i % 5
+                    if rem == 0:
+                        r0 = 0.85 * r
+                    # elif (rem == 2) or (rem == 3):
+                    #     r0 = 0.85 * r
+                    else:
+                        r0 = 0.9 * r
+                x0 = r0 * cos(a)
+                y0 = r0 * sin(a)
+                x1 = rc * cos(a)
+                y1 = rc * sin(a)
+                # print(i, x0, y0, x1, y1)
+                ctx.move_to(x0, y0)
+                ctx.line_to(x1, y1)
+                if label:
+                    txt = str(i)
+                    extents = ctx.text_extents(txt)
+                    r1 = r0 - 0.01
+                    x0 = r1 * cos(a)
+                    y0 = r1 * sin(a)
+                    xOffset = 0
+                    yOffset = 0
+                    if i == 0:
+                        xOffset = -extents.x_advance / 2
+                        yOffset = extents.height
+                    elif i == 10:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height *.75
+                    elif i == 20:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height / 2
+                    elif i == 30:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height / 2
+                    elif i == 40:
+                        xOffset = -extents.x_advance
+                        yOffset = extents.height *.25
+                    elif i == 50:
+                        xOffset = -extents.x_advance / 2
+                    elif i == 60:
+                        yOffset = extents.height * .25
+                    elif i == 70:
+                        yOffset = extents.height / 2
+                    elif i == 80:
+                        yOffset = extents.height / 2
+                    elif i == 90:
+                        yOffset = extents.height *.75
+                    ctx.move_to(x0 + xOffset, y0 + yOffset)
+                    ctx.show_text(txt)
+                    # label = False
+
+            ctx.set_source_rgb(0.3, 0.2, 0.5)  # Solid color
+            ctx.set_line_width(0.002)
+            ctx.stroke()
+
+            ctx.arc(0, 0, 0.05 * r, 0, 2 * pi)
+            ctx.fill()
+
+            self.bmp = wxcairo.BitmapFromImageSurface(surface)
+
+        dc.DrawBitmap(self.bmp, 0, 0)
+
+        # # Arc(cx, cy, radius, start_angle, stop_angle)
+        # ctx.arc(0.2, 0.1, 0.1, -math.pi / 2, 0)
+        # ctx.line_to(0.5, 0.1)  # Line to (x,y)
+        # # Curve(x1, y1, x2, y2, x3, y3)
+        # ctx.curve_to(0.5, 0.2, 0.5, 0.4, 0.2, 0.8)
+        # ctx.close_path()
+
+        # if False:
+        #     ctx = wxcairo.ContextFromDC(dc)
+        #
+        #     s = min(size.x, size.y)
+        #     ctx.scale(s, s)         # Normalizing the canvas
+        #     ctx.translate(r, r)	# Changing the current transformation matrix
+        #
+        #     # ctx.arc(0, 0, 0.05 * r, 0, 2 * pi)
+        #     # ctx.fill()
+        #
+        #     ctx.move_to(0, 0)
+        #     ctx.line_to(0.75 * r, 0)
+        #
+        #     ctx.set_source_rgb(1.0, 0.0, 0.0)
+        #     ctx.set_line_width(0.01)
+        #     ctx.stroke()
+        #
+        #     ctx.move_to(0.75 * r, 0)
+        #     ctx.line_to(0.95 * r, 0)
+        #
+        #     ctx.set_source_rgb(1.0, 0.0, 0.0)
+        #     ctx.set_line_width(0.002)
+        #     ctx.stroke()
+
+        self.drawPointer(dc)
+
+    def drawPointer(self, dc):
+        ctx = wxcairo.ContextFromDC(dc)
+
+        s = self.scale
+        r = self.r
+
+        ctx.scale(s, s)         # Normalizing the canvas
+        ctx.translate(r, r)	# Changing the current transformation matrix
+
+        r0 = 0.70 * r
+        r1 = 0.95 * r
+        a = radians((self.pointerVal / 100) * 360) - pi/2
+
+        x0 = r0 * cos(a)
+        y0 = r0 * sin(a)
+        ctx.move_to(0, 0)
+        ctx.line_to(x0, y0)
+
+        ctx.set_source_rgb(1.0, 0.0, 0.0)
+        ctx.set_line_width(0.01)
+        ctx.stroke()
+
+        x1 = r1 * cos(a)
+        y1 = r1 * sin(a)
+        ctx.move_to(x0, y0)
+        ctx.line_to(x1, y1)
+
+        ctx.set_source_rgb(1.0, 0.0, 0.0)
+        ctx.set_line_width(0.002)
+        ctx.stroke()
+
 class MainFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, -1, title)
+        self.done = False
+        self.xHomed = False
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Connect(-1, -1, EVT_RESIZE_ID, self.OnResize)
         self.dirName = os.getcwd()
         self.parseCmdLine()
-        self.initialConfig()
-        
-        self.hdrFont = wx.Font(20, wx.MODERN, wx.NORMAL, \
-                               wx.NORMAL, False, u'Consolas')
+
+        if not os.path.exists(DBG_DIR):
+            os.makedirs(DBG_DIR)
+        self.dbg = open(DBG_LOG, "ab")
+        t = "\n" + timeStr() + "\n"
+        self.dbg.write(t.encode())
+        self.dbg.flush()
+
+        self.turnSync = en.SEL_TU_SPEED
+        self.threadSync = en.SEL_TH_NO_ENC
+
+        self.xSyncInt = None
+        self.zSyncInt = None
+        self.xSyncExt = None
+        self.zSyncExt = None
+
+        self.cfg = cfg = ConfigInfo(cf.configTable)
+        self.initialConfig(cfg)
+
+        self.zStepsInch = None
+        self.xStepsInch = None
+
+        self.zDROInch = None
+        self.xDROInch = None
+
+        if EXT_DRO:
+            # global eDro
+            import extDro as eDro
+            from extDro import DroTimeout
+            self.dro = eDro.ExtDro()
+
+        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
+            self.syncComm = Comm()
+
+        self.comm = comm = Comm()
+        comm.SWIG = SWIG
+
+        self.hdrFont = \
+            wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         self.defaultFont = defaultFont = \
-            wx.Font(10, wx.MODERN, wx.NORMAL,
-                    wx.NORMAL, False, u'Consolas')
+            wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
         self.SetFont(defaultFont)
 
-        global moveCommands
-        moveCommands = MoveCommands()
-
         self.currentPanel = None
-        
+
         self.zDialog = ZDialog(self, defaultFont)
         self.xDialog = XDialog(self, defaultFont)
         self.spindleDialog = SpindleDialog(self, defaultFont)
         self.portDialog = PortDialog(self, defaultFont)
         self.configDialog = ConfigDialog(self, defaultFont)
+        self.megaDialog = MegaDialog(self, defaultFont)
 
         self.testSpindleDialog = None
         self.testSyncDialog = None
@@ -6214,35 +8316,59 @@ class MainFrame(wx.Frame):
         self.menuSetup()
         self.initUI()
 
-        global updateThread
-        self.updateThread = updateThread = UpdateThread(self.jogPanel)
+        self.zDialog.setupVars()
+        self.xDialog.setupVars()
 
-        global jogShuttle
-        self.jogShuttle = jogShuttle = JogShuttle()
+        self.dbgSave = bool(cfg.getBoolInfoData(cf.cfgDbgSave))
+        self.cfgDraw = bool(cfg.getBoolInfoData(cf.cfgDraw))
+
+        self.sendData = SendData(self)
+
+        self.dialFrame = None
+        self.dialPanel = None
+        # self.dialFrame = DialFrame("Dial Frame")
+        # self.dialPanel = self.dialFrame.dialPanel
+
+        self.updateThread = updateThread = UpdateThread(self, self.jogPanel)
+
+        if self.dbgSave:
+            print("***start saving debug***")
+            updateThread.openDebug()
+
+        self.jogShuttle = JogShuttle(self)
 
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
-        if SPINDLE_SYNC_BOARD:
-            syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
+        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
+            self.syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
                                 cfg.getInfoData(cf.syncRate))
-            syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
+            self.syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
                                sc.SYNC_READVAL)
 
-            syncComm.setupTables(sc.cmdTable, sp.parmTable)
-        
-        global keypad
+            self.syncComm.setupTables(sc.cmdTable, sp.parmTable)
+
         port = cfg.getInfoData(cf.keypadPort)
         if len(port) != 0:
-            self.keypad = keypad = Keypad(cfg.getInfoData(cf.keypadPort), \
-                                          cfg.getInfoData(cf.keypadRate))
+            self.keypad = Keypad(self, cfg.getInfoData(cf.keypadPort), \
+                                 cfg.getInfoData(cf.keypadRate))
         else:
-            self.keypad = keypad = None
-        
-        self.initDRO()
-                                                                              
+            self.keypad = None
+
+        if EXT_DRO:
+            self.initDRO()
+
         if FPGA:
-            comm.xRegs = xr.xRegTable
+            global xb, xr
+            if not R_PI:
+                # import xBitDef as xb
+                import xRegDef as xr
+
+                comm.enableXilinx()
+                comm.xRegs = xr.xRegTable
+            else:
+                # import fpgaLathe as xb
+                import lRegDef as xr
 
         self.initDevice()
 
@@ -6253,23 +8379,51 @@ class MainFrame(wx.Frame):
             comm.rpi.setDbgDispatch(updateThread.dbgDispatch)
         self.delay = Delay(self)
 
-    def onClose(self, e):
-        global done
+        if MEGA:
+            self.sendData.sendMegaData()
+
+        self.fTest = None
+
+    def dbgOpen(self, fName):
+        self.fTest = open(os.path.join(DBG_DIR, fName), 'w')
+
+    def dbgPrt(self, txt, fmt, values):
+        txt.AppendText((fmt + "\n") % values)
+        self.fTest.write((fmt + "\n") % values)
+
+    def dbgClose(self):
+        self.fTest.close()
+
+    def dPrt(self, text, console=False, flush=False):
+        self.dbg.write(text.encode())
+        if flush:
+            self.dbg.flush()
+        if console:
+            print(text, end='')
+            if flush:
+                stdout.flush()
+
+    def onClose(self, _):
         posList = (cf.zSvPosition, cf.zSvHomeOffset, \
                    cf.xSvPosition, cf.xSvHomeOffset)
         if DRO:
             posList += (cf.zSvDROPosition, cf.zSvDROOffset, \
                         cf.xSvDROPosition, cf.xSvDROOffset)
-        cfg.saveList(self.posFile, posList)
-        done = True
-        jogPanel.close()
+        self.cfg.saveList(self.posFile, posList)
+        self.done = True
         self.updateThread.close()
-        buttonRepeat.close()
-        jogShuttle.close()
+        self.jogPanel.btnRpt.close()
+        self.jogShuttle.close()
         if R_PI:
-            comm.rpi.close()
-        if keypad is not None:
-            keypad.close()
+            self.comm.rpi.close()
+        if self.keypad is not None:
+            self.keypad.close()
+        # self.dialFrame.Destroy()
+        if self.comm.ser is not None:
+            self.comm.ser.close()
+        if self.dbg is not None:
+            self.dbg.close()
+            self.dbg = None
         self.Destroy()
 
     def menuSetup(self):
@@ -6286,7 +8440,7 @@ class MainFrame(wx.Frame):
 
         ID_FILE_SAVE_RESTART = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_RESTART, 'Save and Restart')
-        self.Bind(wx.EVT_MENU, self.OnRestat, menu)
+        self.Bind(wx.EVT_MENU, self.OnRestart, menu)
 
         ID_FILE_SAVE_PANEL = wx.Window.NewControlId()
         menu = fileMenu.Append(ID_FILE_SAVE_PANEL, 'Save Panel')
@@ -6319,9 +8473,13 @@ class MainFrame(wx.Frame):
         menu = setupMenu.Append(ID_PORT_SETUP, 'Port')
         self.Bind(wx.EVT_MENU, self.OnPortSetup, menu)
 
-        ID_PORT_SETUP = wx.Window.NewControlId()
-        menu = setupMenu.Append(ID_PORT_SETUP, 'Config')
+        ID_CONFIG_SETUP = wx.Window.NewControlId()
+        menu = setupMenu.Append(ID_CONFIG_SETUP, 'Config')
         self.Bind(wx.EVT_MENU, self.OnConfigSetup, menu)
+
+        ID_MEGA_SETUP = wx.Window.NewControlId()
+        menu = setupMenu.Append(ID_MEGA_SETUP, 'Mega')
+        self.Bind(wx.EVT_MENU, self.OnMegaSetup, menu)
 
         # operation menu
         operationMenu = wx.Menu()
@@ -6346,6 +8504,10 @@ class MainFrame(wx.Frame):
             ID_THREAD = wx.Window.NewControlId()
             menu = operationMenu.Append(ID_THREAD, 'Thread')
             self.Bind(wx.EVT_MENU, self.OnThread, menu)
+
+        ID_ARC = wx.Window.NewControlId()
+        menu = operationMenu.Append(ID_ARC, 'Arc')
+        self.Bind(wx.EVT_MENU, self.OnArc, menu)
 
         # test menu
         testMenu = wx.Menu()
@@ -6380,6 +8542,11 @@ class MainFrame(wx.Frame):
         # self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         # self.Bind(wx.EVT_CHAR_HOOK, self.OnKeyChar)
 
+        print("MainFrame JogPanel")
+        self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
+
+        self.move = MoveCommands(self)
+
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.panels = {}
@@ -6409,29 +8576,28 @@ class MainFrame(wx.Frame):
             sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
             panel.Hide()
 
-        print("MainFrame JogPanel")
-        global jogPanel
-        self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
+        self.arcPanel = panel = ArcPanel(self, self.hdrFont)
+        self.panels['arcPanel'] = panel
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        panel.Hide()
+
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         self.SetSizerAndFit(sizerV)
+        jogPanel.xHomed = self.xHomed
 
-        cfg.readInfo(self.cfgFile, cf.config)
-        cfg.readInfo(self.posFile, cf.config)
-
-        jogPanel.update()
-
-        varList = (('jogPanel.zPosition', cf.zSvPosition), \
-                ('jogPanel.zHomeOffset', cf.zSvHomeOffset), \
-                ('jogPanel.xPosition', cf.xSvPosition), \
-                ('jogPanel.xHomeOffset', cf.xSvHomeOffset))
+        varList = (('jogPanel.zIPosition', cf.zSvPosition), \
+                ('jogPanel.zIHomeOffset', cf.zSvHomeOffset), \
+                ('jogPanel.xIPosition', cf.xSvPosition), \
+                ('jogPanel.xIHomeOffset', cf.xSvHomeOffset))
         if DRO:
-            varList += (('jogPanel.zDROPosition', cf.zSvDROPosition), \
-                     ('jogPanel.zDROOffset', cf.zSvDROOffset), \
-                     ('jogPanel.xDROPosition', cf.xSvDROPosition), \
-                     ('jogPanel.xDROOffset', cf.xSvDROOffset))
+            varList += (('jogPanel.zIDROPosition', cf.zSvDROPosition), \
+                     ('jogPanel.zIDROOffset', cf.zSvDROOffset), \
+                     ('jogPanel.xIDROPosition', cf.xSvDROPosition), \
+                     ('jogPanel.xIDROOffset', cf.xSvDROOffset))
 
+        cfg = self.cfg
         for (v, key) in varList:
             if cfg.info[key] is None:
                 cfg.newInfo(key, 0)
@@ -6442,83 +8608,92 @@ class MainFrame(wx.Frame):
         w, h = self.GetSize()
         self.SetPosition((int((3 * dw) / 4 - w), 0))
 
+        # read data here so updates below have data
+
+        cfg.readInfo(self.cfgFile, cf.config)
+        cfg.readInfo(self.posFile, cf.config)
+
+        jogPanel.update()
+
         self.turnPanel.update()
         self.facePanel.update()
         self.cutoffPanel.update()
         self.taperPanel.update()
         if STEP_DRV:
             self.threadPanel.update()
+        self.arcPanel.update()
 
         self.showPanel()
         self.Fit()
 
     def initDRO(self):
-        if EXT_DRO:
-            port = cfg.getInfoData(cf.extDroPort)
-            print("port %s" % (port))
-            stdout.flush()
-            if port is not None:
-                dro.openSerial(cfg.getInfoData(cf.extDroPort), \
-                               cfg.getInfoData(cf.extDroRate))
-                # rsp = dro.command("system.reset()\n", True)
+        cfg = self.cfg
+        port = cfg.getInfoData(cf.extDroPort)
+        print("port %s" % (port))
+        stdout.flush()
+        if port is not None:
+            self.dro.openSerial(cfg.getInfoData(cf.extDroPort), \
+                           cfg.getInfoData(cf.extDroRate))
+            # rsp = dro.command("system.reset()\n", True)
+            # print(rsp)
+            # dro.flush()
+
+            # automate = False
+            # try:
+            #     dro.flush()
+            #     dro.command("\n", True, eDro.delim)
+            #     print("automation off")
+            # except DroTimeout:
+            #     print("automation on")
+            #     automate = True
+
+            # if automate:
+            #     try:
+            #         rsp = dro.command("luash.automate(nil)\n", \
+            #                           True, eDro.delim)
+            #         print("automation turned on")
+            #     except DroTimeout:
+            #         print("DroTimeont exception")
+
+            try:
+                dro = self.dro
+                dro.command(dro.automateOff, True, dro.delim)
+                print("automation turned on")
+                rsp = dro.command(dro.showFunc, True, dro.delim)
+                rsp = re.sub(dro.matchPrompt, "", rsp)
                 # print(rsp)
-                # dro.flush()
-
-                # automate = False
-                # try:
-                #     dro.flush()
-                #     dro.command("\n", True, eDro.delim)
-                #     print("automation off")
-                # except DroTimeout:
-                #     print("automation on")
-                #     automate = True
-
-                # if automate:
-                #     try:
-                #         rsp = dro.command("luash.automate(nil)\n", \
-                #                           True, eDro.delim)
-                #         print("automation turned on")
-                #     except DroTimeout:
-                #         print("DroTimeont exception")
-
-                try:
-                    dro.command(eDro.automateOff, True, eDro.delim)
-                    print("automation turned on")
-                    rsp = dro.command(eDro.showFunc, True, eDro.delim)
-                    rsp = re.sub(eDro.matchPrompt, "", rsp)
-                    # print(rsp)
-                    rsp = rsp.split("\n")
-                    for option in rsp:
-                        tmp = option.strip().lower().split(":")
-                        if len(tmp) == 2:
-                            if tmp[0].strip() == "diameter":
-                                if tmp[1].strip() != "on":
-                                    dro.command(eDro.diamFunc, \
-                                                True, eDro.delim)
-                                    break
-                    dro.command(eDro.inchMode, True, eDro.delim)
-                    dro.command(eDro.absMode, True, eDro.delim)
-                    for line in eDro.axisFunc:
-                        dro.command(line, True, eDro.delim)
-                    rsp = dro.command(eDro.automateOn, True)
-                    # rsp = dro.command(eDro.extReadX, True)
-                    # print(rsp, end="")
-                    # rsp = dro.command(eDro.extReadZ, True)
-                    # print(rsp, end="")
-                    # dro.command(eDro.setZ(str(3.555)), True)
-                    # dro.command("axis.zeroa(1,-2+axis.read(1))")
-                    # dro.command("axis.zeroa(2,-4+axis.read(2));"\
-                    #             "io.write('ok\\n')", True)
-                except DroTimeout:
-                    print("DroTimeont excpetion")
+                rsp = rsp.split("\n")
+                for option in rsp:
+                    tmp = option.strip().lower().split(":")
+                    if len(tmp) == 2:
+                        if tmp[0].strip() == "diameter":
+                            if tmp[1].strip() != "on":
+                                dro.command(dro.diamFunc, \
+                                            True, dro.delim)
+                                break
+                dro.command(dro.inchMode, True, dro.delim)
+                dro.command(dro.absMode, True, dro.delim)
+                for line in dro.axisFunc:
+                    dro.command(line, True, dro.delim)
+                rsp = dro.command(dro.automateOn, True)
+                # rsp = dro.command(dro.extReadX, True)
+                # print(rsp, end="")
+                # rsp = dro.command(dro.extReadZ, True)
+                # print(rsp, end="")
+                # dro.command(dro.setZ(str(3.555)), True)
+                # dro.command("axis.zeroa(1,-2+axis.read(1))")
+                # dro.command("axis.zeroa(2,-4+axis.read(2))"\
+                #             "io.write('ok\\n')", True)
+            except DroTimeout:
+                print("DroTimeout exception")
 
     def initDevice(self):
-        global zPosition, zHomeOffset, xPosition, xHomeOffset
-        if DRO:
-            global zDROPosition, zDROOffset, xDROPosition, xDROOffset
-        sendClear()
+        self.sendData.sendClear()
         stdout.flush()
 
+        jp = self.jogPanel
+        comm = self.comm
+        cfg = self.cfg
         if comm.ser is not None:
             try:
                 comm.queParm(pm.CFG_FPGA, cfg.getBoolInfoData(cf.cfgFpga))
@@ -6526,82 +8701,93 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
+                comm.queParm(pm.CFG_MEGA, cfg.getBoolInfoData(cf.cfgMega))
                 comm.queParm(pm.CFG_SWITCH, cfg.getBoolInfoData(cf.spSwitch))
                 comm.queParm(pm.CFG_VAR_SPEED, \
                              cfg.getBoolInfoData(cf.spVarSpeed))
                 comm.queParm(pm.FPGA_FREQUENCY, \
                              cfg.getIntInfoData(cf.cfgFpgaFreq))
+                comm.queParm(pm.COMMON_LIMITS, \
+                             cfg.getBoolInfoData(cf.cfgCommonLimits))
+                comm.queParm(pm.LIMITS_ENABLED, \
+                             cfg.getBoolInfoData(cf.cfgLimitsEnabled))
+                comm.queParm(pm.COMMON_HOME, \
+                             cfg.getBoolInfoData(cf.cfgCommonHome))
                 comm.command(cm.CMD_SETUP)
-                
-                sendSpindleData()
 
-                sendZData()
+                self.sendData.sendSpindleData()
+
+                self.sendData.sendZData()
                 if EXT_DRO:
-                    self.jogPanel.setZFromExt()
+                    jp.setZFromExt()
                 else:
-                    zPosition = cfg.getIntInfo(cf.zSvPosition)
-                    comm.queParm(pm.Z_LOC, zPosition)
-                    zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
+                    jp.zPosition = cfg.getIntInfo(cf.zSvPosition)
+                    comm.queParm(pm.Z_LOC, jp.zPosition)
+                    jp.zHomeOffset = cfg.getFloatInfo(cf.zSvHomeOffset)
                     comm.queParm(pm.Z_HOME_OFFSET, \
-                                 round(zHomeOffset * jogPanel.zStepsInch))
+                                 round(jp.zHomeOffset * self.zStepsInch))
                     print("zLoc %d %x %7.4f zHomeOffset %7.4f" % \
-                          (zPosition, zPosition, \
-                           float(zPosition) / jogPanel.zStepsInch, zHomeOffset))
+                          (jp.zPosition, jp.zPosition, \
+                           float(jp.zPosition) / self.zStepsInch, \
+                           jp.zHomeOffset))
                     stdout.flush()
                     if DRO:
-                        zDROPosition = cfg.getIntInfo(cf.zSvDROPosition)
-                        comm.queParm(pm.Z_DRO_POS, zDROPosition)
-                        zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
+                        jp.zDROPosition = cfg.getIntInfo(cf.zSvDROPosition)
+                        comm.queParm(pm.Z_DRO_LOC, jp.zDROPosition)
+                        jp.zDROOffset = cfg.getFloatInfo(cf.zSvDROOffset)
                         comm.queParm(pm.Z_DRO_OFFSET, \
-                                     round(zDROOffset, jogPanel.zDROInch))
+                                     round(jp.zDROOffset * jp.zDROInch))
                         print("zDROPosition %d %x %7.4f zDROOffset %7.4f" % \
-                              (zDROPosition, zDROPosition, \
-                               float(zDROPosition) / jogPanel.zDROInch, \
-                               zDROOffset))
+                              (jp.zDROPosition, jp.zDROPosition, \
+                               float(jp.zDROPosition) / jp.zDROInch, \
+                               jp.zDROOffset))
                         stdout.flush()
                 comm.sendMulti()
 
-                sendXData()
+                self.sendData.sendXData()
                 if EXT_DRO:
-                    self.jogPanel.setXFromExt()
+                    jp.setXFromExt()
                 else:
-                    xPosition = cfg.getIntInfo(cf.xSvPosition)
-                    comm.queParm(pm.X_LOC, xPosition)
-                    xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
+                    jp.xPosition = cfg.getIntInfo(cf.xSvPosition)
+                    comm.queParm(pm.X_LOC, jp.xPosition)
+                    jp.xHomeOffset = cfg.getFloatInfo(cf.xSvHomeOffset)
                     comm.queParm(pm.X_HOME_OFFSET, \
-                                 round(xHomeOffset * jogPanel.xStepsInch))
+                                 round(jp.xHomeOffset * self.xStepsInch))
                     print("xLoc %d %x %7.4f xHomeOffset %7.4f" % \
-                          (xPosition, xPosition, \
-                           float(xPosition) / jogPanel.xStepsInch, xHomeOffset))
+                          (jp.xPosition, jp.xPosition, \
+                           float(jp.xPosition) / self.xStepsInch, \
+                           jp.xHomeOffset))
                     stdout.flush()
                     if DRO:
-                        xDROPosition = cfg.getIntInfo(cf.xSvDROPosition)
-                        comm.queParm(pm.X_DRO_POS, xDROPosition)
-                        xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
+                        jp.xDROPosition = cfg.getIntInfo(cf.xSvDROPosition)
+                        comm.queParm(pm.X_DRO_LOC, jp.xDROPosition)
+                        jp.xDROOffset = cfg.getFloatInfo(cf.xSvDROOffset)
                         comm.queParm(pm.X_DRO_OFFSET, \
-                                     round(xDROOffset * jogPanel.xDROInch))
+                                     round(jp.xDROOffset * jp.xDROInch))
                         print("xDROPosition %d %x %7.4f xDROOffset %7.4f" % \
-                              (xDROPosition, xDROPosition, \
-                               float(xDROPosition) / jogPanel.xDROInch, \
-                               xDROOffset))
+                              (jp.xDROPosition, jp.xDROPosition, \
+                               float(jp.xDROPosition) / jp.xDROInch, \
+                               jp.xDROOffset))
                         stdout.flush()
 
                 if HOME_TEST:
                     val = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * \
-                                  jogPanel.xStepsInch))
+                                  self.xStepsInch))
                     comm.queParm(pm.X_HOME_LOC, val)
                     comm.queParm(pm.X_HOME_STATUS, \
-                                 ct.HOME_SUCCESS if xHomed else ct.HOME_ACTIVE)
+                                 ct.HOME_SUCCESS if jp.xHomed else \
+                                 ct.HOME_ACTIVE)
+
+                comm.queParm(pm.MEGA_SIM, cfg.getBoolInfo(cf.spMegaSim))
                 comm.sendMulti()
 
             except CommTimeout:
-                commTimeout()
+                commTimeout(jp)
         else:
-            sendZData()
-            sendXData()
+            self.sendData.sendZData()
+            self.sendData.sendXData()
 
     def parseCmdLine(self):
-        global xHomed
         n = 1
         self.cfgFile = None
         self.posFile = None
@@ -6613,26 +8799,26 @@ class MainFrame(wx.Frame):
                 if len(val) >= 3:
                     tmp = val[2:]
                     if tmp == 'xhomed':
-                        xHomed = True
+                        self.xHomed = True
                     elif tmp == 'help':
-                        self.help()
+                        self.jogPanel.help()
             elif val.startswith('-'):
                 if len(val) >= 2:
                     tmp = val[1]
                     if tmp == 'h':
-                        self.help()
+                        self.jogPanel.help()
                     elif tmp == 'p':
                         n += 1
                         if n < len(sys.argv):
                             self.posFile = sys.argv[n]
-                            if not re.search('\.[a-zA-Z0-9]*$', self.posFile):
+                            if not re.search(r'\.[a-zA-Z0-9]*$', self.posFile):
                                 self.posFile += ".txt"
             elif val.startswith('?'):
-                self.help();
+                self.jogPanel.help()
             else:
                 if self.cfgFile is None:
                     self.cfgFile = val
-                    if not re.search('\.[a-zA-Z0-9]*$', self.cfgFile):
+                    if not re.search(r'\.[a-zA-Z0-9]*$', self.cfgFile):
                         self.cfgFile += ".txt"
             n += 1
         if self.cfgFile is None:
@@ -6640,13 +8826,12 @@ class MainFrame(wx.Frame):
         if self.posFile is None:
             self.posFile = "posInfo.txt"
 
-    def initialConfig(self):
-        global cfg, comm, FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
-            MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
-            TURN_SYNC, THREAD_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
-            HOME_IN_PLACE, X_DRO_POS
+    def initialConfig(self, cfg):
+        global FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
+            MEGA, MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
+            SPINDLE_INTERNAL_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
+            HOME_IN_PLACE, X_DRO_POS, SYNC_SPI
 
-        cfg = ConfigInfo(cf.configTable)
         cfg.clrInfo(len(cf.config))
         cfg.readInfo(self.cfgFile, cf.config)
 
@@ -6656,6 +8841,8 @@ class MainFrame(wx.Frame):
         STEP_DRV = cfg.getInitialBoolInfo(cf.spStepDrive)
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
+        SYNC_SPI = cfg.getInitialBoolInfo(cf.cfgSyncSPI)
+        MEGA = cfg.getBoolInfoData(cf.cfgMega)
 
         if DRO:
             X_DRO_POS = cfg.getInitialBoolInfo(cf.xDROPos)
@@ -6670,104 +8857,84 @@ class MainFrame(wx.Frame):
 
         if SPINDLE_ENCODER:
             SPINDLE_SYNC_BOARD = cfg.getInitialBoolInfo(cf.cfgSpSyncBoard)
+            SPINDLE_INTERNAL_SYNC = cfg.getInitialBoolInfo(cf.cfgIntSync)
         else:
             SPINDLE_SYNC_BOARD = False
+            SPINDLE_INTERNAL_SYNC = False
 
-        TURN_SYNC = cfg.getIntInfoData(cf.cfgTurnSync)
-        THREAD_SYNC =  cfg.getIntInfoData(cf.cfgThreadSync)
-        
+        self.syncFuncSetup()
+
+        HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
+
+        cfg.clrInfo(len(cf.config))
+
+    def syncFuncSetup(self):
+        cfg = self.cfg
+        self.turnSync = turnSync = cfg.getIntInfoData(cf.cfgTurnSync)
+        self.threadSync = threadSync = cfg.getIntInfoData(cf.cfgThreadSync)
+
+        syncDbg = True
+
+        if not FPGA:
+            if (turnSync == en.SEL_TU_ESYN or \
+                threadSync == en.SEL_TH_ESYN_RENC or \
+                threadSync == en.SEL_TH_ESYN_RSYN):
+                if self.zSyncExt is None:
+                    self.zSyncExt = Sync(dbg=syncDbg)
+
+            if (turnSync == en.SEL_TU_ESYN or \
+                threadSync == en.SEL_TH_ISYN_RENC or \
+                threadSync == en.SEL_TH_ESYN_RSYN):
+                if self.xSyncExt is None:
+                    self.xSyncExt = Sync(dbg=syncDbg)
+
+            if (turnSync == en.SEL_TU_ISYN or \
+                threadSync == en.SEL_TH_ISYN_RENC):
+                if self.zSyncInt is None:
+                    self.zSyncInt = Sync(dbg=syncDbg)
+
+            if turnSync == en.SEL_TU_ISYN:
+                if self.xSyncInt is None:
+                    self.xSyncInt = Sync(dbg=syncDbg)
+        else:
+            self.zSyncInt = Sync(dbg=syncDbg, fpga=True)
+            self.xSyncInt = Sync(dbg=syncDbg, fpga=True)
+
         if True:
             print("FPGA %s" % (FPGA))
             print("STEP_DRV %s SPINDLE_ENCODER %s "\
                   "SPINDLE_SYNC_BOARD %s" % \
                   (STEP_DRV, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD))
-            print("TURN_SYNC %d %s THREAD_SYNC %d %s" % \
-                  (TURN_SYNC, en.selTurnText[TURN_SYNC], \
-                   THREAD_SYNC, en.selThreadText[THREAD_SYNC]))
-            
-        HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
+            print("turnSync %d %s threadSync %d %s" % \
+                  (turnSync, en.selTurnText[turnSync], \
+                   threadSync, en.selThreadText[threadSync]))
 
-        cfg.clrInfo(len(cf.config))
-
-        if FPGA:
-            global xb, xr
-            if not R_PI:
-                import xBitDef as xb
-                import xRegDef as xr
-            else:
-                import fpgaLathe as xb
-                import lRegDef as xr
-
-        if EXT_DRO:
-            global dro, eDro
-            import extDro as eDro
-            from extDro import DroTimeout
-            dro = eDro.ExtDro()
-
-        if DRO:
-            global zDROOffset, xDROOffset, zDROPosition, xDROPosition
-            zDROOffset = 0.0
-            xDROOffset = 0.0
-            zDROPosition = 0.0
-            xDROPosition = 0.0
-
-        if SPINDLE_SYNC_BOARD:
-            global syncComm
-            syncComm = Comm()
-
-        syncDbg = True
-
-        global zSyncInt, zSyncExt, xSyncInt, xSyncExt
-        if not FPGA:
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                zSyncInt = Sync(dbg=syncDbg)
-                zSyncExt = Sync(dbg=syncDbg)
-
-            if (TURN_SYNC == en.SEL_TU_ISYN or \
-                TURN_SYNC == en.SEL_TU_ESYN or \
-                THREAD_SYNC == en.SEL_TH_ISYN_RENC or \
-                THREAD_SYNC == en.SEL_TH_ESYN_RSYN):
-                xSyncExt = Sync(dbg=syncDbg)
-                xSyncInt = Sync(dbg=syncDbg)
-        else:
-            zSyncInt = Sync(dbg=syncDbg, fpga=True)
-            xSyncInt = Sync(dbg=syncDbg, fpga=True)
-
-        comm = Comm()
-        comm.SWIG = SWIG
-
-        if FPGA:
-            comm.enableXilinx()
-
-    def OnResize(self, e):
+    def OnResize(self, _):
         print("OnResize")
         stdout.flush()
         self.Layout()
         self.Fit()
 
-    def OnSave(self, e):
-        cfg.saveInfo(self.cfgFile)
+    def OnSave(self, _):
+        self.cfg.saveInfo(self.cfgFile)
 
-    def OnInit(self, e):
-        if False:
-            self.zDialog = None
-            self.xDialog = None
-            self.SpindleDialog = None
-            self.portDialog = None
-            self.configDialog = None
-            self.initialConfig()
+    def OnInit(self, _):
+        # if False:
+        #     self.zDialog = None
+        #     self.xDialog = None
+        #     self.SpindleDialog = None
+        #     self.portDialog = None
+        #     self.configDialog = None
+        #     self.megaDialog = None
+        #     self.initialConfig()
         self.initDevice()
 
-    def OnRestat(self, e):
-        cfg.saveInfo(self.cfgFile)
+    def OnRestart(self, _):
+        self.cfg.saveInfo(self.cfgFile)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-    def OnSavePanel(self, e):
-        panel = cfg.getInfoData(cf.mainPanel)
+    def OnSavePanel(self, _):
+        panel = self.cfg.getInfoData(cf.mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
         dlg = wx.FileDialog(self, "Save " + p + " Config", self.dirName,
@@ -6775,9 +8942,10 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            cfg.saveList(path, self.panels[panel].getConfigList())
+            self.cfg.saveList(path, getConfigList(self.panels[panel]))
 
-    def OnLoadPanel(self, e):
+    def OnLoadPanel(self, _):
+        cfg = self.cfg
         panel = cfg.getInfoData(cf.mainPanel)
         p = panel.replace('Panel', '')
         p = p[:1].upper() + p[1:].lower()
@@ -6786,13 +8954,13 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.dirName = dlg.GetDirectory()
             path = dlg.GetPath()
-            cfg.readInfo(path, cf.config, self.panels[panel].getConfigList())
+            cfg.readInfo(path, cf.config, getConfigList(self.panels[panel]))
 
-    def OnExit(self, e):
+    def OnExit(self, _):
         self.Close(True)
 
     def showDialog(self, dialog):
-        (xPos, yPos) = mainFrame.GetPosition()
+        (xPos, yPos) = self.GetPosition()
         dialog.Raise()
         dialog.Show(True)
         (w, h) = dialog.GetSize()
@@ -6801,43 +8969,49 @@ class MainFrame(wx.Frame):
             xPos = 1
         dialog.SetPosition((xPos, yPos))
 
-    def OnZSetup(self, e):
+    def OnZSetup(self, _):
         if self.zDialog is None:
             self.zDialog = ZDialog(self, self.defaultFont)
         self.showDialog(self.zDialog)
 
-    def OnXSetup(self, e):
+    def OnXSetup(self, _):
         if self.xDialog is None:
             self.xDialog = XDialog(self, self.defaultFont)
         self.showDialog(self.xDialog)
 
-    def OnSpindleSetup(self, e):
+    def OnSpindleSetup(self, _):
         if self.spindleDialog is None:
             self.spindleDialog = SpindleDialog(self, self.defaultFont)
         self.showDialog(self.spindleDialog)
 
-    def OnPortSetup(self, e):
+    def OnPortSetup(self, _):
         if self.portDialog is None:
             self.portDialog = PortDialog(self, self.defaultFont)
         self.showDialog(self.portDialog)
-        
-    def OnConfigSetup(self, e):
+
+    def OnConfigSetup(self, _):
         if self.configDialog is None:
             self.configDialog = ConfigDialog(self, self.defaultFont)
         self.showDialog(self.configDialog)
 
+    def OnMegaSetup(self, _):
+        if self.megaDialog is None:
+            self.megaDialog = MegaDialog(self, self.defaultFont)
+        self.showDialog(self.megaDialog)
+
     def getCurrentPanel(self):
         return(self.currentPanel)
-    
+
     def showPanel(self):
         key = cf.mainPanel
+        cfg = self.cfg
         if cfg.info[key] is None:
             cfg.initInfo(key, InfoValue('turnPanel'))
 
-        if jogPanel.mvStatus != 0:
-            jogPanel.updateError(st.STR_OP_IN_PROGRESS)
+        if self.jogPanel.mvStatus != 0:
+            self.jogPanel.updateError(st.STR_OP_IN_PROGRESS)
             return
-        
+
         showPanel = cfg.getInfoData(key)
         for key in self.panels:
             panel = self.panels[key]
@@ -6846,34 +9020,38 @@ class MainFrame(wx.Frame):
                 self.currentPanel = panel
             else:
                 panel.Hide()
-        if self.currentPanel == None:
+        if self.currentPanel is None:
             panel = self.turnPanel
             panel.Show()
             self.currentPanel = panel
         self.Layout()
         self.Fit()
 
-    def OnTurn(self, e):
-        cfg.setInfo(cf.mainPanel, 'turnPanel')
+    def OnTurn(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'turnPanel')
         self.showPanel()
 
-    def OnFace(self, e):
-        cfg.setInfo(cf.mainPanel, 'facePanel')
+    def OnFace(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'facePanel')
         self.showPanel()
 
-    def OnCutoff(self, e):
-        cfg.setInfo(cf.mainPanel, 'cutoffPanel')
+    def OnCutoff(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'cutoffPanel')
         self.showPanel()
 
-    def OnTaper(self, e):
-        cfg.setInfo(cf.mainPanel, 'taperPanel')
+    def OnTaper(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'taperPanel')
         self.showPanel()
 
-    def OnThread(self, e):
-        cfg.setInfo(cf.mainPanel, 'threadPanel')
+    def OnThread(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'threadPanel')
         self.showPanel()
 
-    def OnTestSpindle(self, e):
+    def OnArc(self, _):
+        self.cfg.setInfo(cf.mainPanel, 'arcPanel')
+        self.showPanel()
+
+    def OnTestSpindle(self, _):
         if self.testSpindleDialog is None:
             self.testSpindleDialog = TestSpindleDialog(self, self.defaultFont)
         else:
@@ -6881,7 +9059,7 @@ class MainFrame(wx.Frame):
         self.testSpindleDialog.spindleTest.test()
         self.testSpindleDialog.Show()
 
-    def OnTestSync(self, e):
+    def OnTestSync(self, _):
         if self.testSyncDialog is None:
             self.testSyncDialog = TestSyncDialog(self, self.defaultFont)
         else:
@@ -6889,7 +9067,7 @@ class MainFrame(wx.Frame):
         self.testSyncDialog.syncTest.test()
         self.testSyncDialog.Show()
 
-    def OnTestTaper(self, e):
+    def OnTestTaper(self, _):
         if self.testTaperDialog is None:
             self.testTaperDialog = TestTaperDialog(self, self.defaultFont)
         else:
@@ -6897,7 +9075,7 @@ class MainFrame(wx.Frame):
         self.testTaperDialog.taperTest.test()
         self.testTaperDialog.Show()
 
-    def OnTestMove(self, e):
+    def OnTestMove(self, _):
         if self.testMoveDialog is None:
             self.testMoveDialog = TestMoveDialog(self, self.defaultFont)
         else:
@@ -6906,24 +9084,26 @@ class MainFrame(wx.Frame):
         self.testMoveDialog.Show()
 
 class ZDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Z Setup", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
-        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
             ("Pitch", cf.zPitch, 'f'), \
             ("Motor Steps", cf.zMotorSteps, 'd'), \
             ("Micro Steps", cf.zMicroSteps, 'd'), \
             ("Motor Ratio", cf.zMotorRatio, 'fs'), \
+
             ("Backlash", cf.zBacklash, 'f'), \
-            ("Backlash Incrment", cf.zBackInc, 'f'), \
+            ("Backlash Increment", cf.zBackInc, 'f'), \
+
             ("Accel Unit/Sec2", cf.zAccel, 'fs'), \
             ("Min Speed U/Min", cf.zMinSpeed, 'fs'), \
             ("Max Speed U/Min", cf.zMaxSpeed, 'fs'), \
@@ -6931,26 +9111,49 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Max U/Min", cf.zJogMax, 'fs'), \
             ("MPG Jog Increment", cf.zMpgInc, 'fs'), \
             ("MPG Jog Max Dist", cf.zMpgMax, 'fs'), \
-            ("Park Loc", cf.zParkLoc, 'f'), \
-            ("Probe Dist", cf.zProbeDist, 'f'), \
-            ("Probe Speed", cf.zProbeSpeed, 'fs'), \
+
             ("bInvert Dir", cf.zInvDir, None), \
             ("bInvert MPG", cf.zInvMpg, None), \
-            ("DRO Inch", cf.zDROInch, 'd'), \
-            ("bInv DRO", cf.zInvDRO, None), \
+
+            ("Retract Loc", cf.zRetractLoc, 'f'), \
+            ("Probe Dist", cf.zProbeDist, 'f'), \
+            ("Home/Probe Speed", cf.zHomeSpeed, 'fs'), \
+
+            ("bHome Enable", cf.zHomeEna, None), \
+            ("bHome Invert", cf.zHomeInv, None), \
+            ("Home Dist", cf.zHomeDist, 'f'), \
+            ("Home Rev Dist", cf.zHomeDistRev, 'f'), \
+            ("Backoff Dist", cf.zHomeDistBackoff, 'f'), \
+            ("bHome Dir", cf.zHomeDir, None), \
+
+            ("bLimits Enable", cf.zLimEna, None), \
+            ("bNeg Limit Invert", cf.zLimNegInv, None), \
+            ("bPos Limit Invert", cf.zLimPosInv, None), \
         )
-        self.fieldList(sizerG, self.fields)
+
+        if DRO:
+            self.fields += (
+                ("DRO Inch", cf.zDROInch, 'd'), \
+                ("bInv DRO", cf.zInvDRO, None), \
+                ("bDRO Position", cf.zDROPos, None), \
+                ("DRO Final Dist", cf.zDroFinalDist, 'f'), \
+                ("DRO Read Delay ms", cf.zDoneDelay, None), \
+        )
+
+        sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
+
+        fieldList(self, sizerG, self.fields, 2)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
-        self.addButton(sizerV, 'Setup Z', self.OnSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup Z', OnDialogSetup, border=5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -6958,32 +9161,56 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def setupVars(self):
+        cfg = self.mf.cfg
+        pitch = cfg.getDistInfoData(cf.zPitch)
+        motorSteps = cfg.getIntInfoData(cf.zMotorSteps)
+        microSteps = cfg.getIntInfoData(cf.zMicroSteps)
+        motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
+        stepsInch = (microSteps * motorSteps * motorRatio) / pitch
+        self.mf.zStepsInch = stepsInch
+        self.mf.jogPanel.zStepsInch = stepsInch
+        print("zStepsInch %d" % (stepsInch,))
+        if DRO:
+            droInch = cfg.getIntInfoData(cf.zDROInch)
+            self.mf.zDROInch = droInch
+            self.mf.jogPanel.zDROInch = droInch
+
     def setupAction(self):
-        sendZData(True)
+        self.setupVars()
+        self.mf.sendData.sendZData(True)
 
     def showAction(self, changed):
-        global zDataSent
         if changed:
-            zDataSent = False
+            self.mf.sendData.zDataSent = False
+
+    def okAction(self):
+        self.setupVars()
 
 class XDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "X Setup", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
-
-        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
         self.fields = (
             ("Pitch", cf.xPitch, 'f'), \
             ("Motor Steps", cf.xMotorSteps, 'd'), \
             ("Micro Steps", cf.xMicroSteps, 'd'), \
             ("Motor Ratio", cf.xMotorRatio, 'fs'), \
+
             ("Backlash", cf.xBacklash, 'f'), \
+            ("Backlash Increment", cf.xBackInc, 'f'), \
+
             ("Accel Unit/Sec2", cf.xAccel, 'fs'), \
             ("Min Speed U/Min", cf.xMinSpeed, 'fs'), \
             ("Max Speed U/Min", cf.xMaxSpeed, 'fs'), \
@@ -6991,14 +9218,24 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
             ("Jog Max U/Min", cf.xJogMax, 'fs'), \
             ("MPG Jog Increment", cf.xMpgInc, 'fs'), \
             ("MPG Jog Max Dist", cf.xMpgMax, 'fs'), \
-            ("Park Loc", cf.xParkLoc, 'f'), \
+
             ("bInvert Dir", cf.xInvDir, None), \
             ("bInvert MPG", cf.xInvMpg, None), \
+
+            ("Retract Loc", cf.xRetractLoc, 'f'), \
             ("Probe Dist", cf.xProbeDist, 'f'), \
-            ("Home Dist", cf.xHomeDist, 'f'), \
             ("Home/Probe Speed", cf.xHomeSpeed, 'fs'), \
-            ("Backoff Dist", cf.xHomeBackoffDist, 'f'), \
+
+            ("bHome Enable", cf.xHomeEna, None), \
+            ("bHome Invert", cf.xHomeInv, None), \
+            ("Home Dist", cf.xHomeDist, 'f'), \
+            ("Home Rev Dist", cf.xHomeDistRev, 'f'), \
+            ("Backoff Dist", cf.xHomeDistBackoff, 'f'), \
             ("bHome Dir", cf.xHomeDir, None), \
+
+            ("bLimits Enable", cf.xLimEna, None), \
+            ("bNeg Limit Invert", cf.xLimNegInv, None), \
+            ("bPos Limit Invert", cf.xLimPosInv, None), \
         )
         if DRO:
             self.fields += (
@@ -7014,22 +9251,25 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Home End", cf.xHomeEnd, 'f'), \
                 ("Home Loc", cf.xHomeLoc, 'f'), \
             )
-        self.fieldList(sizerG, self.fields)
+
+        sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
+
+        fieldList(self, sizerG, self.fields, 2)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
         if HOME_TEST:
-            self.addButton(sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
+            addButton(self, sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
 
-        self.addButton(sizerV, 'Setup X', self.OnSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup X', OnDialogSetup, border=5)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -7037,26 +9277,49 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
-    def OnSetHomeLoc(self, e):
-        loc = str(int(cfg.getFloatInfoData(cf.xHomeLoc) * jogPanel.xStepsInch))
-        comm.setParm(pm.X_HOME_LOC, loc)
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def OnSetHomeLoc(self, _):
+        loc = str(int(self.mf.cfg.getFloatInfoData(cf.xHomeLoc) * \
+                      self.mf.jogPanel.xStepsInch))
+        self.mf.comm.setParm(pm.X_HOME_LOC, loc)
+
+    def setupVars(self):
+        cfg = self.mf.cfg
+        pitch = cfg.getDistInfoData(cf.xPitch)
+        motorSteps = cfg.getIntInfoData(cf.xMotorSteps)
+        microSteps = cfg.getIntInfoData(cf.xMicroSteps)
+        motorRatio = cfg.getFloatInfoData(cf.xMotorRatio)
+        stepsInch = (microSteps * motorSteps * motorRatio) / pitch
+        self.mf.xStepsInch = stepsInch
+        self.mf.jogPanel.xStepsInch = stepsInch
+        if DRO:
+            droInch = cfg.getIntInfoData(cf.xDROInch)
+            self.mf.xDROInch = droInch
+            self.mf.jogPanel.xDROInch = droInch
 
     def setupAction(self):
-        sendXData(True)
+        self.setupVars()
+        self.mf.sendData.sendXData(True)
 
     def showAction(self, changed):
-        global xDataSent
         if changed:
-            xDataSent = False
+            self.mf.sendData.xDataSent = False
+
+    def okAction(self):
+        self.setupVars()
 
 class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Spindle Setup", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
@@ -7068,7 +9331,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if SPINDLE_ENCODER:
             self.fields += (("Encoder", cf.cfgEncoder, 'd'),)
             if not FPGA:
-                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None),)
+                self.fields += (("bSync Board", cf.cfgSpSyncBoard, None), \
+                                ("bInternal Sync", cf.cfgIntSync, None), \
+                                )
         self.fields += ( \
             ("cTurn Sync", cf.cfgTurnSync, 'c', self.turnSync), \
             ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync), \
@@ -7083,7 +9348,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Jog Min", cf.spJogMin, 'd'), \
                 ("Jog Max", cf.spJogMax, 'd'), \
                 ("Jog Time Initial", cf.spJTimeInitial, 'f2'), \
-                ("Jog Time Incrmemnt", cf.spJTimeInc, 'f2'), \
+                ("Jog Time Increment", cf.spJTimeInc, 'f2'), \
                 ("Jog Time Maximum", cf.spJTimeMax, 'f2'), \
                 # ("Jog Accel Time", cf.spJogAccelTime, 'f'), \
                 ("bInvert Dir", cf.spInvDir, None), \
@@ -7095,6 +9360,10 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("bSwitch", cf.spSwitch, None), \
                 ("bVar Speed", cf.spVarSpeed, None), \
             )
+            if MEGA:
+                self.fields += ( \
+                    ("bMega Encoder", cf.spMegaSim, None), \
+                )
         if SPINDLE_VAR_SPEED:
             self.fields += ( \
                 ("PWM Frequency", cf.spPWMFreq, None), \
@@ -7108,7 +9377,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                     ("Max " + index, cf.spRangeMax1 + i , None), \
                 )
                 self.fields += tmp
-        self.fieldList(sizerG, self.fields)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
 
@@ -7117,9 +9386,9 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         if STEP_DRV:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-            self.addButton(sizerH, 'Start', self.OnStart, border=5)
+            addButton(self, sizerH, 'Start', self.OnStart, border=5)
 
-            self.addButton(sizerH, 'Stop', self.OnStop, border=5)
+            addButton(self, sizerH, 'Stop', self.OnStop, border=5)
 
             sizerV.Add(sizerH, 0, wx.CENTER)
 
@@ -7127,23 +9396,56 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
 
-    def turnSync(self):
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def OnStart(self, _):
+        mf = self.mf
+        if not formatData(self.mf.cfg, self.fields):
+            return
+        for (label, index, fmt) in self.fields:
+            tmp = mf.cfg.getInfoData(index)
+            if self.fieldInfo[index] != tmp:
+                self.fieldInfo[index] = tmp
+                mf.sendData.spindleDataSent = False
+        if not self.mf.senData.spindleDataSent:
+            mf.sendData.sendSpindleData()
+        else:
+            mf.comm.command(cm.CMD_SPSETUP)
+        mf.comm.command(cm.SPINDLE_START)
+
+    def OnStop(self, _):
+        self.mf.comm.command(cm.SPINDLE_STOP)
+
+    def showAction(self, changed):
+        if changed:
+            self.mf.syncFuncSetup()
+            self.mf.jogPanel.spindleRangeSetup()
+            self.mf.sendData.spindleDataSent = False
+
+    def okAction(self):
+        self.mf.syncFuncSetup()
+
+    @staticmethod
+    def turnSync():
         if STEP_DRV:
             indexList = (en.SEL_TU_STEP,)
         elif SPINDLE_ENCODER:
             indexList = (en.SEL_TU_ENC,)
             if not FPGA:
+                if SPINDLE_INTERNAL_SYNC:
+                    indexList += (en.SEL_TU_ISYN,)
                 if SPINDLE_SYNC_BOARD:
-                    indexList += (en.SEL_TU_ISYN, en.SEL_TU_ESYN)
+                    indexList += (en.SEL_TU_ESYN,)
             else:
                 indexList += (en.SEL_TU_SYN,)
         else:
@@ -7152,58 +9454,39 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         choiceList = []
         for i in indexList:
             choiceList.append(en.selTurnText[i])
-        return(indexList, choiceList, en.selTurnText)
+        return( indexList, choiceList, en.selTurnText)
 
-    def threadSync(self):
+    @staticmethod
+    def threadSync():
         if STEP_DRV:
             indexList = (en.SEL_TH_STEP,)
         elif SPINDLE_ENCODER:
-            indexList = (en.SEL_TH_ENC, en.SEL_TH_ISYN_RENC)
+            indexList = (en.SEL_TH_ENC,)
             if not FPGA:
-                indexList += (en.SEL_TH_ISYN_RENC,)
+                if SPINDLE_INTERNAL_SYNC:
+                    indexList += (en.SEL_TH_ISYN_RENC,)
                 if SPINDLE_SYNC_BOARD:
                     indexList += (en.SEL_TH_ESYN_RENC, en.SEL_TH_ESYN_RSYN)
             else:
                 indexList = (en.SEL_TH_ENC, en.SEL_TH_SYN)
         else:
-            indexList += (en.SEL_TH_NO_ENC,)
-            
+            indexList = (en.SEL_TH_NO_ENC,)
+
         choiceList = []
         for i in indexList:
             choiceList.append(en.selThreadText[i])
-        return(indexList, choiceList, en.selThreadText)
-
-    def OnStart(self, e):
-        global spindleDataSent
-        if not self.formatData(self.fields):
-            return
-        for (label, index, fmt) in self.fields:
-            tmp = cfg.getInfoData(index)
-            if self.fieldInfo[index] != tmp:
-                self.fieldInfo[index] = tmp
-                spindleDataSent = False
-        if not spindleDataSent:
-            sendSpindleData()
-        else:
-            comm.command(cm.CMD_SPSETUP)
-        comm.command(cm.SPINDLE_START)
-
-    def OnStop(self, e):
-        comm.command(cm.SPINDLE_STOP)
-
-    def showAction(self, changed):
-        global spindleDataSent
-        if changed:
-            spindleDataSent = False
+        return (indexList, choiceList, en.selThreadText)
 
 class PortDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Port Setup", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
@@ -7223,15 +9506,15 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Ext DRO Port", cf.extDroPort, None), \
                 ("Ext DRO Baud Rate", cf.extDroRate, 'd'), \
             )
-        self.fieldList(sizerG, self.fields)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -7239,17 +9522,22 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def showAction(self, changed):
         pass
 
 class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Config Setup", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Config Setup", pos, \
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
         FormRoutines.__init__(self, False)
         DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
@@ -7259,8 +9547,10 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bDRO", cf.cfgDRO, None), \
             ("bExternal DRO", cf.cfgExtDro, None), \
             ("bLCD", cf.cfgLCD, None), \
+            ("bControl MEGA", cf.cfgMega, None), \
+            ("bSync SPI", cf.cfgSyncSPI, None), \
             ("bProbe Inv", cf.cfgPrbInv, None), \
-            ("wfcy", cf.cfgFcy, 'd'), \
+            ("wFcy", cf.cfgFcy, 'd'), \
             ("bDisable Commands", cf.cfgCmdDis, None), \
             ("bDraw Moves", cf.cfgDraw, None), \
             ("bSave Debug", cf.cfgDbgSave, None), \
@@ -7268,9 +9558,16 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             ("bHome in Place", cf.cfgHomeInPlace, None), \
             ("Taper Cycle Dist", cf.cfgTaperCycleDist, 'f'), \
             ("Jog Time Initial", cf.jogTimeInitial, 'f2'), \
-            ("Jog Time Incrmemnt", cf.jogTimeInc, 'f2'), \
+            ("Jog Time Increment", cf.jogTimeInc, 'f2'), \
             ("Jog Time Maximum", cf.jogTimeMax, 'f2'), \
             ("bMpg Jog Debug", cf.cfgJogDebug, None), \
+
+            ("bCommon Limits", cf.cfgCommonLimits, None), \
+            ("bLimits Enabled", cf.cfgLimitsEnabled, None), \
+            ("bCommon Home", cf.cfgCommonHome, None), \
+
+            ("bEnable EStop", cf.cfgEStop, None), \
+            ("bInvert EStop", cf.cfgEStopInv, None), \
         )
         if FPGA:
                 # ("Encoder", cf.cfgEncoder, 'd'), \
@@ -7281,16 +9578,16 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("Test RPM", cf.cfgTestRPM, 'd'), \
                 ("bInvert Enc Dir", cf.cfgInvEncDir, None), \
             )
-        self.fieldList(sizerG, self.fields)
+        fieldList(self, sizerG, self.fields)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
-        self.addDialogButton(sizerH, wx.ID_OK, self.OnOk)
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
 
-        self.addDialogButton(sizerH, wx.ID_CANCEL, self.OnCancel)
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
 
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
@@ -7298,8 +9595,74 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         self.sizerV.Fit(self)
         self.Show(False)
 
+    def OnEnter(self, _):
+        OnEnter(self)
+
     def showAction(self, changed):
         pass
+
+    def okAction(self):
+        mf = self.mf
+        mf.dbgSave = bool(mf.cfg.getBoolInfoData(cf.cfgDbgSave))
+        mf.cfgDraw = bool(mf.cfg.getBoolInfoData(cf.cfgDraw))
+
+class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
+    def __init__(self, mainFrame, defaultFont):
+        self.mf = mainFrame
+        pos = (10, 10)
+        wx.Dialog.__init__(self, mainFrame, -1, "Mega Setup", pos, \
+                           wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        self.SetFont(defaultFont)
+        FormRoutines.__init__(self, False)
+        DialogActions.__init__(self)
+        self.Bind(wx.EVT_SHOW, OnDialogShow)
+        self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
+        sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
+
+        self.fields = ( \
+            ("cVFD Speed", cf.cfgMegaVFD, 'c', self.vfdSpeed), \
+            ("bMega Encoder Test", cf.cfgMegaEncTest, None), \
+            ("Mega Encoder Lines", cf.cfgMegaEncLines, 'd'), \
+       )
+        fieldList(self, sizerG, self.fields)
+
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+
+        addSetupButton(self, sizerV, 'Setup Mega', OnDialogSetup, \
+                       size=(80, -1), border=5)
+
+        sizerH = wx.BoxSizer(wx.HORIZONTAL)
+        sizerH.Add((0, 0), 0, wx.EXPAND)
+
+        addDialogButton(self, sizerH, wx.ID_OK, OnDialogOk)
+
+        addDialogButton(self, sizerH, wx.ID_CANCEL, OnDialogCancel)
+
+        sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizerV)
+        self.sizerV.Fit(self)
+        self.Show(False)
+
+    def OnEnter(self, _):
+        OnEnter(self)
+
+    def setupAction(self):
+        if formatData(self.mf.cfg, self.fields):
+            changed = saveData(self)
+            print("MegaDialog setupAction changed %s" % (changed))
+            self.mf.sendData.sendMegaData(True)
+
+    def showAction(self, changed):
+        pass
+
+    @staticmethod
+    def vfdSpeed():
+        indexList = (em.MEGA_SLOW_PWM, em.MEGA_FAST_PWM, em.MEGA_DIRECT_RPM)
+        choiceList = []
+        for i in indexList:
+            choiceList.append(em.vfdSpeedText[i])
+        return (indexList, choiceList, em.vfdSpeedText)
 
 def testText(dialog, defaultFont):
     dialog.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -7317,60 +9680,62 @@ def testText(dialog, defaultFont):
     return(txt)
 
 class TestSpindleDialog(wx.Dialog):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Spindle", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Test Spindle", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
+        self.sizerV = None
         txt = testText(self, defaultFont)
-        self.spindleTest = SpindleTest(txt)
+        self.spindleTest = SpindleTest(mainFrame, txt)
 
 class TestSyncDialog(wx.Dialog):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Sync", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Test Sync", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
+        self.sizerV = None
         txt = testText(self, defaultFont)
-        self.syncTest = SyncTest(txt)
+        self.syncTest = SyncTest(mainFrame, txt)
 
 class TestTaperDialog(wx.Dialog):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Taper", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Test Taper", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
+        self.sizerV = None
         txt = testText(self, defaultFont)
-        self.taperTest = TaperTest(txt)
+        self.taperTest = TaperTest(mainFrame, txt)
 
 class TestMoveDialog(wx.Dialog):
-    def __init__(self, frame, defaultFont):
+    def __init__(self, mainFrame, defaultFont):
         pos = (10, 10)
-        wx.Dialog.__init__(self, frame, -1, "Test Move", pos, \
+        wx.Dialog.__init__(self, mainFrame, -1, "Test Move", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
 
+        self.sizerV = None
         txt = testText(self, defaultFont)
-        self.moveTest = MoveTest(txt)
-
-def dbgPrt(txt, fmt, values):
-    txt.AppendText((fmt + "\n") % values)
-    f.write((fmt + "\n") % values)
-
-fcy = 90000000
+        self.moveTest = MoveTest(mainFrame, txt)
 
 class SpindleTest():
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
-        global f
         txt = self.txt
         txt.SetValue("")
+
+        self.mf.dbgOpen('spindle.txt')
+        fTest = self.mf.fTest
+        dbgPrt = self.mf.dbgPrt
+
+        cfg = self.mf.cfg
         minRPM = cfg.getFloatInfoData(cf.spMinRPM) # minimum rpm
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         accel = cfg.getFloatInfoData(cf.spAccel)   # accel rpm per sec
-
-        f = open(os.path_join(DBG_DIR, 'spindle.txt'), 'w')
 
         dbgPrt(txt, "minRPM %d maxRPM %d", (minRPM, maxRPM))
 
@@ -7379,6 +9744,7 @@ class SpindleTest():
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
+        fcy = cfg.getIntInfoData(cf.cfgFcy)
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
@@ -7436,7 +9802,7 @@ class SpindleTest():
         dbgPrt(txt, "accelMinSteps %d lastCount %d lastTime %0.6f", \
                (accelMinSteps, lastCount, lastTime))
 
-        f.write("\n")
+        fTest.write("\n")
 
         lastCtr = 0
         step = accelMinSteps
@@ -7458,22 +9824,22 @@ class SpindleTest():
             delta = time0 - lastTime
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
-            f.write("step %4d count %9d %9d pre %d %5d %6d t %8.6f %8.6f "\
-                    "f %8.2f rpm %4.1f\n" % \
-                    (step, count, actCount, pre, ctr, ctr * pre - lastCtr, \
-                     time0, delta, freq, rpm))
+            fTest.write("step %4d count %9d %9d pre %d %5d %6d t %8.6f %8.6f "\
+                        "f %8.2f rpm %4.1f\n" % \
+                        (step, count, actCount, pre, ctr, ctr * pre - lastCtr, \
+                         time0, delta, freq, rpm))
             lastCount = actCount
             lastCtr = ctr * pre
             lastTime = time0
 
-        f.write("\n")
+        fTest.write("\n")
 
         finalCount = int(cFactor * sqrt(accelMaxSteps))
         finalCount -= int(cFactor * sqrt(accelMaxSteps - 1))
         dbgPrt(txt, "finalCount %d lastCtr %d spindleClocksStep %d", \
                (finalCount, ctr, spindleClocksStep))
 
-        f.write("\n***\n\n")
+        fTest.write("\n***\n\n")
 
         while step > accelMinSteps:
             step -= 1
@@ -7483,31 +9849,36 @@ class SpindleTest():
             delta = lastTime - time0
             freq = 1.0 / delta
             rpm = (freq / spindleStepsRev) * 60
-            f.write("step %4d count %9d %7d %5d t %8.6f %8.6f "\
-                    "f %8.2f rpm %4.1f\n" % \
-                    (step, count, ctr, ctr - lastCtr, time0, delta, freq, rpm))
+            fTest.write("step %4d count %9d %7d %5d t %8.6f %8.6f "\
+                        "f %8.2f rpm %4.1f\n" % \
+                        (step, count, ctr, ctr - lastCtr, time0, delta, \
+                         freq, rpm))
             lastCount = count
             lastCtr = ctr
             lastTime = time0
 
         lastCount = int(cFactor * sqrt(accelMinSteps))
-        f.write("\naccelMinSteps %d lastCount %d\n" % \
-                (accelMinSteps, lastCount))
+        fTest.write("\naccelMinSteps %d lastCount %d\n" % \
+                    (accelMinSteps, lastCount))
 
-        f.close()
+        self.mf.dbgClose()
 
 class SyncTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
-        global f
         txt = self.txt
         txt.SetValue("")
-        print("")
-        f = open(os.path_join(DBG_DIR, 'zsync.txt'), 'w')
+
+        self.mf.dbgOpen('zsync.txt')
+        fTest = self.mf.fTest
+        dbgPrt = self.mf.dbgPrt
 
         zAxis = True
+        cfg = self.mf.cfg
+        arg1 = 20
         panel = cfg.getInfoData(cf.mainPanel)
         if panel == 'threadPanel':
             arg1 = cfg.getFloatInfoData(cf.thThread)
@@ -7529,6 +9900,7 @@ class SyncTest(object):
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
+        fcy = cfg.getIntInfoData(cf.cfgFcy)
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
@@ -7552,6 +9924,8 @@ class SyncTest(object):
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt, "zStepsInch %d", (zStepsInch))
 
+        inchPitch = True
+        tpi = 20
         if arg1 >= 8:
             inch = True
             inchPitch = False
@@ -7665,12 +10039,13 @@ class SyncTest(object):
             dbgPrt(txt, "zAccelSpindleSteps %d remainder %d", \
                    (zAccelSpindleSteps, remainder))
 
-            f.write("\n")
+            fTest.write("\n")
 
             lastCount = 0
             lastTime = 0
             lastCtr = 0
             # dbgPrt(txt, "lastCount %d lastTime %0.6f" % (lastCount, lastTime)
+            count = 0
             for step in range(1, zAccelSteps + 1):
                 count = int(cFactor1 * sqrt(step))
                 ctr = count - lastCount
@@ -7678,15 +10053,15 @@ class SyncTest(object):
                 delta = time0 - lastTime
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
-                f.write("step %4d count %9d %9d %9d t %8.6f %8.6f "\
-                        "f %7.2f ipm %4.1f\n" % \
-                        (step, count, ctr, ctr - lastCtr, time0, delta, \
-                         freq, ipm))
+                fTest.write("step %4d count %9d %9d %9d t %8.6f %8.6f "\
+                            "f %7.2f ipm %4.1f\n" % \
+                            (step, count, ctr, ctr - lastCtr, time0, delta, \
+                             freq, ipm))
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time0
 
-            f.write("\n")
+            fTest.write("\n")
 
             # countRemainder = zAccelClocks - lastCount
             # div = int(countRemainder / zAccelSteps)
@@ -7713,24 +10088,29 @@ class SyncTest(object):
             dbgPrt(txt, "finalCount %d lastCtr %d zClocksStep %d", \
                    (finalCount, lastCtr, zClocksStep))
 
-        f.close()
+        self.mf.dbgClose()
 
 class TaperTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
-        global f
         txt = self.txt
         txt.SetValue("")
-        f = open(os.path_join(DBG_DIR, 'taper.txt'), 'w')
 
+        self.mf.dbgOpen('taper.txt')
+        # fTest = self.mf.fTest
+        dbgPrt = self.mf.dbgPrt
+
+        cfg = self.mf.cfg
         maxRPM = cfg.getFloatInfoData(cf.spMaxRPM) # maximum rpm
         spindleMicroSteps = cfg.getIntInfoData(cf.spMicroSteps)
         spindleMotorSteps = cfg.getIntInfoData(cf.spMotorSteps)
         spindleStepsRev = spindleMotorSteps * spindleMicroSteps
         dbgPrt(txt, "spindleStepsRev %d", (spindleStepsRev))
 
+        fcy = cfg.getIntInfoData(cf.cfgFcy)
         spindleStepsSec = (maxRPM * spindleStepsRev) / 60.0
         spindleClocksStep = int(fcy / spindleStepsSec + .5)
         spindleClockPeriod = (float(spindleClocksStep) / fcy) * 1000000
@@ -7807,23 +10187,27 @@ class TaperTest(object):
         dbgPrt(txt, "incr1 %d incr2 %d d %d", \
                (incr1, incr2, d))
 
-        f.close()
+        self.mf.dbgClose()
 
 class MoveTest(object):
-    def __init__(self, txt):
+    def __init__(self, mainFrame, txt):
+        self.mf = mainFrame
         self.txt = txt
 
     def test(self):
-        global f
         txt = self.txt
         txt.SetValue("")
 
-        f = open(os.path_join(DBG_DIR, 'move.txt'), 'w')
+        self.mf.dbgOpen('move.txt')
+        fTest = self.mf.fTest
+        dbgPrt = self.mf.dbgPrt
 
+        cfg = self.mf.cfg
         pitch = cfg.getFloatInfoData(cf.zPitch)
         microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.zMotorSteps)
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
+        fcy = cfg.getIntInfoData(cf.cfgFcy)
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
         dbgPrt(txt, "zStepsInch %d", (zStepsInch))
@@ -7878,9 +10262,10 @@ class MoveTest(object):
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
             lastTime = float(lastCount) / fcy
 
-            f.write("\n")
+            fTest.write("\n")
 
             lastCtr = 0
+            ctr = 0
             step = zMAccelMinSteps
             while step < zMAccelMaxSteps:
                 step += 1
@@ -7890,22 +10275,22 @@ class MoveTest(object):
                 delta = time0 - lastTime
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
-                f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                        "f %7.2f rpm %3.1f\n" % \
-                        (step, count, ctr, abs(ctr - lastCtr), time0, \
-                         delta, freq, ipm))
+                fTest.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
+                            "f %7.2f rpm %3.1f\n" % \
+                            (step, count, ctr, abs(ctr - lastCtr), time0, \
+                             delta, freq, ipm))
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time0
 
-            f.write("\n")
+            fTest.write("\n")
 
             finalCount = int(zMCFactor * (sqrt(zMAccelSteps) -
                                           sqrt(zMAccelSteps - 1)))
             dbgPrt(txt, "finalCount %d lastCtr %d zMClocksStep %d", \
                    (finalCount, ctr, zMClocksStep))
 
-            f.write("\n***\n\n")
+            fTest.write("\n***\n\n")
 
             while step > zMAccelMinSteps:
                 step -= 1
@@ -7915,19 +10300,19 @@ class MoveTest(object):
                 delta = lastTime - time0
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
-                f.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
-                        "f %7.2f ipm %3.1f\n" % \
-                        (step, count, ctr, abs(ctr - lastCtr), time0, \
-                         delta, freq, ipm))
+                fTest.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
+                            "f %7.2f ipm %3.1f\n" % \
+                            (step, count, ctr, abs(ctr - lastCtr), time0, \
+                             delta, freq, ipm))
                 lastCount = count
                 lastCtr = ctr
                 lastTime = time0
 
             lastCount = int(zMCFactor * sqrt(zMAccelMinSteps))
-            f.write("\nzMAccelMinSteps %d lastCount %d\n" % \
-                    (zMAccelMinSteps, lastCount))
+            fTest.write("\nzMAccelMinSteps %d lastCount %d\n" % \
+                        (zMAccelMinSteps, lastCount))
 
-            f.close()
+            self.mf.dbgClose()
 
 # n = 1
 # while True:
@@ -7949,8 +10334,7 @@ class MainApp(wx.App):
     def OnInit(self):
         """Init Main App."""
         print("mainapp")
-        global mainFrame
-        mainFrame = frame = MainFrame(None, "Lathe Control")
+        frame = MainFrame(None, "Lathe Control")
         frame.Show(True)
         self.SetTopWindow(frame)
         return True
@@ -7960,12 +10344,7 @@ class MainApp(wx.App):
             print(evt)
         return(-1)
 
-factor = Factor(MAX_PRIME)
-
 app = MainApp(redirect=False)
 # app.SetCallFilterEvent(True)
 # wx.lib.inspection.InspectionTool().Show()
 app.MainLoop()
-
-if comm.ser is not None:
-    comm.ser.close()

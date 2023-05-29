@@ -2,7 +2,3 @@ zSvPosition=35544
 zSvHomeOffset=5.1264
 xSvPosition=192
 xSvHomeOffset=-0.0242
-zSvDROPosition=0
-zSvDROOffset=0.0000
-xSvDROPosition=288
-xSvDROOffset=0.0567

@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{ad0d5c58-536c-4003-9216-6e3f25feafbd}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>comm.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <InterpreterVersion />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="#tmp.txt#" />
+    <Content Include="#tmp1.txt#" />
+    <Content Include="accel.txt" />
+    <Content Include="config.txt" />
+    <Content Include="config.txt~" />
+    <Content Include="dbg.txt" />
+    <Content Include="east.gif" />
+    <Content Include="Green.gif" />
+    <Content Include="Lathe\ReadMe.txt" />
+    <Content Include="move.txt" />
+    <Content Include="north.gif" />
+    <Content Include="Red.gif" />
+    <Content Include="south.gif" />
+    <Content Include="spindle.txt" />
+    <Content Include="Stop.gif" />
+    <Content Include="test.txt" />
+    <Content Include="tmp.txt" />
+    <Content Include="tmp1.txt" />
+    <Content Include="tst.txt" />
+    <Content Include="turnAccel.txt" />
+    <Content Include="west.gif" />
+    <Content Include="xtmp.txt" />
+    <Content Include="zsync.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Backup\latheCtl0.py" />
+    <Compile Include="Backup\latheCtl1.py" />
+    <Compile Include="Backup\latheCtl2.py" />
+    <Compile Include="Backup\latheCtl3.py" />
+    <Compile Include="Backup\latheCtl5.py" />
+    <Compile Include="Backup\latheCtl6.py" />
+    <Compile Include="comm.py" />
+    <Compile Include="git.py" />
+    <Compile Include="interface.py" />
+    <Compile Include="interfaceX.py" />
+    <Compile Include="lathe.py" />
+    <Compile Include="latheCtl.py" />
+    <Compile Include="pylathe.py" />
+    <Compile Include="remcmd.py" />
+    <Compile Include="setup.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Backup" />
+    <Folder Include="Lathe" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>
