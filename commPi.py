@@ -34,14 +34,14 @@ def ld(cmd, data, size, dbg=True):
     spi.xfer2(msg)
 
 def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
-<<<<<<< HEAD
+# <<<<<<< HEAD
     global lastRdCmd, lastResult
     if dbg:
         if cmd != lastRdCmd:
             print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
             lastRdCmd = cmd
-=======
->>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
+# =======
+# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
     if spi is None:
         return(0)
     msg = [cmd]
@@ -50,17 +50,17 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     result = int.from_bytes(val, byteorder='big')
     if result & ext:
         result |= -1 & ~mask
-<<<<<<< HEAD
+# <<<<<<< HEAD
     if dbg:
         if (cmd == rg.F_Rd_Status) and (result != lastResult):
             print("status %08x" % result)
             lastResult = result
-=======
+# =======
     s0 = rg.fpgaSizeTable[cmd]
     if dbg:
         print("ld 0x%02x %d %10d %08x %s" % \
               (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
->>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
+# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
     return(result)
 
 def prtAxisCtl(base, axisCtl):
@@ -279,6 +279,9 @@ class PiLathe(Thread):
         self.cmdPause = False
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_HOME_ACTIVE)
 
+    def doneCmd(self):
+        pass
+
     def syncSetup(self):
         pass
 
@@ -342,6 +345,9 @@ class PiLathe(Thread):
                 pass
         pass
 
+    def spindleUpdate(self):
+        pass
+
     def xHomeAxis(self):
         pass
 
@@ -360,6 +366,12 @@ class PiLathe(Thread):
     def xStop(self):
         pass
 
+    def xHomeFwd(self):
+        pass
+
+    def xHomeRev(self):
+        pass
+
     def zJogMove(self):
         pass
 
@@ -373,6 +385,12 @@ class PiLathe(Thread):
         pass
 
     def zStop(self):
+        pass
+
+    def zHomeFwd(self):
+        pass
+
+    def zHomeRev(self):
         pass
 
     def dbgMsg(self, cmd, val):
@@ -488,7 +506,7 @@ class PiLathe(Thread):
         else:
             self.curRPM = 0
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
         status = rd(rg.F_Rd_Status, True)
 
         if status != self.lastStatus:
@@ -508,9 +526,9 @@ class PiLathe(Thread):
             self.lastStatus = status
             print(sString)
             
-=======
+# =======
         status = rd(rg.F_Rd_Status)
->>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
+# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
         axis = self.zAxis
         self.zDro =  rd(rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro, \
                         False, 0x20000, 0x3ffff)
@@ -975,6 +993,8 @@ class Accel():
         stepsInch = self.axis.stepsInch
         stepsSecMax = intRound((self.maxFeed * stepsInch) / 60)
         freqGenMax = stepsSecMax * rpi.freqMult
+        print(stepsSecMax, rpi.freqMult)
+        stdout.flush()
         print("stepsSecMax %6.0f freqGenMax %7.0f" % (stepsSecMax, freqGenMax))
 
         stepsSecMin = intRound((self.minFeed * stepsInch) / 60)

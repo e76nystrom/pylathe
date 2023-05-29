@@ -86,11 +86,11 @@ for f in tuple(fileDir.split(os.sep)[:dirStrip]) + pncDir:
     filePath += f
 sys.path.append(filePath)
 print(sys.path)
-from geometry import Line
-from geometry import ARC, CW, LINE
-from geometry import Arc as GeoArc
-import dbgprt as dp
-dp.DBG = True
+# from geometry import Line
+# from geometry import ARC, CW, LINE
+# from geometry import Arc as GeoArc
+# import dbgprt as dp
+# dp.DBG = True
 
 SWIG = False
 HOME_TEST = False
