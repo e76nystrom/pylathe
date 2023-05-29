@@ -8306,7 +8306,8 @@ class MainFrame(wx.Frame):
         self.spindleDialog = SpindleDialog(self, defaultFont)
         self.portDialog = PortDialog(self, defaultFont)
         self.configDialog = ConfigDialog(self, defaultFont)
-        self.megaDialog = MegaDialog(self, defaultFont)
+        if not R_PI:
+            self.megaDialog = MegaDialog(self, defaultFont)
 
         self.testSpindleDialog = None
         self.testSyncDialog = None
@@ -8379,7 +8380,7 @@ class MainFrame(wx.Frame):
             comm.rpi.setDbgDispatch(updateThread.dbgDispatch)
         self.delay = Delay(self)
 
-        if MEGA:
+        if (not R_PI) and MEGA:
             self.sendData.sendMegaData()
 
         self.fTest = None
@@ -8477,9 +8478,10 @@ class MainFrame(wx.Frame):
         menu = setupMenu.Append(ID_CONFIG_SETUP, 'Config')
         self.Bind(wx.EVT_MENU, self.OnConfigSetup, menu)
 
-        ID_MEGA_SETUP = wx.Window.NewControlId()
-        menu = setupMenu.Append(ID_MEGA_SETUP, 'Mega')
-        self.Bind(wx.EVT_MENU, self.OnMegaSetup, menu)
+        if not R_PI:
+            ID_MEGA_SETUP = wx.Window.NewControlId()
+            menu = setupMenu.Append(ID_MEGA_SETUP, 'Mega')
+            self.Bind(wx.EVT_MENU, self.OnMegaSetup, menu)
 
         # operation menu
         operationMenu = wx.Menu()
@@ -8701,7 +8703,8 @@ class MainFrame(wx.Frame):
                 comm.queParm(pm.CFG_MPG, cfg.getBoolInfoData(cf.cfgMPG))
                 comm.queParm(pm.CFG_DRO, cfg.getBoolInfoData(cf.cfgDRO))
                 comm.queParm(pm.CFG_LCD, cfg.getBoolInfoData(cf.cfgLCD))
-                comm.queParm(pm.CFG_MEGA, cfg.getBoolInfoData(cf.cfgMega))
+                if not R_PI:
+                    comm.queParm(pm.CFG_MEGA, cfg.getBoolInfoData(cf.cfgMega))
                 comm.queParm(pm.CFG_SWITCH, cfg.getBoolInfoData(cf.spSwitch))
                 comm.queParm(pm.CFG_VAR_SPEED, \
                              cfg.getBoolInfoData(cf.spVarSpeed))
@@ -8778,7 +8781,8 @@ class MainFrame(wx.Frame):
                                  ct.HOME_SUCCESS if jp.xHomed else \
                                  ct.HOME_ACTIVE)
 
-                comm.queParm(pm.MEGA_SIM, cfg.getBoolInfo(cf.spMegaSim))
+                if not R_PI:
+                    comm.queParm(pm.MEGA_SIM, cfg.getBoolInfo(cf.spMegaSim))
                 comm.sendMulti()
 
             except CommTimeout:
@@ -8842,7 +8846,10 @@ class MainFrame(wx.Frame):
         MOTOR_TEST = cfg.getInitialBoolInfo(cf.spMotorTest)
         SPINDLE_ENCODER = cfg.getInitialBoolInfo(cf.cfgSpEncoder)
         SYNC_SPI = cfg.getInitialBoolInfo(cf.cfgSyncSPI)
-        MEGA = cfg.getBoolInfoData(cf.cfgMega)
+        if R_PI:
+            MEGA = False
+        else:
+            MEGA = cfg.getBoolInfoData(cf.cfgMega)
 
         if DRO:
             X_DRO_POS = cfg.getInitialBoolInfo(cf.xDROPos)
@@ -10203,7 +10210,7 @@ class MoveTest(object):
         dbgPrt = self.mf.dbgPrt
 
         cfg = self.mf.cfg
-        pitch = cfg.getFloatInfoData(cf.zPitch)
+        pitch = cfg.getDistInfoData(cf.zPitch)
         microSteps = cfg.getFloatInfoData(cf.zMicroSteps)
         motorSteps = cfg.getFloatInfoData(cf.zMotorSteps)
         motorRatio = cfg.getFloatInfoData(cf.zMotorRatio)
@@ -10275,7 +10282,7 @@ class MoveTest(object):
                 delta = time0 - lastTime
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
-                fTest.write("step %4d count %9d %7d %7d t %8.6f %8.6f "\
+                fTest.write("step %4d count %9d %8d %8d t %8.6f %8.6f "\
                             "f %7.2f rpm %3.1f\n" % \
                             (step, count, ctr, abs(ctr - lastCtr), time0, \
                              delta, freq, ipm))

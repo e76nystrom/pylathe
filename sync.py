@@ -4,7 +4,7 @@ import math
 from sys import stdout
 
 class Sync():
-    def __init__(self, maxPrime=127, dbg=False, fpga=False):
+    def __init__(self, maxPrime=127, dbg=True, fpga=False):
         self.calcPrimes(maxPrime)
         self.clockFreq = 72000000
         self.encoderPulse = 1600
@@ -69,8 +69,13 @@ class Sync():
     def setExitRevs(self, rev):
         self.exitRevs = rev
 
-    def calcSync(self, val, dbg=None, metric=False, rpm=None, \
+    def calcSync(self, syncVal, dbg=None, metric=False, rpm=None,
                  dist=None, turn=None):
+        if self.dbg:
+            print("calcSync syncVal %s metric %s rpm %s" %
+                  (syncVal, metric, rpm))
+            print("clockFreq %d encoder %d" %
+                  (self.clockFreq, self.encoderPulse))
         dbgSave = None
         distSave = None
         turnSave = None
@@ -84,15 +89,15 @@ class Sync():
             turnSave = self.turn
             self.turn = turn
 
-        if type(val) is str:
-            val = val.lower()
-            metric =  val.endswith("mm")
+        if type(syncVal) is str:
+            syncVal = syncVal.lower()
+            metric =  syncVal.endswith("mm")
             if metric:
-                val = val[:-2]
-            val = float(val)
+                syncVal = syncVal[:-2]
+            syncVal = float(syncVal)
 
         if metric:
-            pitch = val
+            pitch = syncVal
             if self.metricLeadscrew:
                 nFactor = 1
                 dFactor = 1
@@ -100,7 +105,7 @@ class Sync():
                 nFactor = 127
                 dFactor = 5
         else:
-            tpi = val
+            tpi = syncVal
             if self.metricLeadscrew:
                 nFactor = 5
                 if not self.turn:
@@ -112,7 +117,7 @@ class Sync():
                 dFactor = 1
 
         if self.turn:
-            pitch = val
+            pitch = syncVal
             while int(pitch) != pitch:
                 pitch *= 10
                 nFactor *= 10
@@ -135,7 +140,7 @@ class Sync():
                       (self.leadscrewTPI, "leadscrewTPI"), \
                     )
         elif self.dist:
-            exitDist = val
+            exitDist = syncVal
 
             #=exitDist*motorSteps*microSteps*127/(metricPitch*5)
             stepsInch = float(self.motorSteps * self.microSteps * \
@@ -255,34 +260,43 @@ class Sync():
         for d in dResult:
             output *= d
 
+        while cycle < 16:
+            cycle *= 2
+            output *= 2
+
         result = [cycle, output]
 
         if rpm is not None:
-            clocksMin = self.clockFreq * 60
-            pulseMinIn = self.encoderPulse * rpm
-            pulseMinOut = (pulseMinIn * output) / cycle
-            clocksPulse = int(clocksMin / pulseMinOut)
+            encPerSec = (rpm * self.encoderPulse) / 60.0
+            clockPerEncPulse = self.clockFreq / encPerSec
+            inPreScaler = math.ceil(clockPerEncPulse / 49152)
+            result.append(inPreScaler)
+            clockPerCycle = clockPerEncPulse * cycle
+            outClockPerPulse = clockPerCycle / output
+            # clocksMin = self.clockFreq * 60
+            # pulseMinIn = self.encoderPulse * rpm
+            # pulseMinOut = (pulseMinIn * output) / cycle
+            # clocksPulse = int(clocksMin / pulseMinOut)
             if not self.fpga:
-                preScaler = clocksPulse >> 16
-                if preScaler == 0:
-                    preScaler = 1
+                outPreScaler = math.ceil(outClockPerPulse / 49152)
             else:
-                preScaler = 1
-            result.append(preScaler)
+                outPreScaler = 1
+            result.append(outPreScaler)
 
-        if self.dbg:
-            print("cycle  %4d - " % (cycle), end='')
-            for n in nFactors:
-                print(n, end=' ')
-            print()
+            if self.dbg:
+                print("cycle  %4d - " % (cycle), end='')
+                for n in nFactors:
+                    print(n, end=' ')
+                print()
 
-            print("output %4d - " % (output), end='')
-            for d in dResult:
-                print(d, end=' ')
-            print()
-            
-            if rpm is not None:
-                print("preScaler %d" % (preScaler,))
+                print("output %4d - " % (output), end='')
+                for d in dResult:
+                    print(d, end=' ')
+                print()
+
+                if rpm is not None:
+                    print("inPrescaler %d outPreScaler %d" % \
+                    (inPreScaler, outPreScaler))
             print()
             stdout.flush()
 

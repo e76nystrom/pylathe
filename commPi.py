@@ -232,6 +232,7 @@ class PiLathe(Thread):
         self.dbgQue = Queue()
         self.startEncoder = False
         self.lastStatus = 0xffffffff
+        self.freqMult = 8
 
         self.start()
 

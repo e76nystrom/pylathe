@@ -690,7 +690,7 @@ class Setup():
                     if len(regs) == 1:
                         tmp = "    \"%s\"," % (regs[0])
                     else:
-                        tmp = "    \"%s-%s\"," % (regs[0].strip(), \
+                        tmp = "    \"%s+%s\"," % (regs[0].strip(), \
                                                   regs[-1].strip())
                     fWrite(f, "%s# %3d x%02x\n" % \
                            (tmp.ljust(40), tIndex, tIndex))
