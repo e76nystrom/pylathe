@@ -75,22 +75,22 @@ else:
     else:
         from commPi import Comm, CommTimeout
         R_PI = True
-    pncDir = ("Pnc",)
+    pncDir = ("pnc",)
     dirStrip = -1
 
 fileDir = os.path.dirname(os.path.abspath(__file__))
 filePath = ""
 for f in tuple(fileDir.split(os.sep)[:dirStrip]) + pncDir:
-    if len(filePath) != 0:
-        filePath += os.sep
+    filePath += os.sep
     filePath += f
 sys.path.append(filePath)
 print(sys.path)
-# from geometry import Line
-# from geometry import ARC, CW, LINE
-# from geometry import Arc as GeoArc
-# import dbgprt as dp
-# dp.DBG = True
+
+from geometry import Line
+from geometry import ARC, CW, LINE
+from geometry import Arc as GeoArc
+import dbgprt as dp
+dp.DBG = True
 
 SWIG = False
 HOME_TEST = False
@@ -8336,7 +8336,10 @@ class MainFrame(wx.Frame):
             print("***start saving debug***")
             updateThread.openDebug()
 
-        self.jogShuttle = JogShuttle(self)
+        if WINDOWS:
+            self.jogShuttle = JogShuttle(self)
+        else:
+            self.jogShuttle = None
 
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
@@ -8414,7 +8417,8 @@ class MainFrame(wx.Frame):
         self.done = True
         self.updateThread.close()
         self.jogPanel.btnRpt.close()
-        self.jogShuttle.close()
+        if self.jogShuttle is not None:
+            self.jogShuttle.close()
         if R_PI:
             self.comm.rpi.close()
         if self.keypad is not None:

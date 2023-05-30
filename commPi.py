@@ -34,14 +34,11 @@ def ld(cmd, data, size, dbg=True):
     spi.xfer2(msg)
 
 def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
-# <<<<<<< HEAD
     global lastRdCmd, lastResult
     if dbg:
         if cmd != lastRdCmd:
             print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
             lastRdCmd = cmd
-# =======
-# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
     if spi is None:
         return(0)
     msg = [cmd]
@@ -50,17 +47,14 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     result = int.from_bytes(val, byteorder='big')
     if result & ext:
         result |= -1 & ~mask
-# <<<<<<< HEAD
     if dbg:
         if (cmd == rg.F_Rd_Status) and (result != lastResult):
             print("status %08x" % result)
             lastResult = result
-# =======
-    s0 = rg.fpgaSizeTable[cmd]
-    if dbg:
-        print("ld 0x%02x %d %10d %08x %s" % \
-              (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
-# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
+    # s0 = rg.fpgaSizeTable[cmd]
+    # if dbg:
+    #     print("ld 0x%02x %d %10d %08x %s" % \
+    #           (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
     return(result)
 
 def prtAxisCtl(base, axisCtl):
