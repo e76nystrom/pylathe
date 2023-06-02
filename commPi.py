@@ -119,7 +119,9 @@ def prtAxisCtl(base, axisCtl):
         s += "ignoreLim "
     print("axisCtl %02x %04x %s" % (base, axisCtl, s))
 
-def ldAxisCtl(base, axisCtl):
+def ldAxisCtl(base, axisCtl, ident=None):
+    if ident is not None:
+        print("ldAxisCtl", ident)
     prtAxisCtl(base, axisCtl)
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 1)
         
@@ -484,6 +486,8 @@ class PiLathe(Thread):
         axisDbg = WINDOWS
         
         while self.fpgaFrequency is None:
+            if not self.threadRun:
+                break
             sleep(0.1)
             
         print("starting loop")
@@ -579,7 +583,7 @@ class PiLathe(Thread):
             if (status & bt.zAxisDone) != 0 or dbg:
                 axis.done = True
                 axis.wait = False
-                ldAxisCtl(rg.F_ZAxis_Base, 0)
+                ldAxisCtl(rg.F_ZAxis_Base, 0, "1")
 
             if axis.wait:
                 if dbg:
@@ -620,7 +624,7 @@ class PiLathe(Thread):
             if (status & bt.xAxisDone) != 0 or dbg:
                 axis.done = True
                 axis.wait = False
-                ldAxisCtl(rg.F_XAxis_Base, 0)
+                ldAxisCtl(rg.F_XAxis_Base, 0, "2")
 
             if axis.wait:
                 if dbg:
@@ -945,7 +949,7 @@ class Accel():
         axisCtl = axis.axisCtl
         base = axis.base
         if encParm:
-            ldAxisCtl(base, bt.ctlInit)
+            ldAxisCtl(base, bt.ctlInit, "3")
 
             if self.freqDivider != 0:
                 ld(base + rg.F_Ld_Freq, self.freqDivider, 4)
@@ -963,14 +967,13 @@ class Accel():
             ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
             axisCtl |=  bt.ctlChDirect
 
-        ldAxisCtl(base, bt.ctlStart | axisCtl)
+        ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
 
     def start(self, axisCtl=0):
         print("\n%s accel start" % (self.label))
         axis = self.axis
         axisCtl |= axis.axisCtl | bt.ctlStart
-        prtAxisCtl(axis.base, axisCtl)
-        ldAxisCtl(axis.base, axisCtl)
+        ldAxisCtl(axis.base, axisCtl, "5")
 
     def accelCalc(self):
         print("\n%s accel accelCalc" % (self.label))
@@ -1338,9 +1341,10 @@ class Axis():
         ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, 0, 4)
         ld(base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
         axisCtl = bt.ctlInit | bt.ctlSetLoc
-        ldAxisCtl(base, axisCtl)
+        ldAxisCtl(base, axisCtl, "6")
         self.axisCtl = 0
-        ldAxisCtl(base, axisCtl)
+        axisCtl = 0
+        ldAxisCtl(base, axisCtl, "7")
 
     def loadClock(self, clkCtl):
         print("clkCtl %s %s %s" % \
@@ -1422,8 +1426,8 @@ class Axis():
         cmd = self.cmd & ct.CMD_MSK
 
         ld(self.base + rg.F_Loc_Base + rg.F_Ld_Loc, 100, 4)
-        ldAxisCtl(self.base, bt.ctlInit | bt.ctlSetLoc)
-        ldAxisCtl(self.base, 0)
+        ldAxisCtl(self.base, bt.ctlInit | bt.ctlSetLoc, "8")
+        ldAxisCtl(self.base, 0, "9")
         loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, 4)
         print("+++loc %d" % (loc))
 
@@ -1435,7 +1439,7 @@ class Axis():
                 slvAxis = self.slvAxis
                 slvAxis.taperAccel.load(slvAxis.taperDist, slvAxis.encParm)
                 clkCtl |= slvAxis.clkSel[bt.clkSlvCh]
-                ldAxisCtl(slvAxis.base, slvAxis.axisCtl | bt.ctlSlave)
+                ldAxisCtl(slvAxis.base, slvAxis.axisCtl | bt.ctlSlave, "10")
             self.loadClock(clkCtl)
             accel = self.turnAccel
             accel.load(self.dist, self.encParm)

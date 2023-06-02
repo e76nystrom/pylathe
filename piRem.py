@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/home/pi/p38/bin/python3
 
 import socket
 from threading import Thread
@@ -6,6 +6,7 @@ import spidev
 import pickle
 import lRegDef as rg
 import fpgaLathe as bt
+from time import time
 
 # def ld(cmd, data, size, dbg=True):
 #     s0 = rg.fpgaSizeTable[cmd]
@@ -147,6 +148,7 @@ class Remote(Thread):
         self.start()
 
     def run(self):
+        lastTime = time()
         print("running")
         spi = self.spi
         sock = self.sock
@@ -167,9 +169,12 @@ class Remote(Thread):
                     txt = func(data, actionStr)
                 else:
                     txt = ""
-                print("ld %2d 0x%02x %10d 0x%08x %-32s%s" % \
-                      (cmd, cmd, data, data&0xffffffff, rg.xRegTable[cmd], \
-                      txt))
+                t = time()
+                delta = t - lastTime
+                lastTime = t
+                print("%8.3f ld %2d 0x%02x %10d 0x%08x %-32s%s" % \
+                      (delta, cmd, cmd, data, data&0xffffffff, \
+                       rg.xRegTable[cmd], txt))
                 # print(msg)
                 spi.xfer2(msg)
             else:
@@ -195,8 +200,11 @@ class Remote(Thread):
                     txt = func(data, actionStr)
                 else:
                     txt = ""
-                print("rd %2d 0x%02x %10d 0x%08x %-32s%s" % \
-                      (cmd, cmd, data, data&0xffffffff, rg.xRegTable[cmd], \
-                       txt))
+                t = time()
+                delta = t - lastTime
+                lastTime = t
+                print("%8.3f rd %2d 0x%02x %10d 0x%08x %-32s%s" % \
+                      (delta, cmd, cmd, data, data&0xffffffff, \
+                       rg.xRegTable[cmd], txt))
 
 rem = Remote()
