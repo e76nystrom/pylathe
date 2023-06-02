@@ -5,8 +5,8 @@
 zAxisEna     = 0x01             # z axis enable flag
 zAxisDone    = 0x02             # z axis done
 zAxisCurDir  = 0x04             # z axis current dir
-xAxisDone    = 0x08             # x axis done
-xAxisEna     = 0x10             # x axis enable flag
+xAxisEna     = 0x08             # x axis enable flag
+xAxisDone    = 0x10             # x axis done
 xAxisCurDir  = 0x20             # x axis current dir
 stEStop      = 0x40             # emergency stop
 spindleActive = 0x80            # x axis current dir
@@ -133,8 +133,8 @@ importList = ( \
  zAxisEna, \
  zAxisDone, \
  zAxisCurDir, \
- xAxisDone, \
  xAxisEna, \
+ xAxisDone, \
  xAxisCurDir, \
  stEStop, \
  spindleActive, \
