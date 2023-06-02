@@ -6,6 +6,7 @@ from platform import system
 from math import floor, log
 import os
 import re
+import pickle
 
 from remParmDef import parmTable
 from remCmdDef import cmdTable
@@ -14,6 +15,15 @@ import lRegDef as rg
 import fpgaLathe as bt
 import ctlBitDef as ct
 
+zClkStr = ("zClkNone", "zClkZFreq", "zClkCh", "zClkIntClk", \
+           "zClkFreq", "zClkXCh", "zClkSpindle", "zClkDbgFreq")
+
+xClkStr = ("xClkNone", "xClkXFreq", "xClkCh", "xClkIntClk", \
+           "xClkZFreq", "xClkZCh",  "xClkSpindle", "xClkDbgFreq")
+
+moveCmds = ("CMD_NONE", "CMD_MOV", "CMD_JOG", "CMD_SYN",
+            "CMD_MAX", "CMD_SPEED", "JOGSLOW")
+
 WINDOWS = system() == 'Windows'
 
 spi = None
@@ -21,17 +31,30 @@ spi = None
 lastRdCmd = -1
 lastResult = 0
 
+UDP = True
+import socket
+UDP_IP = "192.168.42.7"
+SND_IP = "192.168.42.65"
+UDP_PORT = 5555
+sock = None
+
 def ld(cmd, data, size, dbg=True):
     s0 = rg.fpgaSizeTable[cmd]
     if dbg:
-        print("ld 0x%02x %d %10d %08x %s" % \
-              (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]))
-    if spi is None:
-        return
+        print("ld %2d 0x%02x %d %10d %08x %s" % \
+              (cmd, cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]))
     data &= 0xffffffff
     val = list(data.to_bytes(size, byteorder='big'))
     msg = [cmd] + val
-    spi.xfer2(msg)
+
+    if UDP:
+        global sock
+        outMsg = pickle.dumps(msg)
+        sock.sendto(outMsg, (SND_IP, UDP_PORT))
+    else:
+        if spi is None:
+            return
+        spi.xfer2(msg)
 
 def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
     global lastRdCmd, lastResult
@@ -39,11 +62,21 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
         if cmd != lastRdCmd:
             print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
             lastRdCmd = cmd
-    if spi is None:
-        return(0)
-    msg = [cmd]
-    spi.xfer2(msg)
-    val = spi.readbytes(4)
+
+    if UDP:
+        global sock
+        outMsg = pickle.dumps([cmd | 0x100])
+        sock.sendto(outMsg, (SND_IP, UDP_PORT))
+        val, addr = sock.recvfrom(64)
+        val = pickle.loads(val)
+    else:
+        if spi is None:
+            return(0)
+        msg = [cmd]
+        spi.xfer2(msg)
+        val = spi.readbytes(4)
+        val = pickle.loads(val)
+
     result = int.from_bytes(val, byteorder='big')
     if result & ext:
         result |= -1 & ~mask
@@ -113,17 +146,22 @@ class Comm():
     def __init__(self):
         self.ser = Serial()
         self.rpi = PiLathe()
-        if system() == 'Linux':
-            if os.uname().machine.startswith('arm'):
-                global spi
-                import spidev
-                bus = 0
-                device = 0
-                spi = spidev.SpiDev()
-                spi.open(bus, device)
-                spi.max_speed_hz = 500000
-                spi.mode = 0
-        print(self.rpi.spSteps)
+        if UDP:
+            global sock
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+            sock.bind((UDP_IP, UDP_PORT))
+        else:
+            if system() == 'Linux':
+                if os.uname().machine.startswith('arm'):
+                    global spi
+                    import spidev
+                    bus = 0
+                    device = 0
+                    spi = spidev.SpiDev()
+                    spi.open(bus, device)
+                    spi.max_speed_hz = 500000
+                    spi.mode = 0
+            print(self.rpi.spSteps)
     
     def setupCmds(self, loadMulti, loadVal, readVal):
         pass
@@ -139,12 +177,13 @@ class Comm():
         pass
     
     def closeSerial(self):
-        pass
-    
+        if spi is not None:
+            print("close spi device")
+            spi.close()
+     
     def command(self, cmdVal):
         print("cmd %12s" % (cmdTable[cmdVal][0]))
         self.rpi.cmdAction[cmdVal]()
-
 
     def queParm(self, parmIndex, val):
         self.setParm(parmIndex, val)
@@ -156,14 +195,14 @@ class Comm():
         (name, varType, varName) = parmTable[parmIndex]
         if varType == 'float':
             val = float(val)
-            valString = "%13.6f" % val
+            valString = "%15.6f" % val
             valString = re.sub("0+$", "", valString)
             if valString.endswith('.'):
                 valString += '0'
         else:
             val = int(val)
-            valString = "%6d" % val
-        print("set %24s %16s %-7s" % (name, varName, valString))
+            valString = "%8d" % val
+        print("set %22s %22s %s" % (name, varName, valString))
         setattr(self.rpi, varName, val)
 
     def getParm(self, parmIndex, dbg=False):
@@ -272,7 +311,8 @@ class PiLathe(Thread):
         self.zStop()
         self.xStop()
         self.cmdPause = False
-        self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | ct.MV_HOME_ACTIVE)
+        self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | \
+                           ct.MV_XHOME_ACTIVE | ct.MV_ZHOME_ACTIVE)
 
     def doneCmd(self):
         pass
@@ -455,7 +495,6 @@ class PiLathe(Thread):
             self.axisCtl(axisDbg)
             self.procMove()
             self.update()
-            
         print("piLathe done")
         stdout.flush()
         self.threadDone = True
@@ -501,7 +540,6 @@ class PiLathe(Thread):
         else:
             self.curRPM = 0
 
-# <<<<<<< HEAD
         status = rd(rg.F_Rd_Status, True)
 
         if status != self.lastStatus:
@@ -519,11 +557,9 @@ class PiLathe(Thread):
             if (status & bt.xAxisDone) != 0:
                 sString += "x Done "
             self.lastStatus = status
-            print(sString)
-            
-# =======
-        status = rd(rg.F_Rd_Status)
-# >>>>>>> 41768e272a795cf838635f46d1fb51afa052345c
+            if len(sString) != 0:
+                print(sString)
+
         axis = self.zAxis
         self.zDro =  rd(rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro, \
                         False, 0x20000, 0x3ffff)
@@ -531,11 +567,14 @@ class PiLathe(Thread):
             if not dbg:
                 tmp =  rd(rg.F_ZAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
                           False, 0x20000, 0x3ffff)
+                dist =  rd(rg.F_ZAxis_Base + rg.F_Dist_Base + rg.F_Rd_Dist, \
+                           False, 0x20000, 0x3ffff)
+                if axis.loc != tmp:
+                    print("zLoc", tmp, dist)
             else:
                 tmp = axis.expLoc
             if axis.loc != tmp:
                 self.zLoc = axis.loc = tmp
-                print(tmp)
 
             if (status & bt.zAxisDone) != 0 or dbg:
                 axis.done = True
@@ -570,6 +609,8 @@ class PiLathe(Thread):
             if not dbg:
                 tmp =  rd(rg.F_XAxis_Base + rg.F_Loc_Base + rg.F_Rd_Loc, \
                           False, 0x20000, 0x3ffff)
+                if axis.loc != tmp:
+                    print("zLoc", tmp)
             else:
                 tmp = axis.expLoc
             if axis.loc != tmp:
@@ -921,13 +962,15 @@ class Accel():
         else:
             ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist, 4)
             axisCtl |=  bt.ctlChDirect
+
         ldAxisCtl(base, bt.ctlStart | axisCtl)
 
     def start(self, axisCtl=0):
         print("\n%s accel start" % (self.label))
-        axisCtl |= self.axis.axisCtl | bt.ctlStart
-        prtAxisCtl(axisCtl)
-        ldAxisCtl(self.axis.base, axisCtl)
+        axis = self.axis
+        axisCtl |= axis.axisCtl | bt.ctlStart
+        prtAxisCtl(axis.base, axisCtl)
+        ldAxisCtl(axis.base, axisCtl)
 
     def accelCalc(self):
         print("\n%s accel accelCalc" % (self.label))
@@ -1292,6 +1335,7 @@ class Axis():
                 (bt.xClkNone, bt.xClkXFreq, bt.xClkCh, bt.xClkIntClk, \
                  bt.xClkZFreq, bt.xClkZCh, bt.xClkSpindle, bt.xClkDbgFreq)
             self.dbgBase = en.D_ZMOV
+        ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, 0, 4)
         ld(base + rg.F_Loc_Base + rg.F_Ld_Loc, 0, 4)
         axisCtl = bt.ctlInit | bt.ctlSetLoc
         ldAxisCtl(base, axisCtl)
@@ -1299,6 +1343,10 @@ class Axis():
         ldAxisCtl(base, axisCtl)
 
     def loadClock(self, clkCtl):
+        print("clkCtl %s %s %s" % \
+              (zClkStr[clkCtl & 7], xClkStr[(clkCtl >> 3) & 7],
+               "dbgFreqEna" if (clkCtl & bt.clkDbgFreqEna) != 0 \
+               else ""))
         ld(rg.F_Ld_Clk_Ctl, clkCtl, 1)
 
     def move(self, pos, cmd):
@@ -1313,6 +1361,17 @@ class Axis():
         self.moveRel(pos - self.loc, cmd)
 
     def moveRel(self, dist, cmd):
+        print("Axis moveRel dist %d cmd %02x" % (dist, cmd))
+        cmdStr = moveCmds[cmd & ct.CMD_MSK]
+        cmdStr += "SYN_START " if ((cmd & ct.SYN_START) != 0) else ""
+        cmdStr += "SYN_LEFT " if ((cmd & ct.SYN_LEFT) != 0) else ""                  
+        cmdStr += "FIND_HOME " if ((cmd & ct.FIND_HOME) != 0) else ""                  
+        cmdStr += "CLEAR_HOME " if ((cmd & ct.CLEAR_HOME) != 0) else ""                  
+        cmdStr += "FIND_PROBE " if ((cmd & ct.FIND_PROBE) != 0) else ""                  
+        cmdStr += "CLEAR_PROBE " if ((cmd & ct.CLEAR_PROBE) != 0) else ""                  
+        cmdStr += "DRO_POS " if ((cmd & ct.DRO_POS) != 0) else ""                  
+        cmdStr += "DRO_UPD " if ((cmd & ct.DRO_UPD) != 0) else ""                  
+        print(cmdStr)
         if self.state != en.AXIS_IDLE:
             return
         self.rpi.dbgMsg(self.dbgBase + D_DST, dist)
@@ -1359,7 +1418,15 @@ class Axis():
             self.state = en.AXIS_START_MOVE
 
     def startMove(self):
+        accel = None
         cmd = self.cmd & ct.CMD_MSK
+
+        ld(self.base + rg.F_Loc_Base + rg.F_Ld_Loc, 100, 4)
+        ldAxisCtl(self.base, bt.ctlInit | bt.ctlSetLoc)
+        ldAxisCtl(self.base, 0)
+        loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, 4)
+        print("+++loc %d" % (loc))
+
         if cmd == ct.CMD_SYN:
             if (self.cmd & ct.SYN_START) != 0:
                 self.axisCtl |= bt.ctlWaitSync
@@ -1370,21 +1437,33 @@ class Axis():
                 clkCtl |= slvAxis.clkSel[bt.clkSlvCh]
                 ldAxisCtl(slvAxis.base, slvAxis.axisCtl | bt.ctlSlave)
             self.loadClock(clkCtl)
-            self.turnAccel.load(self.dist, self.encParm)
+            accel = self.turnAccel
+            accel.load(self.dist, self.encParm)
+
         elif cmd == ct.CMD_JOG:
-            self.moveAccel.load(self.dist)
+            accel = self.moveAccel
+            accel.load(self.dist)
             self.loadClock(self.clkSel[bt.clkFreq])
+
         elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
-            self.moveAccel.load(self.dist)
+            accel = self.moveAccel
+            accel.load(self.dist)
             # self.rpi.readData(self.base)
             self.loadClock(self.clkSel[bt.clkFreq])
+
         elif cmd == ct.CMD_SPEED:
             pass
+
         elif cmd == ct.JOGSLOW:
             pass
+
         else:
             pass
+
         self.wait = True
+        if accel is not None:
+            accel.start()
+            stdout.flush()
         self.state = en.AXIS_WAIT_MOVE
 
     def waitMove(self):
@@ -1392,6 +1471,10 @@ class Axis():
             self.done = False
             self.wait = False
             self.loadClock(0)
+            dist = rd(self.base + rg.F_Dist_Base + rg.F_Rd_Dist, 4)
+            loc = rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, 4)
+            print("dist %d loc %d" % (dist, loc))
+
             self.state = en.AXIS_DONE
 
     def delay(self):
@@ -1410,3 +1493,6 @@ class Axis():
             self.rpi.dbgMsg(D_EXP, self.expLoc)
         self.state = en.AXIS_IDLE
         self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)
+        self.rpi.pauseCmd()
+        print("pause")
+        stdout.flush()
