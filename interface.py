@@ -1136,9 +1136,9 @@ fpgaLatheList = \
         "axis",
 
         ("axisCtl",),
-        ("F_Rd_Axis_Status", 0, 1, 4, "axis status"),
-        ("F_Ld_Axis_Ctl", None, 1, 2, "axis control register"),
-        ("F_Rd_Axis_Ctl", None, 1, 2, "axis control register"),
+        ("F_Rd_Axis_Status", 0, 1, 1, "read axis status"),
+        ("F_Ld_Axis_Ctl", None, 1, 2, "set axis control register"),
+        ("F_Rd_Axis_Ctl", None, 1, 2, "read axis control register"),
         ("F_Ld_Freq", None, 1, 4, "frequency"),
         ("F_Sync_Base", None, "syncAccel", None, "sync registers"),
         ("F_Dist_Base", None, "distCtr", None, "distance registers"),

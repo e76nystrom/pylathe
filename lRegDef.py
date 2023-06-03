@@ -85,9 +85,9 @@ F_Jog_Max        =  3           # number of jog registers
 
 # axis
 
-F_Rd_Axis_Status =  0           # axis status
-F_Ld_Axis_Ctl    =  1           # axis control register
-F_Rd_Axis_Ctl    =  2           # axis control register
+F_Rd_Axis_Status =  0           # read axis status
+F_Ld_Axis_Ctl    =  1           # set axis control register
+F_Rd_Axis_Ctl    =  2           # read axis control register
 F_Ld_Freq        =  3           # frequency
 F_Sync_Base      =  4           # sync registers
 F_Dist_Base      = 14           # distance registers
@@ -274,7 +274,7 @@ fpgaSizeTable = ( \
     4,              #  22 F_Enc_Base, F_Rd_Cmp_Cyc_Clks
     2,              #  23 F_Phase_Base, F_Ld_Phase_Len
     4,              #  24 F_Phase_Base, F_Rd_Phase_Syn
-    4,              #  25 F_ZAxis_Base, F_Rd_Axis_Status
+    1,              #  25 F_ZAxis_Base, F_Rd_Axis_Status
     2,              #  26 F_ZAxis_Base, F_Ld_Axis_Ctl
     2,              #  27 F_ZAxis_Base, F_Rd_Axis_Ctl
     4,              #  28 F_ZAxis_Base, F_Ld_Freq
@@ -300,7 +300,7 @@ fpgaSizeTable = ( \
     4,              #  48 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Ctl
     4,              #  49 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Inc
     4,              #  50 F_ZAxis_Base, F_Jog_Base, F_Ld_Jog_Back
-    4,              #  51 F_XAxis_Base, F_Rd_Axis_Status
+    1,              #  51 F_XAxis_Base, F_Rd_Axis_Status
     2,              #  52 F_XAxis_Base, F_Ld_Axis_Ctl
     2,              #  53 F_XAxis_Base, F_Rd_Axis_Ctl
     4,              #  54 F_XAxis_Base, F_Ld_Freq
