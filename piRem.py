@@ -1,6 +1,7 @@
 #!/home/pi/p38/bin/python3
 
 import socket
+from socket import timeout
 from threading import Thread
 import spidev
 import pickle
@@ -43,6 +44,8 @@ from time import time
 #     #     print("ld 0x%02x %d %10d %08x %s" % \
 #     #           (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
 #     return(result)
+
+FILTER_INPUT = True
 
 RCV_IP = "192.168.42.65"
 SEND_IP = "192.168.42.7"
@@ -97,13 +100,13 @@ def axisCtlStr(axisCtl, axis):
 
 def axisStatStr(axisStat, axis):
     s = " "
-    if (axisStat & axDoneDist) != 0:
+    if (axisStat & bt.axDoneDist) != 0:
         s += "doneDist"
-    if (axisStat & axDoneDro ) != 0:
+    if (axisStat & bt.axDoneDro ) != 0:
         s += "doneDor"
-    if (axisStat & axDoneHome) != 0:
+    if (axisStat & bt.axDoneHome) != 0:
         s += "done Home"
-    if (axisStat & axDoneLimit) != 0:
+    if (axisStat & bt.axDoneLimit) != 0:
         s += "done Limit"
     return s
 
@@ -126,9 +129,10 @@ class Remote(Thread):
         self.sock.bind((RCV_IP, UDP_PORT))
 
         self.last = [0 for i in range(len(rg.xRegTable))]
-        self.last[rg.F_Rd_Idx_Clks] = None
-        self.last[rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
-        self.last[rg.F_XAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
+        if FILTER_INPUT:
+            self.last[rg.F_Rd_Idx_Clks] = None
+            self.last[rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
+            self.last[rg.F_XAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
 
         self.action = [None for i in range(len(rg.xRegTable))]
         self.action[rg.F_Rd_Status] = (statusStr, "")
@@ -153,16 +157,21 @@ class Remote(Thread):
         spi = self.spi
         sock = self.sock
         while True:
+            # while True:
+            #     try:
+            #     except timeout:
+            #         pass
             data, addr = self.sock.recvfrom(1024)
             msg = pickle.loads(data)
             cmd = msg[0]
             if (cmd & 0x100) == 0:
-                data = int.from_bytes(msg[1:], byteorder='big')
+                data = int.from_bytes(msg[1:], byteorder='big', signed=True)
                 # if cmd == (rg.F_ZAxis_Base + rg.F_Ld_Axis_Ctl):
                 #     txt = axisCtlStr("zAxis", data)
                 # elif cmd == (rg.F_XAxis_Base + rg.F_Ld_Axis_Ctl):
                 #     txt = axisCtlStr("xAxis", data)
                 # else:
+                s0 = rg.fpgaSizeTable[cmd]
                 action = self.action[cmd]
                 if action is not None:
                     (func, actionStr) = action
@@ -172,10 +181,11 @@ class Remote(Thread):
                 t = time()
                 delta = t - lastTime
                 lastTime = t
-                print("%8.3f ld %2d 0x%02x %10d 0x%08x %-32s%s" % \
-                      (delta, cmd, cmd, data, data&0xffffffff, \
+                if delta > 2:
+                    print()
+                print("%8.3f ld %d %2d 0x%02x %10d 0x%08x %-32s%s" % \
+                      (delta, len(msg), cmd, cmd, data, data&0xffffffff, \
                        rg.xRegTable[cmd], txt))
-                # print(msg)
                 spi.xfer2(msg)
             else:
                 cmd &= 0xff
@@ -184,27 +194,31 @@ class Remote(Thread):
                 val = spi.readbytes(4)
                 sock.sendto(pickle.dumps(val), addr)
 
-                data = int.from_bytes(val, byteorder='big')
+                data = int.from_bytes(val, byteorder='big', signed=True)
                 if self.last[cmd] is None:
                     continue
-                if data == self.last[cmd]:
-                     continue
-                self.last[cmd] = data
+                if FILTER_INPUT:
+                    if data == self.last[cmd]:
+                         continue
+                    self.last[cmd] = data
                 # if cmd == rg.F_Rd_Status:
                 #     txt = statusStr(data)
                 # else:
                 #     txt = ""
+                t = time()
+
+                txt = "%10d 0x%08x" % (data, data&0xffffffff)
+                delta = t - lastTime
+                lastTime = t
                 action = self.action[cmd]
                 if action is not None:
                     (func, actionStr) = action
-                    txt = func(data, actionStr)
-                else:
-                    txt = ""
-                t = time()
-                delta = t - lastTime
-                lastTime = t
-                print("%8.3f rd %2d 0x%02x %10d 0x%08x %-32s%s" % \
-                      (delta, cmd, cmd, data, data&0xffffffff, \
+                    txt += func(data, actionStr)
+                s0 = rg.fpgaSizeTable[cmd]
+                if delta > 2:
+                    print()
+                print("%8.3f rd %d %2d 0x%02x %21s %-32s->%s" % \
+                      (delta, s0, cmd, cmd, "", \
                        rg.xRegTable[cmd], txt))
 
 rem = Remote()

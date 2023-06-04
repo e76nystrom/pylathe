@@ -66,8 +66,9 @@ if WINDOWS:
         from commPi import Comm, CommTimeout
         R_PI = True
         print("rpi test mode")
-    pncDir = ("Python", "Pnc")
-    dirStrip = -2
+    #pncDir = ("Python", "Pnc")
+    pncDir = ("Pnc", )
+    dirStrip = -1
 else:
     print(os.uname())
     if not os.uname().machine.startswith('arm'):
@@ -81,7 +82,8 @@ else:
 fileDir = os.path.dirname(os.path.abspath(__file__))
 filePath = ""
 for f in tuple(fileDir.split(os.sep)[:dirStrip]) + pncDir:
-    filePath += os.sep
+    if len(f) != 0 and not (":" in f):
+        filePath += os.sep
     filePath += f
 sys.path.append(filePath)
 print(sys.path)
@@ -6666,6 +6668,7 @@ class JogPanel(wx.Panel, FormRoutines):
         val /= 2.0
         self.mf.sendData.sendXData()
         xLocation = self.comm.getParm(pm.X_LOC)
+        print("xLocation %d" % (xLocation))
         if xLocation is not None:
             xLocation = float(xLocation) / self.xStepsInch
             self.xHomeOffset = xLocation - val
@@ -7572,6 +7575,7 @@ class UpdateThread(Thread):
             stdout.flush()
 
     def run(self):
+        print("Update started")
         i = 0
         scanMax = len(self.parmList)
         moveQue = self.mf.move.moveQue
@@ -8285,7 +8289,7 @@ class MainFrame(wx.Frame):
             from extDro import DroTimeout
             self.dro = eDro.ExtDro()
 
-        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
+        if not R_PI and SPINDLE_SYNC_BOARD and not SYNC_SPI:
             self.syncComm = Comm()
 
         self.comm = comm = Comm()
@@ -8344,7 +8348,7 @@ class MainFrame(wx.Frame):
         comm.openSerial(cfg.getInfoData(cf.commPort), \
                         cfg.getInfoData(cf.commRate))
 
-        if SPINDLE_SYNC_BOARD and not SYNC_SPI:
+        if not R_PI and SPINDLE_SYNC_BOARD and not SYNC_SPI:
             self.syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
                                 cfg.getInfoData(cf.syncRate))
             self.syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
@@ -8421,6 +8425,7 @@ class MainFrame(wx.Frame):
             self.jogShuttle.close()
         if R_PI:
             self.comm.rpi.close()
+            self.comm.closeSerial()
         if self.keypad is not None:
             self.keypad.close()
         # self.dialFrame.Destroy()

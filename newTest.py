@@ -8,6 +8,7 @@ import sys
 import time
 import lRegDef as rg
 import fpgaLathe as bt
+import pickle
 
 WINDOWS = system() == 'Windows'
 
@@ -34,7 +35,7 @@ cmdWaitX = 2
 
 sync = True
 syncEnc = True
-Z_AXIS = True
+Z_AXIS = False
 
 base = rg.F_ZAxis_Base if Z_AXIS else rg.F_XAxis_Base
 bSyn = base + rg.F_Sync_Base
@@ -69,30 +70,67 @@ def ldSend():
     if spi is not None:
         spi.xfer2(ldBuf)
 
+lastRdCmd = -1
+lastResult = 0
+
+UDP = True
+import socket
+if WINDOWS:
+    UDP_IP = "192.168.42.7"
+    SND_IP = "192.168.42.65"
+else:
+    UDP_IP = "127.0.0.1"
+    SND_IP = "127.0.0.1"
+
+UDP_PORT = 5555
+sock = None
+
+if UDP:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+    sock.settimeout(3)
+    sock.bind((UDP_IP, UDP_PORT))
+
 def ld(cmd, data, size, dbg=True):
-    global cmdBuf, ldBuf
     s0 = rg.fpgaSizeTable[cmd]
     if dbg:
-        print("ld 0x%02x %d %10d %08x %s" % \
-              (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
-    if s0 != size:
-        print("size %d s0 %d" % (size, s0))
-    data &= 0xffffffff
-    val = list(data.to_bytes(size, byteorder='big'))
-    if cmdBuf:
-        ldBuf += [cmd]
-        ldBuf += [size]
-        ldBuf += val
-        if dbg:
-            t = "b"
+        print("ld %2d 0x%02x %d %10d %08x %s" % \
+              (cmd, cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]))
+    val = list(int(data).to_bytes(size, byteorder='big', signed=True))
+    msg = [cmd] + val
+
+    if UDP:
+        global sock
+        outMsg = pickle.dumps(msg)
+        sock.sendto(outMsg, (SND_IP, UDP_PORT))
     else:
-        msg = [cmd] + val
-        if spi is not None: 
-            spi.xfer2(msg)
-            if dbg:
-                t = "s"
-    if dbg:
-        print(t)
+        if spi is None:
+            return
+        spi.xfer2(msg)
+
+# def ld(cmd, data, size, dbg=True):
+#     global cmdBuf, ldBuf
+#     s0 = rg.fpgaSizeTable[cmd]
+#     if dbg:
+#         print("ld 0x%02x %d %10d %08x %s" % \
+#               (cmd, s0, data, data&0xffffffff, rg.xRegTable[cmd]), end=" ")
+#     if s0 != size:
+#         print("size %d s0 %d" % (size, s0))
+#     data &= 0xffffffff
+#     val = list(data.to_bytes(size, byteorder='big'))
+#     if cmdBuf:
+#         ldBuf += [cmd]
+#         ldBuf += [size]
+#         ldBuf += val
+#         if dbg:
+#             t = "b"
+#     else:
+#         msg = [cmd] + val
+#         if spi is not None: 
+#             spi.xfer2(msg)
+#             if dbg:
+#                 t = "s"
+#     if dbg:
+#         print(t)
 
 def rdInit():
     global rdBuf
@@ -135,25 +173,59 @@ def rdTest():
         j = i * 4
         tmp = val[j:j+4]
         print(i, j, tmp)
-        r = int.from_bytes(tmp, byteorder='big')
+        r = int.from_bytes(tmp, byteorder='big', signed=True)
         if r & 0x80000000:
             r |= -1 & ~0xffffffff
         result[i] = r
     print(result)
     return result
 
-def rd(cmd, size, dbg=False):
-    if spi is None:
-        return(0)
-    msg = [cmd]
-    spi.xfer2(msg)
-    val = spi.readbytes(size)
-    result = int.from_bytes(val, byteorder='big')
-    if result & 0x80000000:
-        result |= -1 & ~0xffffffff
+# def rd(cmd, size, dbg=False):
+#     if spi is None:
+#         return(0)
+#     msg = [cmd]
+#     spi.xfer2(msg)
+#     val = spi.readbytes(size)
+#     result = int.from_bytes(val, byteorder='big')
+#     if result & 0x80000000:
+#         result |= -1 & ~0xffffffff
+#     if dbg:
+#         print("rd 0x%02x   %10d %08x %s" % \
+#               (cmd, result, result&0xffffffff, rg.xRegTable[cmd]))
+#     return(result)
+
+def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
+    global lastRdCmd, lastResult
     if dbg:
-        print("rd 0x%02x   %10d %08x %s" % \
-              (cmd, result, result&0xffffffff, rg.xRegTable[cmd]))
+        if cmd != lastRdCmd:
+            print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
+            lastRdCmd = cmd
+
+    if UDP:
+        global sock
+        outMsg = pickle.dumps([cmd | 0x100])
+        sock.sendto(outMsg, (SND_IP, UDP_PORT))
+        val, addr = sock.recvfrom(64)
+        val = pickle.loads(val)
+    else:
+        if spi is None:
+            return(0)
+        msg = [cmd]
+        spi.xfer2(msg)
+        val = spi.readbytes(4)
+        val = pickle.loads(val)
+
+    result = int.from_bytes(val, byteorder='big')
+    if result & ext:
+        result |= -1 & ~mask
+    if dbg:
+        if (cmd == rg.F_Rd_Status) and (result != lastResult):
+            print("status %08x" % result)
+            lastResult = result
+    # s0 = rg.fpgaSizeTable[cmd]
+    # if dbg:
+    #     print("ld 0x%02x %d %10d %08x %s" % \
+    #           (cmd, s0, result, result&0xffffffff, rg.xRegTable[cmd]), end=" ")
     return(result)
 
 def readData(index=None, prt=True):
@@ -374,6 +446,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 3);
 
     if syncEnc:
+        print("d", d)
+        stdout.flush()
         ld(bSyn + rg.F_Ld_D, d, 4) # load d value
 
         ld(bSyn + rg.F_Ld_Incr1, incr1, 4) # load incr1 value
@@ -417,7 +491,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
         while True:
             status = rd(rg.F_Rd_Status, 4)
-            if (status & bt.queEmpty) != 0:
+            if (status & bt.queNotEmpty) != 0:
                 break
             print("status {0:04b}".format(status))
         runCtl = 0
@@ -527,11 +601,13 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     status = rd(rg.F_Rd_Status, 4)
     print("status {0:04b}".format(status))
     axisStatus = rd(base + rg.F_Rd_Axis_Status, 4)
-    print("status {0:04b}".format(axisStatus))
+    print("axis status {0:04b}".format(axisStatus))
 
     axisCtl = bt.ctlInit
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
     axisCtl = 0
+    val = rd(base + rg.F_Rd_Axis_Ctl, 2);
+    print("read axisctl %03x" % (val, ))
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
 
     status = rd(rg.F_Rd_Status, 4)
@@ -695,7 +771,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         grid(True)
         show()
 
-print("starting")
+print("starting", len(sys.argv), sys.argv)
 
 arg1 = None
 arg2 = None
