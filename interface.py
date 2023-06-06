@@ -434,9 +434,11 @@ cmdList = \
 
         ("CMD_ZSETUP", "zSetup", "setup z axis"),
         ("CMD_ZSYNSETUP", "", "setup z axis sync"),
+        ("CMD_ZSETLOC", "zSetLoc", "setup z location"),
 
         ("CMD_XSETUP", "xSetup", "setup x axis"),
-        ("CMD_XSYNSETUP", "", "setup z axis sync"),
+        ("CMD_XSYNSETUP", "", "setup x axis sync"),
+        ("CMD_XSETLOC", "xSetLoc", "setup x location"),
 
         "state information",
 
@@ -1645,10 +1647,10 @@ enumList = \
         ("SAVE_Z_OFFSET", "save z offset"),
         ("SAVE_X_OFFSET", "save x offset"),
         ("SAVE_TAPER", "save taper"),
-        ("MOVE_ZX", "move x in sync with z"),
-        ("MOVE_XZ", "move z in sync with x"),
-        ("TAPER_ZX", "taper x"),
-        ("TAPER_XZ", "taper z"),
+        ("MOVE_Z_X", "move x in sync with z"),
+        ("MOVE_X_Z", "move z in sync with x"),
+        ("TAPER_Z_X", "taper x"),
+        ("TAPER_X_Z", "taper z"),
         ("START_SPINDLE", "spindle start"),
         ("STOP_SPINDLE", "spindle stop"),
         ("Z_SYN_SETUP", "z sync setup"),

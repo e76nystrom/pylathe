@@ -66,10 +66,10 @@ SAVE_X           =  3           # save x
 SAVE_Z_OFFSET    =  4           # save z offset
 SAVE_X_OFFSET    =  5           # save x offset
 SAVE_TAPER       =  6           # save taper
-MOVE_ZX          =  7           # move x in sync with z
-MOVE_XZ          =  8           # move z in sync with x
-TAPER_ZX         =  9           # taper x
-TAPER_XZ         = 10           # taper z
+MOVE_Z_X         =  7           # move x in sync with z
+MOVE_X_Z         =  8           # move z in sync with x
+TAPER_Z_X        =  9           # taper x
+TAPER_X_Z        = 10           # taper z
 START_SPINDLE    = 11           # spindle start
 STOP_SPINDLE     = 12           # spindle stop
 Z_SYN_SETUP      = 13           # z sync setup
@@ -99,10 +99,10 @@ mCommandsList = ( \
     "SAVE_Z_OFFSET",
     "SAVE_X_OFFSET",
     "SAVE_TAPER",
-    "MOVE_ZX",
-    "MOVE_XZ",
-    "TAPER_ZX",
-    "TAPER_XZ",
+    "MOVE_Z_X",
+    "MOVE_X_Z",
+    "TAPER_Z_X",
+    "TAPER_X_Z",
     "START_SPINDLE",
     "STOP_SPINDLE",
     "Z_SYN_SETUP",

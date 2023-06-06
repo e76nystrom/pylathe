@@ -274,7 +274,7 @@ class Setup():
                             varName = s.lower()
                             first = False
                         else:
-                            varName = varName + s[0].upper() + s[1:].lower()
+                            varName = varName + s.capitalize()
                 else:
                     if regName.startswith('PRM'):
                         varName = regName[3:].lower()
@@ -344,6 +344,12 @@ class Setup():
                 fWrite(f, "    ('%s', '%s', '%s'),\n" % (val))
             fWrite(f, "    )\n")
             # self.listImports(file, imports)
+            f.close()
+            f = open(prefix + "Parm.py", "wb")
+            fWrite(f, "class " + preCap + "Parm():\n")
+            fWrite(f, "    def __init__(self):\n")
+            for (varIndex, varType, varName) in parmTable:
+                fWrite(f, "        self.%s = None\n" % (varName))
             f.close()
         if fData:
             fWrite(cFile, "};\n")

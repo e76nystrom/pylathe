@@ -47,44 +47,46 @@ CMD_SPSETUP          =  28	# 0x1c
 CMD_SYNCSETUP        =  29	# 0x1d
 CMD_ZSETUP           =  30	# 0x1e
 CMD_ZSYNSETUP        =  31	# 0x1f
-CMD_XSETUP           =  32	# 0x20
-CMD_XSYNSETUP        =  33	# 0x21
+CMD_ZSETLOC          =  32	# 0x20
+CMD_XSETUP           =  33	# 0x21
+CMD_XSYNSETUP        =  34	# 0x22
+CMD_XSETLOC          =  35	# 0x23
 
 # state information
 
-READSTAT             =  34	# 0x22
-READISTATE           =  35	# 0x23
+READSTAT             =  36	# 0x24
+READISTATE           =  37	# 0x25
 
 # load processor and xilinx parameters
 
-LOADVAL              =  36	# 0x24
-LOADMULTI            =  37	# 0x25
-READVAL              =  38	# 0x26
-LOADXREG             =  39	# 0x27
-READXREG             =  40	# 0x28
+LOADVAL              =  38	# 0x26
+LOADMULTI            =  39	# 0x27
+READVAL              =  40	# 0x28
+LOADXREG             =  41	# 0x29
+READXREG             =  42	# 0x2a
 
 # move command operations
 
-CLEARQUE             =  41	# 0x29
-QUEMOVE              =  42	# 0x2a
-MOVEMULTI            =  43	# 0x2b
-MOVEQUESTATUS        =  44	# 0x2c
+CLEARQUE             =  43	# 0x2b
+QUEMOVE              =  44	# 0x2c
+MOVEMULTI            =  45	# 0x2d
+MOVEQUESTATUS        =  46	# 0x2e
 
 # location and debug info
 
-READALL              =  45	# 0x2d
-READDBG              =  46	# 0x2e
-CLRDBG               =  47	# 0x2f
+READALL              =  47	# 0x2f
+READDBG              =  48	# 0x30
+CLRDBG               =  49	# 0x31
 
 # encoder commands
 
-ENCSTART             =  48	# 0x30
-ENCSTOP              =  49	# 0x31
+ENCSTART             =  50	# 0x32
+ENCSTOP              =  51	# 0x33
 
 #  mega commands 
 
-SET_MEGA_VAL         =  50	# 0x32
-READ_MEGA_VAL        =  51	# 0x33
+SET_MEGA_VAL         =  52	# 0x34
+READ_MEGA_VAL        =  53	# 0x35
 
 # command table
 
@@ -121,24 +123,26 @@ cmdTable = ( \
     ("CMD_SYNCSETUP", "syncSetup"),     #  29
     ("CMD_ZSETUP", "zSetup"),           #  30
     ("CMD_ZSYNSETUP", None),            #  31
-    ("CMD_XSETUP", "xSetup"),           #  32
-    ("CMD_XSYNSETUP", None),            #  33
-    ("READSTAT", None),                 #  34
-    ("READISTATE", None),               #  35
-    ("LOADVAL", None),                  #  36
-    ("LOADMULTI", None),                #  37
-    ("READVAL", None),                  #  38
-    ("LOADXREG", None),                 #  39
-    ("READXREG", None),                 #  40
-    ("CLEARQUE", "clearQue"),           #  41
-    ("QUEMOVE", None),                  #  42
-    ("MOVEMULTI", None),                #  43
-    ("MOVEQUESTATUS", None),            #  44
-    ("READALL", "readAll"),             #  45
-    ("READDBG", "readDbg"),             #  46
-    ("CLRDBG", "clearDbg"),             #  47
-    ("ENCSTART", None),                 #  48
-    ("ENCSTOP", None),                  #  49
-    ("SET_MEGA_VAL", None),             #  50
-    ("READ_MEGA_VAL", None),            #  51
+    ("CMD_ZSETLOC", "zSetLoc"),         #  32
+    ("CMD_XSETUP", "xSetup"),           #  33
+    ("CMD_XSYNSETUP", None),            #  34
+    ("CMD_XSETLOC", "xSetLoc"),         #  35
+    ("READSTAT", None),                 #  36
+    ("READISTATE", None),               #  37
+    ("LOADVAL", None),                  #  38
+    ("LOADMULTI", None),                #  39
+    ("READVAL", None),                  #  40
+    ("LOADXREG", None),                 #  41
+    ("READXREG", None),                 #  42
+    ("CLEARQUE", "clearQue"),           #  43
+    ("QUEMOVE", None),                  #  44
+    ("MOVEMULTI", None),                #  45
+    ("MOVEQUESTATUS", None),            #  46
+    ("READALL", "readAll"),             #  47
+    ("READDBG", "readDbg"),             #  48
+    ("CLRDBG", "clearDbg"),             #  49
+    ("ENCSTART", None),                 #  50
+    ("ENCSTOP", None),                  #  51
+    ("SET_MEGA_VAL", None),             #  52
+    ("READ_MEGA_VAL", None),            #  53
     )

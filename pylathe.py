@@ -1296,13 +1296,13 @@ class MoveCommands():
 
     def moveXZ(self, zLocation, xLocation):
         self.queMove(en.SAVE_Z, zLocation)
-        self.queMove(en.MOVE_XZ, xLocation)
+        self.queMove(en.MOVE_X_Z, xLocation)
         if self.dbg:
             print("moveZX %7.4f %7.4f" % (zLocation, xLocation))
 
     def moveZX(self, zLocation, xLocation):
         self.queMove(en.SAVE_X, xLocation)
-        self.queMove(en.MOVE_ZX, zLocation)
+        self.queMove(en.MOVE_Z_X, zLocation)
         if self.dbg:
             print("moveXZ %7.4f %7.4f" % (zLocation, xLocation))
 
@@ -1320,13 +1320,13 @@ class MoveCommands():
 
     def taperZX(self, zLocation, xLocation):
         self.queMove(en.SAVE_X, xLocation)
-        self.queMoveF(en.TAPER_ZX, 1, zLocation)
+        self.queMoveF(en.TAPER_Z_X, 1, zLocation)
         if self.dbg:
             print("taperZX %7.4f" % (zLocation))
 
     def taperXZ(self, xLocation, zLocation):
         self.queMove(en.SAVE_Z, zLocation)
-        self.queMoveF(en.TAPER_XZ, 1, xLocation)
+        self.queMoveF(en.TAPER_X_Z, 1, xLocation)
         if self.dbg:
             print("taperXZ %7.4f" % (xLocation))
 
@@ -8755,6 +8755,7 @@ class MainFrame(wx.Frame):
                                jp.zDROOffset))
                         stdout.flush()
                 comm.sendMulti()
+                comm.command(cm.CMD_ZSETLOC)
 
                 self.sendData.sendXData()
                 if EXT_DRO:
@@ -8789,6 +8790,7 @@ class MainFrame(wx.Frame):
                     comm.queParm(pm.X_HOME_STATUS, \
                                  ct.HOME_SUCCESS if jp.xHomed else \
                                  ct.HOME_ACTIVE)
+                comm.command(cm.CMD_XSETLOC)
 
                 if not R_PI:
                     comm.queParm(pm.MEGA_SIM, cfg.getBoolInfo(cf.spMegaSim))
