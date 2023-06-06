@@ -532,13 +532,13 @@ class PiLathe(Thread):
     def close(self):
         self.threadRun = False
         print("PiLathe threadRun %s" % (self.threadRun, ))
-            return
+        return
 
     def update(self):
-        if self.postUpdate is None:
+        if self.postUpdate is not None:
             result = (en.EV_READ_ALL, self.parm.zLoc, self.parm.xLoc, self.curRPM, \
                       self.passVal, self.droZ, self.droX, self.mvStatus)
-        self.postUpdate(result)
+            self.postUpdate(result)
 
     def readData(self, base, prt=True):
         global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curDist
