@@ -25,9 +25,6 @@ xClkStr = ("xClkNone", "xClkXFreq", "xClkCh", "xClkIntClk", \
 moveCmds = ("CMD_NONE", "CMD_MOV", "CMD_JOG", "CMD_SYN",
             "CMD_MAX", "CMD_SPEED", "JOGSLOW")
 
-WINDOWS = system() == 'Windows'
-
-
 UDP = True
 import socket
 UDP_IP = "192.168.42.7"
@@ -89,6 +86,7 @@ class Comm():
         print("CommPi __init__")
         self.ser = Serial()
         self.rpi = PiLathe(self)
+        self.spi = None
         self.lastRdCmd = -1
         self.lastResult = 0
 
@@ -722,20 +720,9 @@ class PiLathe(Thread):
 
     # move functions
 
-    def sendSyncParms(self):
-        pass
-    
-    def syncCommand(self):
-        pass
-
-    def queParm(self):
-        pass
-    
-    def moveArc(self):    
-        pass
-
     def moveZ(self, val):
-        dest = intRound(val * self.zAxis.stepsInch) + self.zAxis.homeOffset
+        dest = val + self.zAxis.homeOffset
+        self.dbgMsg(en.D_ZMOV, val)
         print("moveZ dest %d val %d zStepsInch %d zHomeOffset %d" % \
               (dest, val, self.zAxis.stepsInch, self.zAxis.homeOffset))
         self.mvState = en.M_WAIT_Z
@@ -743,6 +730,7 @@ class PiLathe(Thread):
 
     def moveX(self, val):
         dest = val + self.xAxis.homeOffset
+        self.dbgMsg(en.D_XMOV, val)
         print("moveX dest %d val %d xStepsInch %d xHomeOffset %d" % \
               (dest, val, self.xAxis.stepsInch, self.xAxis.homeOffset))
         self.dbgMsg(en.D_XMOV, dest)
@@ -773,10 +761,10 @@ class PiLathe(Thread):
         self.taper = val
 
     def moveZX(self, val):
-        pass
+        print("moveZX")
 
     def moveXZ(self, val):
-        pass
+        print("moveXZ")
     
     def taperZX(self, val):
         print("taper zx %7.4f" % (val))
@@ -860,6 +848,12 @@ class PiLathe(Thread):
             self.xAxis.encParm = False
             self.mvState = en.M_START_SYNC
 
+    def sendSyncParms(self):
+        print("sendSyncParms")
+
+    def syncCommand(self):
+        print("syncCommand")
+
     def passNum(self, val):
         print("passNum")
         self.passVal = val
@@ -910,6 +904,12 @@ class PiLathe(Thread):
         print("saveXDro")
         pass
 
+    def queParm(self):
+        pass
+    
+    def moveArc(self):    
+        pass
+
     def opDone(self, val):
         print("opDone")
         self.dbgMsg(en.D_DONE, val)
@@ -922,18 +922,15 @@ class PiLathe(Thread):
 
     # move states
 
-    def mvWaitZ(self):
+    def mvWaitZ(self):          # 1
         if self.zAxis.state == en.AXIS_IDLE:
             self.mvState = en.M_IDLE
 
-    def mvWaitX(self):
+    def mvWaitX(self):          # 2
         if self.xAxis.state == en.AXIS_IDLE:
             self.mvState = en.M_IDLE
 
-    def mvWaitSpindle(self):
-        if WINDOWS:
-            self.mvState = en.M_IDLE
-            return
+    def mvWaitSpindle(self):    # 3
         indexClks = self.rd(rg.F_Rd_Idx_Clks)
         if indexClks != self.lastIdxClks:
             print("indexClks %d" % (indexClks))
@@ -950,67 +947,43 @@ class PiLathe(Thread):
                     elif self.mvSpindleCmd == en.START_SPINDLE:
                         self.mvState = en.M_IDLE
 
-    def mvStartSync(self):
+    def mvWaitSyncParms(self):  # 4
+        pass
+
+    def mvWaitSyncCmd(self):    # 5
+        pass
+
+    def mvStartSync(self):      # 6
         self.ld(rg.F_Enc_Base + rg.F_Ld_Enc_Cycle, self.parm.lSyncCycle ,2)
         self.ld(rg.F_Enc_Base + rg.F_Ld_Int_Cycle, self.parm.lSyncOutput ,2)
         self.ld(rg.F_Ld_Sync_Ctl, bt.synEncInit, 1)
         self.ld(rg.F_Ld_Sync_Ctl, bt.synEncEna, 1)
         self.mvState = en.M_WAIT_SYNC_READY
 
-    def mvSyncReady(self):
+    def mvWaitSyncReady(self):  # 7
         status = self.rd(rg.F_Rd_Status)
         if (status & bt.syncActive) != 0:
             self.mvState = en.M_IDLE
 
-#
-    def mvWaitSyncParms(self):
+    def mvWaitSyncDone(self):   # 8
         pass
 
-    def mvWaitSyncCmd(self):
+    def mvWaitMeasureDone(self): # 9
         pass
 
-    def mvWaitSyncReady(self):
+    def mvWaitProbe(self):      # 10
         pass
 
-    def mvWaitSyncDone(self):
+    def mvWaitMeasure(self):    # 11
         pass
 
-    def mvWaitMeasureDone(self):
+    def mvWaitSafeX(self):      # 12
         pass
 
-    def mvWaitProbe(self):
+    def mvWaitSafeZ(self):      # 13
         pass
 
-    def mvWaitMeasure(self):
-        pass
-
-    def mvWaitSafeX(self):
-        pass
-
-    def mvWaitSafeZ(self):
-        pass
-
-    def mvWaitArc(self):
-        pass
-
-#
-    
-    def mvSyncDone(self):
-        pass
-
-    def mvMeasureDone(self):
-        pass
-
-    def mvProbe(self):
-        pass
-
-    def mvMeasure(self):
-        pass
-
-    def mvSafeX(self):
-        pass
-
-    def mvSafeZ(self):
+    def mvWaitArc(self):        # 14
         pass
 
 MAX_SCALE = 12
@@ -1474,9 +1447,8 @@ class Axis():
     def move(self, pos, cmd):
         if self.state != en.AXIS_IDLE:
             return
-        if not WINDOWS:
-            self.loc = self.rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
-                          True, 0x20000, 0x3ffff)
+        self.loc = self.rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                           True, 0x20000, 0x3ffff)
         self.expLoc = pos
         print("%sAxis loc %d pos %d" % (self.name, self.loc, pos))
         self.rpi.dbgMsg(self.dbgBase + D_MOV, pos)
@@ -1606,18 +1578,16 @@ class Axis():
         pass
 
     def done(self):
+        rpi = self.rpi
         self.done = False
         self.cmd = 0
-        if not WINDOWS:
-            self.loc = self.rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
-                          True, 0x20000, 0x3ffff)
-        else:
-            self.loc = self.expLoc
-        self.rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
+        self.loc = self.rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+                           True, 0x20000, 0x3ffff)
+        rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
         if self.loc != self.expLoc:
-            self.rpi.dbgMsg(D_EXP, self.expLoc)
+            rpi.dbgMsg(D_EXP, self.expLoc)
         self.state = en.AXIS_IDLE
-        self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)
-        self.rpi.pauseCmd()
+        rpi.dbgMsg(self.dbgBase + D_ST, self.state)
+        rpi.pauseCmd()
         print("pause")
         stdout.flush()
