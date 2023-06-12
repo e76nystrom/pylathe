@@ -127,6 +127,7 @@ class Comm():
         else:
             if system() == 'Linux':
                 if os.uname().machine.startswith('arm'):
+                    # noinspection PyUnresolvedReferences
                     import spidev
                     bus = 0
                     device = 0
@@ -208,9 +209,10 @@ class Comm():
         if self.spi is not None:
             print("close spi device")
             self.spi.close()
-     
+
     def command(self, cmdVal):
         print("cmd %12s" % (cmdTable[cmdVal][0]))
+        # noinspection PyCallingNonCallable
         self.rpi.cmdAction[cmdVal]()
 
     def queParm(self, parmIndex, val):
@@ -233,7 +235,7 @@ class Comm():
         print("set %22s %22s %s" % (name, varName, valString))
         setattr(self.rpi.parm, varName, val)
 
-    def getParm(self, parmIndex, dbg=False):
+    def getParm(self, parmIndex):
         (name, varType, varName) = parmTable[parmIndex]
         val = getattr(self.rpi.parm, varName)
         print("getParm var %s val %s" % (varName, str(val)))
@@ -258,6 +260,7 @@ class Comm():
         self.rpi.moveQue.put((opString, op, val))
         pass
 
+    # noinspection PyMethodMayBeStatic
     def getQueueStatus(self):
         return(64)
 
@@ -272,6 +275,7 @@ def renameVar(name):
         else:
             varName = varName + s.capitalize()
     return varName
+
 
 class PiLathe(Thread):
     def __init__(self, comm):
@@ -398,7 +402,7 @@ class PiLathe(Thread):
                            ct.MV_XHOME_ACTIVE | ct.MV_ZHOME_ACTIVE)
 
     def doneCmd(self):
-        pass
+        self.mvStatus &= ~ct.MV_DONE
 
     def syncSetup(self):
         pass
@@ -548,27 +552,27 @@ class PiLathe(Thread):
                       self.mvStatus)
             self.postUpdate(result)
 
-    def readData(self, base, prt=True):
-        global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curDist
-        bSyn = base + rg.F_Sync_Base
-        xPos = self.rd(bSyn + rg.F_Rd_XPos)
-        yPos = self.rd(bSyn + rg.F_Rd_YPos)
-        zSum = self.rd(bSyn + rg.F_Rd_Sum)
-        zAclSum = self.rd(bSyn + rg.F_Rd_Accel_Sum)
-        aclCtr = self.rd(bSyn + rg.F_Rd_Accel_Ctr)
-        if prt:
-            print("xPos %7d yPos %6d zSum %12d" % (xPos, yPos, zSum), end=" ")
-            print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
+    # def readData(self, base, prt=True):
+    #     global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curDist
+    #     bSyn = base + rg.F_Sync_Base
+    #     xPos = self.rd(bSyn + rg.F_Rd_XPos)
+    #     yPos = self.rd(bSyn + rg.F_Rd_YPos)
+    #     zSum = self.rd(bSyn + rg.F_Rd_Sum)
+    #     zAclSum = self.rd(bSyn + rg.F_Rd_Accel_Sum)
+    #     aclCtr = self.rd(bSyn + rg.F_Rd_Accel_Ctr)
+    #     if prt:
+    #         print("xPos %7d yPos %6d zSum %12d" % (xPos, yPos, zSum), end=" ")
+    #         print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
 
-        bDist = base + rg.F_Dist_Base
-        curDist = self.rd(bDist + rg.F_Rd_Dist) # read z location
-        curAcl = self.rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
+    #     bDist = base + rg.F_Sync_Base
+    #     curDist = self.rd(bDist + rg.F_Rd_A_Dist) # read z location
+    #     curAcl = self.rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
 
-        curLoc = self.rd(base + rg.F_Loc_Base + rg.F_Rd_Loc, \
-                    False, 0x20000, 0x3ffff)
+    #     curLoc = self.rd(base + rg.F_Loc_Base + rg.F_Rd_Loc, \
+    #                 False, 0x20000, 0x3ffff)
 
-        if prt:
-            print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
+    #     if prt:
+    #         print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
 
     def axisCtl(self, dbg=False):
         indexClks = self.rd(rg.F_Rd_Idx_Clks)
@@ -595,7 +599,7 @@ class PiLathe(Thread):
         if axis.state != en.AXIS_IDLE:
             tmp = self.rd(base + rg.F_Loc_Base + rg.F_Rd_Loc, \
                           False, 0x20000, 0x3ffff)
-            dist = self.rd(base + rg.F_Dist_Base + rg.F_Rd_Dist, \
+            dist = self.rd(base + rg.F_Sync_Base + rg.F_Rd_A_Dist, \
                            False, 0x20000, 0x3ffff)
             self.parm.zLoc = self.zAxis.loc = tmp
             if axis.loc != tmp:
@@ -646,10 +650,11 @@ class PiLathe(Thread):
             axis.control()
 
     # process move command
-    
+
     def procMove(self):
         if self.cmdPause and self.mvState == en.M_IDLE:
             return
+        # noinspection PyCallingNonCallable
         self.mvCtl[self.mvState]()
         if self.mvState != self.mvLastState:
             self.mvLastState = self.mvState
@@ -677,6 +682,7 @@ class PiLathe(Thread):
                     stdout.flush()
                 self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
                 print("\n>>>")
+                # noinspection PyCallingNonCallable
                 self.move[op](val)
                 print("<<<\n")
             except IndexError:
@@ -729,9 +735,11 @@ class PiLathe(Thread):
         print("save taper %7.4f" % (val))
         self.taper = val
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def moveZX(self, val):
         print("moveZX")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def moveXZ(self, val):
         print("moveXZ")
     
@@ -747,8 +755,6 @@ class PiLathe(Thread):
 
     def taperSetup(self, mvAxis, tpAxis, val):
         print("taperSetup")
-        mvAxis = self.zAxis
-        tpAxis = self.xAxis
         tpAxis.taper = taper = self.taper
         loc = intRound(val * mvAxis.stepsInch) + mvAxis.homeOffset
         dist = tpAxis.savedLoc - tpAxis.loc
@@ -763,12 +769,14 @@ class PiLathe(Thread):
         taperCalc(mvAxis.turnAccel, tpAxis.taperAccel, taper)
         mvAxis.move(loc, ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
 
+    # noinspection PyUnusedLocal
     def startSpindle(self, val):
         print("startSpindle")
         self.mvSpindleCmd = self.cmd
         self.spindleStart()
         self.mvState = en.M_WAIT_SPINDLE
         
+    # noinspection PyUnusedLocal
     def stopSpindle(self, val):
         print("stopSpindle")
         self.mvSpindleCmd = self.cmd
@@ -817,10 +825,12 @@ class PiLathe(Thread):
             self.xAxis.encParm = False
             self.mvState = en.M_START_SYNC
 
-    def sendSyncParms(self):
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    def sendSyncParms(self, val):
         print("sendSyncParms")
 
-    def syncCommand(self):
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    def syncCommand(self, val):
         print("syncCommand")
 
     def passNum(self, val):
@@ -832,11 +842,13 @@ class PiLathe(Thread):
             self.springInfo = val
         self.dbgMsg(en.D_PASS, val)
 
+    # noinspection PyUnusedLocal
     def quePause(self, val):
         print("quePause")
         self.cmdPause = True
         self.mvStatus |= ct.MV_PAUSE
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def moveZOffset(self, val):
         print("moveZOffset")
 
@@ -844,9 +856,11 @@ class PiLathe(Thread):
         print("saveFeedType")
         self.feedType = val
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def zFeedSetup(self, val):
         print("zFeedSetup")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def xFeedSetup(self, val):
         print("xFeedSetup")
 
@@ -854,31 +868,39 @@ class PiLathe(Thread):
         print("saveFlags")
         self.threadFlag = val
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def probeX(self, val):
         print("probeX")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def probeZ(self, val):
         print("probeZ")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def saveZDro(self, val):
         print("saveZDro")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def saveXDro(self, val):
         print("saveXDro")
 
-    def queParm(self):
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    def queParm(self, val):
         print("queParm")
     
-    def moveArc(self):
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    def moveArc(self, val):
         print("moveArc")
 
     def opDone(self, val):
         print("opDone")
         self.dbgMsg(en.D_DONE, val)
         if val == ct.PARM_START:
+            self.mvStatus &= ~ct.MV_DONE
             self.mvStatus |= ct.MV_ACTIVE
         elif val == ct.PARM_DONE:
             self.mvStatus &= ~ct.MV_ACTIVE
+            self.mvStatus |= ct.MV_DONE
 
     # move states
 
@@ -996,12 +1018,12 @@ def load(aData, dist, encParm=True):
         ld(bSyn + rg.F_Ld_Accel_Val, aData.intAccel)   # load accel
         ld(bSyn + rg.F_Ld_Accel_Count, aData.accelClocks) # load acl ctr
 
-        ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist)
+        ld(base + rg.F_Sync_Base + rg.F_Ld_A_Dist, dist)
 
         axis.ldAxisCtl(base, bt.ctlInit, "3")
         axis.ldAxisCtl(base, 0, "3a")
     else:
-        ld(base + rg.F_Dist_Base + rg.F_Ld_Dist, dist)
+        ld(base + rg.F_Sync_Base + rg.F_Ld_A_Dist, dist)
         axisCtl |=  bt.ctlChDirect
 
     axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
@@ -1268,13 +1290,14 @@ def accelSetup1(aData):
     #         print(i)
 
 def taperCalc(aData, turnAccel, taper):
-    print("\n%s accel taperCalc" % (aData.axis.label))
+    axis = aData.axis
+    print("\n%s accel taperCalc" % (axis.name))
     print("taperCalc a0 %s a1 %s taper %8.6f" % \
-          (turnAccel.axis.label, aData.axis.label, taper))
-    parm = aData.parm
-    stepsInch = aData.axis.stepsInch
-    aData.taper = 1
-    aData.taperInch = taper
+          (turnAccel.axis.name, aData.axis.name, taper))
+    parm = axis.parm
+    stepsInch = aData.stepsInch
+    axis.taperDist = 1
+    axis.taperInch = taper
 
     turnCycleDist = parm.taperCycleDist
     taperCycleDist = taper * turnCycleDist
@@ -1284,8 +1307,8 @@ def taperCalc(aData, turnAccel, taper):
 
     turnSync = parm.turnSync
     if turnSync == en.SEL_TU_STEP:
-        turnSteps = intRound(turnCycleDist * turnAccel.axis.stepsInch)
-        taperSteps = intRound(taperCycleDist * stepsInch)
+        # turnSteps = intRound(turnCycleDist * turnAccel.axis.stepsInch)
+        # taperSteps = intRound(taperCycleDist * stepsInch)
         print("**not done")
     elif turnSync == en.SEL_TU_ENC:
         dx = intRound((parm.encPerRev * turnCycleDist) / turnAccel.pitch)
@@ -1352,6 +1375,10 @@ class Axis():
         self.encParm = None
         self.homeOffset = None
         self.savedLoc = None
+
+        self.taper = None
+        self.taperDist = None
+        self.taperInch = None
         
     def init(self):
         parm = self.parm
@@ -1409,7 +1436,7 @@ class Axis():
             self.setLoc = self.rpi.setXLoc
 
             
-        self.ld(self.base + rg.F_Dist_Base + rg.F_Ld_Dist, 0)
+        self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_A_Dist, 0)
 
     def initLoc(self):
         print("%sSetLoc" % (self.name))
@@ -1474,6 +1501,7 @@ class Axis():
             self.rpi.dbgMsg(self.dbgBase + D_ST, self.state)
             print("%s axis control %s" % (self.name, en.axisStatesList[self.state]))
         if self.state != en.AXIS_IDLE:
+            # noinspection PyCallingNonCallable
             self.stateDisp[self.state]()
 
     def idle(self):
@@ -1533,10 +1561,10 @@ class Axis():
             self.done = False
             self.wait = False
             self.loadClock(0)
-            dist = self.rd(self.base + rg.F_Dist_Base + rg.F_Rd_Dist)
+            dist = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_A_Dist)
             loc = self.rd(self.base + rg.F_Loc_Base + rg.F_Rd_Loc)
             accelCtr = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Accel_Ctr)
-            aclSteps = self.rd(self.base + rg.F_Dist_Base + rg.F_Rd_Acl_Steps)
+            aclSteps = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_A_Acl_Steps)
             print("dist %d loc %d accelCtr %d aclSteps %d" % \
                   (dist, loc, accelCtr, aclSteps))
 
@@ -1556,8 +1584,10 @@ class Axis():
             rpi.dbgMsg(D_EXP, self.expLoc)
         self.state = en.AXIS_IDLE
         rpi.dbgMsg(self.dbgBase + D_ST, self.state)
-        rpi.pauseCmd()
-        print("pause")
+
+        # rpi.pauseCmd()
+        # print("pause")
+
         # variables = [i for i in dir(self) if not callable(i)]
         # for i in variables:
         #     if not i.startswith("_"):

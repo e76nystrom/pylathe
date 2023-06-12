@@ -29,6 +29,20 @@ pollMegaList = ( \
     "M_POLL_ESTOP_PC",
     )
 
+pollMegaText = ( \
+    "estop no in",
+    "estop nc in",
+    "spindle forward in",
+    "spindle reverse in",
+    "estop condition",
+    "watchdog enabled",
+    "charge pump active",
+    "pwm active",
+    "stepper disabled",
+    "estop relay",
+    "estop pc",
+    )
+
 # mega vfd speed selector
 
 MEGA_SLOW_PWM    =  0           # Slow PWM

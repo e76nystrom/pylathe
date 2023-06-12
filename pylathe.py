@@ -611,7 +611,7 @@ def getConfigList(panel):
     return panel.configList
 
 class FormRoutines:
-    def __init__(self, panel=True):
+    def __init__(self):
         self.configList = None
         self.prefix = ""
         self.focusField = None
@@ -2508,14 +2508,14 @@ class Arc(LatheOp, UpdatePass):
 
         if stem:
             rad0F = rad0 + self.finishAllowance
-            rad1F = rad1 + self.finishAllowance
+            # rad1F = rad1 + self.finishAllowance
             self.moveInitial = self.moveInitStem
             self.movePreCut = self.movePreStem
             self.moveCut = self.moveCutStem
             self.movePostCut = self.movePostStem
         else:
             rad0F = rad0
-            rad1F = rad1
+            # rad1F = rad1
 
         if draw:
             m.drawArc(self.center, (z0, x0), (self.center.z, 0))
@@ -2612,6 +2612,7 @@ class Arc(LatheOp, UpdatePass):
 
         m.drawClose()
 
+    # noinspection PyMethodMayBeStatic
     def moveNone(self, val=None):
         if val is not None:
             print("moveNone called with", val)
@@ -3108,6 +3109,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
     def OnEnter(self, _):
         OnEnter(self)
 
+    # noinspection PyMethodMayBeStatic
     def arcTypeSetup(self):
         indexList = (en.SEL_ARC_END, en.SEL_ARC_CORNER, \
                      en.SEL_ARC_SMALL, en.SEL_ARC_LARGE, \
@@ -5285,7 +5287,7 @@ class JogShuttle(Thread):
 class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, mainFrame, *args, **kwargs):
         super(JogPanel, self).__init__(mainFrame, *args, **kwargs)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
         self.Connect(-1, -1, EVT_KEYPAD_ID, self.OnKeypadEvent)
         # self.Connect(-1, -1, EVT_STATUS_UPDATE_ID, self.OnStatusUpdate)
@@ -5360,6 +5362,7 @@ class JogPanel(wx.Panel, FormRoutines):
         self.initKeypadTable()
         self.initUI()
 
+    # noinspection PyMethodMayBeStatic
     def OnCharHook(self, e):
         code = e.GetUnicodeKey()
         if code != wx.WXK_NONE:
@@ -5688,6 +5691,7 @@ class JogPanel(wx.Panel, FormRoutines):
         else:
             self.rpmText.SetLabel("RPM")
 
+    # noinspection PyMethodMayBeStatic
     def menuPos(self, e, ctl):
         (xPos, yPos) = ctl.GetPosition()
         if e is not None:
@@ -5947,11 +5951,13 @@ class JogPanel(wx.Panel, FormRoutines):
         self.combo.SetFocus()
         evt.Skip()
 
+    # noinspection PyMethodMayBeStatic
     def OnSetFocus(self, evt):
         # print("focus set")
         # stdout.flush()
         evt.Skip()
 
+    # noinspection PyMethodMayBeStatic
     def OnKillFocus(self, evt):
         # print("focus kill")
         # stdout.flush()
@@ -6224,6 +6230,7 @@ class JogPanel(wx.Panel, FormRoutines):
         if dialPanel is not None:
             dialPanel.updatePointer(xPos)
 
+    # noinspection PyMethodMayBeStatic
     def updateRPM(self, val):
         print(val)
         stdout.flush()
@@ -6402,7 +6409,7 @@ class JogPanel(wx.Panel, FormRoutines):
                 if val is not None:
                     if val & ct.HOME_SUCCESS:
                         self.homeDone(AXIS_Z, True, st.STR_HOME_SUCCESS)
-                        zHomed = True
+                        self.zHomed = True
                         if not EXT_DRO:
                             self.comm.setParm(pm.Z_LOC, 0)
                             if DRO:
@@ -6984,7 +6991,7 @@ class PosMenu(wx.Menu):
 
 class SetPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jp, axis):
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.jp = jp
         self.axis = axis
         pos = (10, 10)
@@ -7035,7 +7042,7 @@ class SetPosDialog(wx.Dialog, FormRoutines):
 
 class ProbeDialog(wx.Dialog, FormRoutines):
     def __init__(self, jogPanel, axis):
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.jp = jogPanel
         self.axis = axis
         pos = (10, 10)
@@ -7128,7 +7135,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
 
 class GotoDialog(wx.Dialog, FormRoutines):
     def __init__(self, jp, axis):
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.jp = jp
         self.comm = jp.mf.comm
         self.axis = axis
@@ -7201,7 +7208,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
 
 class FixXPosDialog(wx.Dialog, FormRoutines):
     def __init__(self, jp):
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.jp = jp
         self.comm = jp.mf.comm
         pos = (10, 10)
@@ -7300,7 +7307,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
 class RetractDialog(wx.Dialog, FormRoutines):
     def __init__(self, jp, axis):
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         self.jp = jp
         self.axis = axis
         self.axisVal = 'Z' if axis == AXIS_Z else 'X'
@@ -7676,6 +7683,7 @@ class UpdateThread(Thread):
                     try:
                         action = self.dbgTbl[cmd]
                         assert (callable(action))
+                        # noinspection PyArgumentList
                         output = action(val)
                         if output is not None:
                             if self.dbg is None:
@@ -7732,6 +7740,7 @@ class UpdateThread(Thread):
                   (en.dMessageList[cmd], str(val)))
             stdout.flush()
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def dbgNone(self, val):
         return "none"
 
@@ -7761,6 +7770,7 @@ class UpdateThread(Thread):
         elif val == ct.PARM_DONE:
             return("done " + timeStr())
 
+    # noinspection PyMethodMayBeStatic
     def dbgTest(self, val):
         return("test %d" % (val))
 
@@ -7828,9 +7838,11 @@ class UpdateThread(Thread):
         tmp = float(val) / self.mf.xStepsInch
         return("xerr %7.4f" % (tmp))
 
+    # noinspection PyMethodMayBeStatic
     def dbgXWait(self, val):
         return("xwt  %2x" % (val))
 
+    # noinspection PyMethodMayBeStatic
     def dbgXDone(self, val):
         return("xdn  %2x" % (val))
 
@@ -7838,9 +7850,11 @@ class UpdateThread(Thread):
         self.xEncoderStart = val
         return(None)
 
+    # noinspection PyMethodMayBeStatic
     def dbgXX(self, val):
         return("x_x  %7d" % (val))
 
+    # noinspection PyMethodMayBeStatic
     def dbgXY(self, val):
         return("x_y  %7d" % (val))
 
@@ -7924,9 +7938,11 @@ class UpdateThread(Thread):
         tmp = float(val) / self.mf.zStepsInch
         return("zerr %7.4f" % (tmp))
 
+    # noinspection PyMethodMayBeStatic
     def dbgZWait(self, val):
         return("zwt  %2x" % (val))
 
+    # noinspection PyMethodMayBeStatic
     def dbgZDone(self, val):
         return("zdn  %2x" % (val))
 
@@ -7941,9 +7957,11 @@ class UpdateThread(Thread):
         self.zEncoderCount = count
         return("zedn %7.2f %7d" % (float(count) / self.encoderCount, count))
 
+    # noinspection PyMethodMayBeStatic
     def dbgZX(self, val):
         return("z_x  %7d" % (val))
 
+    # noinspection PyMethodMayBeStatic
     def dbgZY(self, val):
         return("z_y  %7d" % (val))
 
@@ -7989,6 +8007,7 @@ class UpdateThread(Thread):
         self.lastZIdxP = val
         return(result)
 
+    # noinspection PyMethodMayBeStatic
     def dbgHome(self, val):
         return("hsta %s" % (en.hStatesList[val]))
 
@@ -7997,6 +8016,7 @@ class UpdateThread(Thread):
         return("msta %s" % (en.mStatesList[val]
                             + ("\n" if self.mIdle else "")))
 
+    # noinspection PyMethodMayBeStatic
     def dbgMoveCmd(self, val):
         if (val & 0xff00) == 0:
             return("mcmd %s" % (en.mCommandsList[val]))
@@ -8074,6 +8094,7 @@ class DialPanel(wx.Panel):
             self.Refresh()
             # self.Update()
 
+    # noinspection PyUnusedLocal
     def OnResize(self, event):
         self.bmp = None
         self.Refresh()
@@ -9108,7 +9129,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "Z Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9215,7 +9236,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "X Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9335,7 +9356,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "Spindle Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9502,7 +9523,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "Port Setup", pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9553,7 +9574,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "Config Setup", pos, \
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9631,7 +9652,7 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
         wx.Dialog.__init__(self, mainFrame, -1, "Mega Setup", pos, \
                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
         self.SetFont(defaultFont)
-        FormRoutines.__init__(self, False)
+        FormRoutines.__init__(self)
         DialogActions.__init__(self)
         self.Bind(wx.EVT_SHOW, OnDialogShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -9778,6 +9799,7 @@ class SpindleTest():
         deltaV = sStepsSecMax - sStepsSecMin
         dbgPrt(txt, "deltaV %4.1f sStepsSecMin %4.1f sStepsSecMax %4.1f", \
                (deltaV, sStepsSecMin, sStepsSecMax))
+        # noinspection PyUnreachableCode
         if False:
             pass
             # accelStepsSec2 = deltaV / aTime

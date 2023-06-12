@@ -21,6 +21,16 @@ axisStatesList = ( \
     "AXIS_STATES",
     )
 
+axisStatesText = ( \
+    "idle",
+    "wait for backlash move complete",
+    "start axis move",
+    "wait for move complete",
+    "wait for position to settle",
+    "clean up state",
+    "number of states",
+    )
+
 # move control states
 
 M_IDLE           =  0           # idle state
@@ -55,6 +65,24 @@ mStatesList = ( \
     "M_WAIT_SAFE_X",
     "M_WAIT_SAFE_Z",
     "M_WAIT_ARC",
+    )
+
+mStatesText = ( \
+    "idle state",
+    "wait for z to complete",
+    "wait for x to complete",
+    "wait for spindle start",
+    "wait for sync parameters",
+    "wait for sync command",
+    "start sync",
+    "wait for sync",
+    "wait for sync done",
+    "wait for measurement done",
+    "wait for probe to complete",
+    "wait for measurement to complete",
+    "wait for move to safe x to complete",
+    "wait for move to safe z to complete",
+    "wait for arc move to complete",
     )
 
 # move control commands
@@ -125,6 +153,40 @@ mCommandsList = ( \
     "OP_DONE",
     )
 
+mCommandsText = ( \
+    "move z",
+    "move x",
+    "save z",
+    "save x",
+    "save z offset",
+    "save x offset",
+    "save taper",
+    "move x in sync with z",
+    "move z in sync with x",
+    "taper x",
+    "taper z",
+    "spindle start",
+    "spindle stop",
+    "z sync setup",
+    "x sync setup",
+    "send sync parameters",
+    "send sync command",
+    "set pass number",
+    "pause queue",
+    "move z offset",
+    "save feed type",
+    "setup z feed",
+    "setup x feed",
+    "save thread flags",
+    "probe in z direction",
+    "probe in x direction",
+    "save z dro reading",
+    "save x dro reading",
+    "save parameter in queue",
+    "move in an arc",
+    "operation done",
+    )
+
 # move control operation
 
 OP_TURN          =  0           # turn
@@ -143,6 +205,15 @@ operationsList = ( \
     "OP_ARC",
     )
 
+operationsText = ( \
+    "turn",
+    "face",
+    "cutoff",
+    "taper",
+    "thread",
+    "arc",
+    )
+
 # home control states
 
 H_IDLE           =  0           # idle state
@@ -157,6 +228,14 @@ hStatesList = ( \
     "H_OFF_HOME",
     "H_BACKOFF",
     "H_SLOW",
+    )
+
+hStatesText = ( \
+    "idle state",
+    "found home switch",
+    "off home switch",
+    "backoff dist from switch",
+    "found home slowly",
     )
 
 # debug message types
@@ -249,6 +328,51 @@ dMessageList = ( \
     "D_MCMD",
     )
 
+dMessageText = ( \
+    "pass done",
+    "all operations done",
+    "test message",
+    "x move location",
+    "x location",
+    "x distance",
+    "x steps",
+    "x state",
+    "x backlash steps",
+    "x dro location",
+    "x pass dro location",
+    "x expected location",
+    "x error with respect to dro",
+    "x wait",
+    "x done",
+    "x spindle encoder start count",
+    "x spindle encoder done count",
+    "x ",
+    "x ",
+    "z move location",
+    "z location",
+    "z distance",
+    "z steps",
+    "z state",
+    "z backlash steps",
+    "z dro location",
+    "z pass dro location",
+    "z expected location",
+    "z error with respect to dro",
+    "z wait",
+    "z done",
+    "z spindle encoder start count",
+    "Z spindle encoder done count",
+    "z ",
+    "z ",
+    "x dro at index pulse",
+    "x position at index pulse",
+    "z dro at index pulse",
+    "z position at index pulse",
+    "home state",
+    "move state",
+    "move command",
+    )
+
 # pylathe update events
 
 EV_ZLOC          =  0           # z location
@@ -265,6 +389,15 @@ evEventsList = ( \
     "EV_READ_ALL",
     "EV_ERROR",
     "EV_MAX",
+    )
+
+evEventsText = ( \
+    "z location",
+    "x location",
+    "rpm",
+    "all values",
+    "event error",
+    "maximum event",
     )
 
 # turning sync selector

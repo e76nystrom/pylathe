@@ -3,7 +3,7 @@ from sys import stdout
 ################################################################################
 
 configTable = None
-config = None
+config = []
 strTable = None
 cmdTable = None
 parmTable = None
@@ -20,6 +20,7 @@ class Setup():
         self.importList = []
         self.outputFile = True
 
+    # noinspection PyMethodMayBeStatic
     def listImports(self, file, importList):
         line = "from %s import " % (file)
         for i in importList:
@@ -35,9 +36,7 @@ class Setup():
         global config, configTable
         config = {}
         configTable = []
-        imports = []
-        imports.append("config")
-        imports.append("configTable")
+        imports = ["config", "configTable"]
         f = None
         if self.outputFile:
             file = 'configDef'
@@ -81,8 +80,7 @@ class Setup():
     def createStrings(self, strList):
         global strTable
         strTable = []
-        imports = []
-        imports.append("strTable")
+        imports = ["strTable"]
         f = None
         if self.outputFile:
             file = 'stringDef'
@@ -114,8 +112,7 @@ class Setup():
     def createCommands(self, cmdList, cLoc, fData=False, pyFile=True, \
                        check=True, prefix="rem"):
         global cmdTable
-        imports = []
-        imports.append("cmdTable")
+        imports = ["cmdTable"]
         cmdTable = []
         cFile = None
         if fData:
@@ -192,8 +189,7 @@ class Setup():
                          cSource='../lathe_src/', prefix='rem'):
         global parmTable
         parmTable = []
-        imports = []
-        imports.append("parmTable")
+        imports = ["parmTable"]
         preCap = prefix.capitalize()
         preUC = prefix.upper()
         remFunc = None
@@ -280,9 +276,9 @@ class Setup():
                         varName = regName[3:].lower()
                     else:
                         varName = regName.lower()
-                regAct = '0'
-                if (len(data) >= 4):
-                    regAct = data[3]
+                # regAct = '0'
+                # if (len(data) >= 4):
+                #     regAct = data[3]
                 if fData:
                     tmp = " %s, " % (regName)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
@@ -313,7 +309,7 @@ class Setup():
                                                  regComment, varName, tmpType))
                         remFunc.append((regName, index, regComment, \
                                         varName, tmpType))
-                    tmp = "  %s, " % (regName)
+                    # tmp = "  %s, " % (regName)
                     # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
                     #             (tmp.ljust(32), index, regComment))
                 parmTable.append((regName, varType, varName))
@@ -398,6 +394,7 @@ class Setup():
         global enum, stringList
         imports = []
         cFile = None
+        var = None
         if fData:
             fName = 'ctlstates.h'
             if len(prefix) != 0:
@@ -439,17 +436,17 @@ class Setup():
                             fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                 val += 1
             else:
+                commentList = []
                 if data.startswith("enum"):
-                    commentList = None
                     tmp = data.split()
                     if len(tmp) < 2:
                         print("enum failure")
                         stdout.flush()
                     var = tmp[1]
                     enum = tmp[1].replace('_', "") + "List"
-                    if len(tmp) >= 3:
-                        if tmp[2][0] == 'c':
-                            commentList = []
+                    # if len(tmp) >= 3:
+                    #     if tmp[2][0] == 'c':
+                    #         commentList = []
                     globals()[enum] = []
                     imports.append(enum)
                     val = 0
@@ -506,6 +503,8 @@ class Setup():
 
     def createCtlBits(self, regList, cLoc, fData=False):
         imports = []
+        cFile = None
+        bitVal = None
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
@@ -562,6 +561,9 @@ class Setup():
         global xRegTable
         xRegTable = []
         imports = [table]
+        cFile = None
+        xFile = None
+        byteLen = 0
         if fData:
             path = os.path.join(cLoc, cName + 'Reg.h')
             cFile = open(path, 'wb')
@@ -738,6 +740,7 @@ class Setup():
         self.xRegTable = xRegTable
         return(xRegTable)
 
+    # noinspection PyMethodMayBeStatic
     def hexRecord(self, address, record):
         recType = 0
         outRec = ":%02x%04x%02x" % (len(record), address, recType)
@@ -768,6 +771,16 @@ class Setup():
     def createFpgaBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
                        pName="xBitDef", xName="xilinx", \
                        package="CtlBits", cName="xilinx"):
+        var = None
+        shift = None
+        bit = None
+        cFile = None
+        xFile = None
+        comment = None
+        xLst = []
+        cLst = []
+        maxShift = None
+        start = None
         imports = []
         if fData:
             path = os.path.join(cLoc, cName + 'Bits.h')
@@ -794,7 +807,7 @@ class Setup():
             f = open(pName + '.py', 'wb')
             fWrite(f, "# fpga bits\n")
         for i in range(len(xilinxBitList)):
-            shiftType = None
+            # shiftType = None
             data = xilinxBitList[i]
             if not isinstance(data, str):
                 if len(data) == 1:
@@ -885,11 +898,11 @@ class Setup():
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
-                            for i in range(len(xLst)):
-                                fWrite(xFile, xLst[i])
+                            for k in range(len(xLst)):
+                                fWrite(xFile, xLst[k])
                             fWrite(xFile, "\n")
-                            for j in range(len(cLst)):
-                                fWrite(xFile, cLst[j])
+                            for k in range(len(cLst)):
+                                fWrite(xFile, cLst[k])
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +
                         #                 "String[] %sBits =\n {\n") % \

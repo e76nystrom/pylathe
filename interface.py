@@ -1096,20 +1096,28 @@ fpgaLatheList = \
         ("F_Ld_Incr2", None, 1, 4, "axis incr2"),
         ("F_Ld_Accel_Val", None, 1, 4, "axis accel value"),
         ("F_Ld_Accel_Count", None, 1, 4, "axis accel count"),
+
         ("F_Rd_XPos", None, 1, 4, "axis x pos"),
         ("F_Rd_YPos", None, 1, 4, "axis y pos"),
         ("F_Rd_Sum", None, 1, 4, "axis sum"),
         ("F_Rd_Accel_Sum", None, 1, 4, "axis accel sum"),
         ("F_Rd_Accel_Ctr", None, 1, 4, "axis accel counter"),
+
+        ("F_Ld_A_Dist", None, 1, 4, "axis distance"),
+        ("F_Ld_Max_Dist", None, 1, 4, "jog maximum distance"),
+
+        ("F_Rd_A_Dist", None, 1, 4, "read axis distance"),
+        ("F_Rd_A_Acl_Steps", None, 1, 4, "read accel steps"),
+
         ("F_Sync_Max", None, None, 0, "number of sync registers"),
 
-        "distance registers",
+        # "distance registers",
 
-        ("distCtr",),
-        ("F_Ld_Dist", 0, 1, 4, "axis distance"),
-        ("F_Rd_Dist", None, 1, 4, "read axis distance"),
-        ("F_Rd_Acl_Steps", None, 1, 4, "read accel steps"),
-        ("F_Dist_Max", None, None, 0, "number of distance registers"),
+        # ("distCtr",),
+        # ("F_Ld_Dist", 0, 1, 4, "axis distance"),
+        # ("F_Rd_Dist", None, 1, 4, "read axis distance"),
+        # ("F_Rd_Acl_Steps", None, 1, 4, "read accel steps"),
+        # ("F_Dist_Max", None, None, 0, "number of distance registers"),
 
         "location registers",
 
@@ -1143,7 +1151,7 @@ fpgaLatheList = \
         ("F_Rd_Axis_Ctl", None, 1, 2, "read axis control register"),
         ("F_Ld_Freq", None, 1, 4, "frequency"),
         ("F_Sync_Base", None, "syncAccel", None, "sync registers"),
-        ("F_Dist_Base", None, "distCtr", None, "distance registers"),
+        # ("F_Dist_Base", None, "distCtr", None, "distance registers"),
         ("F_Loc_Base", None, "locCtr", None, "location registers"),
         ("F_Dro_Base", None, "dro", None, "dro registers"),
         ("F_Jog_Base", None, "jog", None, "jog registers"),
@@ -1154,8 +1162,8 @@ fpgaLatheList = \
         ("spindle",),
         ("F_Ld_Sp_Ctl", 0, 1, 1, "spindle control register"),
         ("F_Ld_Sp_Freq", None, 1, 4, "freq for step spindle"),
-        ("F_Sp_Sync_Base", None, "syncAccel", None, "spindle sync"),
         ("F_Sp_Jog_Base", None, "jog", None, "spindle jog"),
+        ("F_Sp_Sync_Base", None, "syncAccel", None, "spindle sync"),
 
         "register definitions",
 
