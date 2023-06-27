@@ -75,7 +75,7 @@ def axisCtlStr(axisCtl, axis):
     if (axisCtl & bt.ctlInit) != 0:
         s += "ctlInit "
     if (axisCtl & bt.ctlStart) != 0:
-        s += "cltStart "
+        s += "ctlStart "
         s += "P" if (axisCtl & bt.ctlDirPos) != 0 else "N"
         s += " "
     if (axisCtl & bt.ctlBacklash) != 0:
@@ -90,8 +90,10 @@ def axisCtlStr(axisCtl, axis):
         s += "save "
     if (axisCtl & bt.ctlDroEnd) != 0:
         s += "droEnd "
-    if (axisCtl & bt.ctlJogEna) != 0:
-        s += "jogEna "
+    if (axisCtl & bt.ctlJogCmd) != 0:
+        s += "jogCmd "
+    if (axisCtl & bt.ctlJogMpg) != 0:
+        s += "jogMpg "
     if (axisCtl & bt.ctlHome) != 0:
         s += "home "
     if (axisCtl & bt.ctlIgnoreLim) != 0:
