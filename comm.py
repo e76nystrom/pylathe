@@ -87,7 +87,7 @@ class Comm():
             self.ser = None
 
     def send(self, cmd):
-        if cmd[1:3] != "2d":
+        if cmd[1:3] != "2f":
             print("cmd", cmd.strip('\x01\r'))
         if self.ser is None:
             return
@@ -104,7 +104,7 @@ class Comm():
 
         length = int(rsp[1:3], 16)
         rsp += self.ser.read(length).decode('utf8')
-        if rsp[3:5] != "2d":
+        if rsp[3:5] != "2f":
             print("rsp", rsp)
         if rsp[-1] == '*':
             self.timeout = False

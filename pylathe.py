@@ -58,17 +58,20 @@ stderr = open(os.path.join(DBG_DIR, "err.log"), 'w')
 stderr.write("testing\n")
 
 R_PI = False
+cmds = sys.argv
+for cmd in cmds:
+    if "--rpi" == cmd:
+        R_PI = True
+
 WINDOWS = system() == 'Windows'
 if WINDOWS:
     from pywinusb.hid import find_all_hid_devices, HIDError
-    from comm import Comm, CommTimeout, enableXilinx
-    if os.path.isfile("rpi.txt"):
+    if R_PI:
         from commPi import Comm, CommTimeout
-        R_PI = True
-        print("rpi test mode")
-    #pncDir = ("Python", "Pnc")
-    pncDir = ("Pnc", )
-    dirStrip = -1
+    else:
+        from comm import Comm, CommTimeout, enableXilinx
+    pncDir = ("Python", "Pnc")
+    dirStrip = -2
 else:
     print(os.uname())
     if not os.uname().machine.startswith('arm'):

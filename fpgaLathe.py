@@ -9,7 +9,7 @@ xAxisEna     = 0x08             # x axis enable flag
 xAxisDone    = 0x10             # x axis done
 xAxisCurDir  = 0x20             # x axis current dir
 stEStop      = 0x40             # emergency stop
-spindleActive = 0x80            # x axis current dir
+spindleActive = 0x80            # spindle activer
 queNotEmpty  = 0x100            # ctl queue not empty
 ctlBusy      = 0x200            # controller busy
 syncActive   = 0x400            # sync active
@@ -54,9 +54,10 @@ ctlSetLoc    = 0x20             # set location
 ctlChDirect  = 0x40             # ch input direct
 ctlSlave     = 0x80             # slave controlled by other axis
 ctlDroEnd    = 0x100            # use dro to end move
-ctlJogEna    = 0x200            # enable jog
-ctlHome      = 0x400            # homing axis
-ctlIgnoreLim = 0x800            # ignore limits
+ctlJogCmd    = 0x200            # jog with commands
+ctlJogMpg    = 0x400            # jog with mpg
+ctlHome      = 0x800            # homing axis
+ctlIgnoreLim = 0x1000           # ignore limits
 
 # axis status register
 
@@ -170,7 +171,8 @@ importList = ( \
  ctlChDirect, \
  ctlSlave, \
  ctlDroEnd, \
- ctlJogEna, \
+ ctlJogCmd, \
+ ctlJogMpg, \
  ctlHome, \
  ctlIgnoreLim, \
  axDoneDist, \

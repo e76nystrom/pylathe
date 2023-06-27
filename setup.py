@@ -898,6 +898,9 @@ class Setup():
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
+                            fWrite(xFile, " --variable %sReg : "\
+                                        "unsigned(%sSize-1 downto 0);\n" %
+                                        (regName, regName))
                             for k in range(len(xLst)):
                                 fWrite(xFile, xLst[k])
                             fWrite(xFile, "\n")
