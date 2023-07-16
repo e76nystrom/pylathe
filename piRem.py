@@ -133,8 +133,8 @@ class Remote(Thread):
         self.last = [0 for i in range(len(rg.xRegTable))]
         if FILTER_INPUT:
             self.last[rg.F_Rd_Idx_Clks] = None
-            self.last[rg.F_ZAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
-            self.last[rg.F_XAxis_Base + rg.F_Dro_Base + rg.F_Rd_Dro] = None
+            self.last[rg.F_ZAxis_Base + rg.F_Sync_Base + rg.F_Rd_Dro] = None
+            self.last[rg.F_XAxis_Base + rg.F_Sync_Base + rg.F_Rd_Dro] = None
 
         self.action = [None for i in range(len(rg.xRegTable))]
         self.action[rg.F_Rd_Status] = (statusStr, "")
