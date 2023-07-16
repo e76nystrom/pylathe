@@ -52,7 +52,7 @@ ctlDirPos    = 0x10             # move in positive dir
 ctlDirNeg    = 0x00             # move in negative dir
 ctlSetLoc    = 0x20             # set location
 ctlChDirect  = 0x40             # ch input direct
-ctlSlave     = 0x80             # slave controlled by other axis
+ctlSlave     = 0x80             # slave ctl by other axis
 ctlDroEnd    = 0x100            # use dro to end move
 ctlJogCmd    = 0x200            # jog with commands
 ctlJogMpg    = 0x400            # jog with mpg
@@ -68,13 +68,13 @@ axDoneLimit  = 0x08             # axis done limit
 
 # configuration control register
 
-cfgZDirInv   = 0x01             # z direction inverted
-cfgXDirInv   = 0x02             # x direction inverted
-cfgZDroInv   = 0x04             # z dro direction inverted
-cfgXDroInv   = 0x08             # x dro direction inverted
-cfgZJogInv   = 0x10             # z jog direction inverted
-cfgXJogInv   = 0x20             # x jog direction inverted
-cfgSpDirInv  = 0x40             # spindle direction inverted
+cfgZDirInv   = 0x01             # z dir inverted
+cfgXDirInv   = 0x02             # x dir inverted
+cfgZDroInv   = 0x04             # z dro dir inverted
+cfgXDroInv   = 0x08             # x dro dir inverted
+cfgZJogInv   = 0x10             # z jog dir inverted
+cfgXJogInv   = 0x20             # x jog dir inverted
+cfgSpDirInv  = 0x40             # spindle dir inverted
 cfgZHomeInv  = 0x80             # z home inverted
 cfgZMinusInv = 0x100            # z minus inverted
 cfgZPlusInv  = 0x200            # z plus inverted
@@ -82,11 +82,11 @@ cfgXHomeInv  = 0x400            # x home inverted
 cfgXMinusInv = 0x800            # x minus inverted
 cfgXPlusInv  = 0x1000           # x plus inverted
 cfgProbeInv  = 0x2000           # probe inverted
-cfgEncDirInv = 0x4000           # invert encoder direction
+cfgEncDirInv = 0x4000           # invert encoder dir
 cfgEStopEna  = 0x8000           # estop enable
 cfgEStopInv  = 0x10000          # estop invert
-cfgEnaEncDir = 0x20000          # enable encoder direction
-cfgGenSync   = 0x40000          # no encoder generate sync pulse
+cfgEnaEncDir = 0x20000          # enable encoder dir
+cfgGenSync   = 0x40000          # generate sync pulse
 cfgPWMEna    = 0x80000          # pwm enable
 
 # clock control register

@@ -1047,24 +1047,24 @@ fpgaLatheList = \
         ("phaseCtl",),
         ("F_Ld_Phase_Len", 0, 1, 2, "phase length"),
         ("F_Rd_Phase_Syn", None, 1, 4, "read phase at sync pulse"),
-        ("F_Phase_Max", None, None, 0, "number of phase registers"),
+        ("F_Phase_Max",    None, None, 0, "number of phase registers"),
 
         "controller",
 
         ("controller",),
-        ("F_Ld_Ctrl_Data", 0, 1, 0, "load controller data"),
-        ("F_Ctrl_Cmd", None, 1, 1, "controller command"),
-        ("F_Ld_Seq", None, 1, 1, "load sequence"),
-        ("F_Rd_Seq", None, 1, 4, "read sequence"),
-        ("F_Rd_Ctr", None, 1, 4, "read counter"),
-        ("F_Ctrl_Max", None, None, 0, "number of controller registers"),
+        ("F_Ld_Ctrl_Data", 0,    1, 0, "load controller data"),
+        ("F_Ctrl_Cmd",     None, 1, 1, "controller command"),
+        ("F_Ld_Seq",       None, 1, 1, "load sequence"),
+        ("F_Rd_Seq",       None, 1, 4, "read sequence"),
+        ("F_Rd_Ctr",       None, 1, 4, "read counter"),
+        ("F_Ctrl_Max",     None, None, 0, "number of controller registers"),
 
         "reader",
 
         ("reader",),
         ("F_Ld_Read_Data", 0, 1, 0, "load reader data"),
-        ("F_Read", None, 1, 0, "read data"),
-        ("F_Read_Max", None, None, 0, "number of reader registers"),
+        ("F_Read",         None, 1, 0, "read data"),
+        ("F_Read_Max",     None, None, 0, "number of reader registers"),
 
         "PWM",
 
@@ -1076,41 +1076,53 @@ fpgaLatheList = \
         "encoder",
 
         ("encoder",),
-        ("F_Ld_Enc_Cycle", 0, 1, 2, "load encoder cycle"),
-        ("F_Ld_Int_Cycle", None, 1, 2, "load internal cycle"),
+        ("F_Ld_Enc_Cycle",    0,    1, 2, "load encoder cycle"),
+        ("F_Ld_Int_Cycle",    None, 1, 2, "load internal cycle"),
         ("F_Rd_Cmp_Cyc_Clks", None, 1, 4, "read cmp cycle clocks"),
-        ("F_Enc_Max", None, None, 0, "number of encoder registers"),
+        ("F_Enc_Max",         None, None, 0, "number of encoder registers"),
 
         "debug frequency",
 
         ("dbgFreq",),
-        ("F_Ld_Dbg_Freq", 0, 1, 2, "debug frequency"),
+        ("F_Ld_Dbg_Freq",  0,    1, 2, "debug frequency"),
         ("F_Ld_Dbg_Count", None, 1, 4, "debug count"),
         ("F_Dbg_Freq_Max", None, None, 0, "number of debug frequency regs"),
 
         "sync accel",
 
         ("syncAccel",),
-        ("F_Ld_D", 0, 1, 4, "axis d"),
-        ("F_Ld_Incr1", None, 1, 4, "axis incr1"),
-        ("F_Ld_Incr2", None, 1, 4, "axis incr2"),
-        ("F_Ld_Accel_Val", None, 1, 4, "axis accel value"),
+        ("F_Ld_D",           0,    1, 4, "axis d"),
+        ("F_Ld_Incr1",       None, 1, 4, "axis incr1"),
+        ("F_Ld_Incr2",       None, 1, 4, "axis incr2"),
+        ("F_Ld_Accel_Val",   None, 1, 4, "axis accel value"),
         ("F_Ld_Accel_Count", None, 1, 4, "axis accel count"),
 
-        ("F_Rd_XPos", None, 1, 4, "axis x pos"),
-        ("F_Rd_YPos", None, 1, 4, "axis y pos"),
-        ("F_Rd_Sum", None, 1, 4, "axis sum"),
-        ("F_Rd_Accel_Sum", None, 1, 4, "axis accel sum"),
-        ("F_Rd_Accel_Ctr", None, 1, 4, "axis accel counter"),
+        ("F_Rd_XPos",        None, 1, 4, "axis x pos"),
+        ("F_Rd_YPos",        None, 1, 4, "axis y pos"),
+        ("F_Rd_Sum",         None, 1, 4, "axis sum"),
+        ("F_Rd_Accel_Sum",   None, 1, 4, "axis accel sum"),
+        ("F_Rd_Accel_Ctr",   None, 1, 4, "axis accel counter"),
 
-        ("F_Ld_A_Dist", None, 1, 4, "axis distance"),
-        ("F_Ld_Max_Dist", None, 1, 4, "jog maximum distance"),
-        ("F_Ld_Backlash", None, 1, 4, "jog backlash"),
+        ("F_Ld_A_Dist",      None, 1, 4, "axis distance"),
+        ("F_Ld_Max_Dist",    None, 1, 4, "jog maximum distance"),
+        ("F_Ld_Backlash",    None, 1, 4, "jog backlash"),
 
-        ("F_Rd_A_Dist", None, 1, 4, "read axis distance"),
+        ("F_Rd_A_Dist",      None, 1, 4, "read axis distance"),
         ("F_Rd_A_Acl_Steps", None, 1, 4, "read accel steps"),
 
-        ("F_Sync_Max", None, None, 0, "number of sync registers"),
+        ("F_Ld_X_Loc",       None, 1, 4, "axis location"),
+        ("F_Rd_X_Loc",       None, 1, 4, "read axis location"),
+
+        ("F_Ld_Mpg_Delta",   None, 1, 4, "Mpg delta values"),
+        ("F_Ld_Mpg_Dist",    None, 1, 4, "Mpg dist values"),
+        ("F_Ld_Mpg_Div",     None, 1, 4, "Mpg div values"),
+        
+        ("F_Ld_Dro",         None, 1, 4, "axis dro"),
+        ("F_Ld_Dro_End",     None, 1, 4, "axis dro end"),
+        ("F_Ld_Dro_Limit",   None, 1, 4, "axis dro decel limit"),
+        ("F_Rd_Dro",         None, 1, 4, "read axis dro"),
+
+        ("F_Sync_Max",       None, None, 0, "number of sync registers"),
 
         # "distance registers",
 
@@ -1120,21 +1132,21 @@ fpgaLatheList = \
         # ("F_Rd_Acl_Steps", None, 1, 4, "read accel steps"),
         # ("F_Dist_Max", None, None, 0, "number of distance registers"),
 
-        "location registers",
+        # "location registers",
 
-        ("locCtr",),
-        ("F_Ld_Loc", 0, 1, 4, "axis location"),
-        ("F_Rd_Loc", None, 1, 4, "read axis location"),
-        ("F_Loc_Max", None, None, 0, "number of location registers"),
+        # ("locCtr",),
+        # ("F_Ld_Loc", 0, 1, 4, "axis location"),
+        # ("F_Rd_Loc", None, 1, 4, "read axis location"),
+        # ("F_Loc_Max", None, None, 0, "number of location registers"),
 
-        "dro registers",
+        # "dro registers",
 
-        ("dro",),
-        ("F_Ld_Dro", 0, 1, 4, "axis dro"),
-        ("F_Ld_Dro_End", None, 1, 4, "axis dro end"),
-        ("F_Ld_Dro_Limit", None, 1, 4, "axis dro deceleration limit"),
-        ("F_Rd_Dro", None, 1, 4, "read axis dro"),
-        ("F_Dro_Max", None, None, 0, "number of dro registers"),
+        # ("dro",),
+        # ("F_Ld_Dro", 0, 1, 4, "axis dro"),
+        # ("F_Ld_Dro_End", None, 1, 4, "axis dro end"),
+        # ("F_Ld_Dro_Limit", None, 1, 4, "axis dro deceleration limit"),
+        # ("F_Rd_Dro", None, 1, 4, "read axis dro"),
+        # ("F_Dro_Max", None, None, 0, "number of dro registers"),
 
         "jog registers",
 
@@ -1147,73 +1159,73 @@ fpgaLatheList = \
         "axis",
 
         ("axisCtl",),
-        ("F_Rd_Axis_Status", 0, 1, 1, "read axis status"),
-        ("F_Ld_Axis_Ctl", None, 1, 2, "set axis control register"),
-        ("F_Rd_Axis_Ctl", None, 1, 2, "read axis control register"),
-        ("F_Ld_Freq", None, 1, 4, "frequency"),
-        ("F_Sync_Base", None, "syncAccel", None, "sync registers"),
-        # ("F_Dist_Base", None, "distCtr", None, "distance registers"),
-        ("F_Loc_Base", None, "locCtr", None, "location registers"),
-        ("F_Dro_Base", None, "dro", None, "dro registers"),
-        ("F_Jog_Base", None, "jog", None, "jog registers"),
-        ("F_Axis_Max", None, None, 0, "number of axis registers"),
+        ("F_Rd_Axis_Status", 0,    1,           1, "read axis status"),
+        ("F_Ld_Axis_Ctl",    None, 1,           2, "set axis control reg"),
+        ("F_Rd_Axis_Ctl",    None, 1,           2, "read axis control reg"),
+        ("F_Ld_Freq",        None, 1,           4, "frequency"),
+        ("F_Sync_Base",      None, "syncAccel", None, "sync registers"),
+        # ("F_Dist_Base",    None, "distCtr",   None, "distance registers"),
+        # ("F_Loc_Base",     None, "locCtr",    None, "location registers"),
+        # ("F_Dro_Base",     None, "dro",       None, "dro registers"),
+        # ("F_Jog_Base",     None, "jog",       None, "jog registers"),
+        ("F_Axis_Max",       None, None,        0, "num of axis regs"),
 
         "spindle",
 
         ("spindle",),
-        ("F_Ld_Sp_Ctl", 0, 1, 1, "spindle control register"),
-        ("F_Ld_Sp_Freq", None, 1, 4, "freq for step spindle"),
-        ("F_Sp_Jog_Base", None, "jog", None, "spindle jog"),
+        ("F_Ld_Sp_Ctl",    0,    1,           1,    "spindle control reg"),
+        ("F_Ld_Sp_Freq",   None, 1,           4,    "freq for step spindle"),
+        ("F_Sp_Jog_Base",  None, "jog",       None, "spindle jog"),
         ("F_Sp_Sync_Base", None, "syncAccel", None, "spindle sync"),
 
         "register definitions",
 
         ("regDef",),
-        ("F_Noop", 0, 1, 1, "register 0"),
+        ("F_Noop",         0,    1,            1,    "reg 0"),
 
         "status registers",
 
-        ("F_Rd_Status", None, 1, 4, "status register"),
-        ("F_Rd_Inputs", None, 1, 4, "inputs register"),
+        ("F_Rd_Status",    None, 1,            4,    "status reg"),
+        ("F_Rd_Inputs",    None, 1,            4,    "inputs reg"),
 
         "control registers",
 
-        ("F_Ld_Run_Ctl", None, 1, 1, "run control register"),
-        ("F_Ld_Sync_Ctl", None, 1, 1, "sync control register"),
-        ("F_Ld_Cfg_Ctl", None, 1, 3, "config control register"),
-        ("F_Ld_Clk_Ctl", None, 1, 1, "clock control register"),
-        ("F_Ld_Dsp_Reg", None, 1, 1, "display register"),
+        ("F_Ld_Run_Ctl",   None, 1,            1,    "run control reg"),
+        ("F_Ld_Sync_Ctl",  None, 1,            1,    "sync control reg"),
+        ("F_Ld_Cfg_Ctl",   None, 1,            3,    "config control reg"),
+        ("F_Ld_Clk_Ctl",   None, 1,            1,    "clock control reg"),
+        ("F_Ld_Dsp_Reg",   None, 1,            1,    "display reg"),
 
         "controller",
 
-        ("F_Ctrl_Base", None, "controller", None, "controller"),
+        ("F_Ctrl_Base",    None, "controller", None, "controller"),
 
         "reader",
 
-        ("F_Read_Base", None, "reader", None, "reader"),
+        ("F_Read_Base",    None, "reader",     None, "reader"),
 
         "debug frequency control",
 
-        ("F_Dbg_Freq_Base", None, "dbgFreq", None, "dbg frequency"),
+        ("F_Dbg_Freq_Base", None, "dbgFreq",   None, "dbg frequency"),
 
         "spindle speed",
 
-        ("F_Rd_Idx_Clks", None, 1, 4, "read clocks between index pulses"),
+        ("F_Rd_Idx_Clks",  None, 1,            4,    "clocks per index"),
 
         "step spindle frequency generator",
 
         "pwm",
 
-        ("F_PWM_Base", None, "pwmCtl", None, "pwm control"),
+        ("F_PWM_Base",     None, "pwmCtl",     None, "pwm control"),
 
         "base for modules",
 
-        ("F_Enc_Base", None, "encoder", None, "encoder registers"),
-        ("F_Phase_Base", None, "phaseCtl", None, "phase registers"),
-        ("F_ZAxis_Base", None, "axisCtl", None, "z axis registers"),
-        ("F_XAxis_Base", None, "axisCtl", None, "x axis registers"),
-        ("F_Spindle_Base", None, "spindle", None, "spindle registers"),
-        ("F_Cmd_Max", None, None, None, "number of commands"),
+        ("F_Enc_Base",      None, "encoder",   None, "encoder registers"),
+        ("F_Phase_Base",    None, "phaseCtl",  None, "phase registers"),
+        ("F_ZAxis_Base",    None, "axisCtl",   None, "z axis registers"),
+        ("F_XAxis_Base",    None, "axisCtl",   None, "x axis registers"),
+        ("F_Spindle_Base",  None, "spindle",   None, "spindle registers"),
+        ("F_Cmd_Max",       None, None,        None, "number of commands"),
     )
 
 xilinxList = \
@@ -1478,7 +1490,7 @@ fpgaLatheBitList = \
         ("ctlDirNeg",    0, 4,  "move in negative dir"),
         ("ctlSetLoc",    1, 5,  "set location"),
         ("ctlChDirect",  1, 6,  "ch input direct"),
-        ("ctlSlave",     1, 7,  "slave controlled by other axis"),
+        ("ctlSlave",     1, 7,  "slave ctl by other axis"),
         ("ctlDroEnd",    1, 8,  "use dro to end move"),
         ("ctlJogCmd",    1, 9,  "jog with commands"),
         ("ctlJogMpg",    1, 10, "jog with mpg"),
@@ -1496,13 +1508,13 @@ fpgaLatheBitList = \
         "configuration control register",
 
         ("cfgCtl",),
-        ("cfgZDirInv",   1, 0, "z direction inverted"),
-        ("cfgXDirInv",   1, 1, "x direction inverted"),
-        ("cfgZDroInv",   1, 2, "z dro direction inverted"),
-        ("cfgXDroInv",   1, 3, "x dro direction inverted"),
-        ("cfgZJogInv",   1, 4, "z jog direction inverted"),
-        ("cfgXJogInv",   1, 5, "x jog direction inverted"),
-        ("cfgSpDirInv",  1, 6, "spindle direction inverted"),
+        ("cfgZDirInv",   1, 0, "z dir inverted"),
+        ("cfgXDirInv",   1, 1, "x dir inverted"),
+        ("cfgZDroInv",   1, 2, "z dro dir inverted"),
+        ("cfgXDroInv",   1, 3, "x dro dir inverted"),
+        ("cfgZJogInv",   1, 4, "z jog dir inverted"),
+        ("cfgXJogInv",   1, 5, "x jog dir inverted"),
+        ("cfgSpDirInv",  1, 6, "spindle dir inverted"),
 
         ("cfgZHomeInv",  1, 7, "z home inverted"),
         ("cfgZMinusInv", 1, 8, "z minus inverted"),
@@ -1514,11 +1526,11 @@ fpgaLatheBitList = \
 
         ("cfgProbeInv",  1, 13, "probe inverted"),
 
-        ("cfgEncDirInv", 1, 14, "invert encoder direction"),
+        ("cfgEncDirInv", 1, 14, "invert encoder dir"),
         ("cfgEStopEna",  1, 15, "estop enable"),
         ("cfgEStopInv",  1, 16, "estop invert"),
-        ("cfgEnaEncDir", 1, 17, "enable encoder direction"),
-        ("cfgGenSync",   1, 18, "no encoder generate sync pulse"),
+        ("cfgEnaEncDir", 1, 17, "enable encoder dir"),
+        ("cfgGenSync",   1, 18, "generate sync pulse"),
         ("cfgPWMEna",    1, 19, "pwm enable"),
 
         "clock control register",
