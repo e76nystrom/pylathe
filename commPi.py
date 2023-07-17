@@ -629,6 +629,7 @@ class PiLathe(Thread):
                 axis.wait = False
                 axisStatus = self.rd(base + rg.F_Rd_Axis_Status)
                 print("z axis done status {0:04b}".format(axisStatus))
+                self.ldAxisCtl(base, ctlInit, "1")
                 self.ldAxisCtl(base, 0, "1")
 
             if axis.wait:
