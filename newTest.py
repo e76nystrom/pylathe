@@ -11,7 +11,7 @@ import fpgaLathe as bt
 import pickle
 
 WINDOWS = system() == 'Windows'
-
+print(system())
 if WINDOWS:
     spi = None
 else:
@@ -39,8 +39,8 @@ Z_AXIS = False
 
 base = rg.F_ZAxis_Base if Z_AXIS else rg.F_XAxis_Base
 bSyn = base + rg.F_Sync_Base
-bLoc = base + rg.F_Loc_Base
-bDist = base + rg.F_Dist_Base
+# bLoc = base + rg.F_Loc_Base
+# bDist = base + rg.F_Dist_Base
     
 def fWrite(f, txt):
     f.write(txt.encode())
@@ -154,9 +154,9 @@ def rdSetup():
     rdAdd(bSyn + rg.F_Rd_Sum)
     rdAdd(bSyn + rg.F_Rd_Accel_Sum)
     rdAdd(bSyn + rg.F_Rd_Accel_Ctr)
-    rdAdd(bDist + rg.F_Rd_Dist)
-    rdAdd(bDist + rg.F_Rd_Acl_Steps)
-    rdAdd(bLoc + rg.F_Rd_Loc)
+    rdAdd(bSyn + rg.F_Rd_A_Dist)
+    rdAdd(bSyn + rg.F_Rd_Acl_Steps)
+    rdAdd(bSyn + rg.F_Rd_X_Loc)
     rdLength = (len(rdBuf) - 1) * 4
     rdSend()
 
@@ -244,12 +244,14 @@ def readData(index=None, prt=True):
         print("xPos %7d yPos %6d zSum %12d" % (xPos, yPos, zSum), end=" ")
         print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
 
-    curDist = rd(bDist + rg.F_Rd_Dist, 4) # read z location
-    curAcl = rd(bDist + rg.F_Rd_Acl_Steps, 4) # read accel steps
-    curLoc = rd(bLoc + rg.F_Rd_Loc, 4)  # read z location
+    curDist = rd(bSyn + rg.F_Rd_A_Dist, 4) # read z location
+    curAcl = rd(bSyn + rg.F_Rd_A_Acl_Steps, 4) # read accel steps
+    curLoc = rd(bSyn + rg.F_Rd_X_Loc, 4)  # read z location
 
     if prt:
         print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
+    else:
+        print()
 
 def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
           dbg=False, pData=False):
@@ -424,9 +426,9 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         inputs = rd(rg.F_Rd_Inputs, 4)
         print("status {0:04b}".format(status) + " inputs {0:04b}".format(inputs))
 
-    ld(base + rg.F_Dro_Base + rg.F_Ld_Dro, 100, 4)
-    ld(base + rg.F_Dro_Base + rg.F_Ld_Dro_End, 0, 4)
-    ld(base + rg.F_Dro_Base + rg.F_Ld_Dro_Limit, 0, 4)
+    ld(base + rg.F_Sync_Base + rg.F_Ld_Dro, 100, 4)
+    ld(base + rg.F_Sync_Base + rg.F_Ld_Dro_End, 0, 4)
+    ld(base + rg.F_Sync_Base + rg.F_Ld_Dro_Limit, 0, 4)
 
     clkReg = 0
     ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
@@ -456,8 +458,8 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         ld(bSyn + rg.F_Ld_Accel_Val, zSynAccel, 4) # load accel
         ld(bSyn + rg.F_Ld_Accel_Count, zSynAclCnt-1, 4) # load accel count
 
-    ld(bLoc + rg.F_Ld_Loc, 5, 4)      # set location
-    ld(bDist + rg.F_Ld_Dist, dist, 4) # load distance
+    ld(bSyn + rg.F_Ld_X_Loc, 5, 4)      # set location
+    ld(bSyn + rg.F_Ld_A_Dist, dist, 4) # load distance
 
     axisCtl = bt.ctlInit | bt.ctlSetLoc
     ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);

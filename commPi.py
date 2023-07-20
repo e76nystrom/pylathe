@@ -629,7 +629,7 @@ class PiLathe(Thread):
                 axis.wait = False
                 axisStatus = self.rd(base + rg.F_Rd_Axis_Status)
                 print("z axis done status {0:04b}".format(axisStatus))
-                self.ldAxisCtl(base, ctlInit, "1")
+                self.ldAxisCtl(base, bt.ctlInit, "1")
                 self.ldAxisCtl(base, 0, "1")
 
             if axis.wait:
@@ -1045,6 +1045,7 @@ def load(aData, dist, encParm=True):
         ld(bSyn + rg.F_Ld_Accel_Count, aData.accelClocks) # load acl ctr
 
         ld(base + rg.F_Sync_Base + rg.F_Ld_A_Dist, dist)
+        axis.rd(base + rg.F_Sync_Base + rg.F_Rd_A_Dist)
 
         axis.ldAxisCtl(base, bt.ctlInit, "3")
         axis.ldAxisCtl(base, 0, "3a")
@@ -1467,8 +1468,10 @@ class Axis():
         print("%sSetLoc" % (self.name))
         base = self.base
         self.ld(base + rg.F_Sync_Base + rg.F_Ld_X_Loc, self.getLoc())
-        self.ldAxisCtl(base, bt.ctlInit | bt.ctlSetLoc, "6")
-        self.ldAxisCtl(base, 0, "7")
+        loc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_X_Loc)
+        # self.ldAxisCtl(base, bt.ctlInit | bt.ctlSetLoc, "6")
+        self.ldAxisCtl(base, bt.ctlInit, "6")
+        # self.ldAxisCtl(base, 0, "7")
 
     def loadClock(self, clkCtl):
         print("clkCtl %s %s %s" % \
