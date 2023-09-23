@@ -1437,7 +1437,7 @@ fpgaLatheBitList = \
         ("xAxisDone",     1, 4,  "x axis done"),
         ("xAxisCurDir",   1, 5,  "x axis current dir"),
         ("stEStop",       1, 6,  "emergency stop"),
-        ("spindleActive", 1, 7,  "spindle activer"),
+        ("spindleActive", 1, 7,  "spindle active"),
         ("queNotEmpty",   1, 8,  "ctl queue not empty"),
         ("ctlBusy",       1, 9,  "controller busy"),
         ("syncActive",    1, 10, "sync active"),

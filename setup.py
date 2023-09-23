@@ -768,7 +768,7 @@ class Setup():
             outRec = self.hexRecord(address, record)
             fWrite(f, outRec + '\n')
 
-    def createFpgaBits(self, xilinxBitList, cLoc, xLoc, fData=False, \
+    def createFpgaBits(self, bitList, cLoc, xLoc, fData=False, \
                        pName="xBitDef", xName="xilinx", \
                        package="CtlBits", cName="xilinx"):
         var = None
@@ -776,9 +776,14 @@ class Setup():
         bit = None
         cFile = None
         xFile = None
+        rFile = None
+        fFile = None
+        body = None
         comment = None
         xLst = []
         cLst = []
+        rData = []
+        rCLst = []
         maxShift = None
         start = None
         imports = []
@@ -788,14 +793,39 @@ class Setup():
             try:
                 path = os.path.join(xLoc, xName + 'Bits.vhd')
                 xFile = open(path , 'wb')
-            except IOError:
-                print("unable to open %s" % (xLoc,))
-                xFile = None
-            if xFile:
-                fWrite(xFile, "library ieee;\n"
+                fWrite(xFile, "library ieee;\n\n"
                 "use ieee.std_logic_1164.all;\n"
                 "use ieee.numeric_std.all;\n\n")
                 fWrite(xFile, "package " + package + " is\n")
+            except IOError:
+                print("unable to open %s" % (xLoc,))
+                xFile = None
+
+            try:
+                path = os.path.join(xLoc, xName + 'Rec.vhd')
+                rFile = open(path , 'wb')
+                fWrite(rFile, "library ieee;\n\n"
+                "use ieee.std_logic_1164.all;\n"
+                "use ieee.numeric_std.all;\n\n")
+                fWrite(rFile, "package " + package + "Rec is\n\n")
+            except IOError:
+                print("unable to open %s" % (xLoc,))
+                rFile = None
+
+            try:
+                path = os.path.join(xLoc, xName + 'Func.vhd')
+                fFile = open(path , 'wb')
+                fWrite(fFile, "library ieee;\n\n"
+                "use ieee.std_logic_1164.all;\n"
+                "use ieee.numeric_std.all;\n\n")
+                fWrite(fFile, "use work.%sRec.all;\n\n" % (package))
+                fWrite(fFile, "package " + package + "Func is\n\n")
+
+                body = "package body " + package + "Func is\n\n"
+            except IOError:
+                print("unable to open %s" % (xLoc,))
+                fFile = None
+
             # jFile = open(jLoc + 'XilinxBits.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n")
             # fWrite(jFile, "public class XilinxBits\n{\n")
@@ -806,13 +836,14 @@ class Setup():
         if self.outputFile:
             f = open(pName + '.py', 'wb')
             fWrite(f, "# fpga bits\n")
-        for i in range(len(xilinxBitList)):
+        for i in range(len(bitList)):
             # shiftType = None
-            data = xilinxBitList[i]
+            data = bitList[i]
             if not isinstance(data, str):
                 if len(data) == 1:
                     xLst = []
                     cLst = []
+                    rData = []
                     regName = data[0]
                     maxShift = 0
                     # rec = [regName,]
@@ -843,6 +874,12 @@ class Setup():
                                          "-- x%02x %s\n") %
                                         (xVar, shift, \
                                          1 << shift, comment))
+
+                            rData.append((xVar, shift, comment))
+                            # rLst.append(" %-14s : std_logic;" \
+                            #              "\t-- x%02x %s\n" % \
+                            #              (xVar, 1 << shift, comment))
+
                             # tmp =  (" public static final int %-10s = " \
                             #         "(%s << %s);" % (cVar, bit, shift))
                             # fWrite(jFile, "%s /* %s */\n" % 
@@ -855,12 +892,19 @@ class Setup():
                                             "-- x%02x %s\n" %
                                             (xVar, regName, shift, start, \
                                              1 << shift, comment))
+                                rData.append((xVar, (shift, start), comment))
+                                # rLst.append(" %-14s : std_logic_vector" \
+                                #             "(%d downto 0); " \
+                                #             "-- %s\n" % \
+                                #             (xVar, shift - start, comment))
                             else:
-                                xLst.append(" constant %-12s : unsigned " \
-                                            "(%d downto %d) " \
-                                            ":= \"%s\"; -- %s\n" % \
-                                            (xVar, shift, start, \
-                                             '{0:03b}'.format(bit), comment))
+                                cVal = (" constant %-12s : unsigned " \
+                                        "(%d downto %d) " \
+                                        ":= \"%s\"; -- %s\n" % \
+                                        (xVar, shift-start, 0, \
+                                        '{0:03b}'.format(bit), comment))
+                                xLst.append(cVal)
+                                rCLst.append(cVal)
                     if (shift > maxShift):
                         maxShift = shift
                     if cVar in globals():
@@ -906,6 +950,12 @@ class Setup():
                             fWrite(xFile, "\n")
                             for k in range(len(cLst)):
                                 fWrite(xFile, cLst[k])
+
+                        if rFile is not None:
+                            body += rOut(rFile, fFile, rCLst, rData,
+                                         regName, maxShift)
+                            rCLst = []
+
                         # if (len(bitStr) != 0):
                         #     fWrite(jFile, "\n public static final " +
                         #                 "String[] %sBits =\n {\n") % \
@@ -944,7 +994,103 @@ class Setup():
                 fWrite(xFile, "package body %s is\n\n" % (package))
                 fWrite(xFile, "end %s;\n" % (package))
                 xFile.close()
+            if rFile:
+                fWrite(rFile, "end package %sRec;\n" % (package))
+                rFile.close()
+                fWrite(fFile, "end %sFunc;\n\n" % (package))
+                fWrite(fFile, body)
+                fWrite(fFile, "end package body %sFunc;\n" % (package))
                 # fWrite(jFile, "};\n")
                 # jFile.close()
         self.xBitImports = imports
         self.importList += imports
+
+def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
+    maxLen = 0
+    for val in rData:
+        l = len(val[0])
+        if l > maxLen:
+            maxLen = l
+
+    fWrite(rFile, "type %sRec is record\n" % (regName))
+
+    num = len(rData)
+    fmt = "-- %2d 0x%0" + ("%d" % (int((num + 3) / 4))) + "x %s\n"
+    for k in range(num-1, -1, -1):
+        (name, shift, comment) = rData[k]
+        name = name.ljust(maxLen)
+        if type(shift) != tuple:
+            tmp = (" %s : std_logic;" % (name))
+            tmp = tmp.ljust(32) + \
+                (fmt % (shift, 1 << shift, comment))
+        else:
+            (shift, start) = shift
+            tmp = (" %s : std_logic_vector(%d downto 0);" % \
+                   (name, shift - start))
+            tmp = tmp.ljust(32) + ("-- %d-%d %s\n" % (shift, start, comment))
+        fWrite(rFile, tmp)
+
+    fWrite(rFile, "end record %sRec;\n\n" % (regName))
+
+    if len(rCLst) != 0:
+        for tmp in rCLst:
+            fWrite(rFile, tmp)
+        fWrite(rFile, "\n")
+
+    tmp = ("constant %sSize : integer := %d;\n\n" % \
+                   (regName, maxShift + 1))
+    tmp += ("subType %sVec is " \
+            "std_logic_vector(%sSize-1 downto 0);\n\n" %
+           (regName, regName))
+    tmp += ("function %sToVec(val : %sRec)\n " \
+            "return %sVec;\n\n" %
+           (regName, regName, regName))
+    fWrite(fFile, tmp)
+
+    body = ("function %sToVec(val : %sRec) " \
+            "return %sVec is\n" %
+           (regName, regName, regName))
+
+    body += " variable rtnVec : %sVec;\n" % (regName)
+    body += "begin\n"
+
+    tmp = " rtnVec :="
+    startLen = len(tmp)
+    l = len(tmp)
+    for i in range(num-1, -1, -1):
+        data = " val.%s &" % (rData[i][0].ljust(maxLen))
+        dataLen = len(data)
+        if (l + dataLen) >= 76:
+            l = 4
+            tmp += "\n" + (" " * startLen)
+        l += dataLen
+        tmp += data
+    tmp = tmp[0:-2].rstrip()
+    tmp += ";\n"
+    body += tmp
+
+    body += " return rtnVec;\n"
+    body += "end function;\n\n"
+
+    body += ("function %sToRec(val : %sVec)\n" \
+             "return %sRec;\n\n" %
+             (regName, regName, regName))
+
+    body += ("function %sToRec(val : %sVec) " \
+            "return %sRec is\n" %
+           (regName, regName, regName))
+    body += " variable rtnRec : %sRec;\n" % (regName)
+    body += "begin\n"
+    for i in range(num-1, -1, -1):
+        (name, shift, comment) = rData[i]
+        name = name.ljust(maxLen)
+        if type(shift) != tuple:
+            body += " rtnRec.%s := val(%s);\n" % (name, shift)
+        else:
+            (shift, start) = shift
+            body += (" rtnRec.%s := val(%s downto %s);\n" %
+                     (name, shift, start))
+    body += "\n return rtnRec;\n"
+    body += "end function;\n\n"
+
+    return body
