@@ -41,7 +41,7 @@ def prtAxisCtl(base, axisCtl, prefix=""):
         s += "ctlInit "
     if (axisCtl & bt.ctlStart) != 0:
         s += "cltStart "
-        s += "P" if (axisCtl & bt.ctlDirPos) != 0 else "N"
+        s += "P" if (axisCtl & bt.ctlDir) != 0 else "N"
         s += " "
     if (axisCtl & bt.ctlBacklash) != 0:
         s += "backlash "
@@ -1513,7 +1513,7 @@ class Axis():
 
             self.axisCtl = 0
             if self.dir == ct.DIR_POS:
-                self.axisCtl = bt.ctlDirPos
+                self.axisCtl = bt.ctlDir #bt.ctlDirPos
 
             if dirChange and self.backlashSteps != 0:
                 self.wait = True

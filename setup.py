@@ -876,9 +876,6 @@ class Setup():
                                          1 << shift, comment))
 
                             rData.append((xVar, shift, comment))
-                            # rLst.append(" %-14s : std_logic;" \
-                            #              "\t-- x%02x %s\n" % \
-                            #              (xVar, 1 << shift, comment))
 
                             # tmp =  (" public static final int %-10s = " \
                             #         "(%s << %s);" % (cVar, bit, shift))
@@ -893,10 +890,6 @@ class Setup():
                                             (xVar, regName, shift, start, \
                                              1 << shift, comment))
                                 rData.append((xVar, (shift, start), comment))
-                                # rLst.append(" %-14s : std_logic_vector" \
-                                #             "(%d downto 0); " \
-                                #             "-- %s\n" % \
-                                #             (xVar, shift - start, comment))
                             else:
                                 cVal = (" constant %-12s : unsigned " \
                                         "(%d downto %d) " \
@@ -904,6 +897,11 @@ class Setup():
                                         (xVar, shift-start, 0, \
                                         '{0:03b}'.format(bit), comment))
                                 xLst.append(cVal)
+                                cVal = (" constant %-12s : std_logic_vector " \
+                                        "(%d downto %d) " \
+                                        ":= \"%s\"; -- %s\n" % \
+                                        (xVar, shift-start, 0, \
+                                        '{0:03b}'.format(bit), comment))
                                 rCLst.append(cVal)
                     if (shift > maxShift):
                         maxShift = shift
@@ -1037,11 +1035,13 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
             fWrite(rFile, tmp)
         fWrite(rFile, "\n")
 
-    tmp = ("constant %sSize : integer := %d;\n\n" % \
-                   (regName, maxShift + 1))
+    tmp = ("constant %sSize : integer := %d;\n" % \
+           (regName, maxShift + 1))
     tmp += ("subType %sVec is " \
-            "std_logic_vector(%sSize-1 downto 0);\n\n" %
+            "std_logic_vector(%sSize-1 downto 0);\n" %
            (regName, regName))
+    tmp += ("constant %sZero : %sVec := (others => '0');\n\n" % \
+    (regName, regName))
     tmp += ("function %sToVec(val : %sRec)\n " \
             "return %sVec;\n\n" %
            (regName, regName, regName))
@@ -1072,9 +1072,9 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     body += " return rtnVec;\n"
     body += "end function;\n\n"
 
-    body += ("function %sToRec(val : %sVec)\n" \
-             "return %sRec;\n\n" %
-             (regName, regName, regName))
+    fWrite(fFile, ("function %sToRec(val : %sVec)\n" \
+                   "return %sRec;\n\n" %
+                   (regName, regName, regName)))
 
     body += ("function %sToRec(val : %sVec) " \
             "return %sRec is\n" %

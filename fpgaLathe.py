@@ -48,8 +48,6 @@ ctlStart     = 0x02             # start
 ctlBacklash  = 0x04             # backlash move no pos upd
 ctlWaitSync  = 0x08             # wait for sync to start
 ctlDir       = 0x10             # direction
-ctlDirPos    = 0x10             # move in positive dir
-ctlDirNeg    = 0x00             # move in negative dir
 ctlSetLoc    = 0x20             # set location
 ctlChDirect  = 0x40             # ch input direct
 ctlSlave     = 0x80             # slave ctl by other axis
@@ -165,8 +163,6 @@ importList = ( \
  ctlBacklash, \
  ctlWaitSync, \
  ctlDir, \
- ctlDirPos, \
- ctlDirNeg, \
  ctlSetLoc, \
  ctlChDirect, \
  ctlSlave, \
