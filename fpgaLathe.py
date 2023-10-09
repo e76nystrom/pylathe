@@ -1,5 +1,10 @@
 # fpga bits
 
+# RiscV control register
+
+riscvData    = 0x01             # riscv data active
+riscvSPI     = 0x02             # riscv spi active
+
 # status register
 
 zAxisEna     = 0x01             # z axis enable flag
@@ -85,7 +90,7 @@ cfgEStopEna  = 0x8000           # estop enable
 cfgEStopInv  = 0x10000          # estop invert
 cfgEnaEncDir = 0x20000          # enable encoder dir
 cfgGenSync   = 0x40000          # generate sync pulse
-cfgPWMEna    = 0x80000          # pwm enable
+cfgPwmEna    = 0x80000          # pwm enable
 
 # clock control register
 
@@ -129,6 +134,8 @@ spDir        = 0x04             # spindle direction
 spJogEnable  = 0x08             # spindle jog enable
 
 importList = ( \
+ riscvData, \
+ riscvSPI, \
  zAxisEna, \
  zAxisDone, \
  zAxisCurDir, \
@@ -194,7 +201,7 @@ importList = ( \
  cfgEStopInv, \
  cfgEnaEncDir, \
  cfgGenSync, \
- cfgPWMEna, \
+ cfgPwmEna, \
  clkNone, \
  clkFreq, \
  clkCh, \

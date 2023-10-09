@@ -1103,15 +1103,15 @@ fpgaLatheList = \
         ("F_Rd_Accel_Sum",   None, 1, 4, "axis accel sum"),
         ("F_Rd_Accel_Ctr",   None, 1, 4, "axis accel counter"),
 
-        ("F_Ld_A_Dist",      None, 1, 4, "axis distance"),
+        ("F_Ld_Dist",        None, 1, 4, "axis distance"),
         ("F_Ld_Max_Dist",    None, 1, 4, "jog maximum distance"),
         ("F_Ld_Backlash",    None, 1, 4, "jog backlash"),
 
-        ("F_Rd_A_Dist",      None, 1, 4, "read axis distance"),
-        ("F_Rd_A_Acl_Steps", None, 1, 4, "read accel steps"),
+        ("F_Rd_Dist",        None, 1, 4, "read axis distance"),
+        ("F_Rd_Accel_Steps", None, 1, 4, "read accel steps"),
 
-        ("F_Ld_X_Loc",       None, 1, 4, "axis location"),
-        ("F_Rd_X_Loc",       None, 1, 4, "read axis location"),
+        ("F_Ld_Loc",         None, 1, 4, "axis location"),
+        ("F_Rd_Loc",         None, 1, 4, "read axis location"),
 
         ("F_Ld_Mpg_Delta",   None, 1, 4, "Mpg delta values"),
         ("F_Ld_Mpg_Dist",    None, 1, 4, "Mpg dist values"),
@@ -1190,7 +1190,8 @@ fpgaLatheList = \
 
         "control registers",
 
-        ("F_Ld_Run_Ctl",   None, 1,            1,    "run control reg"),
+        ("F_Ld_Run_Ctl",   None, 1,            1,    "set run control reg"),
+        ("F_Rd_Run_Ctl",   None, 1,            1,    "read run control reg"),
         ("F_Ld_Sync_Ctl",  None, 1,            1,    "sync control reg"),
         ("F_Ld_Cfg_Ctl",   None, 1,            3,    "config control reg"),
         ("F_Ld_Clk_Ctl",   None, 1,            1,    "clock control reg"),
@@ -1427,6 +1428,12 @@ fpgaEncBitList = \
 
 fpgaLatheBitList = \
     (
+        "RiscV control register",
+        
+        ("riscvCtl",),
+        ("riscvData",     1, 0,  "riscv data active"),
+        ("riscvSPI",      1, 1,  "riscv spi active"),
+
         "status register",
 
         ("status",),
@@ -1531,7 +1538,7 @@ fpgaLatheBitList = \
         ("cfgEStopInv",  1, 16, "estop invert"),
         ("cfgEnaEncDir", 1, 17, "enable encoder dir"),
         ("cfgGenSync",   1, 18, "generate sync pulse"),
-        ("cfgPWMEna",    1, 19, "pwm enable"),
+        ("cfgPwmEna",    1, 19, "pwm enable"),
 
         "clock control register",
 

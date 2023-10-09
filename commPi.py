@@ -578,10 +578,10 @@ class PiLathe(Thread):
     #         print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
 
     #     bDist = base + rg.F_Sync_Base
-    #     curDist = self.rd(bDist + rg.F_Rd_A_Dist) # read z location
+    #     curDist = self.rd(bDist + rg.F_Rd_Dist) # read z location
     #     curAcl = self.rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
 
-    #     curLoc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_X_Loc, \
+    #     curLoc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Loc, \
     #                 False, 0x20000, 0x3ffff)
 
     #     if prt:
@@ -615,9 +615,9 @@ class PiLathe(Thread):
                 self.lastZAxisCtl = value
                 prtAxisCtl(base, value)
 
-            tmp = self.rd(base + rg.F_Sync_Base + rg.F_Rd_X_Loc, \
+            tmp = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Loc, \
                           False, 0x20000, 0x3ffff)
-            dist = self.rd(base + rg.F_Sync_Base + rg.F_Rd_A_Dist, \
+            dist = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Dist, \
                            False, 0x20000, 0x3ffff)
             self.parm.zLoc = self.zAxis.loc = tmp
             if axis.loc != tmp:
@@ -654,7 +654,7 @@ class PiLathe(Thread):
                 self.lastXAxisCtl = value
                 prtAxisCtl(base, value)
 
-            tmp = self.rd(base + rg.F_Sync_Base + rg.F_Rd_X_Loc, \
+            tmp = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Loc, \
                           False, 0x20000, 0x3ffff)
             self.parm.xLoc = self.xAxis.loc = tmp
             if axis.loc != tmp:
@@ -1044,13 +1044,13 @@ def load(aData, dist, encParm=True):
         ld(bSyn + rg.F_Ld_Accel_Val, aData.intAccel)   # load accel
         ld(bSyn + rg.F_Ld_Accel_Count, aData.accelClocks) # load acl ctr
 
-        ld(base + rg.F_Sync_Base + rg.F_Ld_A_Dist, dist)
-        axis.rd(base + rg.F_Sync_Base + rg.F_Rd_A_Dist)
+        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
+        axis.rd(base + rg.F_Sync_Base + rg.F_Rd_Dist)
 
         axis.ldAxisCtl(base, bt.ctlInit, "3")
         axis.ldAxisCtl(base, 0, "3a")
     else:
-        ld(base + rg.F_Sync_Base + rg.F_Ld_A_Dist, dist)
+        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
         axisCtl |=  bt.ctlChDirect
 
     axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
@@ -1462,13 +1462,13 @@ class Axis():
             self.getLoc = self.rpi.getXLoc
             self.setLoc = self.rpi.setXLoc
 
-        self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_A_Dist, 0)
+        self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_Dist, 0)
 
     def initLoc(self):
         print("%sSetLoc" % (self.name))
         base = self.base
-        self.ld(base + rg.F_Sync_Base + rg.F_Ld_X_Loc, self.getLoc())
-        loc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_X_Loc)
+        self.ld(base + rg.F_Sync_Base + rg.F_Ld_Loc, self.getLoc())
+        loc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Loc)
         # self.ldAxisCtl(base, bt.ctlInit | bt.ctlSetLoc, "6")
         self.ldAxisCtl(base, bt.ctlInit, "6")
         # self.ldAxisCtl(base, 0, "7")
@@ -1484,7 +1484,7 @@ class Axis():
         if self.state != en.AXIS_IDLE:
             return
 
-        self.loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_X_Loc, \
+        self.loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc, \
                            True, 0x20000, 0x3ffff)
         self.expLoc = pos
         print("%sAxis move loc %d pos %d" % (self.name, self.loc, pos))
@@ -1537,14 +1537,14 @@ class Axis():
             self.axisCtl = bt.ctlJogCmd
             self.moveRel(dist, ct.CMD_JOG)
         else:
-            self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_A_Dist, self.jogIncDist)
+            self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_Dist, self.jogIncDist)
 
     def stop(self):
         self.done = False
         self.cmd = 0
         self.axisCtl = 0
         self.ldAxisCtl(self.base, 0, "S")
-        self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_A_Dist, 0)
+        self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_Dist, 0)
         self.state = en.AXIS_IDLE
 
 
@@ -1571,7 +1571,7 @@ class Axis():
         accel = None
         cmd = self.cmd & ct.CMD_MSK
 
-        loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_X_Loc)
+        loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc)
         print("+++loc %d" % (loc))
 
         if cmd == ct.CMD_SYN:
@@ -1616,10 +1616,10 @@ class Axis():
             self.done = False
             self.wait = False
             self.loadClock(0)
-            dist = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_A_Dist)
-            loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_X_Loc)
+            dist = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Dist)
+            loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc)
             accelCtr = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Accel_Ctr)
-            aclSteps = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_A_Acl_Steps)
+            aclSteps = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Acl_Steps)
             print("dist %d loc %d accelCtr %d aclSteps %d" % \
                   (dist, loc, accelCtr, aclSteps))
 
@@ -1633,7 +1633,7 @@ class Axis():
         self.done = False
         self.cmd = 0
 
-        self.loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_X_Loc, \
+        self.loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc, \
                            True, 0x20000, 0x3ffff)
         rpi.dbgMsg(self.dbgBase + D_LOC, self.loc)
 

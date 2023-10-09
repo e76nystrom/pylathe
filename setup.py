@@ -15,6 +15,20 @@ def fWrite(f, txt):
     if f is not None:
         f.write(txt.encode())
     
+def cVarName(var):
+    cVar = ""
+    last = False
+    for j in range(len(var)):
+        ch = var[j]
+        if ch.isupper():
+            if last:
+                cVar += "_"
+            last = False
+        else:
+            last = True
+        cVar += ch.upper()
+    return cVar
+
 class Setup():
     def __init__(self):
         self.importList = []
@@ -565,7 +579,7 @@ class Setup():
         xFile = None
         byteLen = 0
         if fData:
-            path = os.path.join(cLoc, cName + 'Reg.h')
+            path = os.path.join(cLoc, cName + '.h')
             cFile = open(path, 'wb')
             fWrite(cFile, "enum " + cName.upper() + "\n{\n")
             try:
@@ -614,7 +628,7 @@ class Setup():
                     if base is not None:
                         index = 0
                 if fData:
-                    tmp = " %s, " % (regName)
+                    tmp = " %-18s = %s, " % (regName, index)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment))
                     if xFile:
@@ -788,7 +802,7 @@ class Setup():
         start = None
         imports = []
         if fData:
-            path = os.path.join(cLoc, cName + 'Bits.h')
+            path = os.path.join(cLoc, cName + '.h')
             cFile = open(path, 'wb')
             try:
                 path = os.path.join(xLoc, xName + 'Bits.vhd')
@@ -850,15 +864,16 @@ class Setup():
                 else:
                     if len(data) == 4:
                         (var, bit, shift, comment) = data
-                    cVar = var.upper()
+                    cVar = cVarName(var)
                     xVar = var.replace("_", "")
 
                     shiftType = type(shift)
                     if fData:
-                        tmp =  "#define %-12s  (%s << %s)" % (cVar, bit, shift)
                         if shiftType != tuple:
+                            tmp =  "#define %-18s (%s << %s)" % (cVar, bit, shift)
                             fWrite(cFile, "%s/* 0x%03x %s */\n" % 
-                                   (tmp.ljust(32), bit << shift, comment))
+                                   (tmp.ljust(40), bit << shift, comment))
+
                             if (shift != lastShift):
                                 tmp =  "  \"%s\", " % (cVar)
                                 bitStr.append("%s/* 0x%02x %s */\n" % 
@@ -884,13 +899,24 @@ class Setup():
                         else:
                             (shift, start) = shift
                             if bit is None:
-                                xLst.append(" alias %-12s : unsigned is " \
+                                x = 1
+                                for j in range(start, shift):
+                                    x = (x << 1) + 1
+                                tmp =  "#define %-18s (0x%x << %s)" % (cVar, x, start)
+                                fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                                       (tmp.ljust(40), x << start, comment))
+
+                                xLst.append(" alias %-14s : unsigned is " \
                                             "%sreg(%d downto %d); " \
                                             "-- x%02x %s\n" %
                                             (xVar, regName, shift, start, \
                                              1 << shift, comment))
                                 rData.append((xVar, (shift, start), comment))
                             else:
+                                tmp =  "#define %-18s (%s << %s)" % (cVar, bit, start)
+                                fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                                       (tmp.ljust(40), bit << shift, comment))
+
                                 cVal = (" constant %-12s : unsigned " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
@@ -931,7 +957,7 @@ class Setup():
                 if fData:
                     if (len(regName) > 0):
                         var = "%sSize" % (regName)
-                        tmp =  "#define %-12s %d" % (var, maxShift + 1)
+                        tmp =  "#define %-18s %d" % (cVarName(var), maxShift + 1)
                         fWrite(cFile, "%s\n" % (tmp))
                         if xFile:
                             fWrite(xFile, " constant %sSize : " \
@@ -1045,6 +1071,9 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     tmp += ("function %sToVec(val : %sRec)\n " \
             "return %sVec;\n\n" %
            (regName, regName, regName))
+    #tmp += ("function %sToRec(val : std_logic_vector(%sSize-1 downto 0))\n " \
+    #        "return %sVec;\n\n" %
+    #       (regName, regName, regName))
     fWrite(fFile, tmp)
 
     body = ("function %sToVec(val : %sRec) " \
@@ -1078,6 +1107,27 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
 
     body += ("function %sToRec(val : %sVec) " \
             "return %sRec is\n" %
+           (regName, regName, regName))
+    body += " variable rtnRec : %sRec;\n" % (regName)
+    body += "begin\n"
+    for i in range(num-1, -1, -1):
+        (name, shift, comment) = rData[i]
+        name = name.ljust(maxLen)
+        if type(shift) != tuple:
+            body += " rtnRec.%s := val(%s);\n" % (name, shift)
+        else:
+            (shift, start) = shift
+            body += (" rtnRec.%s := val(%s downto %s);\n" %
+                     (name, shift, start))
+    body += "\n return rtnRec;\n"
+    body += "end function;\n\n"
+
+    fWrite(fFile, ("function %sToRecS(val : std_logic_vector(%sSize-1 downto 0))\n" \
+                   "return %sRec;\n\n" %
+                   (regName, regName, regName)))
+
+    body += ("function %sToRecS(val : std_logic_vector(%sSize-1 downto 0))\n" \
+            " return %sRec is\n" %
            (regName, regName, regName))
     body += " variable rtnRec : %sRec;\n" % (regName)
     body += "begin\n"
