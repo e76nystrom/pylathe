@@ -32,6 +32,8 @@ SND_IP = "192.168.42.65"
 UDP_PORT = 5555
 sock = None
 
+DIR_POS = 1
+
 def prtAxisCtl(base, axisCtl, prefix=""):
     s = prefix
     s += "***** "
@@ -786,7 +788,7 @@ class PiLathe(Thread):
         print("tpAxis.savedLoc %d tpAxis.loc %d dist %d" %
               (tpAxis.savedLoc, tpAxis.loc, dist))
         tpAxis.axisCtl = (bt.ctlSlave | \
-                          (bt.ctlDirPos if dist > 0 else bt.ctlDirPos))
+                          (DIR_POS if dist > 0 else 0))
         mvDist = abs(float(dist) / mvAxis.stepsInch)
         tpAxis.taperDist = intRound(mvDist * taper * tpAxis.stepsInch)
         print("mvDist %7.4f taper %0.6f tpAxis.taperDist %d" % \
@@ -1513,7 +1515,7 @@ class Axis():
 
             self.axisCtl = 0
             if self.dir == ct.DIR_POS:
-                self.axisCtl = bt.ctlDir #bt.ctlDirPos
+                self.axisCtl = DIR_POS #bt.ctlDirPos
 
             if dirChange and self.backlashSteps != 0:
                 self.wait = True

@@ -76,7 +76,7 @@ def axisCtlStr(axisCtl, axis):
         s += "ctlInit "
     if (axisCtl & bt.ctlStart) != 0:
         s += "ctlStart "
-        s += "P" if (axisCtl & bt.ctlDirPos) != 0 else "N"
+        s += "P" if (axisCtl & bt.ctlDir) != 0 else "N"
         s += " "
     if (axisCtl & bt.ctlBacklash) != 0:
         s += "backlash "
