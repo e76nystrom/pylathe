@@ -63,7 +63,7 @@ def prtAxisCtl(base, axisCtl, prefix=""):
         s += "jogMpg "
     if (axisCtl & bt.ctlHome) != 0:
         s += "home "
-    if (axisCtl & bt.ctlIgnoreLim) != 0:
+    if (axisCtl & bt.ctlUseLimits) != 0:
         s += "ignoreLim "
     print("axisCtl %02x %04x %s" % (base, axisCtl, s))
 
@@ -192,6 +192,8 @@ class Comm():
     def ldAxisCtl(self, base, axisCtl, ident=None):
         if ident is not None:
             print("ldAxisCtl", ident)
+        if (axisCtl & 3) == 3:
+            print("start and intit set at same time")
         prtAxisCtl(base, axisCtl, "ld ")
         self.ld(base + rg.F_Ld_Axis_Ctl, axisCtl)
         value = self.rd(base + rg.F_Rd_Axis_Ctl)
@@ -581,7 +583,7 @@ class PiLathe(Thread):
 
     #     bDist = base + rg.F_Sync_Base
     #     curDist = self.rd(bDist + rg.F_Rd_Dist) # read z location
-    #     curAcl = self.rd(bDist + rg.F_Rd_Acl_Steps) # read accel steps
+    #     curAcl = self.rd(bDist + rg.F_Rd_Accel_Steps) # read accel steps
 
     #     curLoc = self.rd(base + rg.F_Sync_Base + rg.F_Rd_Loc, \
     #                 False, 0x20000, 0x3ffff)
@@ -672,7 +674,7 @@ class PiLathe(Thread):
             if axis.wait:
                 if (status & bt.xAxisEna) == 0:
                     # axis.wait = False
-                    print("x waiting no enable")
+                    print("x waiting no enable status %x" % (status))
 
             axis.control()
 
@@ -1055,12 +1057,15 @@ def load(aData, dist, encParm=True):
         ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
         axisCtl |=  bt.ctlChDirect
 
-    axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
+    #axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
+    axisCtl &= ~bt.ctlInit
+    axis.ldAxisCtl(base, bt.ctlStart, "4")
 
 def start(aData, axisCtl=0):
     axis = aData.axis
     print("\n%s %s accelCalc" % (axis.name, aData.accelType))
     axisCtl |= axis.axisCtl | bt.ctlStart
+    axisCtl &= ~bt.ctlInit
     axis.ldAxisCtl(axis.base, axisCtl, "5")
 
 def accelCalc(aData):
@@ -1621,7 +1626,7 @@ class Axis():
             dist = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Dist)
             loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc)
             accelCtr = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Accel_Ctr)
-            aclSteps = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Acl_Steps)
+            aclSteps = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Accel_Steps)
             print("dist %d loc %d accelCtr %d aclSteps %d" % \
                   (dist, loc, accelCtr, aclSteps))
 

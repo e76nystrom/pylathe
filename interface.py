@@ -1502,7 +1502,7 @@ fpgaLatheBitList = \
         ("ctlJogCmd",    1, 9,  "jog with commands"),
         ("ctlJogMpg",    1, 10, "jog with mpg"),
         ("ctlHome",      1, 11, "homing axis"),
-        ("ctlIgnoreLim", 1, 12, "ignore limits"),
+        ("ctlUseLimits", 1, 12, "use limits"),
 
         "axis status register",
 

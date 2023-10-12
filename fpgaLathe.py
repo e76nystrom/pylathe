@@ -60,7 +60,7 @@ ctlDroEnd    = 0x100            # use dro to end move
 ctlJogCmd    = 0x200            # jog with commands
 ctlJogMpg    = 0x400            # jog with mpg
 ctlHome      = 0x800            # homing axis
-ctlIgnoreLim = 0x1000           # ignore limits
+ctlUseLimits = 0x1000           # use limits
 
 # axis status register
 
@@ -177,7 +177,7 @@ importList = ( \
  ctlJogCmd, \
  ctlJogMpg, \
  ctlHome, \
- ctlIgnoreLim, \
+ ctlUseLimits, \
  axDoneDist, \
  axDoneDro, \
  axDoneHome, \

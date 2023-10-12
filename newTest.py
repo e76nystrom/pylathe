@@ -5,10 +5,21 @@ from sys import stdout
 from time import sleep
 from platform import system
 import sys
-import time
+#import time
 import lRegDef as rg
 import fpgaLathe as bt
 import pickle
+
+SAVE_OUTPUT = True
+rdLength = 0
+xPos = 0
+yPos = 0
+zSum = 0
+zAclSum = 0
+aclCtr = 0
+curLoc = 0
+curAcl = 0
+curDist = 0
 
 WINDOWS = system() == 'Windows'
 print(system())
@@ -35,7 +46,7 @@ cmdWaitX = 2
 
 sync = True
 syncEnc = True
-Z_AXIS = False
+Z_AXIS = True
 
 base = rg.F_ZAxis_Base if Z_AXIS else rg.F_XAxis_Base
 bSyn = base + rg.F_Sync_Base
@@ -46,6 +57,19 @@ def fWrite(f, txt):
     f.write(txt.encode())
 
 cmdBuf = False
+
+def fmt(val):
+    result = ""
+    count = 0
+    for i in range(len(val)-1, -1, -1):
+        result = val[i] + result
+        count += 1
+        if count == 4:
+            count = 0
+            result = " " + result
+    if count == 0:
+        result = result[1:]
+    return result
 
 def ldStart():
     global cmdBuf, ldBuf
@@ -83,12 +107,13 @@ else:
     SND_IP = "127.0.0.1"
 
 UDP_PORT = 5555
-sock = None
 
 if UDP:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
     sock.settimeout(3)
     sock.bind((UDP_IP, UDP_PORT))
+else:
+    sock = None
 
 def ld(cmd, data, size, dbg=True):
     s0 = rg.fpgaSizeTable[cmd]
@@ -154,9 +179,9 @@ def rdSetup():
     rdAdd(bSyn + rg.F_Rd_Sum)
     rdAdd(bSyn + rg.F_Rd_Accel_Sum)
     rdAdd(bSyn + rg.F_Rd_Accel_Ctr)
-    rdAdd(bSyn + rg.F_Rd_A_Dist)
-    rdAdd(bSyn + rg.F_Rd_Acl_Steps)
-    rdAdd(bSyn + rg.F_Rd_X_Loc)
+    rdAdd(bSyn + rg.F_Rd_Dist)
+    rdAdd(bSyn + rg.F_Rd_Accel_Steps)
+    rdAdd(bSyn + rg.F_Rd_Loc)
     rdLength = (len(rdBuf) - 1) * 4
     rdSend()
 
@@ -230,11 +255,11 @@ def rd(cmd, dbg=False, ext=0x80000000, mask=0xffffffff):
 
 def readData(index=None, prt=True):
     global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curAcl, curDist
-    xPos = rd(bSyn + rg.F_Rd_XPos, 4)
-    yPos = rd(bSyn + rg.F_Rd_YPos, 4)
-    zSum = rd(bSyn + rg.F_Rd_Sum, 4)
-    zAclSum = rd(bSyn + rg.F_Rd_Accel_Sum, 4)
-    aclCtr = rd(bSyn + rg.F_Rd_Accel_Ctr, 4)
+    xPos = rd(bSyn + rg.F_Rd_XPos)
+    yPos = rd(bSyn + rg.F_Rd_YPos)
+    zSum = rd(bSyn + rg.F_Rd_Sum)
+    zAclSum = rd(bSyn + rg.F_Rd_Accel_Sum)
+    aclCtr = rd(bSyn + rg.F_Rd_Accel_Ctr)
     if prt:
         if index is None:
             print("    ", end=" ")
@@ -244,19 +269,26 @@ def readData(index=None, prt=True):
         print("xPos %7d yPos %6d zSum %12d" % (xPos, yPos, zSum), end=" ")
         print("aclSum %8d aclCtr %8d" % (zAclSum, aclCtr), end=" ")
 
-    curDist = rd(bSyn + rg.F_Rd_A_Dist, 4) # read z location
-    curAcl = rd(bSyn + rg.F_Rd_A_Acl_Steps, 4) # read accel steps
-    curLoc = rd(bSyn + rg.F_Rd_X_Loc, 4)  # read z location
+    curDist = rd(bSyn + rg.F_Rd_Dist) # read z location
+    curAcl = rd(bSyn + rg.F_Rd_Accel_Steps) # read accel steps
+    curLoc = rd(bSyn + rg.F_Rd_Loc)  # read z location
 
     if prt:
         print("dist %6d aclStp %6d loc %5d" % (curDist, curAcl, curLoc))
     else:
         print()
 
+def noop():
+    pass
 def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
           dbg=False, pData=False):
     global ctlEna
     global xPos, yPos, zSum, zAclSum, aclCtr, curLoc, curAcl, curDist
+    time = []
+    data = []
+    plot = noop
+    grid = noop
+    show = noop
     if pData:
         from pylab import plot, grid, show
         from array import array
@@ -294,6 +326,14 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     print("accelTime %8.6f clocks %d" % (accelTime, accelClocks))
 
     scalePrt = False
+    dyIni = 0
+    dx = 0
+    intIncPerClock = 0
+    dyMax = 0
+    dyDeltaC = 0
+    incPerClock = 0
+    hdrCount = 0
+    header = 0
     for scale in range(0, 10):
         dyMin = int(stepsSecMin) << scale
         dyMax = int(stepsSecMax) << scale
@@ -387,7 +427,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
             deltaT = curT - lastT
             if pData:
                 if (lastT != 0):
-                    time.append(curT);
+                    time.append(curT)
                     data.append(1.0 / deltaT)
             lastT = curT
         sum += incAccum
@@ -422,30 +462,34 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
         runCtl = 0
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
-        status = rd(rg.F_Rd_Status, 4, True)
-        inputs = rd(rg.F_Rd_Inputs, 4)
-        print("status {0:04b}".format(status) + " inputs {0:04b}".format(inputs))
+        status = rd(rg.F_Rd_Status, True)
+        inputs = rd(rg.F_Rd_Inputs)
+        print("status {0:04b}".format(status) +
+              " inputs " + fmt("{0:013b}".format(inputs)))
 
     ld(base + rg.F_Sync_Base + rg.F_Ld_Dro, 100, 4)
     ld(base + rg.F_Sync_Base + rg.F_Ld_Dro_End, 0, 4)
     ld(base + rg.F_Sync_Base + rg.F_Ld_Dro_Limit, 0, 4)
 
     clkReg = 0
-    ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
+    ld(rg.F_Ld_Clk_Ctl, clkReg, 1)
 
     axisCtl = bt.ctlInit
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    print("axisCtl %02x" % (tmp))
 
     axisCtl = 0
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    print("axisCtl %02x" % (tmp))
 
     syncCtl = 0
-    ld(rg.F_Ld_Sync_Ctl, syncCtl, 1);
+    ld(rg.F_Ld_Sync_Ctl, syncCtl, 1)
 
-    cfgCtl = 0
     cfgCtl = (bt.cfgXPlusInv | bt.cfgXMinusInv | \
               bt.cfgZPlusInv | bt.cfgZMinusInv)
-    ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 3);
+    ld(rg.F_Ld_Cfg_Ctl, cfgCtl, 3)
 
     if syncEnc:
         print("d", d)
@@ -458,14 +502,20 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         ld(bSyn + rg.F_Ld_Accel_Val, zSynAccel, 4) # load accel
         ld(bSyn + rg.F_Ld_Accel_Count, zSynAclCnt-1, 4) # load accel count
 
-    ld(bSyn + rg.F_Ld_X_Loc, 5, 4)      # set location
-    ld(bSyn + rg.F_Ld_A_Dist, dist, 4) # load distance
+    ld(bSyn + rg.F_Ld_Loc, 5, 4)      # set location
+    ld(bSyn + rg.F_Ld_Dist, dist, 4) # load distance
 
     axisCtl = bt.ctlInit | bt.ctlSetLoc
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
-    
+    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    print("axisCtl %02x" % (tmp))
+    tmp = rd(bSyn + rg.F_Rd_Dist, True)
+    print("dist %d" % (tmp))
+
     axisCtl = 0
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    print("axisCtl %02x" % (tmp))
 
     # if ctlEna:
     #     ldSend()
@@ -482,24 +532,26 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
     if syncEnc:
         axisCtl = bt.ctlStart | bt.ctlDir
-        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
     else:
         axisCtl = bt.ctlStart | bt.ctlChDirect | bt.ctlDir
-        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+        ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    print("axisCtl %02x" % (tmp))
 
     if ctlEna and runClocks != 0:
         ldSend()
         runCtl = bt.runEna
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
         while True:
-            status = rd(rg.F_Rd_Status, 4)
+            status = rd(rg.F_Rd_Status)
             if (status & bt.queNotEmpty) != 0:
                 break
             print("status {0:04b}".format(status))
         runCtl = 0
         ld(rg.F_Ld_Run_Ctl, runCtl, 1)
 
-    status = rd(rg.F_Rd_Status, 4)
+    status = rd(rg.F_Rd_Status,True)
     print("status {0:04b}".format(status))
               
     readData()
@@ -507,7 +559,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         rdSetup()
         rdTest()
 
-    indexClks = rd(rg.F_Rd_Idx_Clks, 4)
+    indexClks = rd(rg.F_Rd_Idx_Clks)
     if indexClks != 0:
         curRPM = int(round((float(cFreq) / (indexClks + 1)) * 60))
         print("indexClks %d curRPM %d" % (indexClks, curRPM))
@@ -525,7 +577,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
         clkReg = bt.zClkDbgFreq if Z_AXIS else bt.xClkDbgFreq
         # ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
         clkReg |= bt.clkDbgFreqEna
-        ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
+        ld(rg.F_Ld_Clk_Ctl, clkReg, 1)
         print("clkReg %02x" % (clkReg))
 
         if runClocks > 1:
@@ -540,7 +592,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                     print()
                 readData(i)
                 stepData.append((xPos, zSum, zAclSum, aclCtr, curAcl, curDist))
-                status = rd(rg.F_Rd_Status, 4)
+                status = rd(rg.F_Rd_Status)
                 if (status & doneFlag) != 0:
                     break
                 ld(rg.F_Dbg_Freq_Base + rg.F_Ld_Dbg_Count, 1, 4, False)
@@ -557,35 +609,35 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                 ld(rg.F_Enc_Base + rg.F_Ld_Enc_Cycle, encCycle ,2)
                 ld(rg.F_Enc_Base + rg.F_Ld_Int_Cycle, intCycle ,2)
                 ld(rg.F_Ld_Sync_Ctl, bt.synEncInit, 1)
-                status = rd(rg.F_Rd_Status, 4)
-                print("status {0:07b}".format(status))
+                status = rd(rg.F_Rd_Status)
+                print("status " + fmt("{0:07b}".format(status)))
                 ld(rg.F_Ld_Sync_Ctl, bt.synEncEna, 1)
                 while True:
-                    status = rd(rg.F_Rd_Status, 4)
+                    status = rd(rg.F_Rd_Status)
                     # print("status {0:07b}".format(status))
                     if (status & bt.syncActive) != 0:
-                        print("status {0:07b}".format(status))
+                        print("status " + fmt("{0:07b}".format(status)))
                         break
                     sleep(0.1)
-                clks = rd(rg.F_Enc_Base + rg.F_Rd_Cmp_Cyc_Clks, 4)
+                clks = rd(rg.F_Enc_Base + rg.F_Rd_Cmp_Cyc_Clks)
                 print("cycleClocks %d", clks)
         else:
             ld(base + rg.F_Ld_Freq, freqDivider, 2)
             clkReg = bt.zClkZFreq if Z_AXIS else bt.xClkXFreq
         print("clkReg %02x" % (clkReg))
-        ld(rg.F_Ld_Clk_Ctl, clkReg, 1);
+        ld(rg.F_Ld_Clk_Ctl, clkReg, 1)
 
         if ctlEna:
             cmd = cmdWaitZ if Z_AXIS else cmdWaitX
             ldCmd(cmd)
             axisCtl = 0
-            ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+            ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
             ldSend()
             runCtl = bt.runEna
             ld(rg.F_Ld_Run_Ctl, runCtl, 1)
             while True:
-                status = rd(rg.F_Rd_Status, 4)
-                if (status & bt.queEmpty) != 0:
+                status = rd(rg.F_Rd_Status)
+                if (status & bt.queNotEmpty) != 0:
                     break
                 sleep(0.1)
             print("status {0:04b}".format(status))
@@ -593,26 +645,31 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
             ld(rg.F_Ld_Run_Ctl, runCtl, 1)
         else:
             while True:
-                status = rd(rg.F_Rd_Status, 4) 
+                status = rd(rg.F_Rd_Status)
                 if (status & doneFlag) != 0:
                     break
                 sleep(0.1)
             print("status {0:04b}".format(status))
         readData()
 
-    status = rd(rg.F_Rd_Status, 4)
-    print("status {0:04b}".format(status))
-    axisStatus = rd(base + rg.F_Rd_Axis_Status, 4)
+    status = rd(rg.F_Rd_Status, True)
+    print("status " + fmt("{0:011b}".format(status)))
+    axisStatus = rd(base + rg.F_Rd_Axis_Status, True)
     print("axis status {0:04b}".format(axisStatus))
+    inputs = rd(base + rg.F_Rd_Inputs, True)
+    print("inputs " + fmt("{0:013b}".format(inputs)))
 
-    axisCtl = bt.ctlInit
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
-    axisCtl = 0
-    val = rd(base + rg.F_Rd_Axis_Ctl, 2);
-    print("read axisctl %03x" % (val, ))
-    ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2);
+    # axisCtl = bt.ctlInit
+    # ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    # tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    # print("axisCtl %02x" % (tmp))
 
-    status = rd(rg.F_Rd_Status, 4)
+    # axisCtl = 0
+    # ld(base + rg.F_Ld_Axis_Ctl, axisCtl, 2)
+    # tmp = rd(base + rg.F_Rd_Axis_Ctl, True)
+    # print("axisCtl %02x" % (tmp))
+
+    status = rd(rg.F_Rd_Status)
     print("status {0:04b}".format(status))
 
     x = 0
@@ -633,7 +690,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     index = 0
     decel = False
     delayDecel = False
-    if False:
+    if not SAVE_OUTPUT:
         while (clocks < xPos):
             clocks += 1
             x += 1
@@ -652,13 +709,13 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
 
             if (not delayDecel) and (clocks <= accelClocks):
                 if aclCount != accelClocks-1:
-                    aclCount += 1;
+                    aclCount += 1
                     accelAccum += zSynAccel
 
             if delayDecel:
                 if (accelAccum > 0):
                     if aclCount != 0:
-                        aclCount -= 1;
+                        aclCount -= 1
                         accelAccum -= zSynAccel
 
             if clocks >= tracePos:
