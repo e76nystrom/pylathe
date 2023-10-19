@@ -26,7 +26,7 @@ class ExtDro():
                          'io.write("ok\\n")', \
                          "end")
         self.delim = "\x1b[K"
-        self.matchPrompt = "\x1b\[G.+?\x1b\[K"
+        self.matchPrompt = "\x1b[G.+?\x1b[K"
         self.automateOn = "luash.automate(true)"
         self.automateOff = "luash.automate(nil)"
         self.showFunc = "func.show()"

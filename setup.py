@@ -431,9 +431,13 @@ class Setup():
             # if not isinstance(data, basestring):
             if not isinstance(data, str):
                 state = data[0]
+                tmp = state.split('=')
+                if len(tmp) == 2:
+                    state = tmp[0].strip()
+                    val = int(tmp[1])
                 comment = data[1]
                 if fData:
-                    tmp =  " %s, " % (state)
+                    tmp =  " %s = %s, " % (state, val)
                     fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                 (tmp.ljust(32), val, val, comment))
                     # fWrite(jFile, '  "%-10s %s", \n' % (state, comment))
@@ -444,7 +448,7 @@ class Setup():
                         globals()[state] = val
                         imports.append(state)
                         eval("%s.append('%s')" % (enum, state))
-                        stringList.append((state, comment))
+                        stringList.append((state, val, comment))
                         if f is not None:
                             tmp = "%s = %2d" % (state.ljust(16), val)
                             fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
@@ -477,13 +481,17 @@ class Setup():
                             fWrite(cFile, "\n#ifdef ENUM_%s\n\n" % \
                                    (var.upper()))
                             fWrite(cFile, "const char *%s[] = \n{\n" % (enum))
-                            for index, (s, comment) in enumerate(stringList):
+                            lastVal = -1
+                            for index, (s, val, comment) in enumerate(stringList):
+                                if val == lastVal:
+                                    continue
+                                lastVal = val
                                 tmp =  " \"%s\", " % (s)
                                 if commentList is not None:
                                     commentList.append(comment)
                                 fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
-                                            (tmp.ljust(32), index, \
-                                             index, comment))
+                                            (tmp.ljust(32), val, \
+                                             val, comment))
                             fWrite(cFile, "};\n\n#else\n\n")
                             fWrite(cFile, "extern const char *%s[];\n" % (enum))
                             fWrite(cFile, "\n#endif\n")

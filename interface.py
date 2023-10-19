@@ -1546,6 +1546,9 @@ fpgaLatheBitList = \
         ("zFreqSel", None, (2, 0), "z Frequency select"),
         ("xFreqSel", None, (5, 3), "x Frequency select"),
 
+        ("zFreqShift", 0, 0, "z Frequency shift"),
+        ("xFreqShift", 3, 0, "x Frequency shift"),
+
         # "clock selection values",
 
         ("clkNone",    0, (2, 0), ""),
@@ -1635,13 +1638,13 @@ enumList = \
 
         "enum axis_States",
         "{",
-        ("AXIS_IDLE", "idle"),
-        ("AXIS_WAIT_BACKLASH", "wait for backlash move complete"),
-        ("AXIS_START_MOVE", "start axis move"),
-        ("AXIS_WAIT_MOVE", "wait for move complete"),
-        ("AXIS_DELAY", "wait for position to settle"),
-        ("AXIS_DONE", "clean up state"),
-        ("AXIS_STATES", "number of states"),
+        ("AXIS_IDLE = 0", "idle"),
+        ("AXIS_WAIT_BACKLASH = 1", "wait for backlash move complete"),
+        ("AXIS_START_MOVE = 2", "start axis move"),
+        ("AXIS_WAIT_MOVE = 3", "wait for move complete"),
+        ("AXIS_DELAY = 4", "wait for position to settle"),
+        ("AXIS_DONE = 5", "clean up state"),
+        ("AXIS_STATES = 6", "number of states"),
         "};",
 
         "move control states",
@@ -1828,6 +1831,116 @@ enumList = \
         ("SEL_ARC_SMALL_STEM", "Small Stem"),
         ("SEL_ARC_LARGE_STEM", "Large Stem"),
         "};",
+
+        "riscv actions",
+        
+        "enum sel_Riscv_Type c",
+        "{",
+        ("R_NONE",       "no operation"),
+        ("R_OP_START",   ""),
+        ("R_OP_DONE",    ""),
+        ("R_STOP",       "stop"),
+        ("R_STOP_X",     "stop x"),
+        ("R_STOP_Z",     "stop z"),
+        ("R_RESUME",     "resume"),
+
+        ("R_SET_LOC_X",  ""),
+        ("R_SET_LOC_Z",  ""),
+
+        ("R_PAUSE",      "pause"),
+        ("R_START_SPIN", "start spindle"),
+        ("R_STOP_SPIN",  "stop spindle"),
+        ("R_WAIT_Z",     "wait z"),
+        ("R_WAIT_X",     "wait x"),
+
+        ("R_PASS",       ""),
+
+        ("R_SEND_ACCEL", "send parm"),
+        ("R_SEND_DATA",  "send data"),
+        ("R_MOVE_Z",     "move z"),
+        ("R_MOVE_X",     "move x"),
+        ("R_MOVE_REL_Z", "move z"),
+        ("R_MOVE_REL_X", "move x"),
+
+        # ("R_", ""),
+        # ("R_", ""),
+        "};",
+
+        "riscv axis name",
+
+        "enum Riscv_Axis_Name_Type c",
+        "{",
+        ("RA_NONE", ""),
+        ("RA_Z_AXIS", ""),
+        ("RA_X_AXIS", ""),
+        # ("RS_", ""),
+        "};",
+
+        "riscv data",
+        
+        "enum Riscv_Data_Type c",
+        "{",
+        ("RD_NONE", ""),
+        ("RD_Z_BACKLASH", ""),
+        ("RD_X_BACKLASH", ""),
+        # ("RD_", ""),
+        "};",
+
+        "riscv accel types",
+
+        "enum Riscv_Accel_Type c",
+        "{",
+         ("RP_Z_TURN  = 0", ""),
+         ("RP_Z_BASE  = 0", ""),
+         ("RP_Z_TAPER = 1", ""),
+         ("RP_Z_MOVE  = 2", ""),
+         ("RP_Z_JOG   = 3", ""),
+         ("RP_Z_SLOW  = 4", ""),
+         ("RP_X_TURN  = 5", ""),
+         ("RP_X_BASE  = 5", ""),
+         ("RP_X_TAPER = 6", ""),
+         ("RP_X_MOVE  = 7", ""),
+         ("RP_X_JOG   = 8", ""),
+         ("RP_X_SLOW  = 9", ""),
+         ("RP_MAX     = 10", ""),
+        "};",
+
+        "riscv axis states",
+
+        "enum Riscv_Axis_State_Type c",
+        "{",
+        ("RS_IDLE", ""),
+        ("RS_WAIT_BACKLASH", ""),
+        ("RS_WAIT", ""),
+        # ("RS_", ""),
+        "};",
+
+        "riscv accel parameters",
+
+        "enum Riscv_Sync_Parm_Type c",
+        "{",
+        ("RP_INITIAL_SUM", ""),
+        ("RP_INCR1",       ""),
+        ("RP_INCR2",       ""),
+        ("RP_ACCEL_VAL",   ""),
+        ("RP_ACCEL_COUNT", ""),
+        ("RP_FREQ_DIV",    ""),
+        # ("RP_", ""),
+        "};",
+        
+        "riscv run wait states",
+
+        "enum Riscv_Run_Wait_Type c",
+        "{",
+        ("RW_NONE", ""),
+        ("RW_PAUSE", ""),
+        ("RW_SPIN_START", ""),
+        ("RW_SPIN_STOP", ""),
+        ("RW_WAIT_X", ""),
+        ("RW_WAIT_Z", ""),
+        # ("RW_", ""),
+        "};",
+
     )
 
 megaEnumList = \
@@ -1883,7 +1996,7 @@ if __name__ == '__main__':
     if WINDOWS:
         from pywinusb.hid import find_all_hid_devices
         # from comm import Comm, CommTimeout
-        from commPi import Comm, CommTimeout
+        #from commPi import Comm, CommTimeout
 
         R_PI = True
     else:

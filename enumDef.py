@@ -483,3 +483,229 @@ selArcTypeText = ( \
     "Small Stem",
     "Large Stem",
     )
+
+# riscv actions
+
+R_NONE           =  0           # no operation
+R_OP_START       =  1           # 
+R_OP_DONE        =  2           # 
+R_STOP           =  3           # stop
+R_STOP_X         =  4           # stop x
+R_STOP_Z         =  5           # stop z
+R_RESUME         =  6           # resume
+R_SET_LOC_X      =  7           # 
+R_SET_LOC_Z      =  8           # 
+R_PAUSE          =  9           # pause
+R_START_SPIN     = 10           # start spindle
+R_STOP_SPIN      = 11           # stop spindle
+R_WAIT_Z         = 12           # wait z
+R_WAIT_X         = 13           # wait x
+R_PASS           = 14           # 
+R_SEND_ACCEL     = 15           # send parm
+R_SEND_DATA      = 16           # send data
+R_MOVE_Z         = 17           # move z
+R_MOVE_X         = 18           # move x
+R_MOVE_REL_Z     = 19           # move z
+R_MOVE_REL_X     = 20           # move x
+
+selRiscvTypeList = ( \
+    "R_NONE",
+    "R_OP_START",
+    "R_OP_DONE",
+    "R_STOP",
+    "R_STOP_X",
+    "R_STOP_Z",
+    "R_RESUME",
+    "R_SET_LOC_X",
+    "R_SET_LOC_Z",
+    "R_PAUSE",
+    "R_START_SPIN",
+    "R_STOP_SPIN",
+    "R_WAIT_Z",
+    "R_WAIT_X",
+    "R_PASS",
+    "R_SEND_ACCEL",
+    "R_SEND_DATA",
+    "R_MOVE_Z",
+    "R_MOVE_X",
+    "R_MOVE_REL_Z",
+    "R_MOVE_REL_X",
+    )
+
+selRiscvTypeText = ( \
+    "no operation",
+    "",
+    "",
+    "stop",
+    "stop x",
+    "stop z",
+    "resume",
+    "",
+    "",
+    "pause",
+    "start spindle",
+    "stop spindle",
+    "wait z",
+    "wait x",
+    "",
+    "send parm",
+    "send data",
+    "move z",
+    "move x",
+    "move z",
+    "move x",
+    )
+
+# riscv axis name
+
+RA_NONE          =  0           # 
+RA_Z_AXIS        =  1           # 
+RA_X_AXIS        =  2           # 
+
+RiscvAxisNameTypeList = ( \
+    "RA_NONE",
+    "RA_Z_AXIS",
+    "RA_X_AXIS",
+    )
+
+RiscvAxisNameTypeText = ( \
+    "",
+    "",
+    "",
+    )
+
+# riscv data
+
+RD_NONE          =  0           # 
+RD_Z_BACKLASH    =  1           # 
+RD_X_BACKLASH    =  2           # 
+
+RiscvDataTypeList = ( \
+    "RD_NONE",
+    "RD_Z_BACKLASH",
+    "RD_X_BACKLASH",
+    )
+
+RiscvDataTypeText = ( \
+    "",
+    "",
+    "",
+    )
+
+# riscv accel types
+
+RP_Z_TURN        =  0           # 
+RP_Z_BASE        =  0           # 
+RP_Z_TAPER       =  1           # 
+RP_Z_MOVE        =  2           # 
+RP_Z_JOG         =  3           # 
+RP_Z_SLOW        =  4           # 
+RP_X_TURN        =  5           # 
+RP_X_BASE        =  5           # 
+RP_X_TAPER       =  6           # 
+RP_X_MOVE        =  7           # 
+RP_X_JOG         =  8           # 
+RP_X_SLOW        =  9           # 
+RP_MAX           = 10           # 
+
+RiscvAccelTypeList = ( \
+    "RP_Z_TURN",
+    "RP_Z_BASE",
+    "RP_Z_TAPER",
+    "RP_Z_MOVE",
+    "RP_Z_JOG",
+    "RP_Z_SLOW",
+    "RP_X_TURN",
+    "RP_X_BASE",
+    "RP_X_TAPER",
+    "RP_X_MOVE",
+    "RP_X_JOG",
+    "RP_X_SLOW",
+    "RP_MAX",
+    )
+
+RiscvAccelTypeText = ( \
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    )
+
+# riscv axis states
+
+RS_IDLE          =  0           # 
+RS_WAIT_BACKLASH =  1           # 
+RS_WAIT          =  2           # 
+
+RiscvAxisStateTypeList = ( \
+    "RS_IDLE",
+    "RS_WAIT_BACKLASH",
+    "RS_WAIT",
+    )
+
+RiscvAxisStateTypeText = ( \
+    "",
+    "",
+    "",
+    )
+
+# riscv accel parameters
+
+RP_INITIAL_SUM   =  0           # 
+RP_INCR1         =  1           # 
+RP_INCR2         =  2           # 
+RP_ACCEL_VAL     =  3           # 
+RP_ACCEL_COUNT   =  4           # 
+RP_FREQ_DIV      =  5           # 
+
+RiscvSyncParmTypeList = ( \
+    "RP_INITIAL_SUM",
+    "RP_INCR1",
+    "RP_INCR2",
+    "RP_ACCEL_VAL",
+    "RP_ACCEL_COUNT",
+    "RP_FREQ_DIV",
+    )
+
+RiscvSyncParmTypeText = ( \
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    )
+
+# riscv run wait states
+
+RW_NONE          =  0           # 
+RW_PAUSE         =  1           # 
+RW_SPIN_START    =  2           # 
+RW_SPIN_STOP     =  3           # 
+RW_WAIT_X        =  4           # 
+RW_WAIT_Z        =  5           # 
+
+RiscvRunWaitTypeList = ( \
+    "RW_NONE",
+    "RW_PAUSE",
+    "RW_SPIN_START",
+    "RW_SPIN_STOP",
+    "RW_WAIT_X",
+    "RW_WAIT_Z",
+    )
+
+RiscvRunWaitTypeText = ( \
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    )

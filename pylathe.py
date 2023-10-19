@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python310/Python.exe
+#!/cygdrive/c/Python312/Python.exe
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################

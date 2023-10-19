@@ -94,6 +94,8 @@ cfgPwmEna    = 0x80000          # pwm enable
 
 # clock control register
 
+zFreqShift   = 0x00             # z Frequency shift
+xFreqShift   = 0x03             # x Frequency shift
 clkNone      = 0x00             # 
 clkFreq      = 0x01             # 
 clkCh        = 0x02             # 
@@ -202,6 +204,8 @@ importList = ( \
  cfgEnaEncDir, \
  cfgGenSync, \
  cfgPwmEna, \
+ zFreqShift, \
+ xFreqShift, \
  clkNone, \
  clkFreq, \
  clkCh, \
