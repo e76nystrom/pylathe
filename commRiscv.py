@@ -611,9 +611,9 @@ class RiscvLathe(Thread):
         self.comm.riscvCmd(en.R_READ_ALL)
         rsp = self.comm.riscvSend()
         try:
-            if self.postUpdate is not None:
-                if len(rsp) >= 5:
-                    parm = int(rsp[3:5], 16)
+            if (self.postUpdate is not None) and len(rsp) >= 5:
+                parm = int(rsp[3:5], 16)
+                if parm == en.R_READ_ALL:
                     splitRsp = rsp[5:-1].split(' ')
                     (z, x, rpm, curPass, droZ, droX, mvStatus, \
                      queCount, dbgCount) = splitRsp[1:10]
@@ -629,7 +629,6 @@ class RiscvLathe(Thread):
                     result = (en.EV_READ_ALL, z, x, rpm, curPass,
                               droZ, droX, mvStatus)
                     self.postUpdate(result)
-                # wx.PostEvent(self.notifyWindow, UpdateEvent(result))
         except ValueError:
             print("readAll ValueError ", rsp)
             stdout.flush()

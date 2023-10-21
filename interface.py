@@ -2027,7 +2027,7 @@ if __name__ == '__main__':
         cLoc     = os.path.join(path, '..\\LatheCPP\\include\\')
         syncLoc  = os.path.join(path, '..\\SyncCPP\\include\\')
         megaLoc  = os.path.join(path, '..\\..\\Arduino\\output\\')
-        riscvLoc = os.path.join(path, "..\\..\\neorv32\\sw\\example\\Lathe\\")
+        riscvLoc = os.path.join(path, "..\\..\\neorv32\\sw\\example\\LatheRiscV\\")
 
         xLoc = path + '/../../Xilinx/LatheCtl/'
         fEncLoc = path + '/../../Altera/Encoder/VHDL/'
@@ -2076,7 +2076,7 @@ if __name__ == '__main__':
     setup.createParameters(riscvParmList, cLoc, fData, pyFile=False,
                            cSource=None, prefix='riscv')
     setup.createParameters(riscvParmList, riscvLoc, fData, pyFile=True,
-                           cSource='', prefix='riscv')
+                           cSource='', prefix='riscv', cExt="c")
 
     setup.createEnums(enumList, cLoc, fData)
 
