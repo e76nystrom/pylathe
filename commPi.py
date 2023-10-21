@@ -7,8 +7,7 @@ import os
 import re
 import pickle
 
-from accelPi import AccelData, load, riscvAccelData, start, \
-    syncAccelCalc, taperCalc
+from accelPi import intRound, AccelData, syncAccelCalc, taperCalc
 from remParmDef import parmTable
 from remCmdDef import cmdTable
 import enumDef as en
@@ -16,7 +15,7 @@ import lRegDef as rg
 import fpgaLathe as bt
 import ctlBitDef as ct
 from remParm import RemParm
-from commRiscv import CommRiscv
+#from commRiscv import CommRiscv
 
 zClkStr = ("zClkNone", "zClkZFreq", "zClkCh", "zClkIntClk", \
            "zClkFreq", "zClkXCh", "zClkSpindle", "zClkDbgFreq")
@@ -36,10 +35,10 @@ sock = None
 
 DIR_POS = 1
 
-def tmpCommand(_0, _1):
-    pass
+# def tmpCommand(_0, _1):
+#     pass
 
-command = tmpCommand
+# command = tmpCommand
 
 dbgFile = None
 def trace(txt):
@@ -124,24 +123,28 @@ X_AXIS = 1
 DBG_SETUP = True
 DBG_DETAIL = False
 
-def intRound(val):
-    return(int(round(val)))
+def enableXilinx():
+    pass
 
 class CommTimeout(Exception):
     pass
 
-class Comm():
+class CommPi():
     def __init__(self):
-        global command
+        # global command
         print("CommPi __init__")
         self.ser   = Serial()
-        self.riscv = CommRiscv(trace)
-        self.riscv.openSerial("COM5", "19200")
-        self.rpi   = PiLathe(self)
+        # self.riscv = CommRiscv(trace)
+        # self.riscv.openSerial("COM5", "19200")
+        self.rpi   = rpi = PiLathe(self)
+        self.moveQue = rpi.moveQue
+        self.setPostUpdate = rpi.setPostUpdate
+        self.setDbgDispatch = rpi.setDbgDispatch
         self.spi = None
         self.lastRdCmd = -1
         self.lastResult = 0
-        command = self.riscv.command
+        self.riscv = None
+        # command = self.riscv.command
 
         if UDP:
             global sock
@@ -160,71 +163,6 @@ class Comm():
                     self.spi.max_speed_hz = 500000
                     self.spi.mode = 0
             print(self.rpi.parm.spSteps)
-
-    def ld(self, cmd, data, dbg=True):
-        s0 = rg.fpgaSizeTable[cmd]
-        val = list(int(data).to_bytes(s0, byteorder='big', signed=True))
-        if dbg:
-            d = ""
-            for i in val:
-                d += "%02x" % i
-            txt = ("ld %d %3d 0x%2x %10d %s %s" % \
-                   (s0, cmd, cmd, data, d.zfill(8), \
-                    rg.xRegTable[cmd]))
-            trace(txt)
-            print(txt)
-        msg = [cmd] + val
-
-        if UDP:
-            outMsg = pickle.dumps(msg)
-            self.sock.sendto(outMsg, (SND_IP, UDP_PORT))
-        else:
-            if self.spi is None:
-                return
-            self.spi.xfer2(msg)
-
-    def rd(self, cmd, dbg=False, ext=0x80000000, mask=0xffffffff, trc=False):
-        if dbg:
-            if cmd != self.lastRdCmd:
-                print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
-                self.lastRdCmd = cmd
-
-        if UDP:
-            outMsg = pickle.dumps([cmd | 0x100])
-            self.sock.sendto(outMsg, (SND_IP, UDP_PORT))
-            val, addr = self.sock.recvfrom(64)
-            val = pickle.loads(val)
-        else:
-            if self.spi is None:
-                return(0)
-            msg = [cmd]
-            self.spi.xfer2(msg)
-            val = self.spi.readbytes(4)
-            val = pickle.loads(val)
-
-        result = int.from_bytes(val, byteorder='big', signed=True)
-        if result & ext:
-            result |= -1 & ~mask
-        if dbg:
-            if (cmd == rg.F_Rd_Status) and (result != self.lastResult):
-                self.lastResult = result
-                print("rd status %08x" % result)
-        if trc:
-            r = int(result)
-            txt = ("rd   %3d 0x%02x %10d %08x %s" % \
-                   (cmd, cmd, r, r, rg.xRegTable[cmd]))
-            trace(txt)
-        return result
-
-    def ldAxisCtl(self, base, axisCtl, ident=None):
-        if ident is not None:
-            print("ldAxisCtl", ident)
-        if (axisCtl & 3) == 3:
-            print("start and intit set at same time")
-        prtAxisCtl(base, axisCtl, "ld ")
-        self.ld(base + rg.F_Ld_Axis_Ctl, axisCtl)
-        value = self.rd(base + rg.F_Rd_Axis_Ctl)
-        prtAxisCtl(base, value, "rd ")
 
     def setupCmds(self, loadMulti, loadVal, readVal):
         pass
@@ -291,12 +229,79 @@ class Comm():
         pass
 
     def sendMove(self, opString, op, val):
-        self.rpi.moveQue.put((opString, op, val))
+        self.moveQue.put((opString, op, val))
         pass
 
     # noinspection PyMethodMayBeStatic
     def getQueueStatus(self):
         return(64)
+
+    def ld(self, cmd, data, dbg=True):
+        s0 = rg.fpgaSizeTable[cmd]
+        val = list(int(data).to_bytes(s0, byteorder='big', signed=True))
+        if dbg:
+            d = ""
+            for i in val:
+                d += "%02x" % i
+            txt = ("ld %d %3d 0x%2x %10d %s %s" % \
+                   (s0, cmd, cmd, data, d.zfill(8), \
+                    rg.xRegTable[cmd]))
+            trace(txt)
+            print(txt)
+        msg = [cmd] + val
+
+        if UDP:
+            outMsg = pickle.dumps(msg)
+            self.sock.sendto(outMsg, (SND_IP, UDP_PORT))
+        else:
+            if self.spi is None:
+                return
+            self.spi.xfer2(msg)
+
+    # end of commmands shared with comm.py
+
+    def rd(self, cmd, dbg=False, ext=0x80000000, mask=0xffffffff, trc=False):
+        if dbg:
+            if cmd != self.lastRdCmd:
+                print("rd %2d %s" % (cmd, rg.xRegTable[cmd]))
+                self.lastRdCmd = cmd
+
+        if UDP:
+            outMsg = pickle.dumps([cmd | 0x100])
+            self.sock.sendto(outMsg, (SND_IP, UDP_PORT))
+            val, addr = self.sock.recvfrom(64)
+            val = pickle.loads(val)
+        else:
+            if self.spi is None:
+                return(0)
+            msg = [cmd]
+            self.spi.xfer2(msg)
+            val = self.spi.readbytes(4)
+            val = pickle.loads(val)
+
+        result = int.from_bytes(val, byteorder='big', signed=True)
+        if result & ext:
+            result |= -1 & ~mask
+        if dbg:
+            if (cmd == rg.F_Rd_Status) and (result != self.lastResult):
+                self.lastResult = result
+                print("rd status %08x" % result)
+        if trc:
+            r = int(result)
+            txt = ("rd   %3d 0x%02x %10d %08x %s" % \
+                   (cmd, cmd, r, r, rg.xRegTable[cmd]))
+            trace(txt)
+        return result
+
+    def ldAxisCtl(self, base, axisCtl, ident=None):
+        if ident is not None:
+            print("ldAxisCtl", ident)
+        if (axisCtl & 3) == 3:
+            print("start and intit set at same time")
+        prtAxisCtl(base, axisCtl, "ld ")
+        self.ld(base + rg.F_Ld_Axis_Ctl, axisCtl)
+        value = self.rd(base + rg.F_Rd_Axis_Ctl)
+        prtAxisCtl(base, value, "rd ")
 
 def renameVar(name):
     val = name.split("_")
@@ -309,7 +314,6 @@ def renameVar(name):
         else:
             varName = varName + s.capitalize()
     return varName
-
 
 class PiLathe(Thread):
     def __init__(self, comm):
@@ -401,23 +405,23 @@ class PiLathe(Thread):
     def setDbgDispatch(self, dbgDispatch):
         self.dbgDispatch = dbgDispatch
 
-    def clearQue(self):
+    def cClearQue(self):
         pass
 
-    def clearDbg(self):
+    def cClearDbg(self):
         pass
 
-    def clearCmd(self):
+    def cClearCmd(self):
         pass
 
-    def measureCmd(self):
+    def cMeasureCmd(self):
         pass
 
-    def pauseCmd(self):
+    def cPauseCmd(self):
         self.cmdPause = True
         self.mvStatus |= ct.MV_PAUSE
 
-    def resumeCmd(self):
+    def cResumeCmd(self):
         self.cmdPause = False
         # if jogPause & DISABLE_JOG:
         #     jogPause &= ~(PAUSE_ENA_X_JOG | PAUSE_ENA_Z_JOG)
@@ -425,63 +429,63 @@ class PiLathe(Thread):
                            ct.MV_READ_X | ct.MV_READ_Z)
         self.riscv.command(en.R_RESUME)
 
-    def setup(self):
+    def cSetup(self):
         pass
 
-    def spSetup(self):
+    def cSpSetup(self):
         pass
 
-    def stopCmd(self):
-        self.spindleStop()
-        self.zStop()
-        self.xStop()
+    def cStopCmd(self):
+        self.cSpindleStop()
+        self.cZStop()
+        self.cXStop()
         self.cmdPause = False
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | \
                            ct.MV_XHOME_ACTIVE | ct.MV_ZHOME_ACTIVE)
         self.riscv.command(en.R_STOP)
 
-    def doneCmd(self):
+    def cDoneCmd(self):
         self.mvStatus &= ~ct.MV_DONE
 
-    def syncSetup(self):
+    def cSyncSetup(self):
         pass
 
-    def zSetup(self):
+    def cZSetup(self):
         print("\n>>>zSetup")
         self.zAxis.init()
         print("<<<\n")
 
-    def zSetLoc(self):
+    def cZSetLoc(self):
         self.zAxis.initLoc()
         self.riscv.command(en.R_SET_LOC_Z,
                            self.zAxis.getLoc())
 
-    def xSetup(self):
+    def cXSetup(self):
         print("\n>>>xSetup")
         self.xAxis.init()
         print("<<<\n")
 
-    def xSetLoc(self):
+    def cXSetLoc(self):
         self.xAxis.initLoc()
         self.riscv.command(en.R_SET_LOC_X,
                            self.xAxis.getLoc())
 
-    def readAll(self):
+    def creadAll(self):
         pass
 
-    def readDbg(self):
+    def creadDbg(self):
         pass
 
-    def spindleSetup(self):
+    def cSpindleSetup(self):
         pass
 
-    def spindleJog(self):
+    def cSpindleJog(self):
         pass
 
-    def spindleJogSpeed(self):
+    def cSpindleJogSpeed(self):
         pass
 
-    def spindleStart(self):
+    def cSpindleStart(self):
         self.lastIdxClks = 0
         if self.parm.stepperDrive:
             pass
@@ -492,7 +496,7 @@ class PiLathe(Thread):
             if self.parm.cfgVarSpeed:
                 pass
 
-    def spindleStop(self):
+    def cSpindleStop(self):
         if self.parm.stepperDrive:
             pass
         else:
@@ -502,50 +506,50 @@ class PiLathe(Thread):
             if self.parm.cfgVarSpeed:
                 pass
 
-    def spindleUpdate(self):
+    def cSpindleUpdate(self):
         pass
 
-    def xHomeAxis(self):
+    def cXHomeAxis(self):
         pass
 
-    def xJogMove(self):
+    def cXJogMove(self):
         parm = self.parm
         self.xAxis.jogMove(parm.xJogDir)
 
-    def xJogSpeed(self):
+    def cXJogSpeed(self):
         pass
 
-    def xMoveAbs(self):
+    def cXMoveAbs(self):
         pass
 
-    def xMoveRel(self):
+    def cXMoveRel(self):
         parm = self.parm
         axis = self.xAxis
         dist = int(parm.xMoveDist * axis.stepsInch)
         axis.moveRel(dist, parm.xFlag)
         self.riscv.command(en.R_MOVE_REL_X, (dist, parm.xFlag))
 
-    def xStop(self):
+    def cXStop(self):
         self.xAxis.stop()
         self.riscv.command(en.R_STOP_X)
 
-    def xHomeFwd(self):
+    def cXHomeFwd(self):
         pass
 
-    def xHomeRev(self):
+    def cXHomeRev(self):
         pass
 
-    def zJogMove(self):
+    def cZJogMove(self):
         parm = self.parm
         self.zAxis.jogMove(parm.zJogDir)
 
-    def zJogSpeed(self):
+    def cZJogSpeed(self):
         pass
 
-    def zMoveAbs(self):
+    def cZMoveAbs(self):
         pass
 
-    def zMoveRel(self):
+    def cZMoveRel(self):
         parm = self.parm
         axis = self.zAxis
         dist = int(parm.zMoveDist * axis.stepsInch)
@@ -553,14 +557,14 @@ class PiLathe(Thread):
         self.riscv.command(en.R_MOVE_REL_Z,
                            (dist, parm.zFlag))
 
-    def zStop(self):
+    def cZStop(self):
         self.zAxis.stop()
         self.riscv.command(en.R_STOP_Z)
 
-    def zHomeFwd(self):
+    def cZHomeFwd(self):
         pass
 
-    def zHomeRev(self):
+    def cZHomeRev(self):
         pass
 
     def dbgMsg(self, cmd, val):
@@ -765,7 +769,7 @@ class PiLathe(Thread):
 
     # move functions
 
-    def moveZ(self, val):
+    def qMoveZ(self, val):
         dest = val + self.zAxis.homeOffset
         self.dbgMsg(en.D_ZMOV, val)
         print("moveZ dest %d val %d zStepsInch %d zHomeOffset %d" % \
@@ -779,7 +783,7 @@ class PiLathe(Thread):
         self.riscv.command(en.R_WAIT_Z)
         self.riscv.send()
 
-    def moveX(self, val):
+    def qMoveX(self, val):
         dest = val + self.xAxis.homeOffset
         self.dbgMsg(en.D_XMOV, val)
         print("moveX dest %d val %d xStepsInch %d xHomeOffset %d" % \
@@ -794,42 +798,42 @@ class PiLathe(Thread):
         self.riscv.command(en.R_WAIT_X)
         self.riscv.send()
 
-    def saveZ(self, val):
+    def qSaveZ(self, val):
         print("save z %7.4f" % (val))
         self.zAxis.savedLoc = (intRound(val * self.zAxis.stepsInch) + \
                                self.zAxis.homeOffset)
 
-    def saveX(self, val):
+    def qSaveX(self, val):
         print("save x %7.4f" % (val))
         self.xAxis.savedLoc = (intRound(val * self.xAxis.stepsInch) + \
                                self.xAxis.homeOffset)
 
-    def saveZOffset(self, val):
+    def qSaveZOffset(self, val):
         print("save z offset %7.4f" % (float(val) / self.zAxis.stepsInch))
         self.zAxis.homeOffset = val
 
-    def saveXOffset(self, val):
+    def qSaveXOffset(self, val):
         print("save x offset %7.4f" % (float(val) / self.xAxis.stepsInch))
         self.xAxis.homeOffset = val
 
-    def saveTaper(self, val):
+    def qSaveTaper(self, val):
         print("save taper %7.4f" % (val))
         self.taper = val
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def moveZX(self, val):
+    def qMoveZX(self, val):
         print("moveZX")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def moveXZ(self, val):
+    def qMoveXZ(self, val):
         print("moveXZ")
 
-    def taperZX(self, val):
+    def qtaperZX(self, val):
         print("taper zx %7.4f" % (val))
         self.taperSetup(self.zAxis, self.xAxis, val)
         self.mvState = en.M_WAIT_Z
 
-    def taperXZ(self, val):
+    def qTaperXZ(self, val):
         print("taper xz %7.4f" % (val))
         self.taperSetup(self.xAxis, self.zAxis, val)
         self.mvState = en.M_WAIT_X
@@ -851,24 +855,24 @@ class PiLathe(Thread):
         mvAxis.move(loc, ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
 
     # noinspection PyUnusedLocal
-    def startSpindle(self, val):
+    def qStartSpindle(self, val):
         print("startSpindle")
         self.mvSpindleCmd = self.cmd
-        self.spindleStart()
+        self.cSpindleStart()
         self.mvState = en.M_WAIT_SPINDLE
         self.riscv.command(en.R_START_SPIN)
         #self.riscv.command(en.R_WAIT_SPIN)
 
     # noinspection PyUnusedLocal
-    def stopSpindle(self, val):
+    def qStopSpindle(self, val):
         print("stopSpindle")
         self.mvSpindleCmd = self.cmd
-        self.spindleStop()
+        self.cSpindleStop()
         self.mvState = en.M_WAIT_SPINDLE
         self.riscv.command(en.R_STOP_SPIN)
         #self.riscv.command(en.R_WAIT_SPIN)
 
-    def zSynSetup(self, val):
+    def qZSynSetup(self, val):
         print("zSynSetup")
         self.zFeed = val
         print("zFeed %7.3f currentOp %d %s turnSync %d %s\n" % \
@@ -883,15 +887,15 @@ class PiLathe(Thread):
         elif currentOp == en.OP_THREAD:
             pass
 
-        if self.parm.turnSync == en.SEL_TU_ENC:
-            self.zAxis.encParm = True
-            syncAccelCalc(self.zAxis.turnAccel, self.feedType, val)
-            riscvAccelData(self.zAxis.turnAccel, en.RP_Z_TURN)
-        elif self.parm.turnSync == en.SEL_TU_SYN:
-            self.zAxis.encParm = False
-            self.mvState = en.M_START_SYNC
+        # if self.parm.turnSync == en.SEL_TU_ENC:
+        #     self.zAxis.encParm = True
+        #     syncAccelCalc(self.zAxis.turnAccel, self.feedType, val)
+        #     riscvAccelData(self.zAxis.turnAccel, en.RP_Z_TURN)
+        # elif self.parm.turnSync == en.SEL_TU_SYN:
+        #     self.zAxis.encParm = False
+        #     self.mvState = en.M_START_SYNC
 
-    def xSynSetup(self, val):
+    def qXSynSetup(self, val):
         print("xSynSetup")
         self.xFeed = val
         currentOp = self.parm.currentOp
@@ -907,20 +911,20 @@ class PiLathe(Thread):
         if self.parm.turnSync == en.SEL_TU_ENC:
             self.xAxis.encParm = True
             syncAccelCalc(self.xAxis.turnAccel, self.feedType, val)
-            riscvAccelData(self.xAxis.turnAccel, en.RP_Z_TURN)
+            # riscvAccelData(self.xAxis.turnAccel, en.RP_Z_TURN)
         else:
             self.xAxis.encParm = False
             self.mvState = en.M_START_SYNC
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def sendSyncParms(self, val):
+    def qSendSyncParms(self, val):
         print("sendSyncParms")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def syncCommand(self, val):
+    def qSyncCommand(self, val):
         print("syncCommand")
 
-    def passNum(self, val):
+    def qPassNum(self, val):
         print("passNum")
         self.passVal = val
         if (val & 0xff00) == 0:
@@ -931,67 +935,67 @@ class PiLathe(Thread):
         self.riscv.command(en.R_PASS, val)
 
     # noinspection PyUnusedLocal
-    def quePause(self, val):
+    def qSuePause(self, val):
         print("quePause")
         self.cmdPause = True
         self.mvStatus |= ct.MV_PAUSE
         self.riscv.command(en.R_PAUSE)
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def moveZOffset(self, val):
+    def qMoveZOffset(self, val):
         print("moveZOffset")
 
-    def saveFeedType(self, val):
+    def qSaveFeedType(self, val):
         print("saveFeedType")
         self.feedType = val
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def zFeedSetup(self, val):
+    def qZFeedSetup(self, val):
         print("zFeedSetup")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def xFeedSetup(self, val):
+    def qXFeedSetup(self, val):
         print("xFeedSetup")
 
-    def saveFlags(self, val):
+    def qSaveFlags(self, val):
         print("saveFlags")
         self.threadFlag = val
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def probeX(self, val):
+    def qProbeX(self, val):
         print("probeX")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def probeZ(self, val):
+    def qProbeZ(self, val):
         print("probeZ")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def saveZDro(self, val):
+    def qSaveZDro(self, val):
         print("saveZDro")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def saveXDro(self, val):
+    def qSaveXDro(self, val):
         print("saveXDro")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def queParm(self, val):
+    def qQueParm(self, val):
         print("queParm")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def moveArc(self, val):
+    def qMoveArc(self, val):
         print("moveArc")
 
-    def opDone(self, val):
+    def qOpDone(self, val):
         print("opDone")
         self.dbgMsg(en.D_DONE, val)
         if val == ct.PARM_START:
             self.mvStatus &= ~ct.MV_DONE
             self.mvStatus |= ct.MV_ACTIVE
-            self.riscv.command(en.R_OP_START)
-            self.zAxis.riscvAccelSetup()
-            self.xAxis.riscvAccelSetup()
+            # self.riscv.command(en.R_OP_START)
+            # self.zAxis.riscvAccelSetup()
+            # self.xAxis.riscvAccelSetup()
         elif val == ct.PARM_DONE:
-            self.riscv.command(en.R_OP_DONE)
+            # self.riscv.command(en.R_OP_DONE)
             self.mvStatus &= ~ct.MV_ACTIVE
             self.mvStatus |= ct.MV_DONE
 
@@ -1018,9 +1022,9 @@ class PiLathe(Thread):
                                 indexClks) * 60)
                 print("delta %d percent %7.2f rpm %d" % (delta, percent, rpm))
                 if percent < 1.0:
-                    if self.mvSpindleCmd == en.STOP_SPINDLE:
+                    if self.mvSpindleCmd == en.Q_STOP_SPINDLE:
                         self.mvState = en.M_IDLE
-                    elif self.mvSpindleCmd == en.START_SPINDLE:
+                    elif self.mvSpindleCmd == en.Q_START_SPINDLE:
                         self.mvState = en.M_IDLE
 
     def mvWaitSyncParms(self):  # 4
@@ -1061,6 +1065,49 @@ class PiLathe(Thread):
 
     def mvWaitArc(self):        # 14
         pass
+
+def load(aData, dist, encParm=True):
+    axis = aData.axis
+    print("\n%s accel load" % (axis.name))
+    axisCtl = axis.axisCtl
+    base = axis.base
+    ld = axis.ld
+    # trace("load")
+    if encParm:
+        if aData.freqDivider != 0:
+            ld(base + rg.F_Ld_Freq, aData.freqDivider)
+
+        bSyn = base + rg.F_Sync_Base
+        ld(bSyn + rg.F_Ld_D, aData.initialSum) # load initialSum (d) value
+        ld(bSyn + rg.F_Ld_Incr1, aData.incr1)  # load incr1 value
+        ld(bSyn + rg.F_Ld_Incr2, aData.incr2)  # load incr2 value
+
+        ld(bSyn + rg.F_Ld_Accel_Val, aData.intAccel)   # load accel
+        ld(bSyn + rg.F_Ld_Accel_Count, aData.accelClocks) # load acl ctr
+
+        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
+        axis.ldAxisCtl(base, bt.ctlInit, "3")
+        axis.ldAxisCtl(base, 0, "3a")
+    else:
+        axis.ldAxisCtl(base, bt.ctlInit, "3")
+        axis.ldAxisCtl(base, 0, "3a")
+        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
+        axisCtl |=  bt.ctlChDirect
+        
+    axis.rd(base + rg.F_Sync_Base + rg.F_Rd_Dist, trc=True)
+    # trace("load\n")
+
+    #axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
+    axisCtl &= ~bt.ctlInit
+    axis.ldAxisCtl(base, bt.ctlStart, "4")
+    # trace("")
+
+def start(aData, axisCtl=0):
+    axis = aData.axis
+    print("\n%s %s accelCalc" % (axis.name, aData.accelType))
+    axisCtl |= axis.axisCtl | bt.ctlStart
+    axisCtl &= ~bt.ctlInit
+    axis.ldAxisCtl(axis.base, axisCtl, "5")
 
 D_MOV  = en.D_XMOV  - en.D_XMOV
 D_LOC  = en.D_XLOC  - en.D_XMOV
@@ -1194,15 +1241,15 @@ class Axis():
         trace("%s load clock control" % (self.name))
         self.ld(rg.F_Ld_Clk_Ctl, clkCtl)
 
-    def riscvAccelSetup(self):
-        if self.axis == Z_AXIS:
-            riscvAccelData(self.moveAccel,    en.RP_Z_MOVE)
-            riscvAccelData(self.jogAccel,     en.RP_Z_JOG)
-            riscvAccelData(self.jogSlowAccel, en.RP_Z_SLOW)
-        else:
-            riscvAccelData(self.moveAccel,    en.RP_X_MOVE)
-            riscvAccelData(self.jogAccel,     en.RP_X_JOG)
-            riscvAccelData(self.jogSlowAccel, en.RP_X_SLOW)
+    # def riscvAccelSetup(self):
+    #     if self.axis == Z_AXIS:
+    #         riscvAccelData(self.moveAccel,    en.RP_Z_MOVE)
+    #         riscvAccelData(self.jogAccel,     en.RP_Z_JOG)
+    #         riscvAccelData(self.jogSlowAccel, en.RP_Z_SLOW)
+    #     else:
+    #         riscvAccelData(self.moveAccel,    en.RP_X_MOVE)
+    #         riscvAccelData(self.jogAccel,     en.RP_X_JOG)
+    #         riscvAccelData(self.jogSlowAccel, en.RP_X_SLOW)
 
     # def riscvSetup(self, cmd):
     #     if cmd == ct.CMD_SYN:
@@ -1217,7 +1264,6 @@ class Axis():
     #         pass
     #     else:
     #         pass
-
 
     def move(self, pos, cmd):
         if self.state != en.AXIS_IDLE:

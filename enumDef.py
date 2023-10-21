@@ -87,70 +87,70 @@ mStatesText = ( \
 
 # move control commands
 
-MOVE_Z           =  0           # move z
-MOVE_X           =  1           # move x
-SAVE_Z           =  2           # save z
-SAVE_X           =  3           # save x
-SAVE_Z_OFFSET    =  4           # save z offset
-SAVE_X_OFFSET    =  5           # save x offset
-SAVE_TAPER       =  6           # save taper
-MOVE_Z_X         =  7           # move x in sync with z
-MOVE_X_Z         =  8           # move z in sync with x
-TAPER_Z_X        =  9           # taper x
-TAPER_X_Z        = 10           # taper z
-START_SPINDLE    = 11           # spindle start
-STOP_SPINDLE     = 12           # spindle stop
-Z_SYN_SETUP      = 13           # z sync setup
-X_SYN_SETUP      = 14           # x sync setup
-SEND_SYNC_PARMS  = 15           # send sync parameters
-SYNC_COMMAND     = 16           # send sync command
-PASS_NUM         = 17           # set pass number
-QUE_PAUSE        = 18           # pause queue
-MOVE_Z_OFFSET    = 19           # move z offset
-SAVE_FEED_TYPE   = 20           # save feed type
-Z_FEED_SETUP     = 21           # setup z feed
-X_FEED_SETUP     = 22           # setup x feed
-SAVE_FLAGS       = 23           # save thread flags
-PROBE_Z          = 24           # probe in z direction
-PROBE_X          = 25           # probe in x direction
-SAVE_Z_DRO       = 26           # save z dro reading
-SAVE_X_DRO       = 27           # save x dro reading
-QUE_PARM         = 28           # save parameter in queue
-MOVE_ARC         = 29           # move in an arc
-OP_DONE          = 30           # operation done
+Q_MOVE_Z         =  0           # move z
+Q_MOVE_X         =  1           # move x
+Q_SAVE_Z         =  2           # save z
+Q_SAVE_X         =  3           # save x
+Q_SAVE_Z_OFFSET  =  4           # save z offset
+Q_SAVE_X_OFFSET  =  5           # save x offset
+Q_SAVE_TAPER     =  6           # save taper
+Q_MOVE_Z_X       =  7           # move x in sync with z
+Q_MOVE_X_Z       =  8           # move z in sync with x
+Q_TAPER_Z_X      =  9           # taper x
+Q_TAPER_X_Z      = 10           # taper z
+Q_START_SPINDLE  = 11           # spindle start
+Q_STOP_SPINDLE   = 12           # spindle stop
+Q_Z_SYN_SETUP    = 13           # z sync setup
+Q_X_SYN_SETUP    = 14           # x sync setup
+Q_SEND_SYNC_PARMS = 15          # send sync parameters
+Q_SYNC_COMMAND   = 16           # send sync command
+Q_PASS_NUM       = 17           # set pass number
+Q_QUE_PAUSE      = 18           # pause queue
+Q_MOVE_Z_OFFSET  = 19           # move z offset
+Q_SAVE_FEED_TYPE = 20           # save feed type
+Q_Z_FEED_SETUP   = 21           # setup z feed
+Q_X_FEED_SETUP   = 22           # setup x feed
+Q_SAVE_FLAGS     = 23           # save thread flags
+Q_PROBE_Z        = 24           # probe in z direction
+Q_PROBE_X        = 25           # probe in x direction
+Q_SAVE_Z_DRO     = 26           # save z dro reading
+Q_SAVE_X_DRO     = 27           # save x dro reading
+Q_QUE_PARM       = 28           # save parameter in queue
+Q_MOVE_ARC       = 29           # move in an arc
+Q_OP_DONE        = 30           # operation done
 
 mCommandsList = ( \
-    "MOVE_Z",
-    "MOVE_X",
-    "SAVE_Z",
-    "SAVE_X",
-    "SAVE_Z_OFFSET",
-    "SAVE_X_OFFSET",
-    "SAVE_TAPER",
-    "MOVE_Z_X",
-    "MOVE_X_Z",
-    "TAPER_Z_X",
-    "TAPER_X_Z",
-    "START_SPINDLE",
-    "STOP_SPINDLE",
-    "Z_SYN_SETUP",
-    "X_SYN_SETUP",
-    "SEND_SYNC_PARMS",
-    "SYNC_COMMAND",
-    "PASS_NUM",
-    "QUE_PAUSE",
-    "MOVE_Z_OFFSET",
-    "SAVE_FEED_TYPE",
-    "Z_FEED_SETUP",
-    "X_FEED_SETUP",
-    "SAVE_FLAGS",
-    "PROBE_Z",
-    "PROBE_X",
-    "SAVE_Z_DRO",
-    "SAVE_X_DRO",
-    "QUE_PARM",
-    "MOVE_ARC",
-    "OP_DONE",
+    "Q_MOVE_Z",
+    "Q_MOVE_X",
+    "Q_SAVE_Z",
+    "Q_SAVE_X",
+    "Q_SAVE_Z_OFFSET",
+    "Q_SAVE_X_OFFSET",
+    "Q_SAVE_TAPER",
+    "Q_MOVE_Z_X",
+    "Q_MOVE_X_Z",
+    "Q_TAPER_Z_X",
+    "Q_TAPER_X_Z",
+    "Q_START_SPINDLE",
+    "Q_STOP_SPINDLE",
+    "Q_Z_SYN_SETUP",
+    "Q_X_SYN_SETUP",
+    "Q_SEND_SYNC_PARMS",
+    "Q_SYNC_COMMAND",
+    "Q_PASS_NUM",
+    "Q_QUE_PAUSE",
+    "Q_MOVE_Z_OFFSET",
+    "Q_SAVE_FEED_TYPE",
+    "Q_Z_FEED_SETUP",
+    "Q_X_FEED_SETUP",
+    "Q_SAVE_FLAGS",
+    "Q_PROBE_Z",
+    "Q_PROBE_X",
+    "Q_SAVE_Z_DRO",
+    "Q_SAVE_X_DRO",
+    "Q_QUE_PARM",
+    "Q_MOVE_ARC",
+    "Q_OP_DONE",
     )
 
 mCommandsText = ( \
@@ -501,12 +501,14 @@ R_STOP_SPIN      = 11           # stop spindle
 R_WAIT_Z         = 12           # wait z
 R_WAIT_X         = 13           # wait x
 R_PASS           = 14           # 
-R_SEND_ACCEL     = 15           # send parm
-R_SEND_DATA      = 16           # send data
-R_MOVE_Z         = 17           # move z
-R_MOVE_X         = 18           # move x
-R_MOVE_REL_Z     = 19           # move z
-R_MOVE_REL_X     = 20           # move x
+R_SET_ACCEL      = 15           # set parm
+R_SET_DATA       = 16           # set data
+R_GET_DATA       = 17           # set data
+R_MOVE_Z         = 18           # move z
+R_MOVE_X         = 19           # move x
+R_MOVE_REL_Z     = 20           # move z
+R_MOVE_REL_X     = 21           # move x
+R_READ_ALL       = 22           # read all status
 
 selRiscvTypeList = ( \
     "R_NONE",
@@ -524,12 +526,14 @@ selRiscvTypeList = ( \
     "R_WAIT_Z",
     "R_WAIT_X",
     "R_PASS",
-    "R_SEND_ACCEL",
-    "R_SEND_DATA",
+    "R_SET_ACCEL",
+    "R_SET_DATA",
+    "R_GET_DATA",
     "R_MOVE_Z",
     "R_MOVE_X",
     "R_MOVE_REL_Z",
     "R_MOVE_REL_X",
+    "R_READ_ALL",
     )
 
 selRiscvTypeText = ( \
@@ -548,12 +552,14 @@ selRiscvTypeText = ( \
     "wait z",
     "wait x",
     "",
-    "send parm",
-    "send data",
+    "set parm",
+    "set data",
+    "set data",
     "move z",
     "move x",
     "move z",
     "move x",
+    "read all status",
     )
 
 # riscv axis name

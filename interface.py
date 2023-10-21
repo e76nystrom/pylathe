@@ -388,93 +388,93 @@ cmdList = \
     (
         "z motion commands",
 
-        ("ZMOVEABS", "zMoveAbs", "start z movement"),
-        ("ZMOVEREL", "zMoveRel", "move z relative"),
-        ("ZJMOV", "zJogMove", "start z jog"),
-        ("ZJSPEED", "zJogSpeed", "start z jog at speed"),
-        ("ZSTOP", "zStop", "stop z movement"),
-        ("ZSETLOC", "", ""),
-        ("ZHOMEFWD", "zHomeFwd", "z home from positive side"),
-        ("ZHOMEREV", "zHomeRev", "z home from negative side"),
+        ("C_ZMOVEABS", "cZMoveAbs", "start z movement"),
+        ("C_ZMOVEREL", "cZMoveRel", "move z relative"),
+        ("C_ZJMOV", "cZJogMove", "start z jog"),
+        ("C_ZJSPEED", "cZJogSpeed", "start z jog at speed"),
+        ("C_ZSTOP", "cZStop", "stop z movement"),
+        ("C_ZSETLOC", "", ""),
+        ("C_ZHOMEFWD", "cZHomeFwd", "z home from positive side"),
+        ("C_ZHOMEREV", "cZHomeRev", "z home from negative side"),
 
         "x motion commands",
 
-        ("XMOVEABS", "xMoveAbs", "start x movement"),
-        ("XMOVEREL", "xMoveRel", "move x relative"),
-        ("XJMOV", "xJogMove", "start z jog"),
-        ("XJSPEED", "xJogSpeed", "start x jog at speed"),
-        ("XSTOP", "xStop", "stop x movement"),
-        ("XSETLOC", "", ""),
-        ("XHOMEFWD", "xHomeFwd", "x home from positive side"),
-        ("XHOMEREV", "xHomeRev", "x home from negative side"),
+        ("C_XMOVEABS", "cXMoveAbs", "start x movement"),
+        ("C_XMOVEREL", "cXMoveRel", "move x relative"),
+        ("C_XJMOV", "cXJogMove", "start z jog"),
+        ("C_XJSPEED", "cXJogSpeed", "start x jog at speed"),
+        ("C_XSTOP", "cXStop", "stop x movement"),
+        ("C_XSETLOC", "", ""),
+        ("C_XHOMEFWD", "cXHomeFwd", "x home from positive side"),
+        ("C_XHOMEREV", "cXHomeRev", "x home from negative side"),
 
         "spindle operations",
 
-        ("SPINDLE_START", "spindleStart", "start spindle"),
-        ("SPINDLE_STOP", "spindleStop", "stop spindle"),
-        ("SPINDLE_UPDATE", "spindleUpdate", "update spindle speed"),
-        ("SPINDLE_JOG", "spindleJog", "spindle jog"),
-        ("SPINDLE_JOG_SPEED", "spindleJogSpeed", "spindle jog at speed"),
+        ("C_SPINDLE_START", "cSpindleStart", "start spindle"),
+        ("C_SPINDLE_STOP", "cSpindleStop", "stop spindle"),
+        ("C_SPINDLE_UPDATE", "cSpindleUpdate", "update spindle speed"),
+        ("C_SPINDLE_JOG", "cSpindleJog", "spindle jog"),
+        ("C_SPINDLE_JOG_SPEED", "cSpindleJogSpeed", "spindle jog at speed"),
 
         "end operations",
 
-        ("CMD_PAUSE", "pauseCmd", "pause current operation"),
-        ("CMD_RESUME", "resumeCmd", "resume current operation"),
-        ("CMD_STOP", "stopCmd", "stop current operation"),
-        ("CMD_DONE", "doneCmd", "done current operation"),
-        ("CMD_MEASURE", "measureCmd", "stop at end of current pass"),
+        ("C_CMD_PAUSE", "cPauseCmd", "pause current operation"),
+        ("C_CMD_RESUME", "cResumeCmd", "resume current operation"),
+        ("C_CMD_STOP", "cStopCmd", "stop current operation"),
+        ("C_CMD_DONE", "cDoneCmd", "done current operation"),
+        ("C_CMD_MEASURE", "cMeasureCmd", "stop at end of current pass"),
 
         "setup operations",
 
-        ("CMD_CLEAR", "clearCmd", "clear all tables"),
-        ("CMD_SETUP", "setup", "setup everything"),
-        ("CMD_SPSETUP", "spindleSetup", "setup spindle"),
+        ("C_CMD_CLEAR", "cClearCmd", "clear all tables"),
+        ("C_CMD_SETUP", "cSetup", "setup everything"),
+        ("C_CMD_SPSETUP", "cSpindleSetup", "setup spindle"),
 
-        ("CMD_SYNCSETUP", "syncSetup", "setup z and x axis synchronization"),
+        ("C_CMD_SYNCSETUP", "cSyncSetup", "setup z and x axis synchronization"),
 
-        ("CMD_ZSETUP", "zSetup", "setup z axis"),
-        ("CMD_ZSYNSETUP", "", "setup z axis sync"),
-        ("CMD_ZSETLOC", "zSetLoc", "setup z location"),
+        ("C_CMD_ZSETUP", "cZSetup", "setup z axis"),
+        ("C_CMD_ZSYNSETUP", "", "setup z axis sync"),
+        ("C_CMD_ZSETLOC", "cZSetLoc", "setup z location"),
 
-        ("CMD_XSETUP", "xSetup", "setup x axis"),
-        ("CMD_XSYNSETUP", "", "setup x axis sync"),
-        ("CMD_XSETLOC", "xSetLoc", "setup x location"),
+        ("C_CMD_XSETUP", "cXSetup", "setup x axis"),
+        ("C_CMD_XSYNSETUP", "", "setup x axis sync"),
+        ("C_CMD_XSETLOC", "cXSetLoc", "setup x location"),
 
         "state information",
 
-        ("READSTAT", "", "read status"),
-        ("READISTATE", "", "read states of state machines"),
+        ("C_READSTAT", "", "read status"),
+        ("C_READISTATE", "", "read states of state machines"),
 
         "load processor and xilinx parameters",
 
-        ("LOADVAL", "", "load parameters"),
-        ("LOADMULTI", "", "load multiple parameters"),
-        ("READVAL", "", "read parameters"),
-        ("LOADXREG", "", "load xilinx registers"),
-        ("READXREG", "", "read xilinx registers"),
+        ("C_LOADVAL", "", "load parameters"),
+        ("C_LOADMULTI", "", "load multiple parameters"),
+        ("C_READVAL", "", "read parameters"),
+        ("C_LOADXREG", "", "load xilinx registers"),
+        ("C_READXREG", "", "read xilinx registers"),
 
         "move command operations",
 
-        ("CLEARQUE", "clearQue", "clear move que"),
-        ("QUEMOVE", "", "que move command"),
-        ("MOVEMULTI", "", "que move command"),
-        ("MOVEQUESTATUS", "", "read move queue status"),
+        ("C_CLEARQUE", "cCclearQue", "clear move que"),
+        ("C_QUEMOVE", "", "que move command"),
+        ("C_MOVEMULTI", "", "que move command"),
+        ("C_MOVEQUESTATUS", "", "read move queue status"),
 
         "location and debug info",
 
-        ("READALL", "readAll", "read all status info"),
-        ("READDBG", "readDbg", "read debug message"),
-        ("CLRDBG", "clearDbg", "clear debug message buffer"),
+        ("C_READALL", "cReadAll", "read all status info"),
+        ("C_READDBG", "cReadDbg", "read debug message"),
+        ("C_CLRDBG", "cClearDbg", "clear debug message buffer"),
 
         "encoder commands",
 
-        ("ENCSTART", "", "encoder start"),
-        ("ENCSTOP", "", "encoder stop"),
+        ("C_ENCSTART", "", "encoder start"),
+        ("C_ENCSTOP", "", "encoder stop"),
 
         " mega commands ",
 
-        ("SET_MEGA_VAL", "", "set mega value"),
-        ("READ_MEGA_VAL", "", "get mega value"),
+        ("C_SET_MEGA_VAL", "", "set mega value"),
+        ("C_READ_MEGA_VAL", "", "get mega value"),
     )
 
 syncCmdList = \
@@ -856,6 +856,16 @@ megaParmList = \
         ("M_PARM_ENC_LINES", "", "int"),
         ("M_PARM_MAX_PARM", "mega maximum parameter", "char"),
         # ("M_PARM_", "", "char"),
+    )
+
+riscvParmList = \
+    (
+        ("R_PARM_RPM", "", "int"),
+        ("R_PARM_X_LOC", "", "int"),
+        ("R_PARM_Z_LOC", "", "int"),
+        ("R_PARM_X_DRO", "", "int"),
+        ("R_PARM_Z_DRO", "", "int"),
+        # (R_PARM_, "", ""),
     )
 
 regList = \
@@ -1672,37 +1682,37 @@ enumList = \
 
         "enum m_Commands",
         "{",
-        ("MOVE_Z", "move z"),
-        ("MOVE_X", "move x"),
-        ("SAVE_Z", "save z"),
-        ("SAVE_X", "save x"),
-        ("SAVE_Z_OFFSET", "save z offset"),
-        ("SAVE_X_OFFSET", "save x offset"),
-        ("SAVE_TAPER", "save taper"),
-        ("MOVE_Z_X", "move x in sync with z"),
-        ("MOVE_X_Z", "move z in sync with x"),
-        ("TAPER_Z_X", "taper x"),
-        ("TAPER_X_Z", "taper z"),
-        ("START_SPINDLE", "spindle start"),
-        ("STOP_SPINDLE", "spindle stop"),
-        ("Z_SYN_SETUP", "z sync setup"),
-        ("X_SYN_SETUP", "x sync setup"),
-        ("SEND_SYNC_PARMS", "send sync parameters"),
-        ("SYNC_COMMAND", "send sync command"),
-        ("PASS_NUM", "set pass number"),
-        ("QUE_PAUSE", "pause queue"),
-        ("MOVE_Z_OFFSET", "move z offset"),
-        ("SAVE_FEED_TYPE", "save feed type"),
-        ("Z_FEED_SETUP", "setup z feed"),
-        ("X_FEED_SETUP", "setup x feed"),
-        ("SAVE_FLAGS", "save thread flags"),
-        ("PROBE_Z", "probe in z direction"),
-        ("PROBE_X", "probe in x direction"),
-        ("SAVE_Z_DRO", "save z dro reading"),
-        ("SAVE_X_DRO", "save x dro reading"),
-        ("QUE_PARM", "save parameter in queue"),
-        ("MOVE_ARC", "move in an arc"),
-        ("OP_DONE", "operation done"),
+        ("Q_MOVE_Z", "move z"),
+        ("Q_MOVE_X", "move x"),
+        ("Q_SAVE_Z", "save z"),
+        ("Q_SAVE_X", "save x"),
+        ("Q_SAVE_Z_OFFSET", "save z offset"),
+        ("Q_SAVE_X_OFFSET", "save x offset"),
+        ("Q_SAVE_TAPER", "save taper"),
+        ("Q_MOVE_Z_X", "move x in sync with z"),
+        ("Q_MOVE_X_Z", "move z in sync with x"),
+        ("Q_TAPER_Z_X", "taper x"),
+        ("Q_TAPER_X_Z", "taper z"),
+        ("Q_START_SPINDLE", "spindle start"),
+        ("Q_STOP_SPINDLE", "spindle stop"),
+        ("Q_Z_SYN_SETUP", "z sync setup"),
+        ("Q_X_SYN_SETUP", "x sync setup"),
+        ("Q_SEND_SYNC_PARMS", "send sync parameters"),
+        ("Q_SYNC_COMMAND", "send sync command"),
+        ("Q_PASS_NUM", "set pass number"),
+        ("Q_QUE_PAUSE", "pause queue"),
+        ("Q_MOVE_Z_OFFSET", "move z offset"),
+        ("Q_SAVE_FEED_TYPE", "save feed type"),
+        ("Q_Z_FEED_SETUP", "setup z feed"),
+        ("Q_X_FEED_SETUP", "setup x feed"),
+        ("Q_SAVE_FLAGS", "save thread flags"),
+        ("Q_PROBE_Z", "probe in z direction"),
+        ("Q_PROBE_X", "probe in x direction"),
+        ("Q_SAVE_Z_DRO", "save z dro reading"),
+        ("Q_SAVE_X_DRO", "save x dro reading"),
+        ("Q_QUE_PARM", "save parameter in queue"),
+        ("Q_MOVE_ARC", "move in an arc"),
+        ("Q_OP_DONE", "operation done"),
         "};",
 
         "move control operation",
@@ -1855,13 +1865,16 @@ enumList = \
 
         ("R_PASS",       ""),
 
-        ("R_SEND_ACCEL", "send parm"),
-        ("R_SEND_DATA",  "send data"),
+        ("R_SET_ACCEL",  "set parm"),
+        ("R_SET_DATA",   "set data"),
+        ("R_GET_DATA",   "set data"),
+
         ("R_MOVE_Z",     "move z"),
         ("R_MOVE_X",     "move x"),
         ("R_MOVE_REL_Z", "move z"),
         ("R_MOVE_REL_X", "move x"),
 
+        ("R_READ_ALL",   "read all status"),
         # ("R_", ""),
         # ("R_", ""),
         "};",
@@ -2011,9 +2024,10 @@ if __name__ == '__main__':
     if WINDOWS:
         path = os.path.dirname(os.path.realpath(__file__))
 
-        cLoc = path + '/../LatheCPP/include/'
-        syncLoc = path + '/../SyncCPP/include/'
-        megaLoc = path + '/../../Arduino/output/'
+        cLoc     = os.path.join(path, '..\\LatheCPP\\include\\')
+        syncLoc  = os.path.join(path, '..\\SyncCPP\\include\\')
+        megaLoc  = os.path.join(path, '..\\..\\Arduino\\output\\')
+        riscvLoc = os.path.join(path, "..\\..\\neorv32\\sw\\example\\Lathe\\")
 
         xLoc = path + '/../../Xilinx/LatheCtl/'
         fEncLoc = path + '/../../Altera/Encoder/VHDL/'
@@ -2024,6 +2038,7 @@ if __name__ == '__main__':
         cLoc = path + '/../LatheCPP/include/'
         syncLoc = path + '/../SyncCPP/include/'
         megaLoc = path + '/../../Arduino/output/'
+        riscvLoc = path + '/../../neorv32/sw/examples/Lathe/'
 
         xLoc = path + '/../Xilinx/LatheCtl/'
         fEncLoc = path + '/../Altera/Encoder/VHDL/'
@@ -2058,6 +2073,11 @@ if __name__ == '__main__':
     setup.createParameters(megaParmList, megaLoc, fData, pyFile=True,
                            cSource='', prefix='mega')
 
+    setup.createParameters(riscvParmList, cLoc, fData, pyFile=False,
+                           cSource=None, prefix='riscv')
+    setup.createParameters(riscvParmList, riscvLoc, fData, pyFile=True,
+                           cSource='', prefix='riscv')
+
     setup.createEnums(enumList, cLoc, fData)
 
     setup.createEnums(megaEnumList, cLoc, fData, pyFile=True,
@@ -2067,8 +2087,8 @@ if __name__ == '__main__':
 
     setup.createCtlBits(regList, cLoc, fData)
 
-    setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
-    setup.createFpgaBits(xilinxBitList, cLoc, xLoc, fData)
+    # setup.createFpgaReg(xilinxList, cLoc, xLoc, fData)
+    # setup.createFpgaBits(xilinxBitList, cLoc, xLoc, fData)
 
     setup.createFpgaReg(fpgaEncList, cLoc, fEncLoc, fData,
                         pName="eRegDef", cName="fpgaEnc")

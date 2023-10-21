@@ -1,15 +1,16 @@
-from commPi import trace, command, intRound
 from math import floor, log
+from sys import stdout
 
 import enumDef as en
-import lRegDef as rg
-import fpgaLathe as bt
 import ctlBitDef as ct
 
 DBG_SETUP = True
 DBG_DETAIL = False
 
 MAX_SCALE = 12
+
+def intRound(val):
+    return(int(round(val)))
 
 class AccelData():
     def __init__(self, axis):
@@ -40,67 +41,6 @@ class AccelData():
         self.stepsInch = self.axis.stepsInch # axis steps per inch
 
         accelCalc1(self)
-
-def load(aData, dist, encParm=True):
-    axis = aData.axis
-    print("\n%s accel load" % (axis.name))
-    axisCtl = axis.axisCtl
-    base = axis.base
-    ld = axis.ld
-    trace("load")
-    if encParm:
-        if aData.freqDivider != 0:
-            ld(base + rg.F_Ld_Freq, aData.freqDivider)
-
-        bSyn = base + rg.F_Sync_Base
-        ld(bSyn + rg.F_Ld_D, aData.initialSum) # load initialSum (d) value
-        ld(bSyn + rg.F_Ld_Incr1, aData.incr1)  # load incr1 value
-        ld(bSyn + rg.F_Ld_Incr2, aData.incr2)  # load incr2 value
-
-        ld(bSyn + rg.F_Ld_Accel_Val, aData.intAccel)   # load accel
-        ld(bSyn + rg.F_Ld_Accel_Count, aData.accelClocks) # load acl ctr
-
-        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
-        axis.ldAxisCtl(base, bt.ctlInit, "3")
-        axis.ldAxisCtl(base, 0, "3a")
-    else:
-        axis.ldAxisCtl(base, bt.ctlInit, "3")
-        axis.ldAxisCtl(base, 0, "3a")
-        ld(base + rg.F_Sync_Base + rg.F_Ld_Dist, dist)
-        axisCtl |=  bt.ctlChDirect
-        
-    axis.rd(base + rg.F_Sync_Base + rg.F_Rd_Dist, trc=True)
-    trace("load\n")
-
-    #axis.ldAxisCtl(base, bt.ctlStart | axisCtl, "4")
-    axisCtl &= ~bt.ctlInit
-    axis.ldAxisCtl(base, bt.ctlStart, "4")
-    trace("")
-
-def riscvAccelData(accel, accelType):
-    txt = "riscVAccelData %-10s" % (en.RiscvAccelTypeList[accelType])
-    trace(txt)
-    print(txt)
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_INITIAL_SUM, accel.initialSum))
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_INCR1,       accel.incr1))
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_INCR2,       accel.incr2))
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_ACCEL_VAL,   accel.intAccel))
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_ACCEL_COUNT, accel.accelClocks))
-    command(en.R_SEND_ACCEL,
-            (accelType << 8 | en.RP_FREQ_DIV,    accel.freqDivider))
-    # command(en.R_SYNC_PARM, accelType << 8 | en.RP_, accel.)
-
-def start(aData, axisCtl=0):
-    axis = aData.axis
-    print("\n%s %s accelCalc" % (axis.name, aData.accelType))
-    axisCtl |= axis.axisCtl | bt.ctlStart
-    axisCtl &= ~bt.ctlInit
-    axis.ldAxisCtl(axis.base, axisCtl, "5")
 
 def accelCalc(aData):
     print("\n%s %s accelCalc" % (aData.axis.name, aData.accelType))
@@ -265,6 +205,7 @@ def accelSetup(aData):
 def accelCalc1(aData):
     axis = aData.axis
     print("\n%s %s accelCalc1" % (axis.name, aData.accelType))
+    stdout.flush()
     if aData.maxSpeed == 0:
         return
     parm = axis.parm

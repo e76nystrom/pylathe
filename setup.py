@@ -180,10 +180,10 @@ class Setup():
             fWrite(f, "cmdTable = ( \\\n")
             for index, (regName, action) in enumerate(cmdTable):
                 if action is not None:
-                    tmp = "    (\"%s\", \"%s\")," % (regName, action)
+                    tmp = "    (\"%-18s\", %-18s)," % (regName, '"' + action + '"')
                 else:
-                    tmp = "    (\"%s\", %s)," % (regName, action)
-                fWrite(f, "%s# %3d\n" % (tmp.ljust(40), index))
+                    tmp = "    (\"%-18s\", %-18s)," % (regName, action)
+                fWrite(f, "%s# %3d\n" % (tmp.ljust(48), index))
             fWrite(f, "    )\n")
             # self.listImports(file, imports)
             f.close()
@@ -212,7 +212,9 @@ class Setup():
         c3File = None
         c4File = None
         if fData:
-            cFile = open(cLoc + prefix + 'ParmList.h', 'wb')
+            cName = os.path.join(cLoc, prefix + 'ParmList.h')
+            cFile = open(cName, 'wb')
+            #cFile = open(cLoc + prefix + 'ParmList.h', 'wb')
             fWrite(cFile, "enum " + preUC + "_PARM\n{\n")
             if cSource is not None:
                 c1File = open(cLoc + prefix + 'Parm.h', 'wb')
@@ -578,7 +580,7 @@ class Setup():
         self.importList += imports
 
     def createFpgaReg(self, fpgaList, cLoc, xLoc, fData=False, \
-                        pName="xRegDef", table="xRegTable", cName="xilinx", \
+                        pName="xRegDef", table="xRegTable", cName="xilinx_", \
                         xName="RegDef"):
         global xRegTable
         xRegTable = []
