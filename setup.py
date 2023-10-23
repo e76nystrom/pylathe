@@ -1,5 +1,6 @@
 import os
 from sys import stdout
+import re
 ################################################################################
 
 configTable = None
@@ -223,15 +224,17 @@ class Setup():
                        "#define " + preUC + "_STRUCT\n\n"\
                        "#include <stdint.h>\n\n"\
                        "#if !defined(__DATA_UNION__)\n"\
-                       "#define __DATA_UNION__\n\n"
+                       "#define __DATA_UNION__\n\n"\
+                       "#define uint_t unsigned int\n\n"\
                        "typedef union uDataUnion\n{\n"\
-                       " float        t_float;\n"\
-                       " int          t_int;\n"\
-                       " unsigned int t_unsigned_int;\n"\
-                       " int32_t      t_int32_t;\n"\
-                       " int16_t      t_int16_t;\n"\
-                       " uint16_t     t_uint16_t;\n"\
-                       " char         t_char;\n"\
+                       " float    t_float;\n"\
+                       " int      t_int;\n"\
+                       " uint_t   t_uint_t;\n"\
+                       " int32_t  t_int32_t;\n"\
+                       " uint32_t t_uint32_t;\n"\
+                       " int16_t  t_int16_t;\n"\
+                       " uint16_t t_uint16_t;\n"\
+                       " char     t_char;\n"\
                        "} T_DATA_UNION, *P_DATA_UNION;\n\n"\
                        "#endif  /* __DATA_UNION__ */\n\n"\
                        "void set" + preCap + \
@@ -300,8 +303,9 @@ class Setup():
                                      (tmp.ljust(40), index, regComment))
                     if c1File is not None:
                         tmp = " %s %s;" % (varType, varName)
-                        fWrite(c1File, "%s/* 0x%02x %s */\n" %
-                                     (tmp.ljust(32), index, regComment))
+                        fWrite(c1File, "%s/* 0x%02x %-16s %s */\n" %
+                                     (tmp.ljust(24), index, \
+                                      regName, regComment))
                     if c2File is not None:
                         tmpType = varType.replace(' ', '_')
                         remFunc.append((regName, index, regComment, \
@@ -586,12 +590,19 @@ class Setup():
         xRegTable = []
         imports = [table]
         cFile = None
+        c1File = None
         xFile = None
         byteLen = 0
         if fData:
             path = os.path.join(cLoc, cName + '.h')
             cFile = open(path, 'wb')
             fWrite(cFile, "enum " + cName.upper() + "\n{\n")
+            path = os.path.join(cLoc, cName.replace("Reg", "Str") + '.h')
+            c1File = open(path, 'wb')
+            fWrite(c1File, "typedef struct S_CHR\n"\
+                           "{\n char c0;\n char c1;\n"
+                           " char c2;\n char c3;\n} T_CH4, *P_CH4;\n\n"\
+                   "T_CH4 fpgaOpStr[] =\n{\n")
             try:
                 xPath = os.path.join(xLoc, xName + '.vhd')
                 xFile = open(xPath , 'wb')
@@ -620,16 +631,16 @@ class Setup():
         regTables = []
         for i in range(len(fpgaList)):
             data = fpgaList[i]
-            # print(data)
-            # if not isinstance(data, basestring):
+
             if not isinstance(data, str):
-                if len(data) == 1:
-                    (tblName,) = data
-                    cmd = "%s = []" % (tblName)
-                    exec(cmd)
-                    table = eval(tblName)
+                if len(data) == 1: 	# create new list
+                    tblName= data[0]
+                    # print("***new list***", tblName)
+                    globals()[tblName] = []
+                    table = globals()[tblName]
                     regTables.append((tblName, table))
                     continue
+
                 if len(data) == 2:
                     (regName, regComment) = data
                     size = 1
@@ -637,6 +648,7 @@ class Setup():
                     (regName, base, size, byteLen, regComment) = data
                     if base is not None:
                         index = 0
+
                 if fData:
                     tmp = " %-18s = %s, " % (regName, index)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
@@ -646,35 +658,60 @@ class Setup():
                                      'unsigned(opb-1 downto 0) ' \
                                      ':= x"%02x"; -- %s\n') %
                                     (regName, index, regComment))
-                    # tmp = "  %s, " % (regName)
-                    # fWrite(jFile, "%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), index, regComment))
-                    # tmp = "  \"%s\", " % (regName)
-                    # j1File.write("%s/* 0x%02x %s */\n" % 
-                    #             (tmp.ljust(32), index, regComment))
+
                 globals()[regName] = index
                 imports.append(regName)
                 xRegTable.append(regName)
+                
                 if f is not None:
                     tmp = "%s = %2d" % (regName.ljust(16), index)
                     fWrite(f, "%s# %s\n" % (tmp.ljust(32), regComment))
+                    # print(regComment)
+
                 if size is None:
-                    cmd = "%s = %d" % (regName, index)
-                    exec(cmd)
+                    # print("***%s*** = %d" % (regName, index))
+                    globals()[regName] = index
                     table = None
                 else:
                     stdout.flush()
-                    if isinstance(size, str):
-                        incTable = eval(size)
+                    if isinstance(size, str): # if ref to another table
+                        incName = size
+                        # print("+++incName+++", incName)
+                        incTable = globals()[incName]
+                        # print(incTable)
                         total = 0
-                        for (tRegName, tIndex, tSize, tByteLen) in incTable:
+                        match = re.match("\'([\w+\-]*)\'", regComment)
+                        regCode = ''
+                        if match is not None:
+                            result = match.groups()
+                            if len(result) >= 1:
+                                regCode = match.group(1)
+                                # print(match.group(1))
+                        for (tRegName, tIndex, tSize, tByteLen,
+                             tRegCode) in incTable:
+                            (tRegCode, tRegComment) = tRegCode
+                            tRegCode = regCode + tRegCode
                             table.append((regName + ", " + tRegName,
-                                          index + tIndex, tSize, tByteLen))
+                                          index + tIndex, tSize,
+                                          tByteLen, (tRegCode, tRegComment)))
+                            # print(table[-1])
                             total += 1
                         index += total
                     else:
                         if table is not None:
-                            table.append((regName, index, size, byteLen))
+                            match = re.match("\'([\w+\-]*)\'([\s\w]*)",
+                                             regComment)
+                            regCode = ''
+                            if match is not None:
+                                result = match.groups()
+                                if len(result) >= 1:
+                                    regCode = match.group(1)
+                                    #print(match.group(1))
+                                    if len(result) >= 2:
+                                        regComment = match.group(2)
+                            table.append((regName, index, size,
+                                          byteLen, (regCode, regComment)))
+                            # print(table[-1])
                         index += size
             else:
                 if fData:
@@ -689,7 +726,10 @@ class Setup():
                             fWrite(xFile, "\n")
                         # fWrite(jFile, "\n")
                 if f is not None:
-                    fWrite(f, "\n# %s\n\n" % (data))
+                    try:
+                        fWrite(f, "\n# %s\n\n" % (data))
+                    except TypeError:
+                        print(data)
 
         if True and len(regTables) != 0:
             # for (name, table) in regTables:
@@ -698,16 +738,15 @@ class Setup():
             #         print("%-48s %2d %2d %2d" % (
             #             tRegName, tIndex, tSize, tByteLen))
             #     print()
+
             (name, table) = regTables[-1]
             opLenTable = []
-            for (tRegName, tIndex, tSize, tByteLen) in table:
+            for (tRegName, tIndex, tSize, tByteLen, tRegCode) in table:
                 opLenTable.append(tByteLen)
-            # print(xLoc, xName)
             self.hexFile(os.path.join(xLoc, xName + ".hex"), opLenTable)
 
         if f is not None:
             fWrite(f, "# fpga table\n\n")
-
             if len(regTables) == 0:
                 fWrite(f, "xRegTable = ( \\\n")
                 for i, regName in enumerate(xRegTable):
@@ -717,7 +756,7 @@ class Setup():
             else:
                 fWrite(f, "xRegTable = ( \\\n")
                 (name, table) = regTables[-1]
-                for (tRegName, tIndex, tSize, tByteLen) in table:
+                for (tRegName, tIndex, tSize, tByteLen, tRegCode) in table:
                     regs = tRegName.split(',')
                     if len(regs) == 1:
                         tmp = "    \"%s\"," % (regs[0])
@@ -730,7 +769,21 @@ class Setup():
 
                 fWrite(f, "\nfpgaSizeTable = ( \\\n")
                 (name, table) = regTables[-1]
-                for (tRegName, tIndex, tSize, tByteLen) in table:
+                for (tRegName, tIndex, tSize, tByteLen, tRegCode) in table:
+
+                    (tRegCode, tRegComment) = tRegCode
+                    tRegCode = tRegCode.strip()
+                    if len(tRegCode) < 4:
+                        tRegCode = tRegCode.ljust(4)
+                    sReg = "{"
+                    for i in range(len(tRegCode)):
+                        sReg += "'" + tRegCode[i]  + "', "
+                    sReg = sReg[:-1] + '}'
+                    txt = (" %s, /* %02x %3d %-24s %s */\n" % \
+                           (sReg, tIndex, tIndex, tRegComment.strip(),
+                            tRegName))
+                    fWrite(c1File, txt)
+
                     tmp = "    %d," % (tByteLen)
                     fWrite(f, "%s# %3d %-s\n" % \
                            (tmp.ljust(20), tIndex, tRegName))
@@ -741,7 +794,9 @@ class Setup():
                 fWrite(f, " %s, \\\n" % val)
             fWrite(f, ")\n")
 
+            fWrite(c1File, "};\n")
             f.close()
+            c1File.close()
 
         if fData:
             fWrite(cFile, "};\n")
@@ -751,11 +806,6 @@ class Setup():
                 fWrite(xFile, "package body RegDef is\n\n")
                 fWrite(xFile, "end RegDef;\n")
                 xFile.close()
-            # print("%s closed" % (xPath))
-            # fWrite(jFile, "};\n")
-            # jFile.close()
-            # j1File.write(" };\n\n};\n")
-            # jFile.close()
 
         # for key in xRegs:
         #     print("%-12s %02x" % (key, xRegs[key]))

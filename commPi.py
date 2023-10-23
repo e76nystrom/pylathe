@@ -143,7 +143,7 @@ class CommPi():
         self.spi = None
         self.lastRdCmd = -1
         self.lastResult = 0
-        self.riscv = None
+        # self.riscv = None
         # command = self.riscv.command
 
         if UDP:
@@ -166,6 +166,9 @@ class CommPi():
 
     def setupCmds(self, loadMulti, loadVal, readVal):
         pass
+
+    def close(self):
+        self.closeSerial()
 
     def setupTables(self, cmdTbl, parmTbl):
         self.cmdTable = cmdTbl
@@ -246,7 +249,7 @@ class CommPi():
             txt = ("ld %d %3d 0x%2x %10d %s %s" % \
                    (s0, cmd, cmd, data, d.zfill(8), \
                     rg.xRegTable[cmd]))
-            trace(txt)
+            # trace(txt)
             print(txt)
         msg = [cmd] + val
 
@@ -290,7 +293,7 @@ class CommPi():
             r = int(result)
             txt = ("rd   %3d 0x%02x %10d %08x %s" % \
                    (cmd, cmd, r, r, rg.xRegTable[cmd]))
-            trace(txt)
+            # trace(txt)
         return result
 
     def ldAxisCtl(self, base, axisCtl, ident=None):
@@ -322,7 +325,7 @@ class PiLathe(Thread):
         self.comm = comm
         self.ld = comm.ld
         self.rd = comm.rd
-        self.riscv = comm.riscv
+        # self.riscv = comm.riscv
         self.ldAxisCtl = comm.ldAxisCtl
         self.threadRun = True
         self.threadDone = False
@@ -427,7 +430,7 @@ class PiLathe(Thread):
         #     jogPause &= ~(PAUSE_ENA_X_JOG | PAUSE_ENA_Z_JOG)
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_MEASURE | \
                            ct.MV_READ_X | ct.MV_READ_Z)
-        self.riscv.command(en.R_RESUME)
+        # self.riscv.command(en.R_RESUME)
 
     def cSetup(self):
         pass
@@ -442,7 +445,7 @@ class PiLathe(Thread):
         self.cmdPause = False
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | \
                            ct.MV_XHOME_ACTIVE | ct.MV_ZHOME_ACTIVE)
-        self.riscv.command(en.R_STOP)
+        # self.riscv.command(en.R_STOP)
 
     def cDoneCmd(self):
         self.mvStatus &= ~ct.MV_DONE
@@ -457,8 +460,8 @@ class PiLathe(Thread):
 
     def cZSetLoc(self):
         self.zAxis.initLoc()
-        self.riscv.command(en.R_SET_LOC_Z,
-                           self.zAxis.getLoc())
+        # self.riscv.command(en.R_SET_LOC_Z,
+        #                    self.zAxis.getLoc())
 
     def cXSetup(self):
         print("\n>>>xSetup")
@@ -467,8 +470,8 @@ class PiLathe(Thread):
 
     def cXSetLoc(self):
         self.xAxis.initLoc()
-        self.riscv.command(en.R_SET_LOC_X,
-                           self.xAxis.getLoc())
+        # self.riscv.command(en.R_SET_LOC_X,
+        #                    self.xAxis.getLoc())
 
     def creadAll(self):
         pass
@@ -527,11 +530,11 @@ class PiLathe(Thread):
         axis = self.xAxis
         dist = int(parm.xMoveDist * axis.stepsInch)
         axis.moveRel(dist, parm.xFlag)
-        self.riscv.command(en.R_MOVE_REL_X, (dist, parm.xFlag))
+        # self.riscv.command(en.R_MOVE_REL_X, (dist, parm.xFlag))
 
     def cXStop(self):
         self.xAxis.stop()
-        self.riscv.command(en.R_STOP_X)
+        # self.riscv.command(en.R_STOP_X)
 
     def cXHomeFwd(self):
         pass
@@ -554,12 +557,12 @@ class PiLathe(Thread):
         axis = self.zAxis
         dist = int(parm.zMoveDist * axis.stepsInch)
         axis.moveRel(dist, parm.zFlag)
-        self.riscv.command(en.R_MOVE_REL_Z,
-                           (dist, parm.zFlag))
+        # self.riscv.command(en.R_MOVE_REL_Z,
+        #                    (dist, parm.zFlag))
 
     def cZStop(self):
         self.zAxis.stop()
-        self.riscv.command(en.R_STOP_Z)
+        # self.riscv.command(en.R_STOP_Z)
 
     def cZHomeFwd(self):
         pass
@@ -729,12 +732,16 @@ class PiLathe(Thread):
         self.mvCtl[self.mvState]()
         if self.mvState != self.mvLastState:
             self.mvLastState = self.mvState
-            trace("move   state %s" % (en.mStatesList[self.mvState]))
+            # trace("move   state %s" % (en.mStatesList[self.mvState]))
             self.dbgMsg(en.D_MSTA, self.mvState)
 
     # idle state
 
     def mvIdle(self):
+        opString = 0
+        op = 0
+        val = 0
+
         while True:
             try:
                 (opString, op, val) = self.moveQue.get(False)
@@ -751,7 +758,7 @@ class PiLathe(Thread):
                         valString = "%6d" % val
                     txt = ("%16s %2d %2d %-7s" % \
                            (opString, op, self.cmdFlag, valString))
-                    trace(txt)
+                    # trace(txt)
                     print(txt)
                     stdout.flush()
                 self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
@@ -759,6 +766,8 @@ class PiLathe(Thread):
                 # noinspection PyCallingNonCallable
                 self.move[op](val)
                 print("<<<\n")
+            except TypeError:
+                print("***typeError***", opString, op, val)
             except IndexError:
                 pass
             except Empty:
@@ -779,9 +788,9 @@ class PiLathe(Thread):
         self.zAxis.move(dest, self.cmdFlag)
 
         # self.zAxis.riscvSetup(self.cmdFlag)
-        self.riscv.command(en.R_MOVE_Z, (self.cmdFlag, dest))
-        self.riscv.command(en.R_WAIT_Z)
-        self.riscv.send()
+        # self.riscv.command(en.R_MOVE_Z, (self.cmdFlag, dest))
+        # self.riscv.command(en.R_WAIT_Z)
+        # self.riscv.send()
 
     def qMoveX(self, val):
         dest = val + self.xAxis.homeOffset
@@ -794,9 +803,9 @@ class PiLathe(Thread):
         self.xAxis.move(dest, self.cmdFlag)
 
         # self.zAxis.riscvSetup(self.cmdFlag)
-        self.riscv.command(en.R_MOVE_X, (self.cmdFlag, dest))
-        self.riscv.command(en.R_WAIT_X)
-        self.riscv.send()
+        # self.riscv.command(en.R_MOVE_X, (self.cmdFlag, dest))
+        # self.riscv.command(en.R_WAIT_X)
+        # self.riscv.send()
 
     def qSaveZ(self, val):
         print("save z %7.4f" % (val))
@@ -860,8 +869,8 @@ class PiLathe(Thread):
         self.mvSpindleCmd = self.cmd
         self.cSpindleStart()
         self.mvState = en.M_WAIT_SPINDLE
-        self.riscv.command(en.R_START_SPIN)
-        #self.riscv.command(en.R_WAIT_SPIN)
+        # self.riscv.command(en.R_START_SPIN)
+        # self.riscv.command(en.R_WAIT_SPIN)
 
     # noinspection PyUnusedLocal
     def qStopSpindle(self, val):
@@ -869,8 +878,8 @@ class PiLathe(Thread):
         self.mvSpindleCmd = self.cmd
         self.cSpindleStop()
         self.mvState = en.M_WAIT_SPINDLE
-        self.riscv.command(en.R_STOP_SPIN)
-        #self.riscv.command(en.R_WAIT_SPIN)
+        # self.riscv.command(en.R_STOP_SPIN)
+        # self.riscv.command(en.R_WAIT_SPIN)
 
     def qZSynSetup(self, val):
         print("zSynSetup")
@@ -932,14 +941,14 @@ class PiLathe(Thread):
         else:
             self.springInfo = val
         self.dbgMsg(en.D_PASS, val)
-        self.riscv.command(en.R_PASS, val)
+        # self.riscv.command(en.R_PASS, val)
 
     # noinspection PyUnusedLocal
-    def qSuePause(self, val):
+    def qQuePause(self, val):
         print("quePause")
         self.cmdPause = True
         self.mvStatus |= ct.MV_PAUSE
-        self.riscv.command(en.R_PAUSE)
+        # self.riscv.command(en.R_PAUSE)
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def qMoveZOffset(self, val):
@@ -1238,7 +1247,7 @@ class Axis():
               (zClkStr[clkCtl & 7], xClkStr[(clkCtl >> 3) & 7],
                "dbgFreqEna" if (clkCtl & bt.clkDbgFreqEna) != 0 \
                else ""))
-        trace("%s load clock control" % (self.name))
+        # trace("%s load clock control" % (self.name))
         self.ld(rg.F_Ld_Clk_Ctl, clkCtl)
 
     # def riscvAccelSetup(self):
@@ -1273,7 +1282,7 @@ class Axis():
                            True, 0x20000, 0x3ffff, trc=True)
         self.expLoc = pos
         txt = ("%s axis move loc %d pos %d" % (self.name, self.loc, pos))
-        trace(txt)
+        # trace(txt)
         print(txt)
         self.rpi.dbgMsg(self.dbgBase + D_MOV, pos)
         self.moveRel(pos - self.loc, cmd)
@@ -1302,8 +1311,7 @@ class Axis():
             if self.dir == ct.DIR_POS:
                 self.axisCtl = bt.ctlDir #bt.ctlDirPos
 
-            trace("%s axis check direction change" % \
-                  (self.name))
+            # trace("%s axis check direction change" % (self.name))
             if dirChange and self.backlashSteps != 0:
                 self.wait = True
                 self.axisCtl |= bt.ctlBacklash
@@ -1346,7 +1354,7 @@ class Axis():
             print(txt)
             txt = ("%s axis state %s" % \
                    (self.name, en.axisStatesList[self.state]))
-            trace(txt)
+            # trace(txt)
         if self.state != en.AXIS_IDLE:
             # noinspection PyCallingNonCallable
             self.stateDisp[self.state]()

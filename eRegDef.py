@@ -5,7 +5,7 @@ F_Ld_Run_Ctl     =  1           # load run control register
 F_Ld_Dbg_Ctl     =  2           # load debug control register
 F_Ld_Enc_Cycle   =  3           # load encoder cycle
 F_Ld_Int_Cycle   =  4           # load internal cycle
-F_Rd_Cmp_Cyc_Clks =  5          # read cmp cycle clocks
+F_Rd_Cmp_Cyc_C   =  5           # read cmp cycle clocks
 F_Ld_Dbg_Freq    =  6           # load debug frequency
 F_Ld_Dbg_Count   =  7           # load debug clocks
 # fpga table
@@ -16,7 +16,7 @@ xRegTable = ( \
     "F_Ld_Dbg_Ctl",                     #   2
     "F_Ld_Enc_Cycle",                   #   3
     "F_Ld_Int_Cycle",                   #   4
-    "F_Rd_Cmp_Cyc_Clks",                #   5
+    "F_Rd_Cmp_Cyc_C",                   #   5
     "F_Ld_Dbg_Freq",                    #   6
     "F_Ld_Dbg_Count",                   #   7
     )
@@ -28,7 +28,7 @@ importList = ( \
  F_Ld_Dbg_Ctl, \
  F_Ld_Enc_Cycle, \
  F_Ld_Int_Cycle, \
- F_Rd_Cmp_Cyc_Clks, \
+ F_Rd_Cmp_Cyc_C, \
  F_Ld_Dbg_Freq, \
  F_Ld_Dbg_Count, \
 )

@@ -58,11 +58,15 @@ stderr = open(os.path.join(DBG_DIR, "err.log"), 'w')
 stderr.write("testing\n")
 
 R_PI = False
-RISCV = True
+RISCV = False
 xArgs = sys.argv
 for xArg in xArgs:
     if "--rpi" == xArg:
         R_PI = True
+    if "--riscv" == xArg:
+        RISCV = True
+
+print("R_PI %s RISCV %s" % (str(R_PI), str(RISCV)))
 
 from comm import CommTimeout
 WINDOWS = system() == 'Windows'
@@ -1194,12 +1198,14 @@ class MoveCommands():
     def queMove(self, op, val=0):
         if self.send:
             opString = en.mCommandsList[op]
+            print("moveQue put op %6x %-18s %s" % (op, opString, str(val)))
             self.moveQue.put((opString, op, val))
 
     def queMoveF(self, op, flag, val):
         if self.send:
             opString = en.mCommandsList[op]
             op |= (flag << 16)
+            print("moveQue put op %6x %-18s %-1s" % (op, opString, str(val)))
             self.moveQue.put((opString, op, val))
 
     def queClear(self):
@@ -1358,6 +1364,7 @@ class MoveCommands():
         op = en.Q_QUE_PARM
         opString = en.mCommandsList[op]
         op |= parm << 16
+        print("moveQue put op %6x %-18s %s" % (op, opString, str(val)))
         self.moveQue.put((opString, op, val))
 
     def moveArc(self):

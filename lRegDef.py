@@ -3,143 +3,143 @@
 
 # phase control
 
-F_Ld_Phase_Len   =  0           # phase length
-F_Rd_Phase_Syn   =  1           # read phase at sync pulse
+F_Ld_Phase_Len   =  0           # 'LLN' phase length
+F_Rd_Phase_Syn   =  1           # 'RSY' read phase at sync pulse
 F_Phase_Max      =  2           # number of phase registers
 
 # controller
 
-F_Ld_Ctrl_Data   =  0           # load controller data
-F_Ctrl_Cmd       =  1           # controller command
-F_Ld_Seq         =  2           # load sequence
-F_Rd_Seq         =  3           # read sequence
-F_Rd_Ctr         =  4           # read counter
+F_Ld_Ctrl_Data   =  0           # 'LCD' load controller data
+F_Ctrl_Cmd       =  1           # 'CMD' controller command
+F_Ld_Seq         =  2           # 'LSQ' load sequence
+F_Rd_Seq         =  3           # 'RSQ' read sequence
+F_Rd_Ctr         =  4           # 'RCT' read counter
 F_Ctrl_Max       =  5           # number of controller registers
 
 # reader
 
-F_Ld_Read_Data   =  0           # load reader data
-F_Read           =  1           # read data
+F_Ld_Read_Data   =  0           # 'LDR' load reader data
+F_Read           =  1           # 'RD'  read data
 F_Read_Max       =  2           # number of reader registers
 
 # PWM
 
-F_Ld_PWM_Max     =  0           # pwm counter maximum
-F_Ld_PWM_Trig    =  0           # pwm trigger
+F_Ld_PWM_Max     =  0           # 'MAX' pwm counter maximum
+F_Ld_PWM_Trig    =  0           # 'TRG' pwm trigger
 F_PWM_Max        =  1           # number of pwm registers
 
 # encoder
 
-F_Ld_Enc_Cycle   =  0           # load encoder cycle
-F_Ld_Int_Cycle   =  1           # load internal cycle
-F_Rd_Cmp_Cyc_Clks =  2          # read cmp cycle clocks
+F_Ld_Enc_Cycle   =  0           # 'LEC' load encoder cycle
+F_Ld_Int_Cycle   =  1           # 'LIC' load internal cycle
+F_Rd_Cmp_Cyc_C   =  2           # 'RCC' read cmp cycle clocks
 F_Enc_Max        =  3           # number of encoder registers
 
 # debug frequency
 
-F_Ld_Dbg_Freq    =  0           # debug frequency
-F_Ld_Dbg_Count   =  1           # debug count
+F_Ld_Dbg_Freq    =  0           # 'DBF' debug frequency
+F_Ld_Dbg_Count   =  1           # 'DBC' debug count
 F_Dbg_Freq_Max   =  2           # number of debug frequency regs
 
 # sync accel
 
-F_Ld_D           =  0           # axis d
-F_Ld_Incr1       =  1           # axis incr1
-F_Ld_Incr2       =  2           # axis incr2
-F_Ld_Accel_Val   =  3           # axis accel value
-F_Ld_Accel_Count =  4           # axis accel count
-F_Rd_XPos        =  5           # axis x pos
-F_Rd_YPos        =  6           # axis y pos
-F_Rd_Sum         =  7           # axis sum
-F_Rd_Accel_Sum   =  8           # axis accel sum
-F_Rd_Accel_Ctr   =  9           # axis accel counter
-F_Ld_Dist        = 10           # axis distance
-F_Ld_Max_Dist    = 11           # jog maximum distance
-F_Ld_Backlash    = 12           # jog backlash
-F_Rd_Dist        = 13           # read axis distance
-F_Rd_Accel_Steps = 14           # read accel steps
-F_Ld_Loc         = 15           # axis location
-F_Rd_Loc         = 16           # read axis location
-F_Ld_Mpg_Delta   = 17           # Mpg delta values
-F_Ld_Mpg_Dist    = 18           # Mpg dist values
-F_Ld_Mpg_Div     = 19           # Mpg div values
-F_Ld_Dro         = 20           # axis dro
-F_Ld_Dro_End     = 21           # axis dro end
-F_Ld_Dro_Limit   = 22           # axis dro decel limit
-F_Rd_Dro         = 23           # read axis dro
+F_Ld_D           =  0           # 'LD'  axis d
+F_Ld_Incr1       =  1           # 'LI1' axis incr1
+F_Ld_Incr2       =  2           # 'LI2' axis incr2
+F_Ld_Accel_Val   =  3           # 'LAV' axis accel value
+F_Ld_Accel_Count =  4           # 'LAC' axis accel count
+F_Rd_XPos        =  5           # 'RX'  axis x pos
+F_Rd_YPos        =  6           # 'RY'  axis y pos
+F_Rd_Sum         =  7           # 'RSU' axis sum
+F_Rd_Accel_Sum   =  8           # 'RAS' axis accel sum
+F_Rd_Accel_Ctr   =  9           # 'RAC' axis accel counter
+F_Ld_Dist        = 10           # 'LD'  axis distance
+F_Ld_Max_Dist    = 11           # 'LMD' jog maximum distance
+F_Ld_Backlash    = 12           # 'LB'  jog backlash
+F_Rd_Dist        = 13           # 'RD'  read axis distance
+F_Rd_Accel_Steps = 14           # 'RAS' read accel steps
+F_Ld_Loc         = 15           # 'LL'  axis location
+F_Rd_Loc         = 16           # 'RL'  read axis location
+F_Ld_Mpg_Delta   = 17           # 'LMD' Mpg delta values
+F_Ld_Mpg_Dist    = 18           # 'LMS' Mpg dist values
+F_Ld_Mpg_Div     = 19           # 'LMV' Mpg div values
+F_Ld_Dro         = 20           # 'LDR' axis dro
+F_Ld_Dro_End     = 21           # 'LDE' axis dro end
+F_Ld_Dro_Limit   = 22           # 'LDL' axis dro decel limit
+F_Rd_Dro         = 23           # 'RDR' read axis dro
 F_Sync_Max       = 24           # number of sync registers
 
 # jog registers
 
-F_Ld_Jog_Ctl     =  0           # jog control
-F_Ld_Jog_Inc     =  1           # jog increment
-F_Ld_Jog_Back    =  2           # jog backlash increment
+F_Ld_Jog_Ctl     =  0           # 'CT' jog control
+F_Ld_Jog_Inc     =  1           # 'IN' jog increment
+F_Ld_Jog_Back    =  2           # 'JB' jog backlash increment
 F_Jog_Max        =  3           # number of jog registers
 
 # axis
 
-F_Rd_Axis_Status =  0           # read axis status
-F_Ld_Axis_Ctl    =  1           # set axis control reg
-F_Rd_Axis_Ctl    =  2           # read axis control reg
-F_Ld_Freq        =  3           # frequency
+F_Rd_Axis_Status =  0           # 'RAS' read axis status
+F_Ld_Axis_Ctl    =  1           # 'LAC' set axis control reg
+F_Rd_Axis_Ctl    =  2           # 'RAC' read axis control reg
+F_Ld_Freq        =  3           # 'LFR' frequency
 F_Sync_Base      =  4           # sync registers
 F_Axis_Max       = 28           # num of axis regs
 
 # spindle
 
-F_Ld_Sp_Ctl      =  0           # spindle control reg
-F_Ld_Sp_Freq     =  1           # freq for step spindle
-F_Sp_Jog_Base    =  2           # spindle jog
+F_Ld_Sp_Ctl      =  0           # 'LCT' spindle control reg
+F_Ld_Sp_Freq     =  1           # 'LFR' freq for step spindle
+F_Sp_Jog_Base    =  2           # 'J' spindle jog
 F_Sp_Sync_Base   =  5           # spindle sync
 
 # register definitions
 
-F_Noop           =  0           # reg 0
+F_Noop           =  0           # 'NO' reg 0
 
 # status registers
 
-F_Rd_Status      =  1           # status reg
-F_Rd_Inputs      =  2           # inputs reg
+F_Rd_Status      =  1           # 'RST' status reg
+F_Rd_Inputs      =  2           # 'RIN' inputs reg
 
 # control registers
 
-F_Ld_Run_Ctl     =  3           # set run control reg
-F_Rd_Run_Ctl     =  4           # read run control reg
-F_Ld_Sync_Ctl    =  5           # sync control reg
-F_Ld_Cfg_Ctl     =  6           # config control reg
-F_Ld_Clk_Ctl     =  7           # clock control reg
-F_Ld_Dsp_Reg     =  8           # display reg
+F_Ld_Run_Ctl     =  3           # 'LRU' set run control reg
+F_Rd_Run_Ctl     =  4           # 'RRU' read run control reg
+F_Ld_Sync_Ctl    =  5           # 'LSY' sync control reg
+F_Ld_Cfg_Ctl     =  6           # 'LCF' config control reg
+F_Ld_Clk_Ctl     =  7           # 'LCL' clock control reg
+F_Ld_Dsp_Reg     =  8           # 'LDS' display reg
 
 # controller
 
-F_Ctrl_Base      =  9           # controller
+F_Ctrl_Base      =  9           # 'C' controller
 
 # reader
 
-F_Read_Base      = 14           # reader
+F_Read_Base      = 14           # 'R' reader
 
 # debug frequency control
 
-F_Dbg_Freq_Base  = 16           # dbg frequency
+F_Dbg_Freq_Base  = 16           # 'D' dbg frequency
 
 # spindle speed
 
-F_Rd_Idx_Clks    = 18           # clocks per index
+F_Rd_Idx_Clks    = 18           # 'RIX' clocks per index
 
 # step spindle frequency generator
 
 
 # pwm
 
-F_PWM_Base       = 19           # pwm control
+F_PWM_Base       = 19           # 'P' pwm control
 
 # base for modules
 
-F_Enc_Base       = 21           # encoder registers
-F_Phase_Base     = 24           # phase registers
-F_ZAxis_Base     = 26           # z axis registers
-F_XAxis_Base     = 54           # x axis registers
-F_Spindle_Base   = 82           # spindle registers
+F_Enc_Base       = 21           # 'E' encoder registers
+F_Phase_Base     = 24           # 'H' phase registers
+F_ZAxis_Base     = 26           # 'Z' z axis registers
+F_XAxis_Base     = 54           # 'X' x axis registers
+F_Spindle_Base   = 82           # 'S' spindle registers
 F_Cmd_Max        = 111          # number of commands
 # fpga table
 
@@ -167,7 +167,7 @@ xRegTable = ( \
     "F_PWM_Base+F_Ld_PWM_Trig",         #  19 x13
     "F_Enc_Base+F_Ld_Enc_Cycle",        #  21 x15
     "F_Enc_Base+F_Ld_Int_Cycle",        #  22 x16
-    "F_Enc_Base+F_Rd_Cmp_Cyc_Clks",     #  23 x17
+    "F_Enc_Base+F_Rd_Cmp_Cyc_C",        #  23 x17
     "F_Phase_Base+F_Ld_Phase_Len",      #  24 x18
     "F_Phase_Base+F_Rd_Phase_Syn",      #  25 x19
     "F_ZAxis_Base+F_Rd_Axis_Status",    #  26 x1a
@@ -281,7 +281,7 @@ fpgaSizeTable = ( \
     4,              #  19 F_PWM_Base, F_Ld_PWM_Trig
     2,              #  21 F_Enc_Base, F_Ld_Enc_Cycle
     2,              #  22 F_Enc_Base, F_Ld_Int_Cycle
-    4,              #  23 F_Enc_Base, F_Rd_Cmp_Cyc_Clks
+    4,              #  23 F_Enc_Base, F_Rd_Cmp_Cyc_C
     2,              #  24 F_Phase_Base, F_Ld_Phase_Len
     4,              #  25 F_Phase_Base, F_Rd_Phase_Syn
     1,              #  26 F_ZAxis_Base, F_Rd_Axis_Status
@@ -390,7 +390,7 @@ importList = ( \
  F_PWM_Max, \
  F_Ld_Enc_Cycle, \
  F_Ld_Int_Cycle, \
- F_Rd_Cmp_Cyc_Clks, \
+ F_Rd_Cmp_Cyc_C, \
  F_Enc_Max, \
  F_Ld_Dbg_Freq, \
  F_Ld_Dbg_Count, \

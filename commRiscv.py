@@ -217,17 +217,18 @@ class CommRiscv():
             raise CommTimeout()
         rspLen = int(rsp[1:3], 16)
         rsp += self.ser.read(rspLen).decode('utf8')
-        rspType = int(rsp[3:5], 16)
-        if (rspLen >= 3) and (rspType != en.R_READ_ALL):
-            trace(rsp)
-            print("cmdLen %d" % (len(cmd)))
-            print("rsp", rsp)
+        if rspLen > 5:
+            rspType = int(rsp[3:5], 16)
+            if rspType != en.R_READ_ALL:
+                trace(rsp)
+                print("cmdLen %d" % (len(cmd)))
+                print("rsp", rsp)
         if rsp[-1] == '*':
             self.timeout = False
         self.commLock.release()
         return rsp
 
-    def riscvCmd(self, cmd, arg=None):
+    def riscvCmd(self, cmd, arg=None, flush=False):
         cmdStr = '%x' % (cmd)
         data = ""
         if arg is not None:
@@ -248,16 +249,17 @@ class CommRiscv():
         txt = "%-16s %-16s%s" % (en.selRiscvTypeList[cmd],
                                  cmdStr.strip('\x01\r'), data)
         cmdLen = len(cmdStr)
-        if (self.cmdLen + cmdLen) < MAX_CMD_LEN:
+        if ((self.cmdLen + cmdLen) >= MAX_CMD_LEN) or flush:
+            self.riscvSend()
+            self.cmdLen = cmdLen
+            self.cmdStr = cmdStr
+        else:
             if self.cmdLen != 0:
                 self.cmdStr += '|'
                 self.cmdLen += 1
             self.cmdStr += cmdStr
             self.cmdLen += cmdLen
-        else:
-            self.riscvSend()
-            self.cmdLen = cmdLen
-            self.cmdStr = cmdStr
+
         if cmd != en.R_READ_ALL:
             trace(txt)
             self.trace(txt)
@@ -332,9 +334,6 @@ class RiscvLathe(Thread):
 
         self.zAxis = None
         self.xAxis = None
-
-        # self.zAxis.slvAxis = self.xAxis
-        # self.xAxis.slvAxis = self.zAxis
 
         self.moveQue = Queue()
 
@@ -452,7 +451,7 @@ class RiscvLathe(Thread):
     def cPauseCmd(self):                # 21
         # self.cmdPause = True
         # self.mvStatus |= ct.MV_PAUSE
-        self.comm.riscvCmd(en.R_PAUSE)
+        self.comm.riscvCmd(en.R_PAUSE, flush=True)
 
     def cResumeCmd(self):               # 22
         # self.cmdPause = False
@@ -460,7 +459,7 @@ class RiscvLathe(Thread):
         #     jogPause &= ~(PAUSE_ENA_X_JOG | PAUSE_ENA_Z_JOG)
         # self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_MEASURE | \
         #                    ct.MV_READ_X | ct.MV_READ_Z)
-        self.comm.riscvCmd(en.R_RESUME)
+        self.comm.riscvCmd(en.R_RESUME, flush=True)
 
     def cStopCmd(self):                 # 23
         self.cSpindleStop()
@@ -481,7 +480,7 @@ class RiscvLathe(Thread):
         pass
 
     def cSetup(self):                   # 27
-        pass
+        self.comm.riscvCmd(en.R_SETUP)
 
     def cSpindleSetup(self):            # 28
         pass
@@ -498,11 +497,11 @@ class RiscvLathe(Thread):
             Axis("z", Z_AXIS, stepsInch, parm.zAccel, parm))
 
         self.zTurnAccel    = ac = AccelData(zAxis)
-        self.zAxis.turnAccl = ac
+        self.zAxis.turnAccel = ac
         ac.init("turn")
 
         self.zTaperAccel   = ac = AccelData(zAxis)
-        self.zAxis.taperAccl = ac
+        self.zAxis.taperAccel = ac
         ac.init("taper")
 
         self.zMoveAccel    = ac = AccelData(zAxis)
@@ -526,11 +525,11 @@ class RiscvLathe(Thread):
             Axis("x", X_AXIS, stepsInch, parm.xAccel, parm))
 
         self.xTurnAccel    = ac = AccelData(xAxis)
-        self.xAxis.turnAccl = ac
+        self.xAxis.turnAccel = ac
         ac.init("turn")
 
         self.xTaperAccel   = ac = AccelData(xAxis)
-        self.xAxis.taperAccl = ac
+        self.xAxis.taperAccel = ac
         ac.init("taper")
 
         self.xMoveAccel    = ac = AccelData(xAxis)
@@ -597,6 +596,7 @@ class RiscvLathe(Thread):
             sleep(1)
             if not self.threadRun:
                 break
+            self.procMove()
             self.update()
         print("RiscvLathe done")
         stdout.flush()
@@ -646,9 +646,11 @@ class RiscvLathe(Thread):
             # self.dbgMsg(en.D_MSTA, self.mvState)
 
     def mvIdle(self):
-        while True:
+        while self.moveQue.qsize() != 0:
             try:
+                print("que size %d" % (self.moveQue.qsize()))
                 (opString, op, val) = self.moveQue.get(False)
+                print("moveQue get op %6x %-18s %s" % (op, opString, str(val)))
                 self.cmdFlag = op >> 16
                 op &= 0xff
                 self.cmd = op
@@ -691,8 +693,7 @@ class RiscvLathe(Thread):
 
         # self.zAxis.riscvSetup(self.cmdFlag)
         self.comm.riscvCmd(en.R_MOVE_Z, (self.cmdFlag, dest))
-        self.comm.riscvCmd(en.R_WAIT_Z)
-        self.comm.send()
+        # self.comm.riscvCmd(en.R_WAIT_Z, flush=True)
 
     def qMoveX(self, val):              # 1
         dest = val + self.xAxis.HomeOffset
@@ -706,8 +707,7 @@ class RiscvLathe(Thread):
 
         # self.zAxis.riscvSetup(self.cmdFlag)
         self.comm.riscvCmd(en.R_MOVE_X, (self.cmdFlag, dest))
-        self.comm.riscvCmd(en.R_WAIT_X)
-        self.comm.send()
+        # self.comm.riscvCmd(en.R_WAIT_X, flush=True)
 
     def qSaveZ(self, val):              # 2
         print("save z %7.4f" % (val))
@@ -742,13 +742,13 @@ class RiscvLathe(Thread):
     def qTaperZX(self, val):            # 9
         print("taper zx %7.4f" % (val))
         self.taperSetup(self.zAxis, self.xAxis, val)
-        self.comm.riscvCmd(en.R_WAIT_Z)
+        # self.comm.riscvCmd(en.R_WAIT_Z)
         # self.mvState = en.M_WAIT_Z
 
     def qTaperXZ(self, val):            # 10
         print("taper xz %7.4f" % (val))
         self.taperSetup(self.xAxis, self.zAxis, val)
-        self.comm.riscvCmd(en.R_WAIT_X)
+        # self.comm.riscvCmd(en.R_WAIT_X)
         # self.mvState = en.M_WAIT_X
 
     def taperSetup(self, mvAxis, tpAxis, val):
@@ -774,7 +774,6 @@ class RiscvLathe(Thread):
         # self.spindleStart()
         # self.mvState = en.M_WAIT_SPINDLE
         self.comm.riscvCmd(en.R_START_SPIN)
-        self.comm.riscvCmd(en.M_WAIT_SPINDLE)
 
     # noinspection PyUnusedLocal
     def qStopSpindle(self, val):        # 12
@@ -783,7 +782,6 @@ class RiscvLathe(Thread):
         # self.spindleStop()
         # self.mvState = en.M_WAIT_SPINDLE
         self.comm.riscvCmd(en.R_STOP_SPIN)
-        self.comm.riscvCmd(en.M_WAIT_SPINDLE)
 
     def qZSynSetup(self, val):          # 13
         print("zSynSetup")

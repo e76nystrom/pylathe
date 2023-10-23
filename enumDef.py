@@ -486,34 +486,36 @@ selArcTypeText = ( \
 
 # riscv actions
 
-R_NONE           =  0           # no operation
-R_OP_START       =  1           # 
-R_OP_DONE        =  2           # 
-R_STOP           =  3           # stop
-R_STOP_X         =  4           # stop x
-R_STOP_Z         =  5           # stop z
-R_RESUME         =  6           # resume
-R_SET_LOC_X      =  7           # 
-R_SET_LOC_Z      =  8           # 
-R_PAUSE          =  9           # pause
-R_START_SPIN     = 10           # start spindle
-R_STOP_SPIN      = 11           # stop spindle
-R_WAIT_Z         = 12           # wait z
-R_WAIT_X         = 13           # wait x
-R_PASS           = 14           # 
-R_SET_ACCEL      = 15           # set parm
-R_SET_DATA       = 16           # set data
-R_GET_DATA       = 17           # set data
-R_MOVE_Z         = 18           # move z
-R_MOVE_X         = 19           # move x
-R_MOVE_REL_Z     = 20           # move z
-R_MOVE_REL_X     = 21           # move x
-R_READ_ALL       = 22           # read all status
+R_NONE           =  0           # 'N', 'O', no operation
+R_OP_START       =  1           # 'O', 'S', start
+R_OP_DONE        =  2           # 'O', 'D', done
+R_SETUP          =  3           # 'S', 'U', setup
+R_STOP           =  4           # 'S', 'P', stop
+R_STOP_X         =  5           # 'S', 'X', stop x
+R_STOP_Z         =  6           # 'S', 'Z', stop z
+R_RESUME         =  7           # 'R', 'E', resume
+R_SET_LOC_X      =  8           # 'L', 'X', set x loc
+R_SET_LOC_Z      =  9           # 'L', 'Z', set z loc
+R_PAUSE          = 10           # 'P', 'A', pause
+R_START_SPIN     = 11           # 'S', '+', start spindle
+R_STOP_SPIN      = 12           # 'S', '-', stop spindle
+R_WAIT_Z         = 13           # 'W', 'Z', wait z
+R_WAIT_X         = 14           # 'W', 'X', wait x
+R_PASS           = 15           # 'P', 'S', pass
+R_SET_ACCEL      = 16           # 'S', 'A', set parm
+R_SET_DATA       = 17           # 'S', 'D', set data
+R_GET_DATA       = 18           # 'G', 'D', set data
+R_MOVE_Z         = 19           # 'M', 'Z', move z
+R_MOVE_X         = 20           # 'M', 'X', move x
+R_MOVE_REL_Z     = 21           # 'R', 'Z', move z
+R_MOVE_REL_X     = 22           # 'R', 'X', move x
+R_READ_ALL       = 23           # 'R', 'A', read all status
 
 selRiscvTypeList = ( \
     "R_NONE",
     "R_OP_START",
     "R_OP_DONE",
+    "R_SETUP",
     "R_STOP",
     "R_STOP_X",
     "R_STOP_Z",
@@ -537,29 +539,30 @@ selRiscvTypeList = ( \
     )
 
 selRiscvTypeText = ( \
-    "no operation",
-    "",
-    "",
-    "stop",
-    "stop x",
-    "stop z",
-    "resume",
-    "",
-    "",
-    "pause",
-    "start spindle",
-    "stop spindle",
-    "wait z",
-    "wait x",
-    "",
-    "set parm",
-    "set data",
-    "set data",
-    "move z",
-    "move x",
-    "move z",
-    "move x",
-    "read all status",
+    "'N', 'O', no operation",
+    "'O', 'S', start",
+    "'O', 'D', done",
+    "'S', 'U', setup",
+    "'S', 'P', stop",
+    "'S', 'X', stop x",
+    "'S', 'Z', stop z",
+    "'R', 'E', resume",
+    "'L', 'X', set x loc",
+    "'L', 'Z', set z loc",
+    "'P', 'A', pause",
+    "'S', '+', start spindle",
+    "'S', '-', stop spindle",
+    "'W', 'Z', wait z",
+    "'W', 'X', wait x",
+    "'P', 'S', pass",
+    "'S', 'A', set parm",
+    "'S', 'D', set data",
+    "'G', 'D', set data",
+    "'M', 'Z', move z",
+    "'M', 'X', move x",
+    "'R', 'Z', move z",
+    "'R', 'X', move x",
+    "'R', 'A', read all status",
     )
 
 # riscv axis name
@@ -691,12 +694,12 @@ RiscvSyncParmTypeText = ( \
 
 # riscv run wait states
 
-RW_NONE          =  0           # 
-RW_PAUSE         =  1           # 
-RW_SPIN_START    =  2           # 
-RW_SPIN_STOP     =  3           # 
-RW_WAIT_X        =  4           # 
-RW_WAIT_Z        =  5           # 
+RW_NONE          =  0           # 'N', 'O', none
+RW_PAUSE         =  1           # 'P', 'S', wait pause
+RW_SPIN_START    =  2           # 'S', '+', wait spindle start
+RW_SPIN_STOP     =  3           # 'S', '-', wait spindle stop
+RW_WAIT_X        =  4           # 'W', 'X', wait x done
+RW_WAIT_Z        =  5           # 'W', 'Z', wait z done
 
 RiscvRunWaitTypeList = ( \
     "RW_NONE",
@@ -708,10 +711,10 @@ RiscvRunWaitTypeList = ( \
     )
 
 RiscvRunWaitTypeText = ( \
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
+    "'N', 'O', none",
+    "'P', 'S', wait pause",
+    "'S', '+', wait spindle start",
+    "'S', '-', wait spindle stop",
+    "'W', 'X', wait x done",
+    "'W', 'Z', wait z done",
     )
