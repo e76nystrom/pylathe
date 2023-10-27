@@ -44,7 +44,7 @@ dbgFile = None
 def trace(txt):
     global dbgFile
     if dbgFile is None:
-        dbgFile = open("piTrace.txt", "wb")
+        dbgFile = open("piCmd.txt", "wb")
     dbgFile.write((txt + "\n").encode())
     dbgFile.flush()
 
@@ -134,8 +134,6 @@ class CommPi():
         # global command
         print("CommPi __init__")
         self.ser   = Serial()
-        # self.riscv = CommRiscv(trace)
-        # self.riscv.openSerial("COM5", "19200")
         self.rpi   = rpi = PiLathe(self)
         self.moveQue = rpi.moveQue
         self.setPostUpdate = rpi.setPostUpdate
@@ -168,6 +166,7 @@ class CommPi():
         pass
 
     def close(self):
+        self.rpi.close()
         self.closeSerial()
 
     def setupTables(self, cmdTbl, parmTbl):
@@ -241,7 +240,12 @@ class CommPi():
 
     def ld(self, cmd, data, dbg=True):
         s0 = rg.fpgaSizeTable[cmd]
-        val = list(int(data).to_bytes(s0, byteorder='big', signed=True))
+        try:
+            val = list(int(data).to_bytes(s0, byteorder='big', signed=True))
+        except OverflowError:
+            print("OverflowError %d %d" % (cmd, data))
+            stdout.flush()
+            return
         if dbg:
             d = ""
             for i in val:
@@ -249,7 +253,7 @@ class CommPi():
             txt = ("ld %d %3d 0x%2x %10d %s %s" % \
                    (s0, cmd, cmd, data, d.zfill(8), \
                     rg.xRegTable[cmd]))
-            # trace(txt)
+            trace(txt)
             print(txt)
         msg = [cmd] + val
 
@@ -293,7 +297,7 @@ class CommPi():
             r = int(result)
             txt = ("rd   %3d 0x%02x %10d %08x %s" % \
                    (cmd, cmd, r, r, rg.xRegTable[cmd]))
-            # trace(txt)
+            trace(txt)
         return result
 
     def ldAxisCtl(self, base, axisCtl, ident=None):
@@ -454,9 +458,7 @@ class PiLathe(Thread):
         pass
 
     def cZSetup(self):
-        print("\n>>>zSetup")
         self.zAxis.init()
-        print("<<<\n")
 
     def cZSetLoc(self):
         self.zAxis.initLoc()
@@ -464,19 +466,17 @@ class PiLathe(Thread):
         #                    self.zAxis.getLoc())
 
     def cXSetup(self):
-        print("\n>>>xSetup")
         self.xAxis.init()
-        print("<<<\n")
 
     def cXSetLoc(self):
         self.xAxis.initLoc()
         # self.riscv.command(en.R_SET_LOC_X,
         #                    self.xAxis.getLoc())
 
-    def creadAll(self):
+    def cReadAll(self):
         pass
 
-    def creadDbg(self):
+    def cReadDbg(self):
         pass
 
     def cSpindleSetup(self):
@@ -762,10 +762,8 @@ class PiLathe(Thread):
                     print(txt)
                     stdout.flush()
                 self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
-                print("\n>>>")
                 # noinspection PyCallingNonCallable
                 self.move[op](val)
-                print("<<<\n")
             except TypeError:
                 print("***typeError***", opString, op, val)
             except IndexError:
@@ -837,7 +835,7 @@ class PiLathe(Thread):
     def qMoveXZ(self, val):
         print("moveXZ")
 
-    def qtaperZX(self, val):
+    def qTaperZX(self, val):
         print("taper zx %7.4f" % (val))
         self.taperSetup(self.zAxis, self.xAxis, val)
         self.mvState = en.M_WAIT_Z
@@ -896,13 +894,13 @@ class PiLathe(Thread):
         elif currentOp == en.OP_THREAD:
             pass
 
-        # if self.parm.turnSync == en.SEL_TU_ENC:
-        #     self.zAxis.encParm = True
-        #     syncAccelCalc(self.zAxis.turnAccel, self.feedType, val)
-        #     riscvAccelData(self.zAxis.turnAccel, en.RP_Z_TURN)
-        # elif self.parm.turnSync == en.SEL_TU_SYN:
-        #     self.zAxis.encParm = False
-        #     self.mvState = en.M_START_SYNC
+        if self.parm.turnSync == en.SEL_TU_ENC:
+            self.zAxis.encParm = True
+            syncAccelCalc(self.zAxis.turnAccel, self.feedType, val)
+            # riscvAccelData(self.zAxis.turnAccel, en.RP_Z_TURN)
+        elif self.parm.turnSync == en.SEL_TU_SYN:
+            self.zAxis.encParm = False
+            self.mvState = en.M_START_SYNC
 
     def qXSynSetup(self, val):
         print("xSynSetup")
@@ -1352,8 +1350,8 @@ class Axis():
             txt = ("%s axis control %s" % \
                    (self.name, en.axisStatesList[self.state]))
             print(txt)
-            txt = ("%s axis state %s" % \
-                   (self.name, en.axisStatesList[self.state]))
+            # txt = ("%s axis state %s" % \
+            #        (self.name, en.axisStatesList[self.state]))
             # trace(txt)
         if self.state != en.AXIS_IDLE:
             # noinspection PyCallingNonCallable

@@ -134,7 +134,7 @@ cmdTable = ( \
     ("C_READVAL         ", None              ), #  40
     ("C_LOADXREG        ", None              ), #  41
     ("C_READXREG        ", None              ), #  42
-    ("C_CLEARQUE        ", "cCclearQue"      ), #  43
+    ("C_CLEARQUE        ", "cClearQue"       ), #  43
     ("C_QUEMOVE         ", None              ), #  44
     ("C_MOVEMULTI       ", None              ), #  45
     ("C_MOVEQUESTATUS   ", None              ), #  46

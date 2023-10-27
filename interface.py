@@ -457,7 +457,7 @@ cmdList = \
 
         "move command operations",
 
-        ("C_CLEARQUE", "cCclearQue", "clear move que"),
+        ("C_CLEARQUE", "cClearQue", "clear move que"),
         ("C_QUEMOVE", "", "que move command"),
         ("C_MOVEMULTI", "", "que move command"),
         ("C_MOVEQUESTATUS", "", "read move queue status"),
@@ -1105,7 +1105,7 @@ fpgaLatheList = \
         "sync accel",
 
         ("syncAccel",),
-        ("F_Ld_D",           0, 1, 4, "'LD'  axis d"),
+        ("F_Ld_D",           0, 1, 4, "'LIS' axis initial sum"),
         ("F_Ld_Incr1",       n, 1, 4, "'LI1' axis incr1"),
         ("F_Ld_Incr2",       n, 1, 4, "'LI2' axis incr2"),
         ("F_Ld_Accel_Val",   n, 1, 4, "'LAV' axis accel value"),
@@ -1117,15 +1117,15 @@ fpgaLatheList = \
         ("F_Rd_Accel_Sum",   n, 1, 4, "'RAS' axis accel sum"),
         ("F_Rd_Accel_Ctr",   n, 1, 4, "'RAC' axis accel counter"),
 
-        ("F_Ld_Dist",        n, 1, 4, "'LD'  axis distance"),
+        ("F_Ld_Dist",        n, 1, 4, "'LDS' axis distance"),
         ("F_Ld_Max_Dist",    n, 1, 4, "'LMD' jog maximum distance"),
         ("F_Ld_Backlash",    n, 1, 4, "'LB'  jog backlash"),
 
-        ("F_Rd_Dist",        n, 1, 4, "'RD'  read axis distance"),
+        ("F_Rd_Dist",        n, 1, 4, "'RDS' read axis distance"),
         ("F_Rd_Accel_Steps", n, 1, 4, "'RAS' read accel steps"),
 
-        ("F_Ld_Loc",         n, 1, 4, "'LL'  axis location"),
-        ("F_Rd_Loc",         n, 1, 4, "'RL'  read axis location"),
+        ("F_Ld_Loc",         n, 1, 4, "'LLC' axis location"),
+        ("F_Rd_Loc",         n, 1, 4, "'RLC' read axis location"),
 
         ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
         ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
@@ -1171,17 +1171,17 @@ fpgaLatheList = \
 
         "status registers",
 
-        ("F_Rd_Status",    n, 1,            4, "'RST' status reg"),
-        ("F_Rd_Inputs",    n, 1,            4, "'RIN' inputs reg"),
+        ("F_Rd_Status",    n, 1,            4, "'RSTS' status reg"),
+        ("F_Rd_Inputs",    n, 1,            4, "'RINP' inputs reg"),
 
         "control registers",
 
-        ("F_Ld_Run_Ctl",   n, 1,            1, "'LRU' set run control reg"),
-        ("F_Rd_Run_Ctl",   n, 1,            1, "'RRU' read run control reg"),
-        ("F_Ld_Sync_Ctl",  n, 1,            1, "'LSY' sync control reg"),
-        ("F_Ld_Cfg_Ctl",   n, 1,            3, "'LCF' config control reg"),
-        ("F_Ld_Clk_Ctl",   n, 1,            1, "'LCL' clock control reg"),
-        ("F_Ld_Dsp_Reg",   n, 1,            1, "'LDS' display reg"),
+        ("F_Ld_Run_Ctl",   n, 1,            1, "'LRUN' set run control reg"),
+        ("F_Rd_Run_Ctl",   n, 1,            1, "'RRUN' read run control reg"),
+        ("F_Ld_Sync_Ctl",  n, 1,            1, "'LSYN' sync control reg"),
+        ("F_Ld_Cfg_Ctl",   n, 1,            3, "'LCFG' config control reg"),
+        ("F_Ld_Clk_Ctl",   n, 1,            1, "'LCLK' clock control reg"),
+        ("F_Ld_Dsp_Reg",   n, 1,            1, "'LDSP' display reg"),
 
         "controller",
 
@@ -1197,7 +1197,7 @@ fpgaLatheList = \
 
         "spindle speed",
 
-        ("F_Rd_Idx_Clks",  n, 1,            4, "'RIX' clocks per index"),
+        ("F_Rd_Idx_Clks",  n, 1,            4, "'RIDX' clocks per index"),
 
         "step spindle frequency generator",
 
@@ -1423,17 +1423,17 @@ fpgaLatheBitList = \
         "status register",
 
         ("status",),
-        ("zAxisEna",      1, 0,  "z axis enable flag"),
-        ("zAxisDone",     1, 1,  "z axis done"),
-        ("zAxisCurDir",   1, 2,  "z axis current dir"),
-        ("xAxisEna",      1, 3,  "x axis enable flag"),
-        ("xAxisDone",     1, 4,  "x axis done"),
-        ("xAxisCurDir",   1, 5,  "x axis current dir"),
-        ("stEStop",       1, 6,  "emergency stop"),
-        ("spindleActive", 1, 7,  "spindle active"),
-        ("queNotEmpty",   1, 8,  "ctl queue not empty"),
-        ("ctlBusy",       1, 9,  "controller busy"),
-        ("syncActive",    1, 10, "sync active"),
+        ("zAxisEna",      1, 0,  "'ZE' z axis enable flag"),
+        ("zAxisDone",     1, 1,  "'ZD' z axis done"),
+        ("zAxisCurDir",   1, 2,  "'Zd' z axis current dir"),
+        ("xAxisEna",      1, 3,  "'XE' x axis enable flag"),
+        ("xAxisDone",     1, 4,  "'XD' x axis done"),
+        ("xAxisCurDir",   1, 5,  "'Xd' x axis current dir"),
+        ("stEStop",       1, 6,  "'ES' emergency stop"),
+        ("spindleActive", 1, 7,  "'S+' spindle active"),
+        ("queNotEmpty",   1, 8,  "'Q+' ctl queue not empty"),
+        ("ctlBusy",       1, 9,  "'CB' controller busy"),
+        ("syncActive",    1, 10, "'SA' sync active"),
 
         "inputs register",
 
@@ -1525,6 +1525,7 @@ fpgaLatheBitList = \
         ("cfgEnaEncDir", 1, 17, "enable encoder dir"),
         ("cfgGenSync",   1, 18, "generate sync pulse"),
         ("cfgPwmEna",    1, 19, "pwm enable"),
+        ("cfgDroStep",   1, 20, "step pulse to dro"),
 
         "clock control register",
 
@@ -1585,7 +1586,7 @@ fpgaLatheBitList = \
         ("spDir",       1, 2, "spindle direction"),
         ("spJogEnable", 1, 3, "spindle jog enable"),
 
-        "",
+        "",                     # end marker
         # ("",),
         # ("",  , , ""),
 
@@ -1820,38 +1821,38 @@ enumList = \
 
         "riscv actions",
         
-        "enum sel_Riscv_Type c",
+        "enum riscv_Cmd c",
         "{",
-        ("R_NONE",       "'N', 'O', no operation"),
-        ("R_OP_START",   "'O', 'S', start"),
-        ("R_OP_DONE",    "'O', 'D', done"),
-        ("R_SETUP",      "'S', 'U', setup"),
-        ("R_STOP",       "'S', 'P', stop"),
-        ("R_STOP_X",     "'S', 'X', stop x"),
-        ("R_STOP_Z",     "'S', 'Z', stop z"),
-        ("R_RESUME",     "'R', 'E', resume"),
+        ("R_NONE",       "'NO' no operation"),
+        ("R_OP_START",   "'OS' start"),
+        ("R_OP_DONE",    "'OD' done"),
+        ("R_SETUP",      "'SU' setup"),
+        ("R_STOP",       "'SP' stop"),
+        ("R_STOP_X",     "'SX' stop x"),
+        ("R_STOP_Z",     "'SZ' stop z"),
+        ("R_RESUME",     "'RE' resume"),
 
-        ("R_SET_LOC_X",  "'L', 'X', set x loc"),
-        ("R_SET_LOC_Z",  "'L', 'Z', set z loc"),
+        ("R_SET_LOC_X",  "'LX' set x loc"),
+        ("R_SET_LOC_Z",  "'LZ' set z loc"),
 
-        ("R_PAUSE",      "'P', 'A', pause"),
-        ("R_START_SPIN", "'S', '+', start spindle"),
-        ("R_STOP_SPIN",  "'S', '-', stop spindle"),
-        ("R_WAIT_Z",     "'W', 'Z', wait z"),
-        ("R_WAIT_X",     "'W', 'X', wait x"),
+        ("R_PAUSE",      "'PA' pause"),
+        ("R_START_SPIN", "'S+' start spindle"),
+        ("R_STOP_SPIN",  "'S-' stop spindle"),
+        # ("R_WAIT_Z",     "'WZ' wait z"),
+        # ("R_WAIT_X",     "'WX' wait x"),
 
-        ("R_PASS",       "'P', 'S', pass"),
+        ("R_PASS",       "'PS' pass"),
 
-        ("R_SET_ACCEL",  "'S', 'A', set parm"),
-        ("R_SET_DATA",   "'S', 'D', set data"),
-        ("R_GET_DATA",   "'G', 'D', set data"),
+        ("R_SET_ACCEL",  "'SA' set parm"),
+        ("R_SET_DATA",   "'SD' set data"),
+        ("R_GET_DATA",   "'GD' set data"),
 
-        ("R_MOVE_Z",     "'M', 'Z', move z"),
-        ("R_MOVE_X",     "'M', 'X', move x"),
-        ("R_MOVE_REL_Z", "'R', 'Z', move z"),
-        ("R_MOVE_REL_X", "'R', 'X', move x"),
+        ("R_MOVE_Z",     "'MZ' move z"),
+        ("R_MOVE_X",     "'MX' move x"),
+        ("R_MOVE_REL_Z", "'RZ' move z"),
+        ("R_MOVE_REL_X", "'RX' move x"),
 
-        ("R_READ_ALL",   "'R', 'A', read all status"),
+        ("R_READ_ALL",   "'RA' read all status"),
         # ("R_", ""),
         # ("R_", ""),
         "};",
@@ -1920,14 +1921,14 @@ enumList = \
         
         "riscv run wait states",
 
-        "enum Riscv_Run_Wait_Type c",
+        "enum riscv_Run_Wait c",
         "{",
-        ("RW_NONE",       "'N', 'O', none"),
-        ("RW_PAUSE",      "'P', 'S', wait pause"),
-        ("RW_SPIN_START", "'S', '+', wait spindle start"),
-        ("RW_SPIN_STOP",  "'S', '-', wait spindle stop"),
-        ("RW_WAIT_X",     "'W', 'X', wait x done"),
-        ("RW_WAIT_Z",     "'W', 'Z', wait z done"),
+        ("RW_NONE",       "'NO' none"),
+        ("RW_PAUSE",      "'PS' wait pause"),
+        ("RW_SPIN_START", "'S+' wait spindle start"),
+        ("RW_SPIN_STOP",  "'S-' wait spindle stop"),
+        ("RW_WAIT_X",     "'WX' wait x done"),
+        ("RW_WAIT_Z",     "'WZ' wait z done"),
         # ("RW_", "''"),
         "};",
 
@@ -1986,14 +1987,16 @@ if __name__ == '__main__':
     if WINDOWS:
         from pywinusb.hid import find_all_hid_devices
         # from comm import Comm, CommTimeout
-        #from commPi import Comm, CommTimeout
+        # from commPi import Comm, CommTimeout
 
         R_PI = True
     else:
         if not os.uname().machine.startswith('arm'):
-            from comm import Comm, CommTimeout
+            pass
+            # from comm import Comm, CommTimeout
         else:
-            from commPi import Comm, CommTimeout
+            pass
+            # from commPi import Comm, CommTimeout
 
             R_PI = True
 

@@ -7,17 +7,17 @@ riscvSPI     = 0x02             # riscv spi active
 
 # status register
 
-zAxisEna     = 0x01             # z axis enable flag
-zAxisDone    = 0x02             # z axis done
-zAxisCurDir  = 0x04             # z axis current dir
-xAxisEna     = 0x08             # x axis enable flag
-xAxisDone    = 0x10             # x axis done
-xAxisCurDir  = 0x20             # x axis current dir
-stEStop      = 0x40             # emergency stop
-spindleActive = 0x80            # spindle active
-queNotEmpty  = 0x100            # ctl queue not empty
-ctlBusy      = 0x200            # controller busy
-syncActive   = 0x400            # sync active
+zAxisEna     = 0x01             # 'ZE' z axis enable flag
+zAxisDone    = 0x02             # 'ZD' z axis done
+zAxisCurDir  = 0x04             # 'Zd' z axis current dir
+xAxisEna     = 0x08             # 'XE' x axis enable flag
+xAxisDone    = 0x10             # 'XD' x axis done
+xAxisCurDir  = 0x20             # 'Xd' x axis current dir
+stEStop      = 0x40             # 'ES' emergency stop
+spindleActive = 0x80            # 'S+' spindle active
+queNotEmpty  = 0x100            # 'Q+' ctl queue not empty
+ctlBusy      = 0x200            # 'CB' controller busy
+syncActive   = 0x400            # 'SA' sync active
 
 # inputs register
 
@@ -91,6 +91,7 @@ cfgEStopInv  = 0x10000          # estop invert
 cfgEnaEncDir = 0x20000          # enable encoder dir
 cfgGenSync   = 0x40000          # generate sync pulse
 cfgPwmEna    = 0x80000          # pwm enable
+cfgDroStep   = 0x100000         # step pulse to dro
 
 # clock control register
 
@@ -204,6 +205,7 @@ importList = ( \
  cfgEnaEncDir, \
  cfgGenSync, \
  cfgPwmEna, \
+ cfgDroStep, \
  zFreqShift, \
  xFreqShift, \
  clkNone, \

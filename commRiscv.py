@@ -3,7 +3,7 @@ from queue import Queue, Empty
 # from sys import stdout
 from time import sleep, time
 # from platform import system
-from ctypes import c_int32
+from ctypes import c_int32, c_uint32
 from sys import stdout
 from threading import Lock
 # import os
@@ -47,8 +47,6 @@ def getResult(rsp, index):
     if index < len(result):
         retVal = int(result[index], 16)
         retVal = c_int32(retVal).value
-        # if retVal & 0x80000000:
-        #     retVal -= 0x100000000
         return retVal
     return 0
 
@@ -58,7 +56,8 @@ def tmpCommand(_0, _1):
 riscvCmd = tmpCommand
 
 def riscvAccelData(accel, accelType):
-    txt = "riscVAccelData %-10s" % (en.RiscvAccelTypeList[accelType])
+    txt = "riscVAccelData %-10s %d" % (en.RiscvAccelTypeList[accelType],
+                                       accelType)
     trace(txt)
     print(txt)
     riscvCmd(en.R_SET_ACCEL,
@@ -136,13 +135,16 @@ class CommRiscv():
             self.ser = None
 
     def close(self):
-        self.closeSerial()
         self.riscv.close()
+        self.closeSerial()
 
     def command(self, cmdVal):
         print("cmd %12s" % (cmdTable[cmdVal][0]))
-        # noinspection PyCallingNonCallable
-        self.riscv.cmdAction[cmdVal]()
+        try:
+            # noinspection PyCallingNonCallable
+            self.riscv.cmdAction[cmdVal]()
+        except TypeError:
+            print("command no routine", cmdVal)
 
     def queParm(self, parmIndex, val):
         self.setParm(parmIndex, val)
@@ -215,8 +217,10 @@ class CommRiscv():
                 print("timeout")
                 stdout.flush()
             raise CommTimeout()
+
         rspLen = int(rsp[1:3], 16)
         rsp += self.ser.read(rspLen).decode('utf8')
+        self.commLock.release()
         if rspLen > 5:
             rspType = int(rsp[3:5], 16)
             if rspType != en.R_READ_ALL:
@@ -225,7 +229,6 @@ class CommRiscv():
                 print("rsp", rsp)
         if rsp[-1] == '*':
             self.timeout = False
-        self.commLock.release()
         return rsp
 
     def riscvCmd(self, cmd, arg=None, flush=False):
@@ -234,10 +237,12 @@ class CommRiscv():
         if arg is not None:
             argType = type(arg)
             if argType != tuple:
-                cmdStr += " %x" % (arg)
+                cmdStr += " %x" % c_uint32(arg).value
+                if arg < 0:
+                    print("***", arg, cmdStr)
             elif argType == tuple:
                 for val in arg:
-                    cmdStr += " %x" % (val)
+                    cmdStr += " %x" % c_uint32(val).value
                 if cmd == en.R_SET_ACCEL:
                     x0 = arg[0] >> 8
                     x1 = arg[0] & 0xff
@@ -246,7 +251,7 @@ class CommRiscv():
                          x1, en.RiscvSyncParmTypeList[x1])
             else:
                 pass
-        txt = "%-16s %-16s%s" % (en.selRiscvTypeList[cmd],
+        txt = "%-16s %-16s%s" % (en.riscvCmdList[cmd],
                                  cmdStr.strip('\x01\r'), data)
         cmdLen = len(cmdStr)
         if ((self.cmdLen + cmdLen) >= MAX_CMD_LEN) or flush:
@@ -262,7 +267,6 @@ class CommRiscv():
 
         if cmd != en.R_READ_ALL:
             trace(txt)
-            self.trace(txt)
             print(txt)
             stdout.flush()
 
@@ -593,7 +597,7 @@ class RiscvLathe(Thread):
         print("RiscvLathe starting loop")
         while True:
             stdout.flush()
-            sleep(1)
+            sleep(0.1)
             if not self.threadRun:
                 break
             self.procMove()
@@ -605,24 +609,29 @@ class RiscvLathe(Thread):
     def close(self):
         self.threadRun = False
         print("RiscvLathe threadRun %s" % (self.threadRun, ))
+        while not self.threadDone:
+            print("waiting for threadDone")
+            stdout.flush()
+            sleep(0.1)
         return
 
     def update(self):
-        self.comm.riscvCmd(en.R_READ_ALL)
-        rsp = self.comm.riscvSend()
+        rsp = ""
         try:
+            self.comm.riscvCmd(en.R_READ_ALL)
+            rsp = self.comm.riscvSend()
             if (self.postUpdate is not None) and len(rsp) >= 5:
                 parm = int(rsp[3:5], 16)
                 if parm == en.R_READ_ALL:
                     splitRsp = rsp[5:-1].split(' ')
                     (z, x, rpm, curPass, droZ, droX, mvStatus, \
                      queCount, dbgCount) = splitRsp[1:10]
-                    z        = int(z, 16)
-                    x        = int(x, 16)
+                    z        = c_int32(int(z, 16)).value
+                    x        = c_int32(int(x, 16)).value
                     rpm      = int(rpm, 16)
                     curPass  = int(curPass, 16)
-                    droZ     = int(droZ, 16)
-                    droX     = int(droX, 16)
+                    droZ     = c_int32(int(droZ, 16)).value
+                    droX     = c_int32(int(droX, 16)).value
                     mvStatus = int(mvStatus, 16)
                     self.queCount = int(queCount, 16)
                     self.dbgCount = int(dbgCount, 16)
@@ -662,16 +671,14 @@ class RiscvLathe(Thread):
                             valString += '0'
                     else:
                         valString = "%6d" % val
-                    txt = ("%16s %2d %2d %-7s" % \
+                    txt = ("%-16s %2d %2d %-7s" % \
                            (opString, op, self.cmdFlag, valString))
                     trace(txt)
                     print(txt)
                     stdout.flush()
                 # self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
-                print("\n>>>")
                 # noinspection PyCallingNonCallable
                 self.move[op](val)
-                print("<<<\n")
             except IndexError:
                 pass
             except Empty:
@@ -915,8 +922,8 @@ class RiscvLathe(Thread):
             riscvAccelData(self.xJogSlowAccel, en.RP_X_SLOW)
 
         elif val == ct.PARM_DONE:
-            self.mvStatus &= ~ct.MV_ACTIVE
-            self.mvStatus |= ct.MV_DONE
+            # self.mvStatus &= ~ct.MV_ACTIVE
+            # self.mvStatus |= ct.MV_DONE
             self.comm.riscvCmd(en.R_OP_DONE)
 
     # move states

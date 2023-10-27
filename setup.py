@@ -413,16 +413,14 @@ class Setup():
                     prefix=""):
         global enum, stringList
         imports = []
-        cFile = None
         var = None
+        cFile = None
         if fData:
             fName = 'ctlstates.h'
             if len(prefix) != 0:
                 fName = prefix + fName.capitalize()
             cFile = open(cLoc + fName, 'wb')
-            # jFile = open(jLoc + 'CtlStates.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n")
-            # fWrite(jFile, "public class CtlStates\n{\n")
+            
         f = None
         if self.outputFile and pyFile:
             fName = 'enum'
@@ -434,7 +432,6 @@ class Setup():
         val = 0
         for i in range(len(enumList)):
             data = enumList[i]
-            # if not isinstance(data, basestring):
             if not isinstance(data, str):
                 state = data[0]
                 tmp = state.split('=')
@@ -446,7 +443,7 @@ class Setup():
                     tmp =  " %s = %s, " % (state, val)
                     fWrite(cFile, "%s/* %2d x%02x %s */\n" % \
                                 (tmp.ljust(32), val, val, comment))
-                    # fWrite(jFile, '  "%-10s %s", \n' % (state, comment))
+
                 if pyFile:
                     if state in globals():
                         print("createCtlStates %s already defined" % state)
@@ -468,18 +465,12 @@ class Setup():
                         stdout.flush()
                     var = tmp[1]
                     enum = tmp[1].replace('_', "") + "List"
-                    # if len(tmp) >= 3:
-                    #     if tmp[2][0] == 'c':
-                    #         commentList = []
                     globals()[enum] = []
                     imports.append(enum)
                     val = 0
                     stringList = []
                     if fData:
                         fWrite(cFile, "enum %s\n" % (var.upper()))
-                        # tmp =  " public static final String[] %s = \n" % \
-                        #    (var])
-                        # fWrite(jFile, tmp)
                 elif data.startswith("{") or data.startswith("}"):
                     if fData:
                         fWrite(cFile, "%s\n" % (data))
@@ -501,7 +492,7 @@ class Setup():
                             fWrite(cFile, "};\n\n#else\n\n")
                             fWrite(cFile, "extern const char *%s[];\n" % (enum))
                             fWrite(cFile, "\n#endif\n")
-                        # fWrite(jFile, " %s\n" % (data))
+                            
                     if data.startswith("}") and f is not None:
                         fWrite(f, "\n%s = ( \\\n" % (enum))
                         for s in eval(enum):
@@ -511,21 +502,46 @@ class Setup():
                             fWrite(f, "\n%s = ( \\\n" % \
                                    (enum.replace('List', 'Text')))
                             for c in commentList:
-                                   fWrite(f, "    \"%s\",\n" % (c))
+                                fWrite(f, "    \"%s\",\n" % (c))
                             fWrite(f, "    )\n")
+
+                            if commentList[0].startswith("'"):
+                                sName = enum.replace("List", "")
+                                print(sName)
+                                path = os.path.join(cLoc, sName + 'Str.h')
+                                sFile = open(path, 'wb')
+                                fWrite(sFile, "struct S_%s\n" \
+                                       "{\n char c0;\n char c1;\n};\n\n" \
+                                       "struct S_%s %sStr[] =\n{\n" % \
+                                       (var.upper(), var.upper(), sName))
+                                for j, c in enumerate(commentList):
+                                    match = re.match("\'([\w+\-]*)\'([\s\w]*)", c)
+                                    regCode = ''
+                                    rComment = ''
+                                    if match is not None:
+                                        result = match.groups()
+                                        regCode = result[0]
+                                        if len(result) >= 2:
+                                            rComment = result[1]
+                                    sReg = ""
+                                    for k in range(len(regCode)):
+                                        sReg += "'" + regCode[k]  + "', "
+                                    sReg = sReg[:-1]
+                                    sReg = '{' + sReg + '},'
+                                    txt = " %s/* %2x %2d %s */\n" % \
+                                        (sReg.ljust(24), j, j, rComment)
+                                    fWrite(sFile, txt)
+                                fWrite(sFile, "};\n")
+                                sFile.close()
                 else:
                     if fData:
                         fWrite(cFile, "\n// %s\n\n" % (data))
-                        # fWrite(jFile, "\n // %s\n\n" % (data))
                     if f is not None:
                         fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            # self.listImports(file, imports)
             f.close()
         if fData:
             cFile.close()
-            # fWrite(jFile, "};\n")
-            # jFile.close()
         self.enumImports = imports
         self.importList += imports
 
@@ -686,7 +702,7 @@ class Setup():
                             result = match.groups()
                             if len(result) >= 1:
                                 regCode = match.group(1)
-                                # print(match.group(1))
+
                         for (tRegName, tIndex, tSize, tByteLen,
                              tRegCode) in incTable:
                             (tRegCode, tRegComment) = tRegCode
@@ -694,7 +710,6 @@ class Setup():
                             table.append((regName + ", " + tRegName,
                                           index + tIndex, tSize,
                                           tByteLen, (tRegCode, tRegComment)))
-                            # print(table[-1])
                             total += 1
                         index += total
                     else:
@@ -858,6 +873,7 @@ class Setup():
         cLst = []
         rData = []
         rCLst = []
+        sLst = []
         maxShift = None
         start = None
         imports = []
@@ -900,9 +916,6 @@ class Setup():
                 print("unable to open %s" % (xLoc,))
                 fFile = None
 
-            # jFile = open(jLoc + 'XilinxBits.java', 'wb')
-            # fWrite(jFile, "package lathe;\n\n")
-            # fWrite(jFile, "public class XilinxBits\n{\n")
         regName = ""
         bitStr = []
         lastShift = -1
@@ -915,15 +928,35 @@ class Setup():
             data = bitList[i]
             if not isinstance(data, str):
                 if len(data) == 1:
+                    if len(sLst) != 0:
+                        path = os.path.join(cLoc, regName + 'RegStr.h')
+                        sFile = open(path, 'wb')
+                        fWrite(sFile, "struct S_%s\n" \
+                                      "{\n char c0;\n char c1;\n};\n\n" \
+                               "struct S_%s %sRegStr[] =\n{\n" % \
+                               (regName.upper(), regName.upper(), regName))
+                        for (cVar, shift, regCode, rComment) in sLst:
+                            if len(regCode) < 2:
+                                tregCode = regCode.ljust(2)
+                            sReg = ""
+                            for j in range(len(regCode)):
+                                sReg += "'" + regCode[j]  + "', "
+                            sReg = sReg[:-1]
+                            txt = " {%s}, /* %4x %2d %-16s %s */\n" % \
+                                (sReg, 1<<shift, shift, cVar, rComment)
+                            fWrite(sFile, txt)
+                        fWrite(sFile, "};\n")
+                        sFile.close()
+                    sLst = []
                     xLst = []
                     cLst = []
                     rData = []
+                    sLst = []
                     regName = data[0]
                     maxShift = 0
-                    # rec = [regName,]
                 else:
-                    if len(data) == 4:
-                        (var, bit, shift, comment) = data
+                    #if len(data) == 4:
+                    (var, bit, shift, comment) = data[:4]
                     cVar = cVarName(var)
                     xVar = var.replace("_", "")
 
@@ -950,12 +983,20 @@ class Setup():
                                         (xVar, shift, \
                                          1 << shift, comment))
 
+                            match = re.match("\'([\w+\-]*)\'([\s\w]*)",
+                                             comment)
+                            if match is not None:
+                                result = match.groups()
+                                if len(result) >= 1:
+                                    regCode = result[0]
+                                    rComment = ''
+                                    if len(result) >= 2:
+                                        rComment = result[1]
+                                    sLst.append((cVar, shift, regCode,
+                                                 rComment.strip()))
+
                             rData.append((xVar, shift, comment))
 
-                            # tmp =  (" public static final int %-10s = " \
-                            #         "(%s << %s);" % (cVar, bit, shift))
-                            # fWrite(jFile, "%s /* %s */\n" % 
-                            #             (tmp, comment));
                         else:
                             (shift, start) = shift
                             if bit is None:
@@ -977,18 +1018,20 @@ class Setup():
                                 fWrite(cFile, "%s/* 0x%03x %s */\n" % 
                                        (tmp.ljust(40), bit << shift, comment))
 
-                                cVal = (" constant %-12s : unsigned " \
+                                xVal = (" constant %-12s : unsigned " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
                                         (xVar, shift-start, 0, \
                                         '{0:03b}'.format(bit), comment))
-                                xLst.append(cVal)
+                                xLst.append(xVal)
+                                
                                 cVal = (" constant %-12s : std_logic_vector " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
                                         (xVar, shift-start, 0, \
                                         '{0:03b}'.format(bit), comment))
                                 rCLst.append(cVal)
+                                
                     if (shift > maxShift):
                         maxShift = shift
                     if cVar in globals():
@@ -1040,19 +1083,10 @@ class Setup():
                                          regName, maxShift)
                             rCLst = []
 
-                        # if (len(bitStr) != 0):
-                        #     fWrite(jFile, "\n public static final " +
-                        #                 "String[] %sBits =\n {\n") % \
-                        #                 (regName))
-                        #     for i in range(len(bitStr)):
-                        #         fWrite(jFile, bitStr[i])
-                        #     fWrite(jFile, " };\n")
-                        #     bitStr = []
                     if (len(data) != 0):
                         fWrite(cFile, "\n// %s\n\n" % (data))
                         if xFile:
                             fWrite(xFile, "\n-- %s\n\n" % (data))
-                        # fWrite(jFile, "\n// %s\n\n" % (data))
                 else:
                     if (len(regName) > 0):
                         var = "%sSize" % (regName)
@@ -1061,16 +1095,17 @@ class Setup():
                         else:
                             globals()[var] = maxShift + 1
                             imports.append(var)
+
                 if len(data) != 0 and f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
+
         if f is not None:
-            # self.listImports(file, imports)
             fWrite(f, "\nimportList = ( \\\n")
             for val in imports:
                 fWrite(f, " %s, \\\n" % val)
             fWrite(f, ")\n")
             f.close()
-            # print("%s closed" % (pName))
+            
         if fData:
             cFile.close()
             if xFile:
@@ -1078,14 +1113,14 @@ class Setup():
                 fWrite(xFile, "package body %s is\n\n" % (package))
                 fWrite(xFile, "end %s;\n" % (package))
                 xFile.close()
+
             if rFile:
                 fWrite(rFile, "end package %sRec;\n" % (package))
                 rFile.close()
                 fWrite(fFile, "end %sFunc;\n\n" % (package))
                 fWrite(fFile, body)
                 fWrite(fFile, "end package body %sFunc;\n" % (package))
-                # fWrite(jFile, "};\n")
-                # jFile.close()
+
         self.xBitImports = imports
         self.importList += imports
 
@@ -1131,6 +1166,7 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     tmp += ("function %sToVec(val : %sRec)\n " \
             "return %sVec;\n\n" %
            (regName, regName, regName))
+
     #tmp += ("function %sToRec(val : std_logic_vector(%sSize-1 downto 0))\n " \
     #        "return %sVec;\n\n" %
     #       (regName, regName, regName))

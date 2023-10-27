@@ -1,4 +1,4 @@
-#!/cygdrive/c/Python312/Python.exe
+#!/cygdrive/c/Python310/Python.exe
 #!/usr/bin/python
 #!/cygdrive/c/DevSoftware/Python/Python36-32/Python
 ################################################################################
@@ -6648,7 +6648,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
     def updateZDroPos(self, val, zDROPos=None):
         if zDROPos is None:
-            zDROPos = self.comm.getParm(pm.Z_DRO_LOC, True)
+            zDROPos = self.comm.getParm(pm.Z_DRO_LOC)
         if zDROPos is not None:
             droPos = float(zDROPos) / self.zDROInch
             print("pos %0.4f zDROPos %d %0.4f" % \

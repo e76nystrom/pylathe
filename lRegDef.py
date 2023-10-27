@@ -43,7 +43,7 @@ F_Dbg_Freq_Max   =  2           # number of debug frequency regs
 
 # sync accel
 
-F_Ld_D           =  0           # 'LD'  axis d
+F_Ld_D           =  0           # 'LIS' axis initial sum
 F_Ld_Incr1       =  1           # 'LI1' axis incr1
 F_Ld_Incr2       =  2           # 'LI2' axis incr2
 F_Ld_Accel_Val   =  3           # 'LAV' axis accel value
@@ -53,13 +53,13 @@ F_Rd_YPos        =  6           # 'RY'  axis y pos
 F_Rd_Sum         =  7           # 'RSU' axis sum
 F_Rd_Accel_Sum   =  8           # 'RAS' axis accel sum
 F_Rd_Accel_Ctr   =  9           # 'RAC' axis accel counter
-F_Ld_Dist        = 10           # 'LD'  axis distance
+F_Ld_Dist        = 10           # 'LDS' axis distance
 F_Ld_Max_Dist    = 11           # 'LMD' jog maximum distance
 F_Ld_Backlash    = 12           # 'LB'  jog backlash
-F_Rd_Dist        = 13           # 'RD'  read axis distance
+F_Rd_Dist        = 13           # 'RDS' read axis distance
 F_Rd_Accel_Steps = 14           # 'RAS' read accel steps
-F_Ld_Loc         = 15           # 'LL'  axis location
-F_Rd_Loc         = 16           # 'RL'  read axis location
+F_Ld_Loc         = 15           # 'LLC' axis location
+F_Rd_Loc         = 16           # 'RLC' read axis location
 F_Ld_Mpg_Delta   = 17           # 'LMD' Mpg delta values
 F_Ld_Mpg_Dist    = 18           # 'LMS' Mpg dist values
 F_Ld_Mpg_Div     = 19           # 'LMV' Mpg div values
@@ -98,17 +98,17 @@ F_Noop           =  0           # 'NO' reg 0
 
 # status registers
 
-F_Rd_Status      =  1           # 'RST' status reg
-F_Rd_Inputs      =  2           # 'RIN' inputs reg
+F_Rd_Status      =  1           # 'RSTS' status reg
+F_Rd_Inputs      =  2           # 'RINP' inputs reg
 
 # control registers
 
-F_Ld_Run_Ctl     =  3           # 'LRU' set run control reg
-F_Rd_Run_Ctl     =  4           # 'RRU' read run control reg
-F_Ld_Sync_Ctl    =  5           # 'LSY' sync control reg
-F_Ld_Cfg_Ctl     =  6           # 'LCF' config control reg
-F_Ld_Clk_Ctl     =  7           # 'LCL' clock control reg
-F_Ld_Dsp_Reg     =  8           # 'LDS' display reg
+F_Ld_Run_Ctl     =  3           # 'LRUN' set run control reg
+F_Rd_Run_Ctl     =  4           # 'RRUN' read run control reg
+F_Ld_Sync_Ctl    =  5           # 'LSYN' sync control reg
+F_Ld_Cfg_Ctl     =  6           # 'LCFG' config control reg
+F_Ld_Clk_Ctl     =  7           # 'LCLK' clock control reg
+F_Ld_Dsp_Reg     =  8           # 'LDSP' display reg
 
 # controller
 
@@ -124,7 +124,7 @@ F_Dbg_Freq_Base  = 16           # 'D' dbg frequency
 
 # spindle speed
 
-F_Rd_Idx_Clks    = 18           # 'RIX' clocks per index
+F_Rd_Idx_Clks    = 18           # 'RIDX' clocks per index
 
 # step spindle frequency generator
 

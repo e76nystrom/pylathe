@@ -619,7 +619,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                         print("status " + fmt("{0:07b}".format(status)))
                         break
                     sleep(0.1)
-                clks = rd(rg.F_Enc_Base + rg.F_Rd_Cmp_Cyc_Clks)
+                clks = rd(rg.F_Enc_Base + rg.F_Rd_Cmp_Cyc_C)
                 print("cycleClocks %d", clks)
         else:
             ld(base + rg.F_Ld_Freq, freqDivider, 2)
