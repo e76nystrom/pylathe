@@ -246,6 +246,7 @@ class CommPi():
             print("OverflowError %d %d" % (cmd, data))
             stdout.flush()
             return
+
         if dbg:
             d = ""
             for i in val:
@@ -255,6 +256,7 @@ class CommPi():
                     rg.xRegTable[cmd]))
             trace(txt)
             print(txt)
+
         msg = [cmd] + val
 
         if UDP:

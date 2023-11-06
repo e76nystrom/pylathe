@@ -704,8 +704,8 @@ def OnPanelSend(evt):
                         buttonDisable(jp.spindleButton)
             except CommTimeout:
                 commTimeout(jp)
-            except:
-                traceback.print_exc()
+            # except:
+            #     traceback.print_exc()
     else:
         jp.setStatus(st.STR_FIELD_ERROR)
     jp.focus()
@@ -741,7 +741,8 @@ def OnPanelAddPass(evt):
         jp.setStatus(st.STR_CLR)
         jp.clrRetract()
         try:
-            curPass = panel.mf.comm.getParm(pm.CURRENT_PASS)
+            # curPass = panel.mf.comm.getParm(pm.CURRENT_PASS)
+            curPass = jp.lastPass
             if curPass >= panel.control.passes:
                 if callable(panel.addAction):
                     panel.addAction()
@@ -1641,10 +1642,10 @@ class SendData:
                 self.zDataSent = True
         except CommTimeout:
             commTimeout(self.jp)
-        except:
-            print("setZData exception")
-            stdout.flush()
-            traceback.print_exc()
+        # except:
+        #     print("setZData exception")
+        #     stdout.flush()
+        #     traceback.print_exc()
 
     def sendXData(self, send=False):
         cfg = self.cfg
@@ -7449,6 +7450,7 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.threadDone = False
         self.parmList = (self.readAll, )
+        
         self.encoderCount = None
         self.xLoc = None
         self.zLoc = None
@@ -7514,7 +7516,7 @@ class UpdateThread(Thread):
             (en.D_MSTA, self.dbgMoveState), \
             (en.D_MCMD, self.dbgMoveCmd), \
             )
-        self.dbgTbl = dbgTbl = [self.dbgNone for _ in range(len(dbgSetup))]
+        self.dbgTbl = dbgTbl = [self.dbgNone for _ in range(en.D_MAX)]
         for (index, action) in dbgSetup:
             dbgTbl[index] = action
         # for i, val in enumerate(dbgTbl):
@@ -8330,7 +8332,7 @@ class MainFrame(wx.Frame):
 
         if R_PI:
             if RISCV:
-                comm = CommRiscv()
+                comm = CommRiscv(self)
             else:
                 comm = CommPi()
         else:
@@ -8377,11 +8379,12 @@ class MainFrame(wx.Frame):
         # self.dialFrame = DialFrame("Dial Frame")
         # self.dialPanel = self.dialFrame.dialPanel
 
-        self.updateThread = updateThread = UpdateThread(self, self.jogPanel)
-
-        if self.dbgSave:
-            print("***start saving debug***")
-            updateThread.openDebug()
+        if not R_PI and not RISCV:
+            self.updateThread = \
+                updateThread = UpdateThread(self, self.jogPanel)
+            if self.dbgSave:
+                print("***start saving debug***")
+                updateThread.openDebug()
 
         if WINDOWS:
             self.jogShuttle = JogShuttle(self)
@@ -8427,7 +8430,7 @@ class MainFrame(wx.Frame):
             updateThread.start()
         else:
             comm.setPostUpdate(self.jogPanel.postUpdate)
-            comm.setDbgDispatch(updateThread.dbgDispatch)
+            # comm.setDbgDispatch(updateThread.dbgDispatch)
         self.delay = Delay(self)
 
         if (not R_PI) and MEGA:
@@ -8462,7 +8465,8 @@ class MainFrame(wx.Frame):
                         cf.xSvDROPosition, cf.xSvDROOffset)
         self.cfg.saveList(self.posFile, posList)
         self.done = True
-        self.updateThread.close()
+        if not R_PI and not RISCV:
+            self.updateThread.close()
         self.jogPanel.btnRpt.close()
         if self.jogShuttle is not None:
             self.jogShuttle.close()
@@ -8597,6 +8601,8 @@ class MainFrame(wx.Frame):
 
         print("MainFrame JogPanel")
         self.jogPanel = jogPanel = JogPanel(self, style=wx.WANTS_CHARS)
+        if RISCV:
+            self.comm.jp = jogPanel
 
         self.move = MoveCommands(self)
 
@@ -10271,13 +10277,17 @@ class MoveTest(object):
         fcy = cfg.getIntInfoData(cf.cfgFcy)
 
         zStepsInch = ((microSteps * motorSteps * motorRatio) / pitch)
-        dbgPrt(txt, "zStepsInch %d", (zStepsInch))
+        dbgPrt(txt, "fcy %d zStepsInch %d", (fcy, zStepsInch))
 
         minSpeed = cfg.getFloatInfoData(cf.zMinSpeed) # minimum speed ipm
         maxSpeed = cfg.getFloatInfoData(cf.zMaxSpeed) # maximum speed ipm
-        zMoveAccelTime = cfg.getFloatInfoData(cf.zAccel) # accel time seconds
-        dbgPrt(txt, "zMinSpeed %d zMaxSpeed %d zMoveAccelTime %4.2f", \
-               (minSpeed, maxSpeed, zMoveAccelTime))
+        # (in / min) / ((sec / min) * (in / sec^2))
+        # (in / min) * ((min / sec) * ((sec * sec) / in)))
+        #  22   111      111   333            333    22
+        zAccel = cfg.getFloatInfoData(cf.zAccel) # accel time seconds
+        zMoveAccelTime = (maxSpeed - minSpeed) / (60 * zAccel)
+        dbgPrt(txt, "zMinSpeed %d zMaxSpeed %d zMoveAccel %3.0f zMoveAccelTime %4.3f", \
+               (minSpeed, maxSpeed, zAccel, zMoveAccelTime))
 
         zMStepsSec = int((maxSpeed * zStepsInch) / 60.0)
         zMClocksStep = int(fcy / zMStepsSec)
@@ -10291,7 +10301,7 @@ class MoveTest(object):
 
         zMDeltaV = zMaxStepsSec - zMinStepsSec
         zMAccelStepsSec2 = zMDeltaV / zMoveAccelTime
-        dbgPrt(txt, "zMDeltaV %d zMAccelStepsSec2 %6.3f", \
+        dbgPrt(txt, "zMDeltaV %d zMAccelStepsSec2 %6.0f", \
                (zMDeltaV, zMAccelStepsSec2))
 
         if zMAccelStepsSec2 != 0:
@@ -10337,7 +10347,7 @@ class MoveTest(object):
                 freq = 1.0 / delta
                 ipm = (freq / zStepsInch) * 60
                 fTest.write("step %4d count %9d %8d %8d t %8.6f %8.6f "\
-                            "f %7.2f rpm %3.1f\n" % \
+                            "f %7.2f ipm %3.1f\n" % \
                             (step, count, ctr, abs(ctr - lastCtr), time0, \
                              delta, freq, ipm))
                 lastCount = count

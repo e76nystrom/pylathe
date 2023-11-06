@@ -8,7 +8,7 @@ from remParmDef import parmTable
 # from configDef import cfgFpga
 from remCmdDef import cmdTable, C_LOADMULTI, \
     C_LOADVAL, C_READVAL, C_LOADXREG, C_READXREG, C_QUEMOVE, C_MOVEMULTI, \
-    C_MOVEQUESTATUS, C_SET_MEGA_VAL, C_READ_MEGA_VAL
+    C_MOVEQUESTATUS, C_SET_MEGA_VAL, C_READ_MEGA_VAL, C_READDBG, C_READALL
 from megaParmDef import parmTable as megaParmTable
     
 CMD_OVERHEAD = 8
@@ -93,7 +93,9 @@ class Comm():
             self.ser = None
 
     def send(self, cmd):
-        if cmd[1:3] != "2f":
+        n = int(cmd[1:3], 16)
+        prt = (n != C_READALL) and (n != C_READDBG)
+        if prt:
             print("cmd", cmd.strip('\x01\r'))
         if self.ser is None:
             return
@@ -110,7 +112,7 @@ class Comm():
 
         length = int(rsp[1:3], 16)
         rsp += self.ser.read(length).decode('utf8')
-        if rsp[3:5] != "2f":
+        if prt:
             print("rsp", rsp)
         if rsp[-1] == '*':
             self.timeout = False

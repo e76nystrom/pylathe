@@ -238,55 +238,131 @@ hStatesText = ( \
     "found home slowly",
     )
 
+# debug axis message types
+
+D_BASE           =  0           # axis base
+D_MOV            =  1           # move location
+D_LOC            =  2           # location
+D_DST            =  3           # distance
+D_STP            =  4           # steps
+D_ST             =  5           # state
+D_BSTP           =  6           # backlash steps
+D_DRO            =  7           # dro location
+D_PDRO           =  8           # pass dro location
+D_EXP            =  9           # expected location
+D_ERR            = 10           # error with respect to dro
+D_WT             = 11           # wait
+D_DN             = 12           # done
+D_EST            = 13           # spindle encoder start count
+D_EDN            = 14           # spindle encoder done count
+D_X              = 15           # 
+D_Y              = 16           # 
+D_IDXD           = 17           # dro at index pulse
+D_IDXP           = 18           # position at index pulse
+D_AMAX           = 19           # axis maximum
+
+DAxisMessageList = ( \
+    "D_BASE",
+    "D_MOV",
+    "D_LOC",
+    "D_DST",
+    "D_STP",
+    "D_ST",
+    "D_BSTP",
+    "D_DRO",
+    "D_PDRO",
+    "D_EXP",
+    "D_ERR",
+    "D_WT",
+    "D_DN",
+    "D_EST",
+    "D_EDN",
+    "D_X",
+    "D_Y",
+    "D_IDXD",
+    "D_IDXP",
+    "D_AMAX",
+    )
+
+DAxisMessageText = ( \
+    "axis base",
+    "move location",
+    "location",
+    "distance",
+    "steps",
+    "state",
+    "backlash steps",
+    "dro location",
+    "pass dro location",
+    "expected location",
+    "error with respect to dro",
+    "wait",
+    "done",
+    "spindle encoder start count",
+    "spindle encoder done count",
+    "",
+    "",
+    "dro at index pulse",
+    "position at index pulse",
+    "axis maximum",
+    )
+
 # debug message types
 
 D_PASS           =  0           # pass done
 D_DONE           =  1           # all operations done
 D_TEST           =  2           # test message
-D_XMOV           =  3           # x move location
-D_XLOC           =  4           # x location
-D_XDST           =  5           # x distance
-D_XSTP           =  6           # x steps
-D_XST            =  7           # x state
-D_XBSTP          =  8           # x backlash steps
-D_XDRO           =  9           # x dro location
-D_XPDRO          = 10           # x pass dro location
-D_XEXP           = 11           # x expected location
-D_XERR           = 12           # x error with respect to dro
-D_XWT            = 13           # x wait
-D_XDN            = 14           # x done
-D_XEST           = 15           # x spindle encoder start count
-D_XEDN           = 16           # x spindle encoder done count
-D_XX             = 17           # x 
-D_XY             = 18           # x 
-D_ZMOV           = 19           # z move location
-D_ZLOC           = 20           # z location
-D_ZDST           = 21           # z distance
-D_ZSTP           = 22           # z steps
-D_ZST            = 23           # z state
-D_ZBSTP          = 24           # z backlash steps
-D_ZDRO           = 25           # z dro location
-D_ZPDRO          = 26           # z pass dro location
-D_ZEXP           = 27           # z expected location
-D_ZERR           = 28           # z error with respect to dro
-D_ZWT            = 29           # z wait
-D_ZDN            = 30           # z done
-D_ZEST           = 31           # z spindle encoder start count
-D_ZEDN           = 32           # Z spindle encoder done count
-D_ZX             = 33           # z 
-D_ZY             = 34           # z 
-D_XIDXD          = 35           # x dro at index pulse
-D_XIDXP          = 36           # x position at index pulse
-D_ZIDXD          = 37           # z dro at index pulse
-D_ZIDXP          = 38           # z position at index pulse
-D_HST            = 39           # home state
-D_MSTA           = 40           # move state
-D_MCMD           = 41           # move command
+D_HST            =  3           # home state
+D_MSTA           =  4           # move state
+D_MCMD           =  5           # move command
+D_XBASE          =  6           # x base
+D_XMOV           =  7           # x move location
+D_XLOC           =  8           # x location
+D_XDST           =  9           # x distance
+D_XSTP           = 10           # x steps
+D_XST            = 11           # x state
+D_XBSTP          = 12           # x backlash steps
+D_XDRO           = 13           # x dro location
+D_XPDRO          = 14           # x pass dro location
+D_XEXP           = 15           # x expected location
+D_XERR           = 16           # x error with respect to dro
+D_XWT            = 17           # x wait
+D_XDN            = 18           # x done
+D_XEST           = 19           # x spindle encoder start count
+D_XEDN           = 20           # x spindle encoder done count
+D_XX             = 21           # x 
+D_XY             = 22           # x 
+D_XIDXD          = 23           # x dro at index pulse
+D_XIDXP          = 24           # x position at index pulse
+D_ZBASE          = 25           # Z base
+D_ZMOV           = 26           # z move location
+D_ZLOC           = 27           # z location
+D_ZDST           = 28           # z distance
+D_ZSTP           = 29           # z steps
+D_ZST            = 30           # z state
+D_ZBSTP          = 31           # z backlash steps
+D_ZDRO           = 32           # z dro location
+D_ZPDRO          = 33           # z pass dro location
+D_ZEXP           = 34           # z expected location
+D_ZERR           = 35           # z error with respect to dro
+D_ZWT            = 36           # z wait
+D_ZDN            = 37           # z done
+D_ZEST           = 38           # z spindle encoder start count
+D_ZEDN           = 39           # Z spindle encoder done count
+D_ZX             = 40           # z 
+D_ZY             = 41           # z 
+D_ZIDXD          = 42           # z dro at index pulse
+D_ZIDXP          = 43           # z position at index pulse
+D_MAX            = 44           # debug maximum
 
 dMessageList = ( \
     "D_PASS",
     "D_DONE",
     "D_TEST",
+    "D_HST",
+    "D_MSTA",
+    "D_MCMD",
+    "D_XBASE",
     "D_XMOV",
     "D_XLOC",
     "D_XDST",
@@ -303,6 +379,9 @@ dMessageList = ( \
     "D_XEDN",
     "D_XX",
     "D_XY",
+    "D_XIDXD",
+    "D_XIDXP",
+    "D_ZBASE",
     "D_ZMOV",
     "D_ZLOC",
     "D_ZDST",
@@ -319,19 +398,19 @@ dMessageList = ( \
     "D_ZEDN",
     "D_ZX",
     "D_ZY",
-    "D_XIDXD",
-    "D_XIDXP",
     "D_ZIDXD",
     "D_ZIDXP",
-    "D_HST",
-    "D_MSTA",
-    "D_MCMD",
+    "D_MAX",
     )
 
 dMessageText = ( \
     "pass done",
     "all operations done",
     "test message",
+    "home state",
+    "move state",
+    "move command",
+    "x base",
     "x move location",
     "x location",
     "x distance",
@@ -348,6 +427,9 @@ dMessageText = ( \
     "x spindle encoder done count",
     "x ",
     "x ",
+    "x dro at index pulse",
+    "x position at index pulse",
+    "Z base",
     "z move location",
     "z location",
     "z distance",
@@ -364,13 +446,9 @@ dMessageText = ( \
     "Z spindle encoder done count",
     "z ",
     "z ",
-    "x dro at index pulse",
-    "x position at index pulse",
     "z dro at index pulse",
     "z position at index pulse",
-    "home state",
-    "move state",
-    "move command",
+    "debug maximum",
     )
 
 # pylathe update events
@@ -490,34 +568,45 @@ R_NONE           =  0           # 'NO' no operation
 R_OP_START       =  1           # 'OS' start
 R_OP_DONE        =  2           # 'OD' done
 R_SETUP          =  3           # 'SU' setup
-R_STOP           =  4           # 'SP' stop
-R_STOP_X         =  5           # 'SX' stop x
-R_STOP_Z         =  6           # 'SZ' stop z
-R_RESUME         =  7           # 'RE' resume
-R_SET_LOC_X      =  8           # 'LX' set x loc
-R_SET_LOC_Z      =  9           # 'LZ' set z loc
-R_PAUSE          = 10           # 'PA' pause
-R_START_SPIN     = 11           # 'S+' start spindle
-R_STOP_SPIN      = 12           # 'S-' stop spindle
-R_PASS           = 13           # 'PS' pass
-R_SET_ACCEL      = 14           # 'SA' set parm
-R_SET_DATA       = 15           # 'SD' set data
-R_GET_DATA       = 16           # 'GD' set data
-R_MOVE_Z         = 17           # 'MZ' move z
-R_MOVE_X         = 18           # 'MX' move x
-R_MOVE_REL_Z     = 19           # 'RZ' move z
-R_MOVE_REL_X     = 20           # 'RX' move x
-R_READ_ALL       = 21           # 'RA' read all status
+R_RESUME         =  4           # 'RE' resume
+R_STOP           =  5           # 'SP' stop
+R_STOP_X         =  6           # 'SX' stop x
+R_STOP_Z         =  7           # 'SZ' stop z
+R_DONE           =  8           # 'DN' done
+R_SET_LOC_X      =  9           # 'LX' set x loc
+R_SET_LOC_Z      = 10           # 'LZ' set z loc
+R_PAUSE          = 11           # 'PA' pause
+R_START_SPIN     = 12           # 'S+' start spindle
+R_STOP_SPIN      = 13           # 'S-' stop spindle
+R_PASS           = 14           # 'PS' pass
+R_SET_ACCEL      = 15           # 'SA' set accel parm
+R_SET_ACCEL_Q    = 16           # 'SQ' set accel parm queued
+R_SET_DATA       = 17           # 'SD' set data
+R_GET_DATA       = 18           # 'GD' set data
+R_SAVE_Z         = 19           # 'VZ' save z
+R_SAVE_X         = 20           # 'VX' save x
+R_STEPS_Z        = 21           # 'IZ' save z steps inch
+R_STEPS_X        = 22           # 'IX' save x steps inch
+R_HOFS_Z         = 23           # 'HZ' home offset z
+R_HOFS_X         = 24           # 'HX' home offset x
+R_MOVE_Z         = 25           # 'MZ' move z
+R_MOVE_X         = 26           # 'MX' move x
+R_MOVE_REL_Z     = 27           # 'RZ' move z
+R_MOVE_REL_X     = 28           # 'RX' move x
+R_READ_ALL       = 29           # 'RA' read all status
+R_READ_DBG       = 30           # 'RD' read all status
+R_MAX_CMD        = 31           # 'MX' max value
 
 riscvCmdList = ( \
     "R_NONE",
     "R_OP_START",
     "R_OP_DONE",
     "R_SETUP",
+    "R_RESUME",
     "R_STOP",
     "R_STOP_X",
     "R_STOP_Z",
-    "R_RESUME",
+    "R_DONE",
     "R_SET_LOC_X",
     "R_SET_LOC_Z",
     "R_PAUSE",
@@ -525,13 +614,22 @@ riscvCmdList = ( \
     "R_STOP_SPIN",
     "R_PASS",
     "R_SET_ACCEL",
+    "R_SET_ACCEL_Q",
     "R_SET_DATA",
     "R_GET_DATA",
+    "R_SAVE_Z",
+    "R_SAVE_X",
+    "R_STEPS_Z",
+    "R_STEPS_X",
+    "R_HOFS_Z",
+    "R_HOFS_X",
     "R_MOVE_Z",
     "R_MOVE_X",
     "R_MOVE_REL_Z",
     "R_MOVE_REL_X",
     "R_READ_ALL",
+    "R_READ_DBG",
+    "R_MAX_CMD",
     )
 
 riscvCmdText = ( \
@@ -539,24 +637,34 @@ riscvCmdText = ( \
     "'OS' start",
     "'OD' done",
     "'SU' setup",
+    "'RE' resume",
     "'SP' stop",
     "'SX' stop x",
     "'SZ' stop z",
-    "'RE' resume",
+    "'DN' done",
     "'LX' set x loc",
     "'LZ' set z loc",
     "'PA' pause",
     "'S+' start spindle",
     "'S-' stop spindle",
     "'PS' pass",
-    "'SA' set parm",
+    "'SA' set accel parm",
+    "'SQ' set accel parm queued",
     "'SD' set data",
     "'GD' set data",
+    "'VZ' save z",
+    "'VX' save x",
+    "'IZ' save z steps inch",
+    "'IX' save x steps inch",
+    "'HZ' home offset z",
+    "'HX' home offset x",
     "'MZ' move z",
     "'MX' move x",
     "'RZ' move z",
     "'RX' move x",
     "'RA' read all status",
+    "'RD' read all status",
+    "'MX' max value",
     )
 
 # riscv axis name
@@ -597,29 +705,25 @@ RiscvDataTypeText = ( \
 
 # riscv accel types
 
-RP_Z_TURN        =  0           # 
-RP_Z_BASE        =  0           # 
-RP_Z_TAPER       =  1           # 
-RP_Z_MOVE        =  2           # 
-RP_Z_JOG         =  3           # 
-RP_Z_SLOW        =  4           # 
-RP_X_TURN        =  5           # 
-RP_X_BASE        =  5           # 
-RP_X_TAPER       =  6           # 
-RP_X_MOVE        =  7           # 
-RP_X_JOG         =  8           # 
-RP_X_SLOW        =  9           # 
+RP_Z_TURN        =  0           # 'ZT'
+RP_Z_TAPER       =  1           # 'ZP'
+RP_Z_MOVE        =  2           # 'ZM'
+RP_Z_JOG         =  3           # 'ZJ'
+RP_Z_SLOW        =  4           # 'ZS'
+RP_X_TURN        =  5           # 'XT'
+RP_X_TAPER       =  6           # 'XP'
+RP_X_MOVE        =  7           # 'XM'
+RP_X_JOG         =  8           # 'XJ'
+RP_X_SLOW        =  9           # 'XS'
 RP_MAX           = 10           # 
 
-RiscvAccelTypeList = ( \
+accelTypeList = ( \
     "RP_Z_TURN",
-    "RP_Z_BASE",
     "RP_Z_TAPER",
     "RP_Z_MOVE",
     "RP_Z_JOG",
     "RP_Z_SLOW",
     "RP_X_TURN",
-    "RP_X_BASE",
     "RP_X_TAPER",
     "RP_X_MOVE",
     "RP_X_JOG",
@@ -627,16 +731,31 @@ RiscvAccelTypeList = ( \
     "RP_MAX",
     )
 
-RiscvAccelTypeText = ( \
+accelTypeText = ( \
+    "'ZT'",
+    "'ZP'",
+    "'ZM'",
+    "'ZJ'",
+    "'ZS'",
+    "'XT'",
+    "'XP'",
+    "'XM'",
+    "'XJ'",
+    "'XS'",
     "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
+    )
+
+# riscv accel axis base index
+
+RP_Z_BASE        =  0           # 
+RP_X_BASE        =  5           # 
+
+accelBaseList = ( \
+    "RP_Z_BASE",
+    "RP_X_BASE",
+    )
+
+accelBaseText = ( \
     "",
     "",
     )
@@ -646,14 +765,17 @@ RiscvAccelTypeText = ( \
 RS_IDLE          =  0           # 
 RS_WAIT_BACKLASH =  1           # 
 RS_WAIT          =  2           # 
+RS_WAIT_TAPER    =  3           # 
 
 RiscvAxisStateTypeList = ( \
     "RS_IDLE",
     "RS_WAIT_BACKLASH",
     "RS_WAIT",
+    "RS_WAIT_TAPER",
     )
 
 RiscvAxisStateTypeText = ( \
+    "",
     "",
     "",
     "",

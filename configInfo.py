@@ -31,26 +31,32 @@ class ConfigInfo():
         self.info = []
         self.infoData = []
         self.configTable = configTable
+        self.maxLen = 17
 
     def clrInfo(self, size):
         self.info = [None for _ in range(size)]
         self.infoData = [None for _ in range(size)]
 
     def saveList(self, file, varList):
+        cfgFormat = "%-" + str(self.maxLen) + "s = %s\n"
         f = open(file, 'wb')
         for index in varList:
             name = self.configTable[index]
             val = self.info[index]
-            string = self.formatConfig(name, val)
+            saveVal = self.readConfig(name, val)
+            string = cfgFormat % (name, saveVal)
             if string is not None:
                 f.write(string.encode())
         f.close()
 
     def saveInfo(self, file):
+        cfgFormat = "%-" + str(self.maxLen) + "s = %s\n"
+        print(cfgFormat)
         f = open(file, 'wb')
         for index, (val) in enumerate(self.info):
             name = self.configTable[index]
-            string = self.formatConfig(name, val)
+            saveVal = self.readConfig(name, val)
+            string = cfgFormat % (name, saveVal)
             if string is not None:
                 f.write(string.encode())
         f.close()
@@ -64,20 +70,20 @@ class ConfigInfo():
             self.infoData[index] = self.info[index].GetValue()
 
     @staticmethod
-    def formatConfig(name, val):
+    def readConfig(name, val):
         valClass = val.__class__.__name__
         # print(name, valClass)
         # stdout.flush()
         if valClass == 'TextCtrl':
-            return("%s=%s\n" % (name, val.GetValue()))
+            return val.GetValue()
         elif valClass == 'RadioButton':
-            return("%s=%s\n" % (name, val.GetValue()))
+            return val.GetValue()
         elif valClass == 'CheckBox':
-            return("%s=%s\n" % (name, val.GetValue()))
+            return val.GetValue()
         elif valClass == 'ComboBox':
-            return("%s=%s\n" % (name, val.GetValue()))
+            return val.GetValue()
         elif valClass == 'InfoValue':
-            return("%s=%s\n" % (name, val.GetValue()))
+            return val.GetValue()
         else:
             return(None)
 
@@ -92,6 +98,8 @@ class ConfigInfo():
                 if len(line) == 0:
                     continue
                 [key, val] = line.split('=')
+                key = key.strip()
+                val = val.strip()
                 if not key in config:
                     print("readInfo invalid config value %s" % key)
                     stdout.flush()

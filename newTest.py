@@ -409,7 +409,7 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     lastC = 0
     x = 0
     y = 0
-    sum = d
+    aSum = d
     inc = 2 * intIncPerClock
     incAccum = 0
     print(("\n%17s incr1 %8d incr2 %10d inc %4d" % \
@@ -418,11 +418,11 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
     prt = False
     while (clocks < (accelClocks * 1.2)):
         x += 1
-        if (sum < 0):
-            sum += incr1
+        if (aSum < 0):
+            aSum += incr1
         else:
             y += 1
-            sum += incr2
+            aSum += incr2
             curT = clocks / freqGenMax
             deltaT = curT - lastT
             if pData:
@@ -430,21 +430,21 @@ def test3(runClocks=100, stepClocks=0, dist=20, loc= 0, dbgprint=True, \
                     time.append(curT)
                     data.append(1.0 / deltaT)
             lastT = curT
-        sum += incAccum
+        aSum += incAccum
         if (clocks < accelClocks):
             incAccum += inc
-        if sum > 0:
+        if aSum > 0:
             deltaC = clocks - lastC
             fWrite(f, ("(%6d %5d) dC %5d sum %8d iAcum %8d " \
                        "i1 %8d i2 %11d\n") % \
-                   (x, y, deltaC, sum, incAccum,
+                   (x, y, deltaC, aSum, incAccum,
                     incr1 + incAccum, incr2 + incAccum))
             lastC = clocks
         clocks += 1
     f.close()
 
-    print(("y %4d clks %5d incr1 %8d incr2 %10d sum %12d incAccum %8d" %
-           (y, clocks, incr1 + incAccum, incr2 + incAccum, sum, incAccum)))
+    print(("y %4d clks %5d incr1 %8d incr2 %10d aSum %12d incAccum %8d" %
+           (y, clocks, incr1 + incAccum, incr2 + incAccum, aSum, incAccum)))
 
     print("\n")
 
