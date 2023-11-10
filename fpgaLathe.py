@@ -57,10 +57,11 @@ ctlSetLoc    = 0x20             # set location
 ctlChDirect  = 0x40             # ch input direct
 ctlSlave     = 0x80             # slave ctl by other axis
 ctlDroEnd    = 0x100            # use dro to end move
-ctlJogCmd    = 0x200            # jog with commands
-ctlJogMpg    = 0x400            # jog with mpg
-ctlHome      = 0x800            # homing axis
-ctlUseLimits = 0x1000           # use limits
+ctlDistMode  = 0x200            # distance udpdate mode
+ctlJogCmd    = 0x400            # jog with commands
+ctlJogMpg    = 0x800            # jog with mpg
+ctlHome      = 0x1000           # homing axis
+ctlUseLimits = 0x2000           # use limits
 
 # axis status register
 
@@ -177,6 +178,7 @@ importList = ( \
  ctlChDirect, \
  ctlSlave, \
  ctlDroEnd, \
+ ctlDistMode, \
  ctlJogCmd, \
  ctlJogMpg, \
  ctlHome, \

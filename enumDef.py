@@ -241,29 +241,35 @@ hStatesText = ( \
 # debug axis message types
 
 D_BASE           =  0           # axis base
-D_MOV            =  1           # move location
-D_LOC            =  2           # location
-D_DST            =  3           # distance
-D_STP            =  4           # steps
-D_ST             =  5           # state
-D_BSTP           =  6           # backlash steps
-D_DRO            =  7           # dro location
-D_PDRO           =  8           # pass dro location
-D_EXP            =  9           # expected location
-D_ERR            = 10           # error with respect to dro
-D_WT             = 11           # wait
-D_DN             = 12           # done
-D_EST            = 13           # spindle encoder start count
-D_EDN            = 14           # spindle encoder done count
-D_X              = 15           # 
-D_Y              = 16           # 
-D_IDXD           = 17           # dro at index pulse
-D_IDXP           = 18           # position at index pulse
-D_AMAX           = 19           # axis maximum
+D_MVCM           =  1           # move command
+D_ACTL           =  2           # axisctl
+D_MOV            =  3           # move location
+D_CUR            =  4           # current location
+D_LOC            =  5           # end location
+D_DST            =  6           # distance
+D_STP            =  7           # steps
+D_ST             =  8           # state
+D_BSTP           =  9           # backlash steps
+D_DRO            = 10           # dro location
+D_PDRO           = 11           # pass dro location
+D_EXP            = 12           # expected location
+D_ERR            = 13           # error with respect to dro
+D_WT             = 14           # wait
+D_DN             = 15           # done
+D_EST            = 16           # spindle encoder start count
+D_EDN            = 17           # spindle encoder done count
+D_X              = 18           # 
+D_Y              = 19           # 
+D_IDXD           = 20           # dro at index pulse
+D_IDXP           = 21           # position at index pulse
+D_AMAX           = 22           # axis maximum
 
 DAxisMessageList = ( \
     "D_BASE",
+    "D_MVCM",
+    "D_ACTL",
     "D_MOV",
+    "D_CUR",
     "D_LOC",
     "D_DST",
     "D_STP",
@@ -286,8 +292,11 @@ DAxisMessageList = ( \
 
 DAxisMessageText = ( \
     "axis base",
+    "move command",
+    "axisctl",
     "move location",
-    "location",
+    "current location",
+    "end location",
     "distance",
     "steps",
     "state",
@@ -309,51 +318,57 @@ DAxisMessageText = ( \
 
 # debug message types
 
-D_PASS           =  0           # pass done
-D_DONE           =  1           # all operations done
-D_TEST           =  2           # test message
-D_HST            =  3           # home state
-D_MSTA           =  4           # move state
-D_MCMD           =  5           # move command
-D_XBASE          =  6           # x base
-D_XMOV           =  7           # x move location
-D_XLOC           =  8           # x location
-D_XDST           =  9           # x distance
-D_XSTP           = 10           # x steps
-D_XST            = 11           # x state
-D_XBSTP          = 12           # x backlash steps
-D_XDRO           = 13           # x dro location
-D_XPDRO          = 14           # x pass dro location
-D_XEXP           = 15           # x expected location
-D_XERR           = 16           # x error with respect to dro
-D_XWT            = 17           # x wait
-D_XDN            = 18           # x done
-D_XEST           = 19           # x spindle encoder start count
-D_XEDN           = 20           # x spindle encoder done count
-D_XX             = 21           # x 
-D_XY             = 22           # x 
-D_XIDXD          = 23           # x dro at index pulse
-D_XIDXP          = 24           # x position at index pulse
-D_ZBASE          = 25           # Z base
-D_ZMOV           = 26           # z move location
-D_ZLOC           = 27           # z location
-D_ZDST           = 28           # z distance
-D_ZSTP           = 29           # z steps
-D_ZST            = 30           # z state
-D_ZBSTP          = 31           # z backlash steps
-D_ZDRO           = 32           # z dro location
-D_ZPDRO          = 33           # z pass dro location
-D_ZEXP           = 34           # z expected location
-D_ZERR           = 35           # z error with respect to dro
-D_ZWT            = 36           # z wait
-D_ZDN            = 37           # z done
-D_ZEST           = 38           # z spindle encoder start count
-D_ZEDN           = 39           # Z spindle encoder done count
-D_ZX             = 40           # z 
-D_ZY             = 41           # z 
-D_ZIDXD          = 42           # z dro at index pulse
-D_ZIDXP          = 43           # z position at index pulse
-D_MAX            = 44           # debug maximum
+D_PASS           =  0           # 'PASS' pass done
+D_DONE           =  1           # 'DONE' all operations done
+D_TEST           =  2           # 'TEST' test message
+D_HST            =  3           # 'HST ' home state
+D_MSTA           =  4           # 'MSTA' move state
+D_MCMD           =  5           # 'MCMD' move command
+D_XBASE          =  6           # 'XBAS' x base
+D_XMVCM          =  7           # 'XMVC' x move command
+D_XACTL          =  8           # 'XCTL' x axis ctl
+D_XMOV           =  9           # 'XMOV' x move to location
+D_XCUR           = 10           # 'XCUR' x current location
+D_XLOC           = 11           # 'XLOC' x end location
+D_XDST           = 12           # 'XDST' x distance
+D_XSTP           = 13           # 'XSTP' x steps
+D_XST            = 14           # 'XSTA' x state
+D_XBSTP          = 15           # 'XBLS' x backlash steps
+D_XDRO           = 16           # 'XDRO' x dro location
+D_XPDRO          = 17           # 'XPDR' x pass dro location
+D_XEXP           = 18           # 'XEXP' x expected location
+D_XERR           = 19           # 'XERR' x error with respect to dro
+D_XWT            = 20           # 'XWT ' x wait
+D_XDN            = 21           # 'XDN ' x done
+D_XEST           = 22           # 'XEST' x spindle encoder start count
+D_XEDN           = 23           # 'XEDN' x spindle encoder done count
+D_XX             = 24           # 'XX  ' x 
+D_XY             = 25           # 'XY  ' x 
+D_XIDXD          = 26           # 'XIDR' x dro at index pulse
+D_XIDXP          = 27           # 'XIPO' x position at index pulse
+D_ZBASE          = 28           # 'ZBAS' Z base
+D_ZMVCM          = 29           # 'ZMVC' z move command
+D_ZACTL          = 30           # 'ZCTL' z axis ctl
+D_ZMOV           = 31           # 'ZMOV' z move location
+D_ZCUR           = 32           # 'ZCUR' x current location
+D_ZLOC           = 33           # 'ZLOC' z end location
+D_ZDST           = 34           # 'ZDST' z distance
+D_ZSTP           = 35           # 'ZSTP' z steps
+D_ZST            = 36           # 'ZSTA' z state
+D_ZBSTP          = 37           # 'ZBLS' z backlash steps
+D_ZDRO           = 38           # 'ZDRO' z dro location
+D_ZPDRO          = 39           # 'ZPDR' z pass dro location
+D_ZEXP           = 40           # 'ZEXP' z expected location
+D_ZERR           = 41           # 'ZERR' z error with respect to dro
+D_ZWT            = 42           # 'ZWT ' z wait
+D_ZDN            = 43           # 'ZDN ' z done
+D_ZEST           = 44           # 'ZEST' z spindle encoder start count
+D_ZEDN           = 45           # 'ZEDN' Z spindle encoder done count
+D_ZX             = 46           # 'ZX  ' z 
+D_ZY             = 47           # 'ZY  ' z 
+D_ZIDXD          = 48           # 'ZIDR' z dro at index pulse
+D_ZIDXP          = 49           # 'ZIPO' z position at index pulse
+D_MAX            = 50           # 'MAX ' debug maximum
 
 dMessageList = ( \
     "D_PASS",
@@ -363,7 +378,10 @@ dMessageList = ( \
     "D_MSTA",
     "D_MCMD",
     "D_XBASE",
+    "D_XMVCM",
+    "D_XACTL",
     "D_XMOV",
+    "D_XCUR",
     "D_XLOC",
     "D_XDST",
     "D_XSTP",
@@ -382,7 +400,10 @@ dMessageList = ( \
     "D_XIDXD",
     "D_XIDXP",
     "D_ZBASE",
+    "D_ZMVCM",
+    "D_ZACTL",
     "D_ZMOV",
+    "D_ZCUR",
     "D_ZLOC",
     "D_ZDST",
     "D_ZSTP",
@@ -404,51 +425,57 @@ dMessageList = ( \
     )
 
 dMessageText = ( \
-    "pass done",
-    "all operations done",
-    "test message",
-    "home state",
-    "move state",
-    "move command",
-    "x base",
-    "x move location",
-    "x location",
-    "x distance",
-    "x steps",
-    "x state",
-    "x backlash steps",
-    "x dro location",
-    "x pass dro location",
-    "x expected location",
-    "x error with respect to dro",
-    "x wait",
-    "x done",
-    "x spindle encoder start count",
-    "x spindle encoder done count",
-    "x ",
-    "x ",
-    "x dro at index pulse",
-    "x position at index pulse",
-    "Z base",
-    "z move location",
-    "z location",
-    "z distance",
-    "z steps",
-    "z state",
-    "z backlash steps",
-    "z dro location",
-    "z pass dro location",
-    "z expected location",
-    "z error with respect to dro",
-    "z wait",
-    "z done",
-    "z spindle encoder start count",
-    "Z spindle encoder done count",
-    "z ",
-    "z ",
-    "z dro at index pulse",
-    "z position at index pulse",
-    "debug maximum",
+    "'PASS' pass done",
+    "'DONE' all operations done",
+    "'TEST' test message",
+    "'HST ' home state",
+    "'MSTA' move state",
+    "'MCMD' move command",
+    "'XBAS' x base",
+    "'XMVC' x move command",
+    "'XCTL' x axis ctl",
+    "'XMOV' x move to location",
+    "'XCUR' x current location",
+    "'XLOC' x end location",
+    "'XDST' x distance",
+    "'XSTP' x steps",
+    "'XSTA' x state",
+    "'XBLS' x backlash steps",
+    "'XDRO' x dro location",
+    "'XPDR' x pass dro location",
+    "'XEXP' x expected location",
+    "'XERR' x error with respect to dro",
+    "'XWT ' x wait",
+    "'XDN ' x done",
+    "'XEST' x spindle encoder start count",
+    "'XEDN' x spindle encoder done count",
+    "'XX  ' x ",
+    "'XY  ' x ",
+    "'XIDR' x dro at index pulse",
+    "'XIPO' x position at index pulse",
+    "'ZBAS' Z base",
+    "'ZMVC' z move command",
+    "'ZCTL' z axis ctl",
+    "'ZMOV' z move location",
+    "'ZCUR' x current location",
+    "'ZLOC' z end location",
+    "'ZDST' z distance",
+    "'ZSTP' z steps",
+    "'ZSTA' z state",
+    "'ZBLS' z backlash steps",
+    "'ZDRO' z dro location",
+    "'ZPDR' z pass dro location",
+    "'ZEXP' z expected location",
+    "'ZERR' z error with respect to dro",
+    "'ZWT ' z wait",
+    "'ZDN ' z done",
+    "'ZEST' z spindle encoder start count",
+    "'ZEDN' Z spindle encoder done count",
+    "'ZX  ' z ",
+    "'ZY  ' z ",
+    "'ZIDR' z dro at index pulse",
+    "'ZIPO' z position at index pulse",
+    "'MAX ' debug maximum",
     )
 
 # pylathe update events
@@ -589,13 +616,15 @@ R_STEPS_Z        = 21           # 'IZ' save z steps inch
 R_STEPS_X        = 22           # 'IX' save x steps inch
 R_HOFS_Z         = 23           # 'HZ' home offset z
 R_HOFS_X         = 24           # 'HX' home offset x
-R_MOVE_Z         = 25           # 'MZ' move z
-R_MOVE_X         = 26           # 'MX' move x
-R_MOVE_REL_Z     = 27           # 'RZ' move z
-R_MOVE_REL_X     = 28           # 'RX' move x
-R_READ_ALL       = 29           # 'RA' read all status
-R_READ_DBG       = 30           # 'RD' read all status
-R_MAX_CMD        = 31           # 'MX' max value
+R_JOG_Z          = 25           # 'JZ' jog move z
+R_JOG_X          = 26           # 'JX' jog move x
+R_MOVE_Z         = 27           # 'MZ' move z
+R_MOVE_X         = 28           # 'MX' move x
+R_MOVE_REL_Z     = 29           # 'RZ' move rel z
+R_MOVE_REL_X     = 30           # 'RX' move rel x
+R_READ_ALL       = 31           # 'RA' read all status
+R_READ_DBG       = 32           # 'RD' read all status
+R_MAX_CMD        = 33           # 'MX' max value
 
 riscvCmdList = ( \
     "R_NONE",
@@ -623,6 +652,8 @@ riscvCmdList = ( \
     "R_STEPS_X",
     "R_HOFS_Z",
     "R_HOFS_X",
+    "R_JOG_Z",
+    "R_JOG_X",
     "R_MOVE_Z",
     "R_MOVE_X",
     "R_MOVE_REL_Z",
@@ -658,10 +689,12 @@ riscvCmdText = ( \
     "'IX' save x steps inch",
     "'HZ' home offset z",
     "'HX' home offset x",
+    "'JZ' jog move z",
+    "'JX' jog move x",
     "'MZ' move z",
     "'MX' move x",
-    "'RZ' move z",
-    "'RX' move x",
+    "'RZ' move rel z",
+    "'RX' move rel x",
     "'RA' read all status",
     "'RD' read all status",
     "'MX' max value",
@@ -703,6 +736,30 @@ RiscvDataTypeText = ( \
     "",
     )
 
+# accel types
+
+A_TURN           =  0           # 'TU'
+A_TAPER          =  1           # 'TP'
+A_MOVE           =  2           # 'MV'
+A_JOG            =  3           # 'JG'
+A_SLOW           =  4           # 'JS'
+
+accelTypeList = ( \
+    "A_TURN",
+    "A_TAPER",
+    "A_MOVE",
+    "A_JOG",
+    "A_SLOW",
+    )
+
+accelTypeText = ( \
+    "'TU'",
+    "'TP'",
+    "'MV'",
+    "'JG'",
+    "'JS'",
+    )
+
 # riscv accel types
 
 RP_Z_TURN        =  0           # 'ZT'
@@ -717,7 +774,7 @@ RP_X_JOG         =  8           # 'XJ'
 RP_X_SLOW        =  9           # 'XS'
 RP_MAX           = 10           # 
 
-accelTypeList = ( \
+axisAccelTypeList = ( \
     "RP_Z_TURN",
     "RP_Z_TAPER",
     "RP_Z_MOVE",
@@ -731,7 +788,7 @@ accelTypeList = ( \
     "RP_MAX",
     )
 
-accelTypeText = ( \
+axisAccelTypeText = ( \
     "'ZT'",
     "'ZP'",
     "'ZM'",
@@ -833,4 +890,85 @@ riscvRunWaitText = ( \
     "'S-' wait spindle stop",
     "'WX' wait x done",
     "'WZ' wait z done",
+    )
+
+# commands in ctlbits
+
+M_CMD_NONE       =  0           # no command
+M_CMD_MOV        =  1           # move a set distance
+M_CMD_JOG        =  2           # move while cmd are present
+M_CMD_SYN        =  3           # move dist synchronized to rotation
+M_CMD_MAX        =  4           # rapid move
+M_CMD_SPEED      =  5           # jog at speed
+M_JOG_SLOW       =  6           # slow jog for home or probe
+
+moveCmdList = ( \
+    "M_CMD_NONE",
+    "M_CMD_MOV",
+    "M_CMD_JOG",
+    "M_CMD_SYN",
+    "M_CMD_MAX",
+    "M_CMD_SPEED",
+    "M_JOG_SLOW",
+    )
+
+moveCmdText = ( \
+    "no command",
+    "move a set distance",
+    "move while cmd are present",
+    "move dist synchronized to rotation",
+    "rapid move",
+    "jog at speed",
+    "slow jog for home or probe",
+    )
+
+# riscv run wait states
+
+M_RSV_0          =  0           # no command
+M_RSV_1          =  1           # no command
+M_RSV_2          =  2           # no command
+M_SYN_START      =  3           # start on sync pulse
+M_SYN_LEFT       =  4           # start sync left
+M_SYN_TAPER      =  5           # taper on other axis
+M_DIST_MODE      =  6           # distance update mode
+M_FIND_HOME      =  7           # find home
+M_CLEAR_HOME     =  8           # move off of home
+M_FIND_PROBE     =  9           # find probe
+M_CLEAR_PROBE    = 10           # move off of probe
+M_DRO_POS        = 11           # use dro for moving
+M_DRO_UPD        = 12           # update internal position from dro
+M_BIT_MAX        = 13           # number of bits
+
+moveBitList = ( \
+    "M_RSV_0",
+    "M_RSV_1",
+    "M_RSV_2",
+    "M_SYN_START",
+    "M_SYN_LEFT",
+    "M_SYN_TAPER",
+    "M_DIST_MODE",
+    "M_FIND_HOME",
+    "M_CLEAR_HOME",
+    "M_FIND_PROBE",
+    "M_CLEAR_PROBE",
+    "M_DRO_POS",
+    "M_DRO_UPD",
+    "M_BIT_MAX",
+    )
+
+moveBitText = ( \
+    "no command",
+    "no command",
+    "no command",
+    "start on sync pulse",
+    "start sync left",
+    "taper on other axis",
+    "distance update mode",
+    "find home",
+    "move off of home",
+    "find probe",
+    "move off of probe",
+    "use dro for moving",
+    "update internal position from dro",
+    "number of bits",
     )

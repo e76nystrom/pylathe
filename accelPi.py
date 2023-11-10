@@ -299,13 +299,13 @@ def accelSetup1(aData):
     #     if not i.startswith("_"):
     #         print(i)
 
-def taperCalc(turn, taperAccel, taper):
-    axis = turn.axis
+def taperCalc(turnAccel, taperAccel, taper):
+    axis = turnAccel.axis
     print("\n%s accel taperCalc" % (axis.name))
     print("taperCalc a0 %s a1 %s taper %8.6f" % \
-          (turn.axis.name, taperAccel.axis.name, taper))
+          (turnAccel.axis.name, taperAccel.axis.name, taper))
     parm = axis.parm
-    stepsInch = turn.stepsInch
+    # stepsInch = turn.stepsInch
     axis.taperDist = 1
     axis.taperInch = taper
 
@@ -321,8 +321,8 @@ def taperCalc(turn, taperAccel, taper):
         # taperSteps = intRound(taperCycleDist * stepsInch)
         print("**not done")
     elif turnSync == en.SEL_TU_ENC:
-        dx = intRound((parm.encPerRev * turnCycleDist) / turn.pitch)
-        dy = intRound(taperCycleDist * stepsInch)
+        dx = intRound((parm.encPerRev * turnCycleDist) / turnAccel.pitch)
+        dy = intRound(taperCycleDist * taperAccel.axis.stepsInch)
         taperAccel.incr1 = 2 * dy
         taperAccel.incr2 = taperAccel.incr1 - 2 * dx
         taperAccel.intAccel = 0
@@ -333,5 +333,6 @@ def taperCalc(turn, taperAccel, taper):
               "incr1 %d incr2 %d initialSum %d" %
                (dx, dy, taperAccel.incr1, taperAccel.incr2, \
                 taperAccel.initialSum))
+        print("dy/dx %7.4f" % (float(dy) / float(dx)))
     elif turnSync == en.SEL_TU_SYN:
         pass

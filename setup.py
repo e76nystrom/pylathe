@@ -506,16 +506,29 @@ class Setup():
                             fWrite(f, "    )\n")
 
                             if commentList[0].startswith("'"):
+                                cLen = 0
+                                c = commentList[0]
+                                match = re.match("\'([ \w+\-]*)\'", c)
+                                if match is not None:
+                                    result = match.groups()
+                                    regCode = result[0]
+                                    cLen = len(regCode)
                                 sName = enum.replace("List", "")
                                 print(sName)
                                 path = os.path.join(cLoc, sName + 'Str.h')
                                 sFile = open(path, 'wb')
                                 fWrite(sFile, "struct S_%s\n" \
-                                       "{\n char c0;\n char c1;\n};\n\n" \
+                                       "{\n char c0;\n char c1;\n" % \
+                                       (var.upper()))
+
+                                if cLen == 4:
+                                    fWrite(sFile, " char c2;\n char c3;\n")
+
+                                fWrite(sFile, "};\n\n" \
                                        "struct S_%s %sStr[] =\n{\n" % \
-                                       (var.upper(), var.upper(), sName))
+                                       (var.upper(), sName))
                                 for j, c in enumerate(commentList):
-                                    match = re.match("\'([\w+\-]*)\'([\s\w]*)", c)
+                                    match = re.match("\'([ \w+\-]*)\'([\s\w]*)", c)
                                     regCode = ''
                                     rComment = ''
                                     if match is not None:

@@ -1,10 +1,10 @@
 from threading import Thread
 from queue import Queue, Empty
-# from sys import stdout
+from sys import stdout
 from time import sleep, time
 # from platform import system
 from ctypes import c_int32, c_uint32
-from sys import stdout
+# from sys import stdout
 from threading import Lock
 from datetime import datetime
 from pytz import timezone
@@ -17,7 +17,7 @@ from remCmdDef import cmdTable
 # from remParm import RemParm
 import enumDef as en
 # import lRegDef as rg
-# import fpgaLathe as bt
+import fpgaLathe as bt
 import ctlBitDef as ct
 from remParm import RemParm
 
@@ -66,7 +66,7 @@ def tmpCommand(_0, _1):
 riscvCmd = tmpCommand
 
 def riscvAccelData(accel, accelType, que=False):
-    txt = "riscVAccelData %-10s %d" % (en.accelTypeList[accelType],
+    txt = "riscVAccelData %-10s %d" % (en.axisAccelTypeList[accelType],
                                        accelType)
     trace(txt)
     print(txt)
@@ -77,6 +77,37 @@ def riscvAccelData(accel, accelType, que=False):
     riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_VAL,   accel.intAccel))
     riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_COUNT, accel.accelClocks))
     riscvCmd(cmd, (accelType << 8 | en.RP_FREQ_DIV,    accel.freqDivider))
+
+def prtAxisCtl(axisCtl):
+    s = ""
+    if (axisCtl & bt.ctlInit) != 0:
+        s += "Init "
+    if (axisCtl & bt.ctlStart) != 0:
+        s += "Start "
+    s += "Dir" + ("+ " if (axisCtl & bt.ctlDir) != 0 else "- ")
+    if (axisCtl & bt.ctlBacklash) != 0:
+        s += "Backlash "
+    if (axisCtl & bt.ctlWaitSync) != 0:
+        s += "WaitSync "
+    if (axisCtl & bt.ctlSetLoc) != 0:
+        s += "SetLoc "
+    if (axisCtl & bt.ctlChDirect) != 0:
+        s += "ChDirect "
+    if (axisCtl & bt.ctlSlave) != 0:
+        s += "Slave "
+    if (axisCtl & bt.ctlDistMode) != 0:
+        s += "DistMode "
+    if (axisCtl & bt.ctlDroEnd) != 0:
+        s += "DroEnd "
+    if (axisCtl & bt.ctlJogCmd) != 0:
+        s += "JogCmd "
+    if (axisCtl & bt.ctlJogMpg) != 0:
+        s += "JogMpg "
+    if (axisCtl & bt.ctlHome) != 0:
+        s += "Home "
+    if (axisCtl & bt.ctlUseLimits) != 0:
+        s += "IgnoreLim "
+    return s
 
 def enableXilinx():
     pass
@@ -255,7 +286,7 @@ class CommRiscv():
                     x0 = arg[0] >> 8
                     x1 = arg[0] & 0xff
                     data = "%10d %d %-10s %d %-14s" % \
-                        (arg[1] ,x0, en.accelTypeList[x0],
+                        (arg[1] ,x0, en.axisAccelTypeList[x0],
                          x1, en.RiscvSyncParmTypeList[x1])
             else:
                 pass
@@ -372,23 +403,32 @@ class RiscvLathe(Thread):
             setattr(self, name, None)
         self.parm = RemParm()
 
-        self.encoderCount = None
-        self.baseTime = None
-        self.xLoc = None
-        self.zLoc = None
-        self.xIntLoc = None
-        self.zIntLoc = None
-        self.zDro = None
-        self.xDro = None
-        self.passVal = None
         self.dbg = None
+        self.baseTime = None
         self.mIdle = False
+        self.passVal = None
+        self.encoderCount = None
+        self.lastAxis = None
+
+        self.xCmd = None
+        self.xExp = None
+        self.xLoc = None
+        self.xIntLoc = None
+        self.xDro = None
+        self.xDist = None
         self.xEncoderStart = None
-        self.zEncoderStart = None
         self.xEncoderCount = None
-        self.zEncoderCount = None
         self.lastXIdxD = None
         self.lastXIdxP = None
+
+        self.zCmd = None
+        self.zExp = None
+        self.zLoc = None
+        self.zIntLoc = None
+        self.zDro = None
+        self.zDist = None
+        self.zEncoderStart = None
+        self.zEncoderCount = None
         self.lastZIdxD = None
         self.lastZIdxP = None
 
@@ -396,10 +436,16 @@ class RiscvLathe(Thread):
             (en.D_PASS,  self.dbgPass),
             (en.D_DONE,  self.dbgDone),
             (en.D_TEST,  self.dbgTest),
+            (en.D_HST,   self.dbgHome),
+            (en.D_MSTA,  self.dbgMoveState),
+            (en.D_MCMD,  self.dbgMoveCmd),
 
+            (en.D_XMVCM, self.dbgXMovCmd),
+            (en.D_XACTL, self.dbgXAxisctl),
             (en.D_XMOV,  self.dbgXMov),
+            (en.D_XCUR,  self.dbgXCur),
             (en.D_XLOC,  self.dbgXLoc),
-            (en.D_XDST,  self.dbgXDst),
+            (en.D_XDST,  self.dbgXDist),
             (en.D_XSTP,  self.dbgXStp),
             (en.D_XST,   self.dbgXState),
             (en.D_XBSTP, self.dbgXBSteps),
@@ -413,10 +459,15 @@ class RiscvLathe(Thread):
             (en.D_XEDN,  self.dbgXEncDone),
             (en.D_XX,    self.dbgXX),
             (en.D_XY,    self.dbgXY),
+            (en.D_XIDXD, self.dbgXIdxD),
+            (en.D_XIDXP, self.dbgXIdxP),
 
+            (en.D_ZMVCM, self.dbgZMovCmd),
+            (en.D_ZACTL, self.dbgZAxisctl),
             (en.D_ZMOV,  self.dbgZMov),
+            (en.D_ZCUR,  self.dbgZCur),
             (en.D_ZLOC,  self.dbgZLoc),
-            (en.D_ZDST,  self.dbgZDst),
+            (en.D_ZDST,  self.dbgZDist),
             (en.D_ZSTP,  self.dbgZStp),
             (en.D_ZST,   self.dbgZState),
             (en.D_ZBSTP, self.dbgZBSteps),
@@ -430,15 +481,8 @@ class RiscvLathe(Thread):
             (en.D_ZEDN,  self.dbgZEncDone),
             (en.D_ZX,    self.dbgZX),
             (en.D_ZY,    self.dbgZY),
-
-            (en.D_XIDXD, self.dbgXIdxD),
-            (en.D_XIDXP, self.dbgXIdxP),
             (en.D_ZIDXD, self.dbgZIdxD),
             (en.D_ZIDXP, self.dbgZIdxP),
-
-            (en.D_HST,   self.dbgHome),
-            (en.D_MSTA,  self.dbgMoveState),
-            (en.D_MCMD,  self.dbgMoveCmd),
             )
         self.dbgTbl = dbgTbl = [self.dbgNone for _ in range(en.D_MAX)]
         for (index, action) in dbgSetup:
@@ -496,9 +540,8 @@ class RiscvLathe(Thread):
         self.comm.riscvCmd(en.R_MOVE_REL_Z, (dist, parm.zFlag))
 
     def cZJogMove(self):                # 2
-        pass
-        # parm = self.parm
-        # self.zAxis.jogMove(parm.zJogDir)
+        dist = self.parm.zJogDir * self.zJogInitialDist
+        self.comm.riscvCmd(en.R_JOG_Z, dist)
 
 
     def cZJogSpeed(self):               # 3
@@ -522,9 +565,8 @@ class RiscvLathe(Thread):
         self.comm.riscvCmd(en.R_MOVE_REL_X, (dist, parm.xFlag))
 
     def cXJogMove(self):                # 10
-        pass
-        # parm = self.parm
-        # self.xAxis.jogMove(parm.xJogDir)
+        dist = self.parm.xJogDir * self.xJogInitialDist
+        self.comm.riscvCmd(en.R_JOG_X, dist)
 
     def cXJogSpeed(self):               # 11
         pass
@@ -632,6 +674,15 @@ class RiscvLathe(Thread):
         self.zJogSlowAccel = ac = AccelData(zAxis)
         ac.init("slowJog", parm.zJogMin, parm.zJogMax)
 
+        riscvAccelData(self.zMoveAccel,    en.RP_Z_MOVE)
+        riscvAccelData(self.zJogAccel,     en.RP_Z_JOG)
+        riscvAccelData(self.zJogSlowAccel, en.RP_Z_SLOW)
+
+        stepsSec = self.zJogAccel.stepsSecMax
+        self.zJogInitialDist = int(parm.jogTimeInitial * stepsSec)
+        self.zJogIncDist = int(parm.jogTimeInc * stepsSec)
+        self.zJogMaxDist = int(parm.jogTimeMax * stepsSec)
+
     def cZSetLoc(self):                 # 32
         self.comm.riscvCmd(en.R_SET_LOC_Z, self.parm.zLoc)
 
@@ -658,6 +709,15 @@ class RiscvLathe(Thread):
 
         self.xJogSlowAccel = ac = AccelData(xAxis)
         ac.init("slowJog", parm.xJogMin, parm.xJogMax)
+
+        riscvAccelData(self.xMoveAccel,    en.RP_X_MOVE)
+        riscvAccelData(self.xJogAccel,     en.RP_X_JOG)
+        riscvAccelData(self.xJogSlowAccel, en.RP_X_SLOW)
+
+        stepsSec = self.xJogAccel.stepsSecMax
+        self.xJogInitialDist = dist = int(parm.jogTimeInitial * stepsSec)
+        self.xJogIncDist = int(parm.jogTimeInc * stepsSec)
+        self.xJogMaxDist = int(parm.jogTimeMax * stepsSec)
 
     def cXSetLoc(self):                 # 35
         self.comm.riscvCmd(en.R_SET_LOC_X, self.parm.xLoc)
@@ -808,8 +868,9 @@ class RiscvLathe(Thread):
                 # self.dbgMsg(en.D_MCMD, (self.cmdFlag << 8) | op)
                 # noinspection PyCallingNonCallable
                 self.move[op](val)
-            except IndexError:
-                pass
+            # except IndexError:
+            #     print("IndexError")
+            #     exit()
             except Empty:
                 return
 
@@ -1060,14 +1121,6 @@ class RiscvLathe(Thread):
             # self.mvStatus |= ct.MV_ACTIVE
             self.comm.riscvCmd(en.R_OP_START)
 
-            riscvAccelData(self.zMoveAccel,    en.RP_Z_MOVE)
-            riscvAccelData(self.zJogAccel,     en.RP_Z_JOG)
-            riscvAccelData(self.zJogSlowAccel, en.RP_Z_SLOW)
-
-            riscvAccelData(self.xMoveAccel,    en.RP_X_MOVE)
-            riscvAccelData(self.xJogAccel,     en.RP_X_JOG)
-            riscvAccelData(self.xJogSlowAccel, en.RP_X_SLOW)
-
         elif val == ct.PARM_DONE:
             # self.mvStatus &= ~ct.MV_ACTIVE
             # self.mvStatus |= ct.MV_DONE
@@ -1179,7 +1232,7 @@ class RiscvLathe(Thread):
             index = 4
             if rLen > 4:
                 print("rLen %d" % (rLen))
-                j = 0;
+                j = 0
                 for i in range(index, rLen):
                     if j == 5:
                         j = 0
@@ -1208,6 +1261,15 @@ class RiscvLathe(Thread):
                     try:
                         action = self.dbgTbl[cmd]
                         assert (callable(action))
+                        axis = (None if cmd < en.D_XBASE else \
+                                X_AXIS if cmd < en.D_ZBASE else Z_AXIS)
+                        if (self.lastAxis is not None) and (axis is not None):
+                            if axis != self.lastAxis:
+                                if self.dbg is None:
+                                    print()
+                                else:
+                                    self.dbg.write("\n".encode())
+                        self.lastAxis = axis
                         # noinspection PyArgumentList
                         output = action(val)
                         print("***" + t + output)
@@ -1301,27 +1363,65 @@ class RiscvLathe(Thread):
     def dbgTest(self, val):
         return("test %d" % (val))
 
-    def dbgXMov(self, val):
+    # noinspection PyMethodMayBeStatic
+    def dbgHome(self, val):
+        return("hsta %s" % (en.hStatesList[val]))
+
+    def dbgMoveState(self, val):
+        self.mIdle = val == en.RW_NONE
+        return("msta %s" % (en.riscvRunWaitList[val]
+                            + ("\n" if self.mIdle else "")))
+
+    # noinspection PyMethodMayBeStatic
+    def dbgMoveCmd(self, val):
+        if (val & 0xff00) == 0:
+            return("mcmd %s" % (en.riscvCmdList[val]))
+        else:
+            return("mcmd %s %02x" % (en.riscvCmdList[val & 0xff], val >> 8))
+
+    # x axis ****************************************
+
+    # noinspection PyMethodMayBeStatic
+    def dbgXMovCmd(self, val):  # move command
+        self.xCmd = val
+        cmd = val & ct.CMD_MSK
+        bits  = val & ~ct.CMD_MSK
+        mask = (1 << (en.M_BIT_MAX-1))
+        bitList = ""
+        for i in range(en.M_BIT_MAX-1, 0, -1):
+            bitList += (en.moveBitList[i] + " ") if (bits & mask) != 0 else ""
+            mask >>= 1
+        return("xcmd %-11s %02x %s" % (en.moveCmdList[cmd], val, bitList.rstrip()))
+
+    def dbgXAxisctl(self, val):
+        return "xctl    %04x %s" % (val, prtAxisCtl(val))
+
+    def dbgXMov(self, val):     # move to location
         tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
         return("xmov %7.4f %7.4f" % (tmp, tmp * 2.0))
 
-    def dbgXLoc(self, val):
+    def dbgXCur(self, val):     # move current location
+        tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
+        return("xloc %7.4f %7.4f" % (tmp, tmp * 2.0))
+
+    def dbgXLoc(self, val):     # end of move location
         iTmp = int(val)
         self.xIntLoc = iTmp
         tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
         self.xLoc = tmp
-        if self.xDro is not None:
-            diff = " diff %7.4f" % (self.xDro - tmp)
+        # if self.xDro is not None:
+        if self.xExp is not None:
+            diff = " diff %7.4f" % (self.xExp - tmp)
             self.xDro = None
         else:
             diff = ""
         return("xloc %7.4f %7.4f %7d%s" % (tmp, tmp * 2.0, iTmp, diff))
 
-    def dbgXDst(self, val):
+    def dbgXDist(self, val):     # move distance
         tmp = float(val) / self.mf.xStepsInch
         return("xdst %7.4f %7d" % (tmp, val))
 
-    def dbgXStp(self, val):
+    def dbgXStp(self, val):     # move steps
         dist = float(val) / self.mf.xStepsInch
         if self.xEncoderCount is None or self.xEncoderCount == 0:
             return("xstp %7.4f %7d" % (dist, val))
@@ -1357,8 +1457,9 @@ class RiscvLathe(Thread):
         self.jp.mf.dPrt(s + "\n", flush=True)
         return("xpdro " + s)
 
-    def dbgXExp(self, val):
+    def dbgXExp(self, val):     # expected location
         tmp = float(val) / self.mf.xStepsInch - self.jp.xHomeOffset
+        self.xExp = tmp
         return("xexp %7.4f" % (tmp))
 
     def dbgXErr(self, val):
@@ -1383,7 +1484,7 @@ class RiscvLathe(Thread):
 
     # noinspection PyMethodMayBeStatic
     def dbgXY(self, val):
-        return("x_y  %7d" % (val))
+        return("x_y  %7d %7.4f" % (val, float(val) / self.mf.xStepsInch))
 
     def dbgXEncDone(self, val):
         if self.xEncoderStart is None:
@@ -1392,24 +1493,69 @@ class RiscvLathe(Thread):
         self.xEncoderCount = count
         return("xedn %7.2f %7d" % (float(count) / self.encoderCount, count))
 
+    def dbgXIdxD(self, val):
+        result = "xixd %7.4f" % (float(val) / self.jp.xDROInch - \
+                                 self.jp.xDROOffset)
+
+        if self.lastXIdxD is not None:
+            delta = abs(self.lastXIdxD - val)
+            result += " %7.4f %6d %5d" % (delta / self.jp.xDROInch, val, delta)
+        self.lastXIdxD = val
+        return(result)
+
+    def dbgXIdxP(self, val):
+        result = "xixp %7.4f" % (float(val) / self.jp.xStepsInch - \
+                                 self.jp.xHomeOffset)
+
+        if self.lastXIdxP is not None:
+            delta = abs(self.lastXIdxP - val)
+            result += " %7.4f %6d %5d" % \
+                (delta / self.jp.xStepsInch, val, delta)
+        self.lastXIdxP = val
+        return(result)
+
+    # z axis ****************************************
+
+    # noinspection PyMethodMayBeStatic
+    def dbgZMovCmd(self, val):
+        self.zCmd = val
+        cmd = val & ct.CMD_MSK
+        bitList = ""
+        bits  = val & ~ct.CMD_MSK
+        mask = (1 << (en.M_BIT_MAX-1))
+        for i in range(en.M_BIT_MAX-1, 0, -1):
+            bitList += (en.moveBitList[i] + " ") if (bits & mask) != 0 else ""
+            mask >>= 1
+        return("zcmd %-11s %02x %s" % \
+               (en.moveCmdList[cmd], val, bitList.rstrip()))
+
+    def dbgZAxisctl(self, val):
+        return "zctl    %04x %s" % (val, prtAxisCtl(val))
+
     def dbgZMov(self, val):
         tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
         return("zmov %7.4f" % (tmp))
+
+    def dbgZCur(self, val):
+        tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
+        return("zloc %7.4f" % (tmp))
 
     def dbgZLoc(self, val):
         iTmp = int(val)
         self.zIntLoc = iTmp
         tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
         self.zLoc = tmp
-        if self.zDro is not None:
-            diff = " diff %7.4f" % (self.zDro - tmp)
+        # if self.zDro is not None:
+        if self.zExp is not None:
+            diff = " diff %7.4f" % (self.zExp - tmp)
             self.zDro = None
         else:
             diff = ""
         return("zloc %7.4f %7d %s" % (tmp, iTmp, diff))
 
-    def dbgZDst(self, val):
+    def dbgZDist(self, val):
         tmp = float(val) / self.mf.zStepsInch
+        self.zDist = tmp
         return("zdst %7.4f %7d" % (tmp, val))
 
     def dbgZStp(self, val):
@@ -1459,6 +1605,7 @@ class RiscvLathe(Thread):
 
     def dbgZExp(self, val):
         tmp = float(val) / self.mf.zStepsInch - self.jp.zHomeOffset
+        self.zExp = tmp
         return("zexp %7.4f" % (tmp))
 
     def dbgZErr(self, val):
@@ -1484,34 +1631,17 @@ class RiscvLathe(Thread):
         self.zEncoderCount = count
         return("zedn %7.2f %7d" % (float(count) / self.encoderCount, count))
 
-    # noinspection PyMethodMayBeStatic
     def dbgZX(self, val):
-        return("z_x  %7d" % (val))
+        if (self.zCmd is not None and self.zDist is not None and \
+            ((self.zCmd & ct.CMD_MSK) == ct.CMD_SYN)):
+            rev = val / self.encoderCount
+            feed = self.zDist / rev
+            return "z_x  %7d rev %5.2f feed %5.4f" % (val, rev, feed)
+        else:
+            return "z_x  %7d" % (val)
 
-    # noinspection PyMethodMayBeStatic
     def dbgZY(self, val):
-        return("z_y  %7d" % (val))
-
-    def dbgXIdxD(self, val):
-        result = "xixd %7.4f" % (float(val) / self.jp.xDROInch - \
-                                 self.jp.xDROOffset)
-
-        if self.lastXIdxD is not None:
-            delta = abs(self.lastXIdxD - val)
-            result += " %7.4f %6d %5d" % (delta / self.jp.xDROInch, val, delta)
-        self.lastXIdxD = val
-        return(result)
-
-    def dbgXIdxP(self, val):
-        result = "xixp %7.4f" % (float(val) / self.jp.xStepsInch - \
-                                 self.jp.xHomeOffset)
-
-        if self.lastXIdxP is not None:
-            delta = abs(self.lastXIdxP - val)
-            result += " %7.4f %6d %5d" % \
-                (delta / self.jp.xStepsInch, val, delta)
-        self.lastXIdxP = val
-        return(result)
+        return("z_y  %7d %7.4f" % (val, float(val) / self.mf.zStepsInch))
 
     def dbgZIdxD(self, val):
         result = "zixd %7.4f" % (float(val) / self.jp.zDROInch - \
@@ -1534,23 +1664,5 @@ class RiscvLathe(Thread):
         self.lastZIdxP = val
         return(result)
 
-    # noinspection PyMethodMayBeStatic
-    def dbgHome(self, val):
-        return("hsta %s" % (en.hStatesList[val]))
-
-    def dbgMoveState(self, val):
-        self.mIdle = val == en.RW_NONE
-        return("msta %s" % (en.riscvRunWaitList[val]
-                            + ("\n" if self.mIdle else "")))
-
-    # noinspection PyMethodMayBeStatic
-    def dbgMoveCmd(self, val):
-        if (val & 0xff00) == 0:
-            return("mcmd %s" % (en.riscvCmdList[val]))
-        else:
-            return("mcmd %s %02x" % (en.riscvCmdList[val & 0xff], val >> 8))
-
     def abort(self):
         self.threadRun = False
-
-    

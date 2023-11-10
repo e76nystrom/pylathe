@@ -37,6 +37,31 @@ import remCmdDef as cm
 import configDef as cf
 import ctlBitDef as ct
 import enumDef as en
+
+for aName in en.moveBitList[:-1]:
+    if aName.startswith("M_RSV"):
+        continue
+    shift = 1 << eval("en." + aName)
+    assert (eval("ct." + aName[2:]) == shift)
+# assert(ct.SYN_START == (1 << en.M_SYN_START))
+# assert(ct.SYN_LEFT == (1 <<en.M_SYN_LEFT))
+# assert(ct.DRO_UPD == (1 << en.M_DRO_UPD))
+
+j = en.D_XBASE
+k = en.D_ZBASE
+for aName in en.DAxisMessageList:
+    aVal = eval("en." + aName)
+    # print(aName, aVal)
+    assert (j + aVal) == eval("en." + en.dMessageList[j + aVal])
+    assert (k + aVal) == eval("en." + en.dMessageList[k + aVal])
+
+j = en.RP_Z_BASE
+k = en.RP_X_BASE
+for aName in en.accelTypeList:
+    aVal = eval("en." + aName)
+    assert (j + aVal) == eval("en." + en.axisAccelTypeList[j + aVal])
+    assert (k + aVal) == eval("en." + en.axisAccelTypeList[k + aVal])
+
 import megaEnumDef as em
 import remParmDef as pm
 import megaParmDef as mp
@@ -965,6 +990,7 @@ class MoveCommands():
         self.jp = mainFrame.jogPanel
         self.cfg = mainFrame.cfg
         self.comm = mainFrame.comm
+        self.dPrt = mainFrame.dPrt
         if not R_PI:
             self.moveQue = Queue()
         else:
@@ -1199,14 +1225,19 @@ class MoveCommands():
     def queMove(self, op, val=0):
         if self.send:
             opString = en.mCommandsList[op]
-            print("moveQue put op %6x %-18s %s" % (op, opString, str(val)))
+            txt = ("moveQue put op %6x %-18s %s\n" % (op, opString, str(val)))
+            print(txt, end="")
+            self.dPrt(txt)
             self.moveQue.put((opString, op, val))
 
-    def queMoveF(self, op, flag, val):
+    def queMoveF(self, op, flag, val, loc):
         if self.send:
             opString = en.mCommandsList[op]
             op |= (flag << 16)
-            print("moveQue put op %6x %-18s %-1s" % (op, opString, str(val)))
+            txt = ("moveQue put op %6x %-18s %6s %7.4f\n" % \
+                   (op, opString, str(val), loc))
+            print(txt, end="")
+            self.dPrt(txt)
             self.moveQue.put((opString, op, val))
 
     def queClear(self):
@@ -1270,7 +1301,7 @@ class MoveCommands():
             val = round((zLocation + backlash) * self.jp.zStepsInch)
         else:
             val = round((zLocation + backlash) * self.jp.zDROInch)
-        self.queMoveF(en.Q_MOVE_Z, flag, val)
+        self.queMoveF(en.Q_MOVE_Z, flag, val, zLocation + backlash)
         self.drawLineZ(zLocation)
         if self.dbg:
             print("moveZ   %7.4f" % (zLocation))
@@ -1281,7 +1312,7 @@ class MoveCommands():
             val = round((xLocation + backlash) * self.jp.xStepsInch)
         else:
             val = round((xLocation + backlash) * self.jp.xDROInch)
-        self.queMoveF(en.Q_MOVE_X, flag, val)
+        self.queMoveF(en.Q_MOVE_X, flag, val, xLocation + backlash)
         self.drawLineX(xLocation)
         if self.dbg:
             print("moveX   %7.4f" % (xLocation))
@@ -1335,13 +1366,13 @@ class MoveCommands():
 
     def taperZX(self, zLocation, xLocation):
         self.queMove(en.Q_SAVE_X, xLocation)
-        self.queMoveF(en.Q_TAPER_Z_X, 1, zLocation)
+        self.queMove(en.Q_TAPER_Z_X, zLocation)
         if self.dbg:
             print("taperZX %7.4f" % (zLocation))
 
     def taperXZ(self, xLocation, zLocation):
         self.queMove(en.Q_SAVE_Z, zLocation)
-        self.queMoveF(en.Q_TAPER_X_Z, 1, xLocation)
+        self.queMove(en.Q_TAPER_X_Z, xLocation)
         if self.dbg:
             print("taperXZ %7.4f" % (xLocation))
 
@@ -1364,8 +1395,12 @@ class MoveCommands():
     def queParm(self, parm, val):
         op = en.Q_QUE_PARM
         opString = en.mCommandsList[op]
+        parmString = pm.parmTable[parm][0]
         op |= parm << 16
-        print("moveQue put op %6x %-18s %s" % (op, opString, str(val)))
+        txt = ("moveQue put op %6x %-18s %-18s %s\n" % \
+               (op, opString, parmString,str(val)))
+        print(txt, end="")
+        self.dPrt(txt)
         self.moveQue.put((opString, op, val))
 
     def moveArc(self):
@@ -1891,6 +1926,7 @@ class UpdatePass():
         m.drawClose()
         if STEP_DRV or MOTOR_TEST or SPINDLE_SWITCH:
             m.stopSpindle()
+        self.upmf.dbg.flush()
         m.done(ct.PARM_DONE)
         stdout.flush()
 
@@ -2221,21 +2257,6 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.hdrFont = hdrFont
         self.InitUI()
         self.prefix = 'tu'
-        # self.formatList = ((cf.tuAddFeed, 'f'), \
-        #                    (cf.tuInternal, None), \
-        #                    (cf.tuPasses, 'd'), \
-        #                    (cf.tuPause, None), \
-        #                    (cf.tuRPM, 'd'), \
-        #                    (cf.tuSPInt, 'd'), \
-        #                    (cf.tuSpring, 'd'), \
-        #                    (cf.tuXDiam0, 'f'), \
-        #                    (cf.tuXDiam1, 'f'), \
-        #                    (cf.tuXFeed, 'f'), \
-        #                    (cf.tuXRetract, 'f'), \
-        #                    (cf.tuZEnd, 'f'), \
-        #                    (cf.tuZFeed, 'f'), \
-        #                    (cf.tuZRetract, 'f'), \
-        #                    (cf.tuZStart, 'f'))
 
     def InitUI(self):
         fields0 = self.fields0
@@ -3359,20 +3380,6 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.hdrFont = hdrFont
         self.InitUI()
         self.prefix = 'fa'
-        # self.formatList = ((cf.faAddFeed, 'f'), \
-        #                    (cf.faPasses, 'd'), \
-        #                    (cf.faPause, None), \
-        #                    (cf.faRPM, 'd'), \
-        #                    (cf.faSPInt, 'd'), \
-        #                    (cf.faSpring, 'd'), \
-        #                    (cf.faXEnd, 'f'), \
-        #                    (cf.faXFeed, 'f'), \
-        #                    (cf.faXRetract, 'f'), \
-        #                    (cf.faXStart, 'f'), \
-        #                    (cf.faZEnd, 'f'), \
-        #                    (cf.faZFeed, 'f'), \
-        #                    (cf.faZRetract, 'f'), \
-        #                    (cf.faZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -3552,17 +3559,6 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.hdrFont = hdrFont
         self.InitUI()
         self.prefix = 'cf'
-        # self.formatList = ((cf.cuPause, None), \
-        #                    (cf.cuRPM, 'd'), \
-        #                    (cf.cuToolWidth, 'f'), \
-        #                    (cf.cuXEnd, 'f'), \
-        #                    (cf.cuXFeed, 'f'), \
-        #                    (cf.cuXRetract, 'f'), \
-        #                    (cf.cuXStart, 'f'), \
-        #                    (cf.cuZCutoff, 'f'), \
-        #                    (cf.cuZStart, 'f'), \
-        #                    (cf.cuZRetract, 'f'), \
-        # )
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4005,6 +4001,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
         self.hdrFont = hdrFont
+        # 		   name   large   small   len   taper/ft
         self.taperDef = [("Custom",), \
                          ("MT1",  0.4750, 0.3690, 2.13, 0.5986/12), \
                          ("MT2",  0.7000, 0.5720, 2.56, 0.5994/12), \
@@ -4033,29 +4030,6 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
             self.taperList.append(t[0])
         self.InitUI()
         self.prefix = 'tp'
-        # self.formatList = ((cf.tpAddFeed, 'f'), \
-        #                    (cf.tpAngle, 'fs'), \
-        #                    (cf.tpAngleBtn, None), \
-        #                    (cf.tpDeltaBtn, None), \
-        #                    (cf.tpInternal, None), \
-        #                    (cf.tpLargeDiam, 'f'), \
-        #                    (cf.tpPasses, 'd'), \
-        #                    (cf.tpPause, None), \
-        #                    (cf.tpRPM, 'd'), \
-        #                    (cf.tpSPInt, 'd'), \
-        #                    (cf.tpSmallDiam, 'f'), \
-        #                    (cf.tpSpring, 'd'), \
-        #                    (cf.tpTaperSel, None), \
-        #                    (cf.tpXDelta, 'f5'), \
-        #                    (cf.tpXFeed, 'f'), \
-        #                    (cf.tpXFinish, 'f'), \
-        #                    (cf.tpXInFeed, 'f'), \
-        #                    (cf.tpXRetract, 'f'), \
-        #                    (cf.tpZDelta, 'f'), \
-        #                    (cf.tpZFeed, 'f'), \
-        #                    (cf.tpZLength, 'f'), \
-        #                    (cf.tpZRetract, 'f'), \
-        #                    (cf.tpZStart, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -4717,7 +4691,7 @@ class ScrewThread(LatheOp, UpdatePass):
                         (self.startZ, self.curX))
 
         m.moveZ(self.endZ, ct.CMD_SYN | \
-                (ct.Z_SYN_START if self.rightHand else ct.Z_SYN_LEFT))
+                (ct.SYN_START if self.rightHand else ct.SYN_LEFT))
 
         m.moveX(self.safeX)
         m.moveZ(self.safeZ if self.rightHand or self.lastPass else \
@@ -4779,31 +4753,6 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.lastFeed = None
         self.InitUI()
         self.prefix = 'th'
-        # self.formatList = ((cf.thAddFeed, 'f'), \
-        #                    (cf.thAlternate, None), \
-        #                    (cf.thAngle, 'fs'), \
-        #                    (cf.thFirstFeed, 'f'), \
-        #                    (cf.thFirstFeedBtn, None), \
-        #                    (cf.thInternal, None), \
-        #                    (cf.thLastFeed, 'f'), \
-        #                    (cf.thLastFeedBtn, None), \
-        #                    (cf.thLeftHand, None), \
-        #                    (cf.thMM, None), \
-        #                    (cf.thPasses, 'd'), \
-        #                    (cf.thPause, None), \
-        #                    (cf.thRPM, 'd'), \
-        #                    (cf.thSPInt, 'n'), \
-        #                    (cf.thSpring, 'n'), \
-        #                    (cf.thTPI, None), \
-        #                    (cf.thThread, 'fs'), \
-        #                    (cf.thXDepth, 'f'), \
-        #                    (cf.thXRetract, 'f'), \
-        #                    (cf.thRunout, 'fs'), \
-        #                    (cf.thXStart, 'f'), \
-        #                    (cf.thXTaper, 'f'), \
-        #                    (cf.thZ0, 'f'), \
-        #                    (cf.thZ1, 'f'), \
-        #                    (cf.thZRetract, 'f'))
 
     def InitUI(self):
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
@@ -8380,19 +8329,19 @@ class MainFrame(wx.Frame):
         # self.dialPanel = self.dialFrame.dialPanel
 
         if not R_PI and not RISCV:
-            self.updateThread = \
-                updateThread = UpdateThread(self, self.jogPanel)
+            self.updateThread = UpdateThread(self, self.jogPanel)
             if self.dbgSave:
                 print("***start saving debug***")
-                updateThread.openDebug()
+                self.updateThread.openDebug()
 
         if WINDOWS:
             self.jogShuttle = JogShuttle(self)
         else:
             self.jogShuttle = None
 
-        comm.openSerial(cfg.getInfoData(cf.commPort), \
-                        cfg.getInfoData(cf.commRate))
+        if not R_PI and not RISCV:
+            comm.openSerial(cfg.getInfoData(cf.commPort), \
+                            cfg.getInfoData(cf.commRate))
 
         if not R_PI and SPINDLE_SYNC_BOARD and not SYNC_SPI:
             self.syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
@@ -8427,7 +8376,7 @@ class MainFrame(wx.Frame):
         self.initDevice()
 
         if not R_PI:
-            updateThread.start()
+            self.updateThread.start()
         else:
             comm.setPostUpdate(self.jogPanel.postUpdate)
             # comm.setDbgDispatch(updateThread.dbgDispatch)
