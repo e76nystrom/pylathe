@@ -828,10 +828,10 @@ parmList = \
         ("ARC_X_END", "arc x center", "int"),
         ("ARC_Z_END", "arc z center", "int"),
 
-        ('MEGA_VFD', 'mega vfd speed mode', "char"),
-        ('MEGA_SIM', 'mega encoder lines', "char"),
+        ("MEGA_VFD", "mega vfd speed mode", "char"),
+        ("MEGA_SIM", "mega encoder lines", "char"),
 
-        ('USB_ENA', 'enable usb', "char"),
+        ("USB_ENA", "enable usb", "char"),
 
         # ("", "", ""),
         # ("", "", ""),
@@ -863,12 +863,17 @@ megaParmList = \
 riscvParmList = \
     (
         ("R_MV_STATUS",  "", "uint32_t"),
+        ("R_JOG_PAUSE",  "", "int"),
         ("R_CUR_PASS",   "", "int"),
-        ("R_PARM_RPM",   "", "int"),
-        ("R_PARM_X_LOC", "", "int"),
-        ("R_PARM_Z_LOC", "", "int"),
-        ("R_PARM_X_DRO", "", "int"),
-        ("R_PARM_Z_DRO", "", "int"),
+        ("R_P_RPM",      "", "int"),
+        ("R_P_X_LOC",    "", "int"),
+        ("R_P_Z_LOC",    "", "int"),
+        ("R_P_X_DRO",    "", "int"),
+        ("R_P_Z_DRO",    "", "int"),
+        ("R_X_JOG_INC", "", "int"),
+        ("R_Z_JOG_INC", "", "int"),
+        # (R_PARM_, "", ""),
+        # (R_PARM_, "", ""),
         # (R_PARM_, "", ""),
     )
 
@@ -943,27 +948,27 @@ regList = \
 
         "movement status",
 
-        ("MV_PAUSE", "(1 << 0)", "movement paused"),
-        ("MV_READ_X", "(1 << 1)", "pause x may change"),
-        ("MV_READ_Z", "(1 << 2)", "pause z may change"),
-        ("MV_ACTIVE", "(1 << 3)", "movement active"),
-        ("MV_DONE", "(1 << 4)", "movement active"),
-        ("MV_XLIMIT", "(1 << 5)", "at limit switch"),
-        ("MV_ZLIMIT", "(1 << 6)", "at limit switch"),
-        ("MV_XHOME_ACTIVE", "(1 << 7)", "x home active"),
-        ("MV_XHOME", "(1 << 8)", "x home success"),
-        ("MV_ZHOME_ACTIVE", "(1 << 9)", "z home active"),
-        ("MV_ZHOME", "(1 << 10)", "z home success"),
-        ("MV_MEASURE", "(1 << 11)", "pause for measurement"),
-        ("MV_ESTOP", "(1 << 12)", "estop"),
+        ("MV_PAUSE",        "(1 << 0)",  "movement paused"),
+        ("MV_READ_X",       "(1 << 1)",  "pause x may change"),
+        ("MV_READ_Z",       "(1 << 2)",  "pause z may change"),
+        ("MV_ACTIVE",       "(1 << 3)",  "movement active"),
+        ("MV_DONE",         "(1 << 4)",  "movement active"),
+        ("MV_XLIMIT",       "(1 << 5)",  "at limit switch"),
+        ("MV_ZLIMIT",       "(1 << 6)",  "at limit switch"),
+        ("MV_XHOME_ACTIVE", "(1 << 7)",  "x home active"),
+        ("MV_XHOME",        "(1 << 8)",  "x home success"),
+        ("MV_ZHOME_ACTIVE", "(1 << 9)",  "z home active"),
+        ("MV_ZHOME",        "(1 << 10)", "z home success"),
+        ("MV_MEASURE",      "(1 << 11)", "pause for measurement"),
+        ("MV_ESTOP",        "(1 << 12)", "estop"),
 
         "pause flags",
 
-        ("PAUSE_ENA_Z_JOG", "(1 << 0)", "enable z job during pause"),
-        ("PAUSE_ENA_X_JOG", "(1 << 1)", "enable x jog during pause"),
-        ("DISABLE_JOG", "(1 << 2)", "jogging disabled"),
-        ("PAUSE_READ_X", "(1 << 3)", "read x after pause"),
-        ("PAUSE_READ_Z", "(1 << 4)", "read z after pause"),
+        ("DISABLE_JOG",     "(1 << 0)", "jogging disabled"),
+        ("PAUSE_ENA_Z_JOG", "(1 << 1)", "enable z job during pause"),
+        ("PAUSE_ENA_X_JOG", "(1 << 2)", "enable x jog during pause"),
+        ("PAUSE_READ_Z",    "(1 << 3)", "read z after pause"),
+        ("PAUSE_READ_X",    "(1 << 4)", "read x after pause"),
 
         "thread flags",
 
@@ -1487,6 +1492,7 @@ fpgaLatheBitList = \
         ("axDoneDro",   1, 1, "axis done dro"),
         ("axDoneHome",  1, 2, "axis done home"),
         ("axDoneLimit", 1, 3, "axis done limit"),
+        ("axDistZero",  1, 4, "axis distance zero"),
 
         "configuration control register",
 
@@ -1525,6 +1531,7 @@ fpgaLatheBitList = \
 
         ("zFreqShift", 0, 0, "z Frequency shift"),
         ("xFreqShift", 3, 0, "x Frequency shift"),
+        ("clkMask",    7, 0, "clock mask"),
 
         # "clock selection values",
 
@@ -1845,6 +1852,16 @@ enumList = \
         ("SEL_ARC_LARGE_STEM", "Large Stem"),
         "};",
 
+        "mpg control states",
+        
+        "enum mpg_State c",
+        "{",
+        ("MPG_DISABLED",        "'DS' disabled"),
+        ("MPG_CHECK_QUE",       "'CQ' check queue"),
+        ("MPG_DIR_CHANGE_WAIT", "'DC' wait for direction change"),
+        ("MPG_WAIT_BACKLASH",   "'WB' wait for backlash"),
+        "};",
+
         "riscv actions",
         
         "enum riscv_Cmd c",
@@ -2022,10 +2039,42 @@ enumList = \
         ("M_FIND_HOME   = 7",  "find home"),
         ("M_CLEAR_HOME  = 8",  "move off of home"),
         ("M_FIND_PROBE  = 9",  "find probe"),
-        ("M_CLEAR_PROBE = 10",  "move off of probe"),
+        ("M_CLEAR_PROBE = 10", "move off of probe"),
         ("M_DRO_POS     = 11", "use dro for moving"),
         ("M_DRO_UPD     = 12", "update internal position from dro"),
         ("M_BIT_MAX     = 13", "number of bits"),
+        "};",
+
+        "movement status",
+
+        "enum mv_Status_Bits c",
+        "{",
+        ("R_MV_PAUSE        = 0",  "'PA' movement paused"),
+        ("R_MV_READ_X       = 1",  "'RX' pause x may change"),
+        ("R_MV_READ_Z       = 2",  "'RZ' pause z may change"),
+        ("R_MV_ACTIVE       = 3",  "'AC' movement active"),
+        ("R_MV_DONE         = 4",  "'DN' movement active"),
+        ("R_MV_XLIMIT       = 5",  "'XL' at limit switch"),
+        ("R_MV_ZLIMIT       = 6",  "'ZL' at limit switch"),
+        ("R_MV_XHOME_ACTIVE = 7",  "'XA' x home active"),
+        ("R_MV_XHOME        = 8",  "'XH' x home success"),
+        ("R_MV_ZHOME_ACTIVE = 9",  "'ZA' z home active"),
+        ("R_MV_ZHOME        = 10", "'ZH' z home success"),
+        ("R_MV_MEASURE      = 11", "'MS' pause for measurement"),
+        ("R_MV_ESTOP        = 12", "'ES' estop"),
+        ("R_MV_MAX          = 13", "number of bits"),
+        "};",
+        
+        "pause flags",
+
+        "enum pause_Bits c",
+        "{",
+        ("R_DISABLE_JOG     = 0", "'DJ' jogging disabled"),
+        ("R_PAUSE_ENA_Z_JOG = 1", "'EZ' enable z job during pause"),
+        ("R_PAUSE_ENA_X_JOG = 2", "'EX' enable x jog during pause"),
+        ("R_PAUSE_READ_Z    = 3", "'RX' read z after pause"),
+        ("R_PAUSE_READ_X    = 4", "'RZ' read x after pause"),
+        ("R_PAUSE_MAX       = 5", "number of bits"),
         "};",
     )
 

@@ -589,6 +589,27 @@ selArcTypeText = ( \
     "Large Stem",
     )
 
+# mpg control states
+
+MPG_DISABLED     =  0           # 'DS' disabled
+MPG_CHECK_QUE    =  1           # 'CQ' check queue
+MPG_DIR_CHANGE_WAIT =  2        # 'DC' wait for direction change
+MPG_WAIT_BACKLASH =  3          # 'WB' wait for backlash
+
+mpgStateList = ( \
+    "MPG_DISABLED",
+    "MPG_CHECK_QUE",
+    "MPG_DIR_CHANGE_WAIT",
+    "MPG_WAIT_BACKLASH",
+    )
+
+mpgStateText = ( \
+    "'DS' disabled",
+    "'CQ' check queue",
+    "'DC' wait for direction change",
+    "'WB' wait for backlash",
+    )
+
 # riscv actions
 
 R_NONE           =  0           # 'NO' no operation
@@ -970,5 +991,83 @@ moveBitText = ( \
     "move off of probe",
     "use dro for moving",
     "update internal position from dro",
+    "number of bits",
+    )
+
+# movement status
+
+R_MV_PAUSE       =  0           # 'PA' movement paused
+R_MV_READ_X      =  1           # 'RX' pause x may change
+R_MV_READ_Z      =  2           # 'RZ' pause z may change
+R_MV_ACTIVE      =  3           # 'AC' movement active
+R_MV_DONE        =  4           # 'DN' movement active
+R_MV_XLIMIT      =  5           # 'XL' at limit switch
+R_MV_ZLIMIT      =  6           # 'ZL' at limit switch
+R_MV_XHOME_ACTIVE =  7          # 'XA' x home active
+R_MV_XHOME       =  8           # 'XH' x home success
+R_MV_ZHOME_ACTIVE =  9          # 'ZA' z home active
+R_MV_ZHOME       = 10           # 'ZH' z home success
+R_MV_MEASURE     = 11           # 'MS' pause for measurement
+R_MV_ESTOP       = 12           # 'ES' estop
+R_MV_MAX         = 13           # number of bits
+
+mvStatusBitsList = ( \
+    "R_MV_PAUSE",
+    "R_MV_READ_X",
+    "R_MV_READ_Z",
+    "R_MV_ACTIVE",
+    "R_MV_DONE",
+    "R_MV_XLIMIT",
+    "R_MV_ZLIMIT",
+    "R_MV_XHOME_ACTIVE",
+    "R_MV_XHOME",
+    "R_MV_ZHOME_ACTIVE",
+    "R_MV_ZHOME",
+    "R_MV_MEASURE",
+    "R_MV_ESTOP",
+    "R_MV_MAX",
+    )
+
+mvStatusBitsText = ( \
+    "'PA' movement paused",
+    "'RX' pause x may change",
+    "'RZ' pause z may change",
+    "'AC' movement active",
+    "'DN' movement active",
+    "'XL' at limit switch",
+    "'ZL' at limit switch",
+    "'XA' x home active",
+    "'XH' x home success",
+    "'ZA' z home active",
+    "'ZH' z home success",
+    "'MS' pause for measurement",
+    "'ES' estop",
+    "number of bits",
+    )
+
+# pause flags
+
+R_DISABLE_JOG    =  0           # 'DJ' jogging disabled
+R_PAUSE_ENA_Z_JOG =  1          # 'EZ' enable z job during pause
+R_PAUSE_ENA_X_JOG =  2          # 'EX' enable x jog during pause
+R_PAUSE_READ_Z   =  3           # 'RX' read z after pause
+R_PAUSE_READ_X   =  4           # 'RZ' read x after pause
+R_PAUSE_MAX      =  5           # number of bits
+
+pauseBitsList = ( \
+    "R_DISABLE_JOG",
+    "R_PAUSE_ENA_Z_JOG",
+    "R_PAUSE_ENA_X_JOG",
+    "R_PAUSE_READ_Z",
+    "R_PAUSE_READ_X",
+    "R_PAUSE_MAX",
+    )
+
+pauseBitsText = ( \
+    "'DJ' jogging disabled",
+    "'EZ' enable z job during pause",
+    "'EX' enable x jog during pause",
+    "'RX' read z after pause",
+    "'RZ' read x after pause",
     "number of bits",
     )

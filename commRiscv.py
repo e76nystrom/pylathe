@@ -13,6 +13,7 @@ import re
 
 from accelPi import AccelData, taperCalc, intRound, syncAccelCalc
 from remParmDef import parmTable
+import riscvParmDef as rp
 from remCmdDef import cmdTable
 # from remParm import RemParm
 import enumDef as en
@@ -239,7 +240,8 @@ class CommRiscv():
         prefix = '\x01%02x' % (self.cmdLen + 1)
         cmd = prefix + self.cmdStr + '\r'
         stdout.flush()
-        trace(cmd.strip('\x01\r'))
+        if len(self.cmdStr) > 2:
+            trace(cmd.strip('\x01\r'))
         self.cmdLen = 0
         self.cmdStr = ""
 
@@ -252,6 +254,7 @@ class CommRiscv():
             if not self.timeout:
                 self.timeout = True
                 print("timeout")
+                print(cmd.strip('\x01\r'))
                 stdout.flush()
             raise CommTimeout()
 
@@ -683,6 +686,8 @@ class RiscvLathe(Thread):
         self.zJogIncDist = int(parm.jogTimeInc * stepsSec)
         self.zJogMaxDist = int(parm.jogTimeMax * stepsSec)
 
+        self.comm.riscvCmd(en.R_SET_DATA, (rp.R_Z_JOG_INC, parm.zMpgInc))
+
     def cZSetLoc(self):                 # 32
         self.comm.riscvCmd(en.R_SET_LOC_Z, self.parm.zLoc)
 
@@ -718,6 +723,9 @@ class RiscvLathe(Thread):
         self.xJogInitialDist = dist = int(parm.jogTimeInitial * stepsSec)
         self.xJogIncDist = int(parm.jogTimeInc * stepsSec)
         self.xJogMaxDist = int(parm.jogTimeMax * stepsSec)
+
+        self.comm.riscvCmd(en.R_SET_DATA, (rp.R_X_JOG_INC, parm.xMpgInc))
+        self.comm.riscvCmd(en.R_SET_DATA, (rp.R_JOG_PAUSE, 0))
 
     def cXSetLoc(self):                 # 35
         self.comm.riscvCmd(en.R_SET_LOC_X, self.parm.xLoc)
@@ -805,6 +813,7 @@ class RiscvLathe(Thread):
     def update(self):
         rsp = ""
         try:
+            self.comm.riscvSend() # flush current commands
             self.comm.riscvCmd(en.R_READ_ALL)
             rsp = self.comm.riscvSend()
             if (self.postUpdate is not None) and len(rsp) >= 7:
@@ -821,6 +830,9 @@ class RiscvLathe(Thread):
                     droX     = c_int32(int(droX, 16)).value
                     mvStatus = int(mvStatus, 16)
                     self.dbgCount = int(dbgCount, 16)
+                    if self.dbgCount > 0:
+                        print("dbgCount", self.dbgCount)
+                        print(rsp)
                     result = (en.EV_READ_ALL, z, x, rpm, curPass,
                               droZ, droX, mvStatus)
                     self.postUpdate(result)
@@ -1128,7 +1140,7 @@ class RiscvLathe(Thread):
 
     # move states
 
-    def mvWaitZ(self):                  # 1
+    def mvWaitZ(self):          # 1
         pass
         # if self.zAxis.state == en.AXIS_IDLE:
         #     self.mvState = en.M_IDLE

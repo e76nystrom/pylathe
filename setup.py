@@ -131,7 +131,11 @@ class Setup():
         cmdTable = []
         cFile = None
         if fData:
-            cFile = open(cLoc + prefix + 'CmdList.h', 'wb')
+            name = prefix + "CmdList"
+            cFile = open(cLoc +  name + ".h", 'wb')
+            gName = cVarName(name)
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n\n" % (gName, gName))
             fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n")
             # jFile = open(jLoc + 'Cmd.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n");
@@ -189,12 +193,9 @@ class Setup():
             # self.listImports(file, imports)
             f.close()
         if fData:
-            fWrite(cFile, "};\n")
+            fWrite(cFile, "};\n"\
+                   "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-            # fWrite(jFile, "};\n")
-            # jFile.close()
-            # for key in cmds:
-            #    print(key, cmds[key])
         self.cmdImports = imports
         self.importList += imports
         self.cmdTable = cmdTable
@@ -214,6 +215,10 @@ class Setup():
         if fData:
             cName = os.path.join(cLoc, prefix + 'Parm.h')
             cFile = open(cName, 'wb')
+            gName = cVarName(prefix + "Parm")
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n" % (gName, gName))
+
             fWrite(cFile, "/* defines */\n\n"\
                    "#define FLT (0x80)\n"\
                    "#define SIZE_MASK (0x7)\n\n"\
@@ -349,7 +354,8 @@ class Setup():
                 fWrite(f, "        self.%s = None\n" % (varName))
             f.close()
         if fData:
-            fWrite(cFile, "};\n")
+            fWrite(cFile, "};\n" \
+                   "\n#endif  /* %s */\n" % (gName))
             cFile.close()
             fWrite(c2File, "};\n\n")
 
@@ -364,7 +370,7 @@ class Setup():
             if c2File is not None:
                 fWrite(c2File,
                        "void set" + preCap + \
-                       "Var(int parm, T_DATA_UNION val)\n{\n"\
+                       "Var(const int parm, const T_DATA_UNION val)\n{\n"\
                        " switch(parm)\n {\n"\
                        " default:\n"\
                        "  break;\n\n")
@@ -382,7 +388,7 @@ class Setup():
                 fWrite(c2File, " }\n}\n\n")
                 fWrite(c2File,
                        "void get" + preCap + \
-                       "Var(int parm, P_DATA_UNION val)\n{\n"\
+                       "Var(const int parm, const P_DATA_UNION val)\n{\n"\
                        " switch(parm)\n {\n"\
                            " default:\n"\
                            "  break;\n\n")
@@ -420,7 +426,9 @@ class Setup():
             if len(prefix) != 0:
                 fName = prefix + fName.capitalize()
             cFile = open(cLoc + fName, 'wb')
-            
+            gName = "CTL_STATES_INC"
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n" % (gName, gName))
         f = None
         if self.outputFile and pyFile:
             fName = 'enum'
@@ -517,9 +525,12 @@ class Setup():
                                 print(sName)
                                 path = os.path.join(cLoc, sName + 'Str.h')
                                 sFile = open(path, 'wb')
-                                fWrite(sFile, "struct S_%s\n" \
+                                uVar = var.upper()
+                                fWrite(sFile, "#if !defined(INC_%s)\n" \
+                                       "#define INC_%s\n\n" \
+                                       "struct S_%s\n" \
                                        "{\n char c0;\n char c1;\n" % \
-                                       (var.upper()))
+                                       (uVar, uVar, uVar))
 
                                 if cLen == 4:
                                     fWrite(sFile, " char c2;\n char c3;\n")
@@ -544,7 +555,8 @@ class Setup():
                                     txt = " %s/* %2x %2d %s */\n" % \
                                         (sReg.ljust(24), j, j, rComment)
                                     fWrite(sFile, txt)
-                                fWrite(sFile, "};\n")
+                                fWrite(sFile, "};\n\n" \
+                                       "#endif  /* %s */\n" % (uVar))
                                 sFile.close()
                 else:
                     if fData:
@@ -554,6 +566,7 @@ class Setup():
         if f is not None:
             f.close()
         if fData:
+            fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()
         self.enumImports = imports
         self.importList += imports
@@ -564,6 +577,9 @@ class Setup():
         bitVal = None
         if fData:
             cFile = open(cLoc + 'ctlbits.h', 'wb')
+            gName = "CTL_BITS_INC"
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n" % (gName, gName))
             # jFile = open(jLoc + 'CtlBits.java', 'wb')
             # fWrite(jFile, "package lathe;\n\n")
             # fWrite(jFile, "public class CtlBits\n{\n")
@@ -605,10 +621,8 @@ class Setup():
         if f is not None:
             f.close()
         if fData:
-            # self.listImports(file, imports)
+            fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-            # fWrite(jFile, "};\n")
-            # jFile.close()
         self.enumImports = imports
         self.importList += imports
 
@@ -625,6 +639,9 @@ class Setup():
         if fData:
             path = os.path.join(cLoc, cName + '.h')
             cFile = open(path, 'wb')
+            gName = cVarName(cName)
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n\n" % (gName, gName))
             fWrite(cFile, "enum " + cName.upper() + "\n{\n")
             path = os.path.join(cLoc, cName.replace("Reg", "Str") + '.h')
             c1File = open(path, 'wb')
@@ -827,7 +844,8 @@ class Setup():
             c1File.close()
 
         if fData:
-            fWrite(cFile, "};\n")
+            fWrite(cFile, "};\n" \
+                   "\n#endif  /* %s */\n" % (gName))
             cFile.close()
             if xFile:
                 fWrite(xFile, "\nend RegDef;\n\n")
@@ -893,6 +911,9 @@ class Setup():
         if fData:
             path = os.path.join(cLoc, cName + '.h')
             cFile = open(path, 'wb')
+            gName = cVarName(cName)
+            fWrite(cFile, "#if !defined(%s)\n"\
+                   "#define %s\n" % (gName, gName))
             try:
                 path = os.path.join(xLoc, xName + 'Bits.vhd')
                 xFile = open(path , 'wb')
@@ -973,9 +994,10 @@ class Setup():
                     cVar = cVarName(var)
                     xVar = var.replace("_", "")
 
-                    shiftType = type(shift)
+                    # shiftType = type(shift)
                     if fData:
-                        if shiftType != tuple:
+                        # if shiftType != tuple:
+                        if not isinstance(shift, tuple):
                             tmp =  "#define %-18s (%s << %s)" % (cVar, bit, shift)
                             fWrite(cFile, "%s/* 0x%03x %s */\n" % 
                                    (tmp.ljust(40), bit << shift, comment))
@@ -1050,7 +1072,8 @@ class Setup():
                     if cVar in globals():
                         print("createFpgaBits %s already defined" % cVar)
                     else:
-                        if shiftType != tuple:
+                        # if shiftType != tuple:
+                        if not isinstance(shift, tuple):
                             if bit is not None:
                                 globals()[cVar] = bit << shift
                                 imports.append(var)
@@ -1120,6 +1143,7 @@ class Setup():
             f.close()
             
         if fData:
+            fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()
             if xFile:
                 fWrite(xFile, "\nend %s;\n\n" % (package))
@@ -1151,7 +1175,8 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     for k in range(num-1, -1, -1):
         (name, shift, comment) = rData[k]
         name = name.ljust(maxLen)
-        if type(shift) != tuple:
+        # if type(shift) != tuple:
+        if not isinstance(shift, tuple):
             tmp = (" %s : std_logic;" % (name))
             tmp = tmp.ljust(32) + \
                 (fmt % (shift, 1 << shift, comment))
@@ -1222,7 +1247,8 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     for i in range(num-1, -1, -1):
         (name, shift, comment) = rData[i]
         name = name.ljust(maxLen)
-        if type(shift) != tuple:
+        # if type(shift) != tuple:
+        if not isinstance(shift, tuple):
             body += " rtnRec.%s := val(%s);\n" % (name, shift)
         else:
             (shift, start) = shift
@@ -1243,7 +1269,8 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     for i in range(num-1, -1, -1):
         (name, shift, comment) = rData[i]
         name = name.ljust(maxLen)
-        if type(shift) != tuple:
+        # if type(shift) != tuple:
+        if not isinstance(shift, tuple):
             body += " rtnRec.%s := val(%s);\n" % (name, shift)
         else:
             (shift, start) = shift

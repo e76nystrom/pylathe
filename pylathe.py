@@ -43,9 +43,14 @@ for aName in en.moveBitList[:-1]:
         continue
     shift = 1 << eval("en." + aName)
     assert (eval("ct." + aName[2:]) == shift)
-# assert(ct.SYN_START == (1 << en.M_SYN_START))
-# assert(ct.SYN_LEFT == (1 <<en.M_SYN_LEFT))
-# assert(ct.DRO_UPD == (1 << en.M_DRO_UPD))
+
+for aName in en.mvStatusBitsList[:-1]:
+    shift = 1 << eval("en." + aName)
+    assert (eval("ct." + aName[2:]) == shift)
+
+for aName in en.pauseBitsList[:-1]:
+    shift = 1 << eval("en." + aName)
+    assert (eval("ct." + aName[2:]) == shift)
 
 j = en.D_XBASE
 k = en.D_ZBASE

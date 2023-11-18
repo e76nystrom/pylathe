@@ -69,6 +69,7 @@ axDoneDist   = 0x01             # axis done distance
 axDoneDro    = 0x02             # axis done dro
 axDoneHome   = 0x04             # axis done home
 axDoneLimit  = 0x08             # axis done limit
+axDistZero   = 0x10             # axis distance zero
 
 # configuration control register
 
@@ -98,30 +99,31 @@ cfgDroStep   = 0x100000         # step pulse to dro
 
 zFreqShift   = 0x00             # z Frequency shift
 xFreqShift   = 0x03             # x Frequency shift
+clkMask      = 0x07             # clock mask
 clkNone      = 0x00             # 
-clkFreq      = 0x01             # 
-clkCh        = 0x02             # 
-clkIntClk    = 0x03             # 
-clkSlvFreq   = 0x04             # 
-clkSlvCh     = 0x05             # 
-clkSpindle   = 0x06             # 
-clkDbgFreq   = 0x07             # 
+clkFreq      = 0x04             # 
+clkCh        = 0x08             # 
+clkIntClk    = 0x0c             # 
+clkSlvFreq   = 0x10             # 
+clkSlvCh     = 0x14             # 
+clkSpindle   = 0x18             # 
+clkDbgFreq   = 0x1c             # 
 zClkNone     = 0x00             # 
-zClkZFreq    = 0x01             # 
-zClkCh       = 0x02             # 
-zClkIntClk   = 0x03             # 
-zClkXFreq    = 0x04             # 
-zClkXCh      = 0x05             # 
-zClkSpindle  = 0x06             # 
-zClkDbgFreq  = 0x07             # 
+zClkZFreq    = 0x04             # 
+zClkCh       = 0x08             # 
+zClkIntClk   = 0x0c             # 
+zClkXFreq    = 0x10             # 
+zClkXCh      = 0x14             # 
+zClkSpindle  = 0x18             # 
+zClkDbgFreq  = 0x1c             # 
 xClkNone     = 0x00             # 
-xClkXFreq    = 0x08             # 
-xClkCh       = 0x10             # 
-xClkIntClk   = 0x18             # 
-xClkZFreq    = 0x20             # 
-xClkZCh      = 0x28             # 
-xClkSpindle  = 0x30             # 
-xClkDbgFreq  = 0x38             # 
+xClkXFreq    = 0x20             # 
+xClkCh       = 0x40             # 
+xClkIntClk   = 0x60             # 
+xClkZFreq    = 0x80             # 
+xClkZCh      = 0xa0             # 
+xClkSpindle  = 0xc0             # 
+xClkDbgFreq  = 0xe0             # 
 clkDbgFreqEna = 0x40            # enable debug frequency
 
 # sync control register
@@ -187,6 +189,7 @@ importList = ( \
  axDoneDro, \
  axDoneHome, \
  axDoneLimit, \
+ axDistZero, \
  cfgZDirInv, \
  cfgXDirInv, \
  cfgZDroInv, \
@@ -210,6 +213,7 @@ importList = ( \
  cfgDroStep, \
  zFreqShift, \
  xFreqShift, \
+ clkMask, \
  clkNone, \
  clkFreq, \
  clkCh, \

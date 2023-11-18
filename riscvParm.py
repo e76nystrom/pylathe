@@ -1,9 +1,12 @@
 class RiscvParm():
     def __init__(self):
         self.rMvStatus = None
+        self.rJogPause = None
         self.rCurPass = None
-        self.rParmRpm = None
-        self.rParmXLoc = None
-        self.rParmZLoc = None
-        self.rParmXDro = None
-        self.rParmZDro = None
+        self.rPRpm = None
+        self.rPXLoc = None
+        self.rPZLoc = None
+        self.rPXDro = None
+        self.rPZDro = None
+        self.rXJogInc = None
+        self.rZJogInc = None

@@ -83,11 +83,11 @@ MV_ESTOP         = (1 << 12)    # 0x1000 estop
 
 # pause flags
 
-PAUSE_ENA_Z_JOG  = (1 << 0)     # 0x01 enable z job during pause
-PAUSE_ENA_X_JOG  = (1 << 1)     # 0x02 enable x jog during pause
-DISABLE_JOG      = (1 << 2)     # 0x04 jogging disabled
-PAUSE_READ_X     = (1 << 3)     # 0x08 read x after pause
-PAUSE_READ_Z     = (1 << 4)     # 0x10 read z after pause
+DISABLE_JOG      = (1 << 0)     # 0x01 jogging disabled
+PAUSE_ENA_Z_JOG  = (1 << 1)     # 0x02 enable z job during pause
+PAUSE_ENA_X_JOG  = (1 << 2)     # 0x04 enable x jog during pause
+PAUSE_READ_Z     = (1 << 3)     # 0x08 read z after pause
+PAUSE_READ_X     = (1 << 4)     # 0x10 read x after pause
 
 # thread flags
 
