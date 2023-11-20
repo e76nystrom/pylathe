@@ -19,7 +19,7 @@ queNotEmpty  = 0x100            # 'Q+' ctl queue not empty
 ctlBusy      = 0x200            # 'CB' controller busy
 syncActive   = 0x400            # 'SA' sync active
 
-# inputs register
+# input register
 
 inZHome      = 0x01             # z home switch
 inZMinus     = 0x02             # z limit minus
@@ -34,6 +34,27 @@ inPin11      = 0x200            # pin 11
 inPin12      = 0x400            # pin 12
 inPin13      = 0x800            # pin 13
 inPin15      = 0x1000           # pin 15
+
+# output register
+
+outPin1      = 0x01             # pin 1
+outPin14     = 0x02             # pin 14
+outPin17     = 0x04             # pin 17
+
+# pin out signals
+
+pinOut2      = 0x01             # 
+pinOut3      = 0x02             # 
+pinOut4      = 0x04             # 
+pinOut5      = 0x08             # 
+pinOut6      = 0x10             # 
+pinOut7      = 0x20             # 
+pinOut8      = 0x40             # 
+pinOut9      = 0x80             # 
+pinOut1      = 0x100            # 
+pinOut14     = 0x200            # 
+pinOut16     = 0x400            # 
+pinOut17     = 0x800            # 
 
 # run control register
 
@@ -77,8 +98,8 @@ cfgZDirInv   = 0x01             # z dir inverted
 cfgXDirInv   = 0x02             # x dir inverted
 cfgZDroInv   = 0x04             # z dro dir inverted
 cfgXDroInv   = 0x08             # x dro dir inverted
-cfgZJogInv   = 0x10             # z jog dir inverted
-cfgXJogInv   = 0x20             # x jog dir inverted
+cfgZMpgInv   = 0x10             # z mpg dir inverted
+cfgXMpgInv   = 0x20             # x mpg dir inverted
 cfgSpDirInv  = 0x40             # spindle dir inverted
 cfgZHomeInv  = 0x80             # z home inverted
 cfgZMinusInv = 0x100            # z minus inverted
@@ -166,6 +187,21 @@ importList = ( \
  inPin12, \
  inPin13, \
  inPin15, \
+ outPin1, \
+ outPin14, \
+ outPin17, \
+ pinOut2, \
+ pinOut3, \
+ pinOut4, \
+ pinOut5, \
+ pinOut6, \
+ pinOut7, \
+ pinOut8, \
+ pinOut9, \
+ pinOut1, \
+ pinOut14, \
+ pinOut16, \
+ pinOut17, \
  runEna, \
  runInit, \
  readerInit, \
@@ -194,8 +230,8 @@ importList = ( \
  cfgXDirInv, \
  cfgZDroInv, \
  cfgXDroInv, \
- cfgZJogInv, \
- cfgXJogInv, \
+ cfgZMpgInv, \
+ cfgXMpgInv, \
  cfgSpDirInv, \
  cfgZHomeInv, \
  cfgZMinusInv, \

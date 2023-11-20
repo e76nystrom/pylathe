@@ -38,6 +38,7 @@ configList = \
         ('cfgCommonHome', 'config all switches on one pin'),
         ('cfgDbgSave', 'config save debug info'),
         ('cfgDRO', 'config dro present'),
+        ('cfgDROStep', 'config step pulse controls dro'),
         ('cfgDraw', 'config draw paths'),
         ('cfgEncoder', 'config encoder counts per revolution'),
         ('cfgEStop', 'config estop enable'),
@@ -390,93 +391,95 @@ cmdList = \
     (
         "z motion commands",
 
-        ("C_ZMOVEABS", "cZMoveAbs", "start z movement"),
-        ("C_ZMOVEREL", "cZMoveRel", "move z relative"),
-        ("C_ZJMOV", "cZJogMove", "start z jog"),
-        ("C_ZJSPEED", "cZJogSpeed", "start z jog at speed"),
-        ("C_ZSTOP", "cZStop", "stop z movement"),
-        ("C_ZSETLOC", "", ""),
-        ("C_ZHOMEFWD", "cZHomeFwd", "z home from positive side"),
-        ("C_ZHOMEREV", "cZHomeRev", "z home from negative side"),
+        ("C_Z_MOVE_ABS", "cZMoveAbs",  "start z movement"),
+        ("C_Z_MOVE_REL", "cZMoveRel",  "move z relative"),
+        ("C_Z_J_MOV",    "cZJogMove",  "start z jog"),
+        ("C_Z_J_SPEED",  "cZJogSpeed", "start z jog at speed"),
+        ("C_Z_STOP",     "cZStop",     "stop z movement"),
+        ("C_Z_SET_LOC",  "",           ""),
+        ("C_Z_HOME_FWD", "cZHomeFwd",  "z home from positive side"),
+        ("C_Z_HOME_REV", "cZHomeRev",  "z home from negative side"),
 
         "x motion commands",
 
-        ("C_XMOVEABS", "cXMoveAbs", "start x movement"),
-        ("C_XMOVEREL", "cXMoveRel", "move x relative"),
-        ("C_XJMOV", "cXJogMove", "start z jog"),
-        ("C_XJSPEED", "cXJogSpeed", "start x jog at speed"),
-        ("C_XSTOP", "cXStop", "stop x movement"),
-        ("C_XSETLOC", "", ""),
-        ("C_XHOMEFWD", "cXHomeFwd", "x home from positive side"),
-        ("C_XHOMEREV", "cXHomeRev", "x home from negative side"),
+        ("C_X_MOVE_ABS", "cXMoveAbs",  "start x movement"),
+        ("C_X_MOVE_REL", "cXMoveRel",  "move x relative"),
+        ("C_X_J_MOV",    "cXJogMove",  "start z jog"),
+        ("C_X_J_SPEED",  "cXJogSpeed", "start x jog at speed"),
+        ("C_X_STOP",     "cXStop",     "stop x movement"),
+        ("C_X_SET_LOC",  "",           ""),
+        ("C_X_HOME_FWD", "cXHomeFwd",  "x home from positive side"),
+        ("C_X_HOME_REV", "cXHomeRev",  "x home from negative side"),
 
         "spindle operations",
 
-        ("C_SPINDLE_START", "cSpindleStart", "start spindle"),
-        ("C_SPINDLE_STOP", "cSpindleStop", "stop spindle"),
-        ("C_SPINDLE_UPDATE", "cSpindleUpdate", "update spindle speed"),
-        ("C_SPINDLE_JOG", "cSpindleJog", "spindle jog"),
+        ("C_SPINDLE_START",     "cSpindleStart",    "start spindle"),
+        ("C_SPINDLE_STOP",      "cSpindleStop",     "stop spindle"),
+        ("C_SPINDLE_UPDATE",    "cSpindleUpdate",   "update spindle speed"),
+        ("C_SPINDLE_JOG",       "cSpindleJog",      "spindle jog"),
         ("C_SPINDLE_JOG_SPEED", "cSpindleJogSpeed", "spindle jog at speed"),
 
         "end operations",
 
-        ("C_CMD_PAUSE", "cPauseCmd", "pause current operation"),
-        ("C_CMD_RESUME", "cResumeCmd", "resume current operation"),
-        ("C_CMD_STOP", "cStopCmd", "stop current operation"),
-        ("C_CMD_DONE", "cDoneCmd", "done current operation"),
+        ("C_CMD_PAUSE",   "cPauseCmd",   "pause current operation"),
+        ("C_CMD_RESUME",  "cResumeCmd",  "resume current operation"),
+        ("C_CMD_STOP",    "cStopCmd",    "stop current operation"),
+        ("C_CMD_DONE",    "cDoneCmd",    "done current operation"),
         ("C_CMD_MEASURE", "cMeasureCmd", "stop at end of current pass"),
 
         "setup operations",
 
-        ("C_CMD_CLEAR", "cClearCmd", "clear all tables"),
-        ("C_CMD_SETUP", "cSetup", "setup everything"),
-        ("C_CMD_SPSETUP", "cSpindleSetup", "setup spindle"),
+        ("C_CMD_CLEAR",    "cClearCmd",     "clear all tables"),
+        ("C_CMD_SETUP",    "cSetup",        "setup everything"),
+        ("C_CMD_SP_SETUP", "cSpindleSetup", "setup spindle"),
 
-        ("C_CMD_SYNCSETUP", "cSyncSetup", "setup z and x axis synchronization"),
+        ("C_CMD_SYNC_SETUP", "cSyncSetup", "setup z and x axis synchronization"),
 
-        ("C_CMD_ZSETUP", "cZSetup", "setup z axis"),
-        ("C_CMD_ZSYNSETUP", "", "setup z axis sync"),
-        ("C_CMD_ZSETLOC", "cZSetLoc", "setup z location"),
+        ("C_CMD_Z_SETUP",     "cZSetup",  "setup z axis"),
+        ("C_CMD_Z_SYN_SETUP", "",         "setup z axis sync"),
+        ("C_CMD_Z_SET_LOC",   "cZSetLoc", "setup z location"),
 
-        ("C_CMD_XSETUP", "cXSetup", "setup x axis"),
-        ("C_CMD_XSYNSETUP", "", "setup x axis sync"),
-        ("C_CMD_XSETLOC", "cXSetLoc", "setup x location"),
+        ("C_CMD_X_SETUP",     "cXSetup",  "setup x axis"),
+        ("C_CMD_X_SYN_SETUP", "",         "setup x axis sync"),
+        ("C_CMD_X_SET_LOC",   "cXSetLoc", "setup x location"),
 
         "state information",
 
-        ("C_READSTAT", "", "read status"),
-        ("C_READISTATE", "", "read states of state machines"),
+        ("C_READ_STAT",    "", "read status"),
+        ("C_READ_I_STATE", "", "read states of state machines"),
 
         "load processor and xilinx parameters",
 
-        ("C_LOADVAL", "", "load parameters"),
-        ("C_LOADMULTI", "", "load multiple parameters"),
-        ("C_READVAL", "", "read parameters"),
-        ("C_LOADXREG", "", "load xilinx registers"),
-        ("C_READXREG", "", "read xilinx registers"),
+        ("C_LOAD_VAL",   "", "load parameters"),
+        ("C_LOAD_MULTI", "", "load multiple parameters"),
+        ("C_READ_VAL",   "", "read parameters"),
+        ("C_LOAD_X_REG", "", "load xilinx registers"),
+        ("C_READ_X_REG", "", "read xilinx registers"),
 
         "move command operations",
 
-        ("C_CLEARQUE", "cClearQue", "clear move que"),
-        ("C_QUEMOVE", "", "que move command"),
-        ("C_MOVEMULTI", "", "que move command"),
-        ("C_MOVEQUESTATUS", "", "read move queue status"),
+        ("C_CLEAR_QUE",       "cClearQue", "clear move que"),
+        ("C_QUE_MOVE",        "", "que move command"),
+        ("C_MOVE_MULTI",      "", "que move command"),
+        ("C_MOVE_QUE_STATUS", "", "read move queue status"),
 
         "location and debug info",
 
-        ("C_READALL", "cReadAll", "read all status info"),
-        ("C_READDBG", "cReadDbg", "read debug message"),
-        ("C_CLRDBG", "cClearDbg", "clear debug message buffer"),
+        ("C_READ_ALL", "cReadAll",  "read all status info"),
+        ("C_READ_DBG", "cReadDbg",  "read debug message"),
+        ("C_CLR_DBG",  "cClearDbg", "clear debug message buffer"),
 
         "encoder commands",
 
-        ("C_ENCSTART", "", "encoder start"),
-        ("C_ENCSTOP", "", "encoder stop"),
+        ("C_ENC_START", "", "encoder start"),
+        ("C_ENC_STOP",  "", "encoder stop"),
 
         " mega commands ",
 
-        ("C_SET_MEGA_VAL", "", "set mega value"),
+        ("C_SET_MEGA_VAL",  "", "set mega value"),
         ("C_READ_MEGA_VAL", "", "get mega value"),
+
+        ("C_SEND_DONE", "cSendDone", "send commands done"),
     )
 
 syncCmdList = \
@@ -523,22 +526,22 @@ parmList = \
         ("SP_JOG_TIME_INC", "spindle jog time increment", "float"),
         ("SP_JOG_TIME_MAX", "spindle jog timemax", "float"),
         ("SP_JOG_DIR", "spindle direction", "char"),
-        ("SP_DIR_FLAG", "spindle invert direction", "char"),
+        ("SP_DIR_INV", "spindle invert direction", "char"),
         ("SP_TEST_INDEX", "generate test index pulse", "char"),
         ("SP_TEST_ENCODER", "generate enc test pulse", "char"),
 
         "z axis parameters",
 
-        ("Z_PITCH", "z axis leadscrew pitch", "float"),
-        ("Z_RATIO", "z axis ratio", "float"),
-        ("Z_MICRO", "z axis micro steps", "int16_t"),
-        ("Z_MOTOR", "z axis motor steps", "int16_t"),
-        ("Z_ACCEL_TIME", "z axis acceleration", "float"),
-        ("Z_ACCEL", "z accel rpm/sec^2", "float"),
-        ("Z_BACKLASH", "z axis backlash", "float"),
+        ("Z_PITCH",       "z axis leadscrew pitch", "float"),
+        ("Z_RATIO",       "z axis ratio", "float"),
+        ("Z_MICRO",       "z axis micro steps", "int16_t"),
+        ("Z_MOTOR",       "z axis motor steps", "int16_t"),
+        ("Z_ACCEL_TIME",  "z axis acceleration", "float"),
+        ("Z_ACCEL",       "z accel rpm/sec^2", "float"),
+        ("Z_BACKLASH",    "z axis backlash", "float"),
         ("Z_STEP_FACTOR", "z steps inch factored", "int"),
-        ("Z_DIR_FLAG", "z invert direction", "char"),
-        ("Z_MPG_FLAG", "z invert mpg", "char"),
+        ("Z_DIR_INV",     "z invert direction", "char"),
+        ("Z_MPG_INV",     "z invert mpg", "char"),
 
         "x axis parameters",
 
@@ -550,8 +553,8 @@ parmList = \
         ("X_ACCEL", "x accel rpm/sec^2", "float"),
         ("X_BACKLASH", "x axis backlash", "float"),
         ("X_STEP_FACTOR", "x steps inch factored", "int"),
-        ("X_DIR_FLAG", "x invert direction", "char"),
-        ("X_MPG_FLAG", "x invert mpg", "char"),
+        ("X_DIR_INV", "x invert direction", "char"),
+        ("X_MPG_INV", "x invert mpg", "char"),
         ("X_DIAMETER", "x diameter", "int"),
 
         "z move parameters",
@@ -833,7 +836,7 @@ parmList = \
 
         ("USB_ENA", "enable usb", "char"),
 
-        # ("", "", ""),
+        ("DRO_STEP", "step pulse drives dro", "char"),
         # ("", "", ""),
         # ("", "", ""),
 
@@ -862,14 +865,17 @@ megaParmList = \
 
 riscvParmList = \
     (
-        ("R_MV_STATUS",  "", "uint32_t"),
-        ("R_JOG_PAUSE",  "", "int"),
-        ("R_CUR_PASS",   "", "int"),
-        ("R_P_RPM",      "", "int"),
-        ("R_P_X_LOC",    "", "int"),
-        ("R_P_Z_LOC",    "", "int"),
-        ("R_P_X_DRO",    "", "int"),
-        ("R_P_Z_DRO",    "", "int"),
+        ("R_MV_STATUS", "move status",              "uint32_t"),
+        ("R_JOG_PAUSE", "jog pause",                "int"),
+        ("R_CUR_PASS",  "current pass",             "int"),
+        ("R_CFG_VAL",   "fpga configuration value", "int"),
+        ("R_P_RPM",     "spindle rpm",              "int"),
+        ("R_PWM_DIV",   "pwm divider",               "int"),
+        ("R_PWM_CTR",   "pwm counter maxy",         "int"),
+        ("R_P_X_LOC",   "", "int"),
+        ("R_P_Z_LOC",   "", "int"),
+        ("R_P_X_DRO",   "", "int"),
+        ("R_P_Z_DRO",   "", "int"),
         ("R_X_JOG_INC", "", "int"),
         ("R_Z_JOG_INC", "", "int"),
         # (R_PARM_, "", ""),
@@ -1080,7 +1086,7 @@ fpgaLatheList = \
 
         ("pwmCtl",),
         ("F_Ld_PWM_Max",  0, 1, 4, "'MAX' pwm counter maximum"),
-        ("F_Ld_PWM_Trig", 0, 1, 4, "'TRG' pwm trigger"),
+        ("F_Ld_PWM_Trig", n, 1, 4, "'TRG' pwm trigger"),
         ("F_PWM_Max",     n, n, 0, "number of pwm registers"),
 
         "encoder",
@@ -1115,7 +1121,7 @@ fpgaLatheList = \
 
         ("F_Ld_Dist",        n, 1, 4, "'LDS' axis distance"),
         ("F_Ld_Max_Dist",    n, 1, 4, "'LMD' jog maximum distance"),
-        ("F_Ld_Backlash",    n, 1, 4, "'LB'  jog backlash"),
+        # ("F_Ld_Backlash",    n, 1, 4, "'LB'  jog backlash"),
 
         ("F_Rd_Dist",        n, 1, 4, "'RDS' read axis distance"),
         ("F_Rd_Accel_Steps", n, 1, 4, "'RAS' read accel steps"),
@@ -1123,9 +1129,9 @@ fpgaLatheList = \
         ("F_Ld_Loc",         n, 1, 4, "'LLC' axis location"),
         ("F_Rd_Loc",         n, 1, 4, "'RLC' read axis location"),
 
-        ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
-        ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
-        ("F_Ld_Mpg_Div",     n, 1, 4, "'LMV' Mpg div values"),
+        # ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
+        # ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
+        # ("F_Ld_Mpg_Div",     n, 1, 4, "'LMV' Mpg div values"),
         
         ("F_Ld_Dro",         n, 1, 4, "'LDR' axis dro"),
         ("F_Ld_Dro_End",     n, 1, 4, "'LDE' axis dro end"),
@@ -1177,6 +1183,7 @@ fpgaLatheList = \
         ("F_Ld_Sync_Ctl",  n, 1,            1, "'LSYN' sync control reg"),
         ("F_Ld_Cfg_Ctl",   n, 1,            3, "'LCFG' config control reg"),
         ("F_Ld_Clk_Ctl",   n, 1,            1, "'LCLK' clock control reg"),
+        ("F_Ld_Out_Reg",   n, 1,            1, "'LDOU' output reg"),
         ("F_Ld_Dsp_Reg",   n, 1,            1, "'LDSP' display reg"),
 
         "controller",
@@ -1431,7 +1438,7 @@ fpgaLatheBitList = \
         ("ctlBusy",       1, 9,  "'CB' controller busy"),
         ("syncActive",    1, 10, "'SA' sync active"),
 
-        "inputs register",
+        "input register",
 
         ("inputs",),
         ("inZHome",  1, 0,  "z home switch"),
@@ -1448,8 +1455,27 @@ fpgaLatheBitList = \
         ("inPin13",  1, 11, "pin 13"),
         ("inPin15",  1, 12, "pin 15"),
 
+        "output register",
+        ("outputs",),
+        ("outPin1",   1, 0,  "pin 1"),
+        ("outPin14",  1, 1,  "pin 14"),
+        ("outPin17",  1, 2,  "pin 17"),
         # ("",  , , ""),
-        # ("",  , , ""),
+        
+        "pin out signals",
+        ("pinOut",),
+        ("pinOut2",   1,  0, ""),
+        ("pinOut3",   1,  1, ""),
+        ("pinOut4",   1,  2, ""),
+        ("pinOut5",   1,  3, ""),
+        ("pinOut6",   1,  4, ""),
+        ("pinOut7",   1,  5, ""),
+        ("pinOut8",   1,  6, ""),
+        ("pinOut9",   1,  7, ""),
+        ("pinOut1",   1,  8, ""),
+        ("pinOut14",  1,  9, ""),
+        ("pinOut16",  1, 10, ""),
+        ("pinOut17",  1, 11, ""),
 
         "run control register",
         ("run",),
@@ -1501,8 +1527,8 @@ fpgaLatheBitList = \
         ("cfgXDirInv",   1, 1, "x dir inverted"),
         ("cfgZDroInv",   1, 2, "z dro dir inverted"),
         ("cfgXDroInv",   1, 3, "x dro dir inverted"),
-        ("cfgZJogInv",   1, 4, "z jog dir inverted"),
-        ("cfgXJogInv",   1, 5, "x jog dir inverted"),
+        ("cfgZMpgInv",   1, 4, "z mpg dir inverted"),
+        ("cfgXMpgInv",   1, 5, "x mpg dir inverted"),
         ("cfgSpDirInv",  1, 6, "spindle dir inverted"),
 
         ("cfgZHomeInv",  1, 7, "z home inverted"),
@@ -1875,6 +1901,7 @@ enumList = \
         ("R_STOP_X",      "'SX' stop x"),
         ("R_STOP_Z",      "'SZ' stop z"),
         ("R_DONE",        "'DN' done"),
+        ("R_SEND_DONE",   "'ND' send data done"),
 
         ("R_SET_LOC_X",   "'LX' set x loc"),
         ("R_SET_LOC_Z",   "'LZ' set z loc"),
@@ -1882,6 +1909,7 @@ enumList = \
         ("R_PAUSE",       "'PA' pause"),
         ("R_START_SPIN",  "'S+' start spindle"),
         ("R_STOP_SPIN",   "'S-' stop spindle"),
+        ("R_UPDATE_SPIN", "'US' update spindle speed"),
         # ("R_WAIT_Z",      "'WZ' wait z"),
         # ("R_WAIT_X",      "'WX' wait x"),
 
@@ -2119,6 +2147,7 @@ xilinxEncList = \
 
 if __name__ == '__main__':
     import os
+    from os.path import join as osJoin
     from setup import Setup
     from sys import stderr, stdout
     from platform import system
@@ -2129,7 +2158,7 @@ if __name__ == '__main__':
     R_PI = False
     WINDOWS = system() == 'Windows'
     if WINDOWS:
-        from pywinusb.hid import find_all_hid_devices
+        # from pywinusb.hid import find_all_hid_devices
         # from comm import Comm, CommTimeout
         # from commPi import Comm, CommTimeout
 
@@ -2145,28 +2174,31 @@ if __name__ == '__main__':
             R_PI = True
 
     fData = True
-    if WINDOWS:
-        path = os.path.dirname(os.path.realpath(__file__))
+    # if WINDOWS:
 
-        cLoc     = os.path.join(path, '..\\LatheCPP\\include\\')
-        syncLoc  = os.path.join(path, '..\\SyncCPP\\include\\')
-        megaLoc  = os.path.join(path, '..\\..\\Arduino\\output\\')
-        riscvLoc = os.path.join(path, "..\\..\\neorv32\\sw\\example\\LatheRiscV\\")
+    path = os.path.dirname(os.path.realpath(__file__))
 
-        xLoc = path + '/../../Xilinx/LatheCtl/'
-        fEncLoc = path + '/../../Altera/Encoder/VHDL/'
-        fLatheLoc = path + '/../../Altera/LatheNew/VHDL/'
-    else:
-        path = os.path.dirname(os.path.realpath(__file__))
+    cLoc     = osJoin(path, '..', 'LatheCPP', 'include')
+    syncLoc  = osJoin(path, '..', 'SyncCPP', 'include')
+    megaLoc  = osJoin(path, '..', '..', 'Arduino', 'output')
+    riscvLoc = osJoin(path, '..', '..', 'neorv32', 'sw', 'example', \
+                      'LatheRiscV')
 
-        cLoc = path + '/../LatheCPP/include/'
-        syncLoc = path + '/../SyncCPP/include/'
-        megaLoc = path + '/../../Arduino/output/'
-        riscvLoc = path + '/../../neorv32/sw/examples/Lathe/'
+    xLoc      = osJoin(path, '..', '..', 'Xilinx', 'LatheCtl')
+    fEncLoc   = osJoin(path, '..', '..', 'Altera', 'Encoder', 'VHDL')
+    fLatheLoc = osJoin(path, '..', '..', 'Altera', 'LatheNew', 'VHDL')
 
-        xLoc = path + '/../Xilinx/LatheCtl/'
-        fEncLoc = path + '/../Altera/Encoder/VHDL/'
-        fLatheLoc = path + '/../Altera/LatheNew/VHDL/'
+    # else:
+    #     path = os.path.dirname(os.path.realpath(__file__))
+
+    #     cLoc     = osJoin(path, '..', 'LatheCPP', 'include')
+    #     syncLoc  = osJoin(path, '..', 'SyncCPP', 'include')
+    #     megaLoc  = osJoin(path, '..', '..', 'Arduino', 'output')
+    #     riscvLoc = osJoin(path, '..', '..', 'neorv32', 'sw', 'examples', 'Lathe')
+
+    #     xLoc      = osJoin(path, '..', 'Xilinx', 'LatheCtl')
+    #     fEncLoc   = osJoin(path, '..', 'Altera', 'Encoder', 'VHDL')
+    #     fLatheLoc = osJoin(path, '..', 'Altera', 'LatheNew', 'VHDL')
 
     # print("creating interface files")
     setup = Setup()
@@ -2190,7 +2222,7 @@ if __name__ == '__main__':
     setup.createParameters(syncParmList, cLoc, fData, prefix='sync',
                            cSource=None)
     setup.createParameters(syncParmList, syncLoc, fData, pyFile=False,
-                           cSource='../src/', prefix='sync')
+                           cSource=osJoin('..', 'src'), prefix='sync')
 
     setup.createParameters(megaParmList, cLoc, fData, pyFile=False,
                            cSource=None, prefix='mega')
@@ -2221,9 +2253,9 @@ if __name__ == '__main__':
                          package="FpgaEncBits", xName="FpgaEnc")
 
     setup.createFpgaReg(fpgaLatheList, cLoc, fLatheLoc, fData,
-                        pName="lRegDef", cName="fpgaLatheReg")
+                        pName="lRegDef", cName="fpgaLathe")
     setup.createFpgaBits(fpgaLatheBitList, cLoc, fLatheLoc, fData,
-                         pName="fpgaLathe", cName="fpgaLatheBits",
+                         pName="fpgaLathe", cName="fpgaLathe",
                          package="FpgaLatheBits", xName="FpgaLathe")
     stdout.flush()
     stderr.flush()

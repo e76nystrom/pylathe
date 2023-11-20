@@ -6,9 +6,10 @@ import serial
 
 from remParmDef import parmTable
 # from configDef import cfgFpga
-from remCmdDef import cmdTable, C_LOADMULTI, \
-    C_LOADVAL, C_READVAL, C_LOADXREG, C_READXREG, C_QUEMOVE, C_MOVEMULTI, \
-    C_MOVEQUESTATUS, C_SET_MEGA_VAL, C_READ_MEGA_VAL, C_READDBG, C_READALL
+from remCmdDef import cmdTable, C_LOAD_MULTI, \
+    C_LOAD_VAL, C_READ_VAL, C_LOAD_X_REG, C_READ_X_REG, C_QUE_MOVE, \
+    C_MOVE_MULTI, C_MOVE_QUE_STATUS, C_SET_MEGA_VAL, C_READ_MEGA_VAL, \
+    C_READ_DBG, C_READ_ALL
 from megaParmDef import parmTable as megaParmTable
     
 CMD_OVERHEAD = 8
@@ -24,8 +25,6 @@ def getResult(rsp, index):
     if index < len(result):
         retVal = int(result[index], 16)
         retVal = c_int32(retVal).value
-        # if retVal & 0x80000000:
-        #     retVal -= 0x100000000
         return retVal
     return 0
 
@@ -36,16 +35,16 @@ class Comm():
         self.commLock = Lock()
 
         self.xDbgPrint = True
-        self.SWIG = False
+        # self.SWIG = False
         self.importLathe = True
         self.lastCmd = ''
 
         self.parmList = []
         self.cmdLen = CMD_OVERHEAD
 
-        self.loadMulti = C_LOADMULTI
-        self.loadVal = C_LOADVAL
-        self.readVal = C_READVAL
+        self.loadMulti = C_LOAD_MULTI
+        self.loadVal = C_LOAD_VAL
+        self.readVal = C_READ_VAL
 
         self.moveList = []
         self.moveLen = MOVE_OVERHEAD
@@ -94,7 +93,7 @@ class Comm():
 
     def send(self, cmd):
         n = int(cmd[1:3], 16)
-        prt = (n != C_READALL) and (n != C_READDBG)
+        prt = (n != C_READ_ALL) and (n != C_READ_DBG)
         if prt:
             print("cmd", cmd.strip('\x01\r'))
         if self.ser is None:
@@ -230,7 +229,7 @@ class Comm():
         val = int(val)
         if self.xDbgPrint:
             print("%-12s %2x %8x %12d" % ("", reg, val & 0xffffffff, val))
-        cmd = '\x01%x %x %08x \r' % (C_LOADXREG, reg, val & 0xffffffff)
+        cmd = '\x01%x %x %08x \r' % (C_LOAD_X_REG, reg, val & 0xffffffff)
         if self.xDbgPrint:
             pass
         self.send(cmd)
@@ -238,7 +237,7 @@ class Comm():
     def getXReg(self, reg):
         if self.ser is None:
             return(0)
-        cmd = '\x01%x %x \r' % (C_READXREG, reg)
+        cmd = '\x01%x %x \r' % (C_READ_X_REG, reg)
         if self.xDbgPrint:
             pass
         rsp = self.send(cmd)
@@ -297,14 +296,14 @@ class Comm():
 
     def sendMove(self, opString, op, val):
         cmd = self.moveCommand(opString, op, val)
-        cmd += "\x01%x %s \r" % (C_QUEMOVE, cmd)
+        cmd += "\x01%x %s \r" % (C_QUE_MOVE, cmd)
         self.send(cmd)
 
     def sendMultiMove(self):
         count = len(self.moveList)
         if count == 0:
             return
-        cmd = '\x01%x %x ' % (C_MOVEMULTI, count)
+        cmd = '\x01%x %x ' % (C_MOVE_MULTI, count)
         for m in self.moveList:
             cmd += m
         cmd += '\r'
@@ -318,6 +317,6 @@ class Comm():
     def getQueueStatus(self):
         if self.ser is None:
             return(None)
-        cmd = '\x01%x \r' % (C_MOVEQUESTATUS)
+        cmd = '\x01%x \r' % (C_MOVE_QUE_STATUS)
         rsp = self.send(cmd)
         return getResult(rsp, 1)

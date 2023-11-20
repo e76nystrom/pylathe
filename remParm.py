@@ -15,7 +15,7 @@ class RemParm():
         self.spJogTimeInc = None
         self.spJogTimeMax = None
         self.spJogDir = None
-        self.spDirFlag = None
+        self.spDirInv = None
         self.spTestIndex = None
         self.spTestEncoder = None
         self.zPitch = None
@@ -26,8 +26,8 @@ class RemParm():
         self.zAccel = None
         self.zBacklash = None
         self.zStepFactor = None
-        self.zDirFlag = None
-        self.zMpgFlag = None
+        self.zDirInv = None
+        self.zMpgInv = None
         self.xPitch = None
         self.xRatio = None
         self.xMicro = None
@@ -36,8 +36,8 @@ class RemParm():
         self.xAccel = None
         self.xBacklash = None
         self.xStepFactor = None
-        self.xDirFlag = None
-        self.xMpgFlag = None
+        self.xDirInv = None
+        self.xMpgInv = None
         self.xDiameter = None
         self.zMoveMin = None
         self.zMoveMax = None
@@ -189,4 +189,5 @@ class RemParm():
         self.megaVfd = None
         self.megaSim = None
         self.usbEna = None
+        self.droStep = None
         self.maxParm = None

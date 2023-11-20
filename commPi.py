@@ -572,6 +572,9 @@ class PiLathe(Thread):
     def cZHomeRev(self):
         pass
 
+    def cSendDone(self):
+        pass
+
     def dbgMsg(self, cmd, val):
         # self.dbgQue.put((time(), cmd, val))
         self.dbgDispatch(time(), cmd, val)
@@ -1402,7 +1405,7 @@ class Axis():
         elif cmd == ct.CMD_SPEED:
             pass
 
-        elif cmd == ct.JOGSLOW:
+        elif cmd == ct.JOG_SLOW:
             pass
 
         else:

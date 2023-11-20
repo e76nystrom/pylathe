@@ -621,31 +621,33 @@ R_STOP           =  5           # 'SP' stop
 R_STOP_X         =  6           # 'SX' stop x
 R_STOP_Z         =  7           # 'SZ' stop z
 R_DONE           =  8           # 'DN' done
-R_SET_LOC_X      =  9           # 'LX' set x loc
-R_SET_LOC_Z      = 10           # 'LZ' set z loc
-R_PAUSE          = 11           # 'PA' pause
-R_START_SPIN     = 12           # 'S+' start spindle
-R_STOP_SPIN      = 13           # 'S-' stop spindle
-R_PASS           = 14           # 'PS' pass
-R_SET_ACCEL      = 15           # 'SA' set accel parm
-R_SET_ACCEL_Q    = 16           # 'SQ' set accel parm queued
-R_SET_DATA       = 17           # 'SD' set data
-R_GET_DATA       = 18           # 'GD' set data
-R_SAVE_Z         = 19           # 'VZ' save z
-R_SAVE_X         = 20           # 'VX' save x
-R_STEPS_Z        = 21           # 'IZ' save z steps inch
-R_STEPS_X        = 22           # 'IX' save x steps inch
-R_HOFS_Z         = 23           # 'HZ' home offset z
-R_HOFS_X         = 24           # 'HX' home offset x
-R_JOG_Z          = 25           # 'JZ' jog move z
-R_JOG_X          = 26           # 'JX' jog move x
-R_MOVE_Z         = 27           # 'MZ' move z
-R_MOVE_X         = 28           # 'MX' move x
-R_MOVE_REL_Z     = 29           # 'RZ' move rel z
-R_MOVE_REL_X     = 30           # 'RX' move rel x
-R_READ_ALL       = 31           # 'RA' read all status
-R_READ_DBG       = 32           # 'RD' read all status
-R_MAX_CMD        = 33           # 'MX' max value
+R_SEND_DONE      =  9           # 'ND' send data done
+R_SET_LOC_X      = 10           # 'LX' set x loc
+R_SET_LOC_Z      = 11           # 'LZ' set z loc
+R_PAUSE          = 12           # 'PA' pause
+R_START_SPIN     = 13           # 'S+' start spindle
+R_STOP_SPIN      = 14           # 'S-' stop spindle
+R_UPDATE_SPIN    = 15           # 'US' update spindle speed
+R_PASS           = 16           # 'PS' pass
+R_SET_ACCEL      = 17           # 'SA' set accel parm
+R_SET_ACCEL_Q    = 18           # 'SQ' set accel parm queued
+R_SET_DATA       = 19           # 'SD' set data
+R_GET_DATA       = 20           # 'GD' set data
+R_SAVE_Z         = 21           # 'VZ' save z
+R_SAVE_X         = 22           # 'VX' save x
+R_STEPS_Z        = 23           # 'IZ' save z steps inch
+R_STEPS_X        = 24           # 'IX' save x steps inch
+R_HOFS_Z         = 25           # 'HZ' home offset z
+R_HOFS_X         = 26           # 'HX' home offset x
+R_JOG_Z          = 27           # 'JZ' jog move z
+R_JOG_X          = 28           # 'JX' jog move x
+R_MOVE_Z         = 29           # 'MZ' move z
+R_MOVE_X         = 30           # 'MX' move x
+R_MOVE_REL_Z     = 31           # 'RZ' move rel z
+R_MOVE_REL_X     = 32           # 'RX' move rel x
+R_READ_ALL       = 33           # 'RA' read all status
+R_READ_DBG       = 34           # 'RD' read all status
+R_MAX_CMD        = 35           # 'MX' max value
 
 riscvCmdList = ( \
     "R_NONE",
@@ -657,11 +659,13 @@ riscvCmdList = ( \
     "R_STOP_X",
     "R_STOP_Z",
     "R_DONE",
+    "R_SEND_DONE",
     "R_SET_LOC_X",
     "R_SET_LOC_Z",
     "R_PAUSE",
     "R_START_SPIN",
     "R_STOP_SPIN",
+    "R_UPDATE_SPIN",
     "R_PASS",
     "R_SET_ACCEL",
     "R_SET_ACCEL_Q",
@@ -694,11 +698,13 @@ riscvCmdText = ( \
     "'SX' stop x",
     "'SZ' stop z",
     "'DN' done",
+    "'ND' send data done",
     "'LX' set x loc",
     "'LZ' set z loc",
     "'PA' pause",
     "'S+' start spindle",
     "'S-' stop spindle",
+    "'US' update spindle speed",
     "'PS' pass",
     "'SA' set accel parm",
     "'SQ' set accel parm queued",

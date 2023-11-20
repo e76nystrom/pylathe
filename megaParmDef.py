@@ -8,10 +8,10 @@ M_PARM_ENC_LINES     =   4	# 0x04
 M_PARM_MAX_PARM      =   5	# 0x05
 
 parmTable = ( \
-    ('M_PARM_RPM', 'int', 'mParmRpm'),
-    ('M_PARM_VFD_ENA', 'char', 'mParmVfdEna'),
-    ('M_PARM_PWM_CFG', 'char', 'mParmPwmCfg'),
-    ('M_PARM_ENC_TEST', 'char', 'mParmEncTest'),
-    ('M_PARM_ENC_LINES', 'int', 'mParmEncLines'),
-    ('M_PARM_MAX_PARM', 'char', 'mParmMaxParm'),
+    ("M_PARM_RPM",       "int",  "mParmRpm"     ), # 0x00   0
+    ("M_PARM_VFD_ENA",   "char", "mParmVfdEna"  ), # 0x01   1
+    ("M_PARM_PWM_CFG",   "char", "mParmPwmCfg"  ), # 0x02   2
+    ("M_PARM_ENC_TEST",  "char", "mParmEncTest" ), # 0x03   3
+    ("M_PARM_ENC_LINES", "int",  "mParmEncLines"), # 0x04   4
+    ("M_PARM_MAX_PARM",  "char", "mParmMaxParm" ), # 0x05   5
     )

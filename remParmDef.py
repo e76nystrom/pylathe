@@ -18,7 +18,7 @@ SP_JOG_TIME_INITIAL  =  11	# 0x0b
 SP_JOG_TIME_INC      =  12	# 0x0c
 SP_JOG_TIME_MAX      =  13	# 0x0d
 SP_JOG_DIR           =  14	# 0x0e
-SP_DIR_FLAG          =  15	# 0x0f
+SP_DIR_INV           =  15	# 0x0f
 SP_TEST_INDEX        =  16	# 0x10
 SP_TEST_ENCODER      =  17	# 0x11
 
@@ -32,8 +32,8 @@ Z_ACCEL_TIME         =  22	# 0x16
 Z_ACCEL              =  23	# 0x17
 Z_BACKLASH           =  24	# 0x18
 Z_STEP_FACTOR        =  25	# 0x19
-Z_DIR_FLAG           =  26	# 0x1a
-Z_MPG_FLAG           =  27	# 0x1b
+Z_DIR_INV            =  26	# 0x1a
+Z_MPG_INV            =  27	# 0x1b
 
 # x axis parameters
 
@@ -45,8 +45,8 @@ X_ACCEL_TIME         =  32	# 0x20
 X_ACCEL              =  33	# 0x21
 X_BACKLASH           =  34	# 0x22
 X_STEP_FACTOR        =  35	# 0x23
-X_DIR_FLAG           =  36	# 0x24
-X_MPG_FLAG           =  37	# 0x25
+X_DIR_INV            =  36	# 0x24
+X_MPG_INV            =  37	# 0x25
 X_DIAMETER           =  38	# 0x26
 
 # z move parameters
@@ -318,197 +318,199 @@ ARC_Z_END            = 185	# 0xb9
 MEGA_VFD             = 186	# 0xba
 MEGA_SIM             = 187	# 0xbb
 USB_ENA              = 188	# 0xbc
-MAX_PARM             = 189	# 0xbd
+DRO_STEP             = 189	# 0xbd
+MAX_PARM             = 190	# 0xbe
 
 parmTable = ( \
-    ('SP_STEPS', 'int16_t', 'spSteps'),
-    ('SP_MICRO', 'int16_t', 'spMicro'),
-    ('SP_MIN_RPM', 'float', 'spMinRpm'),
-    ('SP_MAX_RPM', 'float', 'spMaxRpm'),
-    ('SP_RPM', 'float', 'spRpm'),
-    ('SP_ACCEL_TIME', 'float', 'spAccelTime'),
-    ('SP_ACCEL', 'float', 'spAccel'),
-    ('SP_JOG_MIN_RPM', 'float', 'spJogMinRpm'),
-    ('SP_JOG_MAX_RPM', 'float', 'spJogMaxRpm'),
-    ('SP_JOG_RPM', 'float', 'spJogRpm'),
-    ('SP_JOG_ACCEL_TIME', 'float', 'spJogAccelTime'),
-    ('SP_JOG_TIME_INITIAL', 'float', 'spJogTimeInitial'),
-    ('SP_JOG_TIME_INC', 'float', 'spJogTimeInc'),
-    ('SP_JOG_TIME_MAX', 'float', 'spJogTimeMax'),
-    ('SP_JOG_DIR', 'char', 'spJogDir'),
-    ('SP_DIR_FLAG', 'char', 'spDirFlag'),
-    ('SP_TEST_INDEX', 'char', 'spTestIndex'),
-    ('SP_TEST_ENCODER', 'char', 'spTestEncoder'),
-    ('Z_PITCH', 'float', 'zPitch'),
-    ('Z_RATIO', 'float', 'zRatio'),
-    ('Z_MICRO', 'int16_t', 'zMicro'),
-    ('Z_MOTOR', 'int16_t', 'zMotor'),
-    ('Z_ACCEL_TIME', 'float', 'zAccelTime'),
-    ('Z_ACCEL', 'float', 'zAccel'),
-    ('Z_BACKLASH', 'float', 'zBacklash'),
-    ('Z_STEP_FACTOR', 'int', 'zStepFactor'),
-    ('Z_DIR_FLAG', 'char', 'zDirFlag'),
-    ('Z_MPG_FLAG', 'char', 'zMpgFlag'),
-    ('X_PITCH', 'float', 'xPitch'),
-    ('X_RATIO', 'float', 'xRatio'),
-    ('X_MICRO', 'int16_t', 'xMicro'),
-    ('X_MOTOR', 'int16_t', 'xMotor'),
-    ('X_ACCEL_TIME', 'float', 'xAccelTime'),
-    ('X_ACCEL', 'float', 'xAccel'),
-    ('X_BACKLASH', 'float', 'xBacklash'),
-    ('X_STEP_FACTOR', 'int', 'xStepFactor'),
-    ('X_DIR_FLAG', 'char', 'xDirFlag'),
-    ('X_MPG_FLAG', 'char', 'xMpgFlag'),
-    ('X_DIAMETER', 'int', 'xDiameter'),
-    ('Z_MOVE_MIN', 'float', 'zMoveMin'),
-    ('Z_MOVE_MAX', 'float', 'zMoveMax'),
-    ('Z_JOG_MIN', 'float', 'zJogMin'),
-    ('Z_JOG_MAX', 'float', 'zJogMax'),
-    ('Z_JOG_SPEED', 'float', 'zJogSpeed'),
-    ('X_MOVE_MIN', 'float', 'xMoveMin'),
-    ('X_MOVE_MAX', 'float', 'xMoveMax'),
-    ('X_JOG_MIN', 'float', 'xJogMin'),
-    ('X_JOG_MAX', 'float', 'xJogMax'),
-    ('X_JOG_SPEED', 'float', 'xJogSpeed'),
-    ('TOTAL_PASSES', 'int16_t', 'totalPasses'),
-    ('CURRENT_PASS', 'int16_t', 'currentPass'),
-    ('MV_STATUS', 'int16_t', 'mvStatus'),
-    ('Z_MOVE_DIST', 'float', 'zMoveDist'),
-    ('Z_MOVE_POS', 'float', 'zMovePos'),
-    ('Z_JOG_DIR', 'int', 'zJogDir'),
-    ('Z_SET_LOC', 'float', 'zSetLoc'),
-    ('Z_LOC', 'int', 'zLoc'),
-    ('Z_FLAG', 'int', 'zFlag'),
-    ('Z_ABS_LOC', 'int', 'zAbsLoc'),
-    ('Z_MPG_INC', 'int', 'zMpgInc'),
-    ('Z_MPG_MAX', 'int', 'zMpgMax'),
-    ('X_MOVE_DIST', 'float', 'xMoveDist'),
-    ('X_MOVE_POS', 'float', 'xMovePos'),
-    ('X_JOG_DIR', 'int', 'xJogDir'),
-    ('X_SET_LOC', 'float', 'xSetLoc'),
-    ('X_LOC', 'int', 'xLoc'),
-    ('X_FLAG', 'int', 'xFlag'),
-    ('X_ABS_LOC', 'int', 'xAbsLoc'),
-    ('X_MPG_INC', 'int', 'xMpgInc'),
-    ('X_MPG_MAX', 'int', 'xMpgMax'),
-    ('JOG_TIME_INITIAL', 'float', 'jogTimeInitial'),
-    ('JOG_TIME_INC', 'float', 'jogTimeInc'),
-    ('JOG_TIME_MAX', 'float', 'jogTimeMax'),
-    ('TAPER_CYCLE_DIST', 'float', 'taperCycleDist'),
-    ('INDEX_PRE_SCALER', 'int', 'indexPreScaler'),
-    ('LAST_INDEX_PERIOD', 'uint_t', 'lastIndexPeriod'),
-    ('INDEX_PERIOD', 'uint_t', 'indexPeriod'),
-    ('REV_COUNTER', 'uint_t', 'revCounter'),
-    ('Z_HOME_OFFSET', 'int', 'zHomeOffset'),
-    ('X_HOME_OFFSET', 'int', 'xHomeOffset'),
-    ('Z_HOME_SPEED', 'float', 'zHomeSpeed'),
-    ('Z_HOME_DIST', 'float', 'zHomeDist'),
-    ('Z_HOME_DIST_REV', 'float', 'zHomeDistRev'),
-    ('Z_HOME_DIST_BACKOFF', 'float', 'zHomeDistBackoff'),
-    ('Z_HOME_DIR', 'int', 'zHomeDir'),
-    ('X_HOME_SPEED', 'float', 'xHomeSpeed'),
-    ('X_HOME_DIST', 'float', 'xHomeDist'),
-    ('X_HOME_DIST_REV', 'float', 'xHomeDistRev'),
-    ('X_HOME_DIST_BACKOFF', 'float', 'xHomeDistBackoff'),
-    ('X_HOME_DIR', 'int', 'xHomeDir'),
-    ('X_HOME_LOC', 'int', 'xHomeLoc'),
-    ('X_HOME_START', 'int', 'xHomeStart'),
-    ('X_HOME_END', 'int', 'xHomeEnd'),
-    ('Z_DRO_LOC', 'int', 'zDroLoc'),
-    ('Z_DRO_OFFSET', 'int', 'zDroOffset'),
-    ('Z_DRO_COUNT_INCH', 'int', 'zDroCountInch'),
-    ('Z_DRO_FACTOR', 'int', 'zDroFactor'),
-    ('Z_DRO_INVERT', 'int', 'zDroInvert'),
-    ('Z_USE_DRO', 'char', 'zUseDro'),
-    ('Z_DONE_DELAY', 'int', 'zDoneDelay'),
-    ('Z_DRO_FINAL_DIST', 'int', 'zDroFinalDist'),
-    ('X_DRO_LOC', 'int', 'xDroLoc'),
-    ('X_DRO_OFFSET', 'int', 'xDroOffset'),
-    ('X_DRO_COUNT_INCH', 'int', 'xDroCountInch'),
-    ('X_DRO_FACTOR', 'int', 'xDroFactor'),
-    ('X_DRO_INVERT', 'int', 'xDroInvert'),
-    ('X_USE_DRO', 'char', 'xUseDro'),
-    ('X_DONE_DELAY', 'int', 'xDoneDelay'),
-    ('X_DRO_FINAL_DIST', 'int', 'xDroFinalDist'),
-    ('X_HOME_STATUS', 'int', 'xHomeStatus'),
-    ('Z_HOME_STATUS', 'int', 'zHomeStatus'),
-    ('PROBE_SPEED', 'float', 'probeSpeed'),
-    ('PROBE_DIST', 'int', 'probeDist'),
-    ('PROBE_INV', 'int', 'probeInv'),
-    ('STEPPER_DRIVE', 'char', 'stepperDrive'),
-    ('MOTOR_TEST', 'char', 'motorTest'),
-    ('SPINDLE_ENCODER', 'char', 'spindleEncoder'),
-    ('SPINDLE_SYNC_BOARD', 'char', 'spindleSyncBoard'),
-    ('SPINDLE_INTERNAL_SYNC', 'char', 'spindleInternalSync'),
-    ('TURN_SYNC', 'char', 'turnSync'),
-    ('THREAD_SYNC', 'char', 'threadSync'),
-    ('CAP_TMR_ENABLE', 'char', 'capTmrEnable'),
-    ('CFG_FPGA', 'char', 'cfgFpga'),
-    ('CFG_MEGA', 'char', 'cfgMega'),
-    ('CFG_MPG', 'char', 'cfgMpg'),
-    ('CFG_DRO', 'char', 'cfgDro'),
-    ('CFG_LCD', 'char', 'cfgLcd'),
-    ('CFG_FCY', 'uint_t', 'cfgFcy'),
-    ('CFG_SWITCH', 'int', 'cfgSwitch'),
-    ('CFG_VAR_SPEED', 'int', 'cfgVarSpeed'),
-    ('SETUP_DONE', 'char', 'setupDone'),
-    ('ENC_PER_REV', 'uint16_t', 'encPerRev'),
-    ('ENC_ENABLE', 'char', 'encEnable'),
-    ('ENC_PRE_SCALER', 'uint16_t', 'encPreScaler'),
-    ('ENC_TIMER', 'uint16_t', 'encTimer'),
-    ('ENC_RUN_COUNT', 'int', 'encRunCount'),
-    ('ENC_RUN', 'char', 'encRun'),
-    ('ENC_COUNTER', 'int16_t', 'encCounter'),
-    ('ENC_REV_COUNTER', 'int32_t', 'encRevCounter'),
-    ('RPM', 'int16_t', 'rpm'),
-    ('FPGA_FREQUENCY', 'int32_t', 'fpgaFrequency'),
-    ('FREQ_MULT', 'int16_t', 'freqMult'),
-    ('X_CFG_REG', 'int16_t', 'xCfgReg'),
-    ('L_SYNC_CYCLE', 'uint16_t', 'lSyncCycle'),
-    ('L_SYNC_OUTPUT', 'uint16_t', 'lSyncOutput'),
-    ('L_SYNC_IN_PRESCALER', 'uint16_t', 'lSyncInPrescaler'),
-    ('L_SYNC_OUT_PRESCALER', 'uint16_t', 'lSyncOutPrescaler'),
-    ('L_X_SYNC_CYCLE', 'uint16_t', 'lXSyncCycle'),
-    ('L_X_SYNC_OUTPUT', 'uint16_t', 'lXSyncOutput'),
-    ('L_X_SYNC_IN_PRESCALER', 'uint16_t', 'lXSyncInPrescaler'),
-    ('L_X_SYNC_OUT_PRESCALER', 'uint16_t', 'lXSyncOutPrescaler'),
-    ('TH_Z_START', 'int32_t', 'thZStart'),
-    ('TH_X_START', 'int32_t', 'thXStart'),
-    ('TAN_THREAD_ANGLE', 'float', 'tanThreadAngle'),
-    ('X_FEED', 'int32_t', 'xFeed'),
-    ('RUNOUT_DISTANCE', 'float', 'runoutDistance'),
-    ('RUNOUT_DEPTH', 'float', 'runoutDepth'),
-    ('JOG_DEBUG', 'char', 'jogDebug'),
-    ('PWM_FREQ', 'uint_t', 'pwmFreq'),
-    ('MIN_SPEED', 'int16_t', 'minSpeed'),
-    ('MAX_SPEED', 'int16_t', 'maxSpeed'),
-    ('CURRENT_OP', 'char', 'currentOp'),
-    ('LIMIT_OVERRIDE', 'char', 'limitOverride'),
-    ('COMMON_LIMITS', 'char', 'commonLimits'),
-    ('LIMITS_ENABLED', 'char', 'limitsEnabled'),
-    ('COMMON_HOME', 'char', 'commonHome'),
-    ('Z_LIM_ENA', 'char', 'zLimEna'),
-    ('Z_LIM_NEG_INV', 'char', 'zLimNegInv'),
-    ('Z_LIM_POS_INV', 'char', 'zLimPosInv'),
-    ('Z_HOME_ENA', 'char', 'zHomeEna'),
-    ('Z_HOME_INV', 'char', 'zHomeInv'),
-    ('X_LIM_ENA', 'char', 'xLimEna'),
-    ('X_LIM_NEG_INV', 'char', 'xLimNegInv'),
-    ('X_LIM_POS_INV', 'char', 'xLimPosInv'),
-    ('X_HOME_ENA', 'char', 'xHomeEna'),
-    ('X_HOME_INV', 'char', 'xHomeInv'),
-    ('E_STOP_ENA', 'char', 'eStopEna'),
-    ('E_STOP_INV', 'char', 'eStopInv'),
-    ('CMD_PAUSED', 'char', 'cmdPaused'),
-    ('ARC_RADIUS', 'float', 'arcRadius'),
-    ('ARC_X_CENTER', 'int', 'arcXCenter'),
-    ('ARC_Z_CENTER', 'int', 'arcZCenter'),
-    ('ARC_X_START', 'int', 'arcXStart'),
-    ('ARC_Z_START', 'int', 'arcZStart'),
-    ('ARC_X_END', 'int', 'arcXEnd'),
-    ('ARC_Z_END', 'int', 'arcZEnd'),
-    ('MEGA_VFD', 'char', 'megaVfd'),
-    ('MEGA_SIM', 'char', 'megaSim'),
-    ('USB_ENA', 'char', 'usbEna'),
-    ('MAX_PARM', 'int16_t', 'maxParm'),
+    ("SP_STEPS",               "int16_t",  "spSteps"            ), # 0x00   0
+    ("SP_MICRO",               "int16_t",  "spMicro"            ), # 0x01   1
+    ("SP_MIN_RPM",             "float",    "spMinRpm"           ), # 0x02   2
+    ("SP_MAX_RPM",             "float",    "spMaxRpm"           ), # 0x03   3
+    ("SP_RPM",                 "float",    "spRpm"              ), # 0x04   4
+    ("SP_ACCEL_TIME",          "float",    "spAccelTime"        ), # 0x05   5
+    ("SP_ACCEL",               "float",    "spAccel"            ), # 0x06   6
+    ("SP_JOG_MIN_RPM",         "float",    "spJogMinRpm"        ), # 0x07   7
+    ("SP_JOG_MAX_RPM",         "float",    "spJogMaxRpm"        ), # 0x08   8
+    ("SP_JOG_RPM",             "float",    "spJogRpm"           ), # 0x09   9
+    ("SP_JOG_ACCEL_TIME",      "float",    "spJogAccelTime"     ), # 0x0a  10
+    ("SP_JOG_TIME_INITIAL",    "float",    "spJogTimeInitial"   ), # 0x0b  11
+    ("SP_JOG_TIME_INC",        "float",    "spJogTimeInc"       ), # 0x0c  12
+    ("SP_JOG_TIME_MAX",        "float",    "spJogTimeMax"       ), # 0x0d  13
+    ("SP_JOG_DIR",             "char",     "spJogDir"           ), # 0x0e  14
+    ("SP_DIR_INV",             "char",     "spDirInv"           ), # 0x0f  15
+    ("SP_TEST_INDEX",          "char",     "spTestIndex"        ), # 0x10  16
+    ("SP_TEST_ENCODER",        "char",     "spTestEncoder"      ), # 0x11  17
+    ("Z_PITCH",                "float",    "zPitch"             ), # 0x12  18
+    ("Z_RATIO",                "float",    "zRatio"             ), # 0x13  19
+    ("Z_MICRO",                "int16_t",  "zMicro"             ), # 0x14  20
+    ("Z_MOTOR",                "int16_t",  "zMotor"             ), # 0x15  21
+    ("Z_ACCEL_TIME",           "float",    "zAccelTime"         ), # 0x16  22
+    ("Z_ACCEL",                "float",    "zAccel"             ), # 0x17  23
+    ("Z_BACKLASH",             "float",    "zBacklash"          ), # 0x18  24
+    ("Z_STEP_FACTOR",          "int",      "zStepFactor"        ), # 0x19  25
+    ("Z_DIR_INV",              "char",     "zDirInv"            ), # 0x1a  26
+    ("Z_MPG_INV",              "char",     "zMpgInv"            ), # 0x1b  27
+    ("X_PITCH",                "float",    "xPitch"             ), # 0x1c  28
+    ("X_RATIO",                "float",    "xRatio"             ), # 0x1d  29
+    ("X_MICRO",                "int16_t",  "xMicro"             ), # 0x1e  30
+    ("X_MOTOR",                "int16_t",  "xMotor"             ), # 0x1f  31
+    ("X_ACCEL_TIME",           "float",    "xAccelTime"         ), # 0x20  32
+    ("X_ACCEL",                "float",    "xAccel"             ), # 0x21  33
+    ("X_BACKLASH",             "float",    "xBacklash"          ), # 0x22  34
+    ("X_STEP_FACTOR",          "int",      "xStepFactor"        ), # 0x23  35
+    ("X_DIR_INV",              "char",     "xDirInv"            ), # 0x24  36
+    ("X_MPG_INV",              "char",     "xMpgInv"            ), # 0x25  37
+    ("X_DIAMETER",             "int",      "xDiameter"          ), # 0x26  38
+    ("Z_MOVE_MIN",             "float",    "zMoveMin"           ), # 0x27  39
+    ("Z_MOVE_MAX",             "float",    "zMoveMax"           ), # 0x28  40
+    ("Z_JOG_MIN",              "float",    "zJogMin"            ), # 0x29  41
+    ("Z_JOG_MAX",              "float",    "zJogMax"            ), # 0x2a  42
+    ("Z_JOG_SPEED",            "float",    "zJogSpeed"          ), # 0x2b  43
+    ("X_MOVE_MIN",             "float",    "xMoveMin"           ), # 0x2c  44
+    ("X_MOVE_MAX",             "float",    "xMoveMax"           ), # 0x2d  45
+    ("X_JOG_MIN",              "float",    "xJogMin"            ), # 0x2e  46
+    ("X_JOG_MAX",              "float",    "xJogMax"            ), # 0x2f  47
+    ("X_JOG_SPEED",            "float",    "xJogSpeed"          ), # 0x30  48
+    ("TOTAL_PASSES",           "int16_t",  "totalPasses"        ), # 0x31  49
+    ("CURRENT_PASS",           "int16_t",  "currentPass"        ), # 0x32  50
+    ("MV_STATUS",              "int16_t",  "mvStatus"           ), # 0x33  51
+    ("Z_MOVE_DIST",            "float",    "zMoveDist"          ), # 0x34  52
+    ("Z_MOVE_POS",             "float",    "zMovePos"           ), # 0x35  53
+    ("Z_JOG_DIR",              "int",      "zJogDir"            ), # 0x36  54
+    ("Z_SET_LOC",              "float",    "zSetLoc"            ), # 0x37  55
+    ("Z_LOC",                  "int",      "zLoc"               ), # 0x38  56
+    ("Z_FLAG",                 "int",      "zFlag"              ), # 0x39  57
+    ("Z_ABS_LOC",              "int",      "zAbsLoc"            ), # 0x3a  58
+    ("Z_MPG_INC",              "int",      "zMpgInc"            ), # 0x3b  59
+    ("Z_MPG_MAX",              "int",      "zMpgMax"            ), # 0x3c  60
+    ("X_MOVE_DIST",            "float",    "xMoveDist"          ), # 0x3d  61
+    ("X_MOVE_POS",             "float",    "xMovePos"           ), # 0x3e  62
+    ("X_JOG_DIR",              "int",      "xJogDir"            ), # 0x3f  63
+    ("X_SET_LOC",              "float",    "xSetLoc"            ), # 0x40  64
+    ("X_LOC",                  "int",      "xLoc"               ), # 0x41  65
+    ("X_FLAG",                 "int",      "xFlag"              ), # 0x42  66
+    ("X_ABS_LOC",              "int",      "xAbsLoc"            ), # 0x43  67
+    ("X_MPG_INC",              "int",      "xMpgInc"            ), # 0x44  68
+    ("X_MPG_MAX",              "int",      "xMpgMax"            ), # 0x45  69
+    ("JOG_TIME_INITIAL",       "float",    "jogTimeInitial"     ), # 0x46  70
+    ("JOG_TIME_INC",           "float",    "jogTimeInc"         ), # 0x47  71
+    ("JOG_TIME_MAX",           "float",    "jogTimeMax"         ), # 0x48  72
+    ("TAPER_CYCLE_DIST",       "float",    "taperCycleDist"     ), # 0x49  73
+    ("INDEX_PRE_SCALER",       "int",      "indexPreScaler"     ), # 0x4a  74
+    ("LAST_INDEX_PERIOD",      "uint_t",   "lastIndexPeriod"    ), # 0x4b  75
+    ("INDEX_PERIOD",           "uint_t",   "indexPeriod"        ), # 0x4c  76
+    ("REV_COUNTER",            "uint_t",   "revCounter"         ), # 0x4d  77
+    ("Z_HOME_OFFSET",          "int",      "zHomeOffset"        ), # 0x4e  78
+    ("X_HOME_OFFSET",          "int",      "xHomeOffset"        ), # 0x4f  79
+    ("Z_HOME_SPEED",           "float",    "zHomeSpeed"         ), # 0x50  80
+    ("Z_HOME_DIST",            "float",    "zHomeDist"          ), # 0x51  81
+    ("Z_HOME_DIST_REV",        "float",    "zHomeDistRev"       ), # 0x52  82
+    ("Z_HOME_DIST_BACKOFF",    "float",    "zHomeDistBackoff"   ), # 0x53  83
+    ("Z_HOME_DIR",             "int",      "zHomeDir"           ), # 0x54  84
+    ("X_HOME_SPEED",           "float",    "xHomeSpeed"         ), # 0x55  85
+    ("X_HOME_DIST",            "float",    "xHomeDist"          ), # 0x56  86
+    ("X_HOME_DIST_REV",        "float",    "xHomeDistRev"       ), # 0x57  87
+    ("X_HOME_DIST_BACKOFF",    "float",    "xHomeDistBackoff"   ), # 0x58  88
+    ("X_HOME_DIR",             "int",      "xHomeDir"           ), # 0x59  89
+    ("X_HOME_LOC",             "int",      "xHomeLoc"           ), # 0x5a  90
+    ("X_HOME_START",           "int",      "xHomeStart"         ), # 0x5b  91
+    ("X_HOME_END",             "int",      "xHomeEnd"           ), # 0x5c  92
+    ("Z_DRO_LOC",              "int",      "zDroLoc"            ), # 0x5d  93
+    ("Z_DRO_OFFSET",           "int",      "zDroOffset"         ), # 0x5e  94
+    ("Z_DRO_COUNT_INCH",       "int",      "zDroCountInch"      ), # 0x5f  95
+    ("Z_DRO_FACTOR",           "int",      "zDroFactor"         ), # 0x60  96
+    ("Z_DRO_INVERT",           "int",      "zDroInvert"         ), # 0x61  97
+    ("Z_USE_DRO",              "char",     "zUseDro"            ), # 0x62  98
+    ("Z_DONE_DELAY",           "int",      "zDoneDelay"         ), # 0x63  99
+    ("Z_DRO_FINAL_DIST",       "int",      "zDroFinalDist"      ), # 0x64 100
+    ("X_DRO_LOC",              "int",      "xDroLoc"            ), # 0x65 101
+    ("X_DRO_OFFSET",           "int",      "xDroOffset"         ), # 0x66 102
+    ("X_DRO_COUNT_INCH",       "int",      "xDroCountInch"      ), # 0x67 103
+    ("X_DRO_FACTOR",           "int",      "xDroFactor"         ), # 0x68 104
+    ("X_DRO_INVERT",           "int",      "xDroInvert"         ), # 0x69 105
+    ("X_USE_DRO",              "char",     "xUseDro"            ), # 0x6a 106
+    ("X_DONE_DELAY",           "int",      "xDoneDelay"         ), # 0x6b 107
+    ("X_DRO_FINAL_DIST",       "int",      "xDroFinalDist"      ), # 0x6c 108
+    ("X_HOME_STATUS",          "int",      "xHomeStatus"        ), # 0x6d 109
+    ("Z_HOME_STATUS",          "int",      "zHomeStatus"        ), # 0x6e 110
+    ("PROBE_SPEED",            "float",    "probeSpeed"         ), # 0x6f 111
+    ("PROBE_DIST",             "int",      "probeDist"          ), # 0x70 112
+    ("PROBE_INV",              "int",      "probeInv"           ), # 0x71 113
+    ("STEPPER_DRIVE",          "char",     "stepperDrive"       ), # 0x72 114
+    ("MOTOR_TEST",             "char",     "motorTest"          ), # 0x73 115
+    ("SPINDLE_ENCODER",        "char",     "spindleEncoder"     ), # 0x74 116
+    ("SPINDLE_SYNC_BOARD",     "char",     "spindleSyncBoard"   ), # 0x75 117
+    ("SPINDLE_INTERNAL_SYNC",  "char",     "spindleInternalSync"), # 0x76 118
+    ("TURN_SYNC",              "char",     "turnSync"           ), # 0x77 119
+    ("THREAD_SYNC",            "char",     "threadSync"         ), # 0x78 120
+    ("CAP_TMR_ENABLE",         "char",     "capTmrEnable"       ), # 0x79 121
+    ("CFG_FPGA",               "char",     "cfgFpga"            ), # 0x7a 122
+    ("CFG_MEGA",               "char",     "cfgMega"            ), # 0x7b 123
+    ("CFG_MPG",                "char",     "cfgMpg"             ), # 0x7c 124
+    ("CFG_DRO",                "char",     "cfgDro"             ), # 0x7d 125
+    ("CFG_LCD",                "char",     "cfgLcd"             ), # 0x7e 126
+    ("CFG_FCY",                "uint_t",   "cfgFcy"             ), # 0x7f 127
+    ("CFG_SWITCH",             "int",      "cfgSwitch"          ), # 0x80 128
+    ("CFG_VAR_SPEED",          "int",      "cfgVarSpeed"        ), # 0x81 129
+    ("SETUP_DONE",             "char",     "setupDone"          ), # 0x82 130
+    ("ENC_PER_REV",            "uint16_t", "encPerRev"          ), # 0x83 131
+    ("ENC_ENABLE",             "char",     "encEnable"          ), # 0x84 132
+    ("ENC_PRE_SCALER",         "uint16_t", "encPreScaler"       ), # 0x85 133
+    ("ENC_TIMER",              "uint16_t", "encTimer"           ), # 0x86 134
+    ("ENC_RUN_COUNT",          "int",      "encRunCount"        ), # 0x87 135
+    ("ENC_RUN",                "char",     "encRun"             ), # 0x88 136
+    ("ENC_COUNTER",            "int16_t",  "encCounter"         ), # 0x89 137
+    ("ENC_REV_COUNTER",        "int32_t",  "encRevCounter"      ), # 0x8a 138
+    ("RPM",                    "int16_t",  "rpm"                ), # 0x8b 139
+    ("FPGA_FREQUENCY",         "int32_t",  "fpgaFrequency"      ), # 0x8c 140
+    ("FREQ_MULT",              "int16_t",  "freqMult"           ), # 0x8d 141
+    ("X_CFG_REG",              "int16_t",  "xCfgReg"            ), # 0x8e 142
+    ("L_SYNC_CYCLE",           "uint16_t", "lSyncCycle"         ), # 0x8f 143
+    ("L_SYNC_OUTPUT",          "uint16_t", "lSyncOutput"        ), # 0x90 144
+    ("L_SYNC_IN_PRESCALER",    "uint16_t", "lSyncInPrescaler"   ), # 0x91 145
+    ("L_SYNC_OUT_PRESCALER",   "uint16_t", "lSyncOutPrescaler"  ), # 0x92 146
+    ("L_X_SYNC_CYCLE",         "uint16_t", "lXSyncCycle"        ), # 0x93 147
+    ("L_X_SYNC_OUTPUT",        "uint16_t", "lXSyncOutput"       ), # 0x94 148
+    ("L_X_SYNC_IN_PRESCALER",  "uint16_t", "lXSyncInPrescaler"  ), # 0x95 149
+    ("L_X_SYNC_OUT_PRESCALER", "uint16_t", "lXSyncOutPrescaler" ), # 0x96 150
+    ("TH_Z_START",             "int32_t",  "thZStart"           ), # 0x97 151
+    ("TH_X_START",             "int32_t",  "thXStart"           ), # 0x98 152
+    ("TAN_THREAD_ANGLE",       "float",    "tanThreadAngle"     ), # 0x99 153
+    ("X_FEED",                 "int32_t",  "xFeed"              ), # 0x9a 154
+    ("RUNOUT_DISTANCE",        "float",    "runoutDistance"     ), # 0x9b 155
+    ("RUNOUT_DEPTH",           "float",    "runoutDepth"        ), # 0x9c 156
+    ("JOG_DEBUG",              "char",     "jogDebug"           ), # 0x9d 157
+    ("PWM_FREQ",               "uint_t",   "pwmFreq"            ), # 0x9e 158
+    ("MIN_SPEED",              "int16_t",  "minSpeed"           ), # 0x9f 159
+    ("MAX_SPEED",              "int16_t",  "maxSpeed"           ), # 0xa0 160
+    ("CURRENT_OP",             "char",     "currentOp"          ), # 0xa1 161
+    ("LIMIT_OVERRIDE",         "char",     "limitOverride"      ), # 0xa2 162
+    ("COMMON_LIMITS",          "char",     "commonLimits"       ), # 0xa3 163
+    ("LIMITS_ENABLED",         "char",     "limitsEnabled"      ), # 0xa4 164
+    ("COMMON_HOME",            "char",     "commonHome"         ), # 0xa5 165
+    ("Z_LIM_ENA",              "char",     "zLimEna"            ), # 0xa6 166
+    ("Z_LIM_NEG_INV",          "char",     "zLimNegInv"         ), # 0xa7 167
+    ("Z_LIM_POS_INV",          "char",     "zLimPosInv"         ), # 0xa8 168
+    ("Z_HOME_ENA",             "char",     "zHomeEna"           ), # 0xa9 169
+    ("Z_HOME_INV",             "char",     "zHomeInv"           ), # 0xaa 170
+    ("X_LIM_ENA",              "char",     "xLimEna"            ), # 0xab 171
+    ("X_LIM_NEG_INV",          "char",     "xLimNegInv"         ), # 0xac 172
+    ("X_LIM_POS_INV",          "char",     "xLimPosInv"         ), # 0xad 173
+    ("X_HOME_ENA",             "char",     "xHomeEna"           ), # 0xae 174
+    ("X_HOME_INV",             "char",     "xHomeInv"           ), # 0xaf 175
+    ("E_STOP_ENA",             "char",     "eStopEna"           ), # 0xb0 176
+    ("E_STOP_INV",             "char",     "eStopInv"           ), # 0xb1 177
+    ("CMD_PAUSED",             "char",     "cmdPaused"          ), # 0xb2 178
+    ("ARC_RADIUS",             "float",    "arcRadius"          ), # 0xb3 179
+    ("ARC_X_CENTER",           "int",      "arcXCenter"         ), # 0xb4 180
+    ("ARC_Z_CENTER",           "int",      "arcZCenter"         ), # 0xb5 181
+    ("ARC_X_START",            "int",      "arcXStart"          ), # 0xb6 182
+    ("ARC_Z_START",            "int",      "arcZStart"          ), # 0xb7 183
+    ("ARC_X_END",              "int",      "arcXEnd"            ), # 0xb8 184
+    ("ARC_Z_END",              "int",      "arcZEnd"            ), # 0xb9 185
+    ("MEGA_VFD",               "char",     "megaVfd"            ), # 0xba 186
+    ("MEGA_SIM",               "char",     "megaSim"            ), # 0xbb 187
+    ("USB_ENA",                "char",     "usbEna"             ), # 0xbc 188
+    ("DRO_STEP",               "char",     "droStep"            ), # 0xbd 189
+    ("MAX_PARM",               "int16_t",  "maxParm"            ), # 0xbe 190
     )

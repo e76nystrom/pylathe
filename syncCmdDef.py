@@ -11,11 +11,11 @@ SYNC_POLL            =   6	# 0x06
 # command table
 
 cmdTable = ( \
-    ("SYNC_SETUP        ", None              ), #   0
-    ("SYNC_START        ", None              ), #   1
-    ("SYNC_STOP         ", None              ), #   2
-    ("SYNC_LOADVAL      ", None              ), #   3
-    ("SYNC_LOADMULTI    ", None              ), #   4
-    ("SYNC_READVAL      ", None              ), #   5
-    ("SYNC_POLL         ", None              ), #   6
+    ("SYNC_SETUP",     None), # 0x00  0
+    ("SYNC_START",     None), # 0x01  1
+    ("SYNC_STOP",      None), # 0x02  2
+    ("SYNC_LOADVAL",   None), # 0x03  3
+    ("SYNC_LOADMULTI", None), # 0x04  4
+    ("SYNC_READVAL",   None), # 0x05  5
+    ("SYNC_POLL",      None), # 0x06  6
     )
