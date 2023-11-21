@@ -4,6 +4,7 @@ n = None
 
 configList = \
     (
+        # <-
         "arc panel",
 
         ('arcAddFeed', 'arc '),
@@ -63,12 +64,12 @@ configList = \
         ('cfgSpUseEncoder', 'config use spindle encoder for threading'),
         ('cfgSyncSPI', 'config sync comm through spi'),
         ('cfgTaperCycleDist', 'config taper cycle distance'),
-        ('cfgTestMode', 'conifg test mode'),
+        ('cfgTestMode', 'config test mode'),
         ('cfgTestRPM', 'config fpga test rpm value'),
         ('cfgTurnSync', 'config for turning synchronization'),
         ('cfgThreadSync', 'config for threading synchronization'),
 
-        "communications cxonfig",
+        "communications config",
 
         ('commPort', 'comm port'),
         ('commRate', 'comm baud rate'),
@@ -122,8 +123,8 @@ configList = \
 
         "jog panel config",
 
-        ('jpSurfaceSpeed', 'jogpanle fpm or rpm'),
-        ('jpXDroDiam', 'jogpanel x dro diameter'),
+        ('jpSurfaceSpeed', 'jog panel fpm or rpm'),
+        ('jpXDroDiam', 'jog panel x dro diameter'),
 
         "jog time parameters",
 
@@ -162,7 +163,7 @@ configList = \
         ('spMaxRPM', 'spindle jog max rpm'),
         ('spMicroSteps', 'spindle micro steps'),
         ('spMinRPM', 'spindle minimum rpm'),
-        ('spMotorSteps', 'spindle motor stpes per revolution'),
+        ('spMotorSteps', 'spindle motor steps per revolution'),
         ('spMotorTest', 'use stepper drive to test motor'),
         ('spPWMFreq', 'spindle pwm frequency'),
         ('spMegaSim', 'spindle use mega to simulate index and encoder'),
@@ -362,16 +363,18 @@ configList = \
         ('zSvDROOffset', 'z axis '),
 
         ('cfgJogDebug', 'debug jogging'),
+        # ->
     )
 
 strList = \
     (
+        # <-
         ("STR_OP_NOT_ACTIVE", "Operation Not Active"),
         ("STR_OP_IN_PROGRESS", "Operation In Progress"),
         ("STR_NOT_PAUSED", "Not Paused"),
         ("STR_NOT_SENT", "Data Not Sent"),
         ("STR_NO_ADD", "Cannot Add"),
-        ("STR_PASS_ERROR", "Passcount Incorrect"),
+        ("STR_PASS_ERROR", "Pass count Incorrect"),
         ("STR_NOT_HOMED", "X Not Homed"),
         ("STR_FIELD_ERROR", "Entry Field Error"),
         ("STR_READALL_ERROR", "ReadAll Error"),
@@ -385,10 +388,12 @@ strList = \
         ("STR_PROBE_FAIL", "Probe Fail"),
         ("STR_STOPPED", "Stopped"),
         ("STR_CLR", ""),
+        # ->
     )
 
 cmdList = \
     (
+        # <-
         "z motion commands",
 
         ("C_Z_MOVE_ABS", "cZMoveAbs",  "start z movement"),
@@ -480,21 +485,25 @@ cmdList = \
         ("C_READ_MEGA_VAL", "", "get mega value"),
 
         ("C_SEND_DONE", "cSendDone", "send commands done"),
+        # ->
     )
 
 syncCmdList = \
     (
+        # <-
         ("SYNC_SETUP", "", "setup sync routine"),
         ("SYNC_START", "", "start sync routine"),
         ("SYNC_STOP", "", "stop sync routine"),
-        ("SYNC_LOADVAL", "", "load parameters"),
-        ("SYNC_LOADMULTI", "", "load multiple parameters"),
-        ("SYNC_READVAL", "", "read parameters"),
+        ("SYNC_LOAD_VAL", "", "load parameters"),
+        ("SYNC_LOAD_MULTI", "", "load multiple parameters"),
+        ("SYNC_READ_VAL", "", "read parameters"),
         ("SYNC_POLL", "", "poll sync board"),
+        # ->
     )
 
 megaCmdList = \
     (
+        # <-
         ("MEGA_NONE", "", "no command"),
         ("MEGA_SET_RPM", "", "set pwm for rpm"),
         ("MEGA_GET_RPM", "", "get pwm value"),
@@ -505,390 +514,400 @@ megaCmdList = \
         ("MEGA_ENC_STOP", "", "stop mega encoder"),
         ("MEGA_UPDATE_RPM", "", "update rpm if active"),
         # ("MEGA_", "", ""),
+        # ->
     )
 
 parmList = \
     (
+        # <-
         "spindle parameters",
 
-        ("SP_STEPS", "spindle motor steps", "int16_t"),
-        ("SP_MICRO", "spindle micro steps", "int16_t"),
-        ("SP_MIN_RPM", "spindle minimum rpm", "float"),
-        ("SP_MAX_RPM", "spindle maximum rpm", "float"),
-        ("SP_RPM", "spindle rpm", "float"),  #
-        ("SP_ACCEL_TIME", "spindle accel time", "float"),
-        ("SP_ACCEL", "spindle accel rpm/sec^2", "float"),
-        ("SP_JOG_MIN_RPM", "spindle jog minimum rpm", "float"),
-        ("SP_JOG_MAX_RPM", "spindle jog maximum rpm", "float"),
-        ("SP_JOG_RPM", "spindle jog rpm", "float"),
-        ("SP_JOG_ACCEL_TIME", "spindle jog accel time", "float"),
-        ("SP_JOG_TIME_INITIAL", "spindle jog time initl", "float"),
-        ("SP_JOG_TIME_INC", "spindle jog time increment", "float"),
-        ("SP_JOG_TIME_MAX", "spindle jog timemax", "float"),
-        ("SP_JOG_DIR", "spindle direction", "char"),
-        ("SP_DIR_INV", "spindle invert direction", "char"),
-        ("SP_TEST_INDEX", "generate test index pulse", "char"),
-        ("SP_TEST_ENCODER", "generate enc test pulse", "char"),
+        ("SP_STEPS", "int16_t", "spindle motor steps"),
+        ("SP_MICRO", "int16_t", "spindle micro steps"),
+        ("SP_MIN_RPM", "float", "spindle minimum rpm"),
+        ("SP_MAX_RPM", "float", "spindle maximum rpm"),
+        ("SP_RPM", "float", "spindle rpm"),
+        ("SP_ACCEL_TIME", "float", "spindle accel time"),
+        ("SP_ACCEL", "float", "spindle accel rpm/sec^2"),
+        ("SP_JOG_MIN_RPM", "float", "spindle jog minimum rpm"),
+        ("SP_JOG_MAX_RPM", "float", "spindle jog maximum rpm"),
+        ("SP_JOG_RPM", "float", "spindle jog rpm"),
+        ("SP_JOG_ACCEL_TIME", "float", "spindle jog accel time"),
+        ("SP_JOG_TIME_INITIAL", "float", "spindle jog time initial"),
+        ("SP_JOG_TIME_INC", "float", "spindle jog time increment"),
+        ("SP_JOG_TIME_MAX", "float", "spindle jog time max"),
+        ("SP_JOG_DIR", "char", "spindle direction"),
+        ("SP_DIR_INV", "char", "spindle invert direction"),
+        ("SP_TEST_INDEX", "char",  "generate test index pulse"),
+        ("SP_TEST_ENCODER", "char", "generate enc test pulse"),
 
         "z axis parameters",
 
-        ("Z_PITCH",       "z axis leadscrew pitch", "float"),
-        ("Z_RATIO",       "z axis ratio", "float"),
-        ("Z_MICRO",       "z axis micro steps", "int16_t"),
-        ("Z_MOTOR",       "z axis motor steps", "int16_t"),
-        ("Z_ACCEL_TIME",  "z axis acceleration", "float"),
-        ("Z_ACCEL",       "z accel rpm/sec^2", "float"),
-        ("Z_BACKLASH",    "z axis backlash", "float"),
-        ("Z_STEP_FACTOR", "z steps inch factored", "int"),
-        ("Z_DIR_INV",     "z invert direction", "char"),
-        ("Z_MPG_INV",     "z invert mpg", "char"),
+        ("Z_PITCH",  "float",     "z axis leadscrew pitch"),
+        ("Z_RATIO",  "float",     "z axis ratio"),
+        ("Z_MICRO", "int16_t",     "z axis micro steps"),
+        ("Z_MOTOR", "int16_t",     "z axis motor steps"),
+        ("Z_ACCEL_TIME",  "float","z axis acceleration"),
+        ("Z_ACCEL",  "float",     "z accel rpm/sec^2"),
+        ("Z_BACKLASH",  "float",  "z axis backlash"),
+        ("Z_STEP_FACTOR", "int", "z steps inch factored"),
+        ("Z_DIR_INV", "char",   "z invert direction"),
+        ("Z_MPG_INV", "char",   "z invert mpg"),
 
         "x axis parameters",
 
-        ("X_PITCH", "x axis leadscrew pitch", "float"),
-        ("X_RATIO", "x axis ratio", "float"),
-        ("X_MICRO", "x axis micro steps", "int16_t"),
-        ("X_MOTOR", "x axis motor steps", "int16_t"),
-        ("X_ACCEL_TIME", "x axis acceleration", "float"),
-        ("X_ACCEL", "x accel rpm/sec^2", "float"),
-        ("X_BACKLASH", "x axis backlash", "float"),
-        ("X_STEP_FACTOR", "x steps inch factored", "int"),
-        ("X_DIR_INV", "x invert direction", "char"),
-        ("X_MPG_INV", "x invert mpg", "char"),
-        ("X_DIAMETER", "x diameter", "int"),
+        ("X_PITCH", "float", "x axis leadscrew pitch"),
+        ("X_RATIO", "float", "x axis ratio"),
+        ("X_MICRO", "int16_t", "x axis micro steps"),
+        ("X_MOTOR", "int16_t", "x axis motor steps"),
+        ("X_ACCEL_TIME", "float", "x axis acceleration"),
+        ("X_ACCEL", "float", "x accel rpm/sec^2"),
+        ("X_BACKLASH", "float", "x axis backlash"),
+        ("X_STEP_FACTOR", "int", "x steps inch factored"),
+        ("X_DIR_INV", "char", "x invert direction"),
+        ("X_MPG_INV", "char", "x invert mpg"),
+        ("X_DIAMETER", "int", "x diameter"),
 
         "z move parameters",
 
-        ("Z_MOVE_MIN", "z move min speed", "float"),
-        ("Z_MOVE_MAX", "z move max speed", "float"),
+        ("Z_MOVE_MIN", "float", "z move min speed"),
+        ("Z_MOVE_MAX", "float", "z move max speed"),
 
         "z jog parameters",
 
-        ("Z_JOG_MIN", "z jog min speed", "float"),
-        ("Z_JOG_MAX", "z jog max speed", "float"),
-        ("Z_JOG_SPEED", "z jog speed", "float"),
+        ("Z_JOG_MIN", "float", "z jog min speed"),
+        ("Z_JOG_MAX", "float", "z jog max speed"),
+        ("Z_JOG_SPEED", "float", "z jog speed"),
 
         "x move parameters",
 
-        ("X_MOVE_MIN", "x move min speed", "float"),
-        ("X_MOVE_MAX", "x move max speed", "float"),
+        ("X_MOVE_MIN", "float", "x move min speed"),
+        ("X_MOVE_MAX", "float", "x move max speed"),
 
         "x jog parameters",
 
-        ("X_JOG_MIN", "x jog min speed", "float"),
-        ("X_JOG_MAX", "x jog max speed", "float"),
-        ("X_JOG_SPEED", "x jog speed", "float"),
+        ("X_JOG_MIN", "float", "x jog min speed"),
+        ("X_JOG_MAX", "float", "x jog max speed"),
+        ("X_JOG_SPEED", "float", "x jog speed"),
 
         "pass information",
 
-        ("TOTAL_PASSES", "total passes", "int16_t"),
-        ("CURRENT_PASS", "current passes", "int16_t"),
-        ("MV_STATUS", "movement status", "int16_t"),
+        ("TOTAL_PASSES", "int16_t", "total passes"),
+        ("CURRENT_PASS", "int16_t", "current passes"),
+        ("MV_STATUS", "int16_t", "movement status"),
 
         "z axis move values",
 
-        ("Z_MOVE_DIST", "z move distance", "float"),
-        ("Z_MOVE_POS", "z move position", "float"),
-        ("Z_JOG_DIR", "x jog direction", "int"),
-        ("Z_SET_LOC", "z location to set", "float"),
-        ("Z_LOC", "z dro location", "int"),
-        ("Z_FLAG", "z move flag", "int"),
-        ("Z_ABS_LOC", "z absolute location", "int"),
-        ("Z_MPG_INC", "z man pulse gen incr", "int"),
-        ("Z_MPG_MAX", "z man pulse max distance", "int"),
+        ("Z_MOVE_DIST", "float", "z move distance"),
+        ("Z_MOVE_POS", "float", "z move position"),
+        ("Z_JOG_DIR", "int", "x jog direction"),
+        ("Z_SET_LOC", "float", "z location to set"),
+        ("Z_LOC", "int", "z dro location"),
+        ("Z_FLAG", "int", "z move flag"),
+        ("Z_ABS_LOC", "int", "z absolute location"),
+        ("Z_MPG_INC", "int", "z man pulse gen incr"),
+        ("Z_MPG_MAX", "int", "z man pulse max distance"),
 
         "x axis move values",
 
-        ("X_MOVE_DIST", "x move distance", "float"),
-        ("X_MOVE_POS", "x move position", "float"),
-        ("X_JOG_DIR", "x jog direction", "int"),
-        ("X_SET_LOC", "x location to set", "float"),
-        ("X_LOC", "x dro location", "int"),
-        ("X_FLAG", "x move flag", "int"),
-        ("X_ABS_LOC", "x absolute location", "int"),
-        ("X_MPG_INC", "X man pulse gen incr", "int"),
-        ("X_MPG_MAX", "x man pulse max distance", "int"),
+        ("X_MOVE_DIST", "float", "x move distance"),
+        ("X_MOVE_POS", "float", "x move position"),
+        ("X_JOG_DIR", "int", "x jog direction"),
+        ("X_SET_LOC", "float", "x location to set"),
+        ("X_LOC", "int", "x dro location"),
+        ("X_FLAG", "int", "x move flag"),
+        ("X_ABS_LOC", "int", "x absolute location"),
+        ("X_MPG_INC", "int", "X man pulse gen incr"),
+        ("X_MPG_MAX", "int", "x man pulse max distance"),
 
         "common jog parameters",
 
-        ("JOG_TIME_INITIAL", "jog time initial", "float"),
-        ("JOG_TIME_INC", "jog time increment", "float"),
-        ("JOG_TIME_MAX", "jog time max", "float"),
+        ("JOG_TIME_INITIAL", "float", "jog time initial"),
+        ("JOG_TIME_INC", "float", "jog time increment"),
+        ("JOG_TIME_MAX", "float", "jog time max"),
 
         "taper parameters",
 
-        ("TAPER_CYCLE_DIST", "taperCycleDist", "float"),
+        ("TAPER_CYCLE_DIST", "float", "taperCycleDist"),
 
         "index pulse variables",
 
-        ("INDEX_PRE_SCALER", "index pre scaler", "int"),
-        ("LAST_INDEX_PERIOD", "last index period", "uint_t"),
-        ("INDEX_PERIOD", "index period", "uint_t"),
-        ("REV_COUNTER", "revolution counter", "uint_t"),
+        ("INDEX_PRE_SCALER", "int", "index pre scaler"),
+        ("LAST_INDEX_PERIOD", "uint_t", "last index period"),
+        ("INDEX_PERIOD", "uint_t", "index period"),
+        ("REV_COUNTER", "uint_t", "revolution counter"),
 
         "z home offset",
 
-        ("Z_HOME_OFFSET", "z home offset", "int"),
+        ("Z_HOME_OFFSET", "int", "z home offset"),
 
         "x home offset",
 
-        ("X_HOME_OFFSET", "x home offset", "int"),
+        ("X_HOME_OFFSET", "int", "x home offset"),
 
         "z home parameters",
 
-        ("Z_HOME_SPEED", "z final homing speed", "float"),
-        ("Z_HOME_DIST", "z max homing distance", "float"),
-        ("Z_HOME_DIST_REV", "z max rev homing distance", "float"),
-        ("Z_HOME_DIST_BACKOFF", "z home backoff dist", "float"),
-        ("Z_HOME_DIR", "z homing direction", "int"),
+        ("Z_HOME_SPEED", "float", "z final homing speed"),
+        ("Z_HOME_DIST", "float", "z max homing distance"),
+        ("Z_HOME_DIST_REV", "float", "z max rev homing distance"),
+        ("Z_HOME_DIST_BACKOFF", "float", "z home backoff dist"),
+        ("Z_HOME_DIR", "int", "z homing direction"),
 
         "x home parameters",
 
-        ("X_HOME_SPEED", "x final homing speed", "float"),
-        ("X_HOME_DIST", "x max homing distance", "float"),
-        ("X_HOME_DIST_REV", "x max rev homing distance", "float"),
-        ("X_HOME_DIST_BACKOFF", "x home backoff dist", "float"),
-        ("X_HOME_DIR", "x homing direction", "int"),
+        ("X_HOME_SPEED", "float", "x final homing speed"),
+        ("X_HOME_DIST", "float", "x max homing distance"),
+        ("X_HOME_DIST_REV", "float", "x max rev homing distance"),
+        ("X_HOME_DIST_BACKOFF", "float", "x home backoff dist"),
+        ("X_HOME_DIR", "int", "x homing direction"),
 
         "x home test parameters",
 
-        ("X_HOME_LOC", "x home test location", "int"),
-        ("X_HOME_START", "x start of home signal", "int"),
-        ("X_HOME_END", "x end of home signal", "int"),
+        ("X_HOME_LOC", "int", "x home test location"),
+        ("X_HOME_START", "int", "x start of home signal"),
+        ("X_HOME_END", "int", "x end of home signal"),
 
         "z dro",
 
-        ("Z_DRO_LOC", "z dro location", "int"),
-        ("Z_DRO_OFFSET", "z dro to zero", "int"),
-        ("Z_DRO_COUNT_INCH", "z dro scale", "int"),
-        ("Z_DRO_FACTOR", "x dro counts inch factored", "int"),
-        ("Z_DRO_INVERT", "z dro invert", "int"),
-        ("Z_USE_DRO", "z use dro for position", "char"),
-        ("Z_DONE_DELAY", "z done to read dro delay", "int"),
-        ("Z_DRO_FINAL_DIST", "z final approach distance", "int"),
+        ("Z_DRO_LOC", "int", "z dro location"),
+        ("Z_DRO_OFFSET", "int", "z dro to zero"),
+        ("Z_DRO_COUNT_INCH", "int", "z dro scale"),
+        ("Z_DRO_FACTOR", "int", "x dro counts inch factored"),
+        ("Z_DRO_INVERT", "int", "z dro invert"),
+        ("Z_USE_DRO", "char", "z use dro for position"),
+        ("Z_DONE_DELAY", "int", "z done to read dro delay"),
+        ("Z_DRO_FINAL_DIST", "int", "z final approach distance"),
 
         "x dro",
 
-        ("X_DRO_LOC", "x dro location", "int"),
-        ("X_DRO_OFFSET", "x dro to zero", "int"),
-        ("X_DRO_COUNT_INCH", "x dro scale", "int"),
-        ("X_DRO_FACTOR", "x dro counts inch factored", "int"),
-        ("X_DRO_INVERT", "x dro invert", "int"),
-        ("X_USE_DRO", "x use dro for position", "char"),
-        ("X_DONE_DELAY", "x done to read dro delay", "int"),
-        ("X_DRO_FINAL_DIST", "x final approach distance", "int"),
+        ("X_DRO_LOC", "int", "x dro location"),
+        ("X_DRO_OFFSET", "int", "x dro to zero"),
+        ("X_DRO_COUNT_INCH", "int", "x dro scale"),
+        ("X_DRO_FACTOR", "int", "x dro counts inch factored"),
+        ("X_DRO_INVERT", "int", "x dro invert"),
+        ("X_USE_DRO", "char", "x use dro for position"),
+        ("X_DONE_DELAY", "int", "x done to read dro delay"),
+        ("X_DRO_FINAL_DIST", "int", "x final approach distance"),
 
         "x home or probe status",
 
-        # ("X_HOME_DONE", "x home done", "int"),
-        ("X_HOME_STATUS", "x home status", "int"),
+        # ("X_HOME_DONE", "int", "x home done"),
+        ("X_HOME_STATUS", "int", "x home status"),
 
         "Z home or probe status",
 
-        # ("Z_HOME_DONE", "z home done", "int"),
-        ("Z_HOME_STATUS", "z home status", "int"),
+        # ("Z_HOME_DONE", "int", "z home done"),
+        ("Z_HOME_STATUS", "int", "z home status"),
 
         "probe configuration",
 
-        ("PROBE_SPEED", "probe speed", "float"),
-        ("PROBE_DIST", "probe test distance", "int"),
-        ("PROBE_INV", "invert polarity of probe", "int"),
+        ("PROBE_SPEED", "float", "probe speed"),
+        ("PROBE_DIST", "int", "probe test distance"),
+        ("PROBE_INV", "int", "invert polarity of probe"),
 
         "configuration",
 
-        ("STEPPER_DRIVE", "stepper driven spindle", "char"),
-        ("MOTOR_TEST", "use stepper to test motor", "char"),
-        ("SPINDLE_ENCODER", "motor with spindle enc", "char"),
-        ("SPINDLE_SYNC_BOARD", "spindle sync board", "char"),
-        ("SPINDLE_INTERNAL_SYNC", "spindle internal sync", "char"),
-        ("TURN_SYNC", "sync type for turning", "char"),
-        ("THREAD_SYNC", "sync type for threading", "char"),
-        # ("SPINDLE_SYNC", "spindle sync direct", "char"),
-        # ("USE_ENCODER", "config for use encoder interrupt directly", "char"),
-        # ("ENCODER_DIRECT", "use encoder interrupt directly", "char"),
-        ("CAP_TMR_ENABLE", "enable capture timer", "char"),
-        ("CFG_FPGA", "using fpga", "char"),
-        ("CFG_MEGA", "control link to mega", "char"),
-        ("CFG_MPG", "manual pulse generator", "char"),
-        ("CFG_DRO", "digital readout", "char"),
-        ("CFG_LCD", "lcd display", "char"),
-        ("CFG_FCY", "system clock speed", "uint_t"),
-        ("CFG_SWITCH", "spindle off on switch", "int"),
-        ("CFG_VAR_SPEED", "spindle variable speed", "int"),
+        ("STEPPER_DRIVE", "char", "stepper driven spindle"),
+        ("MOTOR_TEST", "char", "use stepper to test motor"),
+        ("SPINDLE_ENCODER", "char", "motor with spindle enc"),
+        ("SPINDLE_SYNC_BOARD", "char", "spindle sync board"),
+        ("SPINDLE_INTERNAL_SYNC", "char", "spindle internal sync"),
+        ("TURN_SYNC", "char", "sync type for turning"),
+        ("THREAD_SYNC", "char", "sync type for threading"),
+        # ("SPINDLE_SYNC", "char", "spindle sync direct"),
+        # ("USE_ENCODER", "char", "config for use encoder interrupt directly"),
+        # ("ENCODER_DIRECT", "char", "use encoder interrupt directly"),
+        ("CAP_TMR_ENABLE", "char", "enable capture timer"),
+        ("CFG_FPGA", "char", "using fpga"),
+        ("CFG_MEGA", "char", "control link to mega"),
+        ("CFG_MPG", "char", "manual pulse generator"),
+        ("CFG_DRO", "char", "digital readout"),
+        ("CFG_LCD", "char", "lcd display"),
+        ("CFG_FCY", "uint_t", "system clock speed"),
+        ("CFG_SWITCH", "int", "spindle off on switch"),
+        ("CFG_VAR_SPEED", "int", "spindle variable speed"),
 
         "setup",
 
-        ("SETUP_DONE", "setup done", "char"),
+        ("SETUP_DONE", "char", "setup done"),
 
         "encoder counts per revolution",
 
-        ("ENC_PER_REV", "spindle enc counts per rev", "uint16_t"),
+        ("ENC_PER_REV", "uint16_t", "spindle enc counts per rev"),
 
         "test encoder setup variables",
 
-        ("ENC_ENABLE", "encoder enable flag", "char"),
-        ("ENC_PRE_SCALER", "encoder prescaler", "uint16_t"),
-        ("ENC_TIMER", "encoder timer counts", "uint16_t"),
-        ("ENC_RUN_COUNT", "encoder run count", "int"),
+        ("ENC_ENABLE", "char", "encoder enable flag"),
+        ("ENC_PRE_SCALER", "uint16_t", "encoder prescaler"),
+        ("ENC_TIMER", "uint16_t", "encoder timer counts"),
+        ("ENC_RUN_COUNT", "int", "encoder run count"),
 
         "test encoder status variables",
 
-        ("ENC_RUN", "encoder running flag", "char"),
-        ("ENC_COUNTER", "encoder count in rev", "int16_t"),
-        ("ENC_REV_COUNTER", "encoder revolution counter", "int32_t"),
+        ("ENC_RUN", "char", "encoder running flag"),
+        ("ENC_COUNTER", "int16_t", "encoder count in rev"),
+        ("ENC_REV_COUNTER", "int32_t", "encoder revolution counter"),
 
         "measured spindle speed",
 
-        ("RPM", "current measured rpm", "int16_t"),
+        ("RPM", "int16_t", "current measured rpm"),
 
         "fpga frequency variables",
 
-        ("FPGA_FREQUENCY", "fpga clock frequency", "int32_t"),
-        ("FREQ_MULT", "frequency multiplier", "int16_t"),
+        ("FPGA_FREQUENCY", "int32_t", "fpga clock frequency"),
+        ("FREQ_MULT", "int16_t", "frequency multiplier"),
 
         "xilinx configuration register",
 
-        ("X_CFG_REG", "xilinx cfg register", "int16_t"),
+        ("X_CFG_REG", "int16_t", "xilinx cfg register"),
 
         "z sync parameters",
 
-        ("L_SYNC_CYCLE", "sync cycle length", "uint16_t"),
-        ("L_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
-        ("L_SYNC_IN_PRESCALER", "input sync prescaler", "uint16_t"),
-        ("L_SYNC_OUT_PRESCALER", "output sync prescaler", "uint16_t"),
+        ("L_SYNC_CYCLE", "uint16_t", "sync cycle length"),
+        ("L_SYNC_OUTPUT", "uint16_t", "sync outputs per cycle"),
+        ("L_SYNC_IN_PRESCALER", "uint16_t", "input sync prescaler"),
+        ("L_SYNC_OUT_PRESCALER", "uint16_t", "output sync prescaler"),
 
         "x sync parameters",
 
-        ("L_X_SYNC_CYCLE", "sync cycle length", "uint16_t"),
-        ("L_X_SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
-        ("L_X_SYNC_IN_PRESCALER", "input sync prescaler", "uint16_t"),
-        ("L_X_SYNC_OUT_PRESCALER", "output sync prescaler", "uint16_t"),
+        ("L_X_SYNC_CYCLE", "uint16_t", "sync cycle length"),
+        ("L_X_SYNC_OUTPUT", "uint16_t", "sync outputs per cycle"),
+        ("L_X_SYNC_IN_PRESCALER", "uint16_t", "input sync prescaler"),
+        ("L_X_SYNC_OUT_PRESCALER", "uint16_t", "output sync prescaler"),
 
         "threading variables",
 
-        ("TH_Z_START", "threading z start", "int32_t"),
-        ("TH_X_START", "threading x start", "int32_t"),
-        ("TAN_THREAD_ANGLE", "tan of threading angle", "float"),
-        ("X_FEED", "x feed", "int32_t"),
-        ("RUNOUT_DISTANCE", "runout distance", "float"),
-        ("RUNOUT_DEPTH", "runout depth", "float"),
+        ("TH_Z_START", "int32_t", "threading z start"),
+        ("TH_X_START", "int32_t", "threading x start"),
+        ("TAN_THREAD_ANGLE", "float", "tan of threading angle"),
+        ("X_FEED", "int32_t", "x feed"),
+        ("RUNOUT_DISTANCE", "float", "runout distance"),
+        ("RUNOUT_DEPTH", "float", "runout depth"),
 
         "jog debug",
 
-        ("JOG_DEBUG", "jog interrupt debug", "char"),
+        ("JOG_DEBUG", "char", "jog interrupt debug"),
 
         "motor and speed control",
 
-        ("PWM_FREQ", "spindle speed pwm frequency", "uint_t"),
-        ("MIN_SPEED", "min speed for current range", "int16_t"),
-        ("MAX_SPEED", "max speed for current range", "int16_t"),
+        ("PWM_FREQ", "uint_t", "spindle speed pwm frequency"),
+        ("MIN_SPEED", "int16_t", "min speed for current range"),
+        ("MAX_SPEED", "int16_t", "max speed for current range"),
 
         "current operation",
 
-        ("CURRENT_OP", "current operation", "char"),
+        ("CURRENT_OP", "char", "current operation"),
 
         "global limits and home",
 
-        ("LIMIT_OVERRIDE", "override limit switches", "char"),
-        ("COMMON_LIMITS", "all limit switches one pin", "char"),
-        ("LIMITS_ENABLED", "limits enabled", "char"),
-        ("COMMON_HOME", "all home switches one pin", "char"),
+        ("LIMIT_OVERRIDE", "char", "override limit switches"),
+        ("COMMON_LIMITS", "char", "all limit switches one pin"),
+        ("LIMITS_ENABLED", "char", "limits enabled"),
+        ("COMMON_HOME", "char", "all home switches one pin"),
 
         "z limits and home",
 
-        ("Z_LIM_ENA", "z limit enable", "char"),
-        ("Z_LIM_NEG_INV", "z negative limit invert", "char"),
-        ("Z_LIM_POS_INV", "z Positive limit Invert", "char"),
+        ("Z_LIM_ENA", "char", "z limit enable"),
+        ("Z_LIM_NEG_INV", "char", "z negative limit invert"),
+        ("Z_LIM_POS_INV", "char", "z Positive limit Invert"),
 
-        ("Z_HOME_ENA", "z home enable", "char"),
-        ("Z_HOME_INV", "z home invert", "char"),
+        ("Z_HOME_ENA", "char", "z home enable"),
+        ("Z_HOME_INV", "char", "z home invert"),
 
         "x limits and home",
 
-        ("X_LIM_ENA", "x limit enable", "char"),
-        ("X_LIM_NEG_INV", "x negative limit invert", "char"),
-        ("X_LIM_POS_INV", "x Positive limit Invert", "char"),
+        ("X_LIM_ENA", "char", "x limit enable"),
+        ("X_LIM_NEG_INV", "char", "x negative limit invert"),
+        ("X_LIM_POS_INV", "char", "x Positive limit Invert"),
 
-        ("X_HOME_ENA", "x home enable", "char"),
-        ("X_HOME_INV", "x home invert", "char"),
+        ("X_HOME_ENA", "char", "x home enable"),
+        ("X_HOME_INV", "char", "x home invert"),
 
         "e stop",
 
-        ("E_STOP_ENA", "enable estop", "char"),
-        ("E_STOP_INV", "invert estop signal", "char"),
+        ("E_STOP_ENA", "char", "enable estop"),
+        ("E_STOP_INV", "char", "invert estop signal"),
 
         "command pause",
 
-        ("CMD_PAUSED", "move commands paused", "char"),
+        ("CMD_PAUSED", "char", "move commands paused"),
 
         "arc parameters",
 
-        ("ARC_RADIUS", "arc radius", "float"),
-        ("ARC_X_CENTER", "arc x center", "int"),
-        ("ARC_Z_CENTER", "arc z center", "int"),
-        ("ARC_X_START", "arc x start", "int"),
-        ("ARC_Z_START", "arc z start", "int"),
-        ("ARC_X_END", "arc x center", "int"),
-        ("ARC_Z_END", "arc z center", "int"),
+        ("ARC_RADIUS", "float", "arc radius"),
+        ("ARC_X_CENTER", "int", "arc x center"),
+        ("ARC_Z_CENTER", "int", "arc z center"),
+        ("ARC_X_START", "int", "arc x start"),
+        ("ARC_Z_START", "int", "arc z start"),
+        ("ARC_X_END", "int", "arc x center"),
+        ("ARC_Z_END", "int", "arc z center"),
 
-        ("MEGA_VFD", "mega vfd speed mode", "char"),
-        ("MEGA_SIM", "mega encoder lines", "char"),
+        ("MEGA_VFD", "char", "mega vfd speed mode"),
+        ("MEGA_SIM", "char", "mega encoder lines"),
 
-        ("USB_ENA", "enable usb", "char"),
+        ("USB_ENA", "char", "enable usb"),
 
-        ("DRO_STEP", "step pulse drives dro", "char"),
+        ("DRO_STEP", "char", "step pulse drives dro"),
         # ("", "", ""),
         # ("", "", ""),
 
-        ("MAX_PARM", "maximum parameter", "int16_t")
+        ("MAX_PARM", "int16_t", "maximum parameter")
+        # ->
     )
 
 syncParmList = \
     (
-        ("SYNC_CYCLE", "sync cycle length", "uint16_t"),
-        ("SYNC_OUTPUT", "sync outputs per cycle", "uint16_t"),
-        ("SYNC_PRESCALER", "sync prescaler", "uint16_t"),
-        ("SYNC_ENCODER", "sync encoder pulses", "uint16_t"),
-        ("SYNC_MAX_PARM", "sync maximum parameter", "int16_t"),
+        # <-
+        ("SYNC_CYCLE", "uint16_t", "sync cycle length"),
+        ("SYNC_OUTPUT", "uint16_t", "sync outputs per cycle"),
+        ("SYNC_PRESCALER", "uint16_t", "sync prescaler"),
+        ("SYNC_ENCODER", "uint16_t", "sync encoder pulses"),
+        ("SYNC_MAX_PARM", "int16_t", "sync maximum parameter"),
+        # ->
     )
 
 megaParmList = \
     (
-        ("M_PARM_RPM", "rpm value", "int"),
-        ("M_PARM_VFD_ENA", "", "char"),
-        ("M_PARM_PWM_CFG", "", "char"),
-        ("M_PARM_ENC_TEST", "", "char"),
-        ("M_PARM_ENC_LINES", "", "int"),
-        ("M_PARM_MAX_PARM", "mega maximum parameter", "char"),
+        # <-
+        ("M_PARM_RPM", "int", "rpm value"),
+        ("M_PARM_VFD_ENA", "char", ""),
+        ("M_PARM_PWM_CFG", "char", ""),
+        ("M_PARM_ENC_TEST", "char", ""),
+        ("M_PARM_ENC_LINES", "int", ""),
+        ("M_PARM_MAX_PARM", "char", "mega maximum parameter"),
         # ("M_PARM_", "", "char"),
+        # ->
     )
 
 riscvParmList = \
     (
-        ("R_MV_STATUS", "move status",              "uint32_t"),
-        ("R_JOG_PAUSE", "jog pause",                "int"),
-        ("R_CUR_PASS",  "current pass",             "int"),
-        ("R_CFG_VAL",   "fpga configuration value", "int"),
-        ("R_P_RPM",     "spindle rpm",              "int"),
-        ("R_PWM_DIV",   "pwm divider",               "int"),
-        ("R_PWM_CTR",   "pwm counter maxy",         "int"),
-        ("R_P_X_LOC",   "", "int"),
-        ("R_P_Z_LOC",   "", "int"),
-        ("R_P_X_DRO",   "", "int"),
-        ("R_P_Z_DRO",   "", "int"),
-        ("R_X_JOG_INC", "", "int"),
-        ("R_Z_JOG_INC", "", "int"),
+        # <-
+        ("R_MV_STATUS", "uint32_t", "move status"),
+        ("R_JOG_PAUSE", "int", "jog pause"),
+        ("R_CUR_PASS", "int",  "current pass"),
+        ("R_CFG_VAL", "int",   "fpga configuration value"),
+        ("R_P_RPM", "int",     "spindle rpm"),
+        ("R_PWM_DIV", "int",   "pwm divider"),
+        ("R_PWM_CTR", "int",   "pwm counter maxy"),
+        ("R_P_X_LOC", "int",   ""),
+        ("R_P_Z_LOC", "int",   ""),
+        ("R_P_X_DRO", "int",   ""),
+        ("R_P_Z_DRO", "int",   ""),
+        ("R_X_JOG_INC", "int", ""),
+        ("R_Z_JOG_INC", "int", ""),
         # (R_PARM_, "", ""),
         # (R_PARM_, "", ""),
         # (R_PARM_, "", ""),
+        # ->
     )
 
 regList = \
     (
+        # <-
         "common move command bits",
 
         ("CMD_MSK",     "(7 << 0)", "move mask"),
-        
+
         ("CMD_MOV",     "(1 << 0)", "move a set distance"),
         ("CMD_JOG",     "(2 << 0)", "move while cmd are present"),
         ("CMD_SYN",     "(3 << 0)", "move dist synchronized to rotation"),
@@ -900,7 +919,7 @@ regList = \
         ("SYN_LEFT",    "(1 << 4)", "start sync left"),
         ("SYN_TAPER",   "(1 << 5)", "taper on other axis"),
 
-        ("DIST_MODE",   "(1 << 6)", "distance update mode"),        
+        ("DIST_MODE",   "(1 << 6)", "distance update mode"),
         ("FIND_HOME",   "(1 << 7)", "find home"),
         ("CLEAR_HOME",  "(1 << 8)", "move off of home"),
         ("FIND_PROBE",  "(1 << 9)", "find probe"),
@@ -959,12 +978,12 @@ regList = \
         ("MV_READ_Z",       "(1 << 2)",  "pause z may change"),
         ("MV_ACTIVE",       "(1 << 3)",  "movement active"),
         ("MV_DONE",         "(1 << 4)",  "movement active"),
-        ("MV_XLIMIT",       "(1 << 5)",  "at limit switch"),
-        ("MV_ZLIMIT",       "(1 << 6)",  "at limit switch"),
-        ("MV_XHOME_ACTIVE", "(1 << 7)",  "x home active"),
-        ("MV_XHOME",        "(1 << 8)",  "x home success"),
-        ("MV_ZHOME_ACTIVE", "(1 << 9)",  "z home active"),
-        ("MV_ZHOME",        "(1 << 10)", "z home success"),
+        ("MV_X_LIMIT",       "(1 << 5)",  "at limit switch"),
+        ("MV_Z_LIMIT",       "(1 << 6)",  "at limit switch"),
+        ("MV_X_HOME_ACTIVE", "(1 << 7)",  "x home active"),
+        ("MV_X_HOME",        "(1 << 8)",  "x home success"),
+        ("MV_Z_HOME_ACTIVE", "(1 << 9)",  "z home active"),
+        ("MV_Z_HOME",        "(1 << 10)", "z home success"),
         ("MV_MEASURE",      "(1 << 11)", "pause for measurement"),
         ("MV_ESTOP",        "(1 << 12)", "estop"),
 
@@ -988,26 +1007,13 @@ regList = \
         ("PARM_START", "0", "start of operation"),
         ("PARM_DONE", "1", "done operation"),
 
-        "isr active flags",
-
-        ("ARC_SHIFT", (6), "shift for arc syn"),
-
-        ("SYNC_ACTIVE_EXT", "(1 << 0)", "active for sync board"),
-        ("SYNC_ACTIVE_TMR", "(1 << 1)", "active for internal timer"),
-        ("SYNC_ACTIVE_ENC", "(1 << 2)", "active for encoder"),
-        ("SYNC_ACTIVE_STEP", "(1 << 3)", "active for stepper"),
-        ("SYNC_ACTIVE_TAPER", "(1 << 4)", "active for taper"),
-        ("SYNC_ACTIVE_THREAD", "(1 << 5)", "active for threading"),
-        ("ARC_ACTIVE_EXT", "(SYNC_ACTIVE_EXT << ARC_SHIFT)", "arc sync board"),
-        ("ARC_ACTIVE_TMR", "(SYNC_ACTIVE_TMR << ARC_SHIFT)", "arc int tmr"),
-        ("ARC_ACTIVE_ENC", "(SYNC_ACTIVE_ENC << ARC_SHIFT)", "arc encoder"),
-        ("ARC_ACTIVE_STEP", "(SYNC_ACTIVE_STEP << ARC_SHIFT)", "arc stepper"),
-
         "encoder direct flags",
 
         ("Z_ENCODER_DIRECT", "(1 << 0)", "z sync directly from encoder"),
         ("X_ENCODER_DIRECT", "(1 << 1)", "x sync directly from encoder"),
 
+        # ("", "()", ""),
+        # ("", "", ""),
         "point by point movement commands",
 
         ("PCMD_INCX_HLDZ_S1", "(0 << 0)", "step x hold z then step 1"),
@@ -1025,23 +1031,39 @@ regList = \
 
         ("PCMD_CMD_MASK", "(7 << 0)", "command mask"),
 
-        ("PCMD_RPT_SHIFT", "(3)", "repeat mask"),
-        ("PCMD_RPT_SHORT", "(32)", "repeat short"),
-        ("PCMD_RPT_MASK", "(0x1f << PCMD_RPT_SHIFT)", "repeat shift"),
-
         ("PEXT_OFFSET", "(8)", ""),
         ("PEXT_INCX", "(0 << 0)", "step x"),
         ("PEXT_INCZ", "(1 << 0)", "step z"),
         ("PEXT_INCX_INCZ", "(2 << 0)", "step x and z"),
         ("PEXT_INCX2_INCZ", "(3 << 0)", "step x 2 step z"),
+        # ->
 
-        # ("", "()", ""),
-        # ("", "", ""),
+        # <-
+        ("PCMD_RPT_SHIFT", "(3)", "repeat mask"),
+        ("PCMD_RPT_SHORT", "(32)", "repeat short"),
+        ("PCMD_RPT_MASK", "(0x1f << PCMD_RPT_SHIFT)", "repeat shift"),
+
+        "isr active flags",
+
+        ("A_S", (6), "shift for arc syn"),
+
+        ("SYNC_ACTIVE_EXT", "(1 << 0)", "sync board"),
+        ("SYNC_ACTIVE_TMR", "(1 << 1)", "internal timer"),
+        ("SYNC_ACTIVE_ENC", "(1 << 2)", "encoder"),
+        ("SYNC_ACTIVE_STEP", "(1 << 3)", "stepper"),
+        ("SYNC_ACTIVE_TAPER", "(1 << 4)", "taper"),
+        ("SYNC_ACTIVE_THREAD", "(1 << 5)", "threading"),
+        ("ARC_ACTIVE_EXT", "(SYNC_ACTIVE_EXT << A_S)", "arc sync board"),
+        ("ARC_ACTIVE_TMR", "(SYNC_ACTIVE_TMR << A_S)", "arc int tmr"),
+        ("ARC_ACTIVE_ENC", "(SYNC_ACTIVE_ENC << A_S)", "arc encoder"),
+        ("ARC_ACTIVE_STEP", "(SYNC_ACTIVE_STEP << A_S)", "arc stepper"),
+        # ->
     )
 
 # ("", 0, 0, ""),
 fpgaEncList = \
     (
+        # <-
         ("F_Noop", 0, 1, 0, "register 0"),
 
         ("F_Ld_Run_Ctl",   n, 1, 1, "load run control register"),
@@ -1054,10 +1076,12 @@ fpgaEncList = \
 
         ("F_Ld_Dbg_Freq",  n, 1, 2, "load debug frequency"),
         ("F_Ld_Dbg_Count", n, 1, 2, "load debug clocks"),
+        # ->
     )
 
 fpgaLatheList = \
     (
+        # <-
         "phase control",
 
         ("phaseCtl",),
@@ -1132,7 +1156,7 @@ fpgaLatheList = \
         # ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
         # ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
         # ("F_Ld_Mpg_Div",     n, 1, 4, "'LMV' Mpg div values"),
-        
+
         ("F_Ld_Dro",         n, 1, 4, "'LDR' axis dro"),
         ("F_Ld_Dro_End",     n, 1, 4, "'LDE' axis dro end"),
         ("F_Ld_Dro_Limit",   n, 1, 4, "'LDL' axis dro decel limit"),
@@ -1216,10 +1240,12 @@ fpgaLatheList = \
         ("F_XAxis_Base",    n, "axisCtl",  n, "'X' x axis registers"),
         ("F_Spindle_Base",  n, "spindle",  n, "'S' spindle registers"),
         ("F_Cmd_Max",       n, n,          n, "number of commands"),
+        # ->
     )
 
 xilinxList = \
     (
+        # <-
         "skip register zero",
 
         ("XNOOP", "register 0"),
@@ -1316,10 +1342,12 @@ xilinxList = \
 
         ("XRDZCTL", "read control registers"),
         ("XRDXCTL", "read control registers")
+        # ->
     )
 
 xilinxBitList = \
     (
+        # <-
         "z control register",
 
         ("zCtl",),
@@ -1393,10 +1421,12 @@ xilinxBitList = \
         ("s_Enc_Dir_In", 1, 5, "encoder direction in"),
 
         ""
+        # ->
     )
 
 fpgaEncBitList = \
     (
+        # <-
         "run control register",
 
         ("rCtl",),
@@ -1413,12 +1443,14 @@ fpgaEncBitList = \
         ("DbgCount", 1, 3, "gen count num dbg clks"),
 
         ""
+        # ->
     )
 
 fpgaLatheBitList = \
     (
+        # <-
         "RiscV control register",
-        
+
         ("riscvCtl",),
         ("riscvData",     1, 0,  "riscv data active"),
         ("riscvSPI",      1, 1,  "riscv spi active"),
@@ -1461,7 +1493,7 @@ fpgaLatheBitList = \
         ("outPin14",  1, 1,  "pin 14"),
         ("outPin17",  1, 2,  "pin 17"),
         # ("",  , , ""),
-        
+
         "pin out signals",
         ("pinOut",),
         ("pinOut2",   1,  0, ""),
@@ -1616,6 +1648,7 @@ fpgaLatheBitList = \
         # "",
         # ("",),
         # ("",  , , ""),
+        # ->
     )
 
 enumList = \
@@ -1646,6 +1679,7 @@ enumList = \
 
         "axis control states",
 
+        # <-
         "enum axis_States",
         "{",
         ("AXIS_IDLE = 0", "idle"),
@@ -1656,9 +1690,11 @@ enumList = \
         ("AXIS_DONE = 5", "clean up state"),
         ("AXIS_STATES = 6", "number of states"),
         "};",
+        # ->
 
         "move control states",
 
+        # <-
         "enum m_States",
         "{",
         ("M_IDLE", "idle state"),
@@ -1677,9 +1713,11 @@ enumList = \
         ("M_WAIT_SAFE_Z", "wait for move to safe z to complete"),
         ("M_WAIT_ARC", "wait for arc move to complete"),
         "};",
+        # ->
 
         "move control commands",
 
+        # <-
         "enum m_Commands",
         "{",
         ("Q_MOVE_Z", "move z"),
@@ -1714,9 +1752,11 @@ enumList = \
         ("Q_MOVE_ARC", "move in an arc"),
         ("Q_OP_DONE", "operation done"),
         "};",
+        # ->
 
         "move control operation",
 
+        # <-
         "enum operations",
         "{",
         ("OP_TURN", "turn"),
@@ -1726,9 +1766,11 @@ enumList = \
         ("OP_THREAD", "thread"),
         ("OP_ARC", "arc"),
         "};",
+        # ->
 
         "home control states",
 
+        # <-
         "enum h_States",
         "{",
         ("H_IDLE", "idle state"),
@@ -1738,12 +1780,14 @@ enumList = \
         ("H_SLOW", "found home slowly"),
         # ("H_", ""),
         "};",
+        # ->
 
         "debug axis message types",
 
+        # <-
         "enum D_Axis_Message",
         "{",
-        ("D_BASE", "axis base"),        
+        ("D_BASE", "axis base"),
         ("D_MVCM", "move command"),
         ("D_ACTL", "axisctl"),
         ("D_MOV",  "move location"),
@@ -1767,9 +1811,11 @@ enumList = \
         ("D_IDXP", "position at index pulse"),
         ("D_AMAX", "axis maximum"),
         "};",
+        # ->
 
         "debug message types",
 
+        # <-
         "enum d_Message",
         "{",
         ("D_PASS",  "'PASS' pass done"),
@@ -1778,7 +1824,7 @@ enumList = \
         ("D_HST",   "'HST ' home state"),
         ("D_MSTA",  "'MSTA' move state"),
         ("D_MCMD",  "'MCMD' move command"),
-        
+
         ("D_XBASE", "'XBAS' x base"),
         ("D_XMVCM", "'XMVC' x move command"),
         ("D_XACTL", "'XCTL' x axis ctl"),
@@ -1827,9 +1873,11 @@ enumList = \
         ("D_MAX",   "'MAX ' debug maximum"),
 
         "};",
+        # ->
 
         "pylathe update events",
 
+        # <-
         "enum ev_Events",
         "{",
         ("EV_ZLOC", "z location"),
@@ -1840,9 +1888,11 @@ enumList = \
         ("EV_MAX", "maximum event"),
         # ("EV_", ""),
         "};",
+        # ->
 
         "turning sync selector",
 
+        # <-
         "enum sel_Turn c",
         "{",
         ("SEL_TU_SPEED", "Motor Speed"),
@@ -1852,9 +1902,11 @@ enumList = \
         ("SEL_TU_ESYN", "Ext Syn"),
         ("SEL_TU_SYN", "Sync"),
         "};",
+        # ->
 
         "threading sync selector",
 
+        # <-
         "enum sel_Thread c",
         "{",
         ("SEL_TH_NO_ENC", "No Encoder"),
@@ -1865,9 +1917,11 @@ enumList = \
         ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),
         ("SEL_TH_SYN", "Syn, Runout Syn"),
         "};",
+        # ->
 
         "arc config selector",
 
+        # <-
         "enum sel_Arc_Type c",
         "{",
         ("SEL_ARC_END", "End"),
@@ -1877,9 +1931,11 @@ enumList = \
         ("SEL_ARC_SMALL_STEM", "Small Stem"),
         ("SEL_ARC_LARGE_STEM", "Large Stem"),
         "};",
+        # ->
 
         "mpg control states",
-        
+
+        # <-
         "enum mpg_State c",
         "{",
         ("MPG_DISABLED",        "'DS' disabled"),
@@ -1887,9 +1943,11 @@ enumList = \
         ("MPG_DIR_CHANGE_WAIT", "'DC' wait for direction change"),
         ("MPG_WAIT_BACKLASH",   "'WB' wait for backlash"),
         "};",
+        # ->
 
         "riscv actions",
-        
+
+        # <-
         "enum riscv_Cmd c",
         "{",
         ("R_NONE",        "'NO' no operation"),
@@ -1944,9 +2002,11 @@ enumList = \
         # ("R_", ""),
         # ("R_", ""),
         "};",
+        # ->
 
         "riscv axis name",
 
+        # <-
         "enum Riscv_Axis_Name_Type c",
         "{",
         ("RA_NONE", ""),
@@ -1954,9 +2014,11 @@ enumList = \
         ("RA_X_AXIS", ""),
         # ("RS_", ""),
         "};",
+        # ->
 
         "riscv data",
-        
+
+        # <-
         "enum Riscv_Data_Type c",
         "{",
         ("RD_NONE", ""),
@@ -1964,9 +2026,11 @@ enumList = \
         ("RD_X_BACKLASH", ""),
         # ("RD_", ""),
         "};",
+        # ->
 
         "accel types",
 
+        # <-
         "enum accel_Type c",
         "{",
          ("A_TURN  = 0", "'TU'"),
@@ -1975,9 +2039,11 @@ enumList = \
          ("A_JOG   = 3", "'JG'"),
          ("A_SLOW  = 4", "'JS'"),
         "};",
+        # ->
 
         "riscv accel types",
 
+        # <-
         "enum axis_Accel_Type c",
         "{",
          ("RP_Z_TURN  = 0", "'ZT'"),
@@ -1992,17 +2058,21 @@ enumList = \
          ("RP_X_SLOW  = 9", "'XS'"),
          ("RP_MAX     = 10", ""),
         "};",
+        # ->
 
         "riscv accel axis base index",
 
+        # <-
         "enum accel_Base c",
         "{",
          ("RP_Z_BASE  = 0", ""),
          ("RP_X_BASE  = 5", ""),
         "};",
+        # ->
 
         "riscv axis states",
 
+        # <-
         "enum Riscv_Axis_State_Type c",
         "{",
         ("RS_IDLE",          ""),
@@ -2011,9 +2081,11 @@ enumList = \
         ("RS_WAIT_TAPER",    ""),
         # ("RS_", ""),
         "};",
+        # ->
 
         "riscv accel parameters",
 
+        # <-
         "enum Riscv_Sync_Parm_Type c",
         "{",
         ("RP_INITIAL_SUM", ""),
@@ -2024,9 +2096,11 @@ enumList = \
         ("RP_FREQ_DIV",    ""),
         # ("RP_", ""),
         "};",
-        
+        # ->
+
         "riscv run wait states",
 
+        # <-
         "enum riscv_Run_Wait c",
         "{",
         ("RW_NONE",       "'NO' none"),
@@ -2037,9 +2111,11 @@ enumList = \
         ("RW_WAIT_Z",     "'WZ' wait z done"),
         # ("RW_", "''"),
         "};",
+        # ->
 
         "commands in ctlbits",
 
+        # <-
         "enum move_Cmd c",
         "{",
         ("M_CMD_NONE  = 0", "no command"),
@@ -2050,9 +2126,11 @@ enumList = \
         ("M_CMD_SPEED = 5", "jog at speed"),
         ("M_JOG_SLOW  = 6", "slow jog for home or probe"),
         "};",
+        # ->
 
         "riscv run wait states",
 
+        # <-
         "enum move_Bit c",
         "{",
         ("M_RSV_0       = 0",  "no command"),
@@ -2072,9 +2150,11 @@ enumList = \
         ("M_DRO_UPD     = 12", "update internal position from dro"),
         ("M_BIT_MAX     = 13", "number of bits"),
         "};",
+        # ->
 
         "movement status",
 
+        # <-
         "enum mv_Status_Bits c",
         "{",
         ("R_MV_PAUSE        = 0",  "'PA' movement paused"),
@@ -2092,9 +2172,11 @@ enumList = \
         ("R_MV_ESTOP        = 12", "'ES' estop"),
         ("R_MV_MAX          = 13", "number of bits"),
         "};",
-        
+        # ->
+
         "pause flags",
 
+        # <-
         "enum pause_Bits c",
         "{",
         ("R_DISABLE_JOG     = 0", "'DJ' jogging disabled"),
@@ -2104,12 +2186,14 @@ enumList = \
         ("R_PAUSE_READ_X    = 4", "'RZ' read x after pause"),
         ("R_PAUSE_MAX       = 5", "number of bits"),
         "};",
+        # ->
     )
 
 megaEnumList = \
     (
         "mega poll response bits",
 
+        # <-
         "enum poll_Mega",
         "{",
         ("M_POLL_ESTOP_NO", "estop no in"),
@@ -2125,15 +2209,18 @@ megaEnumList = \
         ("M_POLL_ESTOP_PC", "estop pc"),
         # ("M_POLL_", ""),
         "};",
+        # ->
 
         "mega vfd speed selector",
 
+        # <-
         "enum vfdSpeed c",
         "{",
         ("MEGA_SLOW_PWM", "Slow PWM"),
         ("MEGA_FAST_PWM", "Fast PWM"),
         ("MEGA_DIRECT_RPM", "Set RPM"),
         "};",
+        # ->
     )
 
 xilinxEncList = \
