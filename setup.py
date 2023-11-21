@@ -281,7 +281,7 @@ class Setup():
             data = parmList[i]
             # if not isinstance(data, basestring):
             if not isinstance(data, str):
-                (regName, regComment, varType) = data
+                (regName, varType, regComment) = data
                 tmp = regName.split("_")
                 if len(tmp) > 1:
                     varName = ""

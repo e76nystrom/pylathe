@@ -59,12 +59,12 @@ cfgSpSyncBoard   =  50          # config spindle sync board
 cfgSpUseEncoder  =  51          # config use spindle encoder for threading
 cfgSyncSPI       =  52          # config sync comm through spi
 cfgTaperCycleDist =  53         # config taper cycle distance
-cfgTestMode      =  54          # conifg test mode
+cfgTestMode      =  54          # config test mode
 cfgTestRPM       =  55          # config fpga test rpm value
 cfgTurnSync      =  56          # config for turning synchronization
 cfgThreadSync    =  57          # config for threading synchronization
 
-# communications cxonfig
+# communications config
 
 commPort         =  58          # comm port
 commRate         =  59          # comm baud rate
@@ -118,8 +118,8 @@ jogZPos          =  91          # jog
 
 # jog panel config
 
-jpSurfaceSpeed   =  92          # jogpanle fpm or rpm
-jpXDroDiam       =  93          # jogpanel x dro diameter
+jpSurfaceSpeed   =  92          # jog panel fpm or rpm
+jpXDroDiam       =  93          # jog panel x dro diameter
 
 # jog time parameters
 
@@ -157,7 +157,7 @@ spJTimeMax       = 112          # spindle jog max
 spMaxRPM         = 113          # spindle jog max rpm
 spMicroSteps     = 114          # spindle micro steps
 spMinRPM         = 115          # spindle minimum rpm
-spMotorSteps     = 116          # spindle motor stpes per revolution
+spMotorSteps     = 116          # spindle motor steps per revolution
 spMotorTest      = 117          # use stepper drive to test motor
 spPWMFreq        = 118          # spindle pwm frequency
 spMegaSim        = 119          # spindle use mega to simulate index and encoder

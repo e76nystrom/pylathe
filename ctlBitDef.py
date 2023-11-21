@@ -72,12 +72,12 @@ MV_READ_X        = (1 << 1)     # 0x02 pause x may change
 MV_READ_Z        = (1 << 2)     # 0x04 pause z may change
 MV_ACTIVE        = (1 << 3)     # 0x08 movement active
 MV_DONE          = (1 << 4)     # 0x10 movement active
-MV_XLIMIT        = (1 << 5)     # 0x20 at limit switch
-MV_ZLIMIT        = (1 << 6)     # 0x40 at limit switch
-MV_XHOME_ACTIVE  = (1 << 7)     # 0x80 x home active
-MV_XHOME         = (1 << 8)     # 0x100 x home success
-MV_ZHOME_ACTIVE  = (1 << 9)     # 0x200 z home active
-MV_ZHOME         = (1 << 10)    # 0x400 z home success
+MV_X_LIMIT       = (1 << 5)     # 0x20 at limit switch
+MV_Z_LIMIT       = (1 << 6)     # 0x40 at limit switch
+MV_X_HOME_ACTIVE = (1 << 7)     # 0x80 x home active
+MV_X_HOME        = (1 << 8)     # 0x100 x home success
+MV_Z_HOME_ACTIVE = (1 << 9)     # 0x200 z home active
+MV_Z_HOME        = (1 << 10)    # 0x400 z home success
 MV_MEASURE       = (1 << 11)    # 0x800 pause for measurement
 MV_ESTOP         = (1 << 12)    # 0x1000 estop
 
@@ -101,20 +101,6 @@ TH_RUNOUT        = (1 << 3)     # 0x08 runout with thread
 PARM_START       = 0            # 0x00 start of operation
 PARM_DONE        = 1            # 0x01 done operation
 
-# isr active flags
-
-ARC_SHIFT        = 6            # 0x06 shift for arc syn
-SYNC_ACTIVE_EXT  = (1 << 0)     # 0x01 active for sync board
-SYNC_ACTIVE_TMR  = (1 << 1)     # 0x02 active for internal timer
-SYNC_ACTIVE_ENC  = (1 << 2)     # 0x04 active for encoder
-SYNC_ACTIVE_STEP = (1 << 3)     # 0x08 active for stepper
-SYNC_ACTIVE_TAPER = (1 << 4)    # 0x10 active for taper
-SYNC_ACTIVE_THREAD = (1 << 5)   # 0x20 active for threading
-ARC_ACTIVE_EXT   = (SYNC_ACTIVE_EXT << ARC_SHIFT)# 0x40 arc sync board
-ARC_ACTIVE_TMR   = (SYNC_ACTIVE_TMR << ARC_SHIFT)# 0x80 arc int tmr
-ARC_ACTIVE_ENC   = (SYNC_ACTIVE_ENC << ARC_SHIFT)# 0x100 arc encoder
-ARC_ACTIVE_STEP  = (SYNC_ACTIVE_STEP << ARC_SHIFT)# 0x200 arc stepper
-
 # encoder direct flags
 
 Z_ENCODER_DIRECT = (1 << 0)     # 0x01 z sync directly from encoder
@@ -134,11 +120,25 @@ PCMD_X_NEG       = (1 << 0)     # 0x01 mov x negative
 PCMD_Z_NEG       = (1 << 1)     # 0x02 mov z negative
 PCMD_DIR_FLAG    = (1 << 2)     # 0x04 direction flag
 PCMD_CMD_MASK    = (7 << 0)     # 0x07 command mask
-PCMD_RPT_SHIFT   = (3)          # 0x03 repeat mask
-PCMD_RPT_SHORT   = (32)         # 0x20 repeat short
-PCMD_RPT_MASK    = (0x1f << PCMD_RPT_SHIFT)# 0xf8 repeat shift
 PEXT_OFFSET      = (8)          # 0x08 
 PEXT_INCX        = (0 << 0)     # 0x00 step x
 PEXT_INCZ        = (1 << 0)     # 0x01 step z
 PEXT_INCX_INCZ   = (2 << 0)     # 0x02 step x and z
 PEXT_INCX2_INCZ  = (3 << 0)     # 0x03 step x 2 step z
+PCMD_RPT_SHIFT   = (3)          # 0x03 repeat mask
+PCMD_RPT_SHORT   = (32)         # 0x20 repeat short
+PCMD_RPT_MASK    = (0x1f << PCMD_RPT_SHIFT)# 0xf8 repeat shift
+
+# isr active flags
+
+A_S              = 6            # 0x06 shift for arc syn
+SYNC_ACTIVE_EXT  = (1 << 0)     # 0x01 sync board
+SYNC_ACTIVE_TMR  = (1 << 1)     # 0x02 internal timer
+SYNC_ACTIVE_ENC  = (1 << 2)     # 0x04 encoder
+SYNC_ACTIVE_STEP = (1 << 3)     # 0x08 stepper
+SYNC_ACTIVE_TAPER = (1 << 4)    # 0x10 taper
+SYNC_ACTIVE_THREAD = (1 << 5)   # 0x20 threading
+ARC_ACTIVE_EXT   = (SYNC_ACTIVE_EXT << A_S)# 0x40 arc sync board
+ARC_ACTIVE_TMR   = (SYNC_ACTIVE_TMR << A_S)# 0x80 arc int tmr
+ARC_ACTIVE_ENC   = (SYNC_ACTIVE_ENC << A_S)# 0x100 arc encoder
+ARC_ACTIVE_STEP  = (SYNC_ACTIVE_STEP << A_S)# 0x200 arc stepper
