@@ -4,8 +4,7 @@ n = None
 
 configList = \
     (
-        # <-
-        # -> len 2 items 288 [ 19 52]
+        # <- len 2 items 288 [ 19 52]
         "arc panel",
 
         ('arcAddFeed',        'arc '),
@@ -364,12 +363,12 @@ configList = \
         ('zSvDROOffset',      'z axis '),
 
         ('cfgJogDebug',       'debug jogging'),
+        # ->
     )
 
 strList = \
     (
-        # <-
-        # -> len 2 items 19 [ 20 41]
+        # <- len 2 items 19 [ 20 41]
         ("STR_OP_NOT_ACTIVE",  "Operation Not Active"),
         ("STR_OP_IN_PROGRESS", "Operation In Progress"),
         ("STR_NOT_PAUSED",     "Not Paused"),
@@ -389,12 +388,12 @@ strList = \
         ("STR_PROBE_FAIL",     "Probe Fail"),
         ("STR_STOPPED",        "Stopped"),
         ("STR_CLR",            ""),
+        # ->
     )
 
 cmdList = \
     (
-        # <-
-        # -> len 3 items 55 [ 21 18 36]
+        # <- len 3 items 55 [ 21 18 36]
         "z motion commands",
 
         ("C_Z_MOVE_ABS",        "cZMoveAbs",        "start z movement"),
@@ -486,12 +485,12 @@ cmdList = \
         ("C_READ_MEGA_VAL",     "",                 "get mega value"),
 
         ("C_SEND_DONE",         "cSendDone",        "send commands done"),
+        # ->
     )
 
 syncCmdList = \
     (
-        # <-
-        # -> len 3 items 7 [ 17  2 26]
+        # <- len 3 items 7 [ 17  2 26]
         ("SYNC_SETUP",      "", "setup sync routine"),
         ("SYNC_START",      "", "start sync routine"),
         ("SYNC_STOP",       "", "stop sync routine"),
@@ -499,12 +498,12 @@ syncCmdList = \
         ("SYNC_LOAD_MULTI", "", "load multiple parameters"),
         ("SYNC_READ_VAL",   "", "read parameters"),
         ("SYNC_POLL",       "", "poll sync board"),
+        # ->
     )
 
 megaCmdList = \
     (
-        # <-
-        # -> len 3 items 9 [ 17  2 22]
+        # <- len 3 items 9 [ 17  2 22]
         ("MEGA_NONE",       "", "no command"),
         ("MEGA_SET_RPM",    "", "set pwm for rpm"),
         ("MEGA_GET_RPM",    "", "get pwm value"),
@@ -515,12 +514,12 @@ megaCmdList = \
         ("MEGA_ENC_STOP",   "", "stop mega encoder"),
         ("MEGA_UPDATE_RPM", "", "update rpm if active"),
         # ("MEGA_", "", ""),
+        # ->
     )
 
 parmList = \
     (
-        # <-
-        # -> len 3 items 191 [ 24 10 29]
+        # <- len 3 items 191 [ 24 10 29]
         "spindle parameters",
 
         ("SP_STEPS",               "int16_t",  "spindle motor steps"),
@@ -857,19 +856,19 @@ parmList = \
 
 syncParmList = \
     (
-        # <-
-        # -> len 3 items 5 [ 16 10 24]
+        # ->
+        # <- len 3 items 5 [ 16 10 24]
         ("SYNC_CYCLE",     "uint16_t", "sync cycle length"),
         ("SYNC_OUTPUT",    "uint16_t", "sync outputs per cycle"),
         ("SYNC_PRESCALER", "uint16_t", "sync prescaler"),
         ("SYNC_ENCODER",   "uint16_t", "sync encoder pulses"),
         ("SYNC_MAX_PARM",  "int16_t",  "sync maximum parameter"),
+        # ->
     )
 
 megaParmList = \
     (
-        # <-
-        # -> len 3 items 6 [ 18  6 24]
+        # <- len 3 items 6 [ 18  6 24]
         ("M_PARM_RPM",       "int",  "rpm value"),
         ("M_PARM_VFD_ENA",   "char", ""),
         ("M_PARM_PWM_CFG",   "char", ""),
@@ -877,34 +876,41 @@ megaParmList = \
         ("M_PARM_ENC_LINES", "int",  ""),
         ("M_PARM_MAX_PARM",  "char", "mega maximum parameter"),
         # ("M_PARM_", "", "char"),
+        # ->
     )
 
 riscvParmList = \
     (
-        # <-
-        # -> len 3 items 13 [ 13 10 26]
-        ("R_MV_STATUS", "uint32_t", "move status"),
-        ("R_JOG_PAUSE", "int",      "jog pause"),
-        ("R_CUR_PASS",  "int",      "current pass"),
-        ("R_CFG_VAL",   "int",      "fpga configuration value"),
-        ("R_P_RPM",     "int",      "spindle rpm"),
-        ("R_PWM_DIV",   "int",      "pwm divider"),
-        ("R_PWM_CTR",   "int",      "pwm counter maxy"),
-        ("R_P_X_LOC",   "int",      ""),
-        ("R_P_Z_LOC",   "int",      ""),
-        ("R_P_X_DRO",   "int",      ""),
-        ("R_P_Z_DRO",   "int",      ""),
-        ("R_X_JOG_INC", "int",      ""),
-        ("R_Z_JOG_INC", "int",      ""),
+        # <- len 3 items 19 [ 19 10 27]
+        ("R_MV_STATUS",       "uint32_t", "move status"),
+        ("R_JOG_PAUSE",       "int",      "jog pause"),
+        ("R_CUR_PASS",        "int",      "current pass"),
+        ("R_CFG_VAL",         "int",      "fpga configuration value"),
+        ("R_P_RPM",           "int",      "spindle rpm"),
+        ("R_PWM_DIV",         "int",      "pwm divider"),
+        ("R_PWM_CTR",         "int",      "pwm counter maxy"),
+        ("R_P_X_LOC",         "int",      ""),
+        ("R_P_Z_LOC",         "int",      ""),
+        ("R_P_X_DRO",         "int",      ""),
+        ("R_P_Z_DRO",         "int",      ""),
+        ("R_X_JOG_INC",       "int",      ""),
+        ("R_Z_JOG_INC",       "int",      ""),
+        ("R_X_HOME_STATUS",   "int",      "x home status"),
+        ("R_Z_HOME_STATUS",   "int",      "z home status"),
+        ("R_Z_HOME_FIND_RWD", "int",      "z max homing distance"),
+        ("R_Z_HOME_FIND_REV", "int",      "z max rev homing distance"),
+        ("R_Z_HOME_BACKOFF",  "int",      "z home backoff dist"),
+        ("R_Z_HOME_SLOW",     "int",      "z home backoff dist"),
+
         # (R_PARM_, "", ""),
         # (R_PARM_, "", ""),
         # (R_PARM_, "", ""),
+        # ->
     )
 
 regList = \
     (
-        # <-
-        # -> len 3 items 80 [ 19 11 36]
+        # <- len 3 items 80 [ 19 11 36]
         "common move command bits",
 
         ("CMD_MSK",           "(7 << 0)",  "move mask"),
@@ -1038,8 +1044,8 @@ regList = \
         ("PEXT_INCX_INCZ",    "(2 << 0)",  "step x and z"),
         ("PEXT_INCX2_INCZ",   "(3 << 0)",  "step x 2 step z"),
 
-        # <-
-        # -> len 3 items 14 [ 20 27 19]
+        # ->
+        # <- len 3 items 14 [ 20 27 19]
         ("PCMD_RPT_SHIFT",     "(3)",                       "repeat mask"),
         ("PCMD_RPT_SHORT",     "(32)",                      "repeat short"),
         ("PCMD_RPT_MASK",      "(0x1f << PCMD_RPT_SHIFT)",  "repeat shift"),
@@ -1058,13 +1064,13 @@ regList = \
         ("ARC_ACTIVE_TMR",     "(SYNC_ACTIVE_TMR << A_S)",  "arc int tmr"),
         ("ARC_ACTIVE_ENC",     "(SYNC_ACTIVE_ENC << A_S)",  "arc encoder"),
         ("ARC_ACTIVE_STEP",    "(SYNC_ACTIVE_STEP << A_S)", "arc stepper"),
+        # ->
     )
 
 # ("", 0, 0, ""),
 fpgaEncList = \
     (
-        # <-
-        # -> len 5 items 8 [ 16  1  1  1 29]
+        # <- len 5 items 8 [ 16  1  1  1 29]
         ("F_Noop",         0, 1, 0, "register 0"),
 
         ("F_Ld_Run_Ctl",   n, 1, 1, "load run control register"),
@@ -1077,12 +1083,12 @@ fpgaEncList = \
 
         ("F_Ld_Dbg_Freq",  n, 1, 2, "load debug frequency"),
         ("F_Ld_Dbg_Count", n, 1, 2, "load debug clocks"),
+        # ->
     )
 
 fpgaLatheList = \
     (
-        # <-
-        # -> len 5 items 78 [ 18  1 12  1 32]
+        # <- len 5 items 78 [ 18  1 12  1 32]
         "phase control",
 
         ("phaseCtl",),
@@ -1241,12 +1247,12 @@ fpgaLatheList = \
         ("F_XAxis_Base",     n, "axisCtl",    n, "'X' x axis registers"),
         ("F_Spindle_Base",   n, "spindle",    n, "'S' spindle registers"),
         ("F_Cmd_Max",        n, n,            n, "number of commands"),
+        # ->
     )
 
 xilinxList = \
     (
-        # <-
-        # -> len 2 items 52 [ 12 24]
+        # <- len 2 items 52 [ 12 24]
         "skip register zero",
 
         ("XNOOP",      "register 0"),
@@ -1343,12 +1349,12 @@ xilinxList = \
 
         ("XRDZCTL",    "read control registers"),
         ("XRDXCTL",    "read control registers"),
+        # ->
     )
 
 xilinxBitList = \
     (
-        # <-
-        # -> len 4 items 44 [ 14  1  1 28]
+        # <- len 4 items 44 [ 14  1  1 28]
         "z control register",
 
         ("zCtl",),
@@ -1422,12 +1428,12 @@ xilinxBitList = \
         ("s_Enc_Dir_In", 1, 5, "encoder direction in"),
 
         ""
+        # ->
     )
 
 fpgaEncBitList = \
     (
-        # <-
-        # -> len 4 items 7 [ 14  1  1 24]
+        # <- len 4 items 7 [ 14  1  1 24]
         "run control register",
 
         ("rCtl",),
@@ -1444,12 +1450,12 @@ fpgaEncBitList = \
         ("DbgCount",     1, 3, "gen count num dbg clks"),
 
         ""
+        # ->
     )
 
 fpgaLatheBitList = \
     (
-        # <-
-        # -> len 4 items 123 [ 15  1  6 26]
+        # <- len 4 items 124 [ 15  1  6 26]
         "RiscV control register",
 
         ("riscvCtl",),
@@ -1551,7 +1557,8 @@ fpgaLatheBitList = \
         ("axDoneDro",     1, 1,      "axis done dro"),
         ("axDoneHome",    1, 2,      "axis done home"),
         ("axDoneLimit",   1, 3,      "axis done limit"),
-        ("axDistZero",    1, 4,      "axis distance zero"),
+        ("axHomeStatus",  1, 4,      "axis home status"),
+        ("axDistZero",    1, 5,      "axis distance zero"),
 
         "configuration control register",
 
@@ -1649,6 +1656,7 @@ fpgaLatheBitList = \
         # "",
         # ("",),
         # ("",  , , ""),
+        # ->
     )
 
 enumList = \
@@ -1679,8 +1687,7 @@ enumList = \
 
         "axis control states",
 
-        # <-
-        # -> len 2 items 7 [ 24 33]
+        # <- len 2 items 7 [ 24 33]
         "enum axis_States",
         "{",
         ("AXIS_IDLE = 0",          "idle"),
@@ -1691,11 +1698,11 @@ enumList = \
         ("AXIS_DONE = 5",          "clean up state"),
         ("AXIS_STATES = 6",        "number of states"),
         "};",
+        # ->
 
         "move control states",
 
-        # <-
-        # -> len 2 items 15 [ 21 37]
+        # <- len 2 items 15 [ 21 37]
         "enum m_States",
         "{",
         ("M_IDLE",              "idle state"),
@@ -1714,11 +1721,11 @@ enumList = \
         ("M_WAIT_SAFE_Z",       "wait for move to safe z to complete"),
         ("M_WAIT_ARC",          "wait for arc move to complete"),
         "};",
+        # ->
 
         "move control commands",
 
-        # <-
-        # -> len 2 items 31 [ 19 25]
+        # <- len 2 items 31 [ 19 25]
         "enum m_Commands",
         "{",
         ("Q_MOVE_Z",          "move z"),
@@ -1753,11 +1760,11 @@ enumList = \
         ("Q_MOVE_ARC",        "move in an arc"),
         ("Q_OP_DONE",         "operation done"),
         "};",
+        # ->
 
         "move control operation",
 
-        # <-
-        # -> len 2 items 6 [ 11  8]
+        # <- len 2 items 6 [ 11  8]
         "enum operations",
         "{",
         ("OP_TURN",   "turn"),
@@ -1767,11 +1774,11 @@ enumList = \
         ("OP_THREAD", "thread"),
         ("OP_ARC",    "arc"),
         "};",
+        # ->
 
         "home control states",
 
-        # <-
-        # -> len 2 items 5 [ 12 26]
+        # <- len 2 items 5 [ 12 26]
         "enum h_States",
         "{",
         ("H_IDLE",     "idle state"),
@@ -1781,11 +1788,11 @@ enumList = \
         ("H_SLOW",     "found home slowly"),
         # ("H_", ""),
         "};",
+        # ->
 
         "debug axis message types",
 
-        # <-
-        # -> len 2 items 23 [  8 29]
+        # <- len 2 items 23 [  8 29]
         "enum D_Axis_Message",
         "{",
         ("D_BASE", "axis base"),
@@ -1812,11 +1819,11 @@ enumList = \
         ("D_IDXP", "position at index pulse"),
         ("D_AMAX", "axis maximum"),
         "};",
+        # ->
 
         "debug message types",
 
-        # <-
-        # -> len 2 items 51 [  9 38]
+        # <- len 2 items 51 [  9 38]
         "enum d_Message",
         "{",
         ("D_PASS",  "'PASS' pass done"),
@@ -1874,11 +1881,11 @@ enumList = \
         ("D_MAX",   "'MAX ' debug maximum"),
 
         "};",
+        # ->
 
         "pylathe update events",
 
-        # <-
-        # -> len 2 items 6 [ 13 15]
+        # <- len 2 items 6 [ 13 15]
         "enum ev_Events",
         "{",
         ("EV_ZLOC",     "z location"),
@@ -1889,11 +1896,11 @@ enumList = \
         ("EV_MAX",      "maximum event"),
         # ("EV_", ""),
         "};",
+        # ->
 
         "turning sync selector",
 
-        # <-
-        # -> len 2 items 6 [ 14 13]
+        # <- len 2 items 6 [ 14 13]
         "enum sel_Turn c",
         "{",
         ("SEL_TU_SPEED", "Motor Speed"),
@@ -1903,11 +1910,11 @@ enumList = \
         ("SEL_TU_ESYN",  "Ext Syn"),
         ("SEL_TU_SYN",   "Sync"),
         "};",
+        # ->
 
         "threading sync selector",
 
-        # <-
-        # -> len 2 items 7 [ 18 21]
+        # <- len 2 items 7 [ 18 21]
         "enum sel_Thread c",
         "{",
         ("SEL_TH_NO_ENC",    "No Encoder"),
@@ -1918,11 +1925,11 @@ enumList = \
         ("SEL_TH_ESYN_RSYN", "Ext Syn, Runout Syn"),
         ("SEL_TH_SYN",       "Syn, Runout Syn"),
         "};",
+        # ->
 
         "arc config selector",
 
-        # <-
-        # -> len 2 items 6 [ 20 12]
+        # <- len 2 items 6 [ 20 12]
         "enum sel_Arc_Type c",
         "{",
         ("SEL_ARC_END",        "End"),
@@ -1932,11 +1939,11 @@ enumList = \
         ("SEL_ARC_SMALL_STEM", "Small Stem"),
         ("SEL_ARC_LARGE_STEM", "Large Stem"),
         "};",
+        # ->
 
         "mpg control states",
 
-        # <-
-        # -> len 2 items 4 [ 21 32]
+        # <- len 2 items 4 [ 21 32]
         "enum mpg_State c",
         "{",
         ("MPG_DISABLED",        "'DS' disabled"),
@@ -1944,11 +1951,11 @@ enumList = \
         ("MPG_DIR_CHANGE_WAIT", "'DC' wait for direction change"),
         ("MPG_WAIT_BACKLASH",   "'WB' wait for backlash"),
         "};",
+        # ->
 
         "riscv actions",
 
-        # <-
-        # -> len 2 items 36 [ 15 28]
+        # <- len 2 items 36 [ 15 28]
         "enum riscv_Cmd c",
         "{",
         ("R_NONE",        "'NO' no operation"),
@@ -2003,11 +2010,11 @@ enumList = \
         # ("R_", ""),
         # ("R_", ""),
         "};",
+        # ->
 
         "riscv axis name",
 
-        # <-
-        # -> len 2 items 3 [ 11  2]
+        # <- len 2 items 3 [ 11  2]
         "enum Riscv_Axis_Name_Type c",
         "{",
         ("RA_NONE",   ""),
@@ -2015,11 +2022,11 @@ enumList = \
         ("RA_X_AXIS", ""),
         # ("RS_", ""),
         "};",
+        # ->
 
         "riscv data",
 
-        # <-
-        # -> len 2 items 3 [ 15  2]
+        # <- len 2 items 3 [ 15  2]
         "enum Riscv_Data_Type c",
         "{",
         ("RD_NONE",       ""),
@@ -2027,11 +2034,11 @@ enumList = \
         ("RD_X_BACKLASH", ""),
         # ("RD_", ""),
         "};",
+        # ->
 
         "accel types",
 
-        # <-
-        # -> len 2 items 5 [ 13  6]
+        # <- len 2 items 5 [ 13  6]
         "enum accel_Type c",
         "{",
         ("A_TURN  = 0", "'TU'"),
@@ -2040,11 +2047,11 @@ enumList = \
         ("A_JOG   = 3", "'JG'"),
         ("A_SLOW  = 4", "'JS'"),
         "};",
+        # ->
 
         "riscv accel types",
 
-        # <-
-        # -> len 2 items 11 [ 17  6]
+        # <- len 2 items 11 [ 17  6]
         "enum axis_Accel_Type c",
         "{",
         ("RP_Z_TURN  = 0",  "'ZT'"),
@@ -2059,21 +2066,22 @@ enumList = \
         ("RP_X_SLOW  = 9",  "'XS'"),
         ("RP_MAX     = 10", ""),
         "};",
+        # ->
 
         "riscv accel axis base index",
 
-        # <-
-        # -> len 2 items 2 [ 16  2]
+        # <- len 2 items 2 [ 16  2]
         "enum accel_Base c",
         "{",
         ("RP_Z_BASE  = 0", ""),
         ("RP_X_BASE  = 5", ""),
         "};",
+        # ->
 
         "riscv axis states",
 
-        # <-
-        # -> len 2 items 4 [ 18  2]
+        # <- len 2 items 4 [ 18  2]
+        # <- len 2 items 4 [ 18  2]
         "enum Riscv_Axis_State_Type c",
         "{",
         ("RS_IDLE",          ""),
@@ -2082,11 +2090,11 @@ enumList = \
         ("RS_WAIT_TAPER",    ""),
         # ("RS_", ""),
         "};",
+        # ->
 
         "riscv accel parameters",
 
-        # <-
-        # -> len 2 items 6 [ 16  2]
+        # <- len 2 items 6 [ 16  2]
         "enum Riscv_Sync_Parm_Type c",
         "{",
         ("RP_INITIAL_SUM", ""),
@@ -2097,11 +2105,11 @@ enumList = \
         ("RP_FREQ_DIV",    ""),
         # ("RP_", ""),
         "};",
+        # ->
 
         "riscv run wait states",
 
-        # <-
-        # -> len 2 items 6 [ 15 25]
+        # <- len 2 items 6 [ 15 25]
         "enum riscv_Run_Wait c",
         "{",
         ("RW_NONE",       "'NO' none"),
@@ -2112,11 +2120,11 @@ enumList = \
         ("RW_WAIT_Z",     "'WZ' wait z done"),
         # ("RW_", "''"),
         "};",
+        # ->
 
         "commands in ctlbits",
 
-        # <-
-        # -> len 2 items 7 [ 17 36]
+        # <- len 2 items 7 [ 17 36]
         "enum move_Cmd c",
         "{",
         ("M_CMD_NONE  = 0", "no command"),
@@ -2127,11 +2135,11 @@ enumList = \
         ("M_CMD_SPEED = 5", "jog at speed"),
         ("M_JOG_SLOW  = 6", "slow jog for home or probe"),
         "};",
+        # ->
 
         "riscv run wait states",
 
-        # <-
-        # -> len 2 items 14 [ 20 35]
+        # <- len 2 items 14 [ 20 35]
         "enum move_Bit c",
         "{",
         ("M_RSV_0       = 0",  "no command"),
@@ -2151,11 +2159,11 @@ enumList = \
         ("M_DRO_UPD     = 12", "update internal position from dro"),
         ("M_BIT_MAX     = 13", "number of bits"),
         "};",
+        # ->
 
         "movement status",
 
-        # <-
-        # -> len 2 items 14 [ 24 28]
+        # <- len 2 items 14 [ 24 28]
         "enum mv_Status_Bits c",
         "{",
         ("R_MV_PAUSE        = 0",  "'PA' movement paused"),
@@ -2173,11 +2181,11 @@ enumList = \
         ("R_MV_ESTOP        = 12", "'ES' estop"),
         ("R_MV_MAX          = 13", "number of bits"),
         "};",
+        # ->
 
         "pause flags",
 
-        # <-
-        # -> len 2 items 6 [ 23 32]
+        # <- len 2 items 6 [ 23 32]
         "enum pause_Bits c",
         "{",
         ("R_DISABLE_JOG     = 0", "'DJ' jogging disabled"),
@@ -2187,14 +2195,14 @@ enumList = \
         ("R_PAUSE_READ_X    = 4", "'RZ' read x after pause"),
         ("R_PAUSE_MAX       = 5", "number of bits"),
         "};",
+        # ->
     )
 
 megaEnumList = \
     (
         "mega poll response bits",
 
-        # <-
-        # -> len 2 items 11 [ 19 20]
+        # <- len 2 items 11 [ 19 20]
         "enum poll_Mega",
         "{",
         ("M_POLL_ESTOP_NO",   "estop no in"),
@@ -2210,17 +2218,18 @@ megaEnumList = \
         ("M_POLL_ESTOP_PC",   "estop pc"),
         # ("M_POLL_", ""),
         "};",
+        # ->
 
         "mega vfd speed selector",
 
-        # <-
-        # -> len 2 items 3 [ 17 10]
+        # <- len 2 items 3 [ 17 10]
         "enum vfdSpeed c",
         "{",
         ("MEGA_SLOW_PWM",   "Slow PWM"),
         ("MEGA_FAST_PWM",   "Fast PWM"),
         ("MEGA_DIRECT_RPM", "Set RPM"),
         "};",
+        # ->
     )
 
 xilinxEncList = \
