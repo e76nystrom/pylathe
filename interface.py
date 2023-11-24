@@ -517,6 +517,70 @@ megaCmdList = \
         # ->
     )
 
+riscvCmdList = \
+    (
+        # <- len 3 items 35 [ 15  1 33]
+
+        # commands processed immediately
+
+        ("R_NONE",        0, "'NO' no operation"),
+
+        ("R_READ_ALL",    0, "'RA' read all status"),
+        ("R_READ_DBG",    1, "'RD' read debug info"),
+
+        ("R_SETUP",       0, "'SU' setup"),
+        ("R_RESUME",      0, "'RE' resume"),
+        ("R_STOP",        0, "'SP' stop"),
+        ("R_STOP_X",      0, "'SX' stop x"),
+        ("R_STOP_Z",      0, "'SZ' stop z"),
+        ("R_DONE",        0, "'DN' done"),
+        ("R_SEND_DONE",   0, "'ND' send data done"),
+
+        ("R_STR_SPIN",    0, "'S+' start spindle"),
+        ("R_STP_SPIN",    0, "'S-' stop spindle"),
+        ("R_UPD_SPIN",    0, "'US' update spindle speed"),
+
+        ("R_SET_LOC_X",   1, "'LX' set x loc"),
+        ("R_SET_LOC_Z",   1, "'LZ' set z loc"),
+
+        ("R_SET_ACCEL",   2, "'SA' set accel parm"),
+        ("R_SET_DATA",    2, "'SD' set data"),
+        ("R_GET_DATA",    1, "'GD' set data"),
+
+        ("R_JOG_Z",       0, "'JZ' jog move z"),
+        ("R_JOG_X",       0, "'JX' jog move x"),
+
+        ("R_HOME_Z",      1, "'MZ' home z"),
+        ("R_HOME_X",      1, "'MX' home x"),
+
+        # queued commands
+
+        ("R_OP_START",    0, "'OS' start first queued command"),
+        ("R_OP_DONE",     0, "'OD' done"),
+
+        ("R_PAUSE",       0, "'PA' pause"),
+
+        ("R_STR_SPIN_Q",  0, "'Q+' start spindle"),
+        ("R_STP_SPIN_Q",  0, "'Q-' stop spindle"),
+
+        ("R_PASS",        1, "'PS' pass"),
+
+        ("R_SET_ACCEL_Q", 2, "'SQ' set accel parm queued"),
+        ("R_SET_DATA_Q",  2, "'SD' set data"),
+
+        ("R_MOVE_Z",      2, "'MZ' move z"),
+        ("R_MOVE_X",      2, "'MX' move x"),
+
+        ("R_MOVE_REL_Z",  2, "'HZ' move rel z"),
+        ("R_MOVE_REL_X",  2, "'HX' move rel x"),
+
+        ("R_MAX_CMD",     0, "'MX' maximum command"),
+
+        # ("R_", ""),
+        # ("R_", ""),
+        # ->
+    )
+
 parmList = \
     (
         # <- len 3 items 191 [ 24 10 29]
@@ -881,29 +945,43 @@ megaParmList = \
 
 riscvParmList = \
     (
-        # <- len 3 items 19 [ 19 10 27]
-        ("R_MV_STATUS",       "uint32_t", "move status"),
-        ("R_JOG_PAUSE",       "int",      "jog pause"),
-        ("R_CUR_PASS",        "int",      "current pass"),
-        ("R_CFG_VAL",         "int",      "fpga configuration value"),
-        ("R_P_RPM",           "int",      "spindle rpm"),
-        ("R_PWM_DIV",         "int",      "pwm divider"),
-        ("R_PWM_CTR",         "int",      "pwm counter maxy"),
-        ("R_P_X_LOC",         "int",      ""),
-        ("R_P_Z_LOC",         "int",      ""),
-        ("R_P_X_DRO",         "int",      ""),
-        ("R_P_Z_DRO",         "int",      ""),
-        ("R_X_JOG_INC",       "int",      ""),
-        ("R_Z_JOG_INC",       "int",      ""),
-        ("R_X_HOME_STATUS",   "int",      "x home status"),
-        ("R_Z_HOME_STATUS",   "int",      "z home status"),
-        ("R_Z_HOME_FIND_RWD", "int",      "z max homing distance"),
-        ("R_Z_HOME_FIND_REV", "int",      "z max rev homing distance"),
-        ("R_Z_HOME_BACKOFF",  "int",      "z home backoff dist"),
-        ("R_Z_HOME_SLOW",     "int",      "z home backoff dist"),
+        # <- len 3 items 29 [ 29 10 26]
+        ("R_MV_STATUS",                 "uint32_t", "move status"),
+        ("R_JOG_PAUSE",                 "int",      "jog pause"),
+        ("R_CUR_PASS",                  "int",      "current pass"),
+        ("R_CFG_VAL",                   "int",      "fpga configuration value"),
+        ("R_P_RPM",                     "int",      "spindle rpm"),
+        ("R_PWM_DIV",                   "int",      "pwm divider"),
+        ("R_PWM_CTR",                   "int",      "pwm counter maxy"),
 
-        # (R_PARM_, "", ""),
-        # (R_PARM_, "", ""),
+        ("(z)Axis.(R_Z_)STEPS_INCH",    "int",      "steps per inch"),
+        ("(z)Axis.(R_Z_)SAVED_LOC",     "int",      "saved for que op"),
+        ("(z)Axis.(R_Z_)HOME_OFFSET",   "int",      "home offset"),
+
+        ("(z)Axis.(R_Z_)LOC",           "int",      "location"),
+        ("(z)Axis.(R_Z_)DRO",           "int",      "dro"),
+        ("(z)Axis.(R_Z_)JOG_INC",       "int",      "jog increment"),
+
+        ("(z)Axis.(R_Z_)HOME_STATUS",   "int",      "home status"),
+        ("(z)Axis.(R_Z_)HOME_FIND_FWD", "int",      "max homing distance"),
+        ("(z)Axis.(R_Z_)HOME_FIND_REV", "int",      "max rev homing distance"),
+        ("(z)Axis.(R_Z_)HOME_BACKOFF",  "int",      "home backoff dist"),
+        ("(z)Axis.(R_Z_)HOME_SLOW",     "int",      "home backoff dist"),
+
+        ("(x)Axis.(R_X_)STEPS_INCH",    "int",      "steps per inch"),
+        ("(x)Axis.(R_X_)SAVED_LOC",     "int",      "saved for que op"),
+        ("(x)Axis.(R_X_)HOME_OFFSET",   "int",      "home offset"),
+
+        ("(x)Axis.(R_X_)LOC",           "int",      "location"),
+        ("(x)Axis.(R_X_)DRO",           "int",      "dro"),
+        ("(x)Axis.(R_X_)JOG_INC",       "int",      "jog increment"),
+
+        ("(x)Axis.(R_X_)HOME_STATUS",   "int",      "home status"),
+        ("(x)Axis.(R_X_)HOME_FIND_FWD", "int",      "max homing distance"),
+        ("(x)Axis.(R_X_)HOME_FIND_REV", "int",      "max rev homing distance"),
+        ("(x)Axis.(R_X_)HOME_BACKOFF",  "int",      "home backoff dist"),
+        ("(x)Axis.(R_X_)HOME_SLOW",     "int",      "home backoff dist"),
+
         # (R_PARM_, "", ""),
         # ->
     )
@@ -1953,65 +2031,6 @@ enumList = \
         "};",
         # ->
 
-        "riscv actions",
-
-        # <- len 2 items 36 [ 15 28]
-        "enum riscv_Cmd c",
-        "{",
-        ("R_NONE",        "'NO' no operation"),
-        ("R_OP_START",    "'OS' start"),
-        ("R_OP_DONE",     "'OD' done"),
-        ("R_SETUP",       "'SU' setup"),
-        ("R_RESUME",      "'RE' resume"),
-        ("R_STOP",        "'SP' stop"),
-        ("R_STOP_X",      "'SX' stop x"),
-        ("R_STOP_Z",      "'SZ' stop z"),
-        ("R_DONE",        "'DN' done"),
-        ("R_SEND_DONE",   "'ND' send data done"),
-
-        ("R_SET_LOC_X",   "'LX' set x loc"),
-        ("R_SET_LOC_Z",   "'LZ' set z loc"),
-
-        ("R_PAUSE",       "'PA' pause"),
-        ("R_START_SPIN",  "'S+' start spindle"),
-        ("R_STOP_SPIN",   "'S-' stop spindle"),
-        ("R_UPDATE_SPIN", "'US' update spindle speed"),
-        # ("R_WAIT_Z",      "'WZ' wait z"),
-        # ("R_WAIT_X",      "'WX' wait x"),
-
-        ("R_PASS",        "'PS' pass"),
-
-        ("R_SET_ACCEL",   "'SA' set accel parm"),
-        ("R_SET_ACCEL_Q", "'SQ' set accel parm queued"),
-        ("R_SET_DATA",    "'SD' set data"),
-        ("R_GET_DATA",    "'GD' set data"),
-
-        ("R_SAVE_Z",      "'VZ' save z"),
-        ("R_SAVE_X",      "'VX' save x"),
-
-        ("R_STEPS_Z",     "'IZ' save z steps inch"),
-        ("R_STEPS_X",     "'IX' save x steps inch"),
-
-        ("R_HOFS_Z",      "'HZ' home offset z"),
-        ("R_HOFS_X",      "'HX' home offset x"),
-
-        ("R_JOG_Z",       "'JZ' jog move z"),
-        ("R_JOG_X",       "'JX' jog move x"),
-
-        ("R_MOVE_Z",      "'MZ' move z"),
-        ("R_MOVE_X",      "'MX' move x"),
-
-        ("R_MOVE_REL_Z",  "'RZ' move rel z"),
-        ("R_MOVE_REL_X",  "'RX' move rel x"),
-
-        ("R_READ_ALL",    "'RA' read all status"),
-        ("R_READ_DBG",    "'RD' read all status"),
-        ("R_MAX_CMD",     "'MX' max value"),
-        # ("R_", ""),
-        # ("R_", ""),
-        "};",
-        # ->
-
         "riscv axis name",
 
         # <- len 2 items 3 [ 11  2]
@@ -2171,12 +2190,12 @@ enumList = \
         ("R_MV_READ_Z       = 2",  "'RZ' pause z may change"),
         ("R_MV_ACTIVE       = 3",  "'AC' movement active"),
         ("R_MV_DONE         = 4",  "'DN' movement active"),
-        ("R_MV_XLIMIT       = 5",  "'XL' at limit switch"),
-        ("R_MV_ZLIMIT       = 6",  "'ZL' at limit switch"),
-        ("R_MV_XHOME_ACTIVE = 7",  "'XA' x home active"),
-        ("R_MV_XHOME        = 8",  "'XH' x home success"),
-        ("R_MV_ZHOME_ACTIVE = 9",  "'ZA' z home active"),
-        ("R_MV_ZHOME        = 10", "'ZH' z home success"),
+        ("R_MV_X_LIMIT       = 5",  "'XL' at limit switch"),
+        ("R_MV_Z_LIMIT       = 6",  "'ZL' at limit switch"),
+        ("R_MV_X_HOME_ACTIVE = 7",  "'XA' x home active"),
+        ("R_MV_X_HOME        = 8",  "'XH' x home success"),
+        ("R_MV_Z_HOME_ACTIVE = 9",  "'ZA' z home active"),
+        ("R_MV_Z_HOME        = 10", "'ZH' z home success"),
         ("R_MV_MEASURE      = 11", "'MS' pause for measurement"),
         ("R_MV_ESTOP        = 12", "'ES' estop"),
         ("R_MV_MAX          = 13", "number of bits"),
@@ -2312,6 +2331,10 @@ if __name__ == '__main__':
                          pyFile=False)
     setup.createCommands(megaCmdList, megaLoc, fData,
                          pyFile=False, check=False, prefix='mega')
+
+    setup.createCommands(riscvCmdList, riscvLoc, fData,
+                         pyFile=True, check=False, prefix='riscv',
+                         actTbl=True, sizeTbl=True)
 
     setup.createParameters(parmList, cLoc, fData)
 

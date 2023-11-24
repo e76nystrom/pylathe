@@ -32,28 +32,31 @@ def cVarName(var):
         cVar += ch.upper()
     return cVar
 
+def upperToCamelCase(regName):
+    tmp = regName.split("_")
+    if len(tmp) > 1:
+        varName = ""
+        first = True
+        for s in tmp:
+            if first:
+                varName = s.lower()
+                first = False
+            else:
+                varName = varName + s.capitalize()
+    else:
+        varName = regName.lower()
+    return varName
+
 class Setup():
     def __init__(self):
-        self.importList = []
+        # self.importList = []
         self.outputFile = True
-
-    # noinspection PyMethodMayBeStatic
-    def listImports(self, file, importList):
-        line = "from %s import " % (file)
-        for i in importList:
-            if len(line) + len(i) > 72:
-                print(line + "\\")
-                line = "    %s, " % (i)
-            else:
-                line += i + ", "
-        if line.endswith(", "):
-            print(line[:-2])
 
     def createConfig(self, configList):
         global config, configTable
         config = {}
         configTable = []
-        imports = ["config", "configTable"]
+        # imports = ["config", "configTable"]
         f = None
         if self.outputFile:
             fName = 'configDef'
@@ -68,7 +71,6 @@ class Setup():
                     print("createConfig %s already defined" % name)
                 else:
                     globals()[name] = index
-                    imports.append(name)
                     configTable.append(name)
                     if f is not None:
                         tmp = "%s = %3d" % (name.ljust(16), index)
@@ -86,10 +88,7 @@ class Setup():
             for val in configTable:
                 fWrite(f, "    '%s',\n" % (val))
             fWrite(f, "    )\n")
-            # self.listImports(file, imports)
             f.close()
-        self.importList += imports
-        self.configImports = imports
         self.config = config
         self.configTable = configTable
         return(config, configTable)
@@ -97,7 +96,6 @@ class Setup():
     def createStrings(self, strList):
         global strTable
         strTable = []
-        imports = ["strTable"]
         f = None
         if self.outputFile:
             fName = 'stringDef'
@@ -109,7 +107,7 @@ class Setup():
                 print("createConfig %s already defined" % name)
             else:
                 globals()[name] = i
-                imports.append(name)
+                # imports.append(name)
                 strTable.append(value)
                 if f is not None:
                     tmp = "%s = %2d" % (name.ljust(20), i)
@@ -119,29 +117,25 @@ class Setup():
             for s in strTable:
                 fWrite(f, "    \"%s\", \\\n" % (s))
             fWrite(f, "    )\n")
-            # self.listImports(file, imports)
             f.close()
-        self.strImports = imports
-        self.importList += imports
         self.strTable = strTable
         return(strTable)
 
     def createCommands(self, cmdList, cLoc, fData=False, pyFile=True, \
-                       check=True, prefix="rem"):
+                       check=True, prefix="rem", actTbl=True, sizeTbl=False):
         global cmdTable
-        imports = ["cmdTable"]
         cmdTable = []
         maxCmd = 0
         maxAct = 0
         cFile = None
         gName = ""
         if fData:
-            name = prefix + "CmdList"
-            cFile = open(osJoin(cLoc,  name + ".h"), 'wb')
-            gName = cVarName(name)
+            name = prefix + "Cmd"
+            cFile = open(osJoin(cLoc,  name + "List.h"), 'wb')
+            gName = cVarName(name) + "_LIST"
             fWrite(cFile, "#if !defined(%s)\n"\
-                   "#define %s\n\n" % (gName, gName))
-            fWrite(cFile, "enum " + prefix.upper() + "_COMMANDS\n{\n")
+                   "#define %s\n\n// cFile\n\n" % (gName, gName))
+            fWrite(cFile, "enum " + prefix.upper() + "_CMD\n{\n")
         f = None
         if self.outputFile and pyFile:
             f = open(prefix + 'CmdDef.py', 'wb')
@@ -149,26 +143,24 @@ class Setup():
         index = 0
         for i in range(len(cmdList)):
             data = cmdList[i]
-            # if not isinstance(data, basestring):
             if not isinstance(data, str):
                 if (len(data) != 0):
                     (cmdName, action, cmdComment) = data
-                    # if  isinstance(action, basestring):
-                    if len(action) == 0:
-                        action = None
-                    if fData:
+                    maxCmd = max(maxCmd, len(cmdName))
+                    if not sizeTbl and actTbl:
+                        if len(action) == 0:
+                            action = None
+                        else:
+                            maxAct = max(maxAct, len(action))
+                    if fData: 
                         tmp = " %s, " % (cmdName)
                         fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                     (tmp.ljust(32), index, cmdComment))
-                    maxCmd = max(maxCmd, len(cmdName))
-                    if action is not None:
-                        maxAct = max(maxAct, len(action))
-                    cmdTable.append((cmdName, action))
+                    cmdTable.append((cmdName, action, cmdComment))
                     if check and (cmdName in globals()):
                         print("createCommands %s already defined" % cmdName)
                     else:
                         globals()[cmdName] = index
-                        imports.append(cmdName)
                         if f is not None:
                             fWrite(f, "%s = %3d\t# 0x%02x\n" % \
                                    (cmdName.ljust(20), index, index))
@@ -182,29 +174,94 @@ class Setup():
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
         if f is not None:
-            fWrite(f, "\n# command table\n\n")
-            fWrite(f, "cmdTable = ( \\\n")
-            maxCmd += 3
-            maxAct += 2
-            for index, (cmdName, action) in enumerate(cmdTable):
-                cmdStr = ('"%s",' % cmdName).ljust(maxCmd)
-                if action is not None:
-                    actStr = ('"%s"' % action).ljust(maxAct)
-                else:
-                    actStr = 'None'.ljust(maxAct)
-                fWrite(f, "    (%s %s), # 0x%02x %2d\n" % \
-                       (cmdStr, actStr, index,  index))
-            fWrite(f, "    )\n")
-            # self.listImports(file, imports)
+            if actTbl:
+                fWrite(f, "\n# command table\n\n")
+                fWrite(f, "cmdTable = ( \\\n")
+                maxCmd += 3
+
+                maxAct += 2
+                for index, (cmdName, action, comment) in enumerate(cmdTable):
+                    cmdStr = ('"%s",' % cmdName).ljust(maxCmd)
+                    if sizeTbl:
+                      actStr = ""  
+                    elif action is not None:
+                        actStr = ('"%s"' % action).ljust(maxAct)
+                    else:
+                        actStr = 'None'.ljust(maxAct)
+                    fWrite(f, "    (%s %s), # 0x%02x %2d\n" % \
+                           (cmdStr, actStr, index,  index))
+                fWrite(f, "    )\n")
             f.close()
         if fData:
             fWrite(cFile, "};\n"\
                    "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-        self.cmdImports = imports
-        self.importList += imports
+
+            if sizeTbl:
+                commentList = []
+                maxCmd += 1
+                name = prefix + "CmdSize"
+                cFile = open(osJoin(cLoc,  name + ".h"), 'wb')
+                gName = cVarName(name)
+                fWrite(cFile, "#if !defined(%s)\n"\
+                       "#define %s\n\n" % (gName, gName))
+                fWrite(cFile, "int %s[] =\n{\n" % (name))
+                for index, (cmdName, cmdSize, comment) in enumerate(cmdTable):
+                    commentList.append(comment)
+                    cmdStr = (' %s' % cmdName).ljust(maxCmd)
+                    fWrite(cFile, " %d,     /* %s 0x%02x %2d %s */\n" % \
+                           (cmdSize, cmdStr, index, index, comment))
+                fWrite(cFile, "};\n"\
+                       "\n#endif  /* %s */\n" % (gName))
+                cFile.close()
+
+                var = prefix + "CmdStr"
+                self.strList(cLoc, var, commentList)
+
         self.cmdTable = cmdTable
         return(cmdTable)
+
+    def strList(self, cLoc, var, commentList):
+        if commentList[0].startswith("'"):
+            cLen = 0
+            c = commentList[0]
+            match = re.match("\'([ \w+\-]*)\'", c)
+            if match is not None:
+                result = match.groups()
+                regCode = result[0]
+                cLen = len(regCode)
+            path = osJoin(cLoc, var + ".h")
+            sFile = open(path, 'wb')
+            uVar = cVarName(var)
+            fWrite(sFile, "#if !defined(INC_%s)\n" \
+                   "#define INC_%s\n\n" \
+                   "struct S_%s\n" \
+                   "{\n char c0;\n char c1;\n" % \
+                   (uVar, uVar, uVar))
+    
+            if cLen == 4:
+                fWrite(sFile, " char c2;\n char c3;\n")
+    
+            fWrite(sFile, "};\n\n" \
+                   "struct S_%s %s[] =\n{\n" % (uVar, var))
+            for j, c in enumerate(commentList):
+                match = re.match("\'([ \w+\-]*)\'([\s\w]*)", c)
+                regCode = ''
+                rComment = ''
+                if match is not None:
+                    result = match.groups()
+                    regCode = result[0]
+                    if len(result) >= 2:
+                        rComment = result[1]
+                sReg = ""
+                for k in range(len(regCode)):
+                    sReg += "'" + regCode[k]  + "', "
+                sReg = sReg[:-1]
+                sReg = '{' + sReg + '},'
+                txt = " %s/* %2x %2d %s */\n" % (sReg.ljust(24), j, j, rComment)
+                fWrite(sFile, txt)
+            fWrite(sFile, "};\n\n" "#endif  /* %s */\n" % (uVar))
+            sFile.close()
 
     def createParameters(self, parmList, cLoc, fData=False, pyFile=True, \
                          cSource='../lathe_src/', prefix='rem', cExt="cpp"):
@@ -213,7 +270,6 @@ class Setup():
         maxRName = 0
         maxVType = 0
         maxVName = 0
-        imports = ["parmTable"]
         preCap = prefix.capitalize()
         preUC = prefix.upper()
         remFunc = None
@@ -224,9 +280,9 @@ class Setup():
         if fData:
             cName = osJoin(cLoc, prefix + 'Parm.h')
             cFile = open(cName, 'wb')
-            gName = cVarName(prefix + "Parm")
+            gName = cVarName(prefix + "ParmInc")
             fWrite(cFile, "#if !defined(%s)\n"\
-                   "#define %s\n" % (gName, gName))
+                   "#define %s\n// cFile\n\n" % (gName, gName))
 
             fWrite(cFile, "/* defines */\n\n"\
                    "#define FLT (0x80)\n"\
@@ -235,7 +291,7 @@ class Setup():
             if cSource is not None:
                 c1File = open(osJoin(cLoc, prefix + 'Struct.h'), 'wb')
                 fWrite(c1File, "#if !defined(" + preUC + "_STRUCT)\n"\
-                       "#define " + preUC + "_STRUCT\n\n"\
+                       "#define " + preUC + "_STRUCT\n// c1File\n\n"\
                        "#include <stdint.h>\n\n"\
                        "#if !defined(__DATA_UNION__)\n"\
                        "#define __DATA_UNION__\n\n"\
@@ -261,10 +317,13 @@ class Setup():
                     c2File = open(osJoin(cLoc, cSource + prefix +
                                   'Func.' + cExt), 'wb')
                     fWrite(c2File,
-                           "#include <stdint.h>\n"\
+                           "// c2File\n\n#include <stdint.h>\n"\
                            "#define NO_REM_MACROS\n"\
                            "#include \"" + prefix + "Parm.h\"\n"\
-                           "#include \"" + prefix + "Struct.h\"\n\n"\
+                           "#include \"" + prefix + "Struct.h\"\n"\
+                           "#if !defined(EXT)\n#define EXT extern\n"\
+                           "#endif\n"\
+                           "#include \"axisCtl.h\"\n\n"\
                            "T_" + preUC + "_VAR " + prefix[0] + "Var;\n\n")
 
                     fWrite(c2File, "#define FLT (0x80)\n")
@@ -277,111 +336,171 @@ class Setup():
             f = open(prefix + 'ParmDef.py', 'wb')
             fWrite(f, "\n# parameters\n")
         index = 0
-        for i in range(len(parmList)):
-            data = parmList[i]
-            # if not isinstance(data, basestring):
+        structType = ""
+        structDict = {}
+        structList = []
+        fieldDict = {}
+        fieldList = []
+        for data in parmList:
             if not isinstance(data, str):
                 (regName, varType, regComment) = data
-                tmp = regName.split("_")
-                if len(tmp) > 1:
-                    varName = ""
-                    first = True
-                    for s in tmp:
-                        if first:
-                            varName = s.lower()
-                            first = False
-                        else:
-                            varName = varName + s.capitalize()
-                else:
-                    if regName.startswith('PRM'):
-                        varName = regName[3:].lower()
+                if "." in regName:
+                    useRVar = False
+                    (structName, parmName) = regName.split(".")
+                    m = re.search(r"(\(\w*\))", structName)
+                    if m is None:
+                        print("syntax error")
+                        exit()
+                    structType = structName[m.end(1):]
+                    structVar = structName[m.start(1)+1:m.end(1)-1]
+                    structName = re.sub(r"[()]", "", structName)
+
+                    if not structName in structDict:
+                        structDict[structName] = []
+                        structList.append(structName)
+                        # print(structName, structVar, structType)
+
+                    m = re.search(r"(\(\w*\))", parmName)
+                    if m is None:
+                        print("syntax error")
+                        exit()
+
+                    x = parmName[:m.start(1)] + parmName[m.end(1):]
+                    fieldName = upperToCamelCase(x)
+                    if fieldName not in fieldDict:
+                        fieldDict[fieldName] = 1
+                        fieldList.append((fieldName, varType))
                     else:
-                        varName = regName.lower()
-                # regAct = '0'
-                # if (len(data) >= 4):
-                #     regAct = data[3]
+                        fieldDict[fieldName] += 1
+                    parmName = re.sub(r"[()]", "", parmName)
+                    structDict[structName].append((parmName, index))
+
+                    # print("%s %s %s %d" % \
+                    #       (structName, fieldName, parmName, index))
+
+                    regName = parmName
+
+                    gVar = structName + ".v"
+                else:
+                    useRVar = True
+                    gVar = prefix[0] + "Var"
+                    fieldName = upperToCamelCase(regName)
+                
+                varName = upperToCamelCase(regName)
+                    
                 if fData:
                     tmp = " %s, " % (regName)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), index, regComment))
-                    if c2File is not None:
-                        if varType == "float":
-                            tmp = " sizeof(%sVar.%s) | FLT, " % \
-                                  (prefix[0], varName)
-                        else:
-                            tmp = " sizeof(%sVar.%s), " % (prefix[0], varName)
-                        fWrite(c2File, "%s/* 0x%02x %s */\n" %
-                                     (tmp.ljust(40), index, regComment))
-                    if c1File is not None:
+
+                    if useRVar and (c1File is not None):
                         tmp = " %s %s;" % (varType, varName)
                         fWrite(c1File, "%s/* 0x%02x %-16s %s */\n" %
                                      (tmp.ljust(24), index, \
                                       regName, regComment))
+
                     if c2File is not None:
+                        if varType == "float":
+                            tmp = " sizeof(%s.%s) | FLT, " % \
+                                  (gVar, fieldName)
+                        else:
+                            tmp = " sizeof(%s.%s), " % (gVar, fieldName)
+                        fWrite(c2File, "%s/* 0x%02x %s */\n" %
+                                     (tmp.ljust(40), index, regComment))
+
                         tmpType = varType.replace(' ', '_')
-                        remFunc.append((regName, index, regComment, \
-                                        varName, tmpType))
+                        remFunc.append((gVar, regName, index, regComment, \
+                                        varName, tmpType, fieldName))
+                        
                 maxRName = max(maxRName, len(regName))
                 maxVType = max(maxVType, len(varType))
                 maxVName = max(maxVName, len(varName))
-                parmTable.append((regName, varType, varName))
-                if regName in imports:
-                    print("createParameters %s already defined" % regName)
-                else:
-                    # globals()[regName] = index
-                    imports.append(regName)
-                    if f is not None:
-                        fWrite(f, "%s = %3d\t# 0x%02x\n" % \
-                               (regName.ljust(20), index, index))
+                
+                parmTable.append((gVar, regName, varType, varName, fieldName))
+
+                if f is not None:
+                    fWrite(f, "%s = %3d\t# 0x%02x\n" % \
+                           (regName.ljust(20), index, index))
                 index += 1
             else:
                 if fData:
                     fWrite(cFile, "\n// %s\n\n" % (data))
                     if c1File is not None:
-                        fWrite(c2File, "\n// %s\n\n" % (data))
-                        # fWrite(c2File, "\n// %s\n\n" % (data))
                         fWrite(c1File, "\n// %s\n\n" % (data))
+
                     if c2File is not None:
+                        fWrite(c2File, "\n// %s\n\n" % (data))
                         remFunc.append(data)
+
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
+
+        # end loop through parmList
+        
+        if fData:
+            fWrite(cFile, "};\n" \
+                   "\n#endif  /* %s */\n" % (gName))
+            cFile.close()
+                    
         if f is not None:
-            fWrite(f, "\nparmTable = ( \\\n")
+            fWrite(f, "\n" + prefix + "ParmTable = ( \\\n")
             maxRName += 3
             maxVType += 3
             maxVName += 2
-            for index, (regName, varType, varName) in enumerate(parmTable):
+
+            for index, (gVar, regName, varType, varName, fieldName) in \
+                    enumerate(parmTable):
                 rNameStr = ('"%s",' % regName).ljust(maxRName)
                 vTypeStr = ('"%s",' % varType).ljust(maxVType)
                 vNameStr = ('"%s"' % varName).ljust(maxVName)
                 fWrite(f, "    (%s %s %s), # 0x%02x %3d\n" % \
                        (rNameStr, vTypeStr, vNameStr, index, index))
             fWrite(f, "    )\n")
-            # self.listImports(file, imports)
             f.close()
+            
+            maxVName -= 2
             f = open(prefix + "Parm.py", "wb")
             fWrite(f, "class " + preCap + "Parm():\n")
             fWrite(f, "    def __init__(self):\n")
-            for (varIndex, varType, varName) in parmTable:
-                fWrite(f, "        self.%s = None\n" % (varName))
+            for (gVar, varIndex, varType, varName, fieldName) in parmTable:
+                vNameStr = ("%s" % varName).ljust(maxVName)
+                fWrite(f, "        self.%s = None\n" % (vNameStr))
             f.close()
+            
         if fData:
-            fWrite(cFile, "};\n" \
-                   "\n#endif  /* %s */\n" % (gName))
-            cFile.close()
             fWrite(c2File, "};\n\n")
 
             if c1File is not None:
                 fWrite(c1File, "} T_" + preUC + \
                        "_VAR, *P_" + preUC + "_VAR;\n\n")
-                fWrite(c1File,\
+
+                if len(structType) != 0:
+                    fWrite(c1File, "typedef struct\n{\n")
+
+                    for (fieldName, varType) in fieldList:
+                        fWrite(c1File, " %s %s;\n" % (varType, fieldName))
+
+                    tmp = structType.upper()
+                    fWrite(c1File, "}\nT_%s_VAR, *P_%s_VAR;\n\n" % \
+                           (tmp, tmp))
+                
+                fWrite(c1File, \
                        "extern unsigned char " + prefix + "Size[];\n"\
-                       "extern T_" + preUC + "_VAR " + prefix[0] + "Var;\n\n"\
-                       "#endif /* " + preUC + "_STRUCT */\n")
+                       "extern T_" + preUC + "_VAR " + prefix[0] + "Var;\n")
+                    
+                fWrite(c1File, \
+                       "\n#endif /* " + preUC + "_STRUCT */\n")
                 c1File.close()
+                
             if c2File is not None:
+                if len(structType) != 0:
+                    for val in structList:
+                        fWrite(c2File, \
+                            "T_" + structType.upper() + "_VAR " + val \
+                               + "Var;\n")
+
                 fWrite(c2File,
-                       "void set" + preCap + \
+                       "\nvoid set" + preCap + \
                        "Var(const int parm, const T_DATA_UNION val)\n{\n"\
                        " switch(parm)\n {\n"\
                        " default:\n"\
@@ -389,13 +508,14 @@ class Setup():
 
                 for data in remFunc:
                     if not isinstance(data, str):
-                        (regName, index, regComment, varName, tmpType) = data
+                        (gVar, regName, index, regComment, varName, tmpType, \
+                         fieldName) = data
                         tmp = "case %s:" % (regName)
                         fWrite(c2File,
                                (" %s/* %2d 0x%02x %s */\n"\
-                               "  " + prefix[0] + "Var.%s = val.t_%s;\n"\
+                               "  " + gVar + ".%s = val.t_%s;\n"\
                                "  break;\n\n") % (tmp.ljust(32), index, index, \
-                                                 regComment, varName, tmpType))
+                                                 regComment, fieldName, tmpType))
 
                 fWrite(c2File, " }\n}\n\n")
                 fWrite(c2File,
@@ -407,28 +527,24 @@ class Setup():
 
                 for data in remFunc:
                     if not isinstance(data, str):
-                        (regName, index, regComment, varName, tmpType) = data
+                        (gVar, regName, index, regComment, varName, tmpType, \
+                         fieldName) = data
                         tmp = "case %s:" % (regName)
                         fWrite(c2File,
                                (" %s/* %2d 0x%02x %s */\n"\
-                               "  val->t_%s = " + prefix[0] + "Var.%s;\n"\
+                               "  val->t_%s = " + gVar + ".%s;\n"\
                                "  break;\n\n") % \
                                (tmp.ljust(32), index, index, \
-                                regComment, tmpType, varName))
+                                regComment, tmpType, fieldName))
                 fWrite(c2File, " }\n}\n")
                 c2File.close()
 
-        #for key in parms:
-        #    print(key, parms[key])
-        self.parmImports = imports
-        self.importList += imports
         self.parmTable = parmTable
         return(parmTable)
 
     def createEnums(self, enumList, cLoc, fData=False, pyFile=True,
                     prefix=""):
         global enum, stringList
-        imports = []
         var = None
         cFile = None
         gName = ""
@@ -468,7 +584,6 @@ class Setup():
                         print("createCtlStates %s already defined" % state)
                     else:
                         globals()[state] = val
-                        imports.append(state)
                         eval("%s.append('%s')" % (enum, state))
                         stringList.append((state, val, comment))
                         if f is not None:
@@ -485,7 +600,6 @@ class Setup():
                     var = tmp[1]
                     enum = tmp[1].replace('_', "") + "List"
                     globals()[enum] = []
-                    imports.append(enum)
                     val = 0
                     stringList = []
                     if fData:
@@ -533,7 +647,6 @@ class Setup():
                                     regCode = result[0]
                                     cLen = len(regCode)
                                 sName = enum.replace("List", "")
-                                # print(sName)
                                 path = osJoin(cLoc, sName + 'Str.h')
                                 sFile = open(path, 'wb')
                                 uVar = var.upper()
@@ -579,11 +692,9 @@ class Setup():
         if fData:
             fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-        self.enumImports = imports
-        self.importList += imports
 
     def createCtlBits(self, regList, cLoc, fData=False):
-        imports = []
+        # imports = []
         cFile = None
         bitVal = None
         gName = ""
@@ -599,7 +710,6 @@ class Setup():
             fWrite(f, "\n# bit definitions\n")
         for i in range(len(regList)):
             data = regList[i]
-            # if not isinstance(data, basestring):
             if not isinstance(data, str):
                 (var, val, comment) = data
                 if fData:
@@ -610,10 +720,9 @@ class Setup():
                     fWrite(cFile, "%s /* 0x%02x %s */\n" % 
                                 (tmp.ljust(32), bitVal, comment))
                 if var in globals():
-                    print("createctlBits %s already defined" % var)
+                    print("createCtlBits %s already defined" % var)
                 else:
                     globals()[var] = eval(val)
-                    imports.append(var)
                     if f is not None:
                         tmp = "%s = %s" % (var.ljust(16), val)
                         fWrite(f, "%s# 0x%02x %s\n" % \
@@ -628,15 +737,13 @@ class Setup():
         if fData:
             fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-        self.enumImports = imports
-        self.importList += imports
 
     def createFpgaReg(self, fpgaList, cLoc, xLoc, fData=False, \
                         pName="xRegDef", table="xRegTable", cName="xilinx", \
                         xName="RegDef"):
         global xRegTable
         xRegTable = []
-        imports = [table]
+        # imports = [table]
         cFile = None
         c1File = None
         xFile = None
@@ -705,7 +812,6 @@ class Setup():
                                     (regName, index, regComment))
 
                 globals()[regName] = index
-                imports.append(regName)
                 xRegTable.append(regName)
                 
                 if f is not None:
@@ -831,11 +937,6 @@ class Setup():
                            (tmp.ljust(20), tIndex, tRegName))
                 fWrite(f, "    )\n")
 
-            fWrite(f, "\nimportList = ( \\\n")
-            for val in imports:
-                fWrite(f, " %s, \\\n" % val)
-            fWrite(f, ")\n")
-
             fWrite(c1File, "};\n")
             f.close()
             c1File.close()
@@ -852,8 +953,7 @@ class Setup():
 
         # for key in xRegs:
         #     print("%-12s %02x" % (key, xRegs[key]))
-        self.xRegImports = imports
-        self.importList += imports
+
         self.xRegTable = xRegTable
         return(xRegTable)
 
@@ -904,7 +1004,6 @@ class Setup():
         sLst = []
         maxShift = None
         start = None
-        imports = []
         gName = ""
         if fData:
             path = osJoin(cLoc, cName + 'Bits.h')
@@ -1006,7 +1105,7 @@ class Setup():
                                               (tmp.ljust(32), bit << shift,
                                                comment))
                             xLst.append((" alias %-12s : " \
-                                         "std_logic is %sreg(%d); " \
+                                         "std_logic is %sReg(%d); " \
                                          "-- x%02x %s\n") %
                                         (xVar, regName, shift, \
                                          1 << shift, comment))
@@ -1074,7 +1173,6 @@ class Setup():
                         if not isinstance(shift, tuple):
                             if bit is not None:
                                 globals()[cVar] = bit << shift
-                                imports.append(var)
                                 if f is not None:
                                     tmp = "%s = 0x%02x" % \
                                         (var.ljust(12), bit << shift)
@@ -1083,7 +1181,6 @@ class Setup():
                         else:
                             if bit is not None:
                                 globals()[cVar] = bit << start
-                                imports.append(var)
                                 if f is not None:
                                     tmp = "%s = 0x%02x" % \
                                         (var.ljust(12), bit << start)
@@ -1128,16 +1225,11 @@ class Setup():
                             print("createFpgaBits %s already defined" % var)
                         else:
                             globals()[var] = maxShift + 1
-                            imports.append(var)
 
                 if len(data) != 0 and f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
 
         if f is not None:
-            fWrite(f, "\nimportList = ( \\\n")
-            for val in imports:
-                fWrite(f, " %s, \\\n" % val)
-            fWrite(f, ")\n")
             f.close()
             
         if fData:
@@ -1155,9 +1247,6 @@ class Setup():
                 fWrite(fFile, "end %sFunc;\n\n" % (package))
                 fWrite(fFile, body)
                 fWrite(fFile, "end package body %sFunc;\n" % (package))
-
-        self.xBitImports = imports
-        self.importList += imports
 
 def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
     maxLen = 0

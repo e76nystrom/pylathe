@@ -7,7 +7,7 @@ M_PARM_ENC_TEST      =   3	# 0x03
 M_PARM_ENC_LINES     =   4	# 0x04
 M_PARM_MAX_PARM      =   5	# 0x05
 
-parmTable = ( \
+megaParmTable = ( \
     ("M_PARM_RPM",       "int",  "mParmRpm"     ), # 0x00   0
     ("M_PARM_VFD_ENA",   "char", "mParmVfdEna"  ), # 0x01   1
     ("M_PARM_PWM_CFG",   "char", "mParmPwmCfg"  ), # 0x02   2

@@ -4,13 +4,13 @@ from threading import Lock
 
 import serial
 
-from remParmDef import parmTable
+from remParmDef import remParmTable
 # from configDef import cfgFpga
 from remCmdDef import cmdTable, C_LOAD_MULTI, \
     C_LOAD_VAL, C_READ_VAL, C_LOAD_X_REG, C_READ_X_REG, C_QUE_MOVE, \
     C_MOVE_MULTI, C_MOVE_QUE_STATUS, C_SET_MEGA_VAL, C_READ_MEGA_VAL, \
     C_READ_DBG, C_READ_ALL
-from megaParmDef import parmTable as megaParmTable
+from megaParmDef import megaParmTable
     
 CMD_OVERHEAD = 8
 MOVE_OVERHEAD = 8
@@ -50,7 +50,7 @@ class Comm():
         self.moveLen = MOVE_OVERHEAD
 
         self.cmdTable = cmdTable
-        self.parmTable = parmTable
+        self.parmTable = remParmTable
         self.rpi = None
     def setDbgDispatch(self, _):
         pass

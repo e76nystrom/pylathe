@@ -24,6 +24,7 @@ from datetime import datetime
 from pytz import timezone
 from collections import namedtuple
 from extDro import DroTimeout
+from icecream import ic
 # from contextlib import redirect_stderr
 #     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
 #          redirect_stderr(stderr):
@@ -1400,7 +1401,7 @@ class MoveCommands():
     def queParm(self, parm, val):
         op = en.Q_QUE_PARM
         opString = en.mCommandsList[op]
-        parmString = pm.parmTable[parm][0]
+        parmString = pm.remParmTable[parm][0]
         op |= parm << 16
         txt = ("moveQue put op %6x %-18s %-18s %s\n" % \
                (op, opString, parmString,str(val)))
@@ -1522,10 +1523,13 @@ class SendData:
                 elif FPGA:
                     queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
                     queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
-                    # queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
-                    queParm(pm.FREQ_MULT, 8)
-                    self.xilinxTestMode()
-                    queParm(pm.RPM, cfg.getInfoData(cf.cfgTestRPM))
+                    queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
+                    # queParm(pm.FREQ_MULT, 8)
+                    # self.xilinxTestMode()
+                    if rpm is not None:
+                        queParm(pm.SP_RPM, rpm)
+                    else:
+                        queParm(pm.SP_RPM, cfg.getInfoData(cf.cfgTestRPM))
                     print(R_PI)
                     if not R_PI:
                         cfgReg = 0
@@ -5638,6 +5642,7 @@ class JogPanel(wx.Panel, FormRoutines):
             self.speedRange = self.maxSpeed - self.minSpeed
 
     def setRPMSlider(self, rpm):
+        ic("setRPMSlider", rpm, self.minSpeed)
         if rpm > self.minSpeed:
             pos = int((float(rpm - self.minSpeed) / self.speedRange) * \
                       self.sliderMax)
@@ -6331,7 +6336,7 @@ class JogPanel(wx.Panel, FormRoutines):
             text += 'A'
         if mvStatus & ct.MV_DONE:
             text += 'D'
-        if mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT):
+        if mvStatus & (ct.MV_X_LIMIT | ct.MV_Z_LIMIT):
             text += 'L'
         else:
             if self.overrideSet:
@@ -6583,7 +6588,7 @@ class JogPanel(wx.Panel, FormRoutines):
         val = self.limitOverride.GetValue()
         print("override %s" % (val))
         stdout.flush()
-        if val and ((self.mvStatus & (ct.MV_XLIMIT | ct.MV_ZLIMIT)) == 0):
+        if val and ((self.mvStatus & (ct.MV_X_LIMIT | ct.MV_Z_LIMIT)) == 0):
             self.limitOverride.SetValue(False)
             return
         self.overrideSet = val
@@ -8367,10 +8372,10 @@ class MainFrame(wx.Frame):
         if not R_PI and SPINDLE_SYNC_BOARD and not SYNC_SPI:
             self.syncComm.openSerial(cfg.getInfoData(cf.syncPort), \
                                 cfg.getInfoData(cf.syncRate))
-            self.syncComm.setupCmds(sc.SYNC_LOADMULTI, sc.SYNC_LOADVAL,
-                               sc.SYNC_READVAL)
+            self.syncComm.setupCmds(sc.SYNC_LOAD_MULTI, sc.SYNC_LOAD_VAL,
+                               sc.SYNC_READ_VAL)
 
-            self.syncComm.setupTables(sc.cmdTable, sp.parmTable)
+            self.syncComm.setupTables(sc.cmdTable, sp.syncParmTable)
 
         port = cfg.getInfoData(cf.keypadPort)
         if len(port) != 0:

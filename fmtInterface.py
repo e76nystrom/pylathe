@@ -1,10 +1,22 @@
 #!/cygdrive/c/Python310/Python.exe
 from sys import stdout
+from datetime import datetime
+from shutil import copyfile, move
 import re
 # from icecream import ic
 
-f = open("interface.py", "r")
-fOut = open("intTemp.py", "wb")
+
+dateTime = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+inFile = "interface.py"
+backupFile = "interface.py-" + dateTime
+tmpFile = "intTemp.py"
+
+copyfile(inFile, backupFile)
+
+f = open(inFile, "r")
+
+fOut = open(tmpFile, "wb")
+
 fOut.flush()
 
 find = False
@@ -67,6 +79,8 @@ for l, line in enumerate(f):
                     argMax = [0 for i in range(len(arg))]
                 if groupLen != len(arg):
                     print("length error", groupLen, len(arg))
+                    print("%4d" % l, r)
+                    exit()
                 for i, val in enumerate(arg):
                     argMax[i] = max(argMax[i], len(val))
                 items += 1
@@ -74,11 +88,10 @@ for l, line in enumerate(f):
             else:
                 group.append(line)
             # print(len(arg), arg)
-            stdout.flush()
+            # stdout.flush()
         else:
             if re.search(r"->", line):
-                # group.append(line)
-                txt = "        # -> len %d items %d [" % (groupLen, items)
+                txt = "        # <- len %d items %d [" % (groupLen, items)
                 for val in argMax:
                     txt += " %2d" % (val)
                 txt += "]\n"
@@ -97,17 +110,20 @@ for l, line in enumerate(f):
                         fOut.write(txt.encode("utf-8"))
                     else:
                         fOut.write((str(arg) + "\n").encode("utf-8"))
+                fOut.write((line + "\n").encode("utf-8"))
                 fOut.flush()
             else:
                 group.append(line)
     else:
-        fOut.write((line + "\n").encode("utf-8"))
-        fOut.flush()
         if re.search(r"<-", line):
             group = []
             groupLen = 0
             items = 0
             find = True
+        else:
+            fOut.write((line + "\n").encode("utf-8"))
+            fOut.flush()
 fOut.close()
 
+move(tmpFile, inFile)
         

@@ -610,123 +610,6 @@ mpgStateText = ( \
     "'WB' wait for backlash",
     )
 
-# riscv actions
-
-R_NONE           =  0           # 'NO' no operation
-R_OP_START       =  1           # 'OS' start
-R_OP_DONE        =  2           # 'OD' done
-R_SETUP          =  3           # 'SU' setup
-R_RESUME         =  4           # 'RE' resume
-R_STOP           =  5           # 'SP' stop
-R_STOP_X         =  6           # 'SX' stop x
-R_STOP_Z         =  7           # 'SZ' stop z
-R_DONE           =  8           # 'DN' done
-R_SEND_DONE      =  9           # 'ND' send data done
-R_SET_LOC_X      = 10           # 'LX' set x loc
-R_SET_LOC_Z      = 11           # 'LZ' set z loc
-R_PAUSE          = 12           # 'PA' pause
-R_START_SPIN     = 13           # 'S+' start spindle
-R_STOP_SPIN      = 14           # 'S-' stop spindle
-R_UPDATE_SPIN    = 15           # 'US' update spindle speed
-R_PASS           = 16           # 'PS' pass
-R_SET_ACCEL      = 17           # 'SA' set accel parm
-R_SET_ACCEL_Q    = 18           # 'SQ' set accel parm queued
-R_SET_DATA       = 19           # 'SD' set data
-R_GET_DATA       = 20           # 'GD' set data
-R_SAVE_Z         = 21           # 'VZ' save z
-R_SAVE_X         = 22           # 'VX' save x
-R_STEPS_Z        = 23           # 'IZ' save z steps inch
-R_STEPS_X        = 24           # 'IX' save x steps inch
-R_HOFS_Z         = 25           # 'HZ' home offset z
-R_HOFS_X         = 26           # 'HX' home offset x
-R_JOG_Z          = 27           # 'JZ' jog move z
-R_JOG_X          = 28           # 'JX' jog move x
-R_MOVE_Z         = 29           # 'MZ' move z
-R_MOVE_X         = 30           # 'MX' move x
-R_MOVE_REL_Z     = 31           # 'RZ' move rel z
-R_MOVE_REL_X     = 32           # 'RX' move rel x
-R_READ_ALL       = 33           # 'RA' read all status
-R_READ_DBG       = 34           # 'RD' read all status
-R_MAX_CMD        = 35           # 'MX' max value
-
-riscvCmdList = ( \
-    "R_NONE",
-    "R_OP_START",
-    "R_OP_DONE",
-    "R_SETUP",
-    "R_RESUME",
-    "R_STOP",
-    "R_STOP_X",
-    "R_STOP_Z",
-    "R_DONE",
-    "R_SEND_DONE",
-    "R_SET_LOC_X",
-    "R_SET_LOC_Z",
-    "R_PAUSE",
-    "R_START_SPIN",
-    "R_STOP_SPIN",
-    "R_UPDATE_SPIN",
-    "R_PASS",
-    "R_SET_ACCEL",
-    "R_SET_ACCEL_Q",
-    "R_SET_DATA",
-    "R_GET_DATA",
-    "R_SAVE_Z",
-    "R_SAVE_X",
-    "R_STEPS_Z",
-    "R_STEPS_X",
-    "R_HOFS_Z",
-    "R_HOFS_X",
-    "R_JOG_Z",
-    "R_JOG_X",
-    "R_MOVE_Z",
-    "R_MOVE_X",
-    "R_MOVE_REL_Z",
-    "R_MOVE_REL_X",
-    "R_READ_ALL",
-    "R_READ_DBG",
-    "R_MAX_CMD",
-    )
-
-riscvCmdText = ( \
-    "'NO' no operation",
-    "'OS' start",
-    "'OD' done",
-    "'SU' setup",
-    "'RE' resume",
-    "'SP' stop",
-    "'SX' stop x",
-    "'SZ' stop z",
-    "'DN' done",
-    "'ND' send data done",
-    "'LX' set x loc",
-    "'LZ' set z loc",
-    "'PA' pause",
-    "'S+' start spindle",
-    "'S-' stop spindle",
-    "'US' update spindle speed",
-    "'PS' pass",
-    "'SA' set accel parm",
-    "'SQ' set accel parm queued",
-    "'SD' set data",
-    "'GD' set data",
-    "'VZ' save z",
-    "'VX' save x",
-    "'IZ' save z steps inch",
-    "'IX' save x steps inch",
-    "'HZ' home offset z",
-    "'HX' home offset x",
-    "'JZ' jog move z",
-    "'JX' jog move x",
-    "'MZ' move z",
-    "'MX' move x",
-    "'RZ' move rel z",
-    "'RX' move rel x",
-    "'RA' read all status",
-    "'RD' read all status",
-    "'MX' max value",
-    )
-
 # riscv axis name
 
 RA_NONE          =  0           # 
@@ -1007,12 +890,12 @@ R_MV_READ_X      =  1           # 'RX' pause x may change
 R_MV_READ_Z      =  2           # 'RZ' pause z may change
 R_MV_ACTIVE      =  3           # 'AC' movement active
 R_MV_DONE        =  4           # 'DN' movement active
-R_MV_XLIMIT      =  5           # 'XL' at limit switch
-R_MV_ZLIMIT      =  6           # 'ZL' at limit switch
-R_MV_XHOME_ACTIVE =  7          # 'XA' x home active
-R_MV_XHOME       =  8           # 'XH' x home success
-R_MV_ZHOME_ACTIVE =  9          # 'ZA' z home active
-R_MV_ZHOME       = 10           # 'ZH' z home success
+R_MV_X_LIMIT     =  5           # 'XL' at limit switch
+R_MV_Z_LIMIT     =  6           # 'ZL' at limit switch
+R_MV_X_HOME_ACTIVE =  7         # 'XA' x home active
+R_MV_X_HOME      =  8           # 'XH' x home success
+R_MV_Z_HOME_ACTIVE =  9         # 'ZA' z home active
+R_MV_Z_HOME      = 10           # 'ZH' z home success
 R_MV_MEASURE     = 11           # 'MS' pause for measurement
 R_MV_ESTOP       = 12           # 'ES' estop
 R_MV_MAX         = 13           # number of bits
@@ -1023,12 +906,12 @@ mvStatusBitsList = ( \
     "R_MV_READ_Z",
     "R_MV_ACTIVE",
     "R_MV_DONE",
-    "R_MV_XLIMIT",
-    "R_MV_ZLIMIT",
-    "R_MV_XHOME_ACTIVE",
-    "R_MV_XHOME",
-    "R_MV_ZHOME_ACTIVE",
-    "R_MV_ZHOME",
+    "R_MV_X_LIMIT",
+    "R_MV_Z_LIMIT",
+    "R_MV_X_HOME_ACTIVE",
+    "R_MV_X_HOME",
+    "R_MV_Z_HOME_ACTIVE",
+    "R_MV_Z_HOME",
     "R_MV_MEASURE",
     "R_MV_ESTOP",
     "R_MV_MAX",

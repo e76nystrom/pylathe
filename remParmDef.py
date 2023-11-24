@@ -321,7 +321,7 @@ USB_ENA              = 188	# 0xbc
 DRO_STEP             = 189	# 0xbd
 MAX_PARM             = 190	# 0xbe
 
-parmTable = ( \
+remParmTable = ( \
     ("SP_STEPS",               "int16_t",  "spSteps"            ), # 0x00   0
     ("SP_MICRO",               "int16_t",  "spMicro"            ), # 0x01   1
     ("SP_MIN_RPM",             "float",    "spMinRpm"           ), # 0x02   2

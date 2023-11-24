@@ -20,15 +20,3 @@ xRegTable = ( \
     "F_Ld_Dbg_Freq",                    #   6
     "F_Ld_Dbg_Count",                   #   7
     )
-
-importList = ( \
- xRegTable, \
- F_Noop, \
- F_Ld_Run_Ctl, \
- F_Ld_Dbg_Ctl, \
- F_Ld_Enc_Cycle, \
- F_Ld_Int_Cycle, \
- F_Rd_Cmp_Cyc_C, \
- F_Ld_Dbg_Freq, \
- F_Ld_Dbg_Count, \
-)

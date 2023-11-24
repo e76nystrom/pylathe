@@ -8,7 +8,7 @@ import re
 import pickle
 
 from accelPi import intRound, AccelData, syncAccelCalc, taperCalc
-from remParmDef import parmTable
+from remParmDef import remParmTable
 from remCmdDef import cmdTable
 import enumDef as en
 import lRegDef as rg
@@ -196,7 +196,7 @@ class CommPi():
         pass
 
     def setParm(self, parmIndex, val):
-        (name, varType, varName) = parmTable[parmIndex]
+        (name, varType, varName) = remParmTable[parmIndex]
         if varType == 'float':
             val = float(val)
             valString = "%15.6f" % val
@@ -210,7 +210,7 @@ class CommPi():
         setattr(self.rpi.parm, varName, val)
 
     def getParm(self, parmIndex):
-        (name, varType, varName) = parmTable[parmIndex]
+        (name, varType, varName) = remParmTable[parmIndex]
         val = getattr(self.rpi.parm, varName)
         print("getParm var %s val %s" % (varName, str(val)))
         return val
@@ -267,7 +267,7 @@ class CommPi():
                 return
             self.spi.xfer2(msg)
 
-    # end of commmands shared with comm.py
+    # end of commands shared with comm.py
 
     def rd(self, cmd, dbg=False, ext=0x80000000, mask=0xffffffff, trc=False):
         if dbg:
@@ -362,7 +362,7 @@ class PiLathe(Thread):
                 print("routine %s missing" % (stateName))
 
         print("initialize parameters")
-        for (index, varType, name) in parmTable:
+        for (index, varType, name) in remParmTable:
             # print("index %s name %s" % (index, name))
             setattr(self, name, None)
         self.parm = RemParm()
@@ -450,7 +450,7 @@ class PiLathe(Thread):
         self.cXStop()
         self.cmdPause = False
         self.mvStatus &= ~(ct.MV_PAUSE | ct.MV_ACTIVE | \
-                           ct.MV_XHOME_ACTIVE | ct.MV_ZHOME_ACTIVE)
+                           ct.MV_X_HOME_ACTIVE | ct.MV_Z_HOME_ACTIVE)
         # self.riscv.command(en.R_STOP)
 
     def cDoneCmd(self):
