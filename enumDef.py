@@ -216,11 +216,11 @@ operationsText = ( \
 
 # home control states
 
-H_IDLE           =  0           # idle state
-H_HOME           =  1           # found home switch
-H_OFF_HOME       =  2           # off home switch
-H_BACKOFF        =  3           # backoff dist from switch
-H_SLOW           =  4           # found home slowly
+H_IDLE           =  0           # 'HI' idle state
+H_HOME           =  1           # 'HF' found home switch
+H_OFF_HOME       =  2           # 'OF' off home switch
+H_BACKOFF        =  3           # 'BF' backoff dist from switch
+H_SLOW           =  4           # 'HS' found home slowly
 
 hStatesList = ( \
     "H_IDLE",
@@ -231,11 +231,11 @@ hStatesList = ( \
     )
 
 hStatesText = ( \
-    "idle state",
-    "found home switch",
-    "off home switch",
-    "backoff dist from switch",
-    "found home slowly",
+    "'HI' idle state",
+    "'HF' found home switch",
+    "'OF' off home switch",
+    "'BF' backoff dist from switch",
+    "'HS' found home slowly",
     )
 
 # debug axis message types
@@ -804,13 +804,13 @@ riscvRunWaitText = ( \
 
 # commands in ctlbits
 
-M_CMD_NONE       =  0           # no command
-M_CMD_MOV        =  1           # move a set distance
-M_CMD_JOG        =  2           # move while cmd are present
-M_CMD_SYN        =  3           # move dist synchronized to rotation
-M_CMD_MAX        =  4           # rapid move
-M_CMD_SPEED      =  5           # jog at speed
-M_JOG_SLOW       =  6           # slow jog for home or probe
+M_CMD_NONE       =  0           # 'NO' no command
+M_CMD_MOV        =  1           # 'MV' move a set distance
+M_CMD_JOG        =  2           # 'JG' move while cmd are present
+M_CMD_SYN        =  3           # 'SY' move dist synchronized to rotation
+M_CMD_MAX        =  4           # 'MX' rapid move
+M_CMD_SPEED      =  5           # 'CS' jog at speed
+M_JOG_SLOW       =  6           # 'JS' slow jog for home or probe
 
 moveCmdList = ( \
     "M_CMD_NONE",
@@ -823,31 +823,31 @@ moveCmdList = ( \
     )
 
 moveCmdText = ( \
-    "no command",
-    "move a set distance",
-    "move while cmd are present",
-    "move dist synchronized to rotation",
-    "rapid move",
-    "jog at speed",
-    "slow jog for home or probe",
+    "'NO' no command",
+    "'MV' move a set distance",
+    "'JG' move while cmd are present",
+    "'SY' move dist synchronized to rotation",
+    "'MX' rapid move",
+    "'CS' jog at speed",
+    "'JS' slow jog for home or probe",
     )
 
 # riscv run wait states
 
-M_RSV_0          =  0           # no command
-M_RSV_1          =  1           # no command
-M_RSV_2          =  2           # no command
-M_SYN_START      =  3           # start on sync pulse
-M_SYN_LEFT       =  4           # start sync left
-M_SYN_TAPER      =  5           # taper on other axis
-M_DIST_MODE      =  6           # distance update mode
-M_FIND_HOME      =  7           # find home
-M_CLEAR_HOME     =  8           # move off of home
-M_FIND_PROBE     =  9           # find probe
-M_CLEAR_PROBE    = 10           # move off of probe
-M_DRO_POS        = 11           # use dro for moving
-M_DRO_UPD        = 12           # update internal position from dro
-M_BIT_MAX        = 13           # number of bits
+M_RSV_0          =  0           # 'R0' no command
+M_RSV_1          =  1           # 'R1' no command
+M_RSV_2          =  2           # 'R2' no command
+M_SYN_START      =  3           # 'SS' start on sync pulse
+M_SYN_LEFT       =  4           # 'SL' start sync left
+M_SYN_TAPER      =  5           # 'ST' taper on other axis
+M_DIST_MODE      =  6           # 'DM' distance update mode
+M_FIND_HOME      =  7           # 'FH' find home
+M_CLEAR_HOME     =  8           # 'CH' move off of home
+M_FIND_PROBE     =  9           # 'FP' find probe
+M_CLEAR_PROBE    = 10           # 'CP' move off of probe
+M_DRO_POS        = 11           # 'DP' use dro for moving
+M_DRO_UPD        = 12           # 'DU' update internal position from dro
+M_BIT_MAX        = 13           # 'MX' number of bits
 
 moveBitList = ( \
     "M_RSV_0",
@@ -867,20 +867,20 @@ moveBitList = ( \
     )
 
 moveBitText = ( \
-    "no command",
-    "no command",
-    "no command",
-    "start on sync pulse",
-    "start sync left",
-    "taper on other axis",
-    "distance update mode",
-    "find home",
-    "move off of home",
-    "find probe",
-    "move off of probe",
-    "use dro for moving",
-    "update internal position from dro",
-    "number of bits",
+    "'R0' no command",
+    "'R1' no command",
+    "'R2' no command",
+    "'SS' start on sync pulse",
+    "'SL' start sync left",
+    "'ST' taper on other axis",
+    "'DM' distance update mode",
+    "'FH' find home",
+    "'CH' move off of home",
+    "'FP' find probe",
+    "'CP' move off of probe",
+    "'DP' use dro for moving",
+    "'DU' update internal position from dro",
+    "'MX' number of bits",
     )
 
 # movement status

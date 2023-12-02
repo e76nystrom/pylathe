@@ -139,6 +139,7 @@ dp.DBG = True
 
 # SWIG = False
 HOME_TEST = False
+INPUT_TEST = True
 # SETUP = False
 
 MEGA = False
@@ -1687,6 +1688,20 @@ class SendData:
                 queParm(pm.Z_HOME_DIR, \
                         1 if bool(cfg.getBoolInfoData(cf.zHomeDir)) else -1)
 
+                if INPUT_TEST:
+                    stepsInch = self.jp.zStepsInch
+                    hOfs = self.jp.zHomeOffset
+                    queParm(pm.Z_TEST_LIMIT_MIN,
+                            int((cfg.getFloatInfoData(cf.zTstLimitMin) + hOfs) * stepsInch))
+                    queParm(pm.Z_TEST_LIMIT_MAX,
+                            int((cfg.getFloatInfoData(cf.zTstLimitMax) + hOfs) * stepsInch))
+                    queParm(pm.Z_TEST_HOME_MIN,
+                            int((cfg.getFloatInfoData(cf.zTstHomeMin) + hOfs) * stepsInch))
+                    queParm(pm.Z_TEST_HOME_MAX,
+                            int((cfg.getFloatInfoData(cf.zTstHomeMax) + hOfs) * stepsInch))
+                    queParm(pm.Z_TEST_PROBE,
+                            int((cfg.getFloatInfoData(cf.zTstProbe) + hOfs) * stepsInch))
+
                 comm.command(cm.C_CMD_Z_SETUP)
 
                 self.zDataSent = True
@@ -1812,6 +1827,20 @@ class SendData:
                         (start, end) = (end, start)
                     queParm(pm.X_HOME_START, start)
                     queParm(pm.X_HOME_END, end)
+
+                if INPUT_TEST:
+                    stepsInch = self.jp.xStepsInch
+                    hOfs = self.jp.xHomeOffset
+                    queParm(pm.X_TEST_LIMIT_MIN,
+                            int((cfg.getFloatInfoData(cf.xTstLimitMin) + hOfs) * stepsInch))
+                    queParm(pm.X_TEST_LIMIT_MAX,
+                            int((cfg.getFloatInfoData(cf.xTstLimitMax) + hOfs) * stepsInch))
+                    queParm(pm.X_TEST_HOME_MIN,
+                            int((cfg.getFloatInfoData(cf.xTstHomeMin) + hOfs) * stepsInch))
+                    queParm(pm.X_TEST_HOME_MAX,
+                            int((cfg.getFloatInfoData(cf.xTstHomeMax) + hOfs) * stepsInch))
+                    queParm(pm.X_TEST_PROBE,
+                            int((cfg.getFloatInfoData(cf.xTstProbe) + hOfs) * stepsInch))
 
                 comm.command(cm.C_CMD_X_SETUP)
                 self.xDataSent = True
@@ -8761,6 +8790,7 @@ class MainFrame(wx.Frame):
                 self.sendData.sendSpindleData()
 
                 self.sendData.sendZData()
+
                 if EXT_DRO:
                     jp.setZFromExt()
                 else:
@@ -9189,7 +9219,15 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("bDRO Position", cf.zDROPos, None), \
                 ("DRO Final Dist", cf.zDroFinalDist, 'f'), \
                 ("DRO Read Delay ms", cf.zDoneDelay, None), \
-        )
+            )
+        if INPUT_TEST:
+            self.fields += (
+                ("Test Limit Min", cf.zTstLimitMin, 'f'), \
+                ("Test Limit Max", cf.zTstLimitMax, 'f'), \
+                ("Test Home Min", cf.zTstHomeMin, 'f'), \
+                ("Test Home Max", cf.zTstHomeMax, 'f'), \
+                ("Test Probe", cf.zTstProbe, 'f'), \
+            )
 
         sizerG = wx.FlexGridSizer(cols=4, rows=0, vgap=0, hgap=0)
 
@@ -9295,6 +9333,14 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("bDRO Position", cf.xDROPos, None), \
                 ("DRO Final Dist", cf.xDroFinalDist, 'f'), \
                 ("DRO Read Delay ms", cf.xDoneDelay, None), \
+            )
+        if INPUT_TEST:
+            self.fields += (
+                ("Test Limit Min", cf.xTstLimitMin, 'f'), \
+                ("Test Limit Max", cf.xTstLimitMax, 'f'), \
+                ("Test Home Min", cf.xTstHomeMin, 'f'), \
+                ("Test Home Max", cf.xTstHomeMax, 'f'), \
+                ("Test Probe", cf.xTstProbe, 'f'), \
             )
         if HOME_TEST:
             self.fields += (

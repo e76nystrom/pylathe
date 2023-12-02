@@ -4,6 +4,7 @@
 
 riscvData    = 0x01             # riscv data active
 riscvSPI     = 0x02             # riscv spi active
+riscvInTest  = 0x04             # riscv input test
 
 # status register
 
@@ -15,25 +16,30 @@ xAxisDone    = 0x10             # 'XD' x axis done
 xAxisCurDir  = 0x20             # 'Xd' x axis current dir
 stEStop      = 0x40             # 'ES' emergency stop
 spindleActive = 0x80            # 'S+' spindle active
-queNotEmpty  = 0x100            # 'Q+' ctl queue not empty
-ctlBusy      = 0x200            # 'CB' controller busy
-syncActive   = 0x400            # 'SA' sync active
+syncActive   = 0x100            # 'SA' sync active
 
 # input register
 
-inZHome      = 0x01             # z home switch
-inZMinus     = 0x02             # z limit minus
-inZPlus      = 0x04             # z Limit Plus
-inXHome      = 0x08             # x home switch
-inXMinus     = 0x10             # x limit minus
-inXPlus      = 0x20             # x Limit Plus
-inSpare      = 0x40             # spare input
-inProbe      = 0x80             # probe input
-inPin10      = 0x100            # pin 10
-inPin11      = 0x200            # pin 11
-inPin12      = 0x400            # pin 12
-inPin13      = 0x800            # pin 13
-inPin15      = 0x1000           # pin 15
+inPin10      = 0x01             # '10' pin 10
+inPin11      = 0x02             # '11' pin 11
+inPin12      = 0x04             # '12' pin 12
+inPin13      = 0x08             # '13' pin 13
+inPin15      = 0x10             # '15' pin 15
+inZHome      = 0x20             # 'ZH' z home switch
+inZMinus     = 0x40             # 'Z-' z limit minus
+inZPlus      = 0x80             # 'Z+' z Limit Plus
+inXHome      = 0x100            # 'XH' x home switch
+inXMinus     = 0x200            # 'X-' x limit minus
+inXPlus      = 0x400            # 'X+' x Limit Plus
+inProbe      = 0x800            # 'PR' probe input
+inSpare      = 0x1000           # 'SP' spare input
+
+# axis inputs
+
+axHome       = 0x01             # axis home
+axMinus      = 0x02             # axis minus limit
+axPlus       = 0x04             # axis plus limit
+axProbe      = 0x08             # axis probe
 
 # output register
 
@@ -43,10 +49,10 @@ outPin17     = 0x04             # pin 17
 
 # pin out signals
 
-pinOut2      = 0x01             # 
-pinOut3      = 0x02             # 
-pinOut4      = 0x04             # 
-pinOut5      = 0x08             # 
+pinOut2      = 0x01             # z dir
+pinOut3      = 0x02             # z step
+pinOut4      = 0x04             # x dir
+pinOut5      = 0x08             # x step
 pinOut6      = 0x10             # 
 pinOut7      = 0x20             # 
 pinOut8      = 0x40             # 
@@ -56,12 +62,6 @@ pinOut14     = 0x200            #
 pinOut16     = 0x400            # 
 pinOut17     = 0x800            # 
 
-# run control register
-
-runEna       = 0x01             # run from controller data
-runInit      = 0x02             # initialize controller
-readerInit   = 0x04             # initialize reader
-
 # jog control register
 
 jogContinuous = 0x01            # jog continuous mode
@@ -69,29 +69,35 @@ jogBacklash  = 0x02             # jog backlash present
 
 # axis control register
 
-ctlInit      = 0x01             # reset flag
-ctlStart     = 0x02             # start
-ctlBacklash  = 0x04             # backlash move no pos upd
-ctlWaitSync  = 0x08             # wait for sync to start
-ctlDir       = 0x10             # direction
-ctlSetLoc    = 0x20             # set location
-ctlChDirect  = 0x40             # ch input direct
-ctlSlave     = 0x80             # slave ctl by other axis
-ctlDroEnd    = 0x100            # use dro to end move
-ctlDistMode  = 0x200            # distance udpdate mode
-ctlJogCmd    = 0x400            # jog with commands
-ctlJogMpg    = 0x800            # jog with mpg
-ctlHome      = 0x1000           # homing axis
-ctlUseLimits = 0x2000           # use limits
+ctlInit      = 0x01             # 'IN' reset flag
+ctlStart     = 0x02             # 'ST' start
+ctlBacklash  = 0x04             # 'BK' backlash move no pos upd
+ctlWaitSync  = 0x08             # 'WS' wait for sync to start
+ctlDir       = 0x10             # '+-' direction
+ctlSetLoc    = 0x20             # 'SL' set location
+ctlChDirect  = 0x40             # 'CH' ch input direct
+ctlSlave     = 0x80             # 'SL' slave ctl by other axis
+ctlDroEnd    = 0x100            # 'DE' use dro to end move
+ctlDistMode  = 0x200            # 'DM' distance udpdate mode
+ctlJogCmd    = 0x400            # 'JC' jog with commands
+ctlJogMpg    = 0x800            # 'JM' jog with mpg
+ctlHome      = 0x1000           # 'HO' homing axis
+ctlHomePol   = 0x2000           # 'HP' home signal polarity
+ctlProbe     = 0x4000           # 'PR' probe enable
+ctlUseLimits = 0x8000           # 'UL' use limits
 
 # axis status register
 
-axDoneDist   = 0x01             # axis done distance
-axDoneDro    = 0x02             # axis done dro
-axDoneHome   = 0x04             # axis done home
-axDoneLimit  = 0x08             # axis done limit
-axHomeStatus = 0x10             # axis home status
-axDistZero   = 0x20             # axis distance zero
+axDone       = 0x01             # 'DN' axis done
+axDistZero   = 0x02             # 'ZE' axis distance zero
+axDoneDro    = 0x04             # 'DR' axis done dro
+axDoneHome   = 0x08             # 'HO' axis done home
+axDoneLimit  = 0x10             # 'LI' axis done limit
+axDoneProbe  = 0x20             # 'PR' axis done probe
+axInHome     = 0x40             # 'IH' axis home
+axInMinus    = 0x80             # 'IM' axis minus limit
+axInPlus     = 0x100            # 'IP' axis plus limit
+axInProbe    = 0x200            # 'IR' axis probe
 
 # configuration control register
 

@@ -18,6 +18,11 @@ class RiscvParm():
         self.rZHomeFindRev = None
         self.rZHomeBackoff = None
         self.rZHomeSlow    = None
+        self.rZTestLimMin  = None
+        self.rZTestLimMax  = None
+        self.rZTestHomeMin = None
+        self.rZTestHomeMax = None
+        self.rZTestProbe   = None
         self.rXStepsInch   = None
         self.rXSavedLoc    = None
         self.rXHomeOffset  = None
@@ -29,3 +34,8 @@ class RiscvParm():
         self.rXHomeFindRev = None
         self.rXHomeBackoff = None
         self.rXHomeSlow    = None
+        self.rXTestLimMin  = None
+        self.rXTestLimMax  = None
+        self.rXTestHomeMin = None
+        self.rXTestHomeMax = None
+        self.rXTestProbe   = None

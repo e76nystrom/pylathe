@@ -15,6 +15,7 @@ import re
 
 from accelPi import AccelData, taperCalc, intRound, syncAccelCalc
 from remParmDef import remParmTable
+import remParmDef as pm
 import riscvParmDef as rp
 import riscvCmdDef as rc
 from remCmdDef import cmdTable
@@ -24,6 +25,16 @@ import enumDef as en
 import fpgaLathe as bt
 import ctlBitDef as ct
 from remParm import RemParm
+
+riscvParmConv = \
+    {
+        pm.Z_HOME_STATUS: rp.R_Z_HOME_STATUS,
+        pm.X_HOME_STATUS: rp.R_X_HOME_STATUS,
+        pm.Z_LOC:         rp.R_Z_LOC,
+        pm.X_LOC:         rp.R_X_LOC,
+        pm.Z_DRO_LOC:     rp.R_Z_DRO,
+        pm.X_DRO_LOC:     rp.R_X_DRO
+    }
 
 import serial
 
@@ -208,10 +219,9 @@ class CommRiscv():
         setattr(self.riscv.parm, varName, val)
 
     def getParm(self, parmIndex):
-        (name, varType, varName) = remParmTable[parmIndex]
-        val = getattr(self.riscv.parm, varName)
-        print("getParm var %s val %s" % (varName, str(val)))
-        return val
+        riscvParm = riscvParmConv[parmIndex]
+        val = self.riscvGetParm(riscvParm)
+        return int(val[5:-1], 16)
 
     def getString(self, cmd, parm=None):
         pass
@@ -291,9 +301,14 @@ class CommRiscv():
                 if (cmd == rc.R_SET_ACCEL) or (cmd == rc.R_SET_ACCEL_Q):
                     x0 = arg[0] >> 8
                     x1 = arg[0] & 0xff
-                    data = "%10d %d %-10s %d %-14s" % \
+                    data = "%10d %d %-10s %d %s" % \
                         (arg[1] ,x0, en.axisAccelTypeList[x0],
                          x1, en.RiscvSyncParmTypeList[x1])
+                elif (cmd == rc.R_SET_DATA) or (cmd == rc.R_SET_DATA_Q):
+                    x0 = arg[0]
+                    x1 = arg[1]
+                    data = "%10d %s" % \
+                        (x1, rp.riscvParmTable[x0][0])
             else:
                 pass
         txt = "%-16s %-16s%s" % (rc.cmdTable[cmd],
@@ -316,7 +331,28 @@ class CommRiscv():
             stdout.flush()
 
     def riscvGetDbg(self, length):
-        cmd = "%x %s\r" % (rc.R_READ_DBG, length)
+        cmd = "%x %x\r" % (rc.R_READ_DBG, length)
+        cmdStr = "\x01%02x" % len(cmd) + cmd
+
+        self.commLock.acquire(True)
+
+        self.ser.write(cmdStr.encode())
+        rsp = self.ser.read(3).decode('utf8')
+        if len(rsp) == 0:
+            self.commLock.release()
+            if not self.timeout:
+                self.timeout = True
+                print("timeout")
+                stdout.flush()
+            raise CommTimeout()
+
+        rspLen = int(rsp[1:3], 16)
+        rsp = self.ser.read(rspLen)
+        self.commLock.release()
+        return rsp
+
+    def riscvGetParm(self, parm):
+        cmd = "%x %x\r" % (rc.R_GET_DATA, parm)
         cmdStr = "\x01%02x" % len(cmd) + cmd
 
         self.commLock.acquire(True)
@@ -558,10 +594,10 @@ class RiscvLathe(Thread):
         self.riscvCmd(rc.R_STOP_Z)
 
     def cZHomeFwd(self):                # 6
-        pass
+        self.riscvCmd(rc.R_HOME_Z, ct.HOME_FWD, flush=True)
 
     def cZHomeRev(self):                # 7
-        pass
+        self.riscvCmd(rc.R_HOME_Z, ct.HOME_REV, flush=True)
 
     def cXMoveAbs(self):                # 8
         pass
@@ -582,10 +618,10 @@ class RiscvLathe(Thread):
         self.riscvCmd(rc.R_STOP_X)
 
     def cXHomeFwd(self):                # 14
-        pass
+        self.riscvCmd(rc.R_HOME_X, ct.HOME_FWD, flush=True)
 
     def cXHomeRev(self):                # 15
-        pass
+        self.riscvCmd(rc.R_HOME_X, ct.HOME_REV, flush=True)
 
     def cSpindleStart(self):            # 16
         parm = self.parm
@@ -676,7 +712,7 @@ class RiscvLathe(Thread):
 
         stepsInch = intRound((parm.zMicro * parm.zMotor) / parm.zPitch)
         self.zAxis = zAxis = Axis("z", Z_AXIS, stepsInch, parm.zAccel, parm)
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_STEPS_INCH, stepsInch))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_STEPS_INCH, stepsInch))
 
         self.zTurnAccel    = ac = AccelData(zAxis)
         self.zAxis.turnAccel = ac
@@ -704,7 +740,24 @@ class RiscvLathe(Thread):
         self.zJogIncDist = int(parm.jogTimeInc * stepsSec)
         self.zJogMaxDist = int(parm.jogTimeMax * stepsSec)
 
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_JOG_INC, parm.zMpgInc))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_LIM_MIN, parm.zTestLimitMin))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_LIM_MAX, parm.zTestLimitMax))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_HOME_MIN, parm.zTestHomeMin))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_HOME_MAX, parm.zTestHomeMax))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_PROBE, parm.zTestProbe))
+
+        homeDir = parm.zHomeDir
+        homeFindFwd =  homeDir * intRound(parm.zHomeDist * stepsInch)
+        homeFindRev = -homeDir * intRound(parm.zHomeDistRev * stepsInch)
+        homeBackoff = -homeDir * intRound(parm.zHomeDistBackoff * stepsInch)
+        homeSlow    =  homeDir * intRound(1.25 * parm.zHomeDistBackoff * stepsInch)
+
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_FWD, homeFindFwd))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_REV, homeFindRev))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_BACKOFF, homeBackoff))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_SLOW, homeSlow))
+
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_JOG_INC, parm.zMpgInc), flus=True)
 
     def cZSetLoc(self):                 # 32
         self.riscvCmd(rc.R_SET_LOC_Z, self.parm.zLoc)
@@ -742,8 +795,24 @@ class RiscvLathe(Thread):
         self.xJogIncDist = int(parm.jogTimeInc * stepsSec)
         self.xJogMaxDist = int(parm.jogTimeMax * stepsSec)
 
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_JOG_INC, parm.xMpgInc))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_JOG_PAUSE, 0))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_TEST_LIM_MIN, parm.xTestLimitMin))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_TEST_LIM_MAX, parm.xTestLimitMax))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_TEST_HOME_MIN, parm.xTestHomeMin))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_TEST_HOME_MAX, parm.xTestHomeMax))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_TEST_PROBE, parm.xTestProbe))
+
+        homeDir = parm.zHomeDir
+        homeFindFwd =  homeDir * intRound(parm.zHomeDist * stepsInch)
+        homeFindRev = -homeDir * intRound(parm.zHomeDistRev * stepsInch)
+        homeBackoff = -homeDir * intRound(parm.zHomeDistBackoff * stepsInch)
+        homeSlow    =  homeDir * intRound(1.25 * parm.zHomeDistBackoff * stepsInch)
+
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_FIND_FWD, homeFindFwd))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_FIND_REV, homeFindRev))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_BACKOFF, homeBackoff))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_SLOW, homeSlow))
+
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_X_JOG_INC, parm.xMpgInc), flush=True)
 
     def cXSetLoc(self):                 # 35
         self.riscvCmd(rc.R_SET_LOC_X, self.parm.xLoc)
@@ -793,8 +862,10 @@ class RiscvLathe(Thread):
 
         # cfgVal = bt.cfgDroStep | bt.cfgXDroInv | bt.cfgZDroInv
 
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_JOG_PAUSE, 0))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_CFG_VAL, cfgVal))
-        self.riscvCmd(rc.R_SEND_DONE)
+        
+        self.riscvCmd(rc.R_SEND_DONE, flush=True)
 
     # def setZLoc(self, loc):
     #     self.parm.zLoc = loc
@@ -946,8 +1017,8 @@ class RiscvLathe(Thread):
     # move queue routines
 
     def qMoveZ(self, val):       	# 0
-        dest = val + self.zAxis.HomeOffset
-        fDest = (dest - self.xAxis.HomeOffset) / self.xAxis.stepsInch
+        dest = val + self.zAxis.homeOffset
+        fDest = (dest - self.xAxis.homeOffset) / self.xAxis.stepsInch
         # self.dbgMsg(en.D_ZMOV, val)
         print("moveZ dest %7.4f %d val %d zStepsInch %d zHomeOffset %d" % \
               (fDest, dest, val, self.zAxis.stepsInch, self.zAxis.HomeOffset))

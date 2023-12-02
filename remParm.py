@@ -85,6 +85,11 @@ class RemParm():
         self.zHomeDistRev        = None
         self.zHomeDistBackoff    = None
         self.zHomeDir            = None
+        self.zTestLimitMin       = None
+        self.zTestLimitMax       = None
+        self.zTestHomeMin        = None
+        self.zTestHomeMax        = None
+        self.zTestProbe          = None
         self.xHomeSpeed          = None
         self.xHomeDist           = None
         self.xHomeDistRev        = None
@@ -93,6 +98,11 @@ class RemParm():
         self.xHomeLoc            = None
         self.xHomeStart          = None
         self.xHomeEnd            = None
+        self.xTestLimitMin       = None
+        self.xTestLimitMax       = None
+        self.xTestHomeMin        = None
+        self.xTestHomeMax        = None
+        self.xTestProbe          = None
         self.zDroLoc             = None
         self.zDroOffset          = None
         self.zDroCountInch       = None

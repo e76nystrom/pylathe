@@ -17,7 +17,7 @@ xRegTable = None
 def fWrite(f, txt):
     if f is not None:
         f.write(txt.encode())
-    
+
 def cVarName(var):
     cVar = ""
     last = False
@@ -152,9 +152,9 @@ class Setup():
                             action = None
                         else:
                             maxAct = max(maxAct, len(action))
-                    if fData: 
+                    if fData:
                         tmp = " %s, " % (cmdName)
-                        fWrite(cFile, "%s/* 0x%02x %s */\n" % 
+                        fWrite(cFile, "%s/* 0x%02x %s */\n" %
                                     (tmp.ljust(32), index, cmdComment))
                     cmdTable.append((cmdName, action, cmdComment))
                     if check and (cmdName in globals()):
@@ -183,7 +183,7 @@ class Setup():
                 for index, (cmdName, action, comment) in enumerate(cmdTable):
                     cmdStr = ('"%s",' % cmdName).ljust(maxCmd)
                     if sizeTbl:
-                      actStr = ""  
+                      actStr = ""
                     elif action is not None:
                         actStr = ('"%s"' % action).ljust(maxAct)
                     else:
@@ -233,18 +233,19 @@ class Setup():
             path = osJoin(cLoc, var + ".h")
             sFile = open(path, 'wb')
             uVar = cVarName(var)
-            fWrite(sFile, "#if !defined(INC_%s)\n" \
-                   "#define INC_%s\n\n" \
+            fWrite(sFile, "#if !defined(%s_INC)\n" \
+                   "#define %s_INC\n\n" \
                    "struct S_%s\n" \
                    "{\n char c0;\n char c1;\n" % \
                    (uVar, uVar, uVar))
-    
+
             if cLen == 4:
                 fWrite(sFile, " char c2;\n char c3;\n")
-    
+
             fWrite(sFile, "};\n\n" \
                    "struct S_%s %s[] =\n{\n" % (uVar, var))
-            for j, c in enumerate(commentList):
+            j = 0
+            for c in commentList:
                 match = re.match("\'([ \w+\-]*)\'([\s\w]*)", c)
                 regCode = ''
                 rComment = ''
@@ -260,7 +261,10 @@ class Setup():
                 sReg = '{' + sReg + '},'
                 txt = " %s/* %2x %2d %s */\n" % (sReg.ljust(24), j, j, rComment)
                 fWrite(sFile, txt)
-            fWrite(sFile, "};\n\n" "#endif  /* %s */\n" % (uVar))
+                j += 1
+            fWrite(sFile, "};\n\n" \
+                   "#define %s_SIZE %d\n\n" \
+                   "#endif  /* %s_INC */\n" % (uVar, j, uVar))
             sFile.close()
 
     def createParameters(self, parmList, cLoc, fData=False, pyFile=True, \
@@ -385,12 +389,12 @@ class Setup():
                     useRVar = True
                     gVar = prefix[0] + "Var"
                     fieldName = upperToCamelCase(regName)
-                
+
                 varName = upperToCamelCase(regName)
-                    
+
                 if fData:
                     tmp = " %s, " % (regName)
-                    fWrite(cFile, "%s/* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s/* 0x%02x %s */\n" %
                                 (tmp.ljust(32), index, regComment))
 
                     if useRVar and (c1File is not None):
@@ -411,11 +415,11 @@ class Setup():
                         tmpType = varType.replace(' ', '_')
                         remFunc.append((gVar, regName, index, regComment, \
                                         varName, tmpType, fieldName))
-                        
+
                 maxRName = max(maxRName, len(regName))
                 maxVType = max(maxVType, len(varType))
                 maxVName = max(maxVName, len(varName))
-                
+
                 parmTable.append((gVar, regName, varType, varName, fieldName))
 
                 if f is not None:
@@ -436,12 +440,12 @@ class Setup():
                     fWrite(f, "\n# %s\n\n" % (data))
 
         # end loop through parmList
-        
+
         if fData:
             fWrite(cFile, "};\n" \
                    "\n#endif  /* %s */\n" % (gName))
             cFile.close()
-                    
+
         if f is not None:
             fWrite(f, "\n" + prefix + "ParmTable = ( \\\n")
             maxRName += 3
@@ -457,7 +461,7 @@ class Setup():
                        (rNameStr, vTypeStr, vNameStr, index, index))
             fWrite(f, "    )\n")
             f.close()
-            
+
             maxVName -= 2
             f = open(prefix + "Parm.py", "wb")
             fWrite(f, "class " + preCap + "Parm():\n")
@@ -466,7 +470,7 @@ class Setup():
                 vNameStr = ("%s" % varName).ljust(maxVName)
                 fWrite(f, "        self.%s = None\n" % (vNameStr))
             f.close()
-            
+
         if fData:
             fWrite(c2File, "};\n\n")
 
@@ -483,15 +487,15 @@ class Setup():
                     tmp = structType.upper()
                     fWrite(c1File, "}\nT_%s_VAR, *P_%s_VAR;\n\n" % \
                            (tmp, tmp))
-                
+
                 fWrite(c1File, \
                        "extern unsigned char " + prefix + "Size[];\n"\
                        "extern T_" + preUC + "_VAR " + prefix[0] + "Var;\n")
-                    
+
                 fWrite(c1File, \
                        "\n#endif /* " + preUC + "_STRUCT */\n")
                 c1File.close()
-                
+
             if c2File is not None:
                 if len(structType) != 0:
                     for val in structList:
@@ -625,7 +629,7 @@ class Setup():
                             fWrite(cFile, "};\n\n#else\n\n")
                             fWrite(cFile, "extern const char *%s[];\n" % (enum))
                             fWrite(cFile, "\n#endif\n")
-                            
+
                     if data.startswith("}") and f is not None:
                         fWrite(f, "\n%s = ( \\\n" % (enum))
                         for s in eval(enum):
@@ -650,8 +654,8 @@ class Setup():
                                 path = osJoin(cLoc, sName + 'Str.h')
                                 sFile = open(path, 'wb')
                                 uVar = var.upper()
-                                fWrite(sFile, "#if !defined(INC_%s)\n" \
-                                       "#define INC_%s\n\n" \
+                                fWrite(sFile, "#if !defined(%s_INC)\n" \
+                                       "#define %s_INC\n\n" \
                                        "struct S_%s\n" \
                                        "{\n char c0;\n char c1;\n" % \
                                        (uVar, uVar, uVar))
@@ -662,7 +666,8 @@ class Setup():
                                 fWrite(sFile, "};\n\n" \
                                        "struct S_%s %sStr[] =\n{\n" % \
                                        (var.upper(), sName))
-                                for j, c in enumerate(commentList):
+                                j = 0
+                                for c in commentList:
                                     match = re.match("\'([ \w+\-]*)\'([\s\w]*)", c)
                                     regCode = ''
                                     rComment = ''
@@ -679,8 +684,11 @@ class Setup():
                                     txt = " %s/* %2x %2d %s */\n" % \
                                         (sReg.ljust(24), j, j, rComment)
                                     fWrite(sFile, txt)
+                                    j += 1
                                 fWrite(sFile, "};\n\n" \
-                                       "#endif  /* %s */\n" % (uVar))
+                                       "#define %s_SIZE %d\n\n" \
+                                       "#endif  /* %s_INC */\n" %
+                                       (uVar, j, uVar))
                                 sFile.close()
                 else:
                     if fData:
@@ -717,7 +725,7 @@ class Setup():
                     if isinstance(val, int):
                         val = str(val)
                     bitVal = eval(val)
-                    fWrite(cFile, "%s /* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s /* 0x%02x %s */\n" %
                                 (tmp.ljust(32), bitVal, comment))
                 if var in globals():
                     print("createCtlBits %s already defined" % var)
@@ -756,12 +764,14 @@ class Setup():
             fWrite(cFile, "#if !defined(%s)\n"\
                    "#define %s\n\n" % (gName, gName))
             fWrite(cFile, "enum " + cName.upper() + "\n{\n")
+
             path = osJoin(cLoc, cName + 'Str.h')
             c1File = open(path, 'wb')
             fWrite(c1File, "typedef struct S_CHR\n"\
-                           "{\n char c0;\n char c1;\n"
-                           " char c2;\n char c3;\n} T_CH4, *P_CH4;\n\n"\
+                   "{\n char c0;\n char c1;\n"
+                   " char c2;\n char c3;\n} T_CH4, *P_CH4;\n\n"\
                    "T_CH4 fpgaOpStr[] =\n{\n")
+
             try:
                 xPath = osJoin(xLoc, xName + '.vhd')
                 xFile = open(xPath , 'wb')
@@ -803,7 +813,7 @@ class Setup():
 
                 if fData:
                     tmp = " %-18s = %s, " % (regName, index)
-                    fWrite(cFile, "%s/* 0x%02x %s */\n" % 
+                    fWrite(cFile, "%s/* 0x%02x %s */\n" %
                                 (tmp.ljust(32), index, regComment))
                     if xFile:
                         fWrite(xFile, ('constant %-18s : ' \
@@ -813,7 +823,7 @@ class Setup():
 
                 globals()[regName] = index
                 xRegTable.append(regName)
-                
+
                 if f is not None:
                     tmp = "%s = %2d" % (regName.ljust(16), index)
                     fWrite(f, "%s# %s\n" % (tmp.ljust(32), regComment))
@@ -1062,10 +1072,14 @@ class Setup():
                     if len(sLst) != 0:
                         path = osJoin(cLoc, regName + 'RegStr.h')
                         sFile = open(path, 'wb')
+                        rName = cVarName(regName) + "_REG"
+                        gRName = rName + "_INC"
+                        fWrite(sFile, "#if !defined(%s)\n"\
+                               "#define %s\n\n// sFile\n\n" % (gRName, gRName))
                         fWrite(sFile, "struct S_%s\n" \
-                                      "{\n char c0;\n char c1;\n};\n\n" \
+                               "{\n char c0;\n char c1;\n};\n\n" \
                                "struct S_%s %sRegStr[] =\n{\n" % \
-                               (regName.upper(), regName.upper(), regName))
+                               (rName, rName, regName))
                         for (cVar, shift, regCode, rComment) in sLst:
                             # if len(regCode) < 2:
                             #     tregCode = regCode.ljust(2)
@@ -1076,9 +1090,11 @@ class Setup():
                             txt = " {%s}, /* %4x %2d %-16s %s */\n" % \
                                 (sReg, 1<<shift, shift, cVar, rComment)
                             fWrite(sFile, txt)
-                        fWrite(sFile, "};\n")
+                        fWrite(sFile, "};\n\n#define %s_SIZE %d\n" % \
+                               (rName, len(sLst)))
+                        fWrite(sFile, "\n#endif  /* %s */\n" % (gRName))
                         sFile.close()
-                    # sLst = []
+
                     xLst = []
                     cLst = []
                     rData = []
@@ -1096,12 +1112,12 @@ class Setup():
                         # if shiftType != tuple:
                         if not isinstance(shift, tuple):
                             tmp =  "#define %-18s (%s << %s)" % (cVar, bit, shift)
-                            fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                            fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                    (tmp.ljust(40), bit << shift, comment))
 
                             if (shift != lastShift):
                                 tmp =  "  \"%s\", " % (cVar)
-                                bitStr.append("%s/* 0x%02x %s */\n" % 
+                                bitStr.append("%s/* 0x%02x %s */\n" %
                                               (tmp.ljust(32), bit << shift,
                                                comment))
                             xLst.append((" alias %-12s : " \
@@ -1136,7 +1152,7 @@ class Setup():
                                 for j in range(start, shift):
                                     x = (x << 1) + 1
                                 tmp =  "#define %-18s (0x%x << %s)" % (cVar, x, start)
-                                fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                                fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                        (tmp.ljust(40), x << start, comment))
 
                                 xLst.append(" alias %-14s : unsigned is " \
@@ -1147,7 +1163,7 @@ class Setup():
                                 rData.append((xVar, (shift, start), comment))
                             else:
                                 tmp =  "#define %-18s (%s << %s)" % (cVar, bit, start)
-                                fWrite(cFile, "%s/* 0x%03x %s */\n" % 
+                                fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                        (tmp.ljust(40), bit << shift, comment))
 
                                 xVal = (" constant %-12s : unsigned " \
@@ -1156,14 +1172,14 @@ class Setup():
                                         (xVar, shift-start, 0, \
                                         '{0:03b}'.format(bit), comment))
                                 xLst.append(xVal)
-                                
+
                                 cVal = (" constant %-12s : std_logic_vector " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
                                         (xVar, shift-start, 0, \
                                         '{0:03b}'.format(bit), comment))
                                 rCLst.append(cVal)
-                                
+
                     if (shift > maxShift):
                         maxShift = shift
                     if cVar in globals():
@@ -1231,7 +1247,7 @@ class Setup():
 
         if f is not None:
             f.close()
-            
+
         if fData:
             fWrite(cFile, "\n#endif  /* %s */\n" % (gName))
             cFile.close()

@@ -34,7 +34,6 @@ R_MOVE_Z             =  30	# 0x1e
 R_MOVE_X             =  31	# 0x1f
 R_MOVE_REL_Z         =  32	# 0x20
 R_MOVE_REL_X         =  33	# 0x21
-R_MAX_CMD            =  34	# 0x22
 
 # command table
 
@@ -73,5 +72,4 @@ cmdTable = ( \
     ("R_MOVE_X",      ), # 0x1f 31
     ("R_MOVE_REL_Z",  ), # 0x20 32
     ("R_MOVE_REL_X",  ), # 0x21 33
-    ("R_MAX_CMD",     ), # 0x22 34
     )

@@ -4,7 +4,7 @@ n = None
 
 configList = \
     (
-        # <- len 2 items 288 [ 19 52]
+        # <- len 2 items 298 [ 19 52]
         "arc panel",
 
         ('arcAddFeed',        'arc '),
@@ -306,6 +306,11 @@ configList = \
         ('xRetractLoc',       'x axis '),
         ('xPitch',            'x axis '),
         ('xProbeDist',        'x axis '),
+        ('xTstLimitMin',      'x axis test limit minimum'),
+        ('xTstLimitMax',      'x axis test limit maximum'),
+        ('xTstHomeMin',       'x axis test home minimum'),
+        ('xTstHomeMax',       'x axis test home maximum'),
+        ('xTstProbe',         'x axis test probe'),
 
         "x axis position config",
 
@@ -354,6 +359,11 @@ configList = \
         ('zPitch',            'z axis '),
         ('zProbeDist',        'z axis '),
         ('zProbeSpeed',       'z axis '),
+        ('zTstLimitMin',      'z axis test limit minimum'),
+        ('zTstLimitMax',      'z axis test limit maximum'),
+        ('zTstHomeMin',       'z axis test home minimum'),
+        ('zTstHomeMax',       'z axis test home maximum'),
+        ('zTstProbe',         'z axis test probe'),
 
         "z axis position config",
 
@@ -550,8 +560,8 @@ riscvCmdList = \
         ("R_JOG_Z",       0, "'JZ' jog move z"),
         ("R_JOG_X",       0, "'JX' jog move x"),
 
-        ("R_HOME_Z",      1, "'MZ' home z"),
-        ("R_HOME_X",      1, "'MX' home x"),
+        ("R_HOME_Z",      1, "'HZ' home z"),
+        ("R_HOME_X",      1, "'HX' home x"),
 
         # queued commands
 
@@ -571,10 +581,10 @@ riscvCmdList = \
         ("R_MOVE_Z",      2, "'MZ' move z"),
         ("R_MOVE_X",      2, "'MX' move x"),
 
-        ("R_MOVE_REL_Z",  2, "'HZ' move rel z"),
-        ("R_MOVE_REL_X",  2, "'HX' move rel x"),
+        ("R_MOVE_REL_Z",  2, "'RZ' move rel z"),
+        ("R_MOVE_REL_X",  2, "'RX' move rel x"),
 
-        ("R_MAX_CMD",     0, "'MX' maximum command"),
+        # ("R_MAX_CMD",     0, "'MX' maximum command"),
 
         # ("R_", ""),
         # ("R_", ""),
@@ -583,7 +593,7 @@ riscvCmdList = \
 
 parmList = \
     (
-        # <- len 3 items 191 [ 24 10 29]
+        # <- len 3 items 201 [ 24 10 29]
         "spindle parameters",
 
         ("SP_STEPS",               "int16_t",  "spindle motor steps"),
@@ -717,6 +727,14 @@ parmList = \
         ("Z_HOME_DIST_BACKOFF",    "float",    "z home backoff dist"),
         ("Z_HOME_DIR",             "int",      "z homing direction"),
 
+        "z limit test parameters",
+
+        ("Z_TEST_LIMIT_MIN",       "int",      "z test limit minimum"),
+        ("Z_TEST_LIMIT_MAX",       "int",      "z test limit maximum"),
+        ("Z_TEST_HOME_MIN",        "int",      "z test home minimum"),
+        ("Z_TEST_HOME_MAX",        "int",      "z test home maximum"),
+        ("Z_TEST_PROBE",           "int",      "z test probe"),
+
         "x home parameters",
 
         ("X_HOME_SPEED",           "float",    "x final homing speed"),
@@ -730,6 +748,15 @@ parmList = \
         ("X_HOME_LOC",             "int",      "x home test location"),
         ("X_HOME_START",           "int",      "x start of home signal"),
         ("X_HOME_END",             "int",      "x end of home signal"),
+
+        "x limit test parameters",
+
+        ("X_TEST_LIMIT_MIN",       "int",      "x test limit minimum"),
+        ("X_TEST_LIMIT_MAX",       "int",      "x test limit maximum"),
+        ("X_TEST_HOME_MIN",        "int",      "x test home minimum"),
+        ("X_TEST_HOME_MAX",        "int",      "x test home maximum"),
+        ("X_TEST_PROBE",           "int",      "x test probe"),
+
 
         "z dro",
 
@@ -752,6 +779,7 @@ parmList = \
         ("X_USE_DRO",              "char",     "x use dro for position"),
         ("X_DONE_DELAY",           "int",      "x done to read dro delay"),
         ("X_DRO_FINAL_DIST",       "int",      "x final approach distance"),
+
 
         "x home or probe status",
 
@@ -916,11 +944,11 @@ parmList = \
         # ("", "", ""),
 
         ("MAX_PARM",               "int16_t",  "maximum parameter"),
+        # ->
     )
 
 syncParmList = \
     (
-        # ->
         # <- len 3 items 5 [ 16 10 24]
         ("SYNC_CYCLE",     "uint16_t", "sync cycle length"),
         ("SYNC_OUTPUT",    "uint16_t", "sync outputs per cycle"),
@@ -945,7 +973,7 @@ megaParmList = \
 
 riscvParmList = \
     (
-        # <- len 3 items 29 [ 29 10 26]
+        # <- len 3 items 39 [ 29 10 26]
         ("R_MV_STATUS",                 "uint32_t", "move status"),
         ("R_JOG_PAUSE",                 "int",      "jog pause"),
         ("R_CUR_PASS",                  "int",      "current pass"),
@@ -968,6 +996,12 @@ riscvParmList = \
         ("(z)Axis.(R_Z_)HOME_BACKOFF",  "int",      "home backoff dist"),
         ("(z)Axis.(R_Z_)HOME_SLOW",     "int",      "home backoff dist"),
 
+        ("(z)Axis.(R_Z_)TEST_LIM_MIN",  "int",      "test minimum limit"),
+        ("(z)Axis.(R_Z_)TEST_LIM_MAX",  "int",      "test maximum limit"),
+        ("(z)Axis.(R_Z_)TEST_HOME_MIN", "int",      "test home minimum"),
+        ("(z)Axis.(R_Z_)TEST_HOME_MAX", "int",      "test home maximum"),
+        ("(z)Axis.(R_Z_)TEST_PROBE",    "int",      "test probe position"),
+
         ("(x)Axis.(R_X_)STEPS_INCH",    "int",      "steps per inch"),
         ("(x)Axis.(R_X_)SAVED_LOC",     "int",      "saved for que op"),
         ("(x)Axis.(R_X_)HOME_OFFSET",   "int",      "home offset"),
@@ -981,6 +1015,12 @@ riscvParmList = \
         ("(x)Axis.(R_X_)HOME_FIND_REV", "int",      "max rev homing distance"),
         ("(x)Axis.(R_X_)HOME_BACKOFF",  "int",      "home backoff dist"),
         ("(x)Axis.(R_X_)HOME_SLOW",     "int",      "home backoff dist"),
+
+        ("(x)Axis.(R_X_)TEST_LIM_MIN",  "int",      "test minimum limit"),
+        ("(x)Axis.(R_X_)TEST_LIM_MAX",  "int",      "test maximum limit"),
+        ("(x)Axis.(R_X_)TEST_HOME_MIN", "int",      "test home minimum"),
+        ("(x)Axis.(R_X_)TEST_HOME_MAX", "int",      "test home maximum"),
+        ("(x)Axis.(R_X_)TEST_PROBE",    "int",      "test probe position"),
 
         # (R_PARM_, "", ""),
         # ->
@@ -1145,7 +1185,6 @@ regList = \
         # ->
     )
 
-# ("", 0, 0, ""),
 fpgaEncList = \
     (
         # <- len 5 items 8 [ 16  1  1  1 29]
@@ -1161,170 +1200,171 @@ fpgaEncList = \
 
         ("F_Ld_Dbg_Freq",  n, 1, 2, "load debug frequency"),
         ("F_Ld_Dbg_Count", n, 1, 2, "load debug clocks"),
+        # ("", 0, 0, 0, ""),
         # ->
     )
 
 fpgaLatheList = \
     (
-        # <- len 5 items 78 [ 18  1 12  1 32]
+        # <- len 5 items 65 [ 18  1 11  1 32]
         "phase control",
 
         ("phaseCtl",),
-        ("F_Ld_Phase_Len",   0, 1,            2, "'LLN' phase length"),
-        ("F_Rd_Phase_Syn",   n, 1,            4, "'RSY' read phase at sync pulse"),
-        ("F_Phase_Max",      n, n,            0, "number of phase registers"),
+        ("F_Ld_Phase_Len",   0, 1,           2, "'LLN' phase length"),
+        ("F_Rd_Phase_Syn",   n, 1,           4, "'RSY' read phase at sync pulse"),
+        ("F_Phase_Max",      n, n,           0, "number of phase registers"),
 
-        "controller",
+        # "controller",
 
-        ("controller",),
-        ("F_Ld_Ctrl_Data",   0, 1,            0, "'LCD' load controller data"),
-        ("F_Ctrl_Cmd",       n, 1,            1, "'CMD' controller command"),
-        ("F_Ld_Seq",         n, 1,            1, "'LSQ' load sequence"),
-        ("F_Rd_Seq",         n, 1,            4, "'RSQ' read sequence"),
-        ("F_Rd_Ctr",         n, 1,            4, "'RCT' read counter"),
-        ("F_Ctrl_Max",       n, n,            0, "number of controller registers"),
+        # ("controller",),
+        # ("F_Ld_Ctrl_Data",   0, 1,            0, "'LCD' load controller data"),
+        # ("F_Ctrl_Cmd",       n, 1,            1, "'CMD' controller command"),
+        # ("F_Ld_Seq",         n, 1,            1, "'LSQ' load sequence"),
+        # ("F_Rd_Seq",         n, 1,            4, "'RSQ' read sequence"),
+        # ("F_Rd_Ctr",         n, 1,            4, "'RCT' read counter"),
+        # ("F_Ctrl_Max",       n, n,            0, "number of controller registers"),
 
-        "reader",
+        # "reader",
 
-        ("reader",),
-        ("F_Ld_Read_Data",   0, 1,            0, "'LDR' load reader data"),
-        ("F_Read",           n, 1,            0, "'RD'  read data"),
-        ("F_Read_Max",       n, n,            0, "number of reader registers"),
+        # ("reader",),
+        # ("F_Ld_Read_Data",   0, 1,            0, "'LDR' load reader data"),
+        # ("F_Read",           n, 1,            0, "'RD'  read data"),
+        # ("F_Read_Max",       n, n,            0, "number of reader registers"),
 
         "PWM",
 
         ("pwmCtl",),
-        ("F_Ld_PWM_Max",     0, 1,            4, "'MAX' pwm counter maximum"),
-        ("F_Ld_PWM_Trig",    n, 1,            4, "'TRG' pwm trigger"),
-        ("F_PWM_Max",        n, n,            0, "number of pwm registers"),
+        ("F_Ld_PWM_Max",     0, 1,           4, "'MAX' pwm counter maximum"),
+        ("F_Ld_PWM_Trig",    n, 1,           4, "'TRG' pwm trigger"),
+        ("F_PWM_Max",        n, n,           0, "number of pwm registers"),
 
         "encoder",
 
         ("encoder",),
-        ("F_Ld_Enc_Cycle",   0, 1,            2, "'LEC' load encoder cycle"),
-        ("F_Ld_Int_Cycle",   n, 1,            2, "'LIC' load internal cycle"),
-        ("F_Rd_Cmp_Cyc_C",   n, 1,            4, "'RCC' read cmp cycle clocks"),
-        ("F_Enc_Max",        n, n,            0, "number of encoder registers"),
+        ("F_Ld_Enc_Cycle",   0, 1,           2, "'LEC' load encoder cycle"),
+        ("F_Ld_Int_Cycle",   n, 1,           2, "'LIC' load internal cycle"),
+        ("F_Rd_Cmp_Cyc_C",   n, 1,           4, "'RCC' read cmp cycle clocks"),
+        ("F_Enc_Max",        n, n,           0, "number of encoder registers"),
 
         "debug frequency",
 
         ("dbgFreq",),
-        ("F_Ld_Dbg_Freq",    0, 1,            2, "'DBF' debug frequency"),
-        ("F_Ld_Dbg_Count",   n, 1,            4, "'DBC' debug count"),
-        ("F_Dbg_Freq_Max",   n, n,            0, "number of debug frequency regs"),
+        ("F_Ld_Dbg_Freq",    0, 1,           2, "'DBF' debug frequency"),
+        ("F_Ld_Dbg_Count",   n, 1,           4, "'DBC' debug count"),
+        ("F_Dbg_Freq_Max",   n, n,           0, "number of debug frequency regs"),
 
         "sync accel",
 
         ("syncAccel",),
-        ("F_Ld_D",           0, 1,            4, "'LIS' axis initial sum"),
-        ("F_Ld_Incr1",       n, 1,            4, "'LI1' axis incr1"),
-        ("F_Ld_Incr2",       n, 1,            4, "'LI2' axis incr2"),
-        ("F_Ld_Accel_Val",   n, 1,            4, "'LAV' axis accel value"),
-        ("F_Ld_Accel_Count", n, 1,            4, "'LAC' axis accel count"),
+        ("F_Ld_D",           0, 1,           4, "'LIS' axis initial sum"),
+        ("F_Ld_Incr1",       n, 1,           4, "'LI1' axis incr1"),
+        ("F_Ld_Incr2",       n, 1,           4, "'LI2' axis incr2"),
+        ("F_Ld_Accel_Val",   n, 1,           4, "'LAV' axis accel value"),
+        ("F_Ld_Accel_Count", n, 1,           4, "'LAC' axis accel count"),
 
-        ("F_Rd_XPos",        n, 1,            4, "'RX'  axis x pos"),
-        ("F_Rd_YPos",        n, 1,            4, "'RY'  axis y pos"),
-        ("F_Rd_Sum",         n, 1,            4, "'RSU' axis sum"),
-        ("F_Rd_Accel_Sum",   n, 1,            4, "'RAS' axis accel sum"),
-        ("F_Rd_Accel_Ctr",   n, 1,            4, "'RAC' axis accel counter"),
+        ("F_Rd_XPos",        n, 1,           4, "'RX'  axis x pos"),
+        ("F_Rd_YPos",        n, 1,           4, "'RY'  axis y pos"),
+        ("F_Rd_Sum",         n, 1,           4, "'RSU' axis sum"),
+        ("F_Rd_Accel_Sum",   n, 1,           4, "'RAS' axis accel sum"),
+        ("F_Rd_Accel_Ctr",   n, 1,           4, "'RAC' axis accel counter"),
 
-        ("F_Ld_Dist",        n, 1,            4, "'LDS' axis distance"),
-        ("F_Ld_Max_Dist",    n, 1,            4, "'LMD' jog maximum distance"),
+        ("F_Ld_Dist",        n, 1,           4, "'LDS' axis distance"),
+        ("F_Ld_Max_Dist",    n, 1,           4, "'LMD' jog maximum distance"),
         # ("F_Ld_Backlash",    n, 1, 4, "'LB'  jog backlash"),
 
-        ("F_Rd_Dist",        n, 1,            4, "'RDS' read axis distance"),
-        ("F_Rd_Accel_Steps", n, 1,            4, "'RAS' read accel steps"),
+        ("F_Rd_Dist",        n, 1,           4, "'RDS' read axis distance"),
+        ("F_Rd_Accel_Steps", n, 1,           4, "'RAS' read accel steps"),
 
-        ("F_Ld_Loc",         n, 1,            4, "'LLC' axis location"),
-        ("F_Rd_Loc",         n, 1,            4, "'RLC' read axis location"),
+        ("F_Ld_Loc",         n, 1,           4, "'LLC' axis location"),
+        ("F_Rd_Loc",         n, 1,           4, "'RLC' read axis location"),
 
         # ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
         # ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
         # ("F_Ld_Mpg_Div",     n, 1, 4, "'LMV' Mpg div values"),
 
-        ("F_Ld_Dro",         n, 1,            4, "'LDR' axis dro"),
-        ("F_Ld_Dro_End",     n, 1,            4, "'LDE' axis dro end"),
-        ("F_Ld_Dro_Limit",   n, 1,            4, "'LDL' axis dro decel limit"),
-        ("F_Rd_Dro",         n, 1,            4, "'RDR' read axis dro"),
+        ("F_Ld_Dro",         n, 1,           4, "'LDR' axis dro"),
+        ("F_Ld_Dro_End",     n, 1,           4, "'LDE' axis dro end"),
+        ("F_Ld_Dro_Limit",   n, 1,           4, "'LDL' axis dro decel limit"),
+        ("F_Rd_Dro",         n, 1,           4, "'RDR' read axis dro"),
 
-        ("F_Sync_Max",       n, n,            0, "number of sync registers"),
+        ("F_Sync_Max",       n, n,           0, "number of sync registers"),
 
         "jog registers",
 
         ("jog",),
-        ("F_Ld_Jog_Ctl",     0, 1,            4, "'CT' jog control"),
-        ("F_Ld_Jog_Inc",     n, 1,            4, "'IN' jog increment"),
-        ("F_Ld_Jog_Back",    n, 1,            4, "'JB' jog backlash increment"),
-        ("F_Jog_Max",        n, n,            0, "number of jog registers"),
+        ("F_Ld_Jog_Ctl",     0, 1,           4, "'CT' jog control"),
+        ("F_Ld_Jog_Inc",     n, 1,           4, "'IN' jog increment"),
+        ("F_Ld_Jog_Back",    n, 1,           4, "'JB' jog backlash increment"),
+        ("F_Jog_Max",        n, n,           0, "number of jog registers"),
 
         "axis",
 
         ("axisCtl",),
-        ("F_Rd_Axis_Status", 0, 1,            1, "'RAS' read axis status"),
-        ("F_Ld_Axis_Ctl",    n, 1,            2, "'LAC' set axis control reg"),
-        ("F_Rd_Axis_Ctl",    n, 1,            2, "'RAC' read axis control reg"),
-        ("F_Ld_Freq",        n, 1,            4, "'LFR' frequency"),
-        ("F_Sync_Base",      n, "syncAccel",  n, "sync registers"),
-        ("F_Axis_Max",       n, n,            0, "num of axis regs"),
+        ("F_Rd_Axis_Status", 0, 1,           1, "'RAS' read axis status"),
+        ("F_Ld_Axis_Ctl",    n, 1,           2, "'LAC' set axis control reg"),
+        ("F_Rd_Axis_Ctl",    n, 1,           2, "'RAC' read axis control reg"),
+        ("F_Ld_Freq",        n, 1,           4, "'LFR' frequency"),
+        ("F_Sync_Base",      n, "syncAccel", n, "sync registers"),
+        ("F_Axis_Max",       n, n,           0, "num of axis regs"),
 
         "spindle",
 
         ("spindle",),
-        ("F_Ld_Sp_Ctl",      0, 1,            1, "'LCT' spindle control reg"),
-        ("F_Ld_Sp_Freq",     n, 1,            4, "'LFR' freq for step spindle"),
-        ("F_Sp_Jog_Base",    n, "jog",        n, "'J' spindle jog"),
-        ("F_Sp_Sync_Base",   n, "syncAccel",  n, "spindle sync"),
+        ("F_Ld_Sp_Ctl",      0, 1,           1, "'LCT' spindle control reg"),
+        ("F_Ld_Sp_Freq",     n, 1,           4, "'LFR' freq for step spindle"),
+        ("F_Sp_Jog_Base",    n, "jog",       n, "'J' spindle jog"),
+        ("F_Sp_Sync_Base",   n, "syncAccel", n, "spindle sync"),
 
         "register definitions",
 
         ("regDef",),
-        ("F_Noop",           0, 1,            1, "'NO' reg 0"),
+        ("F_Noop",           0, 1,           1, "'NO' reg 0"),
 
         "status registers",
 
-        ("F_Rd_Status",      n, 1,            4, "'RSTS' status reg"),
-        ("F_Rd_Inputs",      n, 1,            4, "'RINP' inputs reg"),
+        ("F_Rd_Status",      n, 1,           4, "'RSTS' status reg"),
+        ("F_Rd_Inputs",      n, 1,           4, "'RINP' inputs reg"),
 
         "control registers",
 
-        ("F_Ld_Run_Ctl",     n, 1,            1, "'LRUN' set run control reg"),
-        ("F_Rd_Run_Ctl",     n, 1,            1, "'RRUN' read run control reg"),
-        ("F_Ld_Sync_Ctl",    n, 1,            1, "'LSYN' sync control reg"),
-        ("F_Ld_Cfg_Ctl",     n, 1,            3, "'LCFG' config control reg"),
-        ("F_Ld_Clk_Ctl",     n, 1,            1, "'LCLK' clock control reg"),
-        ("F_Ld_Out_Reg",     n, 1,            1, "'LDOU' output reg"),
-        ("F_Ld_Dsp_Reg",     n, 1,            1, "'LDSP' display reg"),
+        # ("F_Ld_Run_Ctl",     n, 1,            1, "'LRUN' set run control reg"),
+        # ("F_Rd_Run_Ctl",     n, 1,            1, "'RRUN' read run control reg"),
+        ("F_Ld_Sync_Ctl",    n, 1,           1, "'LSYN' sync control reg"),
+        ("F_Ld_Cfg_Ctl",     n, 1,           3, "'LCFG' config control reg"),
+        ("F_Ld_Clk_Ctl",     n, 1,           1, "'LCLK' clock control reg"),
+        ("F_Ld_Out_Reg",     n, 1,           1, "'LDOU' output reg"),
+        ("F_Ld_Dsp_Reg",     n, 1,           1, "'LDSP' display reg"),
 
-        "controller",
+        # "controller",
 
-        ("F_Ctrl_Base",      n, "controller", n, "'C' controller"),
+        # ("F_Ctrl_Base",      n, "controller", n, "'C' controller"),
 
-        "reader",
+        # "reader",
 
-        ("F_Read_Base",      n, "reader",     n, "'R' reader"),
+        # ("F_Read_Base",      n, "reader",     n, "'R' reader"),
 
         "debug frequency control",
 
-        ("F_Dbg_Freq_Base",  n, "dbgFreq",    n, "'D' dbg frequency"),
+        ("F_Dbg_Freq_Base",  n, "dbgFreq",   n, "'D' dbg frequency"),
 
         "spindle speed",
 
-        ("F_Rd_Idx_Clks",    n, 1,            4, "'RIDX' clocks per index"),
+        ("F_Rd_Idx_Clks",    n, 1,           4, "'RIDX' clocks per index"),
 
         "step spindle frequency generator",
 
         "pwm",
 
-        ("F_PWM_Base",       n, "pwmCtl",     n, "'P' pwm control"),
+        ("F_PWM_Base",       n, "pwmCtl",    n, "'P' pwm control"),
 
         "base for modules",
 
-        ("F_Enc_Base",       n, "encoder",    n, "'E' encoder registers"),
-        ("F_Phase_Base",     n, "phaseCtl",   n, "'H' phase registers"),
-        ("F_ZAxis_Base",     n, "axisCtl",    n, "'Z' z axis registers"),
-        ("F_XAxis_Base",     n, "axisCtl",    n, "'X' x axis registers"),
-        ("F_Spindle_Base",   n, "spindle",    n, "'S' spindle registers"),
-        ("F_Cmd_Max",        n, n,            n, "number of commands"),
+        ("F_Enc_Base",       n, "encoder",   n, "'E' encoder registers"),
+        ("F_Phase_Base",     n, "phaseCtl",  n, "'H' phase registers"),
+        ("F_ZAxis_Base",     n, "axisCtl",   n, "'Z' z axis registers"),
+        ("F_XAxis_Base",     n, "axisCtl",   n, "'X' x axis registers"),
+        ("F_Spindle_Base",   n, "spindle",   n, "'S' spindle registers"),
+        ("F_Cmd_Max",        n, n,           n, "number of commands"),
         # ->
     )
 
@@ -1533,12 +1573,13 @@ fpgaEncBitList = \
 
 fpgaLatheBitList = \
     (
-        # <- len 4 items 124 [ 15  1  6 26]
+        # <- len 4 items 126 [ 15  1  6 26]
         "RiscV control register",
 
         ("riscvCtl",),
         ("riscvData",     1, 0,      "riscv data active"),
         ("riscvSPI",      1, 1,      "riscv spi active"),
+        ("riscvInTest",   1, 2,      "riscv input test"),
 
         "status register",
 
@@ -1551,26 +1592,34 @@ fpgaLatheBitList = \
         ("xAxisCurDir",   1, 5,      "'Xd' x axis current dir"),
         ("stEStop",       1, 6,      "'ES' emergency stop"),
         ("spindleActive", 1, 7,      "'S+' spindle active"),
-        ("queNotEmpty",   1, 8,      "'Q+' ctl queue not empty"),
-        ("ctlBusy",       1, 9,      "'CB' controller busy"),
-        ("syncActive",    1, 10,     "'SA' sync active"),
+        ("syncActive",    1, 8,      "'SA' sync active"),
+        # ("queNotEmpty",   1, 8,      "'Q+' ctl queue not empty"),
+        # ("ctlBusy",       1, 9,      "'CB' controller busy"),
 
         "input register",
 
         ("inputs",),
-        ("inZHome",       1, 0,      "z home switch"),
-        ("inZMinus",      1, 1,      "z limit minus"),
-        ("inZPlus",       1, 2,      "z Limit Plus"),
-        ("inXHome",       1, 3,      "x home switch"),
-        ("inXMinus",      1, 4,      "x limit minus"),
-        ("inXPlus",       1, 5,      "x Limit Plus"),
-        ("inSpare",       1, 6,      "spare input"),
-        ("inProbe",       1, 7,      "probe input"),
-        ("inPin10",       1, 8,      "pin 10"),
-        ("inPin11",       1, 9,      "pin 11"),
-        ("inPin12",       1, 10,     "pin 12"),
-        ("inPin13",       1, 11,     "pin 13"),
-        ("inPin15",       1, 12,     "pin 15"),
+        ("inPin10",       1, 0,      "'10' pin 10"),
+        ("inPin11",       1, 1,      "'11' pin 11"),
+        ("inPin12",       1, 2,      "'12' pin 12"),
+        ("inPin13",       1, 3,      "'13' pin 13"),
+        ("inPin15",       1, 4,      "'15' pin 15"),
+        ("inZHome",       1, 5,      "'ZH' z home switch"),
+        ("inZMinus",      1, 6,      "'Z-' z limit minus"),
+        ("inZPlus",       1, 7,      "'Z+' z Limit Plus"),
+        ("inXHome",       1, 8,      "'XH' x home switch"),
+        ("inXMinus",      1, 9,      "'X-' x limit minus"),
+        ("inXPlus",       1, 10,     "'X+' x Limit Plus"),
+        ("inProbe",       1, 11,     "'PR' probe input"),
+        ("inSpare",       1, 12,     "'SP' spare input"),
+
+        "axis inputs",
+
+        ("axisIn",),
+        ("axHome",        1, 0,      "axis home"),
+        ("axMinus",       1, 1,      "axis minus limit"),
+        ("axPlus",        1, 2,      "axis plus limit"),
+        ("axProbe",       1, 3,      "axis probe"),
 
         "output register",
         ("outputs",),
@@ -1581,10 +1630,10 @@ fpgaLatheBitList = \
 
         "pin out signals",
         ("pinOut",),
-        ("pinOut2",       1, 0,      ""),
-        ("pinOut3",       1, 1,      ""),
-        ("pinOut4",       1, 2,      ""),
-        ("pinOut5",       1, 3,      ""),
+        ("pinOut2",       1, 0,      "z dir"),
+        ("pinOut3",       1, 1,      "z step"),
+        ("pinOut4",       1, 2,      "x dir"),
+        ("pinOut5",       1, 3,      "x step"),
         ("pinOut6",       1, 4,      ""),
         ("pinOut7",       1, 5,      ""),
         ("pinOut8",       1, 6,      ""),
@@ -1594,11 +1643,11 @@ fpgaLatheBitList = \
         ("pinOut16",      1, 10,     ""),
         ("pinOut17",      1, 11,     ""),
 
-        "run control register",
-        ("run",),
-        ("runEna",        1, 0,      "run from controller data"),
-        ("runInit",       1, 1,      "initialize controller"),
-        ("readerInit",    1, 2,      "initialize reader"),
+        # "run control register",
+        # ("run",),
+        # ("runEna",        1, 0,      "run from controller data"),
+        # ("runInit",       1, 1,      "initialize controller"),
+        # ("readerInit",    1, 2,      "initialize reader"),
 
         # "command register",
         # ("cmd",),
@@ -1613,30 +1662,36 @@ fpgaLatheBitList = \
         "axis control register",
 
         ("axisCtl",),
-        ("ctlInit",       1, 0,      "reset flag"),
-        ("ctlStart",      1, 1,      "start"),
-        ("ctlBacklash",   1, 2,      "backlash move no pos upd"),
-        ("ctlWaitSync",   1, 3,      "wait for sync to start"),
-        ("ctlDir",        1, 4,      "direction"),
-        ("ctlSetLoc",     1, 5,      "set location"),
-        ("ctlChDirect",   1, 6,      "ch input direct"),
-        ("ctlSlave",      1, 7,      "slave ctl by other axis"),
-        ("ctlDroEnd",     1, 8,      "use dro to end move"),
-        ("ctlDistMode",   1, 9,      "distance udpdate mode"),
-        ("ctlJogCmd",     1, 10,     "jog with commands"),
-        ("ctlJogMpg",     1, 11,     "jog with mpg"),
-        ("ctlHome",       1, 12,     "homing axis"),
-        ("ctlUseLimits",  1, 13,     "use limits"),
+        ("ctlInit",       1, 0,      "'IN' reset flag"),
+        ("ctlStart",      1, 1,      "'ST' start"),
+        ("ctlBacklash",   1, 2,      "'BK' backlash move no pos upd"),
+        ("ctlWaitSync",   1, 3,      "'WS' wait for sync to start"),
+        ("ctlDir",        1, 4,      "'+-' direction"),
+        ("ctlSetLoc",     1, 5,      "'SL' set location"),
+        ("ctlChDirect",   1, 6,      "'CH' ch input direct"),
+        ("ctlSlave",      1, 7,      "'SL' slave ctl by other axis"),
+        ("ctlDroEnd",     1, 8,      "'DE' use dro to end move"),
+        ("ctlDistMode",   1, 9,      "'DM' distance udpdate mode"),
+        ("ctlJogCmd",     1, 10,     "'JC' jog with commands"),
+        ("ctlJogMpg",     1, 11,     "'JM' jog with mpg"),
+        ("ctlHome",       1, 12,     "'HO' homing axis"),
+        ("ctlHomePol",    1, 13,     "'HP' home signal polarity"),
+        ("ctlProbe",      1, 14,     "'PR' probe enable"),
+        ("ctlUseLimits",  1, 15,     "'UL' use limits"),
 
         "axis status register",
 
         ("axisStatus",),
-        ("axDoneDist",    1, 0,      "axis done distance"),
-        ("axDoneDro",     1, 1,      "axis done dro"),
-        ("axDoneHome",    1, 2,      "axis done home"),
-        ("axDoneLimit",   1, 3,      "axis done limit"),
-        ("axHomeStatus",  1, 4,      "axis home status"),
-        ("axDistZero",    1, 5,      "axis distance zero"),
+        ("axDone",        1, 0,      "'DN' axis done"),
+        ("axDistZero",    1, 1,      "'ZE' axis distance zero"),
+        ("axDoneDro",     1, 2,      "'DR' axis done dro"),
+        ("axDoneHome",    1, 3,      "'HO' axis done home"),
+        ("axDoneLimit",   1, 4,      "'LI' axis done limit"),
+        ("axDoneProbe",   1, 5,      "'PR' axis done probe"),
+        ("axInHome",      1, 6,      "'IH' axis home"),
+        ("axInMinus",     1, 7,      "'IM' axis minus limit"),
+        ("axInPlus",      1, 8,      "'IP' axis plus limit"),
+        ("axInProbe",     1, 9,      "'IR' axis probe"),
 
         "configuration control register",
 
@@ -1856,14 +1911,14 @@ enumList = \
 
         "home control states",
 
-        # <- len 2 items 5 [ 12 26]
+        # <- len 2 items 5 [ 12 31]
         "enum h_States",
         "{",
-        ("H_IDLE",     "idle state"),
-        ("H_HOME",     "found home switch"),
-        ("H_OFF_HOME", "off home switch"),
-        ("H_BACKOFF",  "backoff dist from switch"),
-        ("H_SLOW",     "found home slowly"),
+        ("H_IDLE",     "'HI' idle state"),
+        ("H_HOME",     "'HF' found home switch"),
+        ("H_OFF_HOME", "'OF' off home switch"),
+        ("H_BACKOFF",  "'BF' backoff dist from switch"),
+        ("H_SLOW",     "'HS' found home slowly"),
         # ("H_", ""),
         "};",
         # ->
@@ -2146,65 +2201,65 @@ enumList = \
         # <- len 2 items 7 [ 17 36]
         "enum move_Cmd c",
         "{",
-        ("M_CMD_NONE  = 0", "no command"),
-        ("M_CMD_MOV   = 1", "move a set distance"),
-        ("M_CMD_JOG   = 2", "move while cmd are present"),
-        ("M_CMD_SYN   = 3", "move dist synchronized to rotation"),
-        ("M_CMD_MAX   = 4", "rapid move"),
-        ("M_CMD_SPEED = 5", "jog at speed"),
-        ("M_JOG_SLOW  = 6", "slow jog for home or probe"),
+        ("M_CMD_NONE  = 0", "'NO' no command"),
+        ("M_CMD_MOV   = 1", "'MV' move a set distance"),
+        ("M_CMD_JOG   = 2", "'JG' move while cmd are present"),
+        ("M_CMD_SYN   = 3", "'SY' move dist synchronized to rotation"),
+        ("M_CMD_MAX   = 4", "'MX' rapid move"),
+        ("M_CMD_SPEED = 5", "'CS' jog at speed"),
+        ("M_JOG_SLOW  = 6", "'JS' slow jog for home or probe"),
         "};",
         # ->
 
         "riscv run wait states",
 
-        # <- len 2 items 14 [ 20 35]
+        # <- len 2 items 14 [ 20 40]
         "enum move_Bit c",
         "{",
-        ("M_RSV_0       = 0",  "no command"),
-        ("M_RSV_1       = 1",  "no command"),
-        ("M_RSV_2       = 2",  "no command"),
+        ("M_RSV_0       = 0",  "'R0' no command"),
+        ("M_RSV_1       = 1",  "'R1' no command"),
+        ("M_RSV_2       = 2",  "'R2' no command"),
 
-        ("M_SYN_START   = 3",  "start on sync pulse"),
-        ("M_SYN_LEFT    = 4",  "start sync left"),
-        ("M_SYN_TAPER   = 5",  "taper on other axis"),
+        ("M_SYN_START   = 3",  "'SS' start on sync pulse"),
+        ("M_SYN_LEFT    = 4",  "'SL' start sync left"),
+        ("M_SYN_TAPER   = 5",  "'ST' taper on other axis"),
 
-        ("M_DIST_MODE   = 6",  "distance update mode"),
-        ("M_FIND_HOME   = 7",  "find home"),
-        ("M_CLEAR_HOME  = 8",  "move off of home"),
-        ("M_FIND_PROBE  = 9",  "find probe"),
-        ("M_CLEAR_PROBE = 10", "move off of probe"),
-        ("M_DRO_POS     = 11", "use dro for moving"),
-        ("M_DRO_UPD     = 12", "update internal position from dro"),
-        ("M_BIT_MAX     = 13", "number of bits"),
+        ("M_DIST_MODE   = 6",  "'DM' distance update mode"),
+        ("M_FIND_HOME   = 7",  "'FH' find home"),
+        ("M_CLEAR_HOME  = 8",  "'CH' move off of home"),
+        ("M_FIND_PROBE  = 9",  "'FP' find probe"),
+        ("M_CLEAR_PROBE = 10", "'CP' move off of probe"),
+        ("M_DRO_POS     = 11", "'DP' use dro for moving"),
+        ("M_DRO_UPD     = 12", "'DU' update internal position from dro"),
+        ("M_BIT_MAX     = 13", "'MX' number of bits"),
         "};",
         # ->
 
         "movement status",
 
-        # <- len 2 items 14 [ 24 28]
+        # <- len 2 items 14 [ 25 28]
         "enum mv_Status_Bits c",
         "{",
-        ("R_MV_PAUSE        = 0",  "'PA' movement paused"),
-        ("R_MV_READ_X       = 1",  "'RX' pause x may change"),
-        ("R_MV_READ_Z       = 2",  "'RZ' pause z may change"),
-        ("R_MV_ACTIVE       = 3",  "'AC' movement active"),
-        ("R_MV_DONE         = 4",  "'DN' movement active"),
+        ("R_MV_PAUSE         = 0",  "'PA' movement paused"),
+        ("R_MV_READ_X        = 1",  "'RX' pause x may change"),
+        ("R_MV_READ_Z        = 2",  "'RZ' pause z may change"),
+        ("R_MV_ACTIVE        = 3",  "'AC' movement active"),
+        ("R_MV_DONE          = 4",  "'DN' movement active"),
         ("R_MV_X_LIMIT       = 5",  "'XL' at limit switch"),
         ("R_MV_Z_LIMIT       = 6",  "'ZL' at limit switch"),
         ("R_MV_X_HOME_ACTIVE = 7",  "'XA' x home active"),
         ("R_MV_X_HOME        = 8",  "'XH' x home success"),
         ("R_MV_Z_HOME_ACTIVE = 9",  "'ZA' z home active"),
         ("R_MV_Z_HOME        = 10", "'ZH' z home success"),
-        ("R_MV_MEASURE      = 11", "'MS' pause for measurement"),
-        ("R_MV_ESTOP        = 12", "'ES' estop"),
-        ("R_MV_MAX          = 13", "number of bits"),
+        ("R_MV_MEASURE       = 11", "'MS' pause for measurement"),
+        ("R_MV_ESTOP         = 12", "'ES' estop"),
+        ("R_MV_MAX           = 13", "number of bits"),
         "};",
         # ->
 
         "pause flags",
 
-        # <- len 2 items 6 [ 23 32]
+        # <- len 2 items 17 [ 23 32]
         "enum pause_Bits c",
         "{",
         ("R_DISABLE_JOG     = 0", "'DJ' jogging disabled"),
@@ -2214,7 +2269,28 @@ enumList = \
         ("R_PAUSE_READ_X    = 4", "'RZ' read x after pause"),
         ("R_PAUSE_MAX       = 5", "number of bits"),
         "};",
-        # ->
+
+        # "input register",
+
+        #
+        # "enum inputs_Bits c",
+        # "{",
+        # ("R_IN_PIN10   = 0",      "'10' pin 10"),
+        # ("R_IN_PIN11   = 1",      "'11' pin 11"),
+        # ("R_IN_PIN12   = 2",      "'12' pin 12"),
+        # ("R_IN_PIN13   = 3",      "'13' pin 13"),
+        # ("R_IN_PIN15   = 4",      "'15' pin 15"),
+        # ("R_IN_Z_HOME  = 5",      "'ZH' z home switch"),
+        # ("R_IN_Z_MINUS = 6",      "'Z-' z limit minus"),
+        # ("R_IN_Z_PLUS  = 7",      "'Z+' z Limit Plus"),
+        # ("R_IN_X_HOME  = 8",      "'XH' x home switch"),
+        # ("R_IN_X_MINUS = 9",      "'X-' x limit minus"),
+        # ("R_IN_X_PLUS  = 10",     "'X+' x Limit Plus"),
+        # ("R_IN_PROBE   = 11",     "'PR' probe input"),
+        # ("R_IN_SPARE   = 12",     "'SP' spare input"),
+        # ("R_IN_MAX     = 13",     "'MX' spare input"),
+        # "};",
+        #
     )
 
 megaEnumList = \
@@ -2224,17 +2300,17 @@ megaEnumList = \
         # <- len 2 items 11 [ 19 20]
         "enum poll_Mega",
         "{",
-        ("M_POLL_ESTOP_NO",   "estop no in"),
-        ("M_POLL_ESTOP_NC",   "estop nc in"),
-        ("M_POLL_SP_FWD",     "spindle forward in"),
-        ("M_POLL_SP_REV",     "spindle reverse in"),
-        ("M_POLL_ESTOP",      "estop condition"),
-        ("M_POLL_WD_ENA",     "watchdog enabled"),
-        ("M_POLL_CP_ACTIVE",  "charge pump active"),
-        ("M_POLL_PWM_ACTIVE", "pwm active"),
-        ("M_POLL_STEP_DIS",   "stepper disabled"),
-        ("M_POLL_ESTOP_RLY",  "estop relay"),
-        ("M_POLL_ESTOP_PC",   "estop pc"),
+        ("M_POLL_ESTOP_NO",       "estop no in"),
+        ("M_POLL_ESTOP_NC",       "estop nc in"),
+        ("M_POLL_SP_FWD",         "spindle forward in"),
+        ("M_POLL_SP_REV",         "spindle reverse in"),
+        ("M_POLL_ESTOP",          "estop condition"),
+        ("M_POLL_WD_ENA",         "watchdog enabled"),
+        ("M_POLL_CP_ACTIVE",      "charge pump active"),
+        ("M_POLL_PWM_ACTIVE",     "pwm active"),
+        ("M_POLL_STEP_DIS",       "stepper disabled"),
+        ("M_POLL_ESTOP_RLY",      "estop relay"),
+        ("M_POLL_ESTOP_PC",       "estop pc"),
         # ("M_POLL_", ""),
         "};",
         # ->
