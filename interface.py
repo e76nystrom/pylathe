@@ -1689,9 +1689,10 @@ fpgaLatheBitList = \
         ("axDoneLimit",   1, 4,      "'LI' axis done limit"),
         ("axDoneProbe",   1, 5,      "'PR' axis done probe"),
         ("axInHome",      1, 6,      "'IH' axis home"),
-        ("axInMinus",     1, 7,      "'IM' axis minus limit"),
-        ("axInPlus",      1, 8,      "'IP' axis plus limit"),
-        ("axInProbe",     1, 9,      "'IR' axis probe"),
+        ("axInMinus",     1, 7,      "'I-' axis in minus limit"),
+        ("axInPlus",      1, 8,      "'I+' axis in plus limit"),
+        ("axInProbe",     1, 9,      "'IP' axis in probe"),
+        ("axInFlag",      1, 10,     "'IF' axis in flag"),
 
         "configuration control register",
 

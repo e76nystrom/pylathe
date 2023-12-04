@@ -95,9 +95,10 @@ axDoneHome   = 0x08             # 'HO' axis done home
 axDoneLimit  = 0x10             # 'LI' axis done limit
 axDoneProbe  = 0x20             # 'PR' axis done probe
 axInHome     = 0x40             # 'IH' axis home
-axInMinus    = 0x80             # 'IM' axis minus limit
-axInPlus     = 0x100            # 'IP' axis plus limit
-axInProbe    = 0x200            # 'IR' axis probe
+axInMinus    = 0x80             # 'I-' axis in minus limit
+axInPlus     = 0x100            # 'I+' axis in plus limit
+axInProbe    = 0x200            # 'IP' axis in probe
+axInFlag     = 0x400            # 'IF' axis in flag
 
 # configuration control register
 
