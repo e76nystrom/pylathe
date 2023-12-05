@@ -557,8 +557,8 @@ riscvCmdList = \
         ("R_SET_DATA",    2, "'SD' set data"),
         ("R_GET_DATA",    1, "'GD' set data"),
 
-        ("R_JOG_Z",       0, "'JZ' jog move z"),
-        ("R_JOG_X",       0, "'JX' jog move x"),
+        ("R_JOG_Z",       1, "'JZ' jog move z"),
+        ("R_JOG_X",       1, "'JX' jog move x"),
 
         ("R_HOME_Z",      1, "'HZ' home z"),
         ("R_HOME_X",      1, "'HX' home x"),
