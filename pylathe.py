@@ -9675,7 +9675,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
                 ("bTest Mode", cf.cfgTestMode, None), \
                 ("Test RPM", cf.cfgTestRPM, 'd'), \
                 ("bInvert Enc Dir", cf.cfgInvEncDir, None), \
-                ("bStep DRO", cf.cfgDROStep, None), \
+                # ("bStep DRO", cf.cfgDROStep, None), \
             )
         fieldList(self, sizerG, self.fields)
 
