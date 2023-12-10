@@ -141,13 +141,16 @@ class ConfigInfo():
 
     def initInfo(self, index, val):
         if self.info[index] is not None:
-            print("initInfo duplicate index %s" % (index))
-            stdout.flush()
+            pass
+            # print("initInfo duplicate index %3d %s" %
+            #       (index, self.configTable[index]))
+            # stdout.flush()
         self.info[index] = val
 
     def newInfo(self, index, val):
         if self.info[index] is not None:
-            print("newInfo duplicate index %s" % (index))
+            print("newInfo duplicate index %d %s" %
+                  (index, self.configTable[index]))
             stdout.flush()
         self.info[index] = info = InfoValue(val)
         self.infoData[index] = val

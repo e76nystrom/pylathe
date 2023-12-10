@@ -132,7 +132,7 @@ class CommRiscv():
         self.ser = None
         self.riscv   = riscv = RiscvLathe(self, mainFrame)
         self.moveQue = self.riscv.moveQue
-        self.openSerial("COM10", "19200")
+        # self.openSerial("COM10", "19200")
         global riscvCmd
         riscvCmd = self.riscvCmd
         self.setPostUpdate = riscv.setPostUpdate
@@ -165,6 +165,7 @@ class CommRiscv():
         pass
 
     def openSerial(self, port, rate):
+        print("openSerial %s %s" % (port, rate))
         if port is None or rate is None:
             return
         if (len(port) == 0) or (len(rate) == 0):
