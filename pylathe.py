@@ -24,7 +24,6 @@ from datetime import datetime
 from pytz import timezone
 from collections import namedtuple
 from extDro import DroTimeout
-from icecream import ic
 # from contextlib import redirect_stderr
 #     with open(os.path.join(DBG_DIR, "err.log")) as stderr, \
 #          redirect_stderr(stderr):
@@ -80,8 +79,10 @@ from sync import Sync
 import cairo
 import wx.lib.wxcairo as wxcairo
 
-DBG_DIR = os.path.join(os.getcwd(), "dbg")
-DXF_DIR = os.path.join(os.getcwd(), "dxf")
+PYLATHE_DIR = os.getcwd()
+
+DBG_DIR = os.path.join(PYLATHE_DIR, "dbg")
+DXF_DIR = os.path.join(PYLATHE_DIR, "dxf")
 DBG_LOG = os.path.join(DBG_DIR, "dbgLog.txt")
 
 stdError = stderr
@@ -115,9 +116,15 @@ if WINDOWS:
 else:
     print(os.uname())
     if not os.uname().machine.startswith('arm'):
-        from comm import Comm
+        if not RISCV:
+            from comm import Comm
+        else:
+            from commRiscv import CommRiscv
     else:
-        from commPi import CommPi
+        if not RISCV:
+            from commPi import CommPi
+        else:
+            from commRiscv import CommRiscv
         R_PI = True
     pncDir = ("pnc",)
     dirStrip = -1
@@ -360,6 +367,30 @@ class ComboBox(wx.ComboBox):
                 #     print("indexList", self.indexList)
 
 def fieldList(panel, sizer, fields, col=1):
+    dc = wx.ScreenDC()
+    dc.SetFont(panel.mf.defaultFont)
+    cfg = panel.mf.cfg
+    maxW = 0
+    maxH = 0
+    maxTW = 0
+    maxTH = 0
+    for field in fields:
+        (label, index) = field[0:2]
+        w, h = dc.GetTextExtent(label)
+        print("%-20s w %3d h %2d" % (label, w, h))
+        maxW = max(maxW, w)
+        maxH = max(maxH, h)
+
+        if cfg.info[index] is not None:
+            txt = cfg.getInfo(index)
+            w, h = dc.GetTextExtent(txt)
+            print("%-20s w %3d h %2d" % (txt, w, h))
+            maxTW = max(maxTW, w)
+            maxTH = max(maxTH, h)
+
+    lblSize = (maxW, maxH)
+    fSize = (maxTW, -1)
+
     total = len(fields)
     offset = (total + 1) // 2
     for i in range(total):
@@ -372,14 +403,14 @@ def fieldList(panel, sizer, fields, col=1):
             field = fields[j]
         (label, index) = field[:2]
         if label.startswith('b'):
-            addCheckBox(panel, sizer, label[1:], index)
+            addCheckBox(panel, sizer, label[1:], index, lblSize=lblSize)
         elif label.startswith('c'):
             action = field[3]
-            addComboBox(panel, sizer, label[1:], index, action)
+            addComboBox(panel, sizer, label[1:], index, action, lblSize=lblSize)
         elif label.startswith('w'):
-            addField(panel, sizer, label[1:], index, (80, -1))
+            addField(panel, sizer, label[1:], index, lblSize=lblSize)
         else:
-            addField(panel, sizer, label, index)
+            addField(panel, sizer, label, index, size=fSize, lblSize=lblSize)
 
 def OnEnter(panel):
     if panel.formatList is None:
@@ -411,19 +442,24 @@ def addFieldText(panel, sizer, label, key, fmt=None, keyText=None):
     cfg.initInfo(key, tc)
     return tc, txt
 
-def addField(panel, sizer, label, index, fmt=None, size=None):
+def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
     if size is None:
         size = (panel.width, -1)
     if fmt is not None:
         panel.formatList.append((index, fmt))
     if label is not None:
-        txt = wx.StaticText(panel, -1, label)
+        if lblSize is None:
+            txt = wx.StaticText(panel, -1, label)
+        else:
+            txt = wx.StaticText(panel, -1, label, size=lblSize,
+                                style=wx.ALIGN_RIGHT)
+
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
 
-    tc = wx.TextCtrl(panel, -1, "", size=size, \
-                     style=wx.TE_PROCESS_ENTER)
+    tc = wx.TextCtrl(panel, -1, "", style=wx.TE_PROCESS_ENTER)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
+    tc.SetSize(size)
     sizer.Add(tc, flag=wx.ALL, border=2)
 
     cfg = panel.mf.cfg
@@ -433,8 +469,14 @@ def addField(panel, sizer, label, index, fmt=None, size=None):
     cfg.initInfo(index, tc)
     return tc
 
-def addCheckBox(panel, sizer, label, index, action=None, box=False):
-    txt = wx.StaticText(panel, -1, label)
+def addCheckBox(panel, sizer, label, index, action=None, box=False,
+                lblSize=None):
+    if lblSize is None:
+        txt = wx.StaticText(panel, -1, label)
+    else:
+        txt = wx.StaticText(panel, -1, label, size=lblSize,
+                            style=wx.ALIGN_RIGHT)
+
     if box:
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add(txt, flag=wx.ALL|\
@@ -458,8 +500,13 @@ def addCheckBox(panel, sizer, label, index, action=None, box=False):
     return cb
 
 def addComboBox(panel, sizer, label, index, action, border=2,
-                flag=wx.CENTER|wx.ALL):
-    txt = wx.StaticText(panel, -1, label)
+                flag=wx.CENTER|wx.ALL, lblSize=None):
+    if lblSize is None:
+        txt = wx.StaticText(panel, -1, label)
+    else:
+        txt = wx.StaticText(panel, -1, label, size=lblSize,
+                            style=wx.ALIGN_RIGHT)
+
     sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
               wx.ALIGN_CENTER_VERTICAL, border=2)
 
@@ -932,6 +979,8 @@ def saveData(dialog):
     return changed
 
 def OnDialogShow(evt):
+    print("+++OnDialogShow")
+    stdout.flush()
     dialog = evt.EventObject
     try:
         if dialog.mf.done:
@@ -942,6 +991,22 @@ def OnDialogShow(evt):
     changed = False
     if dialog.IsShown():
         formatData(dialog.mf.cfg, dialog.fields)
+        print("***initialize and fill fieldInfo %s" % (dialog.name))
+        dialog.fieldInfo = {}
+        for fmt in dialog.fields:
+            (label, index) = fmt[:2]
+            dialog.fieldInfo[index] = dialog.mf.cfg.getInfo(index)
+    else:
+        changed = saveData(dialog)
+
+    if hasattr(dialog, 'showAction') and \
+       callable(dialog.showAction):
+        dialog.showAction(changed)
+
+def setupFieldInfo(dialog, shown=True, changed=False):
+    if shown:
+        formatData(dialog.mf.cfg, dialog.fields)
+        print("***initialize and fill fieldInfo %s" % (dialog.name))
         dialog.fieldInfo = {}
         for fmt in dialog.fields:
             (label, index) = fmt[:2]
@@ -980,6 +1045,7 @@ def OnDialogSetup(evt):
 class DialogActions():
     def __init__(self):
         self.fields = None
+        print("**set fieldInfo None %s" % (self.name))
         self.fieldInfo = None
         self.sendData = False
         self.changed = False
@@ -991,6 +1057,9 @@ class DialogActions():
     def showAction(self, changed):
         print("DialogAction showAction stub called")
         stdout.flush()
+
+    def setupFieldInfo(self):
+        setupFieldInfo(self)
 
 class MoveCommands():
     def __init__(self, mainFrame):
@@ -1570,7 +1639,7 @@ class SendData:
                     else:
                         queParm(pm.MIN_SPEED, 0)
                         queParm(pm.MAX_SPEED, 0)
-                        
+
                 if STEP_DRV or MOTOR_TEST or SPINDLE_VAR_SPEED:
                     if rpm is not None:
                         queParm(pm.SP_MAX_RPM, rpm)
@@ -1677,7 +1746,7 @@ class SendData:
                 queParm(pm.Z_LIM_NEG_INV, cfg.getBoolInfoData(cf.zLimNegInv))
                 queParm(pm.Z_LIM_POS_INV, cfg.getBoolInfoData(cf.zLimPosInv))
                 queParm(pm.Z_HOME_INV, cfg.getBoolInfoData(cf.zHomeInv))
-                
+
                 queParm(pm.JOG_DEBUG, cfg.getBoolInfoData(cf.cfgJogDebug))
 
                 queParm(pm.Z_HOME_DIST, cfg.getInfoData(cf.zHomeDist))
@@ -5671,7 +5740,6 @@ class JogPanel(wx.Panel, FormRoutines):
             self.speedRange = self.maxSpeed - self.minSpeed
 
     def setRPMSlider(self, rpm):
-        ic("setRPMSlider", rpm, self.minSpeed)
         if rpm > self.minSpeed:
             pos = int((float(rpm - self.minSpeed) / self.speedRange) * \
                       self.sliderMax)
@@ -7454,7 +7522,7 @@ class UpdateThread(Thread):
         self.threadRun = True
         self.threadDone = False
         self.parmList = (self.readAll, )
-        
+
         self.encoderCount = None
         self.xLoc = None
         self.zLoc = None
@@ -8301,6 +8369,13 @@ class MainFrame(wx.Frame):
         self.dirName = os.getcwd()
         self.parseCmdLine()
 
+        e = wx.FontEnumerator()
+        e.EnumerateFacenames()
+        fontList = e.GetFacenames()
+        fontList.sort()
+        for val in fontList:
+            print(val)
+
         if not os.path.exists(DBG_DIR):
             os.makedirs(DBG_DIR)
         self.dbg = open(DBG_LOG, "ab")
@@ -8317,6 +8392,9 @@ class MainFrame(wx.Frame):
         self.zSyncExt = None
 
         self.cfg = cfg = ConfigInfo(cf.configTable)
+        cfg.clrInfo(len(cf.config))
+        cfg.readInfo(self.cfgFile, cf.config)
+
         self.initialConfig(cfg)
 
         self.zStepsInch = None
@@ -8344,12 +8422,20 @@ class MainFrame(wx.Frame):
         self.comm = comm
         # comm.SWIG = SWIG
 
-        self.hdrFont = \
-            wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
-                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
-        self.defaultFont = defaultFont = \
-            wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
-                    wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+        if WINDOWS:
+            self.hdrFont = \
+                wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                        wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+            self.defaultFont = defaultFont = \
+                wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                        wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+        else:
+            self.hdrFont = \
+                wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                        wx.FONTWEIGHT_NORMAL, False, u'Ubuntu Mono')
+            self.defaultFont = defaultFont = \
+                wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
+                        wx.FONTWEIGHT_NORMAL, False, u'Ubuntu Mono')
         self.SetFont(defaultFont)
 
         self.currentPanel = None
@@ -8366,6 +8452,8 @@ class MainFrame(wx.Frame):
         self.testSyncDialog = None
         self.testTaperDialog = None
         self.testMoveDialog = None
+
+        # cfg.clrInfo(len(cf.config))
 
         self.menuSetup()
         self.initUI()
@@ -8394,7 +8482,7 @@ class MainFrame(wx.Frame):
         else:
             self.jogShuttle = None
 
-        if not R_PI and not RISCV:
+        if not R_PI or RISCV:
             comm.openSerial(cfg.getInfoData(cf.commPort), \
                             cfg.getInfoData(cf.commRate))
 
@@ -8673,6 +8761,7 @@ class MainFrame(wx.Frame):
 
         # read data here so updates below have data
 
+        cfg.clrInfo(len(cf.config))
         cfg.readInfo(self.cfgFile, cf.config)
         cfg.readInfo(self.posFile, cf.config)
 
@@ -8899,19 +8988,20 @@ class MainFrame(wx.Frame):
                     if not re.search(r'\.[a-zA-Z0-9]*$', self.cfgFile):
                         self.cfgFile += ".txt"
             n += 1
+
         if self.cfgFile is None:
             self.cfgFile = "config.txt"
+        self.cfgFile = os.path.join(PYLATHE_DIR, self.cfgFile)
+
         if self.posFile is None:
             self.posFile = "posInfo.txt"
+        self.posFile = os.path.join(PYLATHE_DIR, self.posFile)
 
     def initialConfig(self, cfg):
         global FPGA, DRO, EXT_DRO, REM_DBG, STEP_DRV, \
             MEGA, MOTOR_TEST, SPINDLE_ENCODER, SPINDLE_SYNC_BOARD, \
             SPINDLE_INTERNAL_SYNC, SPINDLE_SWITCH, SPINDLE_VAR_SPEED, \
             HOME_IN_PLACE, X_DRO_POS, SYNC_SPI
-
-        cfg.clrInfo(len(cf.config))
-        cfg.readInfo(self.cfgFile, cf.config)
 
         FPGA = cfg.getInitialBoolInfo(cf.cfgFpga)
         DRO = cfg.getInitialBoolInfo(cf.cfgDRO)
@@ -8947,7 +9037,7 @@ class MainFrame(wx.Frame):
 
         HOME_IN_PLACE = cfg.getInitialBoolInfo(cf.cfgHomeInPlace)
 
-        cfg.clrInfo(len(cf.config))
+        # cfg.clrInfo(len(cf.config))
 
     def syncFuncSetup(self):
         cfg = self.cfg
@@ -9044,6 +9134,8 @@ class MainFrame(wx.Frame):
         (xPos, yPos) = self.GetPosition()
         dialog.Raise()
         dialog.Show(True)
+        if not WINDOWS:
+            dialog.setupFieldInfo()
         (w, h) = dialog.GetSize()
         xPos -= w
         if xPos < 1:
