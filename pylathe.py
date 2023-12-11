@@ -375,7 +375,7 @@ def fieldList(panel, sizerG, fields):
     dc = wx.ScreenDC()
     dc.SetFont(panel.mf.defaultFont)
     cfg = panel.mf.cfg
-    col = sizerG.Cols
+    col = sizerG.Cols / 2
     maxW = 0
     maxH = 0
     maxTW = 0
@@ -447,8 +447,6 @@ def addFieldText(panel, sizer, label, key, fmt=None, size=None, keyText=None):
             cfg.initInfo(keyText, txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
-    if not WINDOWS:
-        tc.SetSize(size)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
     panel.formData.append((tc, key))
     sizer.Add(tc, flag=wx.ALL, border=2)
@@ -472,8 +470,6 @@ def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
                   wx.ALIGN_CENTER_VERTICAL, border=2)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
-    if not WINDOWS:
-        tc.SetSize(size)
     panel.formData.append((tc, index))
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
     sizer.Add(tc, flag=wx.ALL, border=2)
