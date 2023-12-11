@@ -655,7 +655,6 @@ class RiscvLathe(Thread):
     def cSpindleUpdate(self):           # 18
         parm = self.parm
         pwmCtr = int(parm.spRpm * self.pwmDiv / parm.maxSpeed)
-        ic(int(parm.spRpm), pwmCtr, self.pwmDiv, parm.maxSpeed)
         cmd = self.riscvCmd
         cmd(rc.R_SET_DATA, (rp.R_PWM_CTR, int(pwmCtr)))
         cmd(rc.R_UPD_SPIN, flush=True)
