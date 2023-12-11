@@ -377,19 +377,20 @@ def fieldList(panel, sizer, fields, col=1):
     for field in fields:
         (label, index) = field[0:2]
         w, h = dc.GetTextExtent(label)
-        print("%-20s w %3d h %2d" % (label, w, h))
+        # print("%-20s w %3d h %2d" % (label, w, h))
         maxW = max(maxW, w)
         maxH = max(maxH, h)
 
         if cfg.info[index] is not None:
             txt = cfg.getInfo(index)
             w, h = dc.GetTextExtent(txt)
-            print("%-20s w %3d h %2d" % (txt, w, h))
+            # print("%-20s w %3d h %2d" % (txt, w, h))
             maxTW = max(maxTW, w)
             maxTH = max(maxTH, h)
 
-    lblSize = (maxW, maxH)
+    lblSize = (maxW, -1)
     fSize = (maxTW, -1)
+    print("%s labelSize %d fieldSize %d" % (panel.Label, maxW, maxTW))
 
     total = len(fields)
     offset = (total + 1) // 2
@@ -422,7 +423,9 @@ def OnEnter(panel):
     else:
         jp.setStatus(st.STR_FIELD_ERROR)
 
-def addFieldText(panel, sizer, label, key, fmt=None, keyText=None):
+def addFieldText(panel, sizer, label, key, fmt=None, size=None, keyText=None):
+    if size is None:
+        size = (panel.width, -1)
     if fmt is not None:
         panel.formatList.append((key, fmt))
 
@@ -430,14 +433,17 @@ def addFieldText(panel, sizer, label, key, fmt=None, keyText=None):
     txt = None
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
+        panel.formData.append((txt, key))
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
         if keyText is not None:
             cfg.initInfo(keyText, txt)
 
-    tc = wx.TextCtrl(panel, -1, "", size=(panel.width, -1), \
-                     style=wx.TE_PROCESS_ENTER)
+    tc = wx.TextCtrl(panel, -1, "", style=wx.TE_PROCESS_ENTER)
+    if size is not None:
+        tc.SetSize(size)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
+    panel.formData.append((tc, key))
     sizer.Add(tc, flag=wx.ALL, border=2)
     cfg.initInfo(key, tc)
     return tc, txt
@@ -454,12 +460,15 @@ def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
             txt = wx.StaticText(panel, -1, label, size=lblSize,
                                 style=wx.ALIGN_RIGHT)
 
+        panel.formData.append((txt, index))
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
 
     tc = wx.TextCtrl(panel, -1, "", style=wx.TE_PROCESS_ENTER)
+    if size is not None:
+        tc.SetSize(size)
+    panel.formData.append((tc, index))
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
-    tc.SetSize(size)
     sizer.Add(tc, flag=wx.ALL, border=2)
 
     cfg = panel.mf.cfg
@@ -490,6 +499,12 @@ def addCheckBox(panel, sizer, label, index, action=None, box=False,
         panel.Bind(wx.EVT_CHECKBOX, action, cb)
     sizerH.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
 
+    if not box:
+        panel.formData.append((txt, index))
+        panel.formData.append((cb, index))
+    else:
+        panel.formData.append((sizerH, txt, cb, index))
+
     cfg = panel.mf.cfg
     if cfg.info[index] is not None:
         val = cfg.getInfo(index)
@@ -506,6 +521,7 @@ def addComboBox(panel, sizer, label, index, action, border=2,
     else:
         txt = wx.StaticText(panel, -1, label, size=lblSize,
                             style=wx.ALIGN_RIGHT)
+    panel.formData.append((txt, index))
 
     sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
               wx.ALIGN_CENTER_VERTICAL, border=2)
@@ -519,6 +535,7 @@ def addComboBox(panel, sizer, label, index, action, border=2,
     if cfg.info[index] is not None:
         val = cfg.getInfo(index)
         combo.SetValue(val)
+    panel.formData.append((combo, index))
     sizer.Add(combo, flag=flag, border=border)
     cfg.initInfo(index, combo)
     return combo
@@ -531,6 +548,7 @@ class PanelButton(wx.Button):
 def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
               style=0, flag=wx.CENTER|wx.ALL):
     btn = PanelButton(panel, panel, label=label, style=style, size=size)
+    panel.formData.append((btn, None))
     btn.Bind(wx.EVT_BUTTON, action)
     sizer.Add(btn, flag=flag, border=border)
     return btn
@@ -538,6 +556,7 @@ def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
 def addToggleButton(panel, sizer, label, action, size=(60, -1), border=2, \
                     style=0, flag=wx.CENTER|wx.ALL):
     btn = wx.ToggleButton(panel, label=label, style=style, size=size)
+    panel.formData.append((btn, None))
     btn.Bind(wx.EVT_TOGGLEBUTTON, action)
     sizer.Add(btn, flag=flag, border=border)
     return btn
@@ -545,6 +564,7 @@ def addToggleButton(panel, sizer, label, action, size=(60, -1), border=2, \
 def addControlButton(panel, sizer, label, downAction, upAction, \
                      flag=wx.CENTER|wx.ALL):
     btn = wx.Button(panel, label=label)
+    panel.formData.append((btn, None))
     btn.Bind(wx.EVT_LEFT_DOWN, downAction)
     btn.Bind(wx.EVT_LEFT_UP, upAction)
     sizer.Add(btn, flag=flag, border=2)
@@ -707,7 +727,8 @@ class FormRoutines:
         self.prefix = ""
         self.focusField = None
         self.formatList = []
-        self.width = 60 if WINDOWS else 75
+        self.formData = []
+        self.width = 20 if WINDOWS else 75
 
 class PanelVars:
     def __init__(self):
@@ -991,7 +1012,7 @@ def OnDialogShow(evt):
     changed = False
     if dialog.IsShown():
         formatData(dialog.mf.cfg, dialog.fields)
-        print("***initialize and fill fieldInfo %s" % (dialog.name))
+        #print("***initialize and fill fieldInfo %s" % (dialog.name))
         dialog.fieldInfo = {}
         for fmt in dialog.fields:
             (label, index) = fmt[:2]
@@ -1045,7 +1066,6 @@ def OnDialogSetup(evt):
 class DialogActions():
     def __init__(self):
         self.fields = None
-        print("**set fieldInfo None %s" % (self.name))
         self.fieldInfo = None
         self.sendData = False
         self.changed = False
@@ -2434,11 +2454,78 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         self.internal = addCheckBox(self, sizerG, "Internal", cf.tuInternal, \
                                     self.OnInternal, box=True)
+        self.printFormData(sizerG)
+
+        # children = sizerG.GetChildren()
+        # for child in children:
+        #     widget = child.GetWindow()
+        #     if isinstance(widget, wx.StaticText):
+        #         print(widget.GetLabel())
+        #     elif isinstance(widget, wx.TextCtrl):
+        #         print(widget.GetValue())
+        #     else:
+        #         print(widget)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
         sizerV.Fit(self)
+        print("\nFitDone")
+        self.printFormData(sizerG)
+
+    def printFormData(self, sizerG):
+        dc = wx.ScreenDC()
+        dc.SetFont(self.mf.defaultFont)
+        colWidths = sizerG.GetColWidths()
+        for w in colWidths:
+            print("%3d " % (w), end="")
+        print()
+        maxC = [0 for i in range(sizerG.GetCols())]
+
+        for i, data in enumerate(self.formData):
+            r, c = divmod(i, 8)
+            print("%2d (%d, %d) " % (i, r, c), end="")
+            txtLen = None
+            if len(data) == 2:
+                (obj, index) = data
+                print("%-12s " %
+                      (obj.__class__.__name__), end="")
+                if index is None:
+                    print("%-15s " % (" "), end="")
+                else:
+                    print("%-15s " %
+                          (cf.configTable[index]), end="")
+                print("%3d " % (obj.GetSize()[0]), end="")
+                if isinstance(obj, wx.StaticText):
+                    txt = obj.GetLabel()
+                    w = dc.GetTextExtent(txt)[0]
+                    txtLen = w
+                    print("%3d %s" % (w, txt))
+                elif isinstance(obj, wx.TextCtrl):
+                    txt = obj.GetValue()
+                    w = dc.GetTextExtent(txt)[0]
+                    txtLen = w
+                    print("%3d %s" % (w, txt))
+                elif isinstance(obj, wx.CheckBox):
+                    print(obj.GetValue())
+                elif isinstance(obj, ComboBox):
+                    print(obj.GetValue())
+                elif isinstance(obj, PanelButton):
+                    print(obj.GetLabel())
+            else:
+                (sizer, txt, cb, index) = data
+                print("%-12s " %
+                      (cb.__class__.__name__), end="")
+                txtLen = dc.GetTextExtent(txt.GetLabel())[0] + cb.GetSize()[0]
+                print("%-15s %3d" %
+                      (cf.configTable[index], txtLen),
+                      end = " ")
+                print("%3d %s" % (sizer.GetSize()[0], cb.GetValue()))
+            if txtLen is not None:
+                maxC[c] = max(maxC[c], txtLen)
+        for w in maxC:
+            print("%3d " % (w), end="")
+        print()
 
     def OnEnter(self, _):
         OnEnter(self)
@@ -8369,12 +8456,12 @@ class MainFrame(wx.Frame):
         self.dirName = os.getcwd()
         self.parseCmdLine()
 
-        e = wx.FontEnumerator()
-        e.EnumerateFacenames()
-        fontList = e.GetFacenames()
-        fontList.sort()
-        for val in fontList:
-            print(val)
+        # e = wx.FontEnumerator()
+        # e.EnumerateFacenames()
+        # fontList = e.GetFacenames()
+        # fontList.sort()
+        # for val in fontList:
+        #     print(val)
 
         if not os.path.exists(DBG_DIR):
             os.makedirs(DBG_DIR)
