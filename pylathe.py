@@ -357,7 +357,10 @@ class ComboBox(wx.ComboBox):
 
     def SetValue(self, val):
         if isinstance(val, str):
-            val = int(val)
+            if val.isnumeric():
+                val = int(val)
+            else:
+                val = 0
         for (n, index) in enumerate(self.indexList):
             if val == index:
                 self.SetSelection(n)
@@ -391,8 +394,8 @@ def fieldList(panel, sizerG, fields):
             maxTW = max(maxTW, w)
             maxTH = max(maxTH, h)
 
-    lblSize = (maxW, -1)
-    fSize = (maxTW + 12, -1)
+    lblSize = (maxW, maxH) #-1)
+    fSize = (maxTW + 12, maxTH+6) #-1)
     print("%s labelSize %d fieldSize %d" % (panel.Label, maxW, maxTW))
 
     total = len(fields)
@@ -412,7 +415,7 @@ def fieldList(panel, sizerG, fields):
             action = field[3]
             addComboBox(panel, sizerG, label[1:], index, action, lblSize=lblSize)
         elif label.startswith('w'):
-            addField(panel, sizerG, label[1:], index, lblSize=lblSize)
+            addField(panel, sizerG, label[1:], index, size=fSize, lblSize=lblSize)
         else:
             addField(panel, sizerG, label, index, size=fSize, lblSize=lblSize)
     printFormData(panel, sizerG)
@@ -444,8 +447,8 @@ def addFieldText(panel, sizer, label, key, fmt=None, size=None, keyText=None):
             cfg.initInfo(keyText, txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
-    # if size is not None:
-    #     tc.SetSize(size)
+    if not WINDOWS:
+        tc.SetSize(size)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
     panel.formData.append((tc, key))
     sizer.Add(tc, flag=wx.ALL, border=2)
@@ -469,8 +472,8 @@ def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
                   wx.ALIGN_CENTER_VERTICAL, border=2)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
-    # if size is not None:
-    #     tc.SetSize(size)
+    if not WINDOWS:
+        tc.SetSize(size)
     panel.formData.append((tc, index))
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
     sizer.Add(tc, flag=wx.ALL, border=2)
@@ -736,7 +739,7 @@ class FormRoutines:
         self.sizerG = None
 
 def printFormData(panel, sizerG):
-    print("%s" % (panel.GetLabel()))
+    print("printFormData %s" % (panel.GetLabel()))
     dc = wx.ScreenDC()
     dc.SetFont(panel.mf.defaultFont)
     colWidths = sizerG.GetColWidths()
@@ -760,7 +763,8 @@ def printFormData(panel, sizerG):
             else:
                 print("%-20s " %
                       (cf.configTable[index]), end="")
-            print("%3d " % (obj.GetSize()[0]), end="")
+            (w, h) = obj.GetSize()
+            print("%3d %2d " % (w, h), end="")
             if isinstance(obj, wx.StaticText):
                 txt = obj.GetLabel()
                 w = dc.GetTextExtent(txt)[0]
@@ -1092,7 +1096,7 @@ def setupFieldInfo(dialog, shown=True, changed=False):
     if shown:
         printFormData(dialog, dialog.sizerG)
         formatData(dialog.mf.cfg, dialog.fields)
-        print("***initialize and fill fieldInfo %s" % (dialog.name))
+        print("***initialize and fill fieldInfo %s" % (dialog.GetLabel()))
         dialog.fieldInfo = {}
         for fmt in dialog.fields:
             (label, index) = fmt[:2]
@@ -9437,6 +9441,7 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -9561,6 +9566,7 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -9690,6 +9696,7 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -9806,6 +9813,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -9881,6 +9889,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -9930,6 +9939,7 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
         sizerV.Add(sizerH, 0, wx.ALIGN_RIGHT)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
