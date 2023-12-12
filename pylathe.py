@@ -79,6 +79,12 @@ from sync import Sync
 import cairo
 import wx.lib.wxcairo as wxcairo
 
+BORDER = 2
+BTN_BORDER = 5
+HELP_BORDER = 5
+DIALOG_BORDER = 10
+JP_BORDER = (10, 2)
+
 PYLATHE_DIR = os.getcwd()
 
 DBG_DIR = os.path.join(PYLATHE_DIR, "dbg")
@@ -442,7 +448,7 @@ def addFieldText(panel, sizer, label, index, fmt=None, size=None, keyText=None):
         txt = wx.StaticText(panel, -1, label)
         panel.formData.append((txt, index))
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                  wx.ALIGN_CENTER_VERTICAL, border=2)
+                  wx.ALIGN_CENTER_VERTICAL, border=BORDER)
         
         if keyText is not None:
             cfg.initInfo(keyText, txt)
@@ -450,7 +456,7 @@ def addFieldText(panel, sizer, label, index, fmt=None, size=None, keyText=None):
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
     panel.formData.append((tc, index))
-    sizer.Add(tc, flag=wx.ALL, border=2)
+    sizer.Add(tc, flag=wx.ALL, border=BORDER)
 
     if cfg.info[index] is not None:
         val = cfg.getInfo(index)
@@ -472,12 +478,12 @@ def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
 
         panel.formData.append((txt, index))
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                  wx.ALIGN_CENTER_VERTICAL, border=2)
+                  wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
     panel.formData.append((tc, index))
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
-    sizer.Add(tc, flag=wx.ALL, border=2)
+    sizer.Add(tc, flag=wx.ALL, border=BORDER)
 
     cfg = panel.mf.cfg
     if cfg.info[index] is not None:
@@ -497,15 +503,15 @@ def addCheckBox(panel, sizer, label, index, action=None, box=False,
     if box:
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add(txt, flag=wx.ALL|\
-                   wx.ALIGN_CENTER_VERTICAL, border=2)
+                   wx.ALIGN_CENTER_VERTICAL, border=BORDER)
     else:
         sizerH = sizer
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-                   wx.ALIGN_CENTER_VERTICAL, border=2)
+                   wx.ALIGN_CENTER_VERTICAL, border=BORDER)
     cb = wx.CheckBox(panel, -1, style=wx.ALIGN_LEFT)
     if action is not None:
         panel.Bind(wx.EVT_CHECKBOX, action, cb)
-    sizerH.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+    sizerH.Add(cb, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
     if not box:
         panel.formData.append((txt, index))
@@ -522,7 +528,7 @@ def addCheckBox(panel, sizer, label, index, action=None, box=False,
         sizer.Add(sizerH, flag=wx.ALIGN_RIGHT)
     return cb
 
-def addComboBox(panel, sizer, label, index, action, border=2,
+def addComboBox(panel, sizer, label, index, action, border=BORDER,
                 flag=wx.CENTER|wx.ALL, lblSize=None):
     if lblSize is None:
         txt = wx.StaticText(panel, -1, label)
@@ -532,7 +538,7 @@ def addComboBox(panel, sizer, label, index, action, border=2,
     panel.formData.append((txt, index))
 
     sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
-              wx.ALIGN_CENTER_VERTICAL, border=2)
+              wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
     (indexList, choiceList, text) = action()
     combo = ComboBox(panel, label, indexList, choiceList, \
@@ -553,7 +559,7 @@ class PanelButton(wx.Button):
         wx.Button.__init__(self, *args, **kwargs)
         self.panel = panel
 
-def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
+def addButton(panel, sizer, label, action, size=(60, -1), border=BORDER, \
               style=0, flag=wx.CENTER|wx.ALL):
     btn = PanelButton(panel, panel, label=label, style=style, size=size)
     panel.formData.append((btn, None))
@@ -561,7 +567,7 @@ def addButton(panel, sizer, label, action, size=(60, -1), border=2, \
     sizer.Add(btn, flag=flag, border=border)
     return btn
 
-def addToggleButton(panel, sizer, label, action, size=(60, -1), border=2, \
+def addToggleButton(panel, sizer, label, action, size=(60, -1), border=BORDER, \
                     style=0, flag=wx.CENTER|wx.ALL):
     btn = wx.ToggleButton(panel, label=label, style=style, size=size)
     panel.formData.append((btn, None))
@@ -575,7 +581,7 @@ def addControlButton(panel, sizer, label, downAction, upAction, \
     panel.formData.append((btn, None))
     btn.Bind(wx.EVT_LEFT_DOWN, downAction)
     btn.Bind(wx.EVT_LEFT_UP, upAction)
-    sizer.Add(btn, flag=flag, border=2)
+    sizer.Add(btn, flag=flag, border=BORDER)
     return btn
 
 def addBitmapButton(panel, sizer, bitmap, downAction, upAction, flag=0):
@@ -585,7 +591,7 @@ def addBitmapButton(panel, sizer, bitmap, downAction, upAction, flag=0):
     panel.formData.append((btn, None))
     btn.Bind(wx.EVT_LEFT_DOWN, downAction)
     btn.Bind(wx.EVT_LEFT_UP, upAction)
-    sizer.Add(btn, flag=flag, border=2)
+    sizer.Add(btn, flag=flag, border=BORDER)
     return btn
 
 class DialogButton(wx.Button):
@@ -593,14 +599,14 @@ class DialogButton(wx.Button):
         wx.Button.__init__(self, *args, **kwargs)
         self.dialog = dialog
 
-def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=2, \
+def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=BORDER, \
                    style=0, flag=wx.CENTER|wx.ALL):
     btn = DialogButton(dialog, dialog, label=label, style=style, size=size)
     btn.Bind(wx.EVT_BUTTON, action)
     sizer.Add(btn, flag=flag, border=border)
     return btn
 
-def addDialogButton(panel, sizer, idx, action=None, border=5):
+def addDialogButton(panel, sizer, idx, action=None, border=BTN_BORDER):
     btn = DialogButton(panel, panel, idx)
     panel.formData.append((btn, None))
     if action is None:
@@ -615,7 +621,7 @@ def addRadioButton(panel, sizer, label, index, style=0, action=None):
     panel.formData.append((btn, None))
     if action is not None:
         btn.Bind(wx.EVT_RADIOBUTTON, action)
-    sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
+    sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=BORDER)
     panel.mf.cfg.initInfo(index, btn)
     return btn
 
@@ -2405,7 +2411,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Turn", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -2459,7 +2465,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.internal = addCheckBox(self, sizerG, "Internal", cf.tuInternal, \
                                     self.OnInternal, box=True)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -3193,7 +3199,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Arc", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -3283,7 +3289,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
         # self.internal = addCheckBox(self, sizerG, "Internal", cf.arcInternal, \
         #                                  self.OnInternal, box=True)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -3537,7 +3543,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Face", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -3576,7 +3582,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         addButtons(self, sizerG, cf.faAddFeed, cf.faRPM, cf.faPause)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -3720,7 +3726,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Cutoff", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -3749,7 +3755,7 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         addButtons(self, sizerG, None, cf.cuRPM, cf.cuPause)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -4196,23 +4202,23 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Taper", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
         # standard taper select
 
         txt = wx.StaticText(self, -1, "Select Taper")
-        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=2)
+        sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
         self.taperSel = combo = wx.ComboBox(self, -1, self.taperList[0], \
                                             choices=self.taperList, \
                                             style=wx.CB_READONLY)
         self.mf.cfg.initInfo(cf.tpTaperSel, combo)
         combo.Bind(wx.EVT_COMBOBOX, self.OnCombo)
-        sizerH.Add(combo, flag=wx.ALL, border=2)
+        sizerH.Add(combo, flag=wx.ALL, border=BORDER)
 
-        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -4275,7 +4281,7 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.internal = addCheckBox(self, sizerG, "Internal", cf.tpInternal, \
                                     self.OnInternal, box=True)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -4923,7 +4929,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         txt = wx.StaticText(self, -1, "Thread", size=(120, 30))
         txt.SetFont(self.hdrFont)
 
-        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(txt, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerG = wx.FlexGridSizer(cols=8, rows=0, vgap=0, hgap=0)
 
@@ -4953,11 +4959,11 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         # self.final = btn = wx.RadioButton(self, label="Final", \
         #                                   style = wx.RB_GROUP)
-        # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=BORDER)
         # self.mf.cfg.initInfo(thFinal, btn)
 
         # self.depth = btn = wx.RadioButton(self, label="Depth")
-        # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=2)
+        # sizerH.Add(btn, flag=wx.CENTER|wx.ALL, border=BORDER)
         # self.mf.cfg.initInfo(thDepth, btn)
 
         # thread parameters
@@ -5011,7 +5017,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         self.internal = addCheckBox(self, sizerG, "Internal", cf.thInternal, \
                                     action=self.OnInternal, box=True)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         printFormData(self, sizerG)
 
@@ -5538,7 +5544,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.zPos = \
             addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
-                           posFont, (130, -1), border=(10, 2), \
+                           posFont, (130, -1), border=JP_BORDER, \
                            edit=False, index=cf.jogZPos)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -5546,7 +5552,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.xPos = \
             addDialogField(self, sizerG, "X", "0.0000", txtFont, \
-                           posFont, (130, -1), border=(10, 2), \
+                           posFont, (130, -1), border=JP_BORDER, \
                            edit=False, index=cf.jogXPos)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -5554,7 +5560,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         (self.rpm, self.rpmText) = \
             addDialogField(self, sizerG, "RPM", "0", txtFont, \
-                           posFont, (80, -1), border=(10, 2), \
+                           posFont, (80, -1), border=JP_BORDER, \
                            edit=False, text=True)
         self.rpm.Bind(wx.EVT_RIGHT_DOWN, self.OnRpmMenu)
         self.setSurfaceSpeed()
@@ -5564,13 +5570,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         (self.passSize, self.passText) = \
             addDialogField(self, sizerG, "Size", "0.000", txtFont, \
-                           posFont, (130, -1), border=(10,2), \
+                           posFont, (130, -1), border=JP_BORDER, \
                            edit=False, text=True)
         # x diameter
 
         self.xPosDiam = \
             addDialogField(self, sizerG, "X D", "0.0000", txtFont, \
-                           posFont, (130, -1), border=(10, 2), \
+                           posFont, (130, -1), border=JP_BORDER, \
                            edit=False)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -5578,7 +5584,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.curPass = \
             addDialogField(self, sizerG, "Pass", "0", txtFont, \
-                           posFont, (80, -1), border=(10, 2), \
+                           posFont, (80, -1), border=JP_BORDER, \
                            edit=False)
 
         if DRO:
@@ -5587,7 +5593,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.zDROPos = \
                 addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
-                               posFont, (130, -1), border=(10, 2), \
+                               posFont, (130, -1), border=JP_BORDER, \
                                edit=False, index=cf.droZPos)
             self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -5595,14 +5601,14 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.xDROPos = \
                 addDialogField(self, sizerG, "X", "0.0000", txtFont, \
-                               posFont, (130, -1), border=(10, 2), \
+                               posFont, (130, -1), border=JP_BORDER, \
                                edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
         # sizerV.Add(sizerG, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
-        #            border=2)
+        #            border=BORDER)
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, \
-                   border=2)
+                   border=BORDER)
 
         # status line
 
@@ -5612,23 +5618,23 @@ class JogPanel(wx.Panel, FormRoutines):
                                               style=wx.ST_NO_AUTORESIZE)
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=2)
+                   wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
         self.statusLine = txt = wx.StaticText(self, -1, "", size=(300, -1))
         txt.SetFont(txtFont)
         sizerH.Add(txt, flag=wx.ALL|wx.ALIGN_LEFT| \
-                   wx.ALIGN_CENTER_VERTICAL, border=2)
+                   wx.ALIGN_CENTER_VERTICAL, border=BORDER)
 
         txt = wx.StaticText(self, -1, "Limit Override ")
         # sizerH.Add(txt, flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, \
-        #            border=2)
+        #            border=BORDER)
         sizerH.Add(txt, flag=wx.ALIGN_CENTER_VERTICAL, \
-                   border=2)
+                   border=BORDER)
 
         self.limitOverride = cb = wx.CheckBox(self, -1)
         self.Bind(wx.EVT_CHECKBOX, self.OnOverride, cb)
         sizerH.Add(cb, flag=wx.ALIGN_CENTER_VERTICAL, \
-                   border=2)
+                   border=BORDER)
 
         sizerV.Add(sizerH)
 
@@ -5734,7 +5740,7 @@ class JogPanel(wx.Panel, FormRoutines):
         combo.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         combo.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         combo.SetFocus()
-        sizerG.Add(combo, flag=sFlag, border=2)
+        sizerG.Add(combo, flag=sFlag, border=BORDER)
 
         # third row
 
@@ -5757,9 +5763,9 @@ class JogPanel(wx.Panel, FormRoutines):
         sizerH.Add(sizerG)
 
         # sizerV.Add(sizerH, flag=wx.ALIGN_CENTER_VERTICAL|wx.CENTER|wx.ALL, \
-        #            border=2)
+        #            border=BORDER)
         sizerV.Add(sizerH, flag=wx.CENTER|wx.ALL, \
-                   border=2)
+                   border=BORDER)
 
 
         self.sliderMax = 1000
@@ -6912,14 +6918,14 @@ class HelpDialog(wx.Dialog):
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
         for (char, text) in helpText:
             char = wx.StaticText(self, -1, char)
-            sizerG.Add(char, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=5)
+            sizerG.Add(char, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=HELP_BORDER)
             text= wx.StaticText(self, -1, text)
-            sizerG.Add(text, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=5)
+            sizerG.Add(text, flag=wx.LEFT|wx.RIGHT|wx.ALIGN_LEFT, border=HELP_BORDER)
         sizerV.Add(sizerG, 0, wx.ALIGN_LEFT)
 
         btn = wx.Button(self, wx.ID_OK)
         btn.SetDefault()
-        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, border=5)
+        sizerV.Add(btn, 0, wx.ALL|wx.CENTER, border=BTN_BORDER)
         self.SetSizer(sizerV)
         self.sizerV.Fit(self)
         self.Show(True)
@@ -7143,7 +7149,7 @@ class SetPosDialog(wx.Dialog, FormRoutines):
             addDialogField(self, sizerV, tcDefault="0.000", \
                 tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
 
-        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk, border=10)
+        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk, border=DIALOG_BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -7204,7 +7210,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
+        addButton(self, sizerV, 'Ok', self.OnOk, border=DIALOG_BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -7290,7 +7296,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
             addDialogField(self, sizerV, tcDefault="0.000", \
                 tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
 
-        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
+        addButton(self, sizerV, 'Ok', self.OnOk, border=DIALOG_BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -7370,7 +7376,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        addButton(self, sizerV, 'Fix', self.OnFix, border=5)
+        addButton(self, sizerV, 'Fix', self.OnFix, border=BTN_BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -7464,7 +7470,7 @@ class RetractDialog(wx.Dialog, FormRoutines):
             addDialogField(self, sizerV, tcDefault="0.000", \
                 tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
 
-        addButton(self, sizerV, 'Ok', self.OnOk, border=10)
+        addButton(self, sizerV, 'Ok', self.OnOk, border=DIALOG_BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -8759,36 +8765,36 @@ class MainFrame(wx.Frame):
         self.panels = {}
         self.turnPanel = panel = TurnPanel(self, self.hdrFont)
         self.panels['turnPanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
         panel.Hide()
 
         self.facePanel = panel = FacePanel(self, self.hdrFont)
         self.panels['facePanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
         panel.Hide()
 
         self.cutoffPanel = panel = CutoffPanel(self, self.hdrFont)
         self.panels['cutoffPanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
         panel.Hide()
 
         self.taperPanel = panel = TaperPanel(self, self.hdrFont)
         self.panels['taperPanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
         panel.Hide()
 
         if STEP_DRV or SPINDLE_ENCODER:
             self.threadPanel = panel = ThreadPanel(self, self.hdrFont)
             self.panels['threadPanel'] = panel
-            sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+            sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
             panel.Hide()
 
         self.arcPanel = panel = ArcPanel(self, self.hdrFont)
         self.panels['arcPanel'] = panel
-        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(panel, 0, wx.EXPAND|wx.ALL, border=BORDER)
         panel.Hide()
 
-        sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
+        sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=BORDER)
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -9383,9 +9389,9 @@ class ZDialog(wx.Dialog, FormRoutines, DialogActions):
 
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=BORDER)
 
-        addSetupButton(self, sizerV, 'Setup Z', OnDialogSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup Z', OnDialogSetup, border=BTN_BORDER)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
@@ -9504,12 +9510,12 @@ class XDialog(wx.Dialog, FormRoutines, DialogActions):
 
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=BORDER)
 
         if HOME_TEST:
-            addButton(self, sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=5)
+            addButton(self, sizerV, 'Set Home Loc', self.OnSetHomeLoc, border=BTN_BORDER)
 
-        addSetupButton(self, sizerV, 'Setup X', OnDialogSetup, border=5)
+        addSetupButton(self, sizerV, 'Setup X', OnDialogSetup, border=BTN_BORDER)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -9628,16 +9634,16 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
                 self.fields += tmp
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=BORDER)
 
         # spindle start and stop
 
         if STEP_DRV:
             sizerH = wx.BoxSizer(wx.HORIZONTAL)
 
-            addButton(self, sizerH, 'Start', self.OnStart, border=5)
+            addButton(self, sizerH, 'Start', self.OnStart, border=BTN_BORDER)
 
-            addButton(self, sizerH, 'Stop', self.OnStop, border=5)
+            addButton(self, sizerH, 'Stop', self.OnStop, border=BTN_BORDER)
 
             sizerV.Add(sizerH, 0, wx.CENTER)
 
@@ -9758,7 +9764,7 @@ class PortDialog(wx.Dialog, FormRoutines, DialogActions):
             )
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.LEFT|wx.ALL, border=BORDER)
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
 
@@ -9833,7 +9839,7 @@ class ConfigDialog(wx.Dialog, FormRoutines, DialogActions):
             )
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
@@ -9880,10 +9886,10 @@ class MegaDialog(wx.Dialog, FormRoutines, DialogActions):
        )
         fieldList(self, sizerG, self.fields)
 
-        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
+        sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=BORDER)
 
         addSetupButton(self, sizerV, 'Setup Mega', OnDialogSetup, \
-                       size=(80, -1), border=5)
+                       size=(80, -1), border=BTN_BORDER)
 
         sizerH = wx.BoxSizer(wx.HORIZONTAL)
         sizerH.Add((0, 0), 0, wx.EXPAND)
