@@ -430,27 +430,32 @@ def OnEnter(panel):
     else:
         jp.setStatus(st.STR_FIELD_ERROR)
 
-def addFieldText(panel, sizer, label, key, fmt=None, size=None, keyText=None):
+def addFieldText(panel, sizer, label, index, fmt=None, size=None, keyText=None):
     if size is None:
         size = (panel.width, -1)
     if fmt is not None:
-        panel.formatList.append((key, fmt))
+        panel.formatList.append((index, fmt))
 
     cfg = panel.mf.cfg
     txt = None
     if len(label) != 0:
         txt = wx.StaticText(panel, -1, label)
-        panel.formData.append((txt, key))
+        panel.formData.append((txt, index))
         sizer.Add(txt, flag=wx.ALL|wx.ALIGN_RIGHT|\
                   wx.ALIGN_CENTER_VERTICAL, border=2)
+        
         if keyText is not None:
             cfg.initInfo(keyText, txt)
 
     tc = wx.TextCtrl(panel, -1, "", size=size, style=wx.TE_PROCESS_ENTER)
     tc.Bind(wx.EVT_TEXT_ENTER, panel.OnEnter)
-    panel.formData.append((tc, key))
+    panel.formData.append((tc, index))
     sizer.Add(tc, flag=wx.ALL, border=2)
-    cfg.initInfo(key, tc)
+
+    if cfg.info[index] is not None:
+        val = cfg.getInfo(index)
+        tc.SetValue(val)
+    cfg.initInfo(index, tc)
     return tc, txt
 
 def addField(panel, sizer, label, index, fmt=None, size=None, lblSize=None):
@@ -577,6 +582,7 @@ def addBitmapButton(panel, sizer, bitmap, downAction, upAction, flag=0):
     bmp = wx.Bitmap(bitmap, wx.BITMAP_TYPE_ANY)
     btn = wx.BitmapButton(panel, id=wx.ID_ANY, bitmap=bmp, \
                           size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+    panel.formData.append((btn, None))
     btn.Bind(wx.EVT_LEFT_DOWN, downAction)
     btn.Bind(wx.EVT_LEFT_UP, upAction)
     sizer.Add(btn, flag=flag, border=2)
@@ -596,6 +602,7 @@ def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=2, \
 
 def addDialogButton(panel, sizer, idx, action=None, border=5):
     btn = DialogButton(panel, panel, idx)
+    panel.formData.append((btn, None))
     if action is None:
         btn.SetDefault()
     else:
@@ -603,18 +610,20 @@ def addDialogButton(panel, sizer, idx, action=None, border=5):
     sizer.Add(btn, 0, wx.ALL|wx.CENTER, border=border)
     return btn
 
-def addRadioButton(panel, sizer, label, key, style=0, action=None):
+def addRadioButton(panel, sizer, label, index, style=0, action=None):
     btn = wx.RadioButton(panel, label=label, style=style)
+    panel.formData.append((btn, None))
     if action is not None:
         btn.Bind(wx.EVT_RADIOBUTTON, action)
     sizer.Add(btn, flag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=2)
-    panel.mf.cfg.initInfo(key, btn)
+    panel.mf.cfg.initInfo(index, btn)
     return btn
 
 EMPTY_CELL = (0, 0)
 
-def placeHolder(sizerG, count=2):
+def placeHolder(panel, sizerG, count=2):
     for _ in range(count):
+        panel.formData.append(None)
         sizerG.Add(EMPTY_CELL)
 
 def addDialogField(panel, sizer, label=None, tcDefault="", textFont=None, \
@@ -734,21 +743,29 @@ class FormRoutines:
         self.width = 60 if WINDOWS else 75
         self.sizerG = None
 
+        # children = sizerG.GetChildren()
+        # for child in children:
+        #     widget = child.GetWindow()
+        #     if isinstance(widget, wx.StaticText):
+        #         print(widget.GetLabel())
+        #     elif isinstance(widget, wx.TextCtrl):
+        #         print(widget.GetValue())
+        #     else:
+        #         print(widget)
+
 def printFormData(panel, sizerG):
     print("printFormData %s" % (panel.GetLabel()))
     dc = wx.ScreenDC()
     dc.SetFont(panel.mf.defaultFont)
-    colWidths = sizerG.GetColWidths()
     cols = sizerG.Cols
-    print("column widths")
-    for w in colWidths:
-        print("%3d " % (w), end="")
-    print()
     maxC = [0 for i in range(cols)]
 
     for i, data in enumerate(panel.formData):
         r, c = divmod(i, cols)
         print("%2d (%2d, %d) " % (i, r, c), end="")
+        if data is None:
+            print("PlaceHolder")
+            continue
         txtLen = None
         if len(data) == 2:
             (obj, index) = data
@@ -777,12 +794,18 @@ def printFormData(panel, sizerG):
                 print(obj.GetValue())
             elif isinstance(obj, PanelButton):
                 print(obj.GetLabel())
+            elif isinstance(obj, wx.RadioButton):
+                print(obj.GetLabel())
+            elif isinstance(obj, wx.BitmapButton):
+                print(obj.GetLabel())
+            else:
+                print()
         else:
             (sizer, txt, cb, index) = data
             print("%-12s " %
                   (cb.__class__.__name__), end="")
             txtLen = dc.GetTextExtent(txt.GetLabel())[0] + cb.GetSize()[0]
-            print("%-15s %3d" %
+            print("%-20s %3d" %
                   (cf.configTable[index], txtLen),
                   end = " ")
             print("%3d %s" % (sizer.GetSize()[0], cb.GetValue()))
@@ -820,7 +843,7 @@ def addButtons(panel, sizerG, add, rpm, pause, combine=False):
         panel.addPass = addField(panel, sizerG, None, add, 'f')
     else:
         panel.addButton = None
-        placeHolder(sizerG)
+        placeHolder(panel, sizerG)
 
     panel.rpm = addField(panel, sizerG, "RPM", rpm, 'd')
     panel.rpm.Bind(wx.EVT_KILL_FOCUS, OnRPMKillFocus)
@@ -942,13 +965,7 @@ class ActionRoutines():
         self.active = False
         self.safeX = None
         self.safeZ = None
-        self.formatList = []
         self.manualMode = False
-
-    # def formatData(self, formatList):
-    #     print("ActionRoutines formatData stub called")
-    #     stdout.flush()
-    #     return True
 
     def sendAction(self):
         print("ActionRoutines sendAction stub called")
@@ -969,85 +986,6 @@ class ActionRoutines():
 
     def nextOperation(self):
         pass
-
-    # def getSafeLoc(self):
-    #     control = self.control
-    #     control.getParameters()
-    #     self.safeX = control.xStart + control.xRetract
-    #     self.safeZ = control.zStart + control.zRetract
-    #     return self.safeZ, self.safeX
-
-    # def OnSend(self, evt):
-    #     panel = evt.EventObject.panel
-    #     jp = panel.mf.jogPanel
-    #     if formatData(panel.mf.cfg, panel.formatList):
-    #         if not jp.xHomed:
-    #             jp.setStatus(st.STR_NOT_HOMED)
-    #         elif panel.active or \
-    #              jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-    #             jp.setStatus(st.STR_OP_IN_PROGRESS)
-    #         else:
-    #             jp.setStatus(st.STR_CLR)
-    #             try:
-    #                 if callable(panel.sendAction):
-    #                     if panel.sendAction():
-    #                         panel.active = True
-    #                         panel.sendButton.Disable()
-    #                         buttonEnable(panel.startButton)
-    #                         buttonDisable(jp.spindleButton)
-    #             except CommTimeout:
-    #                 commTimeout(jp)
-    #             except:
-    #                 traceback.print_exc()
-    #     else:
-    #         jp.setStatus(st.STR_FIELD_ERROR)
-    #     jp.focus()
-
-    # def OnStart(self, _):
-    #     jp = self.armf.jogPanel
-    #     if not self.active:
-    #         jp.setStatus(st.STR_NOT_SENT)
-    #     elif (jp.mvStatus & ct.MV_PAUSE) == 0:
-    #         jp.setStatus(st.STR_NOT_PAUSED)
-    #     else:
-    #         jp.setStatus(st.STR_CLR)
-    #         try:
-    #             if callable(self.startAction):
-    #                 self.startAction()
-    #                 buttonDisable(self.startButton)
-    #         except CommTimeout:
-    #             commTimeout(jp)
-    #         except AttributeError:
-    #             print("ActionRoutines OnStart AttributeError")
-    #             stdout.flush()
-    #     jp.focus()
-
-    # def OnAddPass(self, _):
-    #     jp = self.armf.jogPanel
-    #     if not self.active:
-    #         jp.setStatus(st.STR_OP_NOT_ACTIVE)
-    #     elif jp.mvStatus & (ct.MV_ACTIVE | ct.MV_PAUSE):
-    #         jp.setStatus(st.STR_OP_IN_PROGRESS)
-    #     else:
-    #         jp.setStatus(st.STR_CLR)
-    #         jp.clrRetract()
-    #         try:
-    #             curPass = self.armf.comm.getParm(pm.CURRENT_PASS)
-    #             if curPass >= self.control.passes:
-    #                 if callable(self.addAction):
-    #                     self.addAction()
-    #             else:
-    #                 jp.setStatus(st.STR_PASS_ERROR)
-    #         except CommTimeout:
-    #             commTimeout(jp)
-    #         except AttributeError:
-    #             print("ActionRoutines OnAddPass AttributeError")
-    #             stdout.flush()
-    #     jp.focus()
-
-    # def OnRPMKillFocus(self, e):
-    #     self.armf.jogPanel.setRPMSlider(int(self.rpm.GetValue()))
-    #     e.Skip()
 
 def saveData(dialog):
     changed = False
@@ -2451,6 +2389,7 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
         super(TurnPanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         ActionRoutines.__init__(self, Turn(mainFrame, self), en.OP_TURN)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -2519,24 +2458,14 @@ class TurnPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         self.internal = addCheckBox(self, sizerG, "Internal", cf.tuInternal, \
                                     self.OnInternal, box=True)
-        printFormData(self, sizerG)
-
-        # children = sizerG.GetChildren()
-        # for child in children:
-        #     widget = child.GetWindow()
-        #     if isinstance(widget, wx.StaticText):
-        #         print(widget.GetLabel())
-        #     elif isinstance(widget, wx.TextCtrl):
-        #         print(widget.GetValue())
-        #     else:
-        #         print(widget)
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
-        self.SetSizer(sizerV)
-        sizerV.Fit(self)
-        print("\nFitDone")
         printFormData(self, sizerG)
+
+        self.SetSizer(sizerV)
+        self.Layout()
+        sizerV.Fit(self)
 
     def OnEnter(self, _):
         OnEnter(self)
@@ -3247,8 +3176,9 @@ class Arc(LatheOp, UpdatePass):
 
 class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
-        super(ArcPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
+        super(ArcPanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         ActionRoutines.__init__(self, Arc(mainFrame, self), en.OP_ARC)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -3339,7 +3269,7 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
         self.spring = addField(self, sizerG, "Spring", cf.arcSpring, 'd')
         fields0.append(self.spring)
 
-        placeHolder(sizerG)
+        placeHolder(self, sizerG)
 
         # line 6 buttons
 
@@ -3355,7 +3285,10 @@ class ArcPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -3590,6 +3523,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
         super(FacePanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         ActionRoutines.__init__(self, Face(mainFrame, self), en.OP_FACE)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -3636,7 +3570,7 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         self.spring = addField(self, sizerG, "Spring", cf.faSpring, 'd')
 
-        placeHolder(sizerG)
+        placeHolder(self, sizerG)
 
         # buttons
 
@@ -3644,7 +3578,10 @@ class FacePanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -3767,8 +3704,9 @@ class Cutoff(LatheOp):
 
 class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
-        super(CutoffPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
+        super(CutoffPanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         ActionRoutines.__init__(self, Cutoff(mainFrame, self), en.OP_CUTOFF)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -3813,7 +3751,10 @@ class CutoffPanel(wx.Panel, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -4211,9 +4152,10 @@ class Taper(LatheOp, UpdatePass):
 
 class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
-        super(TaperPanel, self).__init__(mainFrame, *args, **kwargs)
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
+        super(TaperPanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         ActionRoutines.__init__(self, Taper(mainFrame, self), en.OP_TAPER)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -4335,7 +4277,10 @@ class TaperPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -4948,9 +4893,9 @@ class ScrewThread(LatheOp, UpdatePass):
 
 class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
     def __init__(self, mainFrame, hdrFont, *args, **kwargs):
-        super(ThreadPanel, self).__init__(mainFrame, *args, **kwargs)
         PanelVars.__init__(self)
         FormRoutines.__init__(self)
+        super(ThreadPanel, self).__init__(mainFrame, *args, **kwargs)
         ActionRoutines.__init__(self, ScrewThread(mainFrame, self), en.OP_THREAD)
         self.Bind(wx.EVT_SHOW, OnPanelShow)
         self.mf = mainFrame
@@ -5040,7 +4985,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         self.runout = addField(self, sizerG, "Exit Rev", cf.thRunout, 'fs')
 
-        placeHolder(sizerG)
+        placeHolder(self, sizerG)
 
         self.lastFeedBtn = addRadioButton(self, sizerG, "Last Feed", \
                                           cf.thLastFeedBtn, \
@@ -5057,7 +5002,7 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         self.spring = addField(self, sizerG, "Spring", cf.thSpring, 'd')
 
-        placeHolder(sizerG)
+        placeHolder(self, sizerG)
 
         # buttons
 
@@ -5068,7 +5013,10 @@ class ThreadPanel(wx.Panel, PanelVars, FormRoutines, ActionRoutines):
 
         sizerV.Add(sizerG, flag=wx.CENTER|wx.ALL, border=2)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -5470,8 +5418,9 @@ class JogShuttle(Thread):
 
 class JogPanel(wx.Panel, FormRoutines):
     def __init__(self, mainFrame, *args, **kwargs):
-        super(JogPanel, self).__init__(mainFrame, *args, **kwargs)
         FormRoutines.__init__(self)
+        super(JogPanel, self).__init__(mainFrame, *args, **kwargs)
+        self.SetLabel(self.__class__.__name__)
         self.Connect(-1, -1, EVT_UPDATE_ID, self.OnUpdate)
         self.Connect(-1, -1, EVT_KEYPAD_ID, self.OnKeypadEvent)
         # self.Connect(-1, -1, EVT_STATUS_UPDATE_ID, self.OnStatusUpdate)
@@ -5704,7 +5653,7 @@ class JogPanel(wx.Panel, FormRoutines):
             addControlButton(self, sizerG, 'Jog Spindle +', \
                                   self.OnJogSpindleFwd, self.OnJogUp)
         else:
-            placeHolder(sizerG, 1)
+            placeHolder(self, sizerG, 1)
 
         # second line
 
@@ -5719,7 +5668,7 @@ class JogPanel(wx.Panel, FormRoutines):
             addControlButton(self, sizerG, 'Jog Spindle -', \
                                   self.OnJogSpindleRev, self.OnJogUp)
         else:
-            placeHolder(sizerG, 1)
+            placeHolder(self, sizerG, 1)
 
         # third line
 
@@ -5737,7 +5686,7 @@ class JogPanel(wx.Panel, FormRoutines):
                                 self.OnStartSpindle, btnSize)
             self.spindleButton.SetBackgroundColour('Green')
         else:
-            placeHolder(sizerG, 1)
+            placeHolder(self, sizerG, 1)
 
         sizerH.Add(sizerG)
 
@@ -5746,13 +5695,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # first row
 
-        placeHolder(sizerG, 3)
+        placeHolder(self, sizerG, 3)
 
         self.xNegButton = \
             addBitmapButton(self, sizerG, "north.png", self.OnXNegDown, \
                                  self.OnXUp, flag=sFlag|wx.EXPAND)
 
-        placeHolder(sizerG, 1)
+        placeHolder(self, sizerG, 1)
 
         # second row
 
@@ -5789,13 +5738,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         # third row
 
-        placeHolder(sizerG, 1)
+        placeHolder(self, sizerG, 1)
 
         self.zButton = \
             addBitmapButton(self, sizerG, "eastG.png", self.OnZRetract, \
                                  None,  flag=sFlag|wx.EXPAND)
 
-        placeHolder(sizerG, 1)
+        placeHolder(self, sizerG, 1)
 
         self.xPosButton = \
             addBitmapButton(self, sizerG, "south.png", self.OnXPosDown,
@@ -5821,7 +5770,10 @@ class JogPanel(wx.Panel, FormRoutines):
 
         sizerV.Add(slider)
 
+        printFormData(self, sizerG)
+
         self.SetSizer(sizerV)
+        self.Layout()
         sizerV.Fit(self)
 
     def OnEnter(self, _):
@@ -7194,6 +7146,7 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         addDialogButton(self, sizerV, wx.ID_OK, self.OnOk, border=10)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -7254,6 +7207,7 @@ class ProbeDialog(wx.Dialog, FormRoutines):
         addButton(self, sizerV, 'Ok', self.OnOk, border=10)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -7339,6 +7293,7 @@ class GotoDialog(wx.Dialog, FormRoutines):
         addButton(self, sizerV, 'Ok', self.OnOk, border=10)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -7418,6 +7373,7 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         addButton(self, sizerV, 'Fix', self.OnFix, border=5)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -7511,6 +7467,7 @@ class RetractDialog(wx.Dialog, FormRoutines):
         addButton(self, sizerV, 'Ok', self.OnOk, border=10)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.sizerV.Fit(self)
         self.Show(False)
 
@@ -8262,6 +8219,7 @@ class DialFrame(wx.Frame):
         self.dialPanel = panel = DialPanel(self)
         panel.SetAutoLayout(True)
         panel.SetSizer(sizerV)
+        self.Layout()
         sizerV.Fit(panel)
         self.Show()
 
@@ -8833,6 +8791,7 @@ class MainFrame(wx.Frame):
         sizerV.Add(jogPanel, 0, wx.EXPAND|wx.ALL, border=2)
 
         self.SetSizer(sizerV)
+        self.Layout()
         self.SetSizerAndFit(sizerV)
         jogPanel.xHomed = self.xHomed
 
@@ -8874,6 +8833,7 @@ class MainFrame(wx.Frame):
         self.arcPanel.update()
 
         self.showPanel()
+        self.Layout()
         self.Fit()
 
     def initDRO(self):
