@@ -560,9 +560,13 @@ class PanelButton(wx.Button):
         self.panel = panel
 
 def addButton(panel, sizer, label, action, size=(60, -1), border=BORDER, \
-              style=0, flag=wx.CENTER|wx.ALL):
+              style=0, flag=wx.CENTER|wx.ALL, font=None):
     btn = PanelButton(panel, panel, label=label, style=style, size=size)
     panel.formData.append((btn, None))
+
+    if font is not None:
+        btn.SetFont(font)
+    
     btn.Bind(wx.EVT_BUTTON, action)
     sizer.Add(btn, flag=flag, border=border)
     return btn
@@ -606,13 +610,19 @@ def addSetupButton(dialog, sizer, label, action, size=(60, -1), border=BORDER, \
     sizer.Add(btn, flag=flag, border=border)
     return btn
 
-def addDialogButton(panel, sizer, idx, action=None, border=BTN_BORDER):
+def addDialogButton(panel, sizer, idx, action=None, border=BTN_BORDER,
+                    font=None):
     btn = DialogButton(panel, panel, idx)
     panel.formData.append((btn, None))
+
     if action is None:
         btn.SetDefault()
     else:
         btn.Bind(wx.EVT_BUTTON, action)
+
+    if font is not None:
+        btn.SetFont(font)
+
     sizer.Add(btn, 0, wx.ALL|wx.CENTER, border=border)
     return btn
 
@@ -636,8 +646,8 @@ def addDialogField(panel, sizer, label=None, tcDefault="", textFont=None, \
                    tcFont=None, size=wx.DefaultSize, action=None, \
                    border=None, index=None, edit=True, text=False):
     if border is None:
-        b0 = 10
-        b1 = 10
+        b0 = DIALOG_BORDER
+        b1 = DIALOG_BORDER
     elif isinstance(border, tuple) or isinstance(border, list):
         b0 = border[0]
         b1 = border[1] if len(border) >= 2 else b0
@@ -657,12 +667,16 @@ def addDialogField(panel, sizer, label=None, tcDefault="", textFont=None, \
                      style=wx.TE_RIGHT|wx.TE_PROCESS_ENTER)
     if tcFont is not None:
         tc.SetFont(tcFont)
+
     if action is not None:
         tc.Bind(wx.EVT_CHAR, action)
+
     if not edit:
         tc.SetEditable(False)
+
     if index is not None:
         panel.mf.cfg.initInfo(index, tc)
+
     sizer.Add(tc, flag=wx.CENTER|wx.ALL, border=b1)
     return tc if not text else (tc, txt)
 
@@ -5539,12 +5553,18 @@ class JogPanel(wx.Panel, FormRoutines):
         self.posFont = posFont = \
             wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, \
                     wx.FONTWEIGHT_NORMAL, False, u'Consolas')
+
+        dc = wx.ScreenDC()
+        dc.SetFont(self.posFont)
+        w, h = dc.GetTextExtent("-00.0000")
+        self.posSize = posSize = (w + 2*JP_BORDER[0], h + 2*JP_BORDER[1])
+
         # first row
         # z position
 
         self.zPos = \
             addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
-                           posFont, (130, -1), border=JP_BORDER, \
+                           posFont, posSize, border=JP_BORDER, \
                            edit=False, index=cf.jogZPos)
         self.zPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -5552,7 +5572,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
         self.xPos = \
             addDialogField(self, sizerG, "X", "0.0000", txtFont, \
-                           posFont, (130, -1), border=JP_BORDER, \
+                           posFont, posSize, border=JP_BORDER, \
                            edit=False, index=cf.jogXPos)
         self.xPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -5570,13 +5590,13 @@ class JogPanel(wx.Panel, FormRoutines):
 
         (self.passSize, self.passText) = \
             addDialogField(self, sizerG, "Size", "0.000", txtFont, \
-                           posFont, (130, -1), border=JP_BORDER, \
+                           posFont, posSize, border=JP_BORDER, \
                            edit=False, text=True)
         # x diameter
 
         self.xPosDiam = \
             addDialogField(self, sizerG, "X D", "0.0000", txtFont, \
-                           posFont, (130, -1), border=JP_BORDER, \
+                           posFont, posSize, border=JP_BORDER, \
                            edit=False)
         self.xPosDiam.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -5593,7 +5613,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.zDROPos = \
                 addDialogField(self, sizerG, "Z", "0.0000", txtFont, \
-                               posFont, (130, -1), border=JP_BORDER, \
+                               posFont, posSize, border=JP_BORDER, \
                                edit=False, index=cf.droZPos)
             self.zDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnZMenu)
 
@@ -5601,7 +5621,7 @@ class JogPanel(wx.Panel, FormRoutines):
 
             self.xDROPos = \
                 addDialogField(self, sizerG, "X", "0.0000", txtFont, \
-                               posFont, (130, -1), border=JP_BORDER, \
+                               posFont, posSize, border=JP_BORDER, \
                                edit=False, index=cf.droXPos)
             self.xDROPos.Bind(wx.EVT_RIGHT_DOWN, self.OnXMenu)
 
@@ -7002,6 +7022,7 @@ class PosMenu(wx.Menu):
         dialog = SetPosDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
+        dialog.Layout()
         dialog.Show(True)
 
     def OnZero(self, _):
@@ -7013,6 +7034,8 @@ class PosMenu(wx.Menu):
         dialog = ProbeDialog(self.jP, self.axis)
         dialog.SetPosition(self.getPosCtl())
         dialog.Raise()
+        dialog.Layout()
+        dialog.Fit()
         dialog.Show(True)
 
     def OnHomeXFwd(self, _):
@@ -7142,18 +7165,22 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         title = "Position %s" % ('Z' if axis == AXIS_Z else 'X')
         wx.Dialog.__init__(self, jp, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        posFont = jp.posFont
+        self.SetFont(posFont)
+        self.SetLabel(title)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.pos = \
             addDialogField(self, sizerV, tcDefault="0.000", \
-                tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
+                tcFont=posFont, size=jp.posSize, action=self.OnKeyChar)
 
-        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk, border=DIALOG_BORDER)
+        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk,
+            border=DIALOG_BORDER, font=jp.mf.GetFont())
 
-        self.SetSizer(sizerV)
+        self.SetSizerAndFit(sizerV)
         self.Layout()
-        self.sizerV.Fit(self)
+        print(title, self.pos.GetSize())
         self.Show(False)
 
     def OnShow(self, _):
@@ -7186,35 +7213,39 @@ class SetPosDialog(wx.Dialog, FormRoutines):
         self.jp.focus()
 
 class ProbeDialog(wx.Dialog, FormRoutines):
-    def __init__(self, jogPanel, axis):
+    def __init__(self, jp, axis):
         FormRoutines.__init__(self)
-        self.jp = jogPanel
+        self.jp = jp
         self.axis = axis
         pos = (10, 10)
         title = "Probe %s" % ('Z' if axis == AXIS_Z else 'X Diameter')
-        wx.Dialog.__init__(self, jogPanel, -1, title, pos, \
-                            wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        wx.Dialog.__init__(self, jp, -1, title, pos, \
+                           wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        posFont = jp.posFont
+        self.SetFont(posFont)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
+        posSize = jp.posSize
+        txtFont = jp.mf.GetFont()
         self.probeLoc = \
             addDialogField(self, sizerG, \
                 'Z Position' if axis == AXIS_Z else 'X Diameter', \
-                "0.000", jogPanel.txtFont, jogPanel.posFont, (120, -1))
+                "0.000", txtFont, posFont, posSize)
 
         self.probeDist = \
             addDialogField(self, sizerG, 'Distance', "0.000", \
-                jogPanel.txtFont, jogPanel.posFont, (120, -1), self.OnKeyChar)
+            txtFont, posFont, posSize, self.OnKeyChar)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        addButton(self, sizerV, 'Ok', self.OnOk, border=DIALOG_BORDER)
+        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk,
+                        border=DIALOG_BORDER, font=txtFont)
 
-        self.SetSizer(sizerV)
+        self.SetSizerAndFit(sizerV)
         self.Layout()
-        self.sizerV.Fit(self)
         self.Show(False)
 
     def OnShow(self, _):
@@ -7289,14 +7320,18 @@ class GotoDialog(wx.Dialog, FormRoutines):
         title = "Go to %s" % ('Z Position' if axis == AXIS_Z else 'X Diameter')
         wx.Dialog.__init__(self, jp, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        posFont = jp.posFont
+        self.SetFont(posFont)
+        self.SetLabel(title)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         self.pos = \
             addDialogField(self, sizerV, tcDefault="0.000", \
-                tcFont=jp.posFont, size=(120,-1), action=self.OnKeyChar)
+                tcFont=posFont, size=(120,-1), action=self.OnKeyChar)
 
-        addButton(self, sizerV, 'Ok', self.OnOk, border=DIALOG_BORDER)
+        addDialogButton(self, sizerV, wx.ID_OK, self.OnOk,
+            border=DIALOG_BORDER, font=jp.mf.GetFont())
 
         self.SetSizer(sizerV)
         self.Layout()
@@ -7359,24 +7394,31 @@ class FixXPosDialog(wx.Dialog, FormRoutines):
         self.jp = jp
         self.comm = jp.mf.comm
         pos = (10, 10)
-        wx.Dialog.__init__(self, jp, -1, "Fix X Size", pos, \
+        title = "Fix X Size"
+        wx.Dialog.__init__(self, jp, -1, title, pos, \
                             wx.DefaultSize, wx.DEFAULT_DIALOG_STYLE)
+        posFont = jp.posFont
+        self.SetFont(posFont)
+        self.SetLabel(title)
         self.Bind(wx.EVT_SHOW, self.OnShow)
         self.sizerV = sizerV = wx.BoxSizer(wx.VERTICAL)
 
         sizerG = wx.FlexGridSizer(cols=2, rows=0, vgap=0, hgap=0)
 
+        posSize = jp.posSize
+        txtFont = jp.mf.GetFont()
         self.curXPos = \
-            addDialogField(self, sizerG, 'Current', "0.000", jp.txtFont, \
-                                jp.posFont, (120, -1))
+            addDialogField(self, sizerG, 'Current', "0.000", textFont=txtFont, \
+                           tcFont=posFont, size=posSize)
 
         self.actualXPos = \
-            addDialogField(self, sizerG, 'Measured', "0.000", jp.txtFont, \
-                jp.posFont, (120, -1), self.OnKeyChar)
+            addDialogField(self, sizerG, 'Measured', "0.000", textFont=txtFont, \
+                           tcFont=posFont, size=posSize, action=self.OnKeyChar)
 
         sizerV.Add(sizerG, 0, wx.ALIGN_RIGHT)
 
-        addButton(self, sizerV, 'Fix', self.OnFix, border=BTN_BORDER)
+        addButton(self, sizerV, 'Fix', self.OnFix, border=DIALOG_BORDER,
+                  font=txtFont)
 
         self.SetSizer(sizerV)
         self.Layout()
