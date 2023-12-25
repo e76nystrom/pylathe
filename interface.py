@@ -1315,6 +1315,12 @@ fpgaLatheList = \
         ("F_Sp_Jog_Base",    n, "jog",       n, "'J' spindle jog"),
         ("F_Sp_Sync_Base",   n, "syncAccel", n, "spindle sync"),
 
+        "runout",
+
+        ("runout",),
+        ("F_Ld_RunOut_Ctl", 0, 1,           1, "'CTL' runout control reg"),
+        ("F_Ld_RunLim",     n, 1,           4, "'LIM' runout limit"),
+
         "register definitions",
 
         ("regDef",),
@@ -1351,7 +1357,7 @@ fpgaLatheList = \
 
         ("F_Rd_Idx_Clks",    n, 1,           4, "'RIDX' clocks per index"),
 
-        "step spindle frequency generator",
+        # "step spindle frequency generator",
 
         "pwm",
 
@@ -1361,6 +1367,7 @@ fpgaLatheList = \
 
         ("F_Enc_Base",       n, "encoder",   n, "'E' encoder registers"),
         ("F_Phase_Base",     n, "phaseCtl",  n, "'H' phase registers"),
+        ("F_RunOut_Base",    n, "runout",    n, "'R' runout registers"),
         ("F_ZAxis_Base",     n, "axisCtl",   n, "'Z' z axis registers"),
         ("F_XAxis_Base",     n, "axisCtl",   n, "'X' x axis registers"),
         ("F_Spindle_Base",   n, "spindle",   n, "'S' spindle registers"),
@@ -1486,6 +1493,7 @@ xilinxBitList = \
         ("zSet_Loc",     1, 4, "set z location"),
         ("zBacklash",    1, 5, "backlash move no pos upd"),
         ("zWait_Sync",   1, 6, "wait for sync to start"),
+        ("end",),
 
         "x control register",
 
@@ -1499,6 +1507,7 @@ xilinxBitList = \
         ("xDir_Neg",     0, 3, "x negative direction"),
         ("xSet_Loc",     1, 4, "set x location"),
         ("xBacklash",    1, 5, "x backlash move no pos upd"),
+        ("end",),
 
         "taper control register",
 
@@ -1506,6 +1515,7 @@ xilinxBitList = \
         ("tEna",         1, 0, "taper enable"),
         ("tZ",           1, 1, "one for taper z"),
         ("tX",           0, 1, "zero for taper x"),
+        ("end",),
 
         "position control register",
 
@@ -1513,6 +1523,7 @@ xilinxBitList = \
         ("pReset",       1, 0, "reset position"),
         ("pLimit",       1, 1, "set flag on limit reached"),
         ("pZero",        1, 2, "set flag on zero reached"),
+        ("end",),
 
         "configuration register",
 
@@ -1523,6 +1534,7 @@ xilinxBitList = \
         ("xDir_Pol",     1, 3, "x direction polarity"),
         ("enc_Pol",      1, 4, "encoder dir polarity"),
         ("zPulse_Mult",  1, 5, "enable pulse multiplier"),
+        ("end",),
 
         "debug control register",
 
@@ -1534,6 +1546,7 @@ xilinxBitList = \
         ("Dbg_Init",     1, 4, "init z modules"),
         ("Dbg_Rsyn",     1, 5, "running in sync mode"),
         ("Dbg_Move",     1, 6, "used debug clock for move"),
+        ("end",),
 
         "status register",
 
@@ -1544,6 +1557,7 @@ xilinxBitList = \
         ("s_Z_Start",    1, 3, "z start"),
         ("s_X_Start",    1, 4, "x start"),
         ("s_Enc_Dir_In", 1, 5, "encoder direction in"),
+        ("end",),
 
         ""
         # ->
@@ -1558,6 +1572,7 @@ fpgaEncBitList = \
         ("ctlReset",     1, 0, "reset"),
         ("ctlTestClock", 1, 1, "testclock"),
         ("ctlSpare",     1, 2, "spare"),
+        ("end",),
 
         "debug control register",
 
@@ -1566,6 +1581,7 @@ fpgaEncBitList = \
         ("DbgSel",       1, 1, "select dbg encoder"),
         ("DbgDir",       1, 2, "debug direction"),
         ("DbgCount",     1, 3, "gen count num dbg clks"),
+        ("end",),
 
         ""
         # ->
@@ -1580,6 +1596,7 @@ fpgaLatheBitList = \
         ("riscvData",     1, 0,      "riscv data active"),
         ("riscvSPI",      1, 1,      "riscv spi active"),
         ("riscvInTest",   1, 2,      "riscv input test"),
+        ("end",),
 
         "status register",
 
@@ -1595,6 +1612,7 @@ fpgaLatheBitList = \
         ("syncActive",    1, 8,      "'SA' sync active"),
         # ("queNotEmpty",   1, 8,      "'Q+' ctl queue not empty"),
         # ("ctlBusy",       1, 9,      "'CB' controller busy"),
+        ("end",),
 
         "input register",
 
@@ -1612,20 +1630,23 @@ fpgaLatheBitList = \
         ("inXPlus",       1, 10,     "'X+' x Limit Plus"),
         ("inProbe",       1, 11,     "'PR' probe input"),
         ("inSpare",       1, 12,     "'SP' spare input"),
+        ("end",),
 
         "axis inputs",
-
+        
         ("axisIn",),
         ("axHome",        1, 0,      "axis home"),
         ("axMinus",       1, 1,      "axis minus limit"),
         ("axPlus",        1, 2,      "axis plus limit"),
         ("axProbe",       1, 3,      "axis probe"),
+        ("end",),
 
         "output register",
         ("outputs",),
         ("outPin1",       1, 0,      "pin 1"),
         ("outPin14",      1, 1,      "pin 14"),
         ("outPin17",      1, 2,      "pin 17"),
+        ("end",),
         # ("",  , , ""),
 
         "pin out signals",
@@ -1642,6 +1663,7 @@ fpgaLatheBitList = \
         ("pinOut14",      1, 9,      ""),
         ("pinOut16",      1, 10,     ""),
         ("pinOut17",      1, 11,     ""),
+        ("end",),
 
         # "run control register",
         # ("run",),
@@ -1655,9 +1677,19 @@ fpgaLatheBitList = \
         # ("cmdWaitX",    1, 1, "wait for x done"),
 
         "jog control register",
+
         ("jog",),
         ("jogContinuous", 1, 0,      "jog continuous mode"),
         ("jogBacklash",   1, 1,      "jog backlash present"),
+        ("end",),
+
+        "runOut control register",
+
+        ("runOutCtl",),
+        ("runOutInit",    1, 0,      "runout init"),
+        ("runOutEna",     1, 1,      "runout enable"),
+        ("runOutDir",     1, 2,      "runout direction"),
+        ("end",),
 
         "axis control register",
 
@@ -1678,6 +1710,7 @@ fpgaLatheBitList = \
         ("ctlHomePol",    1, 13,     "'HP' home signal polarity"),
         ("ctlProbe",      1, 14,     "'PR' probe enable"),
         ("ctlUseLimits",  1, 15,     "'UL' use limits"),
+        ("end",),
 
         "axis status register",
 
@@ -1693,6 +1726,7 @@ fpgaLatheBitList = \
         ("axInPlus",      1, 8,      "'I+' axis in plus limit"),
         ("axInProbe",     1, 9,      "'IP' axis in probe"),
         ("axInFlag",      1, 10,     "'IF' axis in flag"),
+        ("end",),
 
         "configuration control register",
 
@@ -1722,18 +1756,23 @@ fpgaLatheBitList = \
         ("cfgGenSync",    1, 18,     "generate sync pulse"),
         ("cfgPwmEna",     1, 19,     "pwm enable"),
         ("cfgDroStep",    1, 20,     "step pulse to dro"),
+        ("end",),
 
         "clock control register",
 
         ("clkCtl",),
-        ("zFreqSel",      n, (2, 0), "z Frequency select"),
-        ("xFreqSel",      n, (5, 3), "x Frequency select"),
+        ("zFreqSel",      n, (2, 0), "z clock select"),
+        ("xFreqSel",      n, (5, 3), "x clock select"),
+        ("clkDbgFreqEna", 1, 6,      "enable debug frequency"),
+        ("end",),
 
-        ("zFreqShift",    0, 0,      "z Frequency shift"),
-        ("xFreqShift",    3, 0,      "x Frequency shift"),
+        "clock shift values",
+
+        ("zFreqShift",    0, 0,      "z clock shift"),
+        ("xFreqShift",    3, 0,      "x clock shift"),
         ("clkMask",       7, 0,      "clock mask"),
 
-        # "clock selection values",
+        "clock selection values",
 
         ("clkNone",       0, (2, 0), ""),
         ("clkFreq",       1, (2, 0), ""),
@@ -1744,7 +1783,7 @@ fpgaLatheBitList = \
         ("clkSpindle",    6, (2, 0), ""),
         ("clkDbgFreq",    7, (2, 0), ""),
 
-        # "z clock values",
+        "z clock values",
 
         ("zClkNone",      0, (2, 0), ""),
         ("zClkZFreq",     1, (2, 0), ""),
@@ -1755,7 +1794,7 @@ fpgaLatheBitList = \
         ("zClkSpindle",   6, (2, 0), ""),
         ("zClkDbgFreq",   7, (2, 0), ""),
 
-        # "x clock values",
+        "x clock values",
 
         ("xClkNone",      0, (5, 3), ""),
         ("xClkXFreq",     1, (5, 3), ""),
@@ -1766,15 +1805,33 @@ fpgaLatheBitList = \
         ("xClkSpindle",   6, (5, 3), ""),
         ("xClkDbgFreq",   7, (5, 3), ""),
 
-        ("clkDbgFreqEna", 1, 6,      "enable debug frequency"),
-
         "sync control register",
 
         ("synCtl",),
         ("synPhaseInit",  1, 0,      "init phase counter"),
         ("synEncInit",    1, 1,      "init encoder"),
         ("synEncEna",     1, 2,      "enable encoder"),
+        ("synEncClkSel",  n, (4, 3), "encoder clk sel"),
+        ("end",),
 
+        "encoder clock shift",
+
+        ("encClkShift",   3, 0,      "enc clock shift"),
+
+        "encoder clock values",
+
+        ("encClkNone",    0, (1, 0), ""),
+        ("encClkCh",      1, (1, 0), ""),
+        ("encClkSp",      2, (1, 0), ""),
+        ("encClkDbg",     3, (1, 0), ""),
+        
+        "encoder clock values shifted",
+
+        ("synEncClkNone", 0, (4, 3), ""),
+        ("synEncClkCh",   1, (4, 3), ""),
+        ("synEncClkSp",   2, (4, 3), ""),
+        ("synEncClkDbg",  3, (4, 3), ""),
+        
         "spindle control register",
 
         ("spCtl",),
@@ -1782,6 +1839,7 @@ fpgaLatheBitList = \
         ("spEna",         1, 1,      "spindle enable"),
         ("spDir",         1, 2,      "spindle direction"),
         ("spJogEnable",   1, 3,      "spindle jog enable"),
+        ("end",),
 
         "",                     # end marker
         # ("",),

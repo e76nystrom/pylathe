@@ -327,8 +327,10 @@ class Setup():
                            "#include \"" + prefix + "Struct.h\"\n"\
                            "#if !defined(EXT)\n#define EXT extern\n"\
                            "#endif\n"\
-                           "#include \"axisCtl.h\"\n\n"\
                            "T_" + preUC + "_VAR " + prefix[0] + "Var;\n\n")
+
+                    if prefix == "riscv":
+                        fWrite(c2File, "#include \"axisCtl.h\"\n\n")
 
                     fWrite(c2File, "#define FLT (0x80)\n")
                     fWrite(c2File, "#define SIZE_MASK (0x7)\n\n")
@@ -757,6 +759,7 @@ class Setup():
         xFile = None
         byteLen = 0
         gName = ""
+        incTable =[]
         if fData:
             path = osJoin(cLoc, cName + 'Reg.h')
             cFile = open(path, 'wb')
@@ -838,8 +841,10 @@ class Setup():
                     if isinstance(size, str): # if ref to another table
                         incName = size
                         # print("+++incName+++", incName)
-                        incTable = globals()[incName]
-                        # print(incTable)
+                        try:
+                            incTable = globals()[incName]
+                        except KeyError:
+                            print("KeyError", incName)
                         total = 0
                         match = re.match("\'([\w+\-]*)\'", regComment)
                         regCode = ''
@@ -1010,7 +1015,6 @@ class Setup():
         xLst = []
         cLst = []
         rData = []
-        rCLst = []
         sLst = []
         maxShift = None
         start = None
@@ -1020,7 +1024,7 @@ class Setup():
             cFile = open(path, 'wb')
             gName = cVarName(cName) + "_BITS"
             fWrite(cFile, "#if !defined(%s)\n"\
-                   "#define %s\n" % (gName, gName))
+                   "#define %s\n\n// cFile\n" % (gName, gName))
             try:
                 path = osJoin(xLoc, xName + 'Bits.vhd')
                 xFile = open(path , 'wb')
@@ -1038,7 +1042,7 @@ class Setup():
                 fWrite(rFile, "library ieee;\n\n"
                 "use ieee.std_logic_1164.all;\n"
                 "use ieee.numeric_std.all;\n\n")
-                fWrite(rFile, "package " + package + "Rec is\n\n")
+                fWrite(rFile, "package " + package + "Rec is\n")
             except IOError:
                 print("unable to open %s" % (xLoc,))
                 rFile = None
@@ -1069,7 +1073,7 @@ class Setup():
             data = bitList[i]
             if not isinstance(data, str):
                 if len(data) == 1:
-                    if len(sLst) != 0:
+                    if len(sLst) != 0 and len(regName) != 0:
                         path = osJoin(cLoc, regName + 'RegStr.h')
                         sFile = open(path, 'wb')
                         rName = cVarName(regName) + "_REG"
@@ -1094,13 +1098,50 @@ class Setup():
                                (rName, len(sLst)))
                         fWrite(sFile, "\n#endif  /* %s */\n" % (gRName))
                         sFile.close()
+                        sLst = []
 
-                    xLst = []
-                    cLst = []
-                    rData = []
-                    sLst = []
-                    regName = data[0]
-                    maxShift = 0
+                    if data[0] == "end" and fData:
+                        var = "%sSize" % (regName)
+                        if var in globals():
+                            print("createFpgaBits %s already defined" % var)
+                        else:
+                            globals()[var] = maxShift + 1
+
+                        tmp =  "#define %-20s %d" % (cVarName(var), maxShift + 1)
+                        fWrite(cFile, "%s\n" % (tmp))
+
+                        if xFile:
+                            fWrite(xFile, " constant %sSize : " \
+                                        "integer := %d;\n" % \
+
+                                        (regName, maxShift + 1))
+                            fWrite(xFile, " signal %sReg : "\
+                                        "unsigned(%sSize-1 downto 0);\n" %
+                                        (regName, regName))
+                            fWrite(xFile, " --variable %sReg : "\
+                                        "unsigned(%sSize-1 downto 0);\n" %
+                                        (regName, regName))
+                            for k in range(len(xLst)):
+                                fWrite(xFile, xLst[k])
+                            fWrite(xFile, "\n")
+                            for k in range(len(cLst)):
+                                fWrite(xFile, cLst[k])
+
+                        if rFile is not None and regName is not None:
+                            body += rOut(rFile, fFile, rData, regName, maxShift)
+                            body += ("\n-- %s\n\n" % data)
+
+                        xLst = []
+                        regName = ""
+
+                    else:
+                        regName = data[0]
+                        rData = []
+                        maxShift = 0
+
+                    if len(data) != 0 and f is not None:
+                        fWrite(f, "\n# %s\n\n" % (data))
+
                 else:
                     #if len(data) == 4:
                     (var, bit, shift, comment) = data[:4]
@@ -1111,7 +1152,8 @@ class Setup():
                     if fData:
                         # if shiftType != tuple:
                         if not isinstance(shift, tuple):
-                            tmp =  "#define %-18s (%s << %s)" % (cVar, bit, shift)
+                            end = shift
+                            tmp =  "#define %-20s (%s << %s)" % (cVar, bit, shift)
                             fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                    (tmp.ljust(40), bit << shift, comment))
 
@@ -1125,11 +1167,16 @@ class Setup():
                                          "-- x%02x %s\n") %
                                         (xVar, regName, shift, \
                                          1 << shift, comment))
-                            cLst.append((" constant c_%-12s : " \
+                            cLst.append((" constant c_%-14s : " \
                                          "integer := %2d; " \
                                          "-- x%02x %s\n") %
-                                        (xVar, shift, \
-                                         1 << shift, comment))
+                                        (xVar, shift,  1 << shift, comment))
+
+                            if len(regName) == 0:
+                                fWrite(rFile,
+                                       " constant %-14s : integer := %2d; " \
+                                       "-- x%02x %s\n" %
+                                       (xVar, shift,  1 << shift, comment))
 
                             match = re.match("\'([\w+\-]*)\'([\s\w]*)",
                                              comment)
@@ -1144,44 +1191,46 @@ class Setup():
                                                  rComment.strip()))
 
                             rData.append((xVar, shift, comment))
-
                         else:
-                            (shift, start) = shift
+                            (end, start) = shift
                             if bit is None:
                                 x = 1
-                                for j in range(start, shift):
+                                for j in range(start, end):
                                     x = (x << 1) + 1
-                                tmp =  "#define %-18s (0x%x << %s)" % (cVar, x, start)
+                                tmp =  "#define %-20s (0x%x << %s)" % (cVar, x, start)
                                 fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                        (tmp.ljust(40), x << start, comment))
 
                                 xLst.append(" alias %-14s : unsigned is " \
                                             "%sreg(%d downto %d); " \
                                             "-- x%02x %s\n" %
-                                            (xVar, regName, shift, start, \
-                                             1 << shift, comment))
-                                rData.append((xVar, (shift, start), comment))
+                                            (xVar, regName, end, start, \
+                                             1 << start, comment))
+                                rData.append((xVar, (end, start), comment))
                             else:
-                                tmp =  "#define %-18s (%s << %s)" % (cVar, bit, start)
+                                tmp =  "#define %-20s (%s << %s)" % (cVar, bit, start)
                                 fWrite(cFile, "%s/* 0x%03x %s */\n" %
-                                       (tmp.ljust(40), bit << shift, comment))
+                                       (tmp.ljust(40), bit << start, comment))
 
-                                xVal = (" constant %-12s : unsigned " \
+                                vecMax = end - start
+                                fmt = '{0:0%db}' % (vecMax + 1)
+                                xVal = (" constant %-14s : unsigned " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
-                                        (xVar, shift-start, 0, \
-                                        '{0:03b}'.format(bit), comment))
+                                        (xVar, vecMax, 0, \
+                                        fmt.format(bit), comment))
                                 xLst.append(xVal)
 
-                                cVal = (" constant %-12s : std_logic_vector " \
+                                cVal = (" constant %-14s : std_logic_vector " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
-                                        (xVar, shift-start, 0, \
-                                        '{0:03b}'.format(bit), comment))
-                                rCLst.append(cVal)
+                                        (xVar, vecMax, 0, \
+                                        fmt.format(bit), comment))
+                                fWrite(rFile, cVal)
 
-                    if (shift > maxShift):
-                        maxShift = shift
+                    if (end > maxShift):
+                        maxShift = end
+
                     if cVar in globals():
                         print("createFpgaBits %s already defined" % cVar)
                     else:
@@ -1203,47 +1252,14 @@ class Setup():
                                     fWrite(f, "%s# %s\n" % \
                                            (tmp.ljust(32), comment))
                         lastShift = shift
-            else:
-                if fData:
-                    if (len(regName) > 0):
-                        var = "%sSize" % (regName)
-                        tmp =  "#define %-18s %d" % (cVarName(var), maxShift + 1)
-                        fWrite(cFile, "%s\n" % (tmp))
-                        if xFile:
-                            fWrite(xFile, " constant %sSize : " \
-                                        "integer := %d;\n" % \
-                                        (regName, maxShift + 1))
-                            fWrite(xFile, " signal %sReg : "\
-                                        "unsigned(%sSize-1 downto 0);\n" %
-                                        (regName, regName))
-                            fWrite(xFile, " --variable %sReg : "\
-                                        "unsigned(%sSize-1 downto 0);\n" %
-                                        (regName, regName))
-                            for k in range(len(xLst)):
-                                fWrite(xFile, xLst[k])
-                            fWrite(xFile, "\n")
-                            for k in range(len(cLst)):
-                                fWrite(xFile, cLst[k])
+            else:               # string
+                if fData and len(data) != 0:
+                    fWrite(rFile, "\n-- %s\n\n" % (data))
 
-                        if rFile is not None:
-                            body += rOut(rFile, fFile, rCLst, rData,
-                                         regName, maxShift)
-                            rCLst = []
+                    fWrite(cFile, "\n// %s\n\n" % (data))
 
-                    if (len(data) != 0):
-                        fWrite(cFile, "\n// %s\n\n" % (data))
-                        if xFile:
-                            fWrite(xFile, "\n-- %s\n\n" % (data))
-                else:
-                    if (len(regName) > 0):
-                        var = "%sSize" % (regName)
-                        if var in globals():
-                            print("createFpgaBits %s already defined" % var)
-                        else:
-                            globals()[var] = maxShift + 1
-
-                if len(data) != 0 and f is not None:
-                    fWrite(f, "\n# %s\n\n" % (data))
+                    if xFile:
+                        fWrite(xFile, "\n-- %s\n\n" % (data))
 
         if f is not None:
             f.close()
@@ -1258,13 +1274,13 @@ class Setup():
                 xFile.close()
 
             if rFile:
-                fWrite(rFile, "end package %sRec;\n" % (package))
+                fWrite(rFile, "\nend package %sRec;\n" % (package))
                 rFile.close()
                 fWrite(fFile, "end %sFunc;\n\n" % (package))
                 fWrite(fFile, body)
                 fWrite(fFile, "end package body %sFunc;\n" % (package))
 
-def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
+def rOut(rFile, fFile, rData, regName, maxShift):
     maxLen = 0
     for val in rData:
         l = len(val[0])
@@ -1290,12 +1306,7 @@ def rOut(rFile, fFile, rCLst, rData, regName, maxShift):
             tmp = tmp.ljust(32) + ("-- %d-%d %s\n" % (shift, start, comment))
         fWrite(rFile, tmp)
 
-    fWrite(rFile, "end record %sRec;\n\n" % (regName))
-
-    if len(rCLst) != 0:
-        for tmp in rCLst:
-            fWrite(rFile, tmp)
-        fWrite(rFile, "\n")
+    fWrite(rFile, "end record %sRec;\n" % (regName))
 
     tmp = ("constant %sSize : integer := %d;\n" % \
            (regName, maxShift + 1))

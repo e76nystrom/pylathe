@@ -4668,7 +4668,9 @@ class ScrewThread(LatheOp, UpdatePass):
 
         if self.runout != 0.0:
             self.runoutDist = self.runout * self.pitch
-            self.runoutDepth = self.depth + 0.005
+            self.runoutDepth = self.depth
+            if self.rightHand:
+                self.runoutDepth += 0.005
 
             if self.rightHand:      # right hand threads
                 self.endZ = self.zEnd - self.runoutDist

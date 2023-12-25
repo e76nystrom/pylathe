@@ -1135,11 +1135,15 @@ class RiscvLathe(Thread):
     def qZSynSetup(self, val):          # 13
         print("zSynSetup")
         self.zFeed = val
+        parm = self.parm
         print("zFeed %7.3f currentOp %d %s turnSync %d %s\n" % \
               (self.zFeed,
-               self.parm.currentOp, en.operationsList[self.parm.currentOp],
-               self.parm.turnSync, en.selTurnList[self.parm.turnSync]))
-        currentOp = self.parm.currentOp
+               parm.currentOp, en.operationsList[parm.currentOp],
+               parm.turnSync, en.selTurnList[parm.turnSync]))
+        if parm.runoutDistance != 0:
+            print("runoutDistance %6.4f runoutDepth %6.4f" %
+                  (parm.runoutDistance, parm.runoutDepth))
+        currentOp = parm.currentOp
         if currentOp == en.OP_TURN:
             pass
         elif currentOp == en.OP_TAPER:
@@ -1148,19 +1152,20 @@ class RiscvLathe(Thread):
             pass
 
         axis = self.zAxis
-        if self.parm.turnSync == en.SEL_TU_ENC:
+        if parm.turnSync == en.SEL_TU_ENC:
             self.zAxis.encParm = True
             syncAccelCalc(axis.turnAccel, self.feedType, val)
             riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
                            que=True)
-        elif self.parm.turnSync == en.SEL_TU_SYN:
+        elif parm.turnSync == en.SEL_TU_SYN:
             axis.encParm = False
             self.mvState = en.M_START_SYNC
 
     def qXSynSetup(self, val):          # 14
         print("xSynSetup")
         self.xFeed = val
-        currentOp = self.parm.currentOp
+        parm = self.parm
+        currentOp = parm.currentOp
         if currentOp == en.OP_FACE:
             pass
         elif currentOp == en.OP_CUTOFF:
@@ -1171,7 +1176,7 @@ class RiscvLathe(Thread):
             pass
 
         axis = self.xAxis
-        if self.parm.turnSync == en.SEL_TU_ENC:
+        if parm.turnSync == en.SEL_TU_ENC:
             axis.encParm = True
             syncAccelCalc(axis.turnAccel, self.feedType, val)
             riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,

@@ -1,12 +1,15 @@
 # fpga bits
 
-# RiscV control register
+# riscvCtl
 
 riscvData    = 0x01             # riscv data active
 riscvSPI     = 0x02             # riscv spi active
 riscvInTest  = 0x04             # riscv input test
 
-# status register
+# end
+
+
+# status
 
 zAxisEna     = 0x01             # 'ZE' z axis enable flag
 zAxisDone    = 0x02             # 'ZD' z axis done
@@ -18,7 +21,10 @@ stEStop      = 0x40             # 'ES' emergency stop
 spindleActive = 0x80            # 'S+' spindle active
 syncActive   = 0x100            # 'SA' sync active
 
-# input register
+# end
+
+
+# inputs
 
 inPin10      = 0x01             # '10' pin 10
 inPin11      = 0x02             # '11' pin 11
@@ -34,20 +40,29 @@ inXPlus      = 0x400            # 'X+' x Limit Plus
 inProbe      = 0x800            # 'PR' probe input
 inSpare      = 0x1000           # 'SP' spare input
 
-# axis inputs
+# end
+
+
+# axisIn
 
 axHome       = 0x01             # axis home
 axMinus      = 0x02             # axis minus limit
 axPlus       = 0x04             # axis plus limit
 axProbe      = 0x08             # axis probe
 
-# output register
+# end
+
+
+# outputs
 
 outPin1      = 0x01             # pin 1
 outPin14     = 0x02             # pin 14
 outPin17     = 0x04             # pin 17
 
-# pin out signals
+# end
+
+
+# pinOut
 
 pinOut2      = 0x01             # z dir
 pinOut3      = 0x02             # z step
@@ -62,12 +77,27 @@ pinOut14     = 0x200            #
 pinOut16     = 0x400            # 
 pinOut17     = 0x800            # 
 
-# jog control register
+# end
+
+
+# jog
 
 jogContinuous = 0x01            # jog continuous mode
 jogBacklash  = 0x02             # jog backlash present
 
-# axis control register
+# end
+
+
+# runOutCtl
+
+runOutInit   = 0x01             # runout init
+runOutEna    = 0x02             # runout enable
+runOutDir    = 0x04             # runout direction
+
+# end
+
+
+# axisCtl
 
 ctlInit      = 0x01             # 'IN' reset flag
 ctlStart     = 0x02             # 'ST' start
@@ -86,7 +116,10 @@ ctlHomePol   = 0x2000           # 'HP' home signal polarity
 ctlProbe     = 0x4000           # 'PR' probe enable
 ctlUseLimits = 0x8000           # 'UL' use limits
 
-# axis status register
+# end
+
+
+# axisStatus
 
 axDone       = 0x01             # 'DN' axis done
 axDistZero   = 0x02             # 'ZE' axis distance zero
@@ -100,7 +133,10 @@ axInPlus     = 0x100            # 'I+' axis in plus limit
 axInProbe    = 0x200            # 'IP' axis in probe
 axInFlag     = 0x400            # 'IF' axis in flag
 
-# configuration control register
+# end
+
+
+# cfgCtl
 
 cfgZDirInv   = 0x01             # z dir inverted
 cfgXDirInv   = 0x02             # x dir inverted
@@ -124,46 +160,67 @@ cfgGenSync   = 0x40000          # generate sync pulse
 cfgPwmEna    = 0x80000          # pwm enable
 cfgDroStep   = 0x100000         # step pulse to dro
 
-# clock control register
+# end
 
-zFreqShift   = 0x00             # z Frequency shift
-xFreqShift   = 0x03             # x Frequency shift
-clkMask      = 0x07             # clock mask
-clkNone      = 0x00             # 
-clkFreq      = 0x04             # 
-clkCh        = 0x08             # 
-clkIntClk    = 0x0c             # 
-clkSlvFreq   = 0x10             # 
-clkSlvCh     = 0x14             # 
-clkSpindle   = 0x18             # 
-clkDbgFreq   = 0x1c             # 
-zClkNone     = 0x00             # 
-zClkZFreq    = 0x04             # 
-zClkCh       = 0x08             # 
-zClkIntClk   = 0x0c             # 
-zClkXFreq    = 0x10             # 
-zClkXCh      = 0x14             # 
-zClkSpindle  = 0x18             # 
-zClkDbgFreq  = 0x1c             # 
-xClkNone     = 0x00             # 
-xClkXFreq    = 0x20             # 
-xClkCh       = 0x40             # 
-xClkIntClk   = 0x60             # 
-xClkZFreq    = 0x80             # 
-xClkZCh      = 0xa0             # 
-xClkSpindle  = 0xc0             # 
-xClkDbgFreq  = 0xe0             # 
+
+# clkCtl
+
 clkDbgFreqEna = 0x40            # enable debug frequency
 
-# sync control register
+# end
+
+zFreqShift   = 0x00             # z clock shift
+xFreqShift   = 0x03             # x clock shift
+clkMask      = 0x07             # clock mask
+clkNone      = 0x00             # 
+clkFreq      = 0x01             # 
+clkCh        = 0x02             # 
+clkIntClk    = 0x03             # 
+clkSlvFreq   = 0x04             # 
+clkSlvCh     = 0x05             # 
+clkSpindle   = 0x06             # 
+clkDbgFreq   = 0x07             # 
+zClkNone     = 0x00             # 
+zClkZFreq    = 0x01             # 
+zClkCh       = 0x02             # 
+zClkIntClk   = 0x03             # 
+zClkXFreq    = 0x04             # 
+zClkXCh      = 0x05             # 
+zClkSpindle  = 0x06             # 
+zClkDbgFreq  = 0x07             # 
+xClkNone     = 0x00             # 
+xClkXFreq    = 0x08             # 
+xClkCh       = 0x10             # 
+xClkIntClk   = 0x18             # 
+xClkZFreq    = 0x20             # 
+xClkZCh      = 0x28             # 
+xClkSpindle  = 0x30             # 
+xClkDbgFreq  = 0x38             # 
+
+# synCtl
 
 synPhaseInit = 0x01             # init phase counter
 synEncInit   = 0x02             # init encoder
 synEncEna    = 0x04             # enable encoder
 
-# spindle control register
+# end
+
+encClkShift  = 0x03             # enc clock shift
+encClkNone   = 0x00             # 
+encClkCh     = 0x01             # 
+encClkSp     = 0x02             # 
+encClkDbg    = 0x03             # 
+synEncClkNone = 0x00            # 
+synEncClkCh  = 0x08             # 
+synEncClkSp  = 0x10             # 
+synEncClkDbg = 0x18             # 
+
+# spCtl
 
 spInit       = 0x01             # spindle init
 spEna        = 0x02             # spindle enable
 spDir        = 0x04             # spindle direction
 spJogEnable  = 0x08             # spindle jog enable
+
+# end
+
