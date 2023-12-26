@@ -1028,7 +1028,7 @@ class Setup():
             try:
                 path = osJoin(xLoc, xName + 'Bits.vhd')
                 xFile = open(path , 'wb')
-                fWrite(xFile, "library ieee;\n\n"
+                fWrite(xFile, "-- xFile\n\nlibrary ieee;\n\n"
                 "use ieee.std_logic_1164.all;\n"
                 "use ieee.numeric_std.all;\n\n")
                 fWrite(xFile, "package " + package + " is\n")
@@ -1039,7 +1039,7 @@ class Setup():
             try:
                 path = osJoin(xLoc, xName + 'Rec.vhd')
                 rFile = open(path , 'wb')
-                fWrite(rFile, "library ieee;\n\n"
+                fWrite(rFile, "--rFile\n\nlibrary ieee;\n\n"
                 "use ieee.std_logic_1164.all;\n"
                 "use ieee.numeric_std.all;\n\n")
                 fWrite(rFile, "package " + package + "Rec is\n")
@@ -1050,7 +1050,7 @@ class Setup():
             try:
                 path = osJoin(xLoc, xName + 'Func.vhd')
                 fFile = open(path , 'wb')
-                fWrite(fFile, "library ieee;\n\n"
+                fWrite(fFile, "-- fFile\n\nlibrary ieee;\n\n"
                 "use ieee.std_logic_1164.all;\n"
                 "use ieee.numeric_std.all;\n\n")
                 fWrite(fFile, "use work.%sRec.all;\n\n" % (package))
@@ -1113,35 +1113,35 @@ class Setup():
                         if xFile:
                             fWrite(xFile, " constant %sSize : " \
                                         "integer := %d;\n" % \
-
                                         (regName, maxShift + 1))
                             fWrite(xFile, " signal %sReg : "\
                                         "unsigned(%sSize-1 downto 0);\n" %
                                         (regName, regName))
                             fWrite(xFile, " --variable %sReg : "\
-                                        "unsigned(%sSize-1 downto 0);\n" %
+                                        "unsigned(%sSize-1 downto 0);\n\n" %
                                         (regName, regName))
+
                             for k in range(len(xLst)):
                                 fWrite(xFile, xLst[k])
                             fWrite(xFile, "\n")
+                            xLst = []
+
                             for k in range(len(cLst)):
                                 fWrite(xFile, cLst[k])
+                            cLst = []
 
                         if rFile is not None and regName is not None:
                             body += rOut(rFile, fFile, rData, regName, maxShift)
                             body += ("\n-- %s\n\n" % data)
 
-                        xLst = []
+                        rData = []
                         regName = ""
-
                     else:
                         regName = data[0]
-                        rData = []
                         maxShift = 0
 
                     if len(data) != 0 and f is not None:
                         fWrite(f, "\n# %s\n\n" % (data))
-
                 else:
                     #if len(data) == 4:
                     (var, bit, shift, comment) = data[:4]
@@ -1162,17 +1162,21 @@ class Setup():
                                 bitStr.append("%s/* 0x%02x %s */\n" %
                                               (tmp.ljust(32), bit << shift,
                                                comment))
-                            xLst.append((" alias %-12s : " \
-                                         "std_logic is %sReg(%d); " \
-                                         "-- x%02x %s\n") %
-                                        (xVar, regName, shift, \
-                                         1 << shift, comment))
-                            cLst.append((" constant c_%-14s : " \
-                                         "integer := %2d; " \
-                                         "-- x%02x %s\n") %
-                                        (xVar, shift,  1 << shift, comment))
-
-                            if len(regName) == 0:
+                            if len(regName) != 0:
+                                xLst.append((" alias    %-18s : " \
+                                             "std_logic is %sReg(%d); " \
+                                             "-- x%02x %s\n") %
+                                            (xVar, regName, shift, \
+                                             1 << shift, comment))
+                                cLst.append((" constant c_%-16s : " \
+                                             "integer := %2d; " \
+                                             "-- x%02x %s\n") %
+                                            (xVar, shift,  1 << shift, comment))
+                            else:
+                                fWrite(xFile, (" constant c_%-16s : " \
+                                               "integer := %2d; " \
+                                               "-- x%02x %s\n" %
+                                               (xVar, shift,  1 << shift, comment)))
                                 fWrite(rFile,
                                        " constant %-14s : integer := %2d; " \
                                        "-- x%02x %s\n" %
@@ -1201,7 +1205,7 @@ class Setup():
                                 fWrite(cFile, "%s/* 0x%03x %s */\n" %
                                        (tmp.ljust(40), x << start, comment))
 
-                                xLst.append(" alias %-14s : unsigned is " \
+                                xLst.append(" alias    %-18s : unsigned is " \
                                             "%sreg(%d downto %d); " \
                                             "-- x%02x %s\n" %
                                             (xVar, regName, end, start, \
@@ -1214,12 +1218,16 @@ class Setup():
 
                                 vecMax = end - start
                                 fmt = '{0:0%db}' % (vecMax + 1)
-                                xVal = (" constant %-14s : unsigned " \
+                                xVal = (" constant %-18s : unsigned " \
                                         "(%d downto %d) " \
                                         ":= \"%s\"; -- %s\n" % \
                                         (xVar, vecMax, 0, \
                                         fmt.format(bit), comment))
-                                xLst.append(xVal)
+
+                                if len(regName) != 0:
+                                    xLst.append(xVal)
+                                else:
+                                    fWrite(xFile, xVal)
 
                                 cVal = (" constant %-14s : std_logic_vector " \
                                         "(%d downto %d) " \
