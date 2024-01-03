@@ -92,6 +92,8 @@ class Comm():
             self.ser = None
 
     def send(self, cmd):
+        if self.ser is None:
+            return
         n = int(cmd[1:3], 16)
         prt = (n != C_READ_ALL) and (n != C_READ_DBG)
         if prt:
@@ -119,6 +121,8 @@ class Comm():
         return rsp
 
     def command(self, cmdVal, silent=False):
+        if self.ser is None:
+            return
         if len(self.parmList) > 0:
             self.sendMulti()
         (cmd, action) = self.cmdTable[cmdVal]
@@ -162,6 +166,8 @@ class Comm():
         return parm, valString
 
     def setParm(self, parmIndex, val):
+        if self.ser is None:
+            return
         parm, valString = self.encodeParm(parmIndex, val)
 
         cmd = '\x01%x %x %s \r' % (self.loadVal, parmIndex, valString)
@@ -172,6 +178,8 @@ class Comm():
         self.send(cmd)
 
     def queParm(self, parmIndex, val):
+        if self.ser is None:
+            return
         parm, valString = self.encodeParm(parmIndex, val)
 
         cmd = ' %x %s' % (parmIndex, valString)
@@ -185,6 +193,8 @@ class Comm():
         self.parmList.append(cmd)
 
     def sendMulti(self):
+        if self.ser is None:
+            return
         count = len(self.parmList)
         if count == 0:
             return
@@ -202,6 +212,8 @@ class Comm():
         self.send(cmd)
 
     def getParm(self, parmIndex, dbg=False):
+        if self.ser is None:
+            return
         if self.ser is None:
             return(None)
         cmd = '\x01%x %x \r' % (self.readVal, parmIndex)
@@ -244,6 +256,8 @@ class Comm():
         return getResult(rsp, 2)
 
     def setMegaParm(self, parm, val):
+        if self.ser is None:
+            return
         stdout.flush()
         val = int(val)
         if self.xDbgPrint:
@@ -287,6 +301,8 @@ class Comm():
         return cmd
 
     def queMove(self, opString, op, val):
+        if self.ser is None:
+            return
         cmd = self.moveCommand(opString, op, val)
         length = len(cmd)
         if (self.moveLen + length) > MAX_CMD_LEN:

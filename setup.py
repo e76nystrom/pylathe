@@ -62,6 +62,12 @@ class Setup():
             fName = 'configDef'
             f = open(fName + '.py', 'wb')
             fWrite(f, "# config table\n")
+
+        maxLen = 0
+        for data in configList:
+            if len(data) == 2:
+                maxLen = max(maxLen, len(data[0]))
+
         index = 0
         for data in configList:
             if len(data) == 2:
@@ -73,22 +79,27 @@ class Setup():
                     globals()[name] = index
                     configTable.append(name)
                     if f is not None:
-                        tmp = "%s = %3d" % (name.ljust(16), index)
+                        tmp = "%s = %3d" % (name.ljust(maxLen), index)
                         fWrite(f, "%s# %s\n" % (tmp.ljust(32), comment))
                 index += 1
             else:
                 if f is not None:
                     fWrite(f, "\n# %s\n\n" % (data))
+
         if f is not None:
+            fWrite(f, "\nMAX_CFG_INDEX = %d\n" % (index,))
             fWrite(f, "\nconfig = { \\\n")
-            for key in config:
-                fWrite(f, "    '%s' : %d,\n" % (key, config[key]))
+            for key in sorted(config):
+                tmp = "'" + key + "'"
+                fWrite(f, "    %s : %d,\n" % (tmp.ljust(maxLen + 2), config[key]))
             fWrite(f, "    }\n")
+
             fWrite(f, "\nconfigTable = ( \\\n")
             for val in configTable:
                 fWrite(f, "    '%s',\n" % (val))
-            fWrite(f, "    )\n")
+            fWrite(f, "    )\n\nCFG_STR_LEN = %d\n\n" % (maxLen,))
             f.close()
+
         self.config = config
         self.configTable = configTable
         return(config, configTable)
@@ -641,6 +652,7 @@ class Setup():
                             fWrite(f, "\n%s = ( \\\n" % \
                                    (enum.replace('List', 'Text')))
                             for c in commentList:
+                                c = re.sub(r"'[\w+-]*'", "", c)
                                 fWrite(f, "    \"%s\",\n" % (c))
                             fWrite(f, "    )\n")
 
@@ -1164,22 +1176,22 @@ class Setup():
                                                comment))
                             if len(regName) != 0:
                                 xLst.append((" alias    %-18s : " \
-                                             "std_logic is %sReg(%d); " \
-                                             "-- x%02x %s\n") %
+                                             "std_logic is %sReg(%2d); " \
+                                             "-- x%04x %s\n") %
                                             (xVar, regName, shift, \
                                              1 << shift, comment))
                                 cLst.append((" constant c_%-16s : " \
                                              "integer := %2d; " \
-                                             "-- x%02x %s\n") %
+                                             "-- x%04x %s\n") %
                                             (xVar, shift,  1 << shift, comment))
                             else:
                                 fWrite(xFile, (" constant c_%-16s : " \
                                                "integer := %2d; " \
-                                               "-- x%02x %s\n" %
+                                               "-- x%04x %s\n" %
                                                (xVar, shift,  1 << shift, comment)))
                                 fWrite(rFile,
                                        " constant %-14s : integer := %2d; " \
-                                       "-- x%02x %s\n" %
+                                       "-- x%04x %s\n" %
                                        (xVar, shift,  1 << shift, comment))
 
                             match = re.match("\'([\w+\-]*)\'([\s\w]*)",
@@ -1207,7 +1219,7 @@ class Setup():
 
                                 xLst.append(" alias    %-18s : unsigned is " \
                                             "%sreg(%d downto %d); " \
-                                            "-- x%02x %s\n" %
+                                            "-- x%04x %s\n" %
                                             (xVar, regName, end, start, \
                                              1 << start, comment))
                                 rData.append((xVar, (end, start), comment))

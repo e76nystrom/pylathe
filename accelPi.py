@@ -59,6 +59,16 @@ def accelCalc(aData):
               (aData.clockFreq, aData.freqDivider))
     accelSetup(aData)
 
+def syncCalc(aData, dx, dy):
+    aData.dx = dx = int(dx)
+    aData.dy = dy = int(dy)
+    aData.incr1 = 2 * dy
+    aData.incr2 = aData.incr1 - 2 * dx
+    adata.initialSum = aData.incr1 - dx
+    aData.intAccel = 0
+    aData.accelClocks = 0
+
+
 def syncAccelCalc(aData, feedType, feed):
     print("\n%s %s syndAccelCalc" % (aData.axis.name, aData.accelType))
     if feedType == ct.FEED_PITCH:

@@ -1,4 +1,8 @@
 from sys import stdout
+import wx
+
+from configDef import CFG_STR_LEN
+from comboBox import ComboBox
 
 class InfoValue():
     def __init__(self, val):
@@ -31,7 +35,7 @@ class ConfigInfo():
         self.info = []
         self.infoData = []
         self.configTable = configTable
-        self.maxLen = 17
+        self.maxLen = CFG_STR_LEN
 
     def clrInfo(self, size):
         self.info = [None for _ in range(size)]
@@ -51,7 +55,6 @@ class ConfigInfo():
 
     def saveInfo(self, file):
         cfgFormat = "%-" + str(self.maxLen) + "s = %s\n"
-        print(cfgFormat)
         f = open(file, 'wb')
         for index, (val) in enumerate(self.info):
             name = self.configTable[index]
@@ -71,21 +74,22 @@ class ConfigInfo():
 
     @staticmethod
     def readConfig(name, val):
-        valClass = val.__class__.__name__
-        # print(name, valClass)
-        # stdout.flush()
-        if valClass == 'TextCtrl':
-            return val.GetValue()
-        elif valClass == 'RadioButton':
-            return val.GetValue()
-        elif valClass == 'CheckBox':
-            return val.GetValue()
-        elif valClass == 'ComboBox':
-            return val.GetValue()
-        elif valClass == 'InfoValue':
-            return val.GetValue()
+        # valClass = val.__class__.__name__
+        if isinstance(val, wx.TextCtrl):
+            result = val.GetValue()
+        elif isinstance(val, wx.RadioButton):
+            result = val.GetValue()
+        elif isinstance(val, wx.CheckBox):
+            result = val.GetValue()
+        elif isinstance(val, ComboBox):
+            result = val.GetValue()
+        elif isinstance(val, InfoValue):
+            result = val.GetValue()
         else:
-            return(None)
+            result = None
+        # print(f"{name:<20} {valClass:<14} {str(result)}")
+        # stdout.flush()
+        return result
 
     def readInfo(self, file, config, configList=None):
         print("readInfo %s" % (file))
@@ -110,23 +114,23 @@ class ConfigInfo():
                         continue
                 if self.info[index] is not None:
                     func = self.info[index]
-                    funcClass = func.__class__.__name__
+                    # funcClass = func.__class__.__name__
                     # print(key, val, funcClass)
-                    if funcClass == 'TextCtrl':
+                    if isinstance(func, wx.TextCtrl):
                         func.SetValue(val)
                         self.infoData[index] = val
-                    elif funcClass == 'RadioButton':
+                    elif isinstance(func, wx.RadioButton):
                         val = val == 'True'
                         func.SetValue(val)
                         self.infoData[index] = val
-                    elif funcClass == 'CheckBox':
+                    elif isinstance(func, wx.CheckBox):
                         val = val == 'True'
                         func.SetValue(val)
                         self.infoData[index] = val
-                    elif funcClass == 'ComboBox':
+                    elif isinstance(func, ComboBox):
                         func.SetValue(val)
                         self.infoData[index] = val
-                    elif funcClass == 'InfoValue':
+                    elif isinstance(func, InfoValue):
                         self.infoData[index] = func.SetValue(val)
                 else:
                     func = InfoValue(val)
@@ -139,19 +143,23 @@ class ConfigInfo():
             print(e)
             stdout.flush()
 
-    def initInfo(self, index, val):
+    def initInfo(self, index, obj):
         if self.info[index] is not None:
             pass
             # print("initInfo duplicate index %3d %s" %
             #       (index, self.configTable[index]))
             # stdout.flush()
-        self.info[index] = val
+        # funcClass = obj.__class__.__name__
+        # print(f"initInfo {index:3d} {self.configTable[index]:<20} " \
+        #       f"{funcClass}")
+        self.info[index] = obj
 
     def newInfo(self, index, val):
         if self.info[index] is not None:
             print("newInfo duplicate index %d %s" %
                   (index, self.configTable[index]))
             stdout.flush()
+        # print(f"newInfo {index:3d} {self.configTable[index]:<20}")
         self.info[index] = info = InfoValue(val)
         self.infoData[index] = val
         return(info)
@@ -266,6 +274,8 @@ class ConfigInfo():
     def getFloatInfoData(self, index):
         try:
             val = self.infoData[index]
+            if val == "None":
+                val = 0.0
             try:
                 return(float(val))
             except ValueError:
@@ -295,13 +305,13 @@ class ConfigInfo():
                         val = fmt % (val,)
                 return(val)
             except ValueError:
-                print("getFloatInfoData ValueError index %d %s %s" % \
+                print("getDistInfoData ValueError index %d %s %s" % \
                       (index, self.configTable[index], val))
             except TypeError:
-                print("getFloatInfo TypeError index %d %s %s" % \
+                print("getDistInfo TypeError index %d %s %s" % \
                       (index, self.configTable[index], val))
         except IndexError:
-            print("getFloatInfo IndexError %d" % (index))
+            print("getDistInfo IndexError %d" % (index))
         stdout.flush()
         return(0.0)
 

@@ -4,12 +4,6 @@
 # common move command bits
 
 CMD_MSK          = (7 << 0)     # 0x07 move mask
-CMD_MOV          = (1 << 0)     # 0x01 move a set distance
-CMD_JOG          = (2 << 0)     # 0x02 move while cmd are present
-CMD_SYN          = (3 << 0)     # 0x03 move dist synchronized to rotation
-CMD_MAX          = (4 << 0)     # 0x04 rapid move
-CMD_SPEED        = (5 << 0)     # 0x05 jog at speed
-JOG_SLOW         = (6 << 0)     # 0x06 slow jog for home or probe
 SYN_START        = (1 << 3)     # 0x08 start on sync pulse
 SYN_LEFT         = (1 << 4)     # 0x10 start sync left
 SYN_TAPER        = (1 << 5)     # 0x20 taper on other axis
@@ -20,6 +14,9 @@ FIND_PROBE       = (1 << 9)     # 0x200 find probe
 CLEAR_PROBE      = (1 << 10)    # 0x400 move off of probe
 DRO_POS          = (1 << 11)    # 0x800 use dro for moving
 DRO_UPD          = (1 << 12)    # 0x1000 update internal position from dro
+ENA_THREAD       = (1 << 13)    # 0x2000 runout enabled
+ENA_RUNOUT       = (1 << 14)    # 0x4000 runout enabled
+INTERNAL_OP      = (1 << 15)    # 0x8000 internal operation
 
 # common definitions
 

@@ -25,15 +25,16 @@ R_HOME_X             =  21	# 0x15
 R_OP_START           =  22	# 0x16
 R_OP_DONE            =  23	# 0x17
 R_PAUSE              =  24	# 0x18
-R_STR_SPIN_Q         =  25	# 0x19
-R_STP_SPIN_Q         =  26	# 0x1a
-R_PASS               =  27	# 0x1b
-R_SET_ACCEL_Q        =  28	# 0x1c
-R_SET_DATA_Q         =  29	# 0x1d
-R_MOVE_Z             =  30	# 0x1e
-R_MOVE_X             =  31	# 0x1f
-R_MOVE_REL_Z         =  32	# 0x20
-R_MOVE_REL_X         =  33	# 0x21
+R_ENC_SCL_STR        =  25	# 0x19
+R_STR_SPIN_Q         =  26	# 0x1a
+R_STP_SPIN_Q         =  27	# 0x1b
+R_PASS               =  28	# 0x1c
+R_SET_ACCEL_Q        =  29	# 0x1d
+R_SET_DATA_Q         =  30	# 0x1e
+R_MOVE_Z             =  31	# 0x1f
+R_MOVE_X             =  32	# 0x20
+R_MOVE_REL_Z         =  33	# 0x21
+R_MOVE_REL_X         =  34	# 0x22
 
 # command table
 
@@ -63,13 +64,14 @@ cmdTable = ( \
     ("R_OP_START",    ), # 0x16 22
     ("R_OP_DONE",     ), # 0x17 23
     ("R_PAUSE",       ), # 0x18 24
-    ("R_STR_SPIN_Q",  ), # 0x19 25
-    ("R_STP_SPIN_Q",  ), # 0x1a 26
-    ("R_PASS",        ), # 0x1b 27
-    ("R_SET_ACCEL_Q", ), # 0x1c 28
-    ("R_SET_DATA_Q",  ), # 0x1d 29
-    ("R_MOVE_Z",      ), # 0x1e 30
-    ("R_MOVE_X",      ), # 0x1f 31
-    ("R_MOVE_REL_Z",  ), # 0x20 32
-    ("R_MOVE_REL_X",  ), # 0x21 33
+    ("R_ENC_SCL_STR", ), # 0x19 25
+    ("R_STR_SPIN_Q",  ), # 0x1a 26
+    ("R_STP_SPIN_Q",  ), # 0x1b 27
+    ("R_PASS",        ), # 0x1c 28
+    ("R_SET_ACCEL_Q", ), # 0x1d 29
+    ("R_SET_DATA_Q",  ), # 0x1e 30
+    ("R_MOVE_Z",      ), # 0x1f 31
+    ("R_MOVE_X",      ), # 0x20 32
+    ("R_MOVE_REL_Z",  ), # 0x21 33
+    ("R_MOVE_REL_X",  ), # 0x22 34
     )

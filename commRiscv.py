@@ -169,12 +169,12 @@ class CommRiscv():
             return
         if (len(port) == 0) or (len(rate) == 0):
             return
-        
+
         try:
             rate = int(rate)
         except ValueError:
             return
-        
+
         try:
             self.ser = serial.Serial(port, rate, timeout=2)
         except IOError:
@@ -559,10 +559,13 @@ class RiscvLathe(Thread):
         self.lastXAxisCtl = 0
         self.freqMult = 8
 
+        self.feed = 0
         self.feedType   = 0
-        self.threadFlag = 0
+        self.threadFlags = 0
         self.queCount = 0
         self.dbgCount = 0
+        self.encCycle = 0
+        self.outCycle = 0
 
         self.start()
 
@@ -701,62 +704,76 @@ class RiscvLathe(Thread):
         self.riscvCmd(rc.R_SETUP)
 
     def cSpindleSetup(self):            # 28
-        pass
+        parm = self.parm
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_TURN_SYNC, parm.turnSync))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_THREAD_SYNC, parm.threadSync))
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_RUNOUT_SYNC, parm.runoutSync))
 
     def cSyncSetup(self):               # 29
         pass
 
     def cZSetup(self):                  # 30
-        parm = self.parm
+        try:
+            parm = self.parm
 
-        stepsInch = intRound((parm.zMicro * parm.zMotor) / parm.zPitch)
-        self.zAxis = zAxis = Axis("z", Z_AXIS, stepsInch, parm.zAccel, parm)
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_STEPS_INCH, stepsInch))
+            stepsInch = intRound((parm.zMicro * parm.zMotor) / parm.zPitch)
+            zAxis = (Axis("z", Z_AXIS, stepsInch, parm.zAccel, parm))
+            self.zAxis = zAxis
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_STEPS_INCH, stepsInch))
 
-        self.zTurnAccel    = ac = AccelData(zAxis)
-        self.zAxis.turnAccel = ac
-        ac.init("turn")
+            self.zTurnAccel    = ac = AccelData(zAxis)
+            self.zAxis.turnAccel = ac
+            ac.init("turn")
 
-        self.zTaperAccel   = ac = AccelData(zAxis)
-        self.zAxis.taperAccel = ac
-        ac.init("taper")
+            self.zTaperAccel   = ac = AccelData(zAxis)
+            self.zAxis.taperAccel = ac
+            ac.init("taper")
 
-        self.zMoveAccel    = ac = AccelData(zAxis)
-        ac.init("move", parm.zMoveMin, parm.zMoveMax)
+            self.zMoveAccel    = ac = AccelData(zAxis)
+            ac.init("move", parm.zMoveMin, parm.zMoveMax)
 
-        self.zJogAccel     = ac = AccelData(zAxis)
-        ac.init("jog", parm.zJogMin, parm.zJogMax)
+            self.zJogAccel     = ac = AccelData(zAxis)
+            ac.init("jog", parm.zJogMin, parm.zJogMax)
 
-        self.zJogSlowAccel = ac = AccelData(zAxis)
-        ac.init("slowJog", parm.zHomeSpeed, parm.zHomeSpeed)
+            self.zJogSlowAccel = ac = AccelData(zAxis)
+            ac.init("slowJog", parm.zHomeSpeed, parm.zHomeSpeed)
 
-        riscvAccelData(self.zMoveAccel,    en.RP_Z_MOVE)
-        riscvAccelData(self.zJogAccel,     en.RP_Z_JOG)
-        riscvAccelData(self.zJogSlowAccel, en.RP_Z_SLOW)
+            riscvAccelData(self.zMoveAccel,    en.RP_Z_MOVE)
+            riscvAccelData(self.zJogAccel,     en.RP_Z_JOG)
+            riscvAccelData(self.zJogSlowAccel, en.RP_Z_SLOW)
 
-        stepsSec = self.zJogAccel.stepsSecMax
-        self.zJogInitialDist = int(parm.jogTimeInitial * stepsSec)
-        self.zJogIncDist = int(parm.jogTimeInc * stepsSec)
-        self.zJogMaxDist = int(parm.jogTimeMax * stepsSec)
+            stepsSec = self.zJogAccel.stepsSecMax
+            self.zJogInitialDist = int(parm.jogTimeInitial * stepsSec)
+            self.zJogIncDist = int(parm.jogTimeInc * stepsSec)
+            self.zJogMaxDist = int(parm.jogTimeMax * stepsSec)
 
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_LIM_MIN, parm.zTestLimitMin))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_LIM_MAX, parm.zTestLimitMax))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_HOME_MIN, parm.zTestHomeMin))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_HOME_MAX, parm.zTestHomeMax))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_TEST_PROBE, parm.zTestProbe))
+            self.riscvCmd(rc.R_SET_DATA,
+                          (rp.R_Z_TEST_LIM_MIN, parm.zTestLimitMin))
+            self.riscvCmd(rc.R_SET_DATA,
+                          (rp.R_Z_TEST_LIM_MAX, parm.zTestLimitMax))
+            self.riscvCmd(rc.R_SET_DATA,
+                          (rp.R_Z_TEST_HOME_MIN, parm.zTestHomeMin))
+            self.riscvCmd(rc.R_SET_DATA,
+                          (rp.R_Z_TEST_HOME_MAX, parm.zTestHomeMax))
+            self.riscvCmd(rc.R_SET_DATA,
+                          (rp.R_Z_TEST_PROBE, parm.zTestProbe))
 
-        homeDir = parm.zHomeDir
-        homeFindFwd =  homeDir * intRound(parm.zHomeDist * stepsInch)
-        homeFindRev = -homeDir * intRound(parm.zHomeDistRev * stepsInch)
-        homeBackoff = -homeDir * intRound(parm.zHomeDistBackoff * stepsInch)
-        homeSlow    =  homeDir * intRound(1.25 * parm.zHomeDistBackoff * stepsInch)
+            homeDir = parm.zHomeDir
+            homeFindFwd =  homeDir * intRound(parm.zHomeDist * stepsInch)
+            homeFindRev = -homeDir * intRound(parm.zHomeDistRev * stepsInch)
+            homeBackoff = -homeDir * intRound(parm.zHomeDistBackoff * stepsInch)
+            homeSlow    =  (homeDir *
+                            intRound(1.25 * parm.zHomeDistBackoff * stepsInch))
 
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_FWD, homeFindFwd))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_REV, homeFindRev))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_BACKOFF, homeBackoff))
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_SLOW, homeSlow))
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_FWD, homeFindFwd))
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_FIND_REV, homeFindRev))
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_BACKOFF, homeBackoff))
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_HOME_SLOW, homeSlow))
 
-        self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_JOG_INC, parm.zMpgInc), flus=True)
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_Z_JOG_INC, parm.zMpgInc),
+                          flush=True)
+        except TypeError as evt:
+            print("TypeError", evt)
 
     def cZSetLoc(self):                 # 32
         self.riscvCmd(rc.R_SET_LOC_Z, self.parm.zLoc)
@@ -765,7 +782,8 @@ class RiscvLathe(Thread):
         parm = self.parm
 
         stepsInch = (intRound((parm.xMicro * parm.xMotor) / parm.xPitch))
-        self.xAxis = xAxis = Axis("x", X_AXIS, stepsInch, parm.xAccel, parm)
+        xAxis = Axis("x", X_AXIS, stepsInch, parm.xAccel, parm)
+        self.xAxis = xAxis
         self.riscvCmd(rc.R_SET_DATA, (rp.R_X_STEPS_INCH, stepsInch))
 
         self.xTurnAccel    = ac = AccelData(xAxis)
@@ -804,7 +822,8 @@ class RiscvLathe(Thread):
         homeFindFwd =  homeDir * intRound(parm.zHomeDist * stepsInch)
         homeFindRev = -homeDir * intRound(parm.zHomeDistRev * stepsInch)
         homeBackoff = -homeDir * intRound(parm.zHomeDistBackoff * stepsInch)
-        homeSlow    =  homeDir * intRound(1.25 * parm.zHomeDistBackoff * stepsInch)
+        homeSlow    =  (homeDir *
+                        intRound(1.25 * parm.zHomeDistBackoff * stepsInch))
 
         self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_FIND_FWD, homeFindFwd))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_X_HOME_FIND_REV, homeFindRev))
@@ -863,7 +882,7 @@ class RiscvLathe(Thread):
 
         self.riscvCmd(rc.R_SET_DATA, (rp.R_JOG_PAUSE, 0))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_CFG_VAL, cfgVal))
-        
+
         self.riscvCmd(rc.R_SEND_DONE, flush=True)
 
     # def setZLoc(self, loc):
@@ -984,7 +1003,8 @@ class RiscvLathe(Thread):
                 print("que size %d queCount %d" % \
                       (self.moveQue.qsize(), self.queCount))
                 (opString, op, val) = self.moveQue.get(False)
-                print("moveQue get op %6x %-18s %s" % (op, opString, str(val)))
+                strVal = f"{val:.4f}" if isinstance(val, float) else str(val)
+                print("moveQue get op %6x %-18s %s" % (op, opString, strVal))
                 self.cmdFlag = op >> 16
                 op &= 0xff
                 self.cmd = op
@@ -1083,14 +1103,14 @@ class RiscvLathe(Thread):
         if self.currentPass == 1:
             self.taperSetup(self.zAxis, self.xAxis)
         loc = intRound(val * self.zAxis.stepsInch) + self.zAxis.homeOffset
-        riscvCmd(rc.R_MOVE_Z, (ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER, loc))
+        riscvCmd(rc.R_MOVE_Z, (en.CMD_SYN | ct.SYN_START | ct.SYN_TAPER, loc))
 
     def qTaperXZ(self, val):            # 10
         print("taper xz %7.4f" % (val))
         if self.currentPass == 1:
             self.taperSetup(self.xAxis, self.zAxis)
         loc = intRound(val * self.xAxis.stepsInch) + self.xAxis.homeOffset
-        riscvCmd(rc.R_MOVE_X, (ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER, loc))
+        riscvCmd(rc.R_MOVE_X, (en.CMD_SYN | ct.SYN_START | ct.SYN_TAPER, loc))
 
     def taperSetup(self, mvAxis, tpAxis):
         print("taperSetup")
@@ -1114,7 +1134,7 @@ class RiscvLathe(Thread):
         # print("mvDist %7.4f taper %0.6f tpAxis.taperDist %d" % \
         #       (mvDist, taper, tpAxis.taperDist))
         # taperCalc(mvAxis.turnAccel, tpAxis.taperAccel, taper)
-        # mvAxis.move(loc, ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
+        # mvAxis.move(loc, en.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
 
     # noinspection PyUnusedLocal
     def qStartSpindle(self, val):       # 11
@@ -1140,50 +1160,119 @@ class RiscvLathe(Thread):
               (self.zFeed,
                parm.currentOp, en.operationsList[parm.currentOp],
                parm.turnSync, en.selTurnList[parm.turnSync]))
-        if parm.runoutDistance != 0:
-            print("runoutDistance %6.4f runoutDepth %6.4f" %
-                  (parm.runoutDistance, parm.runoutDepth))
-        currentOp = parm.currentOp
-        if currentOp == en.OP_TURN:
-            pass
-        elif currentOp == en.OP_TAPER:
-            pass
-        elif currentOp == en.OP_THREAD:
-            pass
 
-        axis = self.zAxis
-        if parm.turnSync == en.SEL_TU_ENC:
-            self.zAxis.encParm = True
-            syncAccelCalc(axis.turnAccel, self.feedType, val)
-            riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
-                           que=True)
-        elif parm.turnSync == en.SEL_TU_SYN:
-            axis.encParm = False
-            self.mvState = en.M_START_SYNC
+        axis = self.xAxis
+        currentOp = parm.currentOp
+        if (currentOp == en.OP_TURN or # encoder for turning
+            currentOp == en.OP_TAPER):
+            if parm.turnSync == en.SEL_TU_ENC:
+                axis.encParm = True
+                syncAccelCalc(axis.turnAccel, self.feedType, val)
+                riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
+                               que=True)
+
+            elif parm.turnSync == en.SEL_TU_SYN: # syn for turning
+                self.riscvCmd(rc.R_SET_DATA,
+                                      (rp.R_SYN_ENC_CYCLE, parm.lSyncCycle))
+                self.riscvCmd(rc.R_SET_DATA,
+                                      (rp.R_SYN_OUT_CYCLE, parm.lSyncOutput))
+
+        elif currentOp == en.OP_THREAD:
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_THREAD_FLAGS, self.threadFlags))
+            threadSync = parm.threadSync
+            if threadSync == en.SEL_TH_ENC: # encoder for threading
+                axis = self.zAxis
+                self.zAxis.encParm = True
+                syncAccelCalc(axis.turnAccel, self.feedType, val)
+                riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
+                               que=True)
+
+            if threadSync == en.SEL_TH_SYN: # syn for threading
+                self.riscvCmd(rc.R_SET_DATA,
+                              (rp.R_SYN_ENC_PRE_SCALER,
+                               parm.lSyncInPreScaler))
+                self.riscvCmd(rc.R_SET_DATA,
+                              (rp.R_SYN_ENC_CYCLE, parm.lSyncCycle))
+                self.riscvCmd(rc.R_SET_DATA,
+                              (rp.R_SYN_OUT_CYCLE, parm.lSyncOutput))
+
+            runoutSync = parm.runoutSync
+            if runoutSync == en.SEL_RU_SYN: # syn for runout
+                if parm.runoutDistance != 0:
+                    print("runoutDistance %6.4f runoutDepth %6.4f" %
+                          (parm.runoutDistance, parm.runoutDepth))
+                    #
+                    # minRatio = 8
+                    # encCycle = 8
+                    # outCycle = 0
+                    #
+                    # runOutEnc = parm.encPerRev * parm.runoutDistance
+                    # xSteps = parm.runoutDepth * self.xAxis.stepsInch
+                    # divRatio = runOutEnc / xSteps
+                    # print(f"runOutEnc {runOutEnc:d} xSteps {xSteps:d} " \
+                    #       "divRatio {runOutEnc / xSteps:.2f}")
+                    # if divRatio < minRatio:
+                    #     # minRatio = (runOutEnc * sclFactor) / xSteps
+                    #     # minRatio * xSteps / runOutEnc = sclFactor
+                    #     sclFactor = (xSteps * minRatio) / runOutEnc
+                    #     # sclFactor = outCycle / encCycle
+                    #     # sclFactor * encCycle = outCycle
+                    #     outCycle = int(round(sclFactor * encCycle))
+                    #     print(f"calculated sclFactor {sclFactor:.2f} "\
+                    #           "actual {outCycle/ encCycle:.2f}")
+                    #     divRatio = (outCycle * runOutEnc) / (encCycle * xSteps)
+                    #     print(f"encCycle {encCycle:d} outCycle {outCycle:d} "
+                    #           "divRatio {divRatio:.2f}")
+                    #     runOutEnc *= outCycle / encCycle
+                    #
+                    # self.encCycle = encCycle
+                    # self.outCycle = outCycle
+                    #
+                    # print("runOutEnc", runOutEnc, "xSteps", xSteps,
+                    #       f"divRatio {runOutEnc / xSteps:.2f}")
+
+                    # syncCalc(axis.turnAccel, runOutEnc, xSteps)
+                    # riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
+                    #                que=True)
+
+                    self.riscvCmd(rc.R_SET_DATA,
+                                  (rp.R_SYN_ENC_PRE_SCALER,
+                                   parm.lXSyncInPreScaler))
+                    self.riscvCmd(rc.R_SET_DATA,
+                                  (rp.R_SYN_ENC_CYCLE, parm.lXSyncCycle))
+                    self.riscvCmd(rc.R_SET_DATA,
+                                  (rp.R_SYN_OUT_CYCLE, parm.lXSyncOutput))
+
+                    self.riscvCmd(rc.R_SET_DATA,
+                                  (rp.R_RUNOUT_LIMIT, parm.runoutLimit))
+                    self.riscvCmd(rc.R_SET_DATA,
+                                  (rp.R_RUNOUT_DEPTH, parm.runoutDepth))
 
     def qXSynSetup(self, val):          # 14
         print("xSynSetup")
         self.xFeed = val
         parm = self.parm
         currentOp = parm.currentOp
-        if currentOp == en.OP_FACE:
-            pass
-        elif currentOp == en.OP_CUTOFF:
-            pass
-        elif currentOp == en.OP_TAPER:
-            pass
-        elif currentOp == en.OP_THREAD:
-            pass
+        if (currentOp == en.OP_FACE or # face, cutoff, taper
+            currentOp == en.OP_CUTOFF or
+            currentOp == en.OP_TAPER):
+            axis = self.xAxis
+            if parm.turnSync == en.SEL_TU_ENC: # encoder
+                axis.encParm = True
+                syncAccelCalc(axis.turnAccel, self.feedType, val)
+                riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
+                               que=True)
 
-        axis = self.xAxis
-        if parm.turnSync == en.SEL_TU_ENC:
-            axis.encParm = True
-            syncAccelCalc(axis.turnAccel, self.feedType, val)
-            riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
-                           que=True)
-        else:
-            axis.encParm = False
-            self.mvState = en.M_START_SYNC
+            elif parm.turnSync == en.SEL_TU_SYN: # syn
+                axis.encParm = False
+                self.mvState = en.M_START_SYNC
+
+            else:               # error
+                pass
+
+            pass
+        else:                   # error
+            pass
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def qSendSyncParms(self, val):      # 15
@@ -1214,47 +1303,52 @@ class RiscvLathe(Thread):
     def qMoveZOffset(self, val):        # 19
         print("moveZOffset")
 
-    def qSaveFeedType(self, val):       # 20
+    def qSaveFeed(self, val):   	# 20
+        print("saveFeed")
+        self.feed = val
+
+    def qSaveFeedType(self, val):       # 21
         print("saveFeedType")
         self.feedType = val
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qZFeedSetup(self, val):         # 21
+    def qZFeedSetup(self, val):         # 22
         print("zFeedSetup")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qXFeedSetup(self, val):         # 22
+    def qXFeedSetup(self, val):         # 23
         print("xFeedSetup")
 
-    def qSaveFlags(self, val):          # 23
+    def qSaveFlags(self, val):          # 24
         print("saveFlags")
-        self.threadFlag = val
+        self.threadFlags = val
+        self.riscvCmd(rc.R_SET_DATA_Q, (rp.R_THREAD_FLAGS, val))
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qProbeX(self, val):             # 24
+    def qProbeX(self, val):             # 25
         print("probeX")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qProbeZ(self, val):             # 25
+    def qProbeZ(self, val):             # 26
         print("probeZ")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qSaveZDro(self, val):           # 26
+    def qSaveZDro(self, val):           # 27
         print("saveZDro")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qSaveXDro(self, val):           # 27
+    def qSaveXDro(self, val):           # 20
         print("saveXDro")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qQueParm(self, val):            # 28
+    def qQueParm(self, val):            # 29
         print("queParm")
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def qMoveArc(self, val):            # 29
+    def qMoveArc(self, val):            # 23
         print("moveArc")
 
-    def qOpDone(self, val):             # 30
+    def qOpDone(self, val):             # 31
         print("opDone")
         # self.dbgMsg(en.D_DONE, val)
         if val == ct.PARM_START:
@@ -1776,7 +1870,7 @@ class RiscvLathe(Thread):
 
     def dbgZX(self, val):
         if (self.zCmd is not None and self.zDist is not None and \
-            ((self.zCmd & ct.CMD_MSK) == ct.CMD_SYN)):
+            ((self.zCmd & ct.CMD_MSK) == en.CMD_SYN)):
             rev = val / self.encoderCount
             feed = self.zDist / rev
             return "z_x  %7d rev %5.2f feed %5.4f" % (val, rev, feed)

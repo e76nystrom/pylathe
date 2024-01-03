@@ -203,7 +203,7 @@ class ThreadCalc():
             pen = self.pen[layer]
             if pen is not None:
                 self.dc.SetPen(pen)
-            self.dc.DrawLine(x0, y0, x1, y1)
+            self.dc.DrawLine(int(x0), int(y0), int(x1), int(y1))
 
     def addText(self, text, p0, align=None, layer='TEXT'):
         if self.d is not None:
@@ -250,7 +250,7 @@ class ThreadCalc():
             if color is not None:
                 self.dc.SetTextForeground(color)
             (x, y) = self.fixPoint(p0)
-            self.dc.DrawText(text, x + hOffset, y + vOffset)
+            self.dc.DrawText(text, int(x + hOffset), int(y + vOffset))
 
     def drawCircle(self, radius, center, layer):
         if self.d is not None:
@@ -264,7 +264,8 @@ class ThreadCalc():
             radius *= self.scale
             size = 2 * radius
             self.dc.SetBrush(wx.Brush('white', wx.TRANSPARENT))
-            self.dc.DrawEllipse(x - radius, y - radius, size, size)
+            self.dc.DrawEllipse(int(x - radius), int(y - radius),
+                                int(size), int(size))
 
     def drawShape(self, path, color, colorName):
         if self.d is not None:
@@ -326,6 +327,7 @@ class ThreadCalc():
                 fontSize = 12
             else:
                 fontSize = 6
+            fontSize *= 1.5
             self.font = wx.Font(fontSize, wx.MODERN, wx.NORMAL,
                                 wx.NORMAL, False, u'Consolas')
             self.dc.SetFont(self.font)

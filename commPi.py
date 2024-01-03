@@ -394,6 +394,10 @@ class PiLathe(Thread):
         self.lastXAxisCtl = 0
         self.freqMult = 8
 
+        self.feed = 0
+        self.feedType   = 0
+        self.threadFlag = 0
+
         self.start()
 
     def setZLoc(self, loc):
@@ -864,7 +868,7 @@ class PiLathe(Thread):
         print("mvDist %7.4f taper %0.6f tpAxis.taperDist %d" % \
               (mvDist, taper, tpAxis.taperDist))
         taperCalc(mvAxis.turnAccel, tpAxis.taperAccel, taper)
-        mvAxis.move(loc, ct.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
+        mvAxis.move(loc, en.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
 
     # noinspection PyUnusedLocal
     def qStartSpindle(self, val):
@@ -956,6 +960,10 @@ class PiLathe(Thread):
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def qMoveZOffset(self, val):
         print("moveZOffset")
+
+    def qSaveFeed(self, val):
+        print("saveFeed")
+        self.feedType = val
 
     def qSaveFeedType(self, val):
         print("saveFeedType")
@@ -1264,13 +1272,13 @@ class Axis():
     #         riscvAccelData(self.jogSlowAccel, en.RP_X_SLOW)
 
     # def riscvSetup(self, cmd):
-    #     if cmd == ct.CMD_SYN:
+    #     if cmd == en.CMD_SYN:
     #         pass
-    #     elif cmd == ct.CMD_JOG:
+    #     elif cmd == en.CMD_JOG:
     #         pass
-    #     elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
+    #     elif cmd == en.CMD_MAX or cmd == en.CMD_MOV:
     #         pass
-    #     elif cmd == ct.CMD_SPEED:
+    #     elif cmd == en.CMD_SPEED:
     #         pass
     #     elif cmd == ct.JOGSLOW:
     #         pass
@@ -1335,7 +1343,7 @@ class Axis():
             self.jogIncDist = int(parm.jogTimeInc * stepsSec)
             self.jogMaxDist = int(parm.jogTimeMax * stepsSec)
             self.axisCtl = bt.ctlJogCmd
-            self.moveRel(dist, ct.CMD_JOG)
+            self.moveRel(dist, en.CMD_JOG)
         else:
             self.ld(self.base + rg.F_Sync_Base + rg.F_Ld_Dist, self.jogIncDist)
 
@@ -1374,12 +1382,12 @@ class Axis():
 
     def startMove(self):
         accel = None
-        cmd = self.cmd & ct.CMD_MSK
+        cmd = self.cmd & en.CMD_MSK
 
         loc = self.rd(self.base + rg.F_Sync_Base + rg.F_Rd_Loc)
         print("+++loc %d" % (loc))
 
-        if cmd == ct.CMD_SYN:
+        if cmd == en.CMD_SYN:
             if (self.cmd & ct.SYN_START) != 0:
                 self.axisCtl |= bt.ctlWaitSync
             clkCtl = self.clkSel[bt.clkCh if self.encParm else bt.clkIntClk]
@@ -1392,17 +1400,17 @@ class Axis():
 
             load(self.turnAccel, self.dist, self.encParm)
 
-        elif cmd == ct.CMD_JOG:
+        elif cmd == en.CMD_JOG:
             accel = self.jogAccel
             load(accel, self.dist)
             self.loadClock(self.clkSel[bt.clkFreq])
 
-        elif cmd == ct.CMD_MAX or cmd == ct.CMD_MOV:
+        elif cmd == en.CMD_MAX or cmd == en.CMD_MOV:
             accel = self.moveAccel
             load(accel, self.dist)
             self.loadClock(self.clkSel[bt.clkFreq])
 
-        elif cmd == ct.CMD_SPEED:
+        elif cmd == en.CMD_SPEED:
             pass
 
         elif cmd == ct.JOG_SLOW:

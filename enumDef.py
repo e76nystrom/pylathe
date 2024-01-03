@@ -107,17 +107,18 @@ Q_SYNC_COMMAND   = 16           # send sync command
 Q_PASS_NUM       = 17           # set pass number
 Q_QUE_PAUSE      = 18           # pause queue
 Q_MOVE_Z_OFFSET  = 19           # move z offset
-Q_SAVE_FEED_TYPE = 20           # save feed type
-Q_Z_FEED_SETUP   = 21           # setup z feed
-Q_X_FEED_SETUP   = 22           # setup x feed
-Q_SAVE_FLAGS     = 23           # save thread flags
-Q_PROBE_Z        = 24           # probe in z direction
-Q_PROBE_X        = 25           # probe in x direction
-Q_SAVE_Z_DRO     = 26           # save z dro reading
-Q_SAVE_X_DRO     = 27           # save x dro reading
-Q_QUE_PARM       = 28           # save parameter in queue
-Q_MOVE_ARC       = 29           # move in an arc
-Q_OP_DONE        = 30           # operation done
+Q_SAVE_FEED      = 20           # save current feed
+Q_SAVE_FEED_TYPE = 21           # save feed type
+Q_Z_FEED_SETUP   = 22           # setup z feed
+Q_X_FEED_SETUP   = 23           # setup x feed
+Q_SAVE_FLAGS     = 24           # save thread flags
+Q_PROBE_Z        = 25           # probe in z direction
+Q_PROBE_X        = 26           # probe in x direction
+Q_SAVE_Z_DRO     = 27           # save z dro reading
+Q_SAVE_X_DRO     = 28           # save x dro reading
+Q_QUE_PARM       = 29           # save parameter in queue
+Q_MOVE_ARC       = 30           # move in an arc
+Q_OP_DONE        = 31           # operation done
 
 mCommandsList = ( \
     "Q_MOVE_Z",
@@ -140,6 +141,7 @@ mCommandsList = ( \
     "Q_PASS_NUM",
     "Q_QUE_PAUSE",
     "Q_MOVE_Z_OFFSET",
+    "Q_SAVE_FEED",
     "Q_SAVE_FEED_TYPE",
     "Q_Z_FEED_SETUP",
     "Q_X_FEED_SETUP",
@@ -174,6 +176,7 @@ mCommandsText = ( \
     "set pass number",
     "pause queue",
     "move z offset",
+    "save current feed",
     "save feed type",
     "setup z feed",
     "setup x feed",
@@ -231,11 +234,11 @@ hStatesList = ( \
     )
 
 hStatesText = ( \
-    "'HI' idle state",
-    "'HF' found home switch",
-    "'OF' off home switch",
-    "'BF' backoff dist from switch",
-    "'HS' found home slowly",
+    " idle state",
+    " found home switch",
+    " off home switch",
+    " backoff dist from switch",
+    " found home slowly",
     )
 
 # debug axis message types
@@ -425,56 +428,56 @@ dMessageList = ( \
     )
 
 dMessageText = ( \
-    "'PASS' pass done",
-    "'DONE' all operations done",
-    "'TEST' test message",
+    " pass done",
+    " all operations done",
+    " test message",
     "'HST ' home state",
-    "'MSTA' move state",
-    "'MCMD' move command",
-    "'XBAS' x base",
-    "'XMVC' x move command",
-    "'XCTL' x axis ctl",
-    "'XMOV' x move to location",
-    "'XCUR' x current location",
-    "'XLOC' x end location",
-    "'XDST' x distance",
-    "'XSTP' x steps",
-    "'XSTA' x state",
-    "'XBLS' x backlash steps",
-    "'XDRO' x dro location",
-    "'XPDR' x pass dro location",
-    "'XEXP' x expected location",
-    "'XERR' x error with respect to dro",
+    " move state",
+    " move command",
+    " x base",
+    " x move command",
+    " x axis ctl",
+    " x move to location",
+    " x current location",
+    " x end location",
+    " x distance",
+    " x steps",
+    " x state",
+    " x backlash steps",
+    " x dro location",
+    " x pass dro location",
+    " x expected location",
+    " x error with respect to dro",
     "'XWT ' x wait",
     "'XDN ' x done",
-    "'XEST' x spindle encoder start count",
-    "'XEDN' x spindle encoder done count",
+    " x spindle encoder start count",
+    " x spindle encoder done count",
     "'XX  ' x ",
     "'XY  ' x ",
-    "'XIDR' x dro at index pulse",
-    "'XIPO' x position at index pulse",
-    "'ZBAS' Z base",
-    "'ZMVC' z move command",
-    "'ZCTL' z axis ctl",
-    "'ZMOV' z move location",
-    "'ZCUR' x current location",
-    "'ZLOC' z end location",
-    "'ZDST' z distance",
-    "'ZSTP' z steps",
-    "'ZSTA' z state",
-    "'ZBLS' z backlash steps",
-    "'ZDRO' z dro location",
-    "'ZPDR' z pass dro location",
-    "'ZEXP' z expected location",
-    "'ZERR' z error with respect to dro",
+    " x dro at index pulse",
+    " x position at index pulse",
+    " Z base",
+    " z move command",
+    " z axis ctl",
+    " z move location",
+    " x current location",
+    " z end location",
+    " z distance",
+    " z steps",
+    " z state",
+    " z backlash steps",
+    " z dro location",
+    " z pass dro location",
+    " z expected location",
+    " z error with respect to dro",
     "'ZWT ' z wait",
     "'ZDN ' z done",
-    "'ZEST' z spindle encoder start count",
-    "'ZEDN' Z spindle encoder done count",
+    " z spindle encoder start count",
+    " Z spindle encoder done count",
     "'ZX  ' z ",
     "'ZY  ' z ",
-    "'ZIDR' z dro at index pulse",
-    "'ZIPO' z position at index pulse",
+    " z dro at index pulse",
+    " z position at index pulse",
     "'MAX ' debug maximum",
     )
 
@@ -507,59 +510,83 @@ evEventsText = ( \
 
 # turning sync selector
 
-SEL_TU_SPEED     =  0           # Motor Speed
-SEL_TU_STEP      =  1           # Stepper
-SEL_TU_ENC       =  2           # Encoder
-SEL_TU_ISYN      =  3           # Int Syn
-SEL_TU_ESYN      =  4           # Ext Syn
-SEL_TU_SYN       =  5           # Sync
+SEL_TU_SPEED     =  0           # 'MS' Motor Speed
+SEL_TU_STEP      =  1           # 'ST' Stepper
+SEL_TU_ENC       =  2           # 'EN' Encoder
+SEL_TU_SYN       =  3           # 'SY' Sync
+SEL_TU_ISYN      =  4           # 'IS' Int Syn
+SEL_TU_ESYN      =  5           # 'ES' Ext Syn
 
 selTurnList = ( \
     "SEL_TU_SPEED",
     "SEL_TU_STEP",
     "SEL_TU_ENC",
+    "SEL_TU_SYN",
     "SEL_TU_ISYN",
     "SEL_TU_ESYN",
-    "SEL_TU_SYN",
     )
 
 selTurnText = ( \
-    "Motor Speed",
-    "Stepper",
-    "Encoder",
-    "Int Syn",
-    "Ext Syn",
-    "Sync",
+    " Motor Speed",
+    " Stepper",
+    " Encoder",
+    " Sync",
+    " Int Syn",
+    " Ext Syn",
     )
 
 # threading sync selector
 
-SEL_TH_NO_ENC    =  0           # No Encoder
-SEL_TH_STEP      =  1           # Stepper
-SEL_TH_ENC       =  2           # Encoder
-SEL_TH_ISYN_RENC =  3           # Int Syn, Runout Enc
-SEL_TH_ESYN_RENC =  4           # Ext Syn, Runout Enc
-SEL_TH_ESYN_RSYN =  5           # Ext Syn, Runout Syn
-SEL_TH_SYN       =  6           # Syn, Runout Syn
+SEL_TH_NO_ENC    =  0           # 'NO' No Encoder
+SEL_TH_STEP      =  1           # 'ST' Stepper
+SEL_TH_ENC       =  2           # 'EN' Encoder
+SEL_TH_SYN       =  3           # 'SY' Syn
+SEL_TH_ISYN      =  4           # 'IS' Syn
+SEL_TH_ESYN      =  5           # 'ES' Syn
 
 selThreadList = ( \
     "SEL_TH_NO_ENC",
     "SEL_TH_STEP",
     "SEL_TH_ENC",
-    "SEL_TH_ISYN_RENC",
-    "SEL_TH_ESYN_RENC",
-    "SEL_TH_ESYN_RSYN",
     "SEL_TH_SYN",
+    "SEL_TH_ISYN",
+    "SEL_TH_ESYN",
     )
 
 selThreadText = ( \
-    "No Encoder",
-    "Stepper",
-    "Encoder",
-    "Int Syn, Runout Enc",
-    "Ext Syn, Runout Enc",
-    "Ext Syn, Runout Syn",
-    "Syn, Runout Syn",
+    " No Encoder",
+    " Stepper",
+    " Encoder",
+    " Syn",
+    " Syn",
+    " Syn",
+    )
+
+# runout sync selector
+
+SEL_RU_NO_ENC    =  0           # 'NO' No Encoder
+SEL_RU_STEP      =  1           # 'ST' Stepper
+SEL_RU_ENC       =  2           # 'EN' Encoder
+SEL_RU_SYN       =  3           # 'SY' Syn
+SEL_RU_ISYN      =  4           # 'IS' Int Syn
+SEL_RU_ESYN      =  5           # 'ES' Ext Syn
+
+selRunoutList = ( \
+    "SEL_RU_NO_ENC",
+    "SEL_RU_STEP",
+    "SEL_RU_ENC",
+    "SEL_RU_SYN",
+    "SEL_RU_ISYN",
+    "SEL_RU_ESYN",
+    )
+
+selRunoutText = ( \
+    " No Encoder",
+    " Stepper",
+    " Encoder",
+    " Syn",
+    " Int Syn",
+    " Ext Syn",
     )
 
 # arc config selector
@@ -604,10 +631,10 @@ mpgStateList = ( \
     )
 
 mpgStateText = ( \
-    "'DS' disabled",
-    "'CQ' check queue",
-    "'DC' wait for direction change",
-    "'WB' wait for backlash",
+    " disabled",
+    " check queue",
+    " wait for direction change",
+    " wait for backlash",
     )
 
 # riscv axis name
@@ -663,11 +690,11 @@ accelTypeList = ( \
     )
 
 accelTypeText = ( \
-    "'TU'",
-    "'TP'",
-    "'MV'",
-    "'JG'",
-    "'JS'",
+    "",
+    "",
+    "",
+    "",
+    "",
     )
 
 # riscv accel types
@@ -699,16 +726,16 @@ axisAccelTypeList = ( \
     )
 
 axisAccelTypeText = ( \
-    "'ZT'",
-    "'ZP'",
-    "'ZM'",
-    "'ZJ'",
-    "'ZS'",
-    "'XT'",
-    "'XP'",
-    "'XM'",
-    "'XJ'",
-    "'XS'",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
     "",
     )
 
@@ -794,42 +821,66 @@ riscvRunWaitList = ( \
     )
 
 riscvRunWaitText = ( \
-    "'NO' none",
-    "'PS' wait pause",
-    "'S+' wait spindle start",
-    "'S-' wait spindle stop",
-    "'WX' wait x done",
-    "'WZ' wait z done",
+    " none",
+    " wait pause",
+    " wait spindle start",
+    " wait spindle stop",
+    " wait x done",
+    " wait z done",
     )
 
-# commands in ctlbits
+# move commands in ctlbits
 
-M_CMD_NONE       =  0           # 'NO' no command
-M_CMD_MOV        =  1           # 'MV' move a set distance
-M_CMD_JOG        =  2           # 'JG' move while cmd are present
-M_CMD_SYN        =  3           # 'SY' move dist synchronized to rotation
-M_CMD_MAX        =  4           # 'MX' rapid move
-M_CMD_SPEED      =  5           # 'CS' jog at speed
-M_JOG_SLOW       =  6           # 'JS' slow jog for home or probe
+CMD_NONE         =  0           # 'NO' no command
+CMD_MOV          =  1           # 'MV' move a set distance
+CMD_JOG          =  2           # 'JG' move while cmd are present
+CMD_SYN          =  3           # 'SY' move dist synchronized to rotation
+CMD_MAX          =  4           # 'MX' rapid move
+CMD_SPEED        =  5           # 'CS' jog at speed
+JOG_SLOW         =  6           # 'JS' slow jog for home or probe
 
 moveCmdList = ( \
-    "M_CMD_NONE",
-    "M_CMD_MOV",
-    "M_CMD_JOG",
-    "M_CMD_SYN",
-    "M_CMD_MAX",
-    "M_CMD_SPEED",
-    "M_JOG_SLOW",
+    "CMD_NONE",
+    "CMD_MOV",
+    "CMD_JOG",
+    "CMD_SYN",
+    "CMD_MAX",
+    "CMD_SPEED",
+    "JOG_SLOW",
     )
 
 moveCmdText = ( \
-    "'NO' no command",
-    "'MV' move a set distance",
-    "'JG' move while cmd are present",
-    "'SY' move dist synchronized to rotation",
-    "'MX' rapid move",
-    "'CS' jog at speed",
-    "'JS' slow jog for home or probe",
+    " no command",
+    " move a set distance",
+    " move while cmd are present",
+    " move dist synchronized to rotation",
+    " rapid move",
+    " jog at speed",
+    " slow jog for home or probe",
+    )
+
+# sync commands in ctlbits
+
+M_SYN_NONE       =  0           # 'SN' sync with encoder
+M_SYN_ENC        =  1           # 'SE' sync with encoder
+M_SYN_SYNC       =  2           # 'SS' sync with encoder scaler
+M_SYN_ENC_RSYNC  =  3           # 'ES' sync encoder runout encoder scaler
+M_SYN_ENC_RENC   =  4           # 'EE' sync encoder runout encoder
+
+syncCmdsList = ( \
+    "M_SYN_NONE",
+    "M_SYN_ENC",
+    "M_SYN_SYNC",
+    "M_SYN_ENC_RSYNC",
+    "M_SYN_ENC_RENC",
+    )
+
+syncCmdsText = ( \
+    " sync with encoder",
+    " sync with encoder",
+    " sync with encoder scaler",
+    " sync encoder runout encoder scaler",
+    " sync encoder runout encoder",
     )
 
 # riscv run wait states
@@ -847,7 +898,10 @@ M_FIND_PROBE     =  9           # 'FP' find probe
 M_CLEAR_PROBE    = 10           # 'CP' move off of probe
 M_DRO_POS        = 11           # 'DP' use dro for moving
 M_DRO_UPD        = 12           # 'DU' update internal position from dro
-M_BIT_MAX        = 13           # 'MX' number of bits
+M_ENA_THREAD     = 13           # 'TH' thread enabled
+M_ENA_RUNOUT     = 14           # 'RO' runout enabled
+M_INTERNAL_OP    = 15           # 'IN' internal operation
+M_BIT_MAX        = 16           # 'MX' number of bits
 
 moveBitList = ( \
     "M_RSV_0",
@@ -863,24 +917,30 @@ moveBitList = ( \
     "M_CLEAR_PROBE",
     "M_DRO_POS",
     "M_DRO_UPD",
+    "M_ENA_THREAD",
+    "M_ENA_RUNOUT",
+    "M_INTERNAL_OP",
     "M_BIT_MAX",
     )
 
 moveBitText = ( \
-    "'R0' no command",
-    "'R1' no command",
-    "'R2' no command",
-    "'SS' start on sync pulse",
-    "'SL' start sync left",
-    "'ST' taper on other axis",
-    "'DM' distance update mode",
-    "'FH' find home",
-    "'CH' move off of home",
-    "'FP' find probe",
-    "'CP' move off of probe",
-    "'DP' use dro for moving",
-    "'DU' update internal position from dro",
-    "'MX' number of bits",
+    " no command",
+    " no command",
+    " no command",
+    " start on sync pulse",
+    " start sync left",
+    " taper on other axis",
+    " distance update mode",
+    " find home",
+    " move off of home",
+    " find probe",
+    " move off of probe",
+    " use dro for moving",
+    " update internal position from dro",
+    " thread enabled",
+    " runout enabled",
+    " internal operation",
+    " number of bits",
     )
 
 # movement status
@@ -918,19 +978,19 @@ mvStatusBitsList = ( \
     )
 
 mvStatusBitsText = ( \
-    "'PA' movement paused",
-    "'RX' pause x may change",
-    "'RZ' pause z may change",
-    "'AC' movement active",
-    "'DN' movement active",
-    "'XL' at limit switch",
-    "'ZL' at limit switch",
-    "'XA' x home active",
-    "'XH' x home success",
-    "'ZA' z home active",
-    "'ZH' z home success",
-    "'MS' pause for measurement",
-    "'ES' estop",
+    " movement paused",
+    " pause x may change",
+    " pause z may change",
+    " movement active",
+    " movement active",
+    " at limit switch",
+    " at limit switch",
+    " x home active",
+    " x home success",
+    " z home active",
+    " z home success",
+    " pause for measurement",
+    " estop",
     "number of bits",
     )
 
@@ -953,10 +1013,43 @@ pauseBitsList = ( \
     )
 
 pauseBitsText = ( \
-    "'DJ' jogging disabled",
-    "'EZ' enable z job during pause",
-    "'EX' enable x jog during pause",
-    "'RX' read z after pause",
-    "'RZ' read x after pause",
+    " jogging disabled",
+    " enable z job during pause",
+    " enable x jog during pause",
+    " read z after pause",
+    " read x after pause",
     "number of bits",
+    )
+
+# fpga clock values
+
+E_CLK_NONE       =  0           # 'NO' 
+E_CLK_FREQ       =  1           # 'FR' 
+E_CLK_CH         =  2           # 'CH' 
+E_CLK_INT_CLK    =  3           # 'IC' 
+E_CLK_SLV_FREQ   =  4           # 'SF' 
+E_CLK_SLV_CH     =  5           # 'SC' 
+E_CLK_SPINDLE    =  6           # 'SP' 
+E_CLK_DBG_FREQ   =  7           # 'DF 
+
+fpgaClkSelList = ( \
+    "E_CLK_NONE",
+    "E_CLK_FREQ",
+    "E_CLK_CH",
+    "E_CLK_INT_CLK",
+    "E_CLK_SLV_FREQ",
+    "E_CLK_SLV_CH",
+    "E_CLK_SPINDLE",
+    "E_CLK_DBG_FREQ",
+    )
+
+fpgaClkSelText = ( \
+    " ",
+    " ",
+    " ",
+    " ",
+    " ",
+    " ",
+    " ",
+    "'DF ",
     )
