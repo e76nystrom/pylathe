@@ -166,8 +166,7 @@ class RemParm():
         self.thXStart            = None
         self.tanThreadAngle      = None
         self.xFeed               = None
-        self.runoutLimit         = None
-        self.runoutDistance      = None
+        self.runoutDist          = None
         self.runoutDepth         = None
         self.jogDebug            = None
         self.pwmFreq             = None

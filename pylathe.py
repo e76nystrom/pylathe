@@ -2299,8 +2299,9 @@ class Turn(LatheOp, UpdatePass):
 
     def setup(self, add=False): # turn
         comm = self.mf.comm
-        comm.queParm(pm.CURRENT_OP, en.OP_TURN)
         m = self.m
+        m.queInit()
+        comm.queParm(pm.CURRENT_OP, en.OP_TURN)
         if not add:
             m.setLoc(self.zEnd, self.xStart)
             m.drawLineZ(self.zStart, REF)
@@ -2309,7 +2310,6 @@ class Turn(LatheOp, UpdatePass):
 
             sendSyncParm(self)
 
-        m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
@@ -2973,8 +2973,9 @@ class Arc(LatheOp, UpdatePass):
 
     def setup(self, add=False): # arc
         comm = self.mf.comm
-        comm.queParm(pm.CURRENT_OP, en.OP_ARC)
         m = self.m
+        m.queInit()
+        comm.queParm(pm.CURRENT_OP, en.OP_ARC)
         if not add:
             m.setLoc(self.zEnd, self.xStart)
             m.drawLineZ(self.zStart, REF)
@@ -2984,7 +2985,6 @@ class Arc(LatheOp, UpdatePass):
             if not FPGA:
                 sendSyncParm(self)
 
-        m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
@@ -3502,8 +3502,9 @@ class Face(LatheOp, UpdatePass):
 
     def setup(self, add=False): # face
         comm = self.mf.comm
-        comm.queParm(pm.CURRENT_OP, en.OP_FACE)
         m = self.m
+        m.queInit()
+        comm.queParm(pm.CURRENT_OP, en.OP_FACE)
         if not add:
             m.setLoc(self.zEnd, self.xStart)
             m.drawLineZ(self.zStart, REF)
@@ -3513,7 +3514,6 @@ class Face(LatheOp, UpdatePass):
             if not FPGA:
                 sendSyncParm(self)
 
-        m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
@@ -3755,15 +3755,15 @@ class Cutoff(LatheOp):
         return(True)
 
     def setup(self):            # cutoff
-        m = self.m
         mf = self.mf
+        m = self.m
+        m.queInit()
         comm = mf.comm
         comm.queParm(pm.CURRENT_OP, en.OP_CUTOFF)
 
         if not FPGA:
             sendSyncParm(self)
 
-        m.queInit()
         m.quePause()
         m.done(ct.PARM_START)
 
@@ -3928,6 +3928,7 @@ class Taper(LatheOp, UpdatePass):
         comm = self.mf.comm
         cfg = self.mf.cfg
         m = self.m
+        m.queInit()
         comm.queParm(pm.CURRENT_OP, en.OP_TAPER)
         if not add:
             m.setLoc(self.zEnd, self.xStart)
@@ -3938,7 +3939,6 @@ class Taper(LatheOp, UpdatePass):
             if not FPGA:
                 sendSyncParm(self)
 
-        m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause(ct.PAUSE_ENA_X_JOG | ct.PAUSE_ENA_Z_JOG)
         m.done(ct.PARM_START)
@@ -4622,25 +4622,28 @@ class ScrewThread(LatheOp, UpdatePass):
                 if runoutSync == en.SEL_RU_SYN:
                     xSync = self.mf.xSyncInt
                     xSync.setExitRevs(self.runout)
-                    d = (cos(self.angle) * self.pitch)
+                    # d = (cos(self.angle) * self.pitch)
+                    d = self.depth
                     (self.xCycle, self.xOutput, self.xInPreScaler) = \
                         xSync.calcSync(d, rpm=rpm, dist=True)
 
         self.endZ = self.zEnd
 
     def setup(self, add=False): # thread
-        comm = self.mf.comm
+        mf = self.mf
+        comm = mf.comm
+        m = self.m
+        m.queInit()
         queParm = comm.queParm
         queParm(pm.CURRENT_OP, en.OP_THREAD)
-        m = self.m
         if not add:
             m.setLoc(self.endZ, self.xStart)
             m.drawLineZ(self.zStart, REF)
             m.drawLineX(self.xEnd, REF)
             m.setLoc(self.safeZ, self.safeX)
 
-        threadSync = self.mf.threadSync
-        runoutSync = self.mf.runoutSync
+        threadSync = mf.threadSync
+        runoutSync = mf.runoutSync
         if not FPGA:
             if threadSync == en.SEL_TH_ISYN or \
                 threadSync == en.SEL_TH_SYN:
@@ -4652,9 +4655,9 @@ class ScrewThread(LatheOp, UpdatePass):
                     m.syncParms()
                     m.syncCommand(sc.SYNC_SETUP)
             elif threadSync == en.SEL_TH_ESYN:
-                syncComm = self.mf.syncComm
+                syncComm = mf.syncComm
                 syncComm.setParm(sp.SYNC_ENCODER, \
-                                 self.mf.cfg.getIntInfoData(cf.cfgEncoder))
+                                 mf.cfg.getIntInfoData(cf.cfgEncoder))
                 syncComm.setParm(sp.SYNC_CYCLE, self.cycle)
                 syncComm.setParm(sp.SYNC_OUTPUT, self.output)
                 syncComm.setParm(sp.SYNC_PRESCALER, self.outPreScaler)
@@ -4674,27 +4677,20 @@ class ScrewThread(LatheOp, UpdatePass):
                 queParm(pm.L_SYNC_CYCLE, self.cycle)
                 queParm(pm.L_SYNC_OUTPUT, self.output)
 
-            if runoutSync == en.SEL_RU_SYN:
-                queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
-                queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
-                queParm(pm.L_X_SYNC_IN_PRE_SCALER, self.xInPreScaler)
-
             runOutDist = self.runoutDist
-            encPerRev = self.mf.cfg.getIntInfoData(cf.cfgEncoder)
-            if self.rightHand:      # right hand threads
-                runoutLimit = \
-                    int(((self.startZ - self.zEnd / self.pitch) - runOutDist) *
-                        encPerRev)
-            else:
-                runoutLimit = runOutDist * encPerRev
+            if runOutDist != 0:
+                if runoutSync == en.SEL_RU_SYN:
+                    queParm(pm.L_X_SYNC_CYCLE, self.xCycle - 1)
+                    queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
+                    
+                    preScaler = self.xInPreScaler
+                    if preScaler != 0:
+                        preScaler -= 1
+                    queParm(pm.L_X_SYNC_IN_PRE_SCALER, preScaler)
 
-            queParm(pm.RUNOUT_LIMIT, runoutLimit)
-            queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+                queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+                queParm(pm.RUNOUT_DIST, runOutDist)
 
-        queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
-        queParm(pm.RUNOUT_DISTANCE, self.runoutDist)
-
-        m.queInit()
         if (not add) or (add and not self.pause):
             m.quePause()
         m.done(ct.PARM_START)
@@ -4765,8 +4761,8 @@ class ScrewThread(LatheOp, UpdatePass):
         if self.runout != 0.0:
             self.runoutDist = self.runout * self.pitch
             self.runoutDepth = self.depth
-            if self.rightHand:
-                self.runoutDepth += 0.005
+            # if self.rightHand:
+            #     self.runoutDepth += 0.005
 
             if self.rightHand:      # right hand threads
                 self.endZ = self.zEnd - self.runoutDist

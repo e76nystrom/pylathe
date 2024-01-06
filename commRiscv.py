@@ -1198,55 +1198,24 @@ class RiscvLathe(Thread):
 
             runoutSync = parm.runoutSync
             if runoutSync == en.SEL_RU_SYN: # syn for runout
-                if parm.runoutDistance != 0:
-                    print("runoutDistance %6.4f runoutDepth %6.4f" %
-                          (parm.runoutDistance, parm.runoutDepth))
-                    #
-                    # minRatio = 8
-                    # encCycle = 8
-                    # outCycle = 0
-                    #
-                    # runOutEnc = parm.encPerRev * parm.runoutDistance
-                    # xSteps = parm.runoutDepth * self.xAxis.stepsInch
-                    # divRatio = runOutEnc / xSteps
-                    # print(f"runOutEnc {runOutEnc:d} xSteps {xSteps:d} " \
-                    #       "divRatio {runOutEnc / xSteps:.2f}")
-                    # if divRatio < minRatio:
-                    #     # minRatio = (runOutEnc * sclFactor) / xSteps
-                    #     # minRatio * xSteps / runOutEnc = sclFactor
-                    #     sclFactor = (xSteps * minRatio) / runOutEnc
-                    #     # sclFactor = outCycle / encCycle
-                    #     # sclFactor * encCycle = outCycle
-                    #     outCycle = int(round(sclFactor * encCycle))
-                    #     print(f"calculated sclFactor {sclFactor:.2f} "\
-                    #           "actual {outCycle/ encCycle:.2f}")
-                    #     divRatio = (outCycle * runOutEnc) / (encCycle * xSteps)
-                    #     print(f"encCycle {encCycle:d} outCycle {outCycle:d} "
-                    #           "divRatio {divRatio:.2f}")
-                    #     runOutEnc *= outCycle / encCycle
-                    #
-                    # self.encCycle = encCycle
-                    # self.outCycle = outCycle
-                    #
-                    # print("runOutEnc", runOutEnc, "xSteps", xSteps,
-                    #       f"divRatio {runOutEnc / xSteps:.2f}")
+                if parm.runoutDist != 0:
+                    print("runoutDist %6.4f runoutDepth %6.4f" %
+                          (parm.runoutDist, parm.runoutDepth))
 
-                    # syncCalc(axis.turnAccel, runOutEnc, xSteps)
-                    # riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
-                    #                que=True)
+                    self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_ENC_PRE_SCALER,
+                                                  parm.lXSyncInPreScaler))
+                    self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_ENC_CYCLE,
+                                                  parm.lXSyncCycle))
+                    self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_OUT_CYCLE,
+                                                  parm.lXSyncOutput))
 
-                    self.riscvCmd(rc.R_SET_DATA,
-                                  (rp.R_SYN_ENC_PRE_SCALER,
-                                   parm.lXSyncInPreScaler))
-                    self.riscvCmd(rc.R_SET_DATA,
-                                  (rp.R_SYN_ENC_CYCLE, parm.lXSyncCycle))
-                    self.riscvCmd(rc.R_SET_DATA,
-                                  (rp.R_SYN_OUT_CYCLE, parm.lXSyncOutput))
+                    runoutDist = int(parm.runoutDist * self.zAxis.stepsInch)
+                    self.riscvCmd(rc.R_SET_DATA, (rp.R_RUNOUT_DIST,
+                                                  runoutDist))
 
-                    self.riscvCmd(rc.R_SET_DATA,
-                                  (rp.R_RUNOUT_LIMIT, parm.runoutLimit))
-                    self.riscvCmd(rc.R_SET_DATA,
-                                  (rp.R_RUNOUT_DEPTH, parm.runoutDepth))
+                    runoutDepth = int(parm.runoutDepth * self.xAxis.stepsInch)
+                    self.riscvCmd(rc.R_SET_DATA, (rp.R_RUNOUT_DEPTH,
+                                                  runoutDepth))
 
     def qXSynSetup(self, val):          # 14
         print("xSynSetup")
@@ -1667,7 +1636,7 @@ class RiscvLathe(Thread):
             return("xstp %7.4f %7d pitch %7.4f" % (dist, val, pitch))
 
     def dbgXState(self, val):
-        return(("x_st %s" % (en.RiscvAxisStateTypeList[val])) + \
+        return(("x_st %s" % (en.riscvAxisStateList[val])) + \
                 ("\n" if self.mIdle and val == en.RS_IDLE else ""))
 
     def dbgXBSteps(self, val):
@@ -1806,10 +1775,10 @@ class RiscvLathe(Thread):
 
     def dbgZState(self, val):
         if self.jp.currentPanel.active:
-            return(("z_st %s" % (en.RiscvAxisStateTypeList[val])) + \
+            return(("z_st %s" % (en.riscvAxisStateList[val])) + \
                    ("\n" if self.mIdle and val == en.RS_IDLE else ""))
         else:
-            rtnVal = "z_st %s" % (en.RiscvAxisStateTypeList[val])
+            rtnVal = "z_st %s" % (en.riscvAxisStateList[val])
             if val == en.RS_IDLE:
                 self.baseTime = None
                 rtnVal += "\n"

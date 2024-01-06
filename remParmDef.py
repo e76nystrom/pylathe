@@ -274,70 +274,69 @@ TH_Z_START           = 162	# 0xa2
 TH_X_START           = 163	# 0xa3
 TAN_THREAD_ANGLE     = 164	# 0xa4
 X_FEED               = 165	# 0xa5
-RUNOUT_LIMIT         = 166	# 0xa6
-RUNOUT_DISTANCE      = 167	# 0xa7
-RUNOUT_DEPTH         = 168	# 0xa8
+RUNOUT_DIST          = 166	# 0xa6
+RUNOUT_DEPTH         = 167	# 0xa7
 
 # jog debug
 
-JOG_DEBUG            = 169	# 0xa9
+JOG_DEBUG            = 168	# 0xa8
 
 # motor and speed control
 
-PWM_FREQ             = 170	# 0xaa
-MIN_SPEED            = 171	# 0xab
-MAX_SPEED            = 172	# 0xac
+PWM_FREQ             = 169	# 0xa9
+MIN_SPEED            = 170	# 0xaa
+MAX_SPEED            = 171	# 0xab
 
 # current operation
 
-CURRENT_OP           = 173	# 0xad
+CURRENT_OP           = 172	# 0xac
 
 # global limits and home
 
-LIMIT_OVERRIDE       = 174	# 0xae
-COMMON_LIMITS        = 175	# 0xaf
-LIMITS_ENABLED       = 176	# 0xb0
-COMMON_HOME          = 177	# 0xb1
+LIMIT_OVERRIDE       = 173	# 0xad
+COMMON_LIMITS        = 174	# 0xae
+LIMITS_ENABLED       = 175	# 0xaf
+COMMON_HOME          = 176	# 0xb0
 
 # z limits and home
 
-Z_LIM_ENA            = 178	# 0xb2
-Z_LIM_NEG_INV        = 179	# 0xb3
-Z_LIM_POS_INV        = 180	# 0xb4
-Z_HOME_ENA           = 181	# 0xb5
-Z_HOME_INV           = 182	# 0xb6
+Z_LIM_ENA            = 177	# 0xb1
+Z_LIM_NEG_INV        = 178	# 0xb2
+Z_LIM_POS_INV        = 179	# 0xb3
+Z_HOME_ENA           = 180	# 0xb4
+Z_HOME_INV           = 181	# 0xb5
 
 # x limits and home
 
-X_LIM_ENA            = 183	# 0xb7
-X_LIM_NEG_INV        = 184	# 0xb8
-X_LIM_POS_INV        = 185	# 0xb9
-X_HOME_ENA           = 186	# 0xba
-X_HOME_INV           = 187	# 0xbb
+X_LIM_ENA            = 182	# 0xb6
+X_LIM_NEG_INV        = 183	# 0xb7
+X_LIM_POS_INV        = 184	# 0xb8
+X_HOME_ENA           = 185	# 0xb9
+X_HOME_INV           = 186	# 0xba
 
 # e stop
 
-E_STOP_ENA           = 188	# 0xbc
-E_STOP_INV           = 189	# 0xbd
+E_STOP_ENA           = 187	# 0xbb
+E_STOP_INV           = 188	# 0xbc
 
 # command pause
 
-CMD_PAUSED           = 190	# 0xbe
+CMD_PAUSED           = 189	# 0xbd
 
 # arc parameters
 
-ARC_RADIUS           = 191	# 0xbf
-ARC_X_CENTER         = 192	# 0xc0
-ARC_Z_CENTER         = 193	# 0xc1
-ARC_X_START          = 194	# 0xc2
-ARC_Z_START          = 195	# 0xc3
-ARC_X_END            = 196	# 0xc4
-ARC_Z_END            = 197	# 0xc5
-MEGA_VFD             = 198	# 0xc6
-MEGA_SIM             = 199	# 0xc7
-USB_ENA              = 200	# 0xc8
-DRO_STEP             = 201	# 0xc9
-MAX_PARM             = 202	# 0xca
+ARC_RADIUS           = 190	# 0xbe
+ARC_X_CENTER         = 191	# 0xbf
+ARC_Z_CENTER         = 192	# 0xc0
+ARC_X_START          = 193	# 0xc1
+ARC_Z_START          = 194	# 0xc2
+ARC_X_END            = 195	# 0xc3
+ARC_Z_END            = 196	# 0xc4
+MEGA_VFD             = 197	# 0xc5
+MEGA_SIM             = 198	# 0xc6
+USB_ENA              = 199	# 0xc7
+DRO_STEP             = 200	# 0xc8
+MAX_PARM             = 201	# 0xc9
 
 remParmTable = ( \
     ("SP_STEPS",                "int16_t",  "spSteps"            ), # 0x00   0
@@ -506,41 +505,40 @@ remParmTable = ( \
     ("TH_X_START",              "int32_t",  "thXStart"           ), # 0xa3 163
     ("TAN_THREAD_ANGLE",        "float",    "tanThreadAngle"     ), # 0xa4 164
     ("X_FEED",                  "int32_t",  "xFeed"              ), # 0xa5 165
-    ("RUNOUT_LIMIT",            "int",      "runoutLimit"        ), # 0xa6 166
-    ("RUNOUT_DISTANCE",         "float",    "runoutDistance"     ), # 0xa7 167
-    ("RUNOUT_DEPTH",            "float",    "runoutDepth"        ), # 0xa8 168
-    ("JOG_DEBUG",               "char",     "jogDebug"           ), # 0xa9 169
-    ("PWM_FREQ",                "uint_t",   "pwmFreq"            ), # 0xaa 170
-    ("MIN_SPEED",               "int16_t",  "minSpeed"           ), # 0xab 171
-    ("MAX_SPEED",               "int16_t",  "maxSpeed"           ), # 0xac 172
-    ("CURRENT_OP",              "char",     "currentOp"          ), # 0xad 173
-    ("LIMIT_OVERRIDE",          "char",     "limitOverride"      ), # 0xae 174
-    ("COMMON_LIMITS",           "char",     "commonLimits"       ), # 0xaf 175
-    ("LIMITS_ENABLED",          "char",     "limitsEnabled"      ), # 0xb0 176
-    ("COMMON_HOME",             "char",     "commonHome"         ), # 0xb1 177
-    ("Z_LIM_ENA",               "char",     "zLimEna"            ), # 0xb2 178
-    ("Z_LIM_NEG_INV",           "char",     "zLimNegInv"         ), # 0xb3 179
-    ("Z_LIM_POS_INV",           "char",     "zLimPosInv"         ), # 0xb4 180
-    ("Z_HOME_ENA",              "char",     "zHomeEna"           ), # 0xb5 181
-    ("Z_HOME_INV",              "char",     "zHomeInv"           ), # 0xb6 182
-    ("X_LIM_ENA",               "char",     "xLimEna"            ), # 0xb7 183
-    ("X_LIM_NEG_INV",           "char",     "xLimNegInv"         ), # 0xb8 184
-    ("X_LIM_POS_INV",           "char",     "xLimPosInv"         ), # 0xb9 185
-    ("X_HOME_ENA",              "char",     "xHomeEna"           ), # 0xba 186
-    ("X_HOME_INV",              "char",     "xHomeInv"           ), # 0xbb 187
-    ("E_STOP_ENA",              "char",     "eStopEna"           ), # 0xbc 188
-    ("E_STOP_INV",              "char",     "eStopInv"           ), # 0xbd 189
-    ("CMD_PAUSED",              "char",     "cmdPaused"          ), # 0xbe 190
-    ("ARC_RADIUS",              "float",    "arcRadius"          ), # 0xbf 191
-    ("ARC_X_CENTER",            "int",      "arcXCenter"         ), # 0xc0 192
-    ("ARC_Z_CENTER",            "int",      "arcZCenter"         ), # 0xc1 193
-    ("ARC_X_START",             "int",      "arcXStart"          ), # 0xc2 194
-    ("ARC_Z_START",             "int",      "arcZStart"          ), # 0xc3 195
-    ("ARC_X_END",               "int",      "arcXEnd"            ), # 0xc4 196
-    ("ARC_Z_END",               "int",      "arcZEnd"            ), # 0xc5 197
-    ("MEGA_VFD",                "char",     "megaVfd"            ), # 0xc6 198
-    ("MEGA_SIM",                "char",     "megaSim"            ), # 0xc7 199
-    ("USB_ENA",                 "char",     "usbEna"             ), # 0xc8 200
-    ("DRO_STEP",                "char",     "droStep"            ), # 0xc9 201
-    ("MAX_PARM",                "int16_t",  "maxParm"            ), # 0xca 202
+    ("RUNOUT_DIST",             "float",    "runoutDist"         ), # 0xa6 166
+    ("RUNOUT_DEPTH",            "float",    "runoutDepth"        ), # 0xa7 167
+    ("JOG_DEBUG",               "char",     "jogDebug"           ), # 0xa8 168
+    ("PWM_FREQ",                "uint_t",   "pwmFreq"            ), # 0xa9 169
+    ("MIN_SPEED",               "int16_t",  "minSpeed"           ), # 0xaa 170
+    ("MAX_SPEED",               "int16_t",  "maxSpeed"           ), # 0xab 171
+    ("CURRENT_OP",              "char",     "currentOp"          ), # 0xac 172
+    ("LIMIT_OVERRIDE",          "char",     "limitOverride"      ), # 0xad 173
+    ("COMMON_LIMITS",           "char",     "commonLimits"       ), # 0xae 174
+    ("LIMITS_ENABLED",          "char",     "limitsEnabled"      ), # 0xaf 175
+    ("COMMON_HOME",             "char",     "commonHome"         ), # 0xb0 176
+    ("Z_LIM_ENA",               "char",     "zLimEna"            ), # 0xb1 177
+    ("Z_LIM_NEG_INV",           "char",     "zLimNegInv"         ), # 0xb2 178
+    ("Z_LIM_POS_INV",           "char",     "zLimPosInv"         ), # 0xb3 179
+    ("Z_HOME_ENA",              "char",     "zHomeEna"           ), # 0xb4 180
+    ("Z_HOME_INV",              "char",     "zHomeInv"           ), # 0xb5 181
+    ("X_LIM_ENA",               "char",     "xLimEna"            ), # 0xb6 182
+    ("X_LIM_NEG_INV",           "char",     "xLimNegInv"         ), # 0xb7 183
+    ("X_LIM_POS_INV",           "char",     "xLimPosInv"         ), # 0xb8 184
+    ("X_HOME_ENA",              "char",     "xHomeEna"           ), # 0xb9 185
+    ("X_HOME_INV",              "char",     "xHomeInv"           ), # 0xba 186
+    ("E_STOP_ENA",              "char",     "eStopEna"           ), # 0xbb 187
+    ("E_STOP_INV",              "char",     "eStopInv"           ), # 0xbc 188
+    ("CMD_PAUSED",              "char",     "cmdPaused"          ), # 0xbd 189
+    ("ARC_RADIUS",              "float",    "arcRadius"          ), # 0xbe 190
+    ("ARC_X_CENTER",            "int",      "arcXCenter"         ), # 0xbf 191
+    ("ARC_Z_CENTER",            "int",      "arcZCenter"         ), # 0xc0 192
+    ("ARC_X_START",             "int",      "arcXStart"          ), # 0xc1 193
+    ("ARC_Z_START",             "int",      "arcZStart"          ), # 0xc2 194
+    ("ARC_X_END",               "int",      "arcXEnd"            ), # 0xc3 195
+    ("ARC_Z_END",               "int",      "arcZEnd"            ), # 0xc4 196
+    ("MEGA_VFD",                "char",     "megaVfd"            ), # 0xc5 197
+    ("MEGA_SIM",                "char",     "megaSim"            ), # 0xc6 198
+    ("USB_ENA",                 "char",     "usbEna"             ), # 0xc7 199
+    ("DRO_STEP",                "char",     "droStep"            ), # 0xc8 200
+    ("MAX_PARM",                "int16_t",  "maxParm"            ), # 0xc9 201
     )

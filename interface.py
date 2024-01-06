@@ -875,8 +875,7 @@ parmList = \
         ("TH_X_START",              "int32_t",  "threading x start"),
         ("TAN_THREAD_ANGLE",        "float",    "tan of threading angle"),
         ("X_FEED",                  "int32_t",  "x feed"),
-        ("RUNOUT_LIMIT",            "int",      "encoder steps to runout"),
-        ("RUNOUT_DISTANCE",         "float",    "runout distance"),
+        ("RUNOUT_DIST",             "float",    "runout distance"),
         ("RUNOUT_DEPTH",            "float",    "runout depth"),
 
         "jog debug",
@@ -976,7 +975,7 @@ megaParmList = \
 
 riscvParmList = \
     (
-        # <- len 3 items 47 [ 29 10 26]
+        # <- len 3 items 48 [ 29 10 26]
         ("R_MV_STATUS",                 "uint32_t", "move status"),
         ("R_JOG_PAUSE",                 "int",      "jog pause"),
         ("R_CUR_PASS",                  "int",      "current pass"),
@@ -991,7 +990,7 @@ riscvParmList = \
         ("R_THREAD_SYNC",               "int",      "thread sync"),
         ("R_RUNOUT_SYNC",               "int",      "runout sync"),
         ("R_THREAD_FLAGS",              "int",      "threading flags"),
-        ("R_RUNOUT_LIMIT",              "int",      "runout limit"),
+        ("R_RUNOUT_DIST" ,              "int",      "runout distance"),
         ("R_RUNOUT_DEPTH",              "int",      "runout depth"),
 
         ("(z)Axis.(R_Z_)STEPS_INCH",    "int",      "steps per inch"),
@@ -1221,7 +1220,7 @@ fpgaEncList = \
 
 fpgaLatheList = \
     (
-        # <- len 5 items 69 [ 19  1 11  1 32]
+        # <- len 5 items 70 [ 19  1 11  1 32]
         "phase control",
 
         ("phaseCtl",),
@@ -1266,7 +1265,8 @@ fpgaLatheList = \
 
         ("dbgFreq",),
         ("F_Ld_Dbg_Freq",     0, 1,           2, "'DBF' debug frequency"),
-        ("F_Ld_Dbg_Count",    n, 1,           4, "'DBC' debug count"),
+        ("F_Ld_Dbg_Count",    n, 1,           4, "'DBC' debug clock count"),
+        ("F_Ld_Sync_Count",   n, 1,           4, "'DBS' debug sync length"),
         ("F_Dbg_Freq_Max",    n, n,           0, "number of debug frequency regs"),
 
         "sync accel",
@@ -1351,6 +1351,7 @@ fpgaLatheList = \
 
         # ("F_Ld_Run_Ctl",     n, 1,            1, "'LRUN' set run control reg"),
         # ("F_Rd_Run_Ctl",     n, 1,            1, "'RRUN' read run control reg"),
+        
         ("F_Ld_Sync_Ctl",     n, 1,           1, "'LSYN' sync control reg"),
         ("F_Ld_Cfg_Ctl",      n, 1,           3, "'LCFG' config control reg"),
         ("F_Ld_Clk_Ctl",      n, 1,           1, "'LCLK' clock control reg"),
@@ -1780,6 +1781,7 @@ fpgaLatheBitList = \
         ("zFreqSel",      n, (2, 0), "z clock select"),
         ("xFreqSel",      n, (5, 3), "x clock select"),
         ("clkDbgFreqEna", 1, 6,      "enable debug frequency"),
+        ("clkDbgSyncEna", 1, 6,      "enable debug sync"),
         ("end",),
 
         "clock shift values",
@@ -1869,30 +1871,6 @@ fpgaLatheBitList = \
 
 enumList = \
     (
-        # "z control states",
-
-        # "enum z_States",
-        # "{",
-        # ("ZIDLE", "idle"),
-        # ("ZWAITBKLS", "wait for backlash move complete"),
-        # ("ZSTARTMOVE", "start z move"),
-        # ("ZWAITMOVE", "wait for move complete"),
-        # ("ZDELAY", "wait for position to settle"),
-        # ("ZDONE", "clean up state"),
-        # "};",
-
-        # "x control states",
-
-        # "enum x_States",
-        # "{",
-        # ("XIDLE", "idle"),
-        # ("XWAITBKLS", "wait for backlash move complete"),
-        # ("XSTARTMOVE", "start x move"),
-        # ("XWAITMOVE", "wait for move complete"),
-        # ("XDELAY", "wait for position to settle"),
-        # ("XDONE", "clean up state"),
-        # "};",
-
         "axis control states",
 
         # <- len 2 items 7 [ 24 33]
@@ -2038,7 +2016,7 @@ enumList = \
         ("D_PASS",  "'PASS' pass done"),
         ("D_DONE",  "'DONE' all operations done"),
         ("D_TEST",  "'TEST' test message"),
-        ("D_HST",   "'HST ' home state"),
+        ("D_HST",   "'HSTA' home state"),
         ("D_MSTA",  "'MSTA' move state"),
         ("D_MCMD",  "'MCMD' move command"),
 
@@ -2056,12 +2034,12 @@ enumList = \
         ("D_XPDRO", "'XPDR' x pass dro location"),
         ("D_XEXP",  "'XEXP' x expected location"),
         ("D_XERR",  "'XERR' x error with respect to dro"),
-        ("D_XWT",   "'XWT ' x wait"),
-        ("D_XDN",   "'XDN ' x done"),
+        ("D_XWT",   "'XWAT' x wait"),
+        ("D_XDN",   "'XDNE' x done"),
         ("D_XEST",  "'XEST' x spindle encoder start count"),
         ("D_XEDN",  "'XEDN' x spindle encoder done count"),
-        ("D_XX",    "'XX  ' x "),
-        ("D_XY",    "'XY  ' x "),
+        ("D_XX",    "'XICT' x input count"),
+        ("D_XY",    "'XOCT' x output count"),
         ("D_XIDXD", "'XIDR' x dro at index pulse"),
         ("D_XIDXP", "'XIPO' x position at index pulse"),
 
@@ -2079,12 +2057,12 @@ enumList = \
         ("D_ZPDRO", "'ZPDR' z pass dro location"),
         ("D_ZEXP",  "'ZEXP' z expected location"),
         ("D_ZERR",  "'ZERR' z error with respect to dro"),
-        ("D_ZWT",   "'ZWT ' z wait"),
-        ("D_ZDN",   "'ZDN ' z done"),
+        ("D_ZWT",   "'ZWAT' z wait"),
+        ("D_ZDN",   "'ZDNE' z done"),
         ("D_ZEST",  "'ZEST' z spindle encoder start count"),
         ("D_ZEDN",  "'ZEDN' Z spindle encoder done count"),
-        ("D_ZX",    "'ZX  ' z "),
-        ("D_ZY",    "'ZY  ' z "),
+        ("D_ZX",    "'ZICT' z input count"),
+        ("D_ZY",    "'ZOCT' z output count"),
         ("D_ZIDXD", "'ZIDR' z dro at index pulse"),
         ("D_ZIDXP", "'ZIPO' z position at index pulse"),
         ("D_MAX",   "'MAX ' debug maximum"),
@@ -2244,13 +2222,13 @@ enumList = \
         "riscv axis states",
 
         # <- len 2 items 4 [ 18  2]
-        # <- len 2 items 4 [ 18  2]
-        "enum Riscv_Axis_State_Type c",
+        "enum riscv_Axis_State c",
         "{",
-        ("RS_IDLE",          ""),
-        ("RS_WAIT_BACKLASH", ""),
-        ("RS_WAIT",          ""),
-        ("RS_WAIT_TAPER",    ""),
+        ("RS_IDLE",          "'ID' idle"),
+        ("RS_WAIT_BACKLASH", "'WB' wait backlash"),
+        ("RS_WAIT",          "'WD' wait done"),
+        ("RS_WAIT_TAPER",    "'WT' wait taper"),
+        ("RS_WAIT_RUNOUT",   "'WR' wait runout"),
         # ("RS_", ""),
         "};",
         # ->
@@ -2493,13 +2471,13 @@ if __name__ == '__main__':
     path = os.path.dirname(os.path.realpath(__file__))
 
     cLoc     = osJoin(path, '..', 'LatheCPP', 'include')
-    syncLoc  = osJoin(path, '..', 'SyncCPP', 'include')
+    syncLoc  = osJoin(path, '..', 'SyncCPP',  'include')
     megaLoc  = osJoin(path, '..', '..', 'Arduino', 'output')
     riscvLoc = osJoin(path, '..', '..', 'neorv32', 'sw', 'example', \
                       'LatheRiscV')
 
     xLoc      = osJoin(path, '..', '..', 'Xilinx', 'LatheCtl')
-    fEncLoc   = osJoin(path, '..', '..', 'Altera', 'Encoder', 'VHDL')
+    fEncLoc   = osJoin(path, '..', '..', 'Altera', 'Encoder',  'VHDL')
     fLatheLoc = osJoin(path, '..', '..', 'Altera', 'LatheNew', 'VHDL')
 
     # else:

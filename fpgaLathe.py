@@ -166,6 +166,7 @@ cfgDroStep   = 0x100000         # step pulse to dro
 # clkCtl
 
 clkDbgFreqEna = 0x40            # enable debug frequency
+clkDbgSyncEna = 0x40            # enable debug sync
 
 # end
 

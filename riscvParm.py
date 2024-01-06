@@ -14,7 +14,8 @@ class RiscvParm():
         self.rThreadSync      = None
         self.rRunoutSync      = None
         self.rThreadFlags     = None
-        self.rRunoutLimit     = None
+        self.rRunoutDist      = None
+        self.rRunoutDepth     = None
         self.rZStepsInch      = None
         self.rZSavedLoc       = None
         self.rZHomeOffset     = None

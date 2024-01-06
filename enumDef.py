@@ -324,7 +324,7 @@ DAxisMessageText = ( \
 D_PASS           =  0           # 'PASS' pass done
 D_DONE           =  1           # 'DONE' all operations done
 D_TEST           =  2           # 'TEST' test message
-D_HST            =  3           # 'HST ' home state
+D_HST            =  3           # 'HSTA' home state
 D_MSTA           =  4           # 'MSTA' move state
 D_MCMD           =  5           # 'MCMD' move command
 D_XBASE          =  6           # 'XBAS' x base
@@ -341,12 +341,12 @@ D_XDRO           = 16           # 'XDRO' x dro location
 D_XPDRO          = 17           # 'XPDR' x pass dro location
 D_XEXP           = 18           # 'XEXP' x expected location
 D_XERR           = 19           # 'XERR' x error with respect to dro
-D_XWT            = 20           # 'XWT ' x wait
-D_XDN            = 21           # 'XDN ' x done
+D_XWT            = 20           # 'XWAT' x wait
+D_XDN            = 21           # 'XDNE' x done
 D_XEST           = 22           # 'XEST' x spindle encoder start count
 D_XEDN           = 23           # 'XEDN' x spindle encoder done count
-D_XX             = 24           # 'XX  ' x 
-D_XY             = 25           # 'XY  ' x 
+D_XX             = 24           # 'XICT' x input count
+D_XY             = 25           # 'XOCT' x output count
 D_XIDXD          = 26           # 'XIDR' x dro at index pulse
 D_XIDXP          = 27           # 'XIPO' x position at index pulse
 D_ZBASE          = 28           # 'ZBAS' Z base
@@ -363,12 +363,12 @@ D_ZDRO           = 38           # 'ZDRO' z dro location
 D_ZPDRO          = 39           # 'ZPDR' z pass dro location
 D_ZEXP           = 40           # 'ZEXP' z expected location
 D_ZERR           = 41           # 'ZERR' z error with respect to dro
-D_ZWT            = 42           # 'ZWT ' z wait
-D_ZDN            = 43           # 'ZDN ' z done
+D_ZWT            = 42           # 'ZWAT' z wait
+D_ZDN            = 43           # 'ZDNE' z done
 D_ZEST           = 44           # 'ZEST' z spindle encoder start count
 D_ZEDN           = 45           # 'ZEDN' Z spindle encoder done count
-D_ZX             = 46           # 'ZX  ' z 
-D_ZY             = 47           # 'ZY  ' z 
+D_ZX             = 46           # 'ZICT' z input count
+D_ZY             = 47           # 'ZOCT' z output count
 D_ZIDXD          = 48           # 'ZIDR' z dro at index pulse
 D_ZIDXP          = 49           # 'ZIPO' z position at index pulse
 D_MAX            = 50           # 'MAX ' debug maximum
@@ -431,7 +431,7 @@ dMessageText = ( \
     " pass done",
     " all operations done",
     " test message",
-    "'HST ' home state",
+    " home state",
     " move state",
     " move command",
     " x base",
@@ -448,12 +448,12 @@ dMessageText = ( \
     " x pass dro location",
     " x expected location",
     " x error with respect to dro",
-    "'XWT ' x wait",
-    "'XDN ' x done",
+    " x wait",
+    " x done",
     " x spindle encoder start count",
     " x spindle encoder done count",
-    "'XX  ' x ",
-    "'XY  ' x ",
+    " x input count",
+    " x output count",
     " x dro at index pulse",
     " x position at index pulse",
     " Z base",
@@ -470,12 +470,12 @@ dMessageText = ( \
     " z pass dro location",
     " z expected location",
     " z error with respect to dro",
-    "'ZWT ' z wait",
-    "'ZDN ' z done",
+    " z wait",
+    " z done",
     " z spindle encoder start count",
     " Z spindle encoder done count",
-    "'ZX  ' z ",
-    "'ZY  ' z ",
+    " z input count",
+    " z output count",
     " z dro at index pulse",
     " z position at index pulse",
     "'MAX ' debug maximum",
@@ -756,23 +756,26 @@ accelBaseText = ( \
 
 # riscv axis states
 
-RS_IDLE          =  0           # 
-RS_WAIT_BACKLASH =  1           # 
-RS_WAIT          =  2           # 
-RS_WAIT_TAPER    =  3           # 
+RS_IDLE          =  0           # 'ID' idle
+RS_WAIT_BACKLASH =  1           # 'WB' wait backlash
+RS_WAIT          =  2           # 'WD' wait done
+RS_WAIT_TAPER    =  3           # 'WT' wait taper
+RS_WAIT_RUNOUT   =  4           # 'WR' wait runout
 
-RiscvAxisStateTypeList = ( \
+riscvAxisStateList = ( \
     "RS_IDLE",
     "RS_WAIT_BACKLASH",
     "RS_WAIT",
     "RS_WAIT_TAPER",
+    "RS_WAIT_RUNOUT",
     )
 
-RiscvAxisStateTypeText = ( \
-    "",
-    "",
-    "",
-    "",
+riscvAxisStateText = ( \
+    " idle",
+    " wait backlash",
+    " wait done",
+    " wait taper",
+    " wait runout",
     )
 
 # riscv accel parameters
