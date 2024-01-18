@@ -20,6 +20,7 @@ xAxisCurDir  = 0x20             # 'Xd' x axis current dir
 stEStop      = 0x40             # 'ES' emergency stop
 spindleActive = 0x80            # 'S+' spindle active
 syncActive   = 0x100            # 'SA' sync active
+encoderDir   = 0x200            # 'ED' encoder direction
 
 # end
 
@@ -57,7 +58,6 @@ axProbe      = 0x08             # axis probe
 
 outPin1      = 0x01             # pin 1
 outPin14     = 0x02             # pin 14
-outPin17     = 0x04             # pin 17
 
 # end
 
@@ -221,7 +221,6 @@ synEncClkDbg = 0x18             #
 spInit       = 0x01             # spindle init
 spEna        = 0x02             # spindle enable
 spDir        = 0x04             # spindle direction
-spJogEnable  = 0x08             # spindle jog enable
 
 # end
 

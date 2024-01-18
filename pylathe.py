@@ -4680,16 +4680,12 @@ class ScrewThread(LatheOp, UpdatePass):
             runOutDist = self.runoutDist
             if runOutDist != 0:
                 if runoutSync == en.SEL_RU_SYN:
-                    queParm(pm.L_X_SYNC_CYCLE, self.xCycle - 1)
+                    queParm(pm.L_X_SYNC_IN_PRE_SCALER, self.inPreScaler)
+                    queParm(pm.L_X_SYNC_CYCLE, self.xCycle)
                     queParm(pm.L_X_SYNC_OUTPUT, self.xOutput)
-                    
-                    preScaler = self.xInPreScaler
-                    if preScaler != 0:
-                        preScaler -= 1
-                    queParm(pm.L_X_SYNC_IN_PRE_SCALER, preScaler)
 
-                queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
-                queParm(pm.RUNOUT_DIST, runOutDist)
+            queParm(pm.RUNOUT_DEPTH, self.runoutDepth)
+            queParm(pm.RUNOUT_DIST, runOutDist)
 
         if (not add) or (add and not self.pause):
             m.quePause()

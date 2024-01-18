@@ -596,7 +596,7 @@ riscvCmdList = \
 
 parmList = \
     (
-        # <- len 3 items 203 [ 25 10 29]
+        # <- len 3 items 202 [ 25 10 29]
         "spindle parameters",
 
         ("SP_STEPS",                "int16_t",  "spindle motor steps"),
@@ -990,7 +990,7 @@ riscvParmList = \
         ("R_THREAD_SYNC",               "int",      "thread sync"),
         ("R_RUNOUT_SYNC",               "int",      "runout sync"),
         ("R_THREAD_FLAGS",              "int",      "threading flags"),
-        ("R_RUNOUT_DIST" ,              "int",      "runout distance"),
+        ("R_RUNOUT_DIST",               "int",      "runout distance"),
         ("R_RUNOUT_DEPTH",              "int",      "runout depth"),
 
         ("(z)Axis.(R_Z_)STEPS_INCH",    "int",      "steps per inch"),
@@ -1220,13 +1220,22 @@ fpgaEncList = \
 
 fpgaLatheList = \
     (
-        # <- len 5 items 70 [ 19  1 11  1 32]
+        # <- len 5 items 81 [ 21  1 11  1 34]
+
+        "spindle speed",
+
+        ("indexCtl",),
+        ("F_Rd_Index_Clks",     n, 1,           4, "'RIC' clocks per index"),
+        ("F_Ld_Enc_Count",      n, 1,           4, "'LEC' enc intervel len"),
+        ("F_Rd_Encoder_Clks",   n, 1,           4, "'REC' clks per enc interval"),
+        ("F_Rd_Turn_Count",     n, 1,           4, "'RTC' enc cnt while z act"),
+
         "phase control",
 
         ("phaseCtl",),
-        ("F_Ld_Phase_Len",    0, 1,           2, "'LLN' phase length"),
-        ("F_Rd_Phase_Syn",    n, 1,           4, "'RSY' read phase at sync pulse"),
-        ("F_Phase_Max",       n, n,           0, "number of phase registers"),
+        ("F_Ld_Phase_Len",      0, 1,           2, "'LLN' phase length"),
+        ("F_Rd_Phase_Syn",      n, 1,           4, "'RSY' read phase at sync pulse"),
+        ("F_Phase_Max",         n, n,           0, "number of phase registers"),
 
         # "controller",
 
@@ -1248,115 +1257,133 @@ fpgaLatheList = \
         "PWM",
 
         ("pwmCtl",),
-        ("F_Ld_PWM_Max",      0, 1,           4, "'MAX' pwm counter maximum"),
-        ("F_Ld_PWM_Trig",     n, 1,           4, "'TRG' pwm trigger"),
-        ("F_PWM_Max",         n, n,           0, "number of pwm registers"),
+        ("F_Ld_PWM_Max",        0, 1,           4, "'MAX' pwm counter maximum"),
+        ("F_Ld_PWM_Trig",       n, 1,           4, "'TRG' pwm trigger"),
+        ("F_PWM_Max",           n, n,           0, "number of pwm registers"),
 
         "encoder",
 
         ("encoder",),
-        ("F_Ld_Enc_Prescale", 0, 1,           2, "'EPS' load encoder prescale"),
-        ("F_Ld_Enc_Cycle",    n, 1,           2, "'LEC' load encoder cycle"),
-        ("F_Ld_Int_Cycle",    n, 1,           2, "'LIC' load internal cycle"),
-        ("F_Rd_Cmp_Cyc_Clks", n, 1,           4, "'RCC' read cmp cycle clocks"),
-        ("F_Enc_Max",         n, n,           0, "number of encoder registers"),
+        ("F_Ld_Enc_Prescale",   0, 1,           2, "'EPS' load encoder prescale"),
+        ("F_Ld_Enc_Cycle",      n, 1,           2, "'LEC' load encoder cycle"),
+        ("F_Ld_Int_Cycle",      n, 1,           2, "'LIC' load internal cycle"),
+        ("F_Rd_Cmp_Cyc_Clks",   n, 1,           4, "'RCC' read cmp cycle clocks"),
+        ("F_Rd_Int_Clks",       n, 1,           4, "'RIN' read interal interval"),
+        ("F_Enc_Max",           n, n,           0, "number of encoder registers"),
 
         "debug frequency",
 
         ("dbgFreq",),
-        ("F_Ld_Dbg_Freq",     0, 1,           2, "'DBF' debug frequency"),
-        ("F_Ld_Dbg_Count",    n, 1,           4, "'DBC' debug clock count"),
-        ("F_Ld_Sync_Count",   n, 1,           4, "'DBS' debug sync length"),
-        ("F_Dbg_Freq_Max",    n, n,           0, "number of debug frequency regs"),
+        ("F_Ld_Dbg_Freq",       0, 1,           2, "'DBF' debug frequency"),
+        ("F_Ld_Dbg_Count",      n, 1,           4, "'DBC' debug clock count"),
+        ("F_Ld_Sync_Count",     n, 1,           4, "'DBS' debug sync length"),
+        ("F_Dbg_Freq_Max",      n, n,           0, "number of debug frequency regs"),
 
         "sync accel",
 
         ("syncAccel",),
-        ("F_Ld_D",            0, 1,           4, "'LIS' axis initial sum"),
-        ("F_Ld_Incr1",        n, 1,           4, "'LI1' axis incr1"),
-        ("F_Ld_Incr2",        n, 1,           4, "'LI2' axis incr2"),
-        ("F_Ld_Accel_Val",    n, 1,           4, "'LAV' axis accel value"),
-        ("F_Ld_Accel_Count",  n, 1,           4, "'LAC' axis accel count"),
+        ("F_Ld_D",              0, 1,           4, "'LIS' axis initial sum"),
+        ("F_Ld_Incr1",          n, 1,           4, "'LI1' axis incr1"),
+        ("F_Ld_Incr2",          n, 1,           4, "'LI2' axis incr2"),
+        ("F_Ld_Accel_Val",      n, 1,           4, "'LAV' axis accel value"),
+        ("F_Ld_Accel_Count",    n, 1,           4, "'LAC' axis accel count"),
 
-        ("F_Rd_XPos",         n, 1,           4, "'RX'  axis x pos"),
-        ("F_Rd_YPos",         n, 1,           4, "'RY'  axis y pos"),
-        ("F_Rd_Sum",          n, 1,           4, "'RSU' axis sum"),
-        ("F_Rd_Accel_Sum",    n, 1,           4, "'RAS' axis accel sum"),
-        ("F_Rd_Accel_Ctr",    n, 1,           4, "'RAC' axis accel counter"),
+        ("F_Rd_XPos",           n, 1,           4, "'RX'  axis x pos"),
+        ("F_Rd_YPos",           n, 1,           4, "'RY'  axis y pos"),
+        ("F_Rd_Sum",            n, 1,           4, "'RSU' axis sum"),
+        ("F_Rd_Accel_Sum",      n, 1,           4, "'RAS' axis accel sum"),
+        ("F_Rd_Accel_Ctr",      n, 1,           4, "'RAC' axis accel counter"),
 
-        ("F_Ld_Dist",         n, 1,           4, "'LDS' axis distance"),
-        ("F_Ld_Max_Dist",     n, 1,           4, "'LMD' jog maximum distance"),
+        ("F_Ld_Dist",           n, 1,           4, "'LDS' axis distance"),
+        ("F_Ld_Max_Dist",       n, 1,           4, "'LMD' jog maximum distance"),
         # ("F_Ld_Backlash",    n, 1, 4, "'LB'  jog backlash"),
 
-        ("F_Rd_Dist",         n, 1,           4, "'RDS' read axis distance"),
-        ("F_Rd_Accel_Steps",  n, 1,           4, "'RAS' read accel steps"),
+        ("F_Rd_Dist",           n, 1,           4, "'RDS' read axis distance"),
+        ("F_Rd_Accel_Steps",    n, 1,           4, "'RAS' read accel steps"),
 
-        ("F_Ld_Loc",          n, 1,           4, "'LLC' axis location"),
-        ("F_Rd_Loc",          n, 1,           4, "'RLC' read axis location"),
+        ("F_Ld_Loc",            n, 1,           4, "'LLC' axis location"),
+        ("F_Rd_Loc",            n, 1,           4, "'RLC' read axis location"),
 
         # ("F_Ld_Mpg_Delta",   n, 1, 4, "'LMD' Mpg delta values"),
         # ("F_Ld_Mpg_Dist",    n, 1, 4, "'LMS' Mpg dist values"),
         # ("F_Ld_Mpg_Div",     n, 1, 4, "'LMV' Mpg div values"),
 
-        ("F_Ld_Dro",          n, 1,           4, "'LDR' axis dro"),
-        ("F_Ld_Dro_End",      n, 1,           4, "'LDE' axis dro end"),
-        ("F_Ld_Dro_Limit",    n, 1,           4, "'LDL' axis dro decel limit"),
-        ("F_Rd_Dro",          n, 1,           4, "'RDR' read axis dro"),
+        ("F_Ld_Dro",            n, 1,           4, "'LDR' axis dro"),
+        ("F_Ld_Dro_End",        n, 1,           4, "'LDE' axis dro end"),
+        ("F_Ld_Dro_Limit",      n, 1,           4, "'LDL' axis dro decel limit"),
+        ("F_Rd_Dro",            n, 1,           4, "'RDR' read axis dro"),
 
-        ("F_Sync_Max",        n, n,           0, "number of sync registers"),
+        ("F_Sync_Max",          n, n,           0, "number of sync registers"),
 
-        "jog registers",
+        "spindle accel",
 
-        ("jog",),
-        ("F_Ld_Jog_Ctl",      0, 1,           4, "'CT' jog control"),
-        ("F_Ld_Jog_Inc",      n, 1,           4, "'IN' jog increment"),
-        ("F_Ld_Jog_Back",     n, 1,           4, "'JB' jog backlash increment"),
-        ("F_Jog_Max",         n, n,           0, "number of jog registers"),
+        ("spAccel",),
+        ("F_Ld_Sp_D",           0, 1,           4, "'LIS' axis initial sum"),
+        ("F_Ld_Sp_Incr1",       n, 1,           4, "'LI1' axis incr1"),
+        ("F_Ld_Sp_Incr2",       n, 1,           4, "'LI2' axis incr2"),
+        ("F_Ld_Sp_Accel_Val",   n, 1,           4, "'LAV' axis accel value"),
+        ("F_Ld_Sp_Accel_Count", n, 1,           4, "'LAC' axis accel count"),
+
+        ("F_Rd_Sp_Sum",         n, 1,           4, "'RSU' axis sum"),
+        ("F_Rd_Sp_Accel_Sum",   n, 1,           4, "'RAS' axis accel sum"),
+        ("F_Rd_Sp_Accel_Ctr",   n, 1,           4, "'RAC' axis accel counter"),
+        ("F_Rd_Sp_XPos",        n, 1,           4, "'RX'  axis x pos"),
+        ("F_Rd_Sp_YPos",        n, 1,           4, "'RY'  axis y pos"),
+
+        ("F_Sp_Max",            n, n,           0, "number of spindle sync registers"),
+
+        # "jog registers",
+
+        # ("jog",),
+        # ("F_Ld_Jog_Ctl",      0, 1,           4, "'CT' jog control"),
+        # ("F_Ld_Jog_Inc",      n, 1,           4, "'IN' jog increment"),
+        # ("F_Ld_Jog_Back",     n, 1,           4, "'JB' jog backlash increment"),
+        # ("F_Jog_Max",         n, n,           0, "number of jog registers"),
 
         "axis",
 
         ("axisCtl",),
-        ("F_Rd_Axis_Status",  0, 1,           1, "'RAS' read axis status"),
-        ("F_Ld_Axis_Ctl",     n, 1,           2, "'LAC' set axis control reg"),
-        ("F_Rd_Axis_Ctl",     n, 1,           2, "'RAC' read axis control reg"),
-        ("F_Ld_Freq",         n, 1,           4, "'LFR' frequency"),
-        ("F_Sync_Base",       n, "syncAccel", n, "sync registers"),
-        ("F_Axis_Max",        n, n,           0, "num of axis regs"),
+        ("F_Rd_Axis_Status",    0, 1,           1, "'RAS' read axis status"),
+        ("F_Ld_Axis_Ctl",       n, 1,           2, "'LAC' set axis control reg"),
+        ("F_Rd_Axis_Ctl",       n, 1,           2, "'RAC' read axis control reg"),
+        ("F_Ld_Freq",           n, 1,           4, "'LFR' frequency"),
+        ("F_Sync_Base",         n, "syncAccel", n, "sync registers"),
+        ("F_Axis_Max",          n, n,           0, "num of axis regs"),
 
         "spindle",
 
         ("spindle",),
-        ("F_Ld_Sp_Ctl",       0, 1,           1, "'LCT' spindle control reg"),
-        ("F_Ld_Sp_Freq",      n, 1,           4, "'LFR' freq for step spindle"),
-        ("F_Sp_Jog_Base",     n, "jog",       n, "'J' spindle jog"),
-        ("F_Sp_Sync_Base",    n, "syncAccel", n, "spindle sync"),
+        ("F_Ld_Sp_Ctl",         0, 1,           1, "'LCT' spindle control reg"),
+        ("F_Ld_Sp_Freq",        n, 1,           4, "'LFR' freq for step spindle"),
+        # ("F_Sp_Jog_Base",     n, "jog",       n, "'J' spindle jog"),
+        ("F_Sp_Sync_Base",      n, "spAccel",   n, "spindle sync"),
 
         "runout",
 
         ("runout",),
-        ("F_Ld_RunOut_Ctl",   0, 1,           1, "'CTL' runout control reg"),
-        ("F_Ld_Run_Limit",    n, 1,           4, "'LIM' runout limit"),
+        ("F_Ld_RunOut_Ctl",     0, 1,           1, "'CTL' runout control reg"),
+        ("F_Ld_Run_Limit",      n, 1,           4, "'LIM' runout limit"),
 
         "register definitions",
 
         ("regDef",),
-        ("F_Noop",            0, 1,           1, "'NO' reg 0"),
+        ("F_Noop",              0, 1,           1, "'NO' reg 0"),
 
         "status registers",
 
-        ("F_Rd_Status",       n, 1,           4, "'RSTS' status reg"),
-        ("F_Rd_Inputs",       n, 1,           4, "'RINP' inputs reg"),
+        ("F_Rd_Status",         n, 1,           4, "'RSTS' status reg"),
+        ("F_Rd_Inputs",         n, 1,           4, "'RINP' inputs reg"),
 
         "control registers",
 
         # ("F_Ld_Run_Ctl",     n, 1,            1, "'LRUN' set run control reg"),
         # ("F_Rd_Run_Ctl",     n, 1,            1, "'RRUN' read run control reg"),
-        
-        ("F_Ld_Sync_Ctl",     n, 1,           1, "'LSYN' sync control reg"),
-        ("F_Ld_Cfg_Ctl",      n, 1,           3, "'LCFG' config control reg"),
-        ("F_Ld_Clk_Ctl",      n, 1,           1, "'LCLK' clock control reg"),
-        ("F_Ld_Out_Reg",      n, 1,           1, "'LDOU' output reg"),
-        ("F_Ld_Dsp_Reg",      n, 1,           1, "'LDSP' display reg"),
+
+        ("F_Ld_Sync_Ctl",       n, 1,           1, "'LSYN' sync control reg"),
+        ("F_Ld_Cfg_Ctl",        n, 1,           3, "'LCFG' config control reg"),
+        ("F_Ld_Clk_Ctl",        n, 1,           1, "'LCLK' clock control reg"),
+        ("F_Ld_Out_Reg",        n, 1,           1, "'LDOU' output reg"),
+        ("F_Ld_Dsp_Reg",        n, 1,           1, "'LDSP' display reg"),
 
         # "controller",
 
@@ -1368,27 +1395,24 @@ fpgaLatheList = \
 
         "debug frequency control",
 
-        ("F_Dbg_Freq_Base",   n, "dbgFreq",   n, "'D' dbg frequency"),
-
-        "spindle speed",
-
-        ("F_Rd_Idx_Clks",     n, 1,           4, "'RIDX' clocks per index"),
+        ("F_Dbg_Freq_Base",     n, "dbgFreq",   n, "'D' dbg frequency"),
 
         # "step spindle frequency generator",
 
         "pwm",
 
-        ("F_PWM_Base",        n, "pwmCtl",    n, "'P' pwm control"),
+        ("F_PWM_Base",          n, "pwmCtl",    n, "'P' pwm control"),
 
         "base for modules",
 
-        ("F_Enc_Base",        n, "encoder",   n, "'E' encoder registers"),
-        ("F_Phase_Base",      n, "phaseCtl",  n, "'H' phase registers"),
-        ("F_RunOut_Base",     n, "runout",    n, "'R' runout registers"),
-        ("F_ZAxis_Base",      n, "axisCtl",   n, "'Z' z axis registers"),
-        ("F_XAxis_Base",      n, "axisCtl",   n, "'X' x axis registers"),
-        ("F_Spindle_Base",    n, "spindle",   n, "'S' spindle registers"),
-        ("F_Cmd_Max",         n, n,           n, "number of commands"),
+        ("F_Index_Base",        n, "indexCtl",  n, "'I' spindle speed"),
+        ("F_Enc_Base",          n, "encoder",   n, "'E' encoder registers"),
+        ("F_Phase_Base",        n, "phaseCtl",  n, "'H' phase registers"),
+        ("F_RunOut_Base",       n, "runout",    n, "'R' runout registers"),
+        ("F_ZAxis_Base",        n, "axisCtl",   n, "'Z' z axis registers"),
+        ("F_XAxis_Base",        n, "axisCtl",   n, "'X' x axis registers"),
+        ("F_Spindle_Base",      n, "spindle",   n, "'S' spindle registers"),
+        ("F_Cmd_Max",           n, n,           n, "number of commands"),
         # ->
     )
 
@@ -1627,6 +1651,7 @@ fpgaLatheBitList = \
         ("stEStop",       1, 6,      "'ES' emergency stop"),
         ("spindleActive", 1, 7,      "'S+' spindle active"),
         ("syncActive",    1, 8,      "'SA' sync active"),
+        ("encoderDir",    1, 9,      "'ED' encoder direction"),
         # ("queNotEmpty",   1, 8,      "'Q+' ctl queue not empty"),
         # ("ctlBusy",       1, 9,      "'CB' controller busy"),
         ("end",),
@@ -1662,7 +1687,7 @@ fpgaLatheBitList = \
         ("outputs",),
         ("outPin1",       1, 0,      "pin 1"),
         ("outPin14",      1, 1,      "pin 14"),
-        ("outPin17",      1, 2,      "pin 17"),
+        # ("outPin17",      1, 2,      "pin 17"),
         ("end",),
         # ("",  , , ""),
 
@@ -1856,7 +1881,7 @@ fpgaLatheBitList = \
         ("spInit",        1, 0,      "spindle init"),
         ("spEna",         1, 1,      "spindle enable"),
         ("spDir",         1, 2,      "spindle direction"),
-        ("spJogEnable",   1, 3,      "spindle jog enable"),
+        # ("spJogEnable",   1, 3,      "spindle jog enable"),
         ("end",),
 
         "",                     # end marker
@@ -2066,7 +2091,6 @@ enumList = \
         ("D_ZIDXD", "'ZIDR' z dro at index pulse"),
         ("D_ZIDXP", "'ZIPO' z position at index pulse"),
         ("D_MAX",   "'MAX ' debug maximum"),
-
         "};",
         # ->
 
@@ -2221,7 +2245,7 @@ enumList = \
 
         "riscv axis states",
 
-        # <- len 2 items 4 [ 18  2]
+        # <- len 2 items 5 [ 18 20]
         "enum riscv_Axis_State c",
         "{",
         ("RS_IDLE",          "'ID' idle"),
@@ -2254,9 +2278,9 @@ enumList = \
         "enum riscv_Run_Wait c",
         "{",
         ("RW_NONE",       "'NO' none"),
-        ("RW_PAUSE",      "'PS' wait pause"),
-        ("RW_SPIN_START", "'S+' wait spindle start"),
-        ("RW_SPIN_STOP",  "'S-' wait spindle stop"),
+        ("RW_PAUSE",      "'WP' wait pause"),
+        ("RW_SPIN_START", "'W+' wait spindle start"),
+        ("RW_SPIN_STOP",  "'W-' wait spindle stop"),
         ("RW_WAIT_X",     "'WX' wait x done"),
         ("RW_WAIT_Z",     "'WZ' wait z done"),
         # ("RW_", "''"),

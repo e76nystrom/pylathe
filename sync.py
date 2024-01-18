@@ -364,7 +364,12 @@ class Sync():
                 
             if self.dbg:
                 print(f"scale {scale:d} cycle {cycle:d} output {output:d}")
-            result = (cycle, output, scale)
+
+            rtnCycle = cycle - 1
+            rtnScale = scale
+            if rtnScale != 0:
+                rtnScale -= 1
+            result = (rtnCycle, output, rtnScale)
 
         if self.dbg:
             if self.fpga and scale != 1:

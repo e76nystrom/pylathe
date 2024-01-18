@@ -808,9 +808,9 @@ RiscvSyncParmTypeText = ( \
 # riscv run wait states
 
 RW_NONE          =  0           # 'NO' none
-RW_PAUSE         =  1           # 'PS' wait pause
-RW_SPIN_START    =  2           # 'S+' wait spindle start
-RW_SPIN_STOP     =  3           # 'S-' wait spindle stop
+RW_PAUSE         =  1           # 'WP' wait pause
+RW_SPIN_START    =  2           # 'W+' wait spindle start
+RW_SPIN_STOP     =  3           # 'W-' wait spindle stop
 RW_WAIT_X        =  4           # 'WX' wait x done
 RW_WAIT_Z        =  5           # 'WZ' wait z done
 

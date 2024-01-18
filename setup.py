@@ -827,11 +827,11 @@ class Setup():
                         index = 0
 
                 if fData:
-                    tmp = " %-18s = %s, " % (regName, index)
+                    tmp = " %-19s = %s, " % (regName, index)
                     fWrite(cFile, "%s/* 0x%02x %s */\n" %
                                 (tmp.ljust(32), index, regComment))
                     if xFile:
-                        fWrite(xFile, ('constant %-18s : ' \
+                        fWrite(xFile, ('constant %-19s : ' \
                                      'unsigned(opb-1 downto 0) ' \
                                      ':= x"%02x"; -- %s\n') %
                                     (regName, index, regComment))
@@ -840,7 +840,7 @@ class Setup():
                 xRegTable.append(regName)
 
                 if f is not None:
-                    tmp = "%s = %2d" % (regName.ljust(16), index)
+                    tmp = "%s = %2d" % (regName.ljust(19), index)
                     fWrite(f, "%s# %s\n" % (tmp.ljust(32), regComment))
                     # print(regComment)
 
@@ -939,7 +939,7 @@ class Setup():
                         tmp = "    \"%s+%s\"," % (regs[0].strip(), \
                                                   regs[-1].strip())
                     fWrite(f, "%s# %3d x%02x\n" % \
-                           (tmp.ljust(40), tIndex, tIndex))
+                           (tmp.ljust(42), tIndex, tIndex))
                 fWrite(f, "    )\n")
 
                 fWrite(f, "\nfpgaSizeTable = ( \\\n")

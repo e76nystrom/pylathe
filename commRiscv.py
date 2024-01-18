@@ -1142,7 +1142,7 @@ class RiscvLathe(Thread):
         # self.mvSpindleCmd = self.cmd
         # self.spindleStart()
         # self.mvState = en.M_WAIT_SPINDLE
-        self.riscvCmd(rc.R_STR_SPIN)
+        self.riscvCmd(rc.R_STR_SPIN_Q)
 
     # noinspection PyUnusedLocal
     def qStopSpindle(self, val):        # 12
@@ -1150,7 +1150,7 @@ class RiscvLathe(Thread):
         # self.mvSpindleCmd = self.cmd
         # self.spindleStop()
         # self.mvState = en.M_WAIT_SPINDLE
-        self.riscvCmd(rc.R_STP_SPIN)
+        self.riscvCmd(rc.R_STP_SPIN_Q)
 
     def qZSynSetup(self, val):          # 13
         print("zSynSetup")
@@ -1172,10 +1172,12 @@ class RiscvLathe(Thread):
                                que=True)
 
             elif parm.turnSync == en.SEL_TU_SYN: # syn for turning
-                self.riscvCmd(rc.R_SET_DATA,
-                                      (rp.R_SYN_ENC_CYCLE, parm.lSyncCycle))
-                self.riscvCmd(rc.R_SET_DATA,
-                                      (rp.R_SYN_OUT_CYCLE, parm.lSyncOutput))
+                self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_ENC_PRE_SCALER,
+                                              parm.lSyncInPreScaler))
+                self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_ENC_CYCLE,
+                                              parm.lSyncCycle))
+                self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_OUT_CYCLE,
+                                              parm.lSyncOutput))
 
         elif currentOp == en.OP_THREAD:
             self.riscvCmd(rc.R_SET_DATA, (rp.R_THREAD_FLAGS, self.threadFlags))
