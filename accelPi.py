@@ -12,32 +12,63 @@ MAX_SCALE = 12
 def intRound(val):
     return(int(round(val)))
 
-class AccelData():
-    def __init__(self, axis):
-        self.axis = axis
+def bitSize(val, dbg=False):
+    if val < 0:
+        val = -val
+        b = 1
+    else:
+        b = 0
+    while b < 32:
+        if dbg:
+            print(b, val)
+        if val == 0:
+            break
+        val >>= 1
+        b += 1
+    return b
+
+class SpindleAccel:
+    def __init__(self):
+        self.maxRPM      = None
+        self.stepsPerRev = None
+        self.initialSum  = None
+        self.accelRMin2  = None
+        self.dx          = None
+        self.dy          = None
+        self.incr1       = None
+        self.incr2       = None
+        self.intAccel    = None
         self.accelClocks = None
-        self.accelSteps = None
-        self.accelTime = None
-        self.clockFreq = None
+        self.accelMax    = None
+        self.freqDivider = None
+
+class AccelData(SpindleAccel):
+    def __init__(self, axis):
+        SpindleAccel.__init__(self)
+        # self.incr1       = None
+        # self.incr2       = None
+        # self.initialSum  = None
+        # self.intAccel    = None
+        # self.accelClocks = None
+        # self.freqDivider = None
+        self.axis          = axis
+        self.accelSteps    = None
+        self.accelTime     = None
+        self.clockFreq     = None
         self.clocksPerInch = None
-        self.dxBase = None
-        self.dyMaxBase = None
-        self.dyMinBase = None
-        self.freqDivider = None    # frequency divider
-        self.incr1 = None
-        self.incr2 = None
-        self.initialSum = None
-        self.intAccel = None
-        self.pitch = None          # pitch for turning or threading
-        self.scale = None
-        self.stepsSecMax = None
+        self.dxBase        = None
+        self.dyMaxBase     = None
+        self.dyMinBase     = None
+        self.pitch         = None # pitch for turning or threading
+        self.scale         = None
+        self.stepsSecMax   = None
 
     def init(self, accelType, minSpeed=0, maxSpeed=0):
         print("\n%s %s AccelData init" % (self.axis.name, accelType))
-        self.accel = self.axis.accel # axis acceleration units/sec^2
+        self.accel     = self.axis.accel # axis acceleration units/sec^2
         self.accelType = accelType # acceleration type string
-        self.maxSpeed = maxSpeed # final speed
-        self.minSpeed = minSpeed # starting speed
+        self.maxSpeed  = maxSpeed # final speed
+        self.minSpeed  = minSpeed # starting speed
         self.stepsInch = self.axis.stepsInch # axis steps per inch
 
         accelCalc1(self)
@@ -60,14 +91,13 @@ def accelCalc(aData):
     accelSetup(aData)
 
 def syncCalc(aData, dx, dy):
-    aData.dx = dx = int(dx)
-    aData.dy = dy = int(dy)
-    aData.incr1 = 2 * dy
-    aData.incr2 = aData.incr1 - 2 * dx
-    adata.initialSum = aData.incr1 - dx
-    aData.intAccel = 0
+    aData.dx     = dx = int(dx)
+    aData.dy     = dy = int(dy)
+    aData.incr1       = 2 * dy
+    aData.incr2       = aData.incr1 - 2 * dx
+    aData.initialSum  = aData.incr1 - dx
+    aData.intAccel    = 0
     aData.accelClocks = 0
-
 
 def syncAccelCalc(aData, feedType, feed):
     print("\n%s %s syndAccelCalc" % (aData.axis.name, aData.accelType))
@@ -79,7 +109,7 @@ def syncAccelCalc(aData, feedType, feed):
         aData.pitch = feed / 25.4
 
     if DBG_SETUP:
-        print("\nturnAccel %3.1f" % aData.accel)
+        print("\n" "turnAccel %3.1f" % aData.accel)
     parm = aData.axis.parm
     aData.freqDivider = 0
     if aData.maxSpeed == 0:
@@ -103,15 +133,6 @@ def syncAccelCalc(aData, feedType, feed):
         aData.clocksPerInch = intRound(parm.encPerRev * aData.pitch)
         aData.clockFreq = intRound((parm.rpm * parm.encPerRev) / 60.0)
         accelSetup(aData)
-
-def bitSize(val):
-    bits = 0
-    while bits < 32:
-        if val == 0:
-            break
-        val >>= 1
-        bits += 1
-    return(bits)
 
 def accelSetup(aData):
     print("\n%s %s accelSetup" % (aData.axis.name, aData.accelType))
@@ -159,7 +180,7 @@ def accelSetup(aData):
         dyMin = dyMinBase << scale
         dyDelta = aData.dyMax - dyMin
         if DBG_DETAIL:
-            print("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" % \
+            print("\n" "scale %d dx %d dyMin %d dyMax %d dyDelta %d" % \
                   (scale, aData.dx, dyMin, aData.dyMax, dyDelta), end=' ')
             print("%10.4f" % (float(aData.dx) / float(aData.dyMax)))
 
@@ -175,7 +196,7 @@ def accelSetup(aData):
             print("dyIni %d dyMax %d intIncPerClock %d accelClks %d" %
                   (aData.dyIni, aData.dyMax, intIncPerClock, accelClks))
 
-        bits = aData.bitSize(aData.dx) + 1
+        bits = bitSize(-2 * aData.dx)
         if DBG_DETAIL:
             print("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f " \
                   "err %d bits %d" %
@@ -184,7 +205,7 @@ def accelSetup(aData):
 
         if (bits >= 30) or (err == 0):
             if DBG_SETUP:
-                print("\nscale %d dx %d dyMin %d dyMax %d dyDelta %d" %
+                print("\n" "scale %d dx %d dyMin %d dyMax %d dyDelta %d" %
                       (scale, aData.dx, dyMin, aData.dyMax, dyDelta))
                 print("dyIni %d dyMax %d dyDelta %d incPerClock %6.2f " \
                       "err %d bits %d" %
@@ -198,7 +219,7 @@ def accelSetup(aData):
     aData.initialSum = aData.incr1 - aData.dx
     aData.intAccel = 2 * intIncPerClock
     if DBG_SETUP:
-        print("\nincr1 %d incr2 %d sum %d" %
+        print("\n" "incr1 %d incr2 %d sum %d" %
               (aData.incr1, aData.incr2, aData.initlSum))
 
     if intIncPerClock != 0:
@@ -346,3 +367,246 @@ def taperCalc(turnAccel, taperAccel, taper):
         print("dy/dx %7.4f" % (float(dy) / float(dx)))
     elif turnSync == en.SEL_TU_SYN:
         pass
+
+def spindleAccelCalc0(parm, maxRPM):
+    fpgaFrequency  = parm.fpgaFreq
+    motorSteps     = parm.spSteps
+    microSteps     = parm.spMicroSteps
+    stepMultiplier = parm.spStepMult
+    accelRPMSec2   = parm.spAccel
+    # minRPM = parm.spMinRPM
+    # maxRPM = parm.spMaxRPM
+
+    stepsPerRev = motorSteps * microSteps * stepMultiplier
+    revPerSec = maxRPM / 60
+    stepsPerSec = revPerSec * stepsPerRev
+    freqDivider = fpgaFrequency / stepsPerSec
+    print(f"stepsPerRev {stepsPerRev:.0f}"
+          f"stepPerSec {stepsPerSec:.0f}"
+          f" freqDivider {freqDivider:.0f}")
+
+    # stepsPerSecMin = (minRPM / 60) * stepsPerRev
+    stepsPerSecMax = (maxRPM / 60) * stepsPerRev
+    accelStepsSec2 = (accelRPMSec2 / 60) * stepsPerRev
+    accelTime = stepsPerSecMax / accelStepsSec2
+    print(f"accelStepsSec2 {accelStepsSec2:.0f} accelTime {accelTime:.3f}")
+
+    dxBase = stepsPerRev
+    dyMinBase = 0
+    dyMaxBase = motorSteps * microSteps
+
+    accelClocks = accelTime * stepsPerSec
+    intIncPerClock = 0
+    dx = 0
+    dyIni = 0
+    scale = 1
+    for scale in range(MAX_SCALE):
+        dx = dxBase << scale
+        dyMax = dyMaxBase << scale
+        dyMin = dyMinBase << scale
+        dyDelta = dyMax - dyMin
+        if DBG_DETAIL:
+            print("\n" "scale %2d dx %8d dyMin %8d dyMax %8d dyDelta %8d" %
+                  (scale, dx, dyMin, dyMax, dyDelta), end=' ')
+            print("%10.4f" % (float(dx) / float(dyMax)))
+
+        incPerClock = float(dyDelta) / accelClocks
+        intIncPerClock = int(incPerClock)
+        if intIncPerClock == 0:
+            continue
+        intIncPerClock = intIncPerClock
+        dyDeltaC = intIncPerClock * accelClocks
+        err = intRound(abs(dyDelta - dyDeltaC)) >> scale
+        dyIni = dyMax - intIncPerClock * accelClocks
+        if DBG_DETAIL:
+            print("dyIni %8d dyMax %8d intIncPerClock %3d accelClocks %3d" %
+                  (dyIni, dyMax, intIncPerClock, accelClocks))
+
+        bits = bitSize(dx) + 1
+        if DBG_DETAIL:
+            print("dyIni %8d dyMax %8d dyDelta %8d incPerClock %6.2f "
+                  "err %d bits %d" %
+                  (dyIni, dyMax, dyDelta, incPerClock, err, bits))
+
+        if (bits >= 30) or (err == 0):
+            if DBG_SETUP:
+                print("\n" "scale %2d dx %8d dyMin %8d dyMax %8d dyDelta %8d" %
+                      (scale, dx, dyMin, dyMax, dyDelta))
+                print("dyIni %8d dyMax %8d dyDelta %8d incPerClock %6.2f "
+                      "err %d bits %d" %
+                      (dyIni, dyMax, dyDelta, incPerClock, err, bits))
+            break
+
+    incr1      = int(2 * dyIni)
+    incr2      = int(incr1 - 2 * dx)
+    initialSum = int(incr1 - dx)
+    intAccel   = int(2 * intIncPerClock)
+
+    accelParm = SpindleAccel()
+    accelParm.initialSum  = initialSum
+    accelParm.incr1       = incr1
+    accelParm.incr2       = incr2
+    accelParm.scale       = scale
+    accelParm.intAccel    = intAccel
+    accelParm.accelClock  = accelClocks
+    accelParm.freqDivider = freqDivider
+
+    if DBG_SETUP:
+        print("\n" "incr1 %d incr2 %d sum %d bits %d" %
+              (incr1, incr2, initialSum, bitSize(incr2)))
+
+    if intIncPerClock != 0:
+        totalSum = accelClocks * incr1 + initialSum
+        totalInc = (accelClocks * (accelClocks - 1) * intAccel) / 2
+        accelSteps = intRound((totalSum + totalInc) / (2 * dx))
+        if DBG_SETUP:
+            print("accelClocks %d totalSum %d totalInc %d " \
+                  "accelSteps %d" % \
+                  (accelClocks, totalSum, totalInc, accelSteps))
+    # else:
+    #     accelSteps = 0
+
+    return accelParm
+
+
+    # fpgaFrequency = 50_000_000
+    # motorSteps = 200
+    # microSteps = 10
+    # stepMultiplier = 8
+    # accelRMin2 = 400
+    # maxRPM = 300
+def spindleAccelCalc(parm, maxRPM):
+    fpgaFrequency  = parm.fpgaFrequency
+    motorSteps     = parm.spSteps
+    microSteps     = parm.spMicro
+    stepMultiplier = parm.spStepMult
+    accelRMin2     = parm.spAccel
+
+    stepsPerRev = motorSteps * microSteps
+    revPerSec = maxRPM / 60
+    stepsPerSec = int(stepsPerRev * revPerSec)
+    print(f"maxRPM {maxRPM} revPerSec {revPerSec:0.3f}"
+          f" stepsPerSec {stepsPerSec}")
+    freqGenMax = revPerSec * stepsPerRev * stepMultiplier
+    freqDivider = fpgaFrequency / freqGenMax
+    periodUSec = 1_000_000 / freqGenMax
+    print(f"stepsPerRev {stepsPerRev:.0f} freqGenMax {freqGenMax:.0f}"
+          f" freqDivider {freqDivider:.0f}"
+          f" periodUSec {periodUSec:.0f} uSec")
+    tmp = (freqGenMax * 60) / (stepsPerRev * stepMultiplier)
+    print(tmp)
+
+    accelTime = maxRPM / accelRMin2
+    accelStepSec2 = (accelRMin2 / 60) * stepsPerRev
+    accelClocks = int(accelTime * freqGenMax)
+    print(f"accelTime {accelTime:.3f}"
+          f" accelStepSec2 {accelStepSec2:.0f}"
+          f" accelClocks {accelClocks:.0f}")
+
+    dx = freqGenMax
+    dy = stepsPerSec * stepMultiplier
+    incr1      = int(2 * dy)
+    incr2      = int(incr1 - 2 * dx)
+    initialSum = int(incr1 - dx)
+    print("dx %d dy %d incr1 %d incr2 %d sum %d bits %d" %
+          (dx, dy, incr1, incr2, initialSum, bitSize(incr2)))
+    # incr1 = dy * 2
+    # dy = incr1 / 2
+    dy = incr1 // 2
+
+    # incr2 = incr1 - 2 * dx
+    # incr2 - incr1 = -2 * dx
+    # dx = (incr1 - incr2) / 2
+    dx = (incr1 - incr2) // 2
+    print(f"dx {dx} dy {dy}")
+
+    dxBase = freqGenMax
+    dyBase = stepsPerSec * stepMultiplier
+    incPerClockInt = 0
+    dx = 0
+    dyIni = 0
+    scale = 1
+    for scale in range(MAX_SCALE):
+        dx = int(dxBase) << scale
+        dyMax = dyBase << scale
+        if DBG_DETAIL:
+            print("\n" "scale %2d dx %8d dyMax %8d" %
+                  (scale, dx, dyMax), end=' ')
+            print("%10.4f" % (float(dx) / float(dyMax)))
+
+        incPerClock = dyMax / accelClocks
+        incPerClockInt = int(dyMax // accelClocks)
+        if incPerClockInt == 0:
+            continue
+
+        err = (dyMax - incPerClockInt * accelClocks) >> scale
+        errPercent = (err * 100) / (dyMax >> scale)
+        dyIni = dyMax - incPerClockInt * accelClocks
+        bits = bitSize(-2 * dx)
+        if DBG_DETAIL:
+            print("dyIni %8d dyMax %8d IncPerClockInt %3d" %
+                  (dyIni, dyMax, incPerClockInt), end="")
+            print(" incPerClock %6.2f err %d %.1f%% bits %d" %
+                  (incPerClock, err, errPercent, bits))
+
+        if (bits >= 30) or (errPercent <= 1.0):
+            # if DBG_SETUP:
+            #     print("\n" "scale %2d dx %8d dyMax %8d" %
+            #           (scale, dx, dyMax))
+            #     print("dyIni %8d dyMax %8d incPerClock %6.2f err %d bits %d" %
+            #           (dyIni, dyMax, incPerClock, err, bits))
+            break
+
+    incr1      = int(2 * dyIni)
+    incr2      = int(incr1 - 2 * dx)
+    initialSum = int(incr1 - dx)
+    intAccel   = int(2 * incPerClockInt)
+
+    sA = SpindleAccel()
+    sA.maxRPM      = maxRPM
+    sA.stepsPerRev = stepsPerRev
+    sA.accelRMin2  = accelRMin2
+    sA.freqGenMax  = freqGenMax
+    sA.dx          = dx
+    sA.dy          = dy
+    sA.initialSum  = initialSum
+    sA.incr1       = incr1
+    sA.incr2       = incr2
+    sA.scale       = scale
+    sA.intAccel    = intAccel
+    sA.accelClocks = accelClocks
+    sA.accelMax    = accelClocks * intAccel
+    sA.freqDivider = intRound(freqDivider) - 1
+
+    if DBG_SETUP:
+        print("\n" "incr1 %d incr2 %d sum %d intAccel %d clocks %d bits %d" %
+              (incr1, incr2, initialSum, intAccel, accelClocks, bitSize(incr2)))
+
+    if incPerClockInt != 0:
+        totalSum = accelClocks * incr1 + initialSum
+        totalInc = (accelClocks * (accelClocks - 1) * intAccel) / 2
+        accelSteps = intRound((totalSum + totalInc) / (2 * dx))
+        if DBG_SETUP:
+            print("accelClocks %d totalSum %d totalInc %d " \
+                  "accelSteps %d" % \
+                  (accelClocks, totalSum, totalInc, accelSteps))
+    return sA
+
+def spUpdate(sA, curRPM):
+    dx         = sA.dx
+    dy         = int((curRPM * sA.stepsPerRev) / sA.maxRPM)
+    incr1      = int(2 * dy)
+    incr2      = int(incr1 - 2 * dx)
+    initialSum = int(incr1 - dx)
+    print("dx %d dy %d incr1 %d incr2 %d sum %d bits %d" %
+          (dx, dy, incr1, incr2, initialSum, bitSize(incr2)))
+    
+    curTime = curRPM / sA.accelRMin2
+    curClocks = curTime * sA.freqGenMax
+    print(f"curTime {curTime:.03f}"
+          f" curClocks {curClocks:.0f}")
+
+    curAccelMax = int(curClocks) * sA.intAccel
+    print(f"accelMax = {sA.accelMax}"
+          f" curAccelMax: {curAccelMax}")
+    return curAccelMax

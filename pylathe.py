@@ -1629,76 +1629,57 @@ class SendData:
             comm.queParm(pm.ENC_ENABLE, '0')
 
     def sendSpindleData(self, send=False, rpm=None):
-        cfg = self.cfg
         comm = self.comm
-        queParm = self.comm.queParm
+        queParm = comm.queParm
+        cfg = self.cfg
+        getBool = cfg.getBoolInfoData
+        getInt  = cfg.getIntInfoData
+        getInfo = cfg.getInfoData
         try:
             if send or (not self.spindleDataSent):
-                queParm(pm.STEPPER_DRIVE, cfg.getBoolInfoData(cf.spStepDrive))
-                queParm(pm.MOTOR_TEST, cfg.getBoolInfoData(cf.spMotorTest))
-                queParm(pm.SPINDLE_ENCODER, \
-                        cfg.getBoolInfoData(cf.cfgSpEncoder))
-                queParm(pm.SPINDLE_SYNC_BOARD, \
-                        cfg.getBoolInfoData(cf.cfgSpSyncBoard))
-                queParm(pm.SPINDLE_INTERNAL_SYNC, \
-                        cfg.getBoolInfoData(cf.cfgIntSync))
-                queParm(pm.TURN_SYNC, cfg.getInfoData(cf.cfgTurnSync))
-                queParm(pm.THREAD_SYNC, cfg.getInfoData(cf.cfgThreadSync))
-                queParm(pm.RUNOUT_SYNC, cfg.getInfoData(cf.cfgRunoutSync))
+                queParm(pm.STEPPER_DRIVE, getBool(cf.spStepDrive))
+                queParm(pm.MOTOR_TEST, getBool(cf.spMotorTest))
+                queParm(pm.SPINDLE_ENCODER, getBool(cf.cfgSpEncoder))
+                if SPINDLE_ENCODER:
+                    queParm(pm.SPINDLE_SYNC_BOARD, getBool(cf.cfgSpSyncBoard))
+                    queParm(pm.SPINDLE_INTERNAL_SYNC, getBool(cf.cfgIntSync))
+                else:
+                    queParm(pm.SPINDLE_SYNC_BOARD, 0)
+                    queParm(pm.SPINDLE_INTERNAL_SYNC, 0)
+
+                queParm(pm.TURN_SYNC, getInfo(cf.cfgTurnSync))
+                queParm(pm.THREAD_SYNC, getInfo(cf.cfgThreadSync))
+                queParm(pm.RUNOUT_SYNC, getInfo(cf.cfgRunoutSync))
                 if STEP_DRV or MOTOR_TEST:
-                    queParm(pm.SP_STEPS, cfg.getInfoData(cf.spMotorSteps))
-                    queParm(pm.SP_MICRO, cfg.getInfoData(cf.spMicroSteps))
-                    queParm(pm.SP_MIN_RPM, cfg.getInfoData(cf.spMinRPM))
+                    queParm(pm.SP_STEPS, getInfo(cf.spMotorSteps))
+                    queParm(pm.SP_MICRO, getInfo(cf.spMicroSteps))
+                    queParm(pm.SP_MIN_RPM, getInfo(cf.spMinRPM))
                     # if rpm is not None:
                     #     queParm(pm.SP_MAX_RPM, rpm)
                     # else:
-                    #     queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                    #     queParm(pm.SP_MAX_RPM, getInfo(cf.spMaxRPM))
 
-                    queParm(pm.SP_ACCEL, cfg.getInfoData(cf.spAccel))
-                    queParm(pm.SP_JOG_MIN_RPM, cfg.getInfoData(cf.spJogMin))
-                    queParm(pm.SP_JOG_MAX_RPM, cfg.getInfoData(cf.spJogMax))
+                    queParm(pm.SP_ACCEL, getInfo(cf.spAccel))
+                    queParm(pm.SP_JOG_MIN_RPM, getInfo(cf.spJogMin))
+                    queParm(pm.SP_JOG_MAX_RPM, getInfo(cf.spJogMax))
 
-                    queParm(pm.SP_JOG_TIME_INITIAL, \
-                            cfg.getInfoData(cf.spJTimeInitial))
-                    queParm(pm.SP_JOG_TIME_INC, cfg.getInfoData(cf.spJTimeInc))
-                    queParm(pm.SP_JOG_TIME_MAX, cfg.getInfoData(cf.spJTimeMax))
+                    queParm(pm.SP_JOG_TIME_INITIAL, getInfo(cf.spJTimeInitial))
+                    queParm(pm.SP_JOG_TIME_INC, getInfo(cf.spJTimeInc))
+                    queParm(pm.SP_JOG_TIME_MAX, getInfo(cf.spJTimeMax))
 
-                    queParm(pm.SP_DIR_INV, cfg.getBoolInfoData(cf.spInvDir))
-                    queParm(pm.SP_TEST_INDEX, \
-                            cfg.getBoolInfoData(cf.spTestIndex))
-                    count = (cfg.getIntInfoData(cf.spMotorSteps) * \
-                             cfg.getIntInfoData(cf.spMicroSteps))
-                    queParm(pm.ENC_PER_REV, count)
-                    self.mf.updateThread.encoderCount = count
+                    queParm(pm.SP_DIR_INV, getBool(cf.spInvDir))
+                    queParm(pm.SP_TEST_INDEX, getBool(cf.spTestIndex))
+
+                    if not FPGA:
+                        count = (getInt(cf.spMotorSteps) *
+                                 getInt(cf.spMicroSteps))
+                        queParm(pm.ENC_PER_REV, count)
+                        self.mf.updateThread.encoderCount = count
                     if MOTOR_TEST and SPINDLE_ENCODER:
-                        queParm(pm.SP_TEST_ENCODER, \
-                                cfg.getBoolInfoData(cf.spTestEncoder))
-                elif FPGA:
-                    queParm(pm.ENC_PER_REV, cfg.getInfoData(cf.cfgEncoder))
-                    queParm(pm.FPGA_FREQUENCY, cfg.getInfoData(cf.cfgFpgaFreq))
-                    queParm(pm.FREQ_MULT, cfg.getInfoData(cf.cfgFreqMult))
-                    # queParm(pm.FREQ_MULT, 8)
-                    # self.xilinxTestMode()
-                    if rpm is not None:
-                        queParm(pm.SP_RPM, rpm)
-                    else:
-                        queParm(pm.SP_RPM, cfg.getInfoData(cf.cfgTestRPM))
-                    print(R_PI)
-                    if not R_PI:
-                        cfgReg = 0
-                        if bool(cfg.getBoolInfoData(cf.cfgInvEncDir)):
-                            cfgReg |= xb.ENC_POL
-                        if bool(cfg.getBoolInfoData(cf.zInvDir)):
-                            cfgReg |= xb.ZDIR_POL
-                        if bool(cfg.getBoolInfoData(cf.xInvDir)):
-                            cfgReg |= xb.XDIR_POL
-                        queParm(pm.X_CFG_REG, cfgReg)
-                    else:
-                        pass
-                    comm.sendMulti()
+                        queParm(pm.SP_TEST_ENCODER, getBool(cf.spTestEncoder))
                 elif SPINDLE_ENCODER:
                     mf = self.mf
-                    count = cfg.getIntInfoData(cf.cfgEncoder)
+                    count = getInt(cf.cfgEncoder)
                     if mf.zSyncExt is not None:
                         mf.zSyncExt.setEncoder(count)
                     if mf.xSyncExt is not None:
@@ -1710,15 +1691,45 @@ class SendData:
                     queParm(pm.ENC_PER_REV, count)
                     mf.updateThread.encoderCount = count
 
+                if FPGA:
+                    queParm(pm.FPGA_FREQUENCY, getInfo(cf.cfgFpgaFreq))
+                    queParm(pm.FREQ_MULT, getInfo(cf.cfgFreqMult))
+
+                    if STEP_DRV:
+                        count = (getInt(cf.spMotorSteps) *
+                                 getInt(cf.spMicroSteps))
+                        queParm(pm.ENC_PER_REV, count)
+
+                        queParm(pm.SP_STEP_MULT, getInfo(cf.spStepMult))
+                    else:
+                        queParm(pm.ENC_PER_REV, getInfo(cf.cfgEncoder))
+
+                    if rpm is not None:
+                        queParm(pm.SP_RPM, rpm)
+                    else:
+                        queParm(pm.SP_RPM, getInfo(cf.cfgTestRPM))
+
+                    print(R_PI)
+                    if not R_PI:
+                        cfgReg = 0
+                        if bool(getBool(cf.cfgInvEncDir)):
+                            cfgReg |= xb.ENC_POL
+                        if bool(getBool(cf.zInvDir)):
+                            cfgReg |= xb.ZDIR_POL
+                        if bool(getBool(cf.xInvDir)):
+                            cfgReg |= xb.XDIR_POL
+                        queParm(pm.X_CFG_REG, cfgReg)
+                    else:
+                        pass
+                comm.sendMulti()
+
                 if SPINDLE_VAR_SPEED:
-                    queParm(pm.PWM_FREQ, cfg.getIntInfoData(cf.spPWMFreq))
-                    curRange = cfg.getIntInfoData(cf.spCurRange)
-                    if 1 <= curRange <= cfg.getIntInfoData(cf.spRanges):
+                    queParm(pm.PWM_FREQ, getInt(cf.spPWMFreq))
+                    curRange = getInt(cf.spCurRange)
+                    if 1 <= curRange <= getInt(cf.spRanges):
                         curRange -= 1
-                        queParm(pm.MIN_SPEED, \
-                                cfg.getIntInfoData(cf.spRangeMin1 + curRange))
-                        queParm(pm.MAX_SPEED, \
-                                cfg.getIntInfoData(cf.spRangeMax1 + curRange))
+                        queParm(pm.MIN_SPEED, getInt(cf.spRangeMin1 + curRange))
+                        queParm(pm.MAX_SPEED, getInt(cf.spRangeMax1 + curRange))
                     else:
                         queParm(pm.MIN_SPEED, 0)
                         queParm(pm.MAX_SPEED, 0)
@@ -1727,7 +1738,7 @@ class SendData:
                     if rpm is not None:
                         queParm(pm.SP_MAX_RPM, rpm)
                     else:
-                        queParm(pm.SP_MAX_RPM, cfg.getInfoData(cf.spMaxRPM))
+                        queParm(pm.SP_MAX_RPM, getInfo(cf.spMaxRPM))
 
                 comm.command(cm.C_CMD_SP_SETUP)
                 self.spindleDataSent = True
@@ -9722,15 +9733,25 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
 
         self.fields = (
             ("bStepper Drive",   cf.spStepDrive,  None),
-            ("bMotor Test",      cf.spMotorTest,  None),
-            ("bSpindle Encoder", cf.cfgSpEncoder, None),
         )
-        if SPINDLE_ENCODER:
-            self.fields += (("Encoder", cf.cfgEncoder, 'd'),)
+        if not FPGA:
+            self.fields += (
+                ("bMotor Test",      cf.spMotorTest,  None),
+            )
+        if not (STEP_DRV or MOTOR_TEST):
+            self.fields += (
+                ("bSpindle Encoder", cf.cfgSpEncoder, None),
+        )
+
+        if (not STEP_DRV) and SPINDLE_ENCODER:
+            self.fields += (
+                ("Encoder", cf.cfgEncoder, 'd'),
+            )
             if not FPGA:
-                self.fields += (("bSync Board",    cf.cfgSpSyncBoard, None),
-                                ("bInternal Sync", cf.cfgIntSync,     None),
-                                )
+                self.fields += (
+                    ("bSync Board",    cf.cfgSpSyncBoard, None),
+                    ("bInternal Sync", cf.cfgIntSync,     None),
+                )
         self.fields += (
             ("cTurn Sync",   cf.cfgTurnSync,   'c', self.turnSync),
             ("cThread Sync", cf.cfgThreadSync, 'c', self.threadSync),
@@ -9740,6 +9761,13 @@ class SpindleDialog(wx.Dialog, FormRoutines, DialogActions):
             self.fields += (
                 ("Motor Steps",        cf.spMotorSteps,   'd' ),
                 ("Micro Steps",        cf.spMicroSteps,   'd' ),
+            )
+            if FPGA:
+                self.fields += (
+                ("Step Multiplier",    cf.spStepMult,     'd' ),
+                ("bIndex",             cf.spIndex,        None),
+                )
+            self.fields += (
                 ("Min RPM",            cf.spMinRPM,       'd' ),
                 ("Max RPM",            cf.spMaxRPM,       'd' ),
                 ("Accel RPM/Sec2",     cf.spAccel,        'fs'),

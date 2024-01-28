@@ -709,7 +709,9 @@ RP_X_TAPER       =  6           # 'XP'
 RP_X_MOVE        =  7           # 'XM'
 RP_X_JOG         =  8           # 'XJ'
 RP_X_SLOW        =  9           # 'XS'
-RP_MAX           = 10           # 
+RP_SP_RUN        = 10           # 'SR'
+RP_SP_JOG        = 11           # 'SJ'
+RP_MAX           = 12           # 
 
 axisAccelTypeList = ( \
     "RP_Z_TURN",
@@ -722,10 +724,14 @@ axisAccelTypeList = ( \
     "RP_X_MOVE",
     "RP_X_JOG",
     "RP_X_SLOW",
+    "RP_SP_RUN",
+    "RP_SP_JOG",
     "RP_MAX",
     )
 
 axisAccelTypeText = ( \
+    "",
+    "",
     "",
     "",
     "",
@@ -785,7 +791,8 @@ RP_INCR1         =  1           #
 RP_INCR2         =  2           # 
 RP_ACCEL_VAL     =  3           # 
 RP_ACCEL_COUNT   =  4           # 
-RP_FREQ_DIV      =  5           # 
+RP_ACCEL_MAX     =  5           # 
+RP_FREQ_DIV      =  6           # 
 
 RiscvSyncParmTypeList = ( \
     "RP_INITIAL_SUM",
@@ -793,10 +800,12 @@ RiscvSyncParmTypeList = ( \
     "RP_INCR2",
     "RP_ACCEL_VAL",
     "RP_ACCEL_COUNT",
+    "RP_ACCEL_MAX",
     "RP_FREQ_DIV",
     )
 
 RiscvSyncParmTypeText = ( \
+    "",
     "",
     "",
     "",

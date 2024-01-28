@@ -66,10 +66,10 @@ F_Ld_Sp_D           =  0        # 'LIS' axis initial sum
 F_Ld_Sp_Incr1       =  1        # 'LI1' axis incr1
 F_Ld_Sp_Incr2       =  2        # 'LI2' axis incr2
 F_Ld_Sp_Accel_Val   =  3        # 'LAV' axis accel value
-F_Ld_Sp_Accel_Count =  4        # 'LAC' axis accel count
+F_Ld_Sp_Accel_Max   =  4        # 'LAM' axis accel max
 F_Rd_Sp_Sum         =  5        # 'RSU' axis sum
 F_Rd_Sp_Accel_Sum   =  6        # 'RAS' axis accel sum
-F_Rd_Sp_Accel_Ctr   =  7        # 'RAC' axis accel counter
+F_Rd_Sp_Accel_Max   =  7        # 'RAC' axis accel max
 F_Rd_Sp_XPos        =  8        # 'RX'  axis x pos
 F_Rd_Sp_YPos        =  9        # 'RY'  axis y pos
 F_Sp_Max            = 10        # number of spindle sync registers
@@ -86,8 +86,9 @@ F_Axis_Max          = 24        # num of axis regs
 # spindle
 
 F_Ld_Sp_Ctl         =  0        # 'LCT' spindle control reg
-F_Ld_Sp_Freq        =  1        # 'LFR' freq for step spindle
-F_Sp_Sync_Base      =  2        # spindle sync
+F_Ld_Sp_Freq        =  1        # 'LFR' freq for spindle
+F_Ld_Sp_Scale       =  2        # 'LSC' scaler for spindle
+F_Sp_Sync_Base      =  3        # spindle sync
 
 # runout
 
@@ -128,7 +129,7 @@ F_RunOut_Base       = 24        # 'R' runout registers
 F_ZAxis_Base        = 26        # 'Z' z axis registers
 F_XAxis_Base        = 50        # 'X' x axis registers
 F_Spindle_Base      = 74        # 'S' spindle registers
-F_Cmd_Max           = 86        # number of commands
+F_Cmd_Max           = 87        # number of commands
 # fpga table
 
 xRegTable = ( \
@@ -208,16 +209,17 @@ xRegTable = ( \
     "F_XAxis_Base+F_Rd_Dro",              #  73 x49
     "F_Spindle_Base+F_Ld_Sp_Ctl",         #  74 x4a
     "F_Spindle_Base+F_Ld_Sp_Freq",        #  75 x4b
-    "F_Spindle_Base+F_Ld_Sp_D",           #  76 x4c
-    "F_Spindle_Base+F_Ld_Sp_Incr1",       #  77 x4d
-    "F_Spindle_Base+F_Ld_Sp_Incr2",       #  78 x4e
-    "F_Spindle_Base+F_Ld_Sp_Accel_Val",   #  79 x4f
-    "F_Spindle_Base+F_Ld_Sp_Accel_Count", #  80 x50
-    "F_Spindle_Base+F_Rd_Sp_Sum",         #  81 x51
-    "F_Spindle_Base+F_Rd_Sp_Accel_Sum",   #  82 x52
-    "F_Spindle_Base+F_Rd_Sp_Accel_Ctr",   #  83 x53
-    "F_Spindle_Base+F_Rd_Sp_XPos",        #  84 x54
-    "F_Spindle_Base+F_Rd_Sp_YPos",        #  85 x55
+    "F_Spindle_Base+F_Ld_Sp_Scale",       #  76 x4c
+    "F_Spindle_Base+F_Ld_Sp_D",           #  77 x4d
+    "F_Spindle_Base+F_Ld_Sp_Incr1",       #  78 x4e
+    "F_Spindle_Base+F_Ld_Sp_Incr2",       #  79 x4f
+    "F_Spindle_Base+F_Ld_Sp_Accel_Val",   #  80 x50
+    "F_Spindle_Base+F_Ld_Sp_Accel_Max",   #  81 x51
+    "F_Spindle_Base+F_Rd_Sp_Sum",         #  82 x52
+    "F_Spindle_Base+F_Rd_Sp_Accel_Sum",   #  83 x53
+    "F_Spindle_Base+F_Rd_Sp_Accel_Max",   #  84 x54
+    "F_Spindle_Base+F_Rd_Sp_XPos",        #  85 x55
+    "F_Spindle_Base+F_Rd_Sp_YPos",        #  86 x56
     )
 
 fpgaSizeTable = ( \
@@ -297,14 +299,15 @@ fpgaSizeTable = ( \
     4,              #  73 F_XAxis_Base, F_Sync_Base, F_Rd_Dro
     1,              #  74 F_Spindle_Base, F_Ld_Sp_Ctl
     4,              #  75 F_Spindle_Base, F_Ld_Sp_Freq
-    4,              #  76 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_D
-    4,              #  77 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Incr1
-    4,              #  78 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Incr2
-    4,              #  79 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Accel_Val
-    4,              #  80 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Accel_Count
-    4,              #  81 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Sum
-    4,              #  82 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Accel_Sum
-    4,              #  83 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Accel_Ctr
-    4,              #  84 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_XPos
-    4,              #  85 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_YPos
+    4,              #  76 F_Spindle_Base, F_Ld_Sp_Scale
+    4,              #  77 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_D
+    4,              #  78 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Incr1
+    4,              #  79 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Incr2
+    4,              #  80 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Accel_Val
+    4,              #  81 F_Spindle_Base, F_Sp_Sync_Base, F_Ld_Sp_Accel_Max
+    4,              #  82 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Sum
+    4,              #  83 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Accel_Sum
+    4,              #  84 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_Accel_Max
+    4,              #  85 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_XPos
+    4,              #  86 F_Spindle_Base, F_Sp_Sync_Base, F_Rd_Sp_YPos
     )

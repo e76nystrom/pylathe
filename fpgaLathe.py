@@ -163,10 +163,29 @@ cfgDroStep   = 0x100000         # step pulse to dro
 # end
 
 
+# spCtl
+
+spInit       = 0x01             # spindle init
+spEna        = 0x02             # spindle enable
+spDir        = 0x04             # spindle direction
+
+# end
+
+
+# synCtl
+
+synPhaseInit = 0x01             # init phase counter
+synEncInit   = 0x02             # init encoder
+synEncEna    = 0x04             # enable encoder
+
+# end
+
+
 # clkCtl
 
 clkDbgFreqEna = 0x40            # enable debug frequency
-clkDbgSyncEna = 0x40            # enable debug sync
+clkDbgSyncEna = 0x80            # enable debug sync
+clkDbgAxisEna = 0x100           # set index axisEna
 
 # end
 
@@ -197,15 +216,6 @@ xClkZFreq    = 0x20             #
 xClkZCh      = 0x28             # 
 xClkSpindle  = 0x30             # 
 xClkDbgFreq  = 0x38             # 
-
-# synCtl
-
-synPhaseInit = 0x01             # init phase counter
-synEncInit   = 0x02             # init encoder
-synEncEna    = 0x04             # enable encoder
-
-# end
-
 encClkShift  = 0x03             # enc clock shift
 encClkNone   = 0x00             # 
 encClkCh     = 0x01             # 
@@ -215,12 +225,3 @@ synEncClkNone = 0x00            #
 synEncClkCh  = 0x08             # 
 synEncClkSp  = 0x10             # 
 synEncClkDbg = 0x18             # 
-
-# spCtl
-
-spInit       = 0x01             # spindle init
-spEna        = 0x02             # spindle enable
-spDir        = 0x04             # spindle direction
-
-# end
-

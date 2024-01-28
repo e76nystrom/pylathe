@@ -2,6 +2,7 @@ class RemParm():
     def __init__(self):
         self.spSteps             = None
         self.spMicro             = None
+        self.spStepMult          = None
         self.spMinRpm            = None
         self.spMaxRpm            = None
         self.spRpm               = None

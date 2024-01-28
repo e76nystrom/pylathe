@@ -4,12 +4,15 @@ class RiscvParm():
         self.rJogPause        = None
         self.rCurPass         = None
         self.rCfgVal          = None
-        self.rPRpm            = None
+        self.rSpRpm           = None
         self.rPwmDiv          = None
         self.rPwmCtr          = None
         self.rSynEncPreScaler = None
         self.rSynEncCycle     = None
         self.rSynOutCycle     = None
+        self.rStepDrv         = None
+        self.rEncPerRev       = None
+        self.rSpStepMult      = None
         self.rTurnSync        = None
         self.rThreadSync      = None
         self.rRunoutSync      = None

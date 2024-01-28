@@ -782,7 +782,9 @@ class Setup():
 
             path = osJoin(cLoc, cName + 'Str.h')
             c1File = open(path, 'wb')
-            fWrite(c1File, "typedef struct S_CHR\n"\
+            fWrite(c1File, "#if !defined(FPGA_OP_STR)\n"
+                   "#define FPGA_OP_STR\n\n"
+                   "typedef struct S_CHR\n"\
                    "{\n char c0;\n char c1;\n"
                    " char c2;\n char c3;\n} T_CH4, *P_CH4;\n\n"\
                    "T_CH4 fpgaOpStr[] =\n{\n")
@@ -945,7 +947,6 @@ class Setup():
                 fWrite(f, "\nfpgaSizeTable = ( \\\n")
                 (name, table) = regTables[-1]
                 for (tRegName, tIndex, tSize, tByteLen, tRegCode) in table:
-
                     (tRegCode, tRegComment) = tRegCode
                     tRegCode = tRegCode.strip()
                     if len(tRegCode) < 4:
@@ -954,8 +955,8 @@ class Setup():
                     for i in range(len(tRegCode)):
                         sReg += "'" + tRegCode[i]  + "', "
                     sReg = sReg[:-1] + '}'
-                    txt = (" %s, /* %02x %3d %-24s %s */\n" % \
-                           (sReg, tIndex, tIndex, tRegComment.strip(),
+                    txt = (" %s, /*  %02x %3d %-4s %-24s %s */\n" % \
+                           (sReg, tIndex, tIndex, tRegCode, tRegComment.strip(),
                             tRegName))
                     fWrite(c1File, txt)
 
@@ -964,7 +965,8 @@ class Setup():
                            (tmp.ljust(20), tIndex, tRegName))
                 fWrite(f, "    )\n")
 
-            fWrite(c1File, "};\n")
+            fWrite(c1File, "};\n\n"
+                   "#endif  /* FPGA_OP_STR */\n")
             f.close()
             c1File.close()
 

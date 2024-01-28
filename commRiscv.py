@@ -12,7 +12,8 @@ from pytz import timezone
 import os
 import re
 
-from accelPi import AccelData, taperCalc, intRound, syncAccelCalc
+from accelPi import AccelData, taperCalc, intRound, syncAccelCalc, \
+    spindleAccelCalc, spUpdate
 from remParmDef import remParmTable
 import remParmDef as pm
 import riscvParmDef as rp
@@ -90,6 +91,19 @@ def riscvAccelData(accel, accelType, que=False):
     riscvCmd(cmd, (accelType << 8 | en.RP_INCR2,       accel.incr2))
     riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_VAL,   accel.intAccel))
     riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_COUNT, accel.accelClocks))
+    riscvCmd(cmd, (accelType << 8 | en.RP_FREQ_DIV,    accel.freqDivider))
+
+def riscvSpAccelData(accel, accelType, que=False):
+    txt = "riscVAccelData %-10s %d" % (en.axisAccelTypeList[accelType],
+                                       accelType)
+    trace(txt)
+    print(txt)
+    cmd = rc.R_SET_ACCEL if not que else rc.R_SET_ACCEL_Q
+    riscvCmd(cmd, (accelType << 8 | en.RP_INITIAL_SUM, accel.initialSum))
+    riscvCmd(cmd, (accelType << 8 | en.RP_INCR1,       accel.incr1))
+    riscvCmd(cmd, (accelType << 8 | en.RP_INCR2,       accel.incr2))
+    riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_VAL,   accel.intAccel))
+    riscvCmd(cmd, (accelType << 8 | en.RP_ACCEL_MAX,   accel.accelMax))
     riscvCmd(cmd, (accelType << 8 | en.RP_FREQ_DIV,    accel.freqDivider))
 
 def prtAxisCtl(axisCtl):
@@ -192,11 +206,12 @@ class CommRiscv():
 
     def command(self, cmdVal):
         print("cmd %12s" % (cmdTable[cmdVal][0]))
-        try:
-            # noinspection PyCallingNonCallable
-            self.riscv.cmdAction[cmdVal]()
-        except TypeError:
-            print("command no routine %d %s" % (cmdVal, cmdTable[cmdVal]))
+        self.riscv.cmdAction[cmdVal]()
+        # try:
+        #     # noinspection PyCallingNonCallable
+        #     self.riscv.cmdAction[cmdVal]()
+        # except TypeError:
+        #     print("command no routine %d %s" % (cmdVal, cmdTable[cmdVal]))
 
     def queParm(self, parmIndex, val):
         self.setParm(parmIndex, val)
@@ -475,6 +490,9 @@ class RiscvLathe(Thread):
         self.lastZIdxD = None
         self.lastZIdxP = None
 
+        self.spAccelRun = None
+        self.spAccelJog = None
+
         dbgSetup = ( \
             (en.D_PASS,  self.dbgPass),
             (en.D_DONE,  self.dbgDone),
@@ -630,7 +648,7 @@ class RiscvLathe(Thread):
         parm = self.parm
         cmd = self.riscvCmd
         if self.parm.stepperDrive:
-            pass
+                cmd(rc.R_STR_SPIN, flush=True)
         else:
             if self.parm.cfgVarSpeed:
                 self.pwmDiv = pwmDiv = int(parm.fpgaFrequency / parm.pwmFreq)
@@ -705,9 +723,20 @@ class RiscvLathe(Thread):
 
     def cSpindleSetup(self):            # 28
         parm = self.parm
+        stepDrv = parm.stepperDrive
+        self.riscvCmd(rc.R_SET_DATA, (rp.R_STEP_DRV, stepDrv))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_TURN_SYNC, parm.turnSync))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_THREAD_SYNC, parm.threadSync))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_RUNOUT_SYNC, parm.runoutSync))
+
+        if stepDrv:
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_ENC_PER_REV, parm.encPerRev-1))
+            self.riscvCmd(rc.R_SET_DATA, (rp.R_SP_STEP_MULT, parm.spStepMult-1))
+            self.spAccelRun = spindleAccelCalc(parm, parm.spMaxRpm)
+            self.spAccelJog = spindleAccelCalc(parm, parm.spJogMaxRpm)
+
+            riscvSpAccelData(self.spAccelRun, en.RP_SP_RUN)
+            riscvSpAccelData(self.spAccelJog, en.RP_SP_JOG)
 
     def cSyncSetup(self):               # 29
         pass
@@ -848,37 +877,38 @@ class RiscvLathe(Thread):
         pass
 
     def cSendDone(self):        	# 54
-        cfgLookup = (("zDirInv",   bt.cfgZDirInv),
-                     ("xDirInv",   bt.cfgXDirInv),
-                     ("zDroInvert", bt.cfgZDroInv),
-                     ("xDroInvert", bt.cfgXDroInv),
-                     ("zMpgInv",    bt.cfgZMpgInv),
-                     ("xMpgInv",    bt.cfgXMpgInv),
-                     ("zLimNegInv", bt.cfgZMinusInv),
-                     ("zLimPosInv", bt.cfgZPlusInv),
-                     ("xLimNegInv", bt.cfgXMinusInv),
-                     ("xLimPosInv", bt.cfgXPlusInv),
-                     ("zHomeInv",   bt.cfgZHomeInv),
-                     ("xHomeInv",   bt.cfgXHomeInv),
-                     ("probeInv",   bt.cfgProbeInv),
-                     ("eStopEna",   bt.cfgEStopEna),
-                     ("eStopInv",   bt.cfgEStopInv),
-                     ("droStep",    bt.cfgDroStep),
+        cfgLookup = (("zDirInv",        bt.cfgZDirInv),
+                     ("xDirInv",        bt.cfgXDirInv),
+                     ("zDroInvert",     bt.cfgZDroInv),
+                     ("xDroInvert",     bt.cfgXDroInv),
+                     ("zMpgInv",        bt.cfgZMpgInv),
+                     ("xMpgInv",        bt.cfgXMpgInv),
+                     ("zLimNegInv",     bt.cfgZMinusInv),
+                     ("zLimPosInv",     bt.cfgZPlusInv),
+                     ("xLimNegInv",     bt.cfgXMinusInv),
+                     ("xLimPosInv",     bt.cfgXPlusInv),
+                     ("zHomeInv",       bt.cfgZHomeInv),
+                     ("xHomeInv",       bt.cfgXHomeInv),
+                     ("probeInv",       bt.cfgProbeInv),
+                     ("eStopEna",       bt.cfgEStopEna),
+                     ("eStopInv",       bt.cfgEStopInv),
+                     ("stepperDrive",   bt.cfgGenSync),
+                     ("spindleEncoder", bt.cfgPwmEna),
+                     ("droStep",        bt.cfgDroStep),
                      )
         parm = self.parm
         cfgVal = 0
         txt = "cfg "
         for varName, flag in cfgLookup:
             val = getattr(parm, varName)
-            print("%-12s %6x %s" % (varName, flag, val))
+            print("%-16s %6x %s" % (varName, flag, val))
             if val is None:
                 continue
             if val != 0:
                 txt += " " + varName
                 cfgVal |= flag
-        print("%6x %s" % (cfgVal, txt))
 
-        # cfgVal = bt.cfgDroStep | bt.cfgXDroInv | bt.cfgZDroInv
+        print("%6x %s" % (cfgVal, txt))
 
         self.riscvCmd(rc.R_SET_DATA, (rp.R_JOG_PAUSE, 0))
         self.riscvCmd(rc.R_SET_DATA, (rp.R_CFG_VAL, cfgVal))
@@ -1123,33 +1153,18 @@ class RiscvLathe(Thread):
         elif self.parm.turnSync == en.SEL_TU_SYN:
             self.mvState = en.M_START_SYNC
 
-        # loc = intRound(val * mvAxis.stepsInch) + mvAxis.homeOffset
-        # dist = tpAxis.savedLoc - tpAxis.loc
-        # print("tpAxis.savedLoc %d tpAxis.loc %d dist %d" %
-        #       (tpAxis.savedLoc, tpAxis.loc, dist))
-        # tpAxis.axisCtl = (bt.ctlSlave | \
-        #                   (DIR_POS if dist > 0 else 0))
-        # mvDist = abs(float(dist) / mvAxis.stepsInch)
-        # tpAxis.taperDist = intRound(mvDist * taper * tpAxis.stepsInch)
-        # print("mvDist %7.4f taper %0.6f tpAxis.taperDist %d" % \
-        #       (mvDist, taper, tpAxis.taperDist))
-        # taperCalc(mvAxis.turnAccel, tpAxis.taperAccel, taper)
-        # mvAxis.move(loc, en.CMD_SYN | ct.SYN_START | ct.SYN_TAPER)
-
     # noinspection PyUnusedLocal
     def qStartSpindle(self, val):       # 11
-        print("startSpindle")
-        # self.mvSpindleCmd = self.cmd
-        # self.spindleStart()
-        # self.mvState = en.M_WAIT_SPINDLE
-        self.riscvCmd(rc.R_STR_SPIN_Q)
+        print("startSpindle rpm %d" % (val))
+        if self.parm.stepperDrive:
+            curAccelMax = spUpdate(self.spAccelRun, val)
+            self.riscvCmd(rc.R_SET_ACCEL_Q,
+                          (en.RP_SP_RUN << 8 | en.RP_ACCEL_MAX, curAccelMax))
+            self.riscvCmd(rc.R_STR_SPIN_Q)
 
     # noinspection PyUnusedLocal
     def qStopSpindle(self, val):        # 12
         print("stopSpindle")
-        # self.mvSpindleCmd = self.cmd
-        # self.spindleStop()
-        # self.mvState = en.M_WAIT_SPINDLE
         self.riscvCmd(rc.R_STP_SPIN_Q)
 
     def qZSynSetup(self, val):          # 13
@@ -1161,7 +1176,7 @@ class RiscvLathe(Thread):
                parm.currentOp, en.operationsList[parm.currentOp],
                parm.turnSync, en.selTurnList[parm.turnSync]))
 
-        axis = self.xAxis
+        axis = self.zAxis
         currentOp = parm.currentOp
         if (currentOp == en.OP_TURN or # encoder for turning
             currentOp == en.OP_TAPER):
@@ -1179,6 +1194,9 @@ class RiscvLathe(Thread):
                 self.riscvCmd(rc.R_SET_DATA, (rp.R_SYN_OUT_CYCLE,
                                               parm.lSyncOutput))
 
+            elif parm.turnSync == en.SEL_TU_STEP: # stepper for turning
+                pass
+
         elif currentOp == en.OP_THREAD:
             self.riscvCmd(rc.R_SET_DATA, (rp.R_THREAD_FLAGS, self.threadFlags))
             threadSync = parm.threadSync
@@ -1189,7 +1207,7 @@ class RiscvLathe(Thread):
                 riscvAccelData(axis.turnAccel, axis.accelBase + RP_TURN,
                                que=True)
 
-            if threadSync == en.SEL_TH_SYN: # syn for threading
+            elif threadSync == en.SEL_TH_SYN: # syn for threading
                 self.riscvCmd(rc.R_SET_DATA,
                               (rp.R_SYN_ENC_PRE_SCALER,
                                parm.lSyncInPreScaler))
@@ -1197,6 +1215,9 @@ class RiscvLathe(Thread):
                               (rp.R_SYN_ENC_CYCLE, parm.lSyncCycle))
                 self.riscvCmd(rc.R_SET_DATA,
                               (rp.R_SYN_OUT_CYCLE, parm.lSyncOutput))
+
+            elif parm.threadSync == en.SEL_TH_STEP: # stepper for threading
+                pass
 
             runoutSync = parm.runoutSync
             if runoutSync == en.SEL_RU_SYN: # syn for runout
@@ -1219,6 +1240,9 @@ class RiscvLathe(Thread):
                     self.riscvCmd(rc.R_SET_DATA, (rp.R_RUNOUT_DEPTH,
                                                   runoutDepth))
 
+            elif parm.runoutSync == en.SEL_RU_STEP: # stepper for runout
+                pass
+
     def qXSynSetup(self, val):          # 14
         print("xSynSetup")
         self.xFeed = val
@@ -1237,6 +1261,9 @@ class RiscvLathe(Thread):
             elif parm.turnSync == en.SEL_TU_SYN: # syn
                 axis.encParm = False
                 self.mvState = en.M_START_SYNC
+
+            elif parm.turnSync == en.SEL_TU_STEP: # stepper
+                pass
 
             else:               # error
                 pass
