@@ -552,6 +552,7 @@ riscvCmdList = \
         ("R_STR_SPIN",    0, "'S+' start spindle"),
         ("R_STP_SPIN",    0, "'S-' stop spindle"),
         ("R_UPD_SPIN",    0, "'US' update spindle speed"),
+        ("R_JOG_SPIN",    1, "'JS' jog spindle"),
 
         ("R_SET_LOC_X",   1, "'LX' set x loc"),
         ("R_SET_LOC_Z",   1, "'LZ' set z loc"),
@@ -1228,7 +1229,7 @@ fpgaLatheList = \
     (
         # <- len 5 items 82 [ 19  1 11  1 34]
 
-        "spindle speed",
+        "index counter",
 
         ("indexCtl",),
         ("F_Rd_Index_Clks",   n, 1,           4, "'RIC' clocks per index"),
@@ -1324,17 +1325,19 @@ fpgaLatheList = \
         "spindle accel",
 
         ("spAccel",),
-        ("F_Ld_Sp_D",         0, 1,           4, "'LIS' axis initial sum"),
-        ("F_Ld_Sp_Incr1",     n, 1,           4, "'LI1' axis incr1"),
-        ("F_Ld_Sp_Incr2",     n, 1,           4, "'LI2' axis incr2"),
-        ("F_Ld_Sp_Accel_Val", n, 1,           4, "'LAV' axis accel value"),
-        ("F_Ld_Sp_Accel_Max", n, 1,           4, "'LAM' axis accel max"),
+        ("F_Ld_Sp_D",         0, 1,           4, "'LIS' spindle initial sum"),
+        ("F_Ld_Sp_Incr1",     n, 1,           4, "'LI1' spindle incr1"),
+        ("F_Ld_Sp_Incr2",     n, 1,           4, "'LI2' spindle incr2"),
+        ("F_Ld_Sp_Accel_Val", n, 1,           4, "'LAV' spindle accel value"),
+        ("F_Ld_Sp_Accel_Max", n, 1,           4, "'LAM' spindle accel max"),
+        ("F_Ld_Sp_Dist",      n, 1,           4, "'LDS' spindle disttance"),
 
-        ("F_Rd_Sp_Sum",       n, 1,           4, "'RSU' axis sum"),
-        ("F_Rd_Sp_Accel_Sum", n, 1,           4, "'RAS' axis accel sum"),
-        ("F_Rd_Sp_Accel_Max", n, 1,           4, "'RAC' axis accel max"),
-        ("F_Rd_Sp_XPos",      n, 1,           4, "'RX'  axis x pos"),
-        ("F_Rd_Sp_YPos",      n, 1,           4, "'RY'  axis y pos"),
+        ("F_Rd_Sp_Dist",      n, 1,           4, "'RDS' spindle distance"),
+        ("F_Rd_Sp_Sum",       n, 1,           4, "'RSU' spindle sum"),
+        ("F_Rd_Sp_Accel_Sum", n, 1,           4, "'RAS' spindle accel sum"),
+        ("F_Rd_Sp_Accel_Max", n, 1,           4, "'RAC' spindle accel max"),
+        ("F_Rd_Sp_XPos",      n, 1,           4, "'RX'  spindle x pos"),
+        ("F_Rd_Sp_YPos",      n, 1,           4, "'RY'  spindle y pos"),
 
         ("F_Sp_Max",          n, n,           0, "number of spindle sync registers"),
 
@@ -1812,6 +1815,7 @@ fpgaLatheBitList = \
         ("spInit",        1, 0,      "spindle init"),
         ("spEna",         1, 1,      "spindle enable"),
         ("spDir",         1, 2,      "spindle direction"),
+        ("spDistMode",    1, 3,      "spindle distance mode"),        
         # ("spJogEnable",   1, 3,      "spindle jog enable"),
         ("end",),
 
@@ -1831,7 +1835,7 @@ fpgaLatheBitList = \
         ("xFreqSel",      n, (5, 3), "x clock select"),
         ("clkDbgFreqEna", 1, 6,      "enable debug frequency"),
         ("clkDbgSyncEna", 1, 7,      "enable debug sync"),
-        ("clkDbgAxisEna", 1, 8,      "set index axisEna"),
+        ("clkDbgAxisEna", 1, 8,      "set axis enable for testing"),
         ("end",),
 
         # put constants not in registers at end
@@ -2404,7 +2408,7 @@ enumList = \
         ("E_CLK_SLV_FREQ  = 4", "'SF' "),
         ("E_CLK_SLV_CH    = 5", "'SC' "),
         ("E_CLK_SPINDLE   = 6", "'SP' "),
-        ("E_CLK_DBG_FREQ  = 7", "'DF "),
+        ("E_CLK_DBG_FREQ  = 7", "'DF' "),
         "};",
         # ->
 

@@ -168,6 +168,7 @@ cfgDroStep   = 0x100000         # step pulse to dro
 spInit       = 0x01             # spindle init
 spEna        = 0x02             # spindle enable
 spDir        = 0x04             # spindle direction
+spDistMode   = 0x08             # spindle distance mode
 
 # end
 
@@ -185,7 +186,7 @@ synEncEna    = 0x04             # enable encoder
 
 clkDbgFreqEna = 0x40            # enable debug frequency
 clkDbgSyncEna = 0x80            # enable debug sync
-clkDbgAxisEna = 0x100           # set index axisEna
+clkDbgAxisEna = 0x100           # set axis enable for testing
 
 # end
 

@@ -112,10 +112,11 @@ def syncAccelCalc(aData, feedType, feed):
         print("\n" "turnAccel %3.1f" % aData.accel)
     parm = aData.axis.parm
     aData.freqDivider = 0
+    encPerRev = aData.axis.encPerRev
     if aData.maxSpeed == 0:
         # (pulse / rev) / (in / rev) = pulse / in
         # (pulse / in) / (steps / in) = pulse / step
-        encPerInch = intRound(parm.encPerRev / aData.pitch)
+        encPerInch = intRound(encPerRev / aData.pitch)
         aData.dx = encPerInch
         aData.dy = aData.stepsInch
         aData.incr1 = 2 * aData.dy
@@ -130,8 +131,8 @@ def syncAccelCalc(aData, feedType, feed):
                    aData.incr2, aData.initialSum))
     else:
         aData.maxFeed = parm.rpm * aData.pitch
-        aData.clocksPerInch = intRound(parm.encPerRev * aData.pitch)
-        aData.clockFreq = intRound((parm.rpm * parm.encPerRev) / 60.0)
+        aData.clocksPerInch = intRound(encPerRev * aData.pitch)
+        aData.clockFreq = intRound((parm.rpm * encPerRev) / 60.0)
         accelSetup(aData)
 
 def accelSetup(aData):
@@ -352,7 +353,8 @@ def taperCalc(turnAccel, taperAccel, taper):
         # taperSteps = intRound(taperCycleDist * stepsInch)
         print("**not done")
     elif turnSync == en.SEL_TU_ENC:
-        dx = intRound((parm.encPerRev * turnCycleDist) / turnAccel.pitch)
+        encPerRev = turnAccel.axis.encPerRev
+        dx = intRound((encPerRev * turnCycleDist) / turnAccel.pitch)
         dy = intRound(taperCycleDist * taperAccel.axis.stepsInch)
         taperAccel.incr1 = 2 * dy
         taperAccel.incr2 = taperAccel.incr1 - 2 * dx
@@ -476,6 +478,7 @@ def spindleAccelCalc0(parm, maxRPM):
     # accelRMin2 = 400
     # maxRPM = 300
 def spindleAccelCalc(parm, maxRPM):
+    print("\n" "spindleAccelCalc")
     fpgaFrequency  = parm.fpgaFrequency
     motorSteps     = parm.spSteps
     microSteps     = parm.spMicro
@@ -493,8 +496,8 @@ def spindleAccelCalc(parm, maxRPM):
     print(f"stepsPerRev {stepsPerRev:.0f} freqGenMax {freqGenMax:.0f}"
           f" freqDivider {freqDivider:.0f}"
           f" periodUSec {periodUSec:.0f} uSec")
-    tmp = (freqGenMax * 60) / (stepsPerRev * stepMultiplier)
-    print(tmp)
+    rpmCalc = (freqGenMax * 60) / (stepsPerRev * stepMultiplier)
+    print(f"rpmCalc" f"{rpmCalc:.0f}")
 
     accelTime = maxRPM / accelRMin2
     accelStepSec2 = (accelRMin2 / 60) * stepsPerRev

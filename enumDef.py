@@ -1042,7 +1042,7 @@ E_CLK_INT_CLK    =  3           # 'IC'
 E_CLK_SLV_FREQ   =  4           # 'SF' 
 E_CLK_SLV_CH     =  5           # 'SC' 
 E_CLK_SPINDLE    =  6           # 'SP' 
-E_CLK_DBG_FREQ   =  7           # 'DF 
+E_CLK_DBG_FREQ   =  7           # 'DF' 
 
 fpgaClkSelList = ( \
     "E_CLK_NONE",
@@ -1063,5 +1063,5 @@ fpgaClkSelText = ( \
     " ",
     " ",
     " ",
-    "'DF ",
+    " ",
     )

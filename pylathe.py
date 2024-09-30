@@ -518,6 +518,7 @@ def addComboBox(panel, sizer, label, index, action, border=BORDER,
                      id=-1, value=choiceList[0], choices=choiceList, \
                      style=wx.CB_READONLY)
     combo.text = text
+    # print(text, indexList, choiceList)
 
     if len(actionResult) >= 4:
         combo.Bind(wx.EVT_TEXT, actionResult[3])
@@ -525,6 +526,8 @@ def addComboBox(panel, sizer, label, index, action, border=BORDER,
     cfg = panel.mf.cfg
     if cfg.info[index] is not None:
         val = cfg.getInfo(index)
+        if not val in indexList:
+            val = indexList[0]
         combo.SetValue(val)
     panel.formData.append((combo, index))
     sizer.Add(combo, flag=flag, border=border)
@@ -1700,7 +1703,10 @@ class SendData:
                                  getInt(cf.spMicroSteps))
                         queParm(pm.ENC_PER_REV, count)
 
-                        queParm(pm.SP_STEP_MULT, getInfo(cf.spStepMult))
+                        spStepMult = getInfo(cf.spStepMult)
+                        if spStepMult == 0:
+                            spStepMult = 1;
+                        queParm(pm.SP_STEP_MULT, spStepMult)
                     else:
                         queParm(pm.ENC_PER_REV, getInfo(cf.cfgEncoder))
 
